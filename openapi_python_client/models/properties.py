@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict, Union, ClassVar
+import stringcase
 
 
 @dataclass
@@ -8,6 +9,14 @@ class Property:
 
     name: str
     required: bool
+
+    _type_string: ClassVar[str]
+
+    def get_type_string(self):
+        """ Get a string representation of type that should be used when declaring this property """
+        if self.required:
+            return self._type_string
+        return f"Optional[{self._type_string}]"
 
 
 @dataclass
@@ -18,12 +27,24 @@ class StringProperty(Property):
     default: Optional[str] = None
     pattern: Optional[str] = None
 
+    _type_string: ClassVar[str] = "str"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        if self.default:
+            return f"{self.name}: {self.get_type_string()} = {self.default}"
+        else:
+            return f"{self.name}: {self.get_type_string()}"
+
 
 @dataclass
 class DateTimeProperty(Property):
     """ A property of type datetime.datetime """
+    _type_string: ClassVar[str] = "datetime"
 
-    pass
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        return f"{self.name}: {self.get_type_string()}"
 
 
 @dataclass
@@ -31,6 +52,14 @@ class FloatProperty(Property):
     """ A property of type float """
 
     default: Optional[float] = None
+    _type_string: ClassVar[str] = "float"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        if self.default:
+            return f"{self.name}: {self.get_type_string()} = {self.default}"
+        else:
+            return f"{self.name}: {self.get_type_string()}"
 
 
 @dataclass
@@ -38,21 +67,42 @@ class IntProperty(Property):
     """ A property of type int """
 
     default: Optional[int] = None
+    _type_string: ClassVar[str] = "int"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        if self.default:
+            return f"{self.name}: {self.get_type_string()} = {self.default}"
+        else:
+            return f"{self.name}: {self.get_type_string()}"
 
 
 @dataclass
 class BooleanProperty(Property):
     """ Property for bool """
+    _type_string: ClassVar[str] = "bool"
 
-    pass
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        return f"{self.name}: {self.get_type_string()}"
 
 
 @dataclass
 class ListProperty(Property):
     """ Property for list """
 
-    type: Optional[str] = None
-    ref: Optional[str] = None
+    type: Optional[str]
+    ref: Optional[str]
+
+    def get_type_string(self):
+        """ Get a string representation of type that should be used when declaring this property """
+        if self.required:
+            return f"List[{self.type}]"
+        return f"Optional[List[{self.type}]]"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        return f"{self.name}: {self.get_type_string()}"
 
 
 @dataclass
@@ -61,6 +111,17 @@ class EnumProperty(Property):
 
     values: List[str]
 
+    def get_type_string(self):
+        """ Get a string representation of type that should be used when declaring this property """
+        class_name = stringcase.pascalcase(self.name)
+        if self.required:
+            return class_name
+        return f"Optional[{class_name}]"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        return f"{self.name}: {self.get_type_string()}"
+
 
 @dataclass
 class RefProperty(Property):
@@ -68,15 +129,41 @@ class RefProperty(Property):
 
     ref: str
 
+    def get_type_string(self):
+        """ Get a string representation of type that should be used when declaring this property """
+        if self.required:
+            return self.ref
+        return f"Optional[{self.ref}]"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        return f"{self.name}: {self.get_type_string()}"
+
 
 @dataclass
 class DictProperty(Property):
     """ Property that is a general Dict """
 
+    _type_string: ClassVar[str] = "Dict"
+
+    def to_string(self) -> str:
+        """ How this should be declared in a dataclass """
+        return f"{self.name}: {self.get_type_string()}"
+
+
+_openapi_types_to_python_type_strings = {
+    "string": "str",
+    "number": "float",
+    "integer": "int",
+    "boolean": "bool",
+    "object": "Dict",
+}
+
 
 def property_from_dict(
     name: str, required: bool, data: Dict[str, Union[float, int, str, List[str], Dict[str, str]]]
 ) -> Property:
+    """ Generate a Property from the OpenAPI dictionary representation of it """
     if "enum" in data:
         return EnumProperty(name=name, required=required, values=data["enum"],)
     if "$ref" in data:
@@ -99,7 +186,10 @@ def property_from_dict(
         ref = None
         if "$ref" in data["items"]:
             ref = data["items"]["$ref"].split("/")[-1]
-        return ListProperty(name=name, required=required, type=data["items"].get("type"), ref=ref,)
+        _type = None
+        if "type" in data["items"]:
+            _type = _openapi_types_to_python_type_strings[data["items"]["type"]]
+        return ListProperty(name=name, required=required, type=_type, ref=ref)
     elif data["type"] == "object":
         return DictProperty(name=name, required=required,)
     raise ValueError(f"Did not recognize type of {data}")

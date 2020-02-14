@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
-from .properties import Property, property_from_dict
+import stringcase
+
+from .properties import Property, property_from_dict, DateTimeProperty, ListProperty, RefProperty, EnumProperty
 
 
 class Method(Enum):
@@ -83,15 +85,20 @@ class Schema:
     title: str
     properties: List[Property]
     description: str
+    relative_imports: Set[str] = field(default_factory=set)
 
     @staticmethod
     def from_dict(d: Dict, /) -> Schema:
         """ A single Schema from its dict representation """
         required = set(d.get("required", []))
         properties: List[Property] = []
+        schema = Schema(title=d["title"], properties=properties, description=d.get("description", ""))
         for key, value in d["properties"].items():
-            properties.append(property_from_dict(name=key, required=key in required, data=value,))
-        return Schema(title=d["title"], properties=properties, description=d.get("description", ""),)
+            p = property_from_dict(name=key, required=key in required, data=value)
+            properties.append(p)
+            if isinstance(p, (ListProperty, RefProperty)) and p.ref:
+                schema.relative_imports.add(f"from .{stringcase.snakecase(p.ref)} import {p.ref}")
+        return schema
 
     @staticmethod
     def dict(d: Dict, /) -> Dict[str, Schema]:
@@ -113,15 +120,26 @@ class OpenAPI:
     security_schemes: Dict
     schemas: Dict[str, Schema]
     endpoints: List[Endpoint]
+    enums: Dict[str, List[str]]
 
     @staticmethod
     def from_dict(d: Dict, /) -> OpenAPI:
         """ Create an OpenAPI from dict """
+        schemas = Schema.dict(d["components"]["schemas"])
+        enums = {}
+        for schema in schemas.values():
+            for prop in schema.properties:
+                if isinstance(prop, EnumProperty):
+                    enum_class_name = stringcase.pascalcase(prop.name)
+                    enums[enum_class_name] = prop.values
+                    schema.relative_imports.add(f"from .{prop.name} import {enum_class_name}")
+
         return OpenAPI(
             title=d["info"]["title"],
             description=d["info"]["description"],
             version=d["info"]["version"],
             endpoints=Endpoint.get_list_from_dict(d["paths"]),
-            schemas=Schema.dict(d["components"]["schemas"]),
+            schemas=schemas,
             security_schemes=d["components"]["securitySchemes"],
+            enums=enums,
         )
