@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "openapi-python-client"
+version = "0.1.0"
+description = "Generate modern Python clients from OpenAPI"
+
+authors = [
+    "Dylan Anthony <danthony@triaxtec.com>",
+]
+
+readme = "README.md"
+packages = [
+    {include = "openapi_python_client"},
+]
+classifiers = [
+    "Private :: Internal Triax Use Only"  # Prevents this from being accidentally published to public PyPI
+]
+include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
+
+[[tool.poetry.source]]
+name = "triaxtec"
+url = "https://pypi.fury.io/triaxtec/"
+
+[tool.poetry.dependencies]
+python = "==3.*,>=3.8.0"
+requests = "^2.22.0"
+orjson = "^2.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-mock = "*"
+black = {version = ">=19.10b", allow-prereleases = true}
+mypy = "^0.761"
+taskipy = "^1.1.3"
+isort = "^4.3.21"
+safety = "^1.8.5"
+
+[tool.taskipy.tasks]
+check = "isort --recursive --apply && black . && safety check && mypy openapi_python_client"
+
+[tool.black]
+line-length = 120
+target_version = ['py38']
+exclude = '''
+(
+  /(
+    | \.git
+    | \.venv
+    | \.mypy_cache
+  )/
+)
+'''
+
+[tool.isort]
+line_length = 120
+multi_line_output = 3
