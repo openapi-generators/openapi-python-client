@@ -50,7 +50,6 @@ class Endpoint:
     @staticmethod
     def get_by_tags_from_dict(d: Dict[str, Dict[str, Dict]], /) -> Dict[str, List[Endpoint]]:
         """ Parse the openapi paths data to get a list of endpoints """
-        # TODO: handle requestBody
         endpoints_by_tag: Dict[str, List[Endpoint]] = defaultdict(list)
         for path, path_data in d.items():
             for method, method_data in path_data.items():
