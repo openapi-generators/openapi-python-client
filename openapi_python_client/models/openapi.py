@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Set
@@ -34,23 +33,21 @@ class Parameter:
         )
 
 
-@dataclass
-class Endpoint:
-    """
-    Describes a single endpoint on the server
-    """
+def _import_string_from_ref(ref: str, prefix: str = "") -> str:
+    return f"from {prefix}.{stringcase.snakecase(ref)} import {ref}"
 
-    path: str
-    method: str
-    description: Optional[str]
-    name: str
-    parameters: List[Parameter]
-    responses: List[Response]
+
+@dataclass
+class EndpointCollection:
+    """ A bunch of endpoints grouped under a tag that will become a module """
+    tag: str
+    endpoints: List[Endpoint] = field(default_factory=list)
+    relative_imports: Set[str] = field(default_factory=set)
 
     @staticmethod
-    def get_by_tags_from_dict(d: Dict[str, Dict[str, Dict]], /) -> Dict[str, List[Endpoint]]:
-        """ Parse the openapi paths data to get a list of endpoints """
-        endpoints_by_tag: Dict[str, List[Endpoint]] = defaultdict(list)
+    def from_dict(d: Dict[str, Dict[str, Dict]], /) -> Dict[str, EndpointCollection]:
+        """ Parse the openapi paths data to get EndpointCollections by tag """
+        endpoints_by_tag: Dict[str, EndpointCollection] = {}
         for path, path_data in d.items():
             for method, method_data in path_data.items():
                 parameters: List[Parameter] = []
@@ -64,6 +61,10 @@ class Endpoint:
                         data=response_dict,
                     )
                     responses.append(response)
+                form_body_ref = None
+                if "requestBody" in method_data:
+                    form_body_ref = Endpoint.parse_request_body(method_data["requestBody"])
+
                 endpoint = Endpoint(
                     path=path,
                     method=method,
@@ -71,9 +72,39 @@ class Endpoint:
                     name=method_data["operationId"],
                     parameters=parameters,
                     responses=responses,
+                    form_body_ref=form_body_ref,
                 )
-                endpoints_by_tag[tag].append(endpoint)
+
+                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
+                collection.endpoints.append(endpoint)
+                if form_body_ref:
+                    collection.relative_imports.add(_import_string_from_ref(form_body_ref, prefix="..models"))
         return endpoints_by_tag
+
+
+@dataclass
+class Endpoint:
+    """
+    Describes a single endpoint on the server
+    """
+
+    path: str
+    method: str
+    description: Optional[str]
+    name: str
+    parameters: List[Parameter]
+    responses: List[Response]
+    form_body_ref: Optional[str]
+
+    @staticmethod
+    def parse_request_body(body: Dict, /) -> Optional[str]:
+        """ Return form_body_ref """
+        form_body_ref = None
+        body_content = body["content"]
+        form_body = body_content.get("application/x-www-form-urlencoded")
+        if form_body:
+            form_body_ref = form_body["schema"]["$ref"].split("/")[-1]
+        return form_body_ref
 
 
 @dataclass
@@ -99,7 +130,7 @@ class Schema:
             p = property_from_dict(name=key, required=key in required, data=value)
             properties.append(p)
             if isinstance(p, (ListProperty, RefProperty)) and p.ref:
-                schema.relative_imports.add(f"from .{stringcase.snakecase(p.ref)} import {p.ref}")
+                schema.relative_imports.add(_import_string_from_ref(p.ref))
         return schema
 
     @staticmethod
@@ -121,7 +152,7 @@ class OpenAPI:
     version: str
     security_schemes: Dict
     schemas: Dict[str, Schema]
-    endpoints_by_tag: Dict[str, List[Endpoint]]
+    endpoint_collections_by_tag: Dict[str, EndpointCollection]
     enums: Dict[str, EnumProperty]
 
     @staticmethod
@@ -146,7 +177,7 @@ class OpenAPI:
             title=d["info"]["title"],
             description=d["info"]["description"],
             version=d["info"]["version"],
-            endpoints_by_tag=Endpoint.get_by_tags_from_dict(d["paths"]),
+            endpoint_collections_by_tag=EndpointCollection.from_dict(d["paths"]),
             schemas=schemas,
             security_schemes=d["components"]["securitySchemes"],
             enums=enums,

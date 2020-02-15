@@ -79,8 +79,8 @@ def _build_project(openapi: OpenAPI):
     api_init = api_dir / "__init__.py"
     api_init.write_text('""" Contains all methods for accessing the API """')
     endpoint_template = env.get_template("endpoint_module.pyi")
-    for tag, endpoints in openapi.endpoints_by_tag.items():
+    for tag, collection in openapi.endpoint_collections_by_tag.items():
         module_path = api_dir / f"{tag}.py"
-        module_path.write_text(endpoint_template.render(endpoints=endpoints))
+        module_path.write_text(endpoint_template.render(collection=collection))
 
 
