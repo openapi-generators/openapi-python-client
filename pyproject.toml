@@ -11,14 +11,8 @@ readme = "README.md"
 packages = [
     {include = "openapi_python_client"},
 ]
-classifiers = [
-    "Private :: Internal Triax Use Only"  # Prevents this from being accidentally published to public PyPI
-]
 include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 
-[[tool.poetry.source]]
-name = "triaxtec"
-url = "https://pypi.fury.io/triaxtec/"
 
 [tool.poetry.dependencies]
 python = "==3.*,>=3.8.0"

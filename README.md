@@ -3,10 +3,6 @@
 ## Purpose
 Generate modern Python clients from OpenAPI
 
-## Contribution Guidelines
- - The project is written to support Python 3.8 and should conform to the [Triax Python Standards](https://triaxtec.atlassian.net/wiki/spaces/EN/pages/499482627/Python+Guidelines).
- - Any changes should be covered with a unit test and documented in [CHANGELOG.md]
-
 ## Release Process
 1. Start a release with Git Flow
 1. Update the version number in `pyproject.toml` with `poetry version <rule>`
@@ -20,7 +16,7 @@ Generate modern Python clients from OpenAPI
 1. Create a tag on the merge commit with the release number
 
 ## Contributors 
- - Dylan Anthony <danthony@triaxtec.com>
+ - Dylan Anthony <danthony@triaxtec.com> (Owner)
 
 
 [CHANGELOG.md]: CHANGELOG.md
