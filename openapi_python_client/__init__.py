@@ -53,3 +53,9 @@ def _build_project(openapi: OpenAPI):
         module_path = models_dir / f"{stringcase.snakecase(schema.title)}.py"
         module_path.write_text(model_template.render(schema=schema))
 
+    # Generate enums
+    enum_template = env.get_template("enum.pyi")
+    for enum in openapi.enums.values():
+        module_path = models_dir / f"{enum.name}.py"
+        module_path.write_text(enum_template.render(enum=enum))
+

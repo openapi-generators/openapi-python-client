@@ -6,11 +6,12 @@ from typing import Dict, List, Optional, Set
 
 import stringcase
 
-from .properties import Property, property_from_dict, DateTimeProperty, ListProperty, RefProperty, EnumProperty
+from .properties import Property, property_from_dict, ListProperty, RefProperty, EnumProperty
 
 
 class Method(Enum):
     """ HTTP Methods """
+
     GET = "get"
     POST = "post"
     PATCH = "patch"
@@ -18,6 +19,7 @@ class Method(Enum):
 
 class ParameterLocation(Enum):
     """ The places Parameters can be put when calling an Endpoint """
+
     QUERY = "query"
     PATH = "path"
 
@@ -25,6 +27,7 @@ class ParameterLocation(Enum):
 @dataclass
 class Parameter:
     """ A parameter in an Endpoint """
+
     location: ParameterLocation
     property: Property
 
@@ -33,11 +36,7 @@ class Parameter:
         """ Construct a parameter from it's OpenAPI dict form """
         return Parameter(
             location=ParameterLocation(d["in"]),
-            property=property_from_dict(
-                name=d["name"],
-                required=d["required"],
-                data=d["schema"],
-            ),
+            property=property_from_dict(name=d["name"], required=d["required"], data=d["schema"],),
         )
 
 
@@ -46,6 +45,7 @@ class Endpoint:
     """
     Describes a single endpoint on the server
     """
+
     path: str
     method: Method
     description: Optional[str]
@@ -120,19 +120,25 @@ class OpenAPI:
     security_schemes: Dict
     schemas: Dict[str, Schema]
     endpoints: List[Endpoint]
-    enums: Dict[str, List[str]]
+    enums: Dict[str, EnumProperty]
 
     @staticmethod
     def from_dict(d: Dict, /) -> OpenAPI:
         """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
-        enums = {}
+        enums: Dict[str, EnumProperty] = {}
         for schema in schemas.values():
             for prop in schema.properties:
-                if isinstance(prop, EnumProperty):
-                    enum_class_name = stringcase.pascalcase(prop.name)
-                    enums[enum_class_name] = prop.values
-                    schema.relative_imports.add(f"from .{prop.name} import {enum_class_name}")
+                if not isinstance(prop, EnumProperty):
+                    continue
+                schema.relative_imports.add(f"from .{prop.name} import {prop.class_name}")
+                if prop.class_name in enums:
+                    # We already have an enum with this name, make sure the values match
+                    assert (
+                        prop.values == enums[prop.class_name].values
+                    ), f"Encountered conflicting enum named {prop.class_name}"
+
+                enums[prop.class_name] = prop
 
         return OpenAPI(
             title=d["info"]["title"],
