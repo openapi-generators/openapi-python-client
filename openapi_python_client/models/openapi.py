@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Set
@@ -7,14 +8,7 @@ from typing import Dict, List, Optional, Set
 import stringcase
 
 from .properties import Property, property_from_dict, ListProperty, RefProperty, EnumProperty
-
-
-class Method(Enum):
-    """ HTTP Methods """
-
-    GET = "get"
-    POST = "post"
-    PATCH = "patch"
+from .responses import Response, response_from_dict
 
 
 class ParameterLocation(Enum):
@@ -47,31 +41,40 @@ class Endpoint:
     """
 
     path: str
-    method: Method
+    method: str
     description: Optional[str]
     name: str
     parameters: List[Parameter]
-    tag: Optional[str] = None
+    responses: List[Response]
 
     @staticmethod
-    def get_list_from_dict(d: Dict[str, Dict[str, Dict]], /) -> List[Endpoint]:
+    def get_by_tags_from_dict(d: Dict[str, Dict[str, Dict]], /) -> Dict[str, List[Endpoint]]:
         """ Parse the openapi paths data to get a list of endpoints """
-        endpoints = []
+        # TODO: handle requestBody
+        endpoints_by_tag: Dict[str, List[Endpoint]] = defaultdict(list)
         for path, path_data in d.items():
             for method, method_data in path_data.items():
                 parameters: List[Parameter] = []
+                responses: List[Response] = []
                 for param_dict in method_data.get("parameters", []):
                     parameters.append(Parameter.from_dict(param_dict))
+                tag = method_data.get("tags", ["default"])[0]
+                for code, response_dict in method_data["responses"].items():
+                    response = response_from_dict(
+                        status_code=int(code),
+                        data=response_dict,
+                    )
+                    responses.append(response)
                 endpoint = Endpoint(
                     path=path,
-                    method=Method(method),
+                    method=method,
                     description=method_data.get("description"),
                     name=method_data["operationId"],
                     parameters=parameters,
-                    tag=method_data.get("tags", [None])[0],
+                    responses=responses,
                 )
-                endpoints.append(endpoint)
-        return endpoints
+                endpoints_by_tag[tag].append(endpoint)
+        return endpoints_by_tag
 
 
 @dataclass
@@ -119,7 +122,7 @@ class OpenAPI:
     version: str
     security_schemes: Dict
     schemas: Dict[str, Schema]
-    endpoints: List[Endpoint]
+    endpoints_by_tag: Dict[str, List[Endpoint]]
     enums: Dict[str, EnumProperty]
 
     @staticmethod
@@ -144,7 +147,7 @@ class OpenAPI:
             title=d["info"]["title"],
             description=d["info"]["description"],
             version=d["info"]["version"],
-            endpoints=Endpoint.get_list_from_dict(d["paths"]),
+            endpoints_by_tag=Endpoint.get_by_tags_from_dict(d["paths"]),
             schemas=schemas,
             security_schemes=d["components"]["securitySchemes"],
             enums=enums,

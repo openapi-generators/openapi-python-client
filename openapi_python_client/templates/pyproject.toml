@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "{{ project_name }}"
 version = "0.1.0"
-description = "A client API"
+description = "{{ description }}"
 
 authors = []
 
