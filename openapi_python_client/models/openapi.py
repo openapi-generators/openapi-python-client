@@ -72,6 +72,7 @@ class EndpointCollection:
                     parameters=parameters,
                     responses=responses,
                     form_body_reference=form_body_reference,
+                    requires_security=method_data.get("security"),
                 )
 
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
@@ -95,6 +96,7 @@ class Endpoint:
     name: str
     parameters: List[Parameter]
     responses: List[Response]
+    requires_security: bool
     form_body_reference: Optional[Reference]
 
     @staticmethod

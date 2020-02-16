@@ -41,7 +41,8 @@ def _build_project(openapi: OpenAPI):
     package_dir.mkdir()
     package_init = package_dir / "__init__.py"
     package_description = f"A client library for accessing {openapi.title}"
-    package_init.write_text(f'""" {package_description} """')
+    package_init_template = env.get_template("package_init.pyi")
+    package_init.write_text(package_init_template.render(description=package_description))
 
     # Create a pyproject.toml file
     pyproject_template = env.get_template("pyproject.toml")
