@@ -11,8 +11,8 @@ from ..client import Client
 def {{ endpoint.name }}(
     *,
     client: Client,
-    {% if endpoint.form_body_ref %}
-    form_data: {{ endpoint.form_body_ref }},
+    {% if endpoint.form_body_reference %}
+    form_data: {{ endpoint.form_body_reference.class_name }},
     {% endif %}
 ):
     """ {{ endpoint.description }} """
@@ -23,21 +23,21 @@ def {{ endpoint.name }}(
     {% elif endpoint.method == "post" %}
     return requests.post(
         url=url,
-        {% if endpoint.form_body_ref %}
+        {% if endpoint.form_body_reference %}
         data=asdict(form_data),
         {% endif %}
     )
     {% elif endpoint.method == "patch" %}
     return requests.patch(
         url=url,
-        {% if endpoint.form_body_ref %}
+        {% if endpoint.form_body_reference %}
         data=asdict(form_data),
         {% endif %}
     )
     {% elif endpoint.method == "put" %}
     return requests.put(
         url=url,
-        {% if endpoint.form_body_ref %}
+        {% if endpoint.form_body_reference %}
         data=asdict(form_data),
         {% endif %}
     )

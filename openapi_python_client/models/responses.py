@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Union, ClassVar, TypedDict, Literal, cast
-import stringcase
+from dataclasses import dataclass
+from typing import Dict, Union, TypedDict, Literal, cast
 
+from .reference import Reference
 
 ContentType = Union[Literal["application/json"], Literal["text/html"]]
 
@@ -18,25 +18,27 @@ class Response:
 class ListRefResponse(Response):
     """ Response is a list of some ref schema """
 
-    ref: str
+    reference: Reference
 
 
 @dataclass
 class RefResponse(Response):
     """ Response is a single ref schema """
 
-    ref: str
+    reference: Reference
 
 
 @dataclass
 class StringResponse(Response):
     """ Response is a string """
+
     pass
 
 
 @dataclass
 class EmptyResponse(Response):
     """ Response has no payload """
+
     pass
 
 
@@ -69,9 +71,7 @@ class _ResponseDict(TypedDict):
     content: Dict[ContentType, _ResponseContentDict]
 
 
-def response_from_dict(
-    *, status_code: int, data: _ResponseDict
-) -> Response:
+def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     """ Generate a Response from the OpenAPI dictionary representation of it """
     if "content" not in data:
         raise ValueError(f"Cannot parse response data: {data}")
@@ -89,24 +89,14 @@ def response_from_dict(
 
     if "$ref" in schema_data:
         return RefResponse(
-            status_code=status_code,
-            content_type=content_type,
-            ref=schema_data["$ref"].split("/")[-1],
+            status_code=status_code, content_type=content_type, reference=Reference(schema_data["$ref"]),
         )
     if "type" not in schema_data:
-        return EmptyResponse(
-            status_code=status_code,
-            content_type=content_type,
-        )
+        return EmptyResponse(status_code=status_code, content_type=content_type,)
     if schema_data["type"] == "array":
         list_data = cast(_ResponseListSchemaDict, schema_data)
         return ListRefResponse(
-            status_code=status_code,
-            content_type=content_type,
-            ref=list_data["items"]["$ref"].split("/")[-1],
+            status_code=status_code, content_type=content_type, reference=Reference(list_data["items"]["$ref"]),
         )
     if schema_data["type"] == "string":
-        return StringResponse(
-            status_code=status_code,
-            content_type=content_type,
-        )
+        return StringResponse(status_code=status_code, content_type=content_type,)

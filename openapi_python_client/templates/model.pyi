@@ -9,6 +9,9 @@ from typing import Dict, Optional, List
 
 @dataclass
 class {{ schema.title }}:
-    {% for property in schema.properties %}
+    {% for property in schema.required_properties %}
+    {{ property.to_string() }}
+    {% endfor %}
+    {% for property in schema.optional_properties %}
     {{ property.to_string() }}
     {% endfor %}
