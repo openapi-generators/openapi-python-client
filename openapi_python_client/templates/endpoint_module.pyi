@@ -1,9 +1,10 @@
 from dataclasses import asdict
-from typing import Optional
+from typing import List, Optional, Union
 
 import requests
 
 from ..client import AuthenticatedClient, Client
+
 {% for relative in collection.relative_imports %}
 {{ relative }}
 {% endfor %}
@@ -28,7 +29,11 @@ def {{ endpoint.name }}(
     {{ parameter.to_string() }},
     {% endfor %}
     {% endif %}
-):
+) -> Union[
+    {% for response in endpoint.responses %}
+    {{ response.return_string() }},
+    {% endfor %}
+]:
     """ {{ endpoint.description }} """
     url = client.base_url + "{{ endpoint.path }}"
 
@@ -40,7 +45,7 @@ def {{ endpoint.name }}(
     }
     {% endif %}
 
-    return requests.{{ endpoint.method }}(
+    response = requests.{{ endpoint.method }}(
         url=url,
         headers=client.get_headers(),
         {% if endpoint.form_body_reference %}
@@ -50,4 +55,9 @@ def {{ endpoint.name }}(
         params=params,
         {% endif %}
     )
+
+    {% for response in endpoint.responses %}
+    if response.status_code == {{ response.status_code }}:
+        return {{ response.constructor() }}
+    {% endfor %}
 {% endfor %}

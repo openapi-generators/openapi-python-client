@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Union, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from .reference import Reference
 
@@ -10,11 +10,12 @@ class Property:
 
     name: str
     required: bool
-    default: Optional[str]
+    default: Optional[Any]
 
+    constructor_template: ClassVar[Optional[str]] = None
     _type_string: ClassVar[str]
 
-    def get_type_string(self):
+    def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         if self.required:
             return self._type_string
@@ -38,6 +39,13 @@ class Property:
         """ What it takes to turn this object into a native python type """
         return self.name
 
+    def constructor_from_dict(self, dict_name: str) -> str:
+        """ How to load this property from a dict (used in generated model from_dict function """
+        if self.required:
+            return f'{dict_name}["{self.name}"]'
+        else:
+            return f'{dict_name}.get("{self.name}")'
+
 
 @dataclass
 class StringProperty(Property):
@@ -48,7 +56,7 @@ class StringProperty(Property):
 
     _type_string: ClassVar[str] = "str"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.default is not None:
             self.default = f'"{self.default}"'
 
@@ -58,6 +66,7 @@ class DateTimeProperty(Property):
     """ A property of type datetime.datetime """
 
     _type_string: ClassVar[str] = "datetime"
+    constructor_template: ClassVar[str] = "datetime_property.pyi"
 
 
 @dataclass
@@ -89,12 +98,20 @@ class ListProperty(Property):
 
     type: Optional[str]
     reference: Optional[Reference]
+    constructor_template: ClassVar[str] = "list_property.pyi"
 
-    def get_type_string(self):
+    def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
+        if self.type:
+            this_type = self.type
+        elif self.reference:
+            this_type = self.reference.class_name
+        else:
+            raise ValueError(f"Could not figure out type of ListProperty {self.name}")
+
         if self.required:
-            return f"List[{self.type}]"
-        return f"Optional[List[{self.type}]]"
+            return f"List[{this_type}]"
+        return f"Optional[List[{this_type}]]"
 
 
 @dataclass
@@ -105,13 +122,13 @@ class EnumProperty(Property):
     inverse_values: Dict[str, str] = field(init=False)
     reference: Reference = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.reference = Reference(self.name)
         self.inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:
             self.default = f"{self.reference.class_name}.{self.inverse_values[self.default]}"
 
-    def get_type_string(self):
+    def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
 
         if self.required:
@@ -121,6 +138,10 @@ class EnumProperty(Property):
     def transform(self) -> str:
         """ Output to the template, convert this Enum into a JSONable value """
         return f"{self.name}.value"
+
+    def constructor_from_dict(self, dict_name: str) -> str:
+        """ How to load this property from a dict (used in generated model from_dict function """
+        return f'{self.reference.class_name}({dict_name}["{self.name}"]) if "{self.name}" in {dict_name} else None'
 
     @staticmethod
     def values_from_list(l: List[str], /) -> Dict[str, str]:
@@ -144,7 +165,9 @@ class RefProperty(Property):
 
     reference: Reference
 
-    def get_type_string(self):
+    constructor_template: ClassVar[str] = "ref_property.pyi"
+
+    def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         if self.required:
             return self.reference.class_name
@@ -167,9 +190,7 @@ _openapi_types_to_python_type_strings = {
 }
 
 
-def property_from_dict(
-    name: str, required: bool, data: Dict[str, Union[float, int, str, List[str], Dict[str, str]]]
-) -> Property:
+def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Property:
     """ Generate a Property from the OpenAPI dictionary representation of it """
     if "enum" in data:
         return EnumProperty(

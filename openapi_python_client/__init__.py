@@ -1,7 +1,7 @@
 """ Generate modern Python clients from OpenAPI """
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 
 import orjson
 import requests
@@ -10,7 +10,7 @@ from jinja2 import Environment, PackageLoader
 from .models import OpenAPI, import_string_from_reference
 
 
-def main():
+def main() -> None:
     """ Generate the client library """
     url = sys.argv[1]
     json = _get_json(url)
@@ -19,16 +19,16 @@ def main():
     _build_project(openapi)
 
 
-def _get_json(url) -> bytes:
+def _get_json(url: str) -> bytes:
     response = requests.get(url)
     return response.content
 
 
-def _parse_json(json: bytes) -> Dict:
+def _parse_json(json: bytes) -> Dict[str, Any]:
     return orjson.loads(json)
 
 
-def _build_project(openapi: OpenAPI):
+def _build_project(openapi: OpenAPI) -> None:
     env = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
     # Create output directories
@@ -46,7 +46,9 @@ def _build_project(openapi: OpenAPI):
     # Create a pyproject.toml file
     pyproject_template = env.get_template("pyproject.toml")
     pyproject_path = project_dir / "pyproject.toml"
-    pyproject_path.write_text(pyproject_template.render(project_name=project_name, package_name=package_name, description=package_description))
+    pyproject_path.write_text(
+        pyproject_template.render(project_name=project_name, package_name=package_name, description=package_description)
+    )
 
     readme = project_dir / "README.md"
     readme_template = env.get_template("README.md")
@@ -88,5 +90,3 @@ def _build_project(openapi: OpenAPI):
     for tag, collection in openapi.endpoint_collections_by_tag.items():
         module_path = api_dir / f"{tag}.py"
         module_path.write_text(endpoint_template.render(collection=collection))
-
-

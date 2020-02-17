@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Iterable, Generator
+from typing import Any, Dict, Generator, Iterable, List, Optional, Set
 
-from .properties import Property, property_from_dict, ListProperty, RefProperty, EnumProperty
+from .properties import EnumProperty, ListProperty, Property, RefProperty, property_from_dict
 from .reference import Reference
-from .responses import Response, response_from_dict
+from .responses import ListRefResponse, RefResponse, Response, response_from_dict
 
 
 class ParameterLocation(str, Enum):
@@ -30,7 +30,7 @@ class EndpointCollection:
     relative_imports: Set[str] = field(default_factory=set)
 
     @staticmethod
-    def from_dict(d: Dict[str, Dict[str, Dict]], /) -> Dict[str, EndpointCollection]:
+    def from_dict(d: Dict[str, Dict[str, Dict[str, Any]]], /) -> Dict[str, EndpointCollection]:
         """ Parse the openapi paths data to get EndpointCollections by tag """
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
         for path, path_data in d.items():
@@ -55,6 +55,10 @@ class EndpointCollection:
 
                 for code, response_dict in method_data["responses"].items():
                     response = response_from_dict(status_code=int(code), data=response_dict)
+                    if isinstance(response, (RefResponse, ListRefResponse)):
+                        collection.relative_imports.add(
+                            import_string_from_reference(response.reference, prefix="..models")
+                        )
                     responses.append(response)
                 form_body_reference = None
                 if "requestBody" in method_data:
@@ -69,7 +73,7 @@ class EndpointCollection:
                     path_parameters=path_parameters,
                     responses=responses,
                     form_body_reference=form_body_reference,
-                    requires_security=method_data.get("security"),
+                    requires_security=bool(method_data.get("security")),
                 )
 
                 collection.endpoints.append(endpoint)
@@ -97,7 +101,7 @@ class Endpoint:
     form_body_reference: Optional[Reference]
 
     @staticmethod
-    def parse_request_body(body: Dict, /) -> Optional[Reference]:
+    def parse_request_body(body: Dict[str, Any], /) -> Optional[Reference]:
         """ Return form_body_ref """
         form_body_reference = None
         body_content = body["content"]
@@ -122,7 +126,7 @@ class Schema:
     relative_imports: Set[str]
 
     @staticmethod
-    def from_dict(d: Dict, /) -> Schema:
+    def from_dict(d: Dict[str, Any], /) -> Schema:
         """ A single Schema from its dict representation """
         required_set = set(d.get("required", []))
         required_properties: List[Property] = []
@@ -148,7 +152,7 @@ class Schema:
         return schema
 
     @staticmethod
-    def dict(d: Dict, /) -> Dict[str, Schema]:
+    def dict(d: Dict[str, Dict[str, Any]], /) -> Dict[str, Schema]:
         """ Get a list of Schemas from an OpenAPI dict """
         result = {}
         for data in d.values():
@@ -164,7 +168,7 @@ class OpenAPI:
     title: str
     description: str
     version: str
-    security_schemes: Dict
+    # security_schemes: Dict
     schemas: Dict[str, Schema]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
     enums: Dict[str, EnumProperty]
@@ -173,7 +177,7 @@ class OpenAPI:
     def check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
         enums: Dict[str, EnumProperty] = {}
 
-        def _iterate_properties() -> Generator[Property]:
+        def _iterate_properties() -> Generator[Property, None, None]:
             for schema in schemas:
                 yield from schema.required_properties
                 yield from schema.optional_properties
@@ -196,7 +200,7 @@ class OpenAPI:
         return enums
 
     @staticmethod
-    def from_dict(d: Dict, /) -> OpenAPI:
+    def from_dict(d: Dict[str, Dict[str, Any]], /) -> OpenAPI:
         """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
         endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])
@@ -208,6 +212,6 @@ class OpenAPI:
             version=d["info"]["version"],
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             schemas=schemas,
-            security_schemes=d["components"]["securitySchemes"],
+            # security_schemes=d["components"]["securitySchemes"],
             enums=enums,
         )

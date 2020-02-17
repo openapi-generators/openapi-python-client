@@ -42,6 +42,7 @@ exclude = '''
     | \.git
     | \.venv
     | \.mypy_cache
+    | openapi_python_client/templates
   )/
 )
 '''

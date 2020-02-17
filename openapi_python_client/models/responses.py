@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Union, TypedDict, Literal, cast
+from typing import Any, Dict, Literal, TypedDict, Union, cast
 
 from .reference import Reference
 
@@ -13,12 +13,28 @@ class Response:
     status_code: int
     content_type: ContentType
 
+    def return_string(self) -> str:
+        """ How this Response should be represented as a return type """
+        return "None"
+
+    def constructor(self) -> str:
+        """ How the return value of this response should be constructed """
+        return "None"
+
 
 @dataclass
 class ListRefResponse(Response):
     """ Response is a list of some ref schema """
 
     reference: Reference
+
+    def return_string(self) -> str:
+        """ How this Response should be represented as a return type """
+        return f"List[{self.reference.class_name}]"
+
+    def constructor(self) -> str:
+        """ How the return value of this response should be constructed """
+        return f"[{self.reference.class_name}.from_dict(item) for item in response.json()]"
 
 
 @dataclass
@@ -27,12 +43,26 @@ class RefResponse(Response):
 
     reference: Reference
 
+    def return_string(self) -> str:
+        """ How this Response should be represented as a return type """
+        return self.reference.class_name
+
+    def constructor(self) -> str:
+        """ How the return value of this response should be constructed """
+        return f"{self.reference.class_name}.from_dict(response.json())"
+
 
 @dataclass
 class StringResponse(Response):
     """ Response is a string """
 
-    pass
+    def return_string(self) -> str:
+        """ How this Response should be represented as a return type """
+        return "str"
+
+    def constructor(self) -> str:
+        """ How the return value of this response should be constructed """
+        return "response.text"
 
 
 @dataclass
@@ -51,24 +81,9 @@ _openapi_types_to_python_type_strings = {
 }
 
 
-class _ResponseListSchemaDict(TypedDict):
-    title: str
-    type: Literal["array"]
-    items: Dict[Literal["$ref"], str]
-
-
-_ResponseRefSchemaDict = Dict[Literal["$ref"], str]
-_ResponseStringSchemaDict = Dict[Literal["type"], Literal["string"]]
-_ResponseSchemaDict = Union[_ResponseListSchemaDict, _ResponseRefSchemaDict, _ResponseStringSchemaDict]
-
-
-class _ResponseContentDict(TypedDict):
-    schema: _ResponseSchemaDict
-
-
 class _ResponseDict(TypedDict):
     description: str
-    content: Dict[ContentType, _ResponseContentDict]
+    content: Dict[ContentType, Any]
 
 
 def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
@@ -85,7 +100,7 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     else:
         raise ValueError(f"Cannot parse content type of {data}")
 
-    schema_data: _ResponseSchemaDict = data["content"][content_type]["schema"]
+    schema_data = data["content"][content_type]["schema"]
 
     if "$ref" in schema_data:
         return RefResponse(
@@ -94,9 +109,9 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     if "type" not in schema_data:
         return EmptyResponse(status_code=status_code, content_type=content_type,)
     if schema_data["type"] == "array":
-        list_data = cast(_ResponseListSchemaDict, schema_data)
         return ListRefResponse(
-            status_code=status_code, content_type=content_type, reference=Reference(list_data["items"]["$ref"]),
+            status_code=status_code, content_type=content_type, reference=Reference(schema_data["items"]["$ref"]),
         )
     if schema_data["type"] == "string":
-        return StringResponse(status_code=status_code, content_type=content_type,)
+        return StringResponse(status_code=status_code, content_type=content_type)
+    raise ValueError(f"Cannot parse response of type {schema_data['type']}")

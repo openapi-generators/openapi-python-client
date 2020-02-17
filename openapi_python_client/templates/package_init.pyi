@@ -1,2 +1,2 @@
 """ {{ description }} """
-from .client import Client, AuthenticatedClient
+from .client import AuthenticatedClient, Client
