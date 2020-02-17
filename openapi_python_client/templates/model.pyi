@@ -8,7 +8,7 @@ from typing import Dict, Optional, List
 
 
 @dataclass
-class {{ schema.title }}:
+class {{ schema.reference.class_name }}:
     {% for property in schema.required_properties %}
     {{ property.to_string() }}
     {% endfor %}

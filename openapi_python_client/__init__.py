@@ -5,10 +5,9 @@ from typing import Dict
 
 import orjson
 import requests
-import stringcase
 from jinja2 import Environment, PackageLoader
 
-from .models import OpenAPI
+from .models import OpenAPI, import_string_from_reference
 
 
 def main():
@@ -57,17 +56,23 @@ def _build_project(openapi: OpenAPI):
     models_dir = package_dir / "models"
     models_dir.mkdir()
     models_init = models_dir / "__init__.py"
-    models_init.write_text('""" Contains all the data models used in inputs/outputs """')
+    imports = []
+
     model_template = env.get_template("model.pyi")
     for schema in openapi.schemas.values():
-        module_path = models_dir / f"{stringcase.snakecase(schema.title)}.py"
+        module_path = models_dir / f"{schema.reference.module_name}.py"
         module_path.write_text(model_template.render(schema=schema))
+        imports.append(import_string_from_reference(schema.reference))
 
     # Generate enums
     enum_template = env.get_template("enum.pyi")
     for enum in openapi.enums.values():
         module_path = models_dir / f"{enum.name}.py"
         module_path.write_text(enum_template.render(enum=enum))
+        imports.append(import_string_from_reference(enum.reference))
+
+    models_init_template = env.get_template("models_init.pyi")
+    models_init.write_text(models_init_template.render(imports=imports))
 
     # Generate Client
     client_path = package_dir / "client.py"

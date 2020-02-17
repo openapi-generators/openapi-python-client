@@ -2,39 +2,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set
-
-import stringcase
+from typing import Dict, List, Optional, Set, Iterable, Generator
 
 from .properties import Property, property_from_dict, ListProperty, RefProperty, EnumProperty
-from .responses import Response, response_from_dict
 from .reference import Reference
+from .responses import Response, response_from_dict
 
 
-class ParameterLocation(Enum):
+class ParameterLocation(str, Enum):
     """ The places Parameters can be put when calling an Endpoint """
 
     QUERY = "query"
     PATH = "path"
 
 
-@dataclass
-class Parameter:
-    """ A parameter in an Endpoint """
-
-    location: ParameterLocation
-    property: Property
-
-    @staticmethod
-    def from_dict(d: Dict, /) -> Parameter:
-        """ Construct a parameter from it's OpenAPI dict form """
-        return Parameter(
-            location=ParameterLocation(d["in"]),
-            property=property_from_dict(name=d["name"], required=d["required"], data=d["schema"]),
-        )
-
-
-def _import_string_from_reference(reference: Reference, prefix: str = "") -> str:
+def import_string_from_reference(reference: Reference, prefix: str = "") -> str:
+    """ Create a string which is used to import a reference """
     return f"from {prefix}.{reference.module_name} import {reference.class_name}"
 
 
@@ -52,11 +35,24 @@ class EndpointCollection:
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
         for path, path_data in d.items():
             for method, method_data in path_data.items():
-                parameters: List[Parameter] = []
+                query_parameters: List[Property] = []
+                path_parameters: List[Property] = []
                 responses: List[Response] = []
-                for param_dict in method_data.get("parameters", []):
-                    parameters.append(Parameter.from_dict(param_dict))
                 tag = method_data.get("tags", ["default"])[0]
+                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
+                for param_dict in method_data.get("parameters", []):
+                    prop = property_from_dict(
+                        name=param_dict["name"], required=param_dict["required"], data=param_dict["schema"]
+                    )
+                    if isinstance(prop, (ListProperty, RefProperty, EnumProperty)) and prop.reference:
+                        collection.relative_imports.add(import_string_from_reference(prop.reference, prefix="..models"))
+                    if param_dict["in"] == ParameterLocation.QUERY:
+                        query_parameters.append(prop)
+                    elif param_dict["in"] == ParameterLocation.PATH:
+                        path_parameters.append(prop)
+                    else:
+                        raise ValueError(f"Don't know where to put this parameter: {param_dict}")
+
                 for code, response_dict in method_data["responses"].items():
                     response = response_from_dict(status_code=int(code), data=response_dict)
                     responses.append(response)
@@ -69,17 +65,17 @@ class EndpointCollection:
                     method=method,
                     description=method_data.get("description"),
                     name=method_data["operationId"],
-                    parameters=parameters,
+                    query_parameters=query_parameters,
+                    path_parameters=path_parameters,
                     responses=responses,
                     form_body_reference=form_body_reference,
                     requires_security=method_data.get("security"),
                 )
 
-                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
                 collection.endpoints.append(endpoint)
                 if form_body_reference:
                     collection.relative_imports.add(
-                        _import_string_from_reference(form_body_reference, prefix="..models")
+                        import_string_from_reference(form_body_reference, prefix="..models")
                     )
         return endpoints_by_tag
 
@@ -94,7 +90,8 @@ class Endpoint:
     method: str
     description: Optional[str]
     name: str
-    parameters: List[Parameter]
+    query_parameters: List[Property]
+    path_parameters: List[Property]
     responses: List[Response]
     requires_security: bool
     form_body_reference: Optional[Reference]
@@ -118,7 +115,7 @@ class Schema:
     These will all be converted to dataclasses in the client
     """
 
-    title: str
+    reference: Reference
     required_properties: List[Property]
     optional_properties: List[Property]
     description: str
@@ -139,10 +136,10 @@ class Schema:
                 required_properties.append(p)
             else:
                 optional_properties.append(p)
-            if isinstance(p, (ListProperty, RefProperty)) and p.reference:
-                relative_imports.add(_import_string_from_reference(p.reference))
+            if isinstance(p, (ListProperty, RefProperty, EnumProperty)) and p.reference:
+                relative_imports.add(import_string_from_reference(p.reference))
         schema = Schema(
-            title=stringcase.pascalcase(d["title"]),
+            reference=Reference(d["title"]),
             required_properties=required_properties,
             optional_properties=optional_properties,
             relative_imports=relative_imports,
@@ -156,7 +153,7 @@ class Schema:
         result = {}
         for data in d.values():
             s = Schema.from_dict(data)
-            result[s.title] = s
+            result[s.reference.class_name] = s
         return result
 
 
@@ -173,28 +170,43 @@ class OpenAPI:
     enums: Dict[str, EnumProperty]
 
     @staticmethod
+    def check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
+        enums: Dict[str, EnumProperty] = {}
+
+        def _iterate_properties() -> Generator[Property]:
+            for schema in schemas:
+                yield from schema.required_properties
+                yield from schema.optional_properties
+            for collection in collections:
+                for endpoint in collection.endpoints:
+                    yield from endpoint.path_parameters
+                    yield from endpoint.query_parameters
+
+        for prop in _iterate_properties():
+            if not isinstance(prop, EnumProperty):
+                continue
+
+            if prop.reference.class_name in enums:
+                # We already have an enum with this name, make sure the values match
+                assert (
+                    prop.values == enums[prop.reference.class_name].values
+                ), f"Encountered conflicting enum named {prop.reference.class_name}"
+
+            enums[prop.reference.class_name] = prop
+        return enums
+
+    @staticmethod
     def from_dict(d: Dict, /) -> OpenAPI:
         """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
-        enums: Dict[str, EnumProperty] = {}
-        for schema in schemas.values():
-            for prop in schema.required_properties + schema.optional_properties:
-                if not isinstance(prop, EnumProperty):
-                    continue
-                schema.relative_imports.add(f"from .{prop.name} import {prop.class_name}")
-                if prop.class_name in enums:
-                    # We already have an enum with this name, make sure the values match
-                    assert (
-                        prop.values == enums[prop.class_name].values
-                    ), f"Encountered conflicting enum named {prop.class_name}"
-
-                enums[prop.class_name] = prop
+        endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])
+        enums = OpenAPI.check_enums(schemas.values(), endpoint_collections_by_tag.values())
 
         return OpenAPI(
             title=d["info"]["title"],
             description=d["info"]["description"],
             version=d["info"]["version"],
-            endpoint_collections_by_tag=EndpointCollection.from_dict(d["paths"]),
+            endpoint_collections_by_tag=endpoint_collections_by_tag,
             schemas=schemas,
             security_schemes=d["components"]["securitySchemes"],
             enums=enums,

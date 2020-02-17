@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Union, ClassVar
 
-import stringcase
-
 from .reference import Reference
 
 
@@ -35,6 +33,10 @@ class Property:
             return f"{self.name}: {self.get_type_string()} = {self.default}"
         else:
             return f"{self.name}: {self.get_type_string()}"
+
+    def transform(self) -> str:
+        """ What it takes to turn this object into a native python type """
+        return self.name
 
 
 @dataclass
@@ -100,17 +102,25 @@ class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, str]
-    class_name: str = field(init=False)
+    inverse_values: Dict[str, str] = field(init=False)
+    reference: Reference = field(init=False)
 
     def __post_init__(self):
-        self.class_name = stringcase.pascalcase(self.name)
+        self.reference = Reference(self.name)
+        self.inverse_values = {v: k for k, v in self.values.items()}
+        if self.default is not None:
+            self.default = f"{self.reference.class_name}.{self.inverse_values[self.default]}"
 
     def get_type_string(self):
         """ Get a string representation of type that should be used when declaring this property """
 
         if self.required:
-            return self.class_name
-        return f"Optional[{self.class_name}]"
+            return self.reference.class_name
+        return f"Optional[{self.reference.class_name}]"
+
+    def transform(self) -> str:
+        """ Output to the template, convert this Enum into a JSONable value """
+        return f"{self.name}.value"
 
     @staticmethod
     def values_from_list(l: List[str], /) -> Dict[str, str]:
@@ -140,20 +150,12 @@ class RefProperty(Property):
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
-    def to_string(self) -> str:
-        """ How this should be declared in a dataclass """
-        return f"{self.name}: {self.get_type_string()}"
-
 
 @dataclass
 class DictProperty(Property):
     """ Property that is a general Dict """
 
     _type_string: ClassVar[str] = "Dict"
-
-    def to_string(self) -> str:
-        """ How this should be declared in a dataclass """
-        return f"{self.name}: {self.get_type_string()}"
 
 
 _openapi_types_to_python_type_strings = {
