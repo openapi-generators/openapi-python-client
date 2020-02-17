@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 
 @dataclass
 class {{ schema.reference.class_name }}:
+    """ {{ schema.description }} """
     {% for property in schema.required_properties + schema.optional_properties %}
     {{ property.to_string() }}
     {% endfor %}
