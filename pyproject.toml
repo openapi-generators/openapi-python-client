@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.1.0"
+version = "0.1.0-dev.0"
 description = "Generate modern Python clients from OpenAPI"
 
 authors = [
@@ -20,6 +20,10 @@ requests = "^2.22.0"
 orjson = "^2.4.0"
 jinja2 = "^2.11.1"
 stringcase = "^1.2.0"
+click = "^7.0"
+
+[tool.poetry.scripts]
+openapi-python-client = "openapi_python_client.cli:cli"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

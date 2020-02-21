@@ -1,5 +1,4 @@
 """ Generate modern Python clients from OpenAPI """
-import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -7,12 +6,11 @@ import orjson
 import requests
 from jinja2 import Environment, PackageLoader
 
-from .models import OpenAPI, import_string_from_reference
+from .openapi_parser import OpenAPI, import_string_from_reference
 
 
-def main() -> None:
+def main(url: str) -> None:
     """ Generate the client library """
-    url = sys.argv[1]
     json = _get_json(url)
     data_dict = _parse_json(json)
     openapi = OpenAPI.from_dict(data_dict)
@@ -33,6 +31,7 @@ def _build_project(openapi: OpenAPI) -> None:
 
     # Create output directories
     project_name = f"{openapi.title.replace(' ', '-').lower()}-client"
+    print(f"Generating {project_name}")
     package_name = f"{openapi.title.replace(' ', '_').lower()}_client"
     project_dir = Path.cwd() / project_name
     project_dir.mkdir()
