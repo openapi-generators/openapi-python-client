@@ -173,6 +173,10 @@ class RefProperty(Property):
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
+    def transform(self) -> str:
+        """ Convert this into a JSONable value """
+        return f"{self.name}.to_dict()"
+
 
 @dataclass
 class DictProperty(Property):

@@ -16,6 +16,13 @@ class {{ schema.reference.class_name }}:
     {{ property.to_string() }}
     {% endfor %}
 
+    def to_dict(self) -> Dict:
+        return {
+            {% for property in schema.required_properties + schema.optional_properties %}
+            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.name }} else None,
+            {% endfor %}
+        }
+
     @staticmethod
     def from_dict(d: Dict) -> {{ schema.reference.class_name }}:
         {% for property in schema.required_properties + schema.optional_properties %}

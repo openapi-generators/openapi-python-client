@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -22,6 +22,10 @@ def {{ endpoint.name }}(
     {# Form data if any #}
     {% if endpoint.form_body_reference %}
     form_data: {{ endpoint.form_body_reference.class_name }},
+    {% endif %}
+    {# Form data if any #}
+    {% if endpoint.json_body %}
+    json_body: {{ endpoint.json_body.get_type_string() }},
     {% endif %}
     {# query parameters #}
     {% if endpoint.query_parameters %}
@@ -50,6 +54,9 @@ def {{ endpoint.name }}(
         headers=client.get_headers(),
         {% if endpoint.form_body_reference %}
         data=asdict(form_data),
+        {% endif %}
+        {% if endpoint.json_body %}
+        json={{ endpoint.json_body.transform() }},
         {% endif %}
         {% if endpoint.query_parameters %}
         params=params,

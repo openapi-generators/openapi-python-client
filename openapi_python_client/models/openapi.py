@@ -61,8 +61,10 @@ class EndpointCollection:
                         )
                     responses.append(response)
                 form_body_reference = None
+                json_body = None
                 if "requestBody" in method_data:
-                    form_body_reference = Endpoint.parse_request_body(method_data["requestBody"])
+                    form_body_reference = Endpoint.parse_request_form_body(method_data["requestBody"])
+                    json_body = Endpoint.parse_request_json_body(method_data["requestBody"])
 
                 endpoint = Endpoint(
                     path=path,
@@ -73,6 +75,7 @@ class EndpointCollection:
                     path_parameters=path_parameters,
                     responses=responses,
                     form_body_reference=form_body_reference,
+                    json_body=json_body,
                     requires_security=bool(method_data.get("security")),
                 )
 
@@ -80,6 +83,14 @@ class EndpointCollection:
                 if form_body_reference:
                     collection.relative_imports.add(
                         import_string_from_reference(form_body_reference, prefix="..models")
+                    )
+                if (
+                    json_body is not None
+                    and isinstance(json_body, (ListProperty, RefProperty, EnumProperty))
+                    and json_body.reference is not None
+                ):
+                    collection.relative_imports.add(
+                        import_string_from_reference(json_body.reference, prefix="..models")
                     )
         return endpoints_by_tag
 
@@ -99,16 +110,26 @@ class Endpoint:
     responses: List[Response]
     requires_security: bool
     form_body_reference: Optional[Reference]
+    json_body: Optional[Property]
 
     @staticmethod
-    def parse_request_body(body: Dict[str, Any], /) -> Optional[Reference]:
-        """ Return form_body_ref """
+    def parse_request_form_body(body: Dict[str, Any], /) -> Optional[Reference]:
+        """ Return form_body_reference """
         form_body_reference = None
         body_content = body["content"]
         form_body = body_content.get("application/x-www-form-urlencoded")
         if form_body:
             form_body_reference = Reference(form_body["schema"]["$ref"])
         return form_body_reference
+
+    @staticmethod
+    def parse_request_json_body(body: Dict[str, Any], /) -> Optional[Property]:
+        """ Return json_body """
+        body_content = body["content"]
+        json_body = body_content.get("application/json")
+        if json_body:
+            return property_from_dict("json_body", required=True, data=json_body["schema"])
+        return None
 
 
 @dataclass
