@@ -19,27 +19,29 @@ def {{ endpoint.name }}(
     {% else %}
     client: Client,
     {% endif %}
+    {# path parameters #}
+    {% for parameter in endpoint.path_parameters %}
+    {{ parameter.to_string() }},
+    {% endfor %}
     {# Form data if any #}
     {% if endpoint.form_body_reference %}
     form_data: {{ endpoint.form_body_reference.class_name }},
     {% endif %}
-    {# Form data if any #}
+    {# JSON body if any #}
     {% if endpoint.json_body %}
     json_body: {{ endpoint.json_body.get_type_string() }},
     {% endif %}
     {# query parameters #}
-    {% if endpoint.query_parameters %}
     {% for parameter in endpoint.query_parameters %}
     {{ parameter.to_string() }},
     {% endfor %}
-    {% endif %}
 ) -> Union[
     {% for response in endpoint.responses %}
     {{ response.return_string() }},
     {% endfor %}
 ]:
     """ {{ endpoint.description }} """
-    url = client.base_url + "{{ endpoint.path }}"
+    url = f"{client.base_url}{{ endpoint.path }}"
 
     {% if endpoint.query_parameters %}
     params = {
