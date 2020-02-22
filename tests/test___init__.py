@@ -22,7 +22,7 @@ def test_main(mocker):
 class TestGetJson:
     def test__get_json_no_url_or_path(self, mocker):
         get = mocker.patch("requests.get")
-        Path = mocker.patch("pathlib.Path")
+        Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
         from openapi_python_client import _get_json
@@ -36,7 +36,7 @@ class TestGetJson:
 
     def test__get_json_url_and_path(self, mocker):
         get = mocker.patch("requests.get")
-        Path = mocker.patch("pathlib.Path")
+        Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
         from openapi_python_client import _get_json
@@ -50,7 +50,7 @@ class TestGetJson:
 
     def test__get_json_url_no_path(self, mocker):
         get = mocker.patch("requests.get")
-        Path = mocker.patch("pathlib.Path")
+        Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
         from openapi_python_client import _get_json
@@ -64,7 +64,7 @@ class TestGetJson:
 
     def test__get_json_path_no_url(self, mocker):
         get = mocker.patch("requests.get")
-        Path = mocker.patch("pathlib.Path")
+        Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
         from openapi_python_client import _get_json
