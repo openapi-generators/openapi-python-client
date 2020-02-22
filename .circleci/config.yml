@@ -8,31 +8,22 @@ jobs:
         keys:
         - v1-dependencies-{{ checksum "poetry.lock" }}
     - run:
-        command: 'pip install poetry --user --upgrade
-
+        name: install dependencies
+        command: |
+          pip install poetry --user --upgrade
           poetry config virtualenvs.in-project true
-
-          poetry config repositories.triaxtec https://pypi.fury.io/triaxtec/
-
-          poetry config http-basic.triaxtec $GEMFURY_PULL_TOKEN $GEMFURY_PULL_TOKEN
-
           poetry install
 
-          '
-        name: install dependencies
     - run:
-        command: 'mkdir -p test-reports/safety test-reports/mypy test-reports/pytest
-
-          poetry run black . --check
-
-          poetry run safety check --json > test-reports/safety/results.json
-
-          poetry run mypy openapi_python_client --junit-xml=test-reports/mypy/results.xml
-
-          poetry run pytest --junitxml=test-reports/pytest/results.xml
-
-          '
         name: run tests
+        command: |
+          mkdir -p test-reports/safety test-reports/mypy test-reports/pytest
+          poetry shell
+          black . --check
+          isort
+          safety check --json > test-reports/safety/results.json
+          mypy openapi_python_client --junit-xml=test-reports/mypy/results.xml
+          pytest --junitxml=test-reports/pytest/results.xml
     - store_test_results:
         path: test-reports
     - run:

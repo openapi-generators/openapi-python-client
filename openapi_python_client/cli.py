@@ -1,3 +1,5 @@
+from typing import Optional
+
 import click
 
 from . import main
@@ -10,7 +12,11 @@ def cli():
 
 
 @cli.command()
-@click.option("--url", required=True, help="The URL to the openapi.json file")
-def generate(url: str):
+@click.option("--url", help="The URL to the openapi.json file")
+@click.option("--path", help="The path to the openapi.json file")
+def generate(url: Optional[str], path: Optional[str]):
     """ Generate a new OpenAPI Client library """
-    main(url=url)
+    if not url and not path:
+        print("You must either provide --url or --path")
+        exit(1)
+    main(url=url, path=path)
