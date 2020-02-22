@@ -8,6 +8,7 @@ def test_main(mocker):
     path = mocker.MagicMock()
 
     from openapi_python_client import main
+
     main(url=url, path=path)
 
     _get_json.assert_called_once_with(url=url, path=path)

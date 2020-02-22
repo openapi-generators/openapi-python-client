@@ -6,7 +6,7 @@ from . import main
 
 
 @click.group()
-def cli():
+def cli() -> None:
     """ Entrypoint into CLI """
     pass
 
@@ -14,7 +14,7 @@ def cli():
 @cli.command()
 @click.option("--url", help="The URL to the openapi.json file")
 @click.option("--path", help="The path to the openapi.json file")
-def generate(url: Optional[str], path: Optional[str]):
+def generate(url: Optional[str], path: Optional[str]) -> None:
     """ Generate a new OpenAPI Client library """
     if not url and not path:
         print("You must either provide --url or --path")

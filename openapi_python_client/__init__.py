@@ -18,11 +18,13 @@ def main(*, url: Optional[str], path: Optional[str]) -> None:
 
 def _get_json(*, url: Optional[str], path: Optional[str]) -> Dict[str, Any]:
     json_bytes: bytes
-    if url:
+    if url is not None:
         response = requests.get(url)
         json_bytes = response.content
-    else:
+    elif path is not None:
         json_bytes = Path(path).read_bytes()
+    else:
+        raise ValueError("No URL or Path provided")
     return orjson.loads(json_bytes)
 
 
