@@ -17,7 +17,6 @@ include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 [tool.poetry.dependencies]
 python = "==3.*,>=3.8.0"
 requests = "^2.22.0"
-orjson = "^2.4.0"
 jinja2 = "^2.11.1"
 stringcase = "^1.2.0"
 click = "^7.0"

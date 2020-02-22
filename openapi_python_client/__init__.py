@@ -1,8 +1,8 @@
 """ Generate modern Python clients from OpenAPI """
+import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import orjson
 import requests
 from jinja2 import Environment, PackageLoader
 
@@ -18,14 +18,16 @@ def main(*, url: Optional[str], path: Optional[str]) -> None:
 
 def _get_json(*, url: Optional[str], path: Optional[str]) -> Dict[str, Any]:
     json_bytes: bytes
-    if url is not None:
+    if url is not None and path is not None:
+        raise ValueError("Provide URL or Path, not both.")
+    elif url is not None:
         response = requests.get(url)
         json_bytes = response.content
     elif path is not None:
         json_bytes = Path(path).read_bytes()
     else:
         raise ValueError("No URL or Path provided")
-    return orjson.loads(json_bytes)
+    return json.loads(json_bytes)
 
 
 def _build_project(*, openapi: OpenAPI) -> None:
