@@ -217,5 +217,59 @@ class TestProject:
         enum_1_module_path.write_text.assert_called_once_with(enum_render_1)
         enum_2_module_path.write_text.assert_called_once_with(enum_render_2)
 
-    # def test__build_api(self):
-    #     assert False
+    def test__build_api(self, mocker):
+        import pathlib
+        from openapi_python_client import _Project, OpenAPI
+
+        openapi = mocker.MagicMock(autospec=OpenAPI, title="My Test API")
+        tag_1 = mocker.MagicMock(autospec=str)
+        tag_2 = mocker.MagicMock(autospec=str)
+        collection_1 = mocker.MagicMock()
+        collection_2 = mocker.MagicMock()
+        openapi.endpoint_collections_by_tag = {tag_1: collection_1, tag_2: collection_2}
+        project = _Project(openapi=openapi)
+        project.package_dir = mocker.MagicMock()
+        client_path = mocker.MagicMock()
+        api_init = mocker.MagicMock(autospec=pathlib.Path)
+        collection_1_path = mocker.MagicMock(autospec=pathlib.Path)
+        collection_2_path = mocker.MagicMock(autospec=pathlib.Path)
+        api_paths = {
+            "__init__.py": api_init,
+            f"{tag_1}.py": collection_1_path,
+            f"{tag_2}.py": collection_2_path,
+        }
+        api_dir = mocker.MagicMock(autospec=pathlib.Path)
+        api_dir.__truediv__.side_effect = lambda x: api_paths[x]
+        package_paths = {
+            "client.py": client_path,
+            "api": api_dir,
+        }
+        project.package_dir.__truediv__.side_effect = lambda x: package_paths[x]
+        client_template = mocker.MagicMock()
+        endpoint_template = mocker.MagicMock()
+        templates = {
+            "client.pyi": client_template,
+            "endpoint_module.pyi": endpoint_template,
+        }
+        mocker.patch.object(project.env, "get_template", autospec=True, side_effect=lambda x: templates[x])
+        endpoint_renders = {
+            collection_1: mocker.MagicMock(),
+            collection_2: mocker.MagicMock(),
+        }
+        endpoint_template.render.side_effect = lambda collection: endpoint_renders[collection]
+
+        project._build_api()
+
+        project.package_dir.__truediv__.assert_has_calls([mocker.call(key) for key in package_paths])
+        project.env.get_template.assert_has_calls([mocker.call(key) for key in templates])
+        client_template.render.assert_called_once()
+        client_path.write_text.assert_called_once_with(client_template.render())
+        api_dir.mkdir.assert_called_once()
+        api_dir.__truediv__.assert_has_calls([mocker.call(key) for key in api_paths])
+        api_init.write_text.assert_called_once_with('""" Contains all methods for accessing the API """')
+        endpoint_template.render.assert_has_calls([
+            mocker.call(collection=collection_1),
+            mocker.call(collection=collection_2),
+        ])
+        collection_1_path.write_text.assert_called_once_with(endpoint_renders[collection_1])
+        collection_2_path.write_text.assert_called_once_with(endpoint_renders[collection_2])
