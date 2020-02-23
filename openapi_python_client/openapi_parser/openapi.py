@@ -195,6 +195,12 @@ class OpenAPI:
 
     @staticmethod
     def _check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
+        """
+        Create EnumProperties for every enum in any schema or collection.
+        Enums are deduplicated by class name.
+
+        :raises AssertionError: if two Enums with the same name but different values are detected
+        """
         enums: Dict[str, EnumProperty] = {}
 
         def _iterate_properties() -> Generator[Property, None, None]:
