@@ -1,5 +1,6 @@
 [![triaxtec](https://circleci.com/gh/triaxtec/openapi-python-client.svg?style=svg)](https://circleci.com/gh/triaxtec/openapi-python-client)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![codecov](https://codecov.io/gh/triaxtec/openapi-python-client/branch/master/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
 # openapi-python-client
 Generate modern Python clients from OpenAPI
 
