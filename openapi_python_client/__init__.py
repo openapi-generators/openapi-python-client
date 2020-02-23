@@ -32,7 +32,7 @@ def _get_json(*, url: Optional[str], path: Optional[str]) -> Dict[str, Any]:
 
 
 class _Project:
-    def __init__(self, *, openapi: OpenAPI):
+    def __init__(self, *, openapi: OpenAPI) -> None:
         self.openapi: OpenAPI = openapi
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
@@ -42,7 +42,7 @@ class _Project:
         self.package_name: str = self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
 
-    def build(self):
+    def build(self) -> None:
         """ Create the project from templates """
         print(f"Generating {self.project_name}")
         self.project_dir.mkdir()
@@ -51,7 +51,7 @@ class _Project:
         self._build_models()
         self._build_api()
 
-    def _build_metadata(self):
+    def _build_metadata(self) -> None:
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
         package_description = f"A client library for accessing {self.openapi.title}"
@@ -62,8 +62,9 @@ class _Project:
         pyproject_template = self.env.get_template("pyproject.toml")
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
-            pyproject_template.render(project_name=self.project_name, package_name=self.package_name,
-                                      description=package_description)
+            pyproject_template.render(
+                project_name=self.project_name, package_name=self.package_name, description=package_description
+            )
         )
 
         # README.md
@@ -71,7 +72,7 @@ class _Project:
         readme_template = self.env.get_template("README.md")
         readme.write_text(readme_template.render(description=package_description))
 
-    def _build_models(self):
+    def _build_models(self) -> None:
         # Generate models
         models_dir = self.package_dir / "models"
         models_dir.mkdir()
@@ -94,7 +95,7 @@ class _Project:
         models_init_template = self.env.get_template("models_init.pyi")
         models_init.write_text(models_init_template.render(imports=imports))
 
-    def _build_api(self):
+    def _build_api(self) -> None:
         # Generate Client
         client_path = self.package_dir / "client.py"
         client_template = self.env.get_template("client.pyi")
