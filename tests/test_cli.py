@@ -68,4 +68,3 @@ def test_no_params():
 
     assert result.exit_code == 0
     assert "Usage" in result.output
-

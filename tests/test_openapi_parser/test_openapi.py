@@ -125,3 +125,22 @@ class TestOpenAPI:
 
         with pytest.raises(AssertionError):
             OpenAPI._check_enums([schema], [])
+
+
+class TestSchema:
+    def test_dict(self, mocker):
+        from_dict = mocker.patch(f"{MODULE_NAME}.Schema.from_dict")
+        in_data = {1: mocker.MagicMock(), 2: mocker.MagicMock()}
+        schema_1 = mocker.MagicMock()
+        schema_2 = mocker.MagicMock()
+        from_dict.side_effect = [schema_1, schema_2]
+
+        from openapi_python_client.openapi_parser.openapi import Schema
+
+        result = Schema.dict(in_data)
+
+        from_dict.assert_has_calls([mocker.call(value) for value in in_data.values()])
+        assert result == {
+            schema_1.reference.class_name: schema_1,
+            schema_2.reference.class_name: schema_2,
+        }
