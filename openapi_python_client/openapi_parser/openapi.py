@@ -189,13 +189,12 @@ class OpenAPI:
     title: str
     description: str
     version: str
-    # security_schemes: Dict
     schemas: Dict[str, Schema]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
     enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
+    def _check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
         enums: Dict[str, EnumProperty] = {}
 
         def _iterate_properties() -> Generator[Property, None, None]:
@@ -225,7 +224,7 @@ class OpenAPI:
         """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
         endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])
-        enums = OpenAPI.check_enums(schemas.values(), endpoint_collections_by_tag.values())
+        enums = OpenAPI._check_enums(schemas.values(), endpoint_collections_by_tag.values())
 
         return OpenAPI(
             title=d["info"]["title"],
@@ -233,6 +232,5 @@ class OpenAPI:
             version=d["info"]["version"],
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             schemas=schemas,
-            # security_schemes=d["components"]["securitySchemes"],
             enums=enums,
         )

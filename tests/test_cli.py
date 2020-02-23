@@ -1,7 +1,8 @@
 from click.testing import CliRunner
 
 
-def test_generate_no_params():
+def test_generate_no_params(mocker):
+    main = mocker.patch("openapi_python_client.cli.main")
     from openapi_python_client.cli import generate
 
     runner = CliRunner()
@@ -9,9 +10,11 @@ def test_generate_no_params():
 
     assert result.exit_code == 1
     assert result.output == "You must either provide --url or --path\n"
+    main.assert_not_called()
 
 
-def test_generate_url_and_path():
+def test_generate_url_and_path(mocker):
+    main = mocker.patch("openapi_python_client.cli.main")
     from openapi_python_client.cli import generate
 
     runner = CliRunner()
@@ -19,10 +22,11 @@ def test_generate_url_and_path():
 
     assert result.exit_code == 1
     assert result.output == "Provide either --url or --path, not both\n"
+    main.assert_not_called()
 
 
 def test_generate_url(mocker):
-    main = mocker.patch("openapi_python_client.main")
+    main = mocker.patch("openapi_python_client.cli.main")
     url = mocker.MagicMock()
     from openapi_python_client.cli import generate
 
@@ -34,7 +38,7 @@ def test_generate_url(mocker):
 
 
 def test_generate_path(mocker):
-    main = mocker.patch("openapi_python_client.main")
+    main = mocker.patch("openapi_python_client.cli.main")
     path = mocker.MagicMock()
     from openapi_python_client.cli import generate
 
