@@ -24,3 +24,5 @@ dmypy.json
 
 # Terraform
 .terraform
+/coverage.xml
+/.coverage

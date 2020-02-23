@@ -1,3 +1,7 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.5
+
 jobs:
   build:
     docker:
@@ -22,9 +26,12 @@ jobs:
           poetry run isort
           poetry run safety check --json > test-reports/safety/results.json
           poetry run mypy openapi_python_client --junit-xml=test-reports/mypy/results.xml
-          poetry run pytest --junitxml=test-reports/pytest/results.xml
+          poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=./
+          poetry run coverage xml
     - store_test_results:
         path: test-reports
+    - codecov/upload:
+        file: coverage.xml
     - run:
         command: poetry run pip uninstall openapi-python-client -y
         name: Uninstall Package
@@ -33,4 +40,3 @@ jobs:
         paths:
         - ./.venv
     working_directory: ~/repo
-version: 2
