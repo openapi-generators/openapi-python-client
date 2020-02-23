@@ -58,3 +58,14 @@ def test_version():
 
     assert result.exit_code == 0
     assert result.output == f"OpenAPI Python Client, version {version('openapi-python-client')}\n"
+
+
+def test_no_params():
+    from openapi_python_client.cli import cli
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [])
+
+    assert result.exit_code == 0
+    assert "Usage" in result.output
+
