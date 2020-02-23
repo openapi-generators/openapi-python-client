@@ -267,9 +267,8 @@ class TestProject:
         api_dir.mkdir.assert_called_once()
         api_dir.__truediv__.assert_has_calls([mocker.call(key) for key in api_paths])
         api_init.write_text.assert_called_once_with('""" Contains all methods for accessing the API """')
-        endpoint_template.render.assert_has_calls([
-            mocker.call(collection=collection_1),
-            mocker.call(collection=collection_2),
-        ])
+        endpoint_template.render.assert_has_calls(
+            [mocker.call(collection=collection_1), mocker.call(collection=collection_2),]
+        )
         collection_1_path.write_text.assert_called_once_with(endpoint_renders[collection_1])
         collection_2_path.write_text.assert_called_once_with(endpoint_renders[collection_2])
