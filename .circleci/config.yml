@@ -12,14 +12,14 @@ jobs:
         keys:
         - v1-dependencies-{{ checksum "poetry.lock" }}
     - run:
-        name: install dependencies
+        name: Install Dependencies
         command: |
           pip install poetry --user --upgrade
           poetry config virtualenvs.in-project true
           poetry install
 
     - run:
-        name: run tests
+        name: Run Tests
         command: |
           mkdir -p test-reports/safety test-reports/mypy test-reports/pytest
           poetry run black . --check

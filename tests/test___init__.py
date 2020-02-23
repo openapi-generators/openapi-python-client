@@ -139,8 +139,83 @@ class TestProject:
         readme_template.render.assert_called_once_with(description=description)
         readme_path.write_text.assert_called_once_with(readme_template.render())
 
-    # def test__build_models(self):
-    #     assert False
-    #
+    def test__build_models(self, mocker):
+        from openapi_python_client import _Project, OpenAPI
+
+        openapi = mocker.MagicMock(autospec=OpenAPI, title="My Test API")
+        schema_1 = mocker.MagicMock()
+        schema_2 = mocker.MagicMock()
+        openapi.schemas = {"1": schema_1, "2": schema_2}
+        enum_1 = mocker.MagicMock()
+        enum_2 = mocker.MagicMock()
+        openapi.enums = {"1": enum_1, "2": enum_2}
+        project = _Project(openapi=openapi)
+        project.package_dir = mocker.MagicMock()
+        models_init = mocker.MagicMock()
+        models_dir = mocker.MagicMock()
+        schema_1_module_path = mocker.MagicMock()
+        schema_2_module_path = mocker.MagicMock()
+        enum_1_module_path = mocker.MagicMock()
+        enum_2_module_path = mocker.MagicMock()
+        module_paths = {
+            "__init__.py": models_init,
+            f"{schema_1.reference.module_name}.py": schema_1_module_path,
+            f"{schema_2.reference.module_name}.py": schema_2_module_path,
+            f"{enum_1.name}.py": enum_1_module_path,
+            f"{enum_2.name}.py": enum_2_module_path,
+        }
+        models_dir.__truediv__.side_effect = lambda x: module_paths[x]
+        project.package_dir.__truediv__.return_value = models_dir
+        model_render_1 = mocker.MagicMock()
+        model_render_2 = mocker.MagicMock()
+        model_template = mocker.MagicMock()
+        model_template.render.side_effect = [model_render_1, model_render_2]
+        enum_render_1 = mocker.MagicMock()
+        enum_render_2 = mocker.MagicMock()
+        enum_template = mocker.MagicMock()
+        enum_renders = {
+            enum_1: enum_render_1,
+            enum_2: enum_render_2,
+        }
+        enum_template.render.side_effect = lambda enum: enum_renders[enum]
+        models_init_template = mocker.MagicMock()
+        templates = {
+            "model.pyi": model_template,
+            "enum.pyi": enum_template,
+            "models_init.pyi": models_init_template,
+        }
+        project.env = mocker.MagicMock()
+        project.env.get_template.side_effect = lambda x: templates[x]
+        imports = [
+            "import_schema_1",
+            "import_schema_2",
+            "import_enum_1",
+            "import_enum_2",
+        ]
+        import_string_from_reference = mocker.patch(
+            "openapi_python_client.import_string_from_reference", side_effect=imports
+        )
+
+        project._build_models()
+
+        project.package_dir.__truediv__.assert_called_once_with("models")
+        models_dir.mkdir.assert_called_once()
+        models_dir.__truediv__.assert_has_calls([mocker.call(key) for key in module_paths])
+        project.env.get_template.assert_has_calls([mocker.call(key) for key in templates])
+        model_template.render.assert_has_calls([mocker.call(schema=schema_1), mocker.call(schema=schema_2)])
+        schema_1_module_path.write_text.assert_called_once_with(model_render_1)
+        schema_2_module_path.write_text.assert_called_once_with(model_render_2)
+        import_string_from_reference.assert_has_calls(
+            [
+                mocker.call(schema_1.reference),
+                mocker.call(schema_2.reference),
+                mocker.call(enum_1.reference),
+                mocker.call(enum_2.reference),
+            ]
+        )
+        models_init_template.render.assert_called_once_with(imports=imports)
+        enum_1_module_path.write_text.assert_called_once_with(enum_render_1)
+        enum_2_module_path.write_text.assert_called_once_with(enum_render_2)
+
     # def test__build_api(self):
     #     assert False
