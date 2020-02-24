@@ -144,3 +144,40 @@ class TestSchema:
             schema_1.reference.class_name: schema_1,
             schema_2.reference.class_name: schema_2,
         }
+
+    def test_from_dict(self, mocker):
+        from openapi_python_client.openapi_parser.properties import EnumProperty, StringProperty
+
+        in_data = {
+            "title": mocker.MagicMock(),
+            "description": mocker.MagicMock(),
+            "required": ["RequiredEnum"],
+            "properties": {"RequiredEnum": mocker.MagicMock(), "OptionalString": mocker.MagicMock(),},
+        }
+        required_property = EnumProperty(name="RequiredEnum", required=True, default=None, values={},)
+        optional_property = StringProperty(name="OptionalString", required=False, default=None)
+        property_from_dict = mocker.patch(
+            f"{MODULE_NAME}.property_from_dict", side_effect=[required_property, optional_property]
+        )
+        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        import_string_from_reference = mocker.patch(f"{MODULE_NAME}.import_string_from_reference")
+
+        from openapi_python_client.openapi_parser.openapi import Schema
+
+        result = Schema.from_dict(in_data)
+
+        Reference.assert_called_once_with(in_data["title"])
+        property_from_dict.assert_has_calls(
+            [
+                mocker.call(name="RequiredEnum", required=True, data=in_data["properties"]["RequiredEnum"]),
+                mocker.call(name="OptionalString", required=False, data=in_data["properties"]["OptionalString"]),
+            ]
+        )
+        import_string_from_reference.assert_called_once_with(required_property.reference)
+        assert result == Schema(
+            reference=Reference(),
+            required_properties=[required_property],
+            optional_properties=[optional_property],
+            relative_imports={import_string_from_reference()},
+            description=in_data["description"],
+        )
