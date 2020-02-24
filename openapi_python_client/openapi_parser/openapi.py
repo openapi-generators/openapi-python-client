@@ -115,12 +115,11 @@ class Endpoint:
     @staticmethod
     def parse_request_form_body(body: Dict[str, Any], /) -> Optional[Reference]:
         """ Return form_body_reference """
-        form_body_reference = None
         body_content = body["content"]
         form_body = body_content.get("application/x-www-form-urlencoded")
         if form_body:
-            form_body_reference = Reference(form_body["schema"]["$ref"])
-        return form_body_reference
+            return Reference(form_body["schema"]["$ref"])
+        return None
 
     @staticmethod
     def parse_request_json_body(body: Dict[str, Any], /) -> Optional[Property]:

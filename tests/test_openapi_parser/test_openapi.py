@@ -181,3 +181,47 @@ class TestSchema:
             relative_imports={import_string_from_reference()},
             description=in_data["description"],
         )
+
+
+class TestEndpoint:
+    def test_parse_request_form_body(self, mocker):
+        ref = mocker.MagicMock()
+        body = {"content": {"application/x-www-form-urlencoded": {"schema": {"$ref": ref}}}}
+        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        result = Endpoint.parse_request_form_body(body)
+
+        Reference.assert_called_once_with(ref)
+        assert result == Reference()
+
+    def test_parse_request_form_body_no_data(self):
+        body = {"content": {}}
+
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        result = Endpoint.parse_request_form_body(body)
+
+        assert result is None
+
+    def test_parse_request_json_body(self, mocker):
+        schema = mocker.MagicMock()
+        body = {"content": {"application/json": {"schema": schema}}}
+        property_from_dict = mocker.patch(f"{MODULE_NAME}.property_from_dict")
+
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        result = Endpoint.parse_request_json_body(body)
+
+        property_from_dict.assert_called_once_with("json_body", required=True, data=schema)
+        assert result == property_from_dict()
+
+    def test_parse_request_json_body_no_data(self):
+        body = {"content": {}}
+
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        result = Endpoint.parse_request_json_body(body)
+
+        assert result is None
