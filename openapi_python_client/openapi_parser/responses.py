@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Literal, TypedDict, Union, cast
+from typing import Any, Dict, Literal, TypedDict, Union
 
 from .reference import Reference
 
@@ -11,7 +11,6 @@ class Response:
     """ Describes a single response for an endpoint """
 
     status_code: int
-    content_type: ContentType
 
     def return_string(self) -> str:
         """ How this Response should be represented as a return type """
@@ -65,13 +64,6 @@ class StringResponse(Response):
         return "response.text"
 
 
-@dataclass
-class EmptyResponse(Response):
-    """ Response has no payload """
-
-    pass
-
-
 _openapi_types_to_python_type_strings = {
     "string": "str",
     "number": "float",
@@ -103,15 +95,11 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     schema_data = data["content"][content_type]["schema"]
 
     if "$ref" in schema_data:
-        return RefResponse(
-            status_code=status_code, content_type=content_type, reference=Reference(schema_data["$ref"]),
-        )
+        return RefResponse(status_code=status_code, reference=Reference(schema_data["$ref"]),)
     if "type" not in schema_data:
-        return EmptyResponse(status_code=status_code, content_type=content_type,)
+        return Response(status_code=status_code)
     if schema_data["type"] == "array":
-        return ListRefResponse(
-            status_code=status_code, content_type=content_type, reference=Reference(schema_data["items"]["$ref"]),
-        )
+        return ListRefResponse(status_code=status_code, reference=Reference(schema_data["items"]["$ref"]),)
     if schema_data["type"] == "string":
-        return StringResponse(status_code=status_code, content_type=content_type)
+        return StringResponse(status_code=status_code)
     raise ValueError(f"Cannot parse response of type {schema_data['type']}")

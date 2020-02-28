@@ -296,8 +296,8 @@ class TestEndpoint:
         )
         ref_1 = Reference(ref="ref_1")
         ref_2 = Reference(ref="ref_2")
-        response_1 = RefResponse(status_code=200, content_type="application/json", reference=ref_1)
-        response_2 = RefResponse(status_code=404, content_type="application/json", reference=ref_2)
+        response_1 = RefResponse(status_code=200, reference=ref_1)
+        response_2 = RefResponse(status_code=404, reference=ref_2)
         response_from_dict = mocker.patch(f"{MODULE_NAME}.response_from_dict", side_effect=[response_1, response_2])
         import_string_from_reference = mocker.patch(
             f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
