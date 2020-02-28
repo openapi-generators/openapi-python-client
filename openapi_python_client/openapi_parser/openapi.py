@@ -35,63 +35,10 @@ class EndpointCollection:
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
         for path, path_data in d.items():
             for method, method_data in path_data.items():
-                query_parameters: List[Property] = []
-                path_parameters: List[Property] = []
-                responses: List[Response] = []
-                tag = method_data.get("tags", ["default"])[0]
-                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
-                for param_dict in method_data.get("parameters", []):
-                    prop = property_from_dict(
-                        name=param_dict["name"], required=param_dict["required"], data=param_dict["schema"]
-                    )
-                    if isinstance(prop, (ListProperty, RefProperty, EnumProperty)) and prop.reference:
-                        collection.relative_imports.add(import_string_from_reference(prop.reference, prefix="..models"))
-                    if param_dict["in"] == ParameterLocation.QUERY:
-                        query_parameters.append(prop)
-                    elif param_dict["in"] == ParameterLocation.PATH:
-                        path_parameters.append(prop)
-                    else:
-                        raise ValueError(f"Don't know where to put this parameter: {param_dict}")
-
-                for code, response_dict in method_data["responses"].items():
-                    response = response_from_dict(status_code=int(code), data=response_dict)
-                    if isinstance(response, (RefResponse, ListRefResponse)):
-                        collection.relative_imports.add(
-                            import_string_from_reference(response.reference, prefix="..models")
-                        )
-                    responses.append(response)
-                form_body_reference = None
-                json_body = None
-                if "requestBody" in method_data:
-                    form_body_reference = Endpoint.parse_request_form_body(method_data["requestBody"])
-                    json_body = Endpoint.parse_request_json_body(method_data["requestBody"])
-
-                endpoint = Endpoint(
-                    path=path,
-                    method=method,
-                    description=method_data.get("description"),
-                    name=method_data["operationId"],
-                    query_parameters=query_parameters,
-                    path_parameters=path_parameters,
-                    responses=responses,
-                    form_body_reference=form_body_reference,
-                    json_body=json_body,
-                    requires_security=bool(method_data.get("security")),
-                )
-
+                endpoint = Endpoint.from_data(data=method_data, path=path, method=method)
+                collection = endpoints_by_tag.setdefault(endpoint.tag, EndpointCollection(tag=endpoint.tag))
                 collection.endpoints.append(endpoint)
-                if form_body_reference:
-                    collection.relative_imports.add(
-                        import_string_from_reference(form_body_reference, prefix="..models")
-                    )
-                if (
-                    json_body is not None
-                    and isinstance(json_body, (ListProperty, RefProperty, EnumProperty))
-                    and json_body.reference is not None
-                ):
-                    collection.relative_imports.add(
-                        import_string_from_reference(json_body.reference, prefix="..models")
-                    )
+                collection.relative_imports.update(endpoint.relative_imports)
         return endpoints_by_tag
 
 
@@ -111,6 +58,8 @@ class Endpoint:
     requires_security: bool
     form_body_reference: Optional[Reference]
     json_body: Optional[Property]
+    tag: str
+    relative_imports: Set[str]
 
     @staticmethod
     def parse_request_form_body(body: Dict[str, Any], /) -> Optional[Reference]:
@@ -129,6 +78,63 @@ class Endpoint:
         if json_body:
             return property_from_dict("json_body", required=True, data=json_body["schema"])
         return None
+
+    @staticmethod
+    def from_data(*, data: Dict[str, Any], path: str, method: str) -> Endpoint:
+        """ Construct an endpoint from the OpenAPI data """
+        query_parameters: List[Property] = []
+        path_parameters: List[Property] = []
+        responses: List[Response] = []
+        tag = data.get("tags", ["default"])[0]
+        relative_imports: Set[str] = set()
+
+        for param_dict in data.get("parameters", []):
+            prop = property_from_dict(
+                name=param_dict["name"], required=param_dict["required"], data=param_dict["schema"]
+            )
+            if isinstance(prop, (ListProperty, RefProperty, EnumProperty)) and prop.reference:
+                relative_imports.add(import_string_from_reference(prop.reference, prefix="..models"))
+            if param_dict["in"] == ParameterLocation.QUERY:
+                query_parameters.append(prop)
+            elif param_dict["in"] == ParameterLocation.PATH:
+                path_parameters.append(prop)
+            else:
+                raise ValueError(f"Don't know where to put this parameter: {param_dict}")
+
+        for code, response_dict in data["responses"].items():
+            response = response_from_dict(status_code=int(code), data=response_dict)
+            if isinstance(response, (RefResponse, ListRefResponse)):
+                relative_imports.add(import_string_from_reference(response.reference, prefix="..models"))
+            responses.append(response)
+        form_body_reference = None
+        json_body = None
+        if "requestBody" in data:
+            form_body_reference = Endpoint.parse_request_form_body(data["requestBody"])
+            json_body = Endpoint.parse_request_json_body(data["requestBody"])
+
+        if form_body_reference:
+            relative_imports.add(import_string_from_reference(form_body_reference, prefix="..models"))
+        if (
+            json_body is not None
+            and isinstance(json_body, (ListProperty, RefProperty, EnumProperty))
+            and json_body.reference is not None
+        ):
+            relative_imports.add(import_string_from_reference(json_body.reference, prefix="..models"))
+
+        return Endpoint(
+            path=path,
+            method=method,
+            description=data.get("description"),
+            name=data["operationId"],
+            query_parameters=query_parameters,
+            path_parameters=path_parameters,
+            responses=responses,
+            form_body_reference=form_body_reference,
+            json_body=json_body,
+            requires_security=bool(data.get("security")),
+            tag=tag,
+            relative_imports=relative_imports,
+        )
 
 
 @dataclass
