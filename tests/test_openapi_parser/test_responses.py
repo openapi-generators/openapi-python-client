@@ -35,6 +35,22 @@ class TestListRefResponse:
         assert r.constructor() == "[SuperCoolClass.from_dict(item) for item in response.json()]"
 
 
+class TestRefResponse:
+    def test_return_string(self, mocker):
+        from openapi_python_client.openapi_parser.responses import RefResponse
+
+        r = RefResponse(200, reference=mocker.MagicMock(class_name="SuperCoolClass"))
+
+        assert r.return_string() == "SuperCoolClass"
+
+    def test_constructor(self, mocker):
+        from openapi_python_client.openapi_parser.responses import RefResponse
+
+        r = RefResponse(200, reference=mocker.MagicMock(class_name="SuperCoolClass"))
+
+        assert r.constructor() == "SuperCoolClass.from_dict(response.json())"
+
+
 class TestStringResponse:
     def test_return_string(self):
         from openapi_python_client.openapi_parser.responses import StringResponse
