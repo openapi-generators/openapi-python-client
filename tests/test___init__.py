@@ -65,7 +65,6 @@ class TestGetJson:
 
     def test__get_json_path_no_url(self, mocker):
         get = mocker.patch("requests.get")
-        Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
         from openapi_python_client import _get_json
@@ -74,8 +73,8 @@ class TestGetJson:
         _get_json(url=None, path=path)
 
         get.assert_not_called()
-        Path.assert_called_once_with(path)
-        loads.assert_called_once_with(Path().read_bytes())
+        path.read_bytes.assert_called_once()
+        loads.assert_called_once_with(path.read_bytes())
 
 
 class TestProject:

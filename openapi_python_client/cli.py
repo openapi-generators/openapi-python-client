@@ -1,27 +1,29 @@
-from importlib.metadata import version
+import pathlib
 from typing import Optional
 
-import click
+import typer
 
 from . import main
 
+app = typer.Typer()
 
-@click.group()
-@click.version_option(version(__package__), prog_name="OpenAPI Python Client")
+
+@app.callback()
 def cli() -> None:
-    """ Entrypoint into CLI """
+    """ Generate a Python client from an OpenAPI JSON document """
     pass
 
 
-@cli.command()
-@click.option("--url", help="The URL to the openapi.json file")
-@click.option("--path", help="The path to the openapi.json file")
-def generate(url: Optional[str], path: Optional[str]) -> None:
+@app.command()
+def generate(
+    url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
+    path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file")
+) -> None:
     """ Generate a new OpenAPI Client library """
     if not url and not path:
-        click.secho("You must either provide --url or --path", fg="red")
-        exit(1)
+        typer.secho("You must either provide --url or --path", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
     elif url and path:
-        click.secho("Provide either --url or --path, not both", fg="red")
-        exit(1)
+        typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
     main(url=url, path=path)

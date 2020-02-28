@@ -9,7 +9,7 @@ from jinja2 import Environment, PackageLoader
 from .openapi_parser import OpenAPI, import_string_from_reference
 
 
-def main(*, url: Optional[str], path: Optional[str]) -> None:
+def main(*, url: Optional[str], path: Optional[Path]) -> None:
     """ Generate the client library """
     data_dict = _get_json(url=url, path=path)
     openapi = OpenAPI.from_dict(data_dict)
@@ -17,7 +17,7 @@ def main(*, url: Optional[str], path: Optional[str]) -> None:
     project.build()
 
 
-def _get_json(*, url: Optional[str], path: Optional[str]) -> Dict[str, Any]:
+def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
     json_bytes: bytes
     if url is not None and path is not None:
         raise ValueError("Provide URL or Path, not both.")
@@ -25,7 +25,7 @@ def _get_json(*, url: Optional[str], path: Optional[str]) -> Dict[str, Any]:
         response = requests.get(url)
         json_bytes = response.content
     elif path is not None:
-        json_bytes = Path(path).read_bytes()
+        json_bytes = path.read_bytes()
     else:
         raise ValueError("No URL or Path provided")
     return json.loads(json_bytes)
