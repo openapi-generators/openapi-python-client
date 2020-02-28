@@ -17,7 +17,7 @@ def cli() -> None:
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
-    path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file")
+    path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
 ) -> None:
     """ Generate a new OpenAPI Client library """
     if not url and not path:
