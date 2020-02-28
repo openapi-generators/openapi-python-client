@@ -119,14 +119,13 @@ class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, str]
-    inverse_values: Dict[str, str] = field(init=False)
     reference: Reference = field(init=False)
 
     def __post_init__(self) -> None:
         self.reference = Reference(self.name)
-        self.inverse_values = {v: k for k, v in self.values.items()}
+        inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:
-            self.default = f"{self.reference.class_name}.{self.inverse_values[self.default]}"
+            self.default = f"{self.reference.class_name}.{inverse_values[self.default]}"
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -149,7 +148,7 @@ class EnumProperty(Property):
         output: Dict[str, str] = {}
 
         for i, value in enumerate(l):
-            if value.isalpha():
+            if value[0].isalpha():
                 key = value.upper()
             else:
                 key = f"VALUE_{i}"
@@ -227,5 +226,5 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
             _type = _openapi_types_to_python_type_strings[data["items"]["type"]]
         return ListProperty(name=name, required=required, type=_type, reference=reference, default=None)
     elif data["type"] == "object":
-        return DictProperty(name=name, required=required, default=None)
+        return DictProperty(name=name, required=required, default=data.get("default"))
     raise ValueError(f"Did not recognize type of {data}")
