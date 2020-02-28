@@ -2,6 +2,12 @@ import pytest
 import typer
 
 
+def test_callback():
+    from openapi_python_client.cli import cli
+
+    cli()
+
+
 def test_generate_no_params(mocker):
     main = mocker.patch("openapi_python_client.cli.main")
     from openapi_python_client.cli import generate
