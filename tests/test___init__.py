@@ -135,7 +135,9 @@ class TestProject:
             project_name=project.project_name, package_name=project.package_name, description=description
         )
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render())
-        readme_template.render.assert_called_once_with(description=description)
+        readme_template.render.assert_called_once_with(
+            description=description, project_name=project.project_name, package_name=project.package_name,
+        )
         readme_path.write_text.assert_called_once_with(readme_template.render())
 
     def test__build_models(self, mocker):

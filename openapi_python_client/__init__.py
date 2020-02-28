@@ -70,7 +70,11 @@ class _Project:
         # README.md
         readme = self.project_dir / "README.md"
         readme_template = self.env.get_template("README.md")
-        readme.write_text(readme_template.render(description=package_description))
+        readme.write_text(
+            readme_template.render(
+                project_name=self.project_name, description=package_description, package_name=self.package_name
+            )
+        )
 
     def _build_models(self) -> None:
         # Generate models
