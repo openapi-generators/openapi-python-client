@@ -7,7 +7,7 @@ def test_generate_no_params(mocker):
     from openapi_python_client.cli import generate
 
     with pytest.raises(typer.Exit) as exc_info:
-        generate()
+        generate(url=None, path=None)
         assert exc_info.value.exit_code == 1
     main.assert_not_called()
 
