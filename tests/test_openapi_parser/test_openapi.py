@@ -225,3 +225,24 @@ class TestEndpoint:
         result = Endpoint.parse_request_json_body(body)
 
         assert result is None
+
+
+class TestImportStringFromReference:
+    def test_import_string_from_reference_no_prefix(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import import_string_from_reference
+        from openapi_python_client.openapi_parser.reference import Reference
+
+        reference = mocker.MagicMock(autospec=Reference)
+        result = import_string_from_reference(reference)
+
+        assert result == f"from .{reference.module_name} import {reference.class_name}"
+
+    def test_import_string_from_reference_with_prefix(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import import_string_from_reference
+        from openapi_python_client.openapi_parser.reference import Reference
+
+        prefix = mocker.MagicMock(autospec=str)
+        reference = mocker.MagicMock(autospec=Reference)
+        result = import_string_from_reference(reference=reference, prefix=prefix)
+
+        assert result == f"from {prefix}.{reference.module_name} import {reference.class_name}"
