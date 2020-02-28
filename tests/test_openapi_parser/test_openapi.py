@@ -226,6 +226,191 @@ class TestEndpoint:
 
         assert result is None
 
+    def test_add_body_no_data(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        parse_request_form_body = mocker.patch.object(Endpoint, "parse_request_form_body")
+        endpoint = Endpoint(
+            path="path",
+            method="method",
+            description=None,
+            name="name",
+            requires_security=False,
+            tag="tag",
+            relative_imports={"import_3"},
+        )
+
+        endpoint._add_body({})
+
+        parse_request_form_body.assert_not_called()
+
+    def test_add_body_happy(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import Endpoint, Reference, RefProperty
+
+        request_body = mocker.MagicMock()
+        form_body_reference = Reference(ref="a")
+        parse_request_form_body = mocker.patch.object(
+            Endpoint, "parse_request_form_body", return_value=form_body_reference
+        )
+        json_body = RefProperty(name="name", required=True, default=None, reference=Reference("b"))
+        parse_request_json_body = mocker.patch.object(Endpoint, "parse_request_json_body", return_value=json_body)
+        import_string_from_reference = mocker.patch(
+            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
+        )
+
+        endpoint = Endpoint(
+            path="path",
+            method="method",
+            description=None,
+            name="name",
+            requires_security=False,
+            tag="tag",
+            relative_imports={"import_3"},
+        )
+
+        endpoint._add_body({"requestBody": request_body})
+
+        parse_request_form_body.assert_called_once_with(request_body)
+        parse_request_json_body.assert_called_once_with(request_body)
+        import_string_from_reference.assert_has_calls(
+            [mocker.call(form_body_reference, prefix="..models"), mocker.call(json_body.reference, prefix="..models")]
+        )
+        assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
+        assert endpoint.json_body == json_body
+        assert endpoint.form_body_reference == form_body_reference
+
+    def test__add_responses(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import Endpoint, RefResponse, Reference
+
+        response_1_data = mocker.MagicMock()
+        response_2_data = mocker.MagicMock()
+        data = {"responses": {"200": response_1_data, "404": response_2_data,}}
+        endpoint = Endpoint(
+            path="path",
+            method="method",
+            description=None,
+            name="name",
+            requires_security=False,
+            tag="tag",
+            relative_imports={"import_3"},
+        )
+        ref_1 = Reference(ref="ref_1")
+        ref_2 = Reference(ref="ref_2")
+        response_1 = RefResponse(status_code=200, content_type="application/json", reference=ref_1)
+        response_2 = RefResponse(status_code=404, content_type="application/json", reference=ref_2)
+        response_from_dict = mocker.patch(f"{MODULE_NAME}.response_from_dict", side_effect=[response_1, response_2])
+        import_string_from_reference = mocker.patch(
+            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
+        )
+
+        endpoint._add_responses(data)
+
+        response_from_dict.assert_has_calls(
+            [mocker.call(status_code=200, data=response_1_data), mocker.call(status_code=404, data=response_2_data),]
+        )
+        import_string_from_reference.assert_has_calls(
+            [mocker.call(ref_1, prefix="..models"), mocker.call(ref_2, prefix="..models"),]
+        )
+        assert endpoint.responses == [response_1, response_2]
+        assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
+
+    def test__add_parameters_handles_no_params(self):
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        endpoint = Endpoint(
+            path="path", method="method", description=None, name="name", requires_security=False, tag="tag",
+        )
+        endpoint._add_parameters({})  # Just checking there's no exception here
+
+    def test__add_parameters_fail_loudly_when_location_not_supported(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        endpoint = Endpoint(
+            path="path", method="method", description=None, name="name", requires_security=False, tag="tag",
+        )
+        mocker.patch(f"{MODULE_NAME}.property_from_dict")
+
+        with pytest.raises(ValueError):
+            endpoint._add_parameters(
+                {"parameters": [{"name": "test", "required": True, "schema": mocker.MagicMock(), "in": "cookie"}]}
+            )
+
+    def test__add_parameters_happy(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import Endpoint, EnumProperty
+
+        endpoint = Endpoint(
+            path="path",
+            method="method",
+            description=None,
+            name="name",
+            requires_security=False,
+            tag="tag",
+            relative_imports={"import_3"},
+        )
+        path_prop = EnumProperty(name="path_enum", required=True, default=None, values={})
+        query_prop = EnumProperty(name="query_enum", required=False, default=None, values={})
+        propety_from_dict = mocker.patch(f"{MODULE_NAME}.property_from_dict", side_effect=[path_prop, query_prop])
+        path_schema = mocker.MagicMock()
+        query_schema = mocker.MagicMock()
+        import_string_from_reference = mocker.patch(
+            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
+        )
+        data = {
+            "parameters": [
+                {"name": "path_prop_name", "required": True, "schema": path_schema, "in": "path"},
+                {"name": "query_prop_name", "required": False, "schema": query_schema, "in": "query"},
+            ]
+        }
+
+        endpoint._add_parameters(data)
+
+        propety_from_dict.assert_has_calls(
+            [
+                mocker.call(name="path_prop_name", required=True, data=path_schema),
+                mocker.call(name="query_prop_name", required=False, data=query_schema),
+            ]
+        )
+        import_string_from_reference.assert_has_calls(
+            [mocker.call(path_prop.reference, prefix="..models"), mocker.call(query_prop.reference, prefix="..models"),]
+        )
+        assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
+        assert endpoint.path_parameters == [path_prop]
+        assert endpoint.query_parameters == [query_prop]
+
+    def test_from_data(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        path = mocker.MagicMock()
+        method = mocker.MagicMock()
+        _add_parameters = mocker.patch.object(Endpoint, "_add_parameters")
+        _add_responses = mocker.patch.object(Endpoint, "_add_responses")
+        _add_body = mocker.patch.object(Endpoint, "_add_body")
+        data = {
+            "description": mocker.MagicMock(),
+            "operationId": mocker.MagicMock(),
+            "security": {"blah": "bloo"},
+        }
+
+        endpoint = Endpoint.from_data(data=data, path=path, method=method)
+
+        assert endpoint.path == path
+        assert endpoint.method == method
+        assert endpoint.description == data["description"]
+        assert endpoint.name == data["operationId"]
+        assert endpoint.requires_security
+        assert endpoint.tag == "default"
+        _add_parameters.assert_called_once_with(data)
+        _add_responses.assert_called_once_with(data)
+        _add_body.assert_called_once_with(data)
+
+        data["tags"] = ["a", "b"]
+        del data["security"]
+
+        endpoint = Endpoint.from_data(data=data, path=path, method=method)
+
+        assert not endpoint.requires_security
+        assert endpoint.tag == "a"
+
 
 class TestImportStringFromReference:
     def test_import_string_from_reference_no_prefix(self, mocker):
