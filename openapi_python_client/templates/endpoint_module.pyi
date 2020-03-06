@@ -47,9 +47,17 @@ def {{ endpoint.name }}(
     {% if endpoint.query_parameters %}
     params = {
         {% for parameter in endpoint.query_parameters %}
-        "{{ parameter.name }}": {{ parameter.transform() }},
+        {% if parameter.required %}
+            "{{ parameter.name }}": {{ parameter.transform() }},
+        {% endif %}
         {% endfor %}
     }
+    {% for parameter in endpoint.query_parameters %}
+    {% if not parameter.required %}
+    if {{ parameter.name }} is not None:
+        params["{{ parameter.name }}"] = {{ parameter.transform() }}
+    {% endif %}
+    {% endfor %}
     {% endif %}
 
     response = requests.{{ endpoint.method }}(
