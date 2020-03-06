@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Union
 
 import requests
 
-from .errors import ApiResponseError
 from ..client import AuthenticatedClient, Client
+from .errors import ApiResponseError
 
 {% for relative in collection.relative_imports %}
 {{ relative }}
