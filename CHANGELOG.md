@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix mypy issue in generated models `from_dict` with datetime or reference properties
 - Generated clients now raise an `ApiResponseError` if they receive a response that was not declared
 - Stop including optional query parameters when value is set to None
+- Added an `update` command to update a previously generated client
+- Added click-completion for installable tab completion in most shells
 
 ## 0.1.0 - 2020-02-28
 - Initial Release

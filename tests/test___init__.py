@@ -1,7 +1,9 @@
+import pathlib
+
 import pytest
 
 
-def test_main(mocker):
+def test__get_project_for_url_or_path(mocker):
     data_dict = mocker.MagicMock()
     _get_json = mocker.patch("openapi_python_client._get_json", return_value=data_dict)
     openapi = mocker.MagicMock()
@@ -10,14 +12,46 @@ def test_main(mocker):
     url = mocker.MagicMock()
     path = mocker.MagicMock()
 
-    from openapi_python_client import main
+    from openapi_python_client import _get_project_for_url_or_path
 
-    main(url=url, path=path)
+    project = _get_project_for_url_or_path(url=url, path=path)
 
     _get_json.assert_called_once_with(url=url, path=path)
     from_dict.assert_called_once_with(data_dict)
     _Project.assert_called_once_with(openapi=openapi)
-    _Project().build.assert_called_once()
+    assert project == _Project()
+
+
+def test_create_new_client(mocker):
+    project = mocker.MagicMock()
+    _get_project_for_url_or_path = mocker.patch(
+        "openapi_python_client._get_project_for_url_or_path", return_value=project
+    )
+    url = mocker.MagicMock()
+    path = mocker.MagicMock()
+
+    from openapi_python_client import create_new_client
+
+    create_new_client(url=url, path=path)
+
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    project.build.assert_called_once()
+
+
+def test_update_existing_client(mocker):
+    project = mocker.MagicMock()
+    _get_project_for_url_or_path = mocker.patch(
+        "openapi_python_client._get_project_for_url_or_path", return_value=project
+    )
+    url = mocker.MagicMock()
+    path = mocker.MagicMock()
+
+    from openapi_python_client import update_existing_client
+
+    update_existing_client(url=url, path=path)
+
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    project.update.assert_called_once()
 
 
 class TestGetJson:
@@ -88,6 +122,7 @@ class TestProject:
         assert project.openapi == openapi
         assert project.project_name == "my-test-api-client"
         assert project.package_name == "my_test_api_client"
+        assert project.package_description == f"A client library for accessing My Test API"
 
     def test_build(self, mocker):
         from openapi_python_client import _Project
@@ -98,14 +133,65 @@ class TestProject:
         project._build_metadata = mocker.MagicMock()
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
+        project._create_package = mocker.MagicMock()
 
         project.build()
 
         project.project_dir.mkdir.assert_called_once()
-        project.package_dir.mkdir.assert_called_once()
+        project._create_package.assert_called_once()
         project._build_metadata.assert_called_once()
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
+
+    def test_update(self, mocker):
+        from openapi_python_client import _Project, shutil
+
+        rmtree = mocker.patch.object(shutil, "rmtree")
+        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project.package_dir = mocker.MagicMock()
+        project._build_metadata = mocker.MagicMock()
+        project._build_models = mocker.MagicMock()
+        project._build_api = mocker.MagicMock()
+        project._create_package = mocker.MagicMock()
+
+        project.update()
+
+        rmtree.assert_called_once_with(project.package_dir)
+        project._create_package.assert_called_once()
+        project._build_models.assert_called_once()
+        project._build_api.assert_called_once()
+
+    def test_update_missing_dir(self, mocker):
+        from openapi_python_client import _Project
+
+        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project.package_dir = mocker.MagicMock()
+        project.package_dir.is_dir.return_value = False
+        project._build_models = mocker.MagicMock()
+
+        with pytest.raises(FileNotFoundError):
+            project.update()
+
+        project.package_dir.is_dir.assert_called_once()
+        project._build_models.assert_not_called()
+
+    def test__create_package(self, mocker):
+        from openapi_python_client import _Project
+
+        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project.package_dir = mocker.MagicMock()
+        package_init_template = mocker.MagicMock()
+        project.env = mocker.MagicMock()
+        project.env.get_template.return_value = package_init_template
+        package_init_path = mocker.MagicMock(autospec=pathlib.Path)
+        project.package_dir.__truediv__.return_value = package_init_path
+
+        project._create_package()
+
+        project.package_dir.mkdir.assert_called_once()
+        project.env.get_template.assert_called_once_with("package_init.pyi")
+        package_init_template.render.assert_called_once_with(description=project.package_description)
+        package_init_path.write_text.assert_called_once_with(package_init_template.render())
 
     def test__build_metadata(self, mocker):
         from openapi_python_client import _Project
@@ -115,28 +201,26 @@ class TestProject:
         pyproject_path = mocker.MagicMock()
         readme_path = mocker.MagicMock()
         project.project_dir.__truediv__.side_effect = [pyproject_path, readme_path]
-        project.package_dir = mocker.MagicMock()
-        package_init_template = mocker.MagicMock()
+
         pyproject_template = mocker.MagicMock()
         readme_template = mocker.MagicMock()
         project.env = mocker.MagicMock()
-        project.env.get_template.side_effect = [package_init_template, pyproject_template, readme_template]
+        project.env.get_template.side_effect = [pyproject_template, readme_template]
 
         project._build_metadata()
 
-        project.env.get_template.assert_has_calls(
-            [mocker.call("package_init.pyi"), mocker.call("pyproject.toml"), mocker.call("README.md"),]
-        )
-        description = f"A client library for accessing {project.openapi.title}"
-        package_init = project.package_dir / "__init__.py"
-        package_init_template.render.assert_called_once_with(description=description)
-        package_init.write_text.assert_called_once_with(package_init_template.render())
+        project.env.get_template.assert_has_calls([mocker.call("pyproject.toml"), mocker.call("README.md")])
+
         pyproject_template.render.assert_called_once_with(
-            project_name=project.project_name, package_name=project.package_name, description=description
+            project_name=project.project_name,
+            package_name=project.package_name,
+            description=project.package_description,
         )
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render())
         readme_template.render.assert_called_once_with(
-            description=description, project_name=project.project_name, package_name=project.package_name,
+            description=project.package_description,
+            project_name=project.project_name,
+            package_name=project.package_name,
         )
         readme_path.write_text.assert_called_once_with(readme_template.render())
 

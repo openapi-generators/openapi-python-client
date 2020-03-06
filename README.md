@@ -21,12 +21,18 @@ using it (Python developers).
 ## Installation
 `pip install openapi-python-client`
 
+Then, if you want tab completion: `openapi-python-client --install-completion`
+
 ## Usage
+### Create a new client
 `openapi-python-client generate --url https://my.api.com/openapi.json`
 
 This will generate a new client library named based on the title in your OpenAPI spec.  For example, if the title 
 of your API is "My API", the expected output will be "my-api-client".  If a folder already exists by that name, you'll 
 get an error.
+
+### Update an existing client
+`openapi-python-client update --url https://my.api.com/openapi.json`
 
 ## What You Get
 1. A `pyproject.toml` file with some basic metadata intended to be used with [Poetry].

@@ -1,5 +1,8 @@
 """ Generate modern Python clients from OpenAPI """
+from __future__ import annotations
+
 import json
+import shutil
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -9,12 +12,22 @@ from jinja2 import Environment, PackageLoader
 from .openapi_parser import OpenAPI, import_string_from_reference
 
 
-def main(*, url: Optional[str], path: Optional[Path]) -> None:
-    """ Generate the client library """
+def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> _Project:
     data_dict = _get_json(url=url, path=path)
     openapi = OpenAPI.from_dict(data_dict)
-    project = _Project(openapi=openapi)
+    return _Project(openapi=openapi)
+
+
+def create_new_client(*, url: Optional[str], path: Optional[Path]) -> None:
+    """ Generate the client library """
+    project = _get_project_for_url_or_path(url=url, path=path)
     project.build()
+
+
+def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> None:
+    """ Update an existing client library """
+    project = _get_project_for_url_or_path(url=url, path=path)
+    project.update()
 
 
 def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
@@ -41,29 +54,44 @@ class _Project:
 
         self.package_name: str = self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
+        self.package_description = f"A client library for accessing {self.openapi.title}"
 
     def build(self) -> None:
         """ Create the project from templates """
+
         print(f"Generating {self.project_name}")
         self.project_dir.mkdir()
-        self.package_dir.mkdir()
+        self._create_package()
         self._build_metadata()
         self._build_models()
         self._build_api()
 
-    def _build_metadata(self) -> None:
+    def update(self) -> None:
+        """ Update an existing project """
+
+        if not self.package_dir.is_dir():
+            raise FileNotFoundError()
+        print(f"Updating {self.project_name}")
+        shutil.rmtree(self.package_dir)
+        self._create_package()
+        self._build_models()
+        self._build_api()
+
+    def _create_package(self) -> None:
+        self.package_dir.mkdir()
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
-        package_description = f"A client library for accessing {self.openapi.title}"
-        package_init_template = self.env.get_template("package_init.pyi")
-        package_init.write_text(package_init_template.render(description=package_description))
 
+        package_init_template = self.env.get_template("package_init.pyi")
+        package_init.write_text(package_init_template.render(description=self.package_description))
+
+    def _build_metadata(self) -> None:
         # Create a pyproject.toml file
         pyproject_template = self.env.get_template("pyproject.toml")
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
             pyproject_template.render(
-                project_name=self.project_name, package_name=self.package_name, description=package_description
+                project_name=self.project_name, package_name=self.package_name, description=self.package_description
             )
         )
 
@@ -72,7 +100,7 @@ class _Project:
         readme_template = self.env.get_template("README.md")
         readme.write_text(
             readme_template.render(
-                project_name=self.project_name, description=package_description, package_name=self.package_name
+                project_name=self.project_name, description=self.package_description, package_name=self.package_name
             )
         )
 
