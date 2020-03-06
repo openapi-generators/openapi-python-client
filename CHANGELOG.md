@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.1.1 - 2020-03-06
 - Fix mypy issue in generated models `from_dict` with datetime or reference properties
+- Generated clients now raise an `ApiResponseError` if they receive a response that was not declared
 
 ## 0.1.0 - 2020-02-28
 - Initial Release

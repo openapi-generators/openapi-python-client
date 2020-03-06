@@ -220,6 +220,7 @@ class TestProject:
 
     def test__build_api(self, mocker):
         import pathlib
+        from jinja2 import Template
         from openapi_python_client import _Project, OpenAPI
 
         openapi = mocker.MagicMock(autospec=OpenAPI, title="My Test API")
@@ -232,10 +233,12 @@ class TestProject:
         project.package_dir = mocker.MagicMock()
         client_path = mocker.MagicMock()
         api_init = mocker.MagicMock(autospec=pathlib.Path)
+        api_errors = mocker.MagicMock(autospec=pathlib.Path)
         collection_1_path = mocker.MagicMock(autospec=pathlib.Path)
         collection_2_path = mocker.MagicMock(autospec=pathlib.Path)
         api_paths = {
             "__init__.py": api_init,
+            "errors.py": api_errors,
             f"{tag_1}.py": collection_1_path,
             f"{tag_2}.py": collection_2_path,
         }
@@ -246,10 +249,12 @@ class TestProject:
             "api": api_dir,
         }
         project.package_dir.__truediv__.side_effect = lambda x: package_paths[x]
-        client_template = mocker.MagicMock()
-        endpoint_template = mocker.MagicMock()
+        client_template = mocker.MagicMock(autospec=Template)
+        errors_template = mocker.MagicMock(autospec=Template)
+        endpoint_template = mocker.MagicMock(autospec=Template)
         templates = {
             "client.pyi": client_template,
+            "errors.pyi": errors_template,
             "endpoint_module.pyi": endpoint_template,
         }
         mocker.patch.object(project.env, "get_template", autospec=True, side_effect=lambda x: templates[x])
@@ -268,6 +273,8 @@ class TestProject:
         api_dir.mkdir.assert_called_once()
         api_dir.__truediv__.assert_has_calls([mocker.call(key) for key in api_paths])
         api_init.write_text.assert_called_once_with('""" Contains all methods for accessing the API """')
+        errors_template.render.assert_called_once()
+        api_errors.write_text.assert_called_once_with(errors_template.render())
         endpoint_template.render.assert_has_calls(
             [mocker.call(collection=collection_1), mocker.call(collection=collection_2),]
         )

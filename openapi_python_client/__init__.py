@@ -110,6 +110,11 @@ class _Project:
         api_dir.mkdir()
         api_init = api_dir / "__init__.py"
         api_init.write_text('""" Contains all methods for accessing the API """')
+
+        api_errors = api_dir / "errors.py"
+        errors_template = self.env.get_template("errors.pyi")
+        api_errors.write_text(errors_template.render())
+
         endpoint_template = self.env.get_template("endpoint_module.pyi")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
             module_path = api_dir / f"{tag}.py"

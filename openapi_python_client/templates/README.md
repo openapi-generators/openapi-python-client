@@ -32,3 +32,6 @@ Things to know:
 1. All path/query params, and bodies become method arguments.
 1. If your endpoint had any tags on it, the first tag will be used as a module name for the function (my_tag above)
 1. Any endpoint which did not have a tag will be in `{{ package_name }}.api.default`
+1. If the API returns a response code that was not declared in the OpenAPI document, a 
+    `{{ package_name }}.api.errors.ApiResponseError` wil be raised 
+    with the `response` attribute set to the `requests.Response` that was received.

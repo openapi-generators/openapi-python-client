@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Union
 
 import requests
 
+from .errors import ApiResponseError
 from ..client import AuthenticatedClient, Client
 
 {% for relative in collection.relative_imports %}
@@ -69,4 +70,6 @@ def {{ endpoint.name }}(
     if response.status_code == {{ response.status_code }}:
         return {{ response.constructor() }}
     {% endfor %}
+    else:
+        raise ApiResponseError(response=response)
 {% endfor %}
