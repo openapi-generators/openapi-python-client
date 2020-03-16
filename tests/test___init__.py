@@ -186,7 +186,7 @@ class TestProject:
         package_init_path = mocker.MagicMock(autospec=pathlib.Path)
         pytyped_path = mocker.MagicMock(autospec=pathlib.Path)
         paths = {
-            "__init__.py":  package_init_path,
+            "__init__.py": package_init_path,
             "py.typed": pytyped_path,
         }
 
