@@ -18,8 +18,11 @@ class {{ schema.reference.class_name }}:
 
     def to_dict(self) -> Dict:
         return {
-            {% for property in schema.required_properties + schema.optional_properties %}
-            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.name }} else None,
+            {% for property in schema.required_properties %}
+            "{{ property.name }}": self.{{ property.transform() }},
+            {% endfor %}
+            {% for property in schema.optional_properties %}
+            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.name }} is not None else None,
             {% endfor %}
         }
 
