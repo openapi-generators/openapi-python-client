@@ -85,6 +85,9 @@ class _Project:
         package_init_template = self.env.get_template("package_init.pyi")
         package_init.write_text(package_init_template.render(description=self.package_description))
 
+        pytyped = self.package_dir / "py.typed"
+        pytyped.write_text("# Marker file for PEP 561")
+
     def _build_metadata(self) -> None:
         # Create a pyproject.toml file
         pyproject_template = self.env.get_template("pyproject.toml")

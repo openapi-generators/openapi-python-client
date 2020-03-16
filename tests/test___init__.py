@@ -184,7 +184,13 @@ class TestProject:
         project.env = mocker.MagicMock()
         project.env.get_template.return_value = package_init_template
         package_init_path = mocker.MagicMock(autospec=pathlib.Path)
-        project.package_dir.__truediv__.return_value = package_init_path
+        pytyped_path = mocker.MagicMock(autospec=pathlib.Path)
+        paths = {
+            "__init__.py":  package_init_path,
+            "py.typed": pytyped_path,
+        }
+
+        project.package_dir.__truediv__.side_effect = lambda x: paths[x]
 
         project._create_package()
 
@@ -192,6 +198,7 @@ class TestProject:
         project.env.get_template.assert_called_once_with("package_init.pyi")
         package_init_template.render.assert_called_once_with(description=project.package_description)
         package_init_path.write_text.assert_called_once_with(package_init_template.render())
+        pytyped_path.write_text.assert_called_once_with("# Marker file for PEP 561")
 
     def test__build_metadata(self, mocker):
         from openapi_python_client import _Project
