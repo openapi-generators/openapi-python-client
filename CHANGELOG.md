@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.1.2 - 2020-03-16
 - Improve handling of optional properties in generated `to_dict` function for models
+- Add PEP 561 marker file (py.typed) to generated packages
 
 ## 0.1.1 - 2020-03-06
 - Fix mypy issue in generated models `from_dict` with datetime or reference properties
