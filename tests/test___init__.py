@@ -234,7 +234,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls(
-            [mocker.call("pyproject.toml"), mocker.call("README.md"), mocker.call(".gitignore"), ]
+            [mocker.call("pyproject.toml"), mocker.call("README.md"), mocker.call(".gitignore")]
         )
 
         pyproject_template.render.assert_called_once_with(
@@ -388,7 +388,7 @@ class TestProject:
         errors_template.render.assert_called_once()
         api_errors.write_text.assert_called_once_with(errors_template.render())
         endpoint_template.render.assert_has_calls(
-            [mocker.call(collection=collection_1), mocker.call(collection=collection_2), ]
+            [mocker.call(collection=collection_1), mocker.call(collection=collection_2)]
         )
         collection_1_path.write_text.assert_called_once_with(endpoint_renders[collection_1])
         collection_2_path.write_text.assert_called_once_with(endpoint_renders[collection_2])
@@ -404,7 +404,9 @@ def test__reformat(mocker):
 
     project._reformat()
 
-    sub_run.assert_has_calls([
-        mocker.call("isort --recursive --apply", cwd=project.project_dir, shell=True),
-        mocker.call("black .", cwd=project.project_dir, shell=True),
-    ])
+    sub_run.assert_has_calls(
+        [
+            mocker.call("isort --recursive --apply", cwd=project.project_dir, shell=True),
+            mocker.call("black .", cwd=project.project_dir, shell=True),
+        ]
+    )
