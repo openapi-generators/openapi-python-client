@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import shutil
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -10,6 +11,8 @@ import requests
 from jinja2 import Environment, PackageLoader
 
 from .openapi_parser import OpenAPI, import_string_from_reference
+
+__version__ = version(__package__)
 
 
 def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> _Project:

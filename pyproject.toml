@@ -19,9 +19,9 @@ python = "==3.*,>=3.8.0"
 requests = "^2.22.0"
 jinja2 = "^2.11.1"
 stringcase = "^1.2.0"
-typer = "^0.0.8"
+typer = "^0.1.0"
 colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
-click-completion = "^0.5.2"
+shellingham = "^1.3.2"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"

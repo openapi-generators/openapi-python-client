@@ -6,8 +6,19 @@ import typer
 app = typer.Typer()
 
 
+def _version_callback(value: bool):
+    from openapi_python_client import __version__
+
+    if value:
+        typer.echo(f"openapi-python-client version: {__version__}")
+        raise typer.Exit()
+
+
+# noinspection PyUnusedLocal
 @app.callback()
-def cli() -> None:
+def cli(
+    version: bool = typer.Option(False, "--version", callback=_version_callback),
+) -> None:
     """ Generate a Python client from an OpenAPI JSON document """
     pass
 

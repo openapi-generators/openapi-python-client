@@ -1,84 +1,99 @@
+from pathlib import PosixPath
+
 import pytest
-import typer
+from typer.testing import CliRunner
+
+runner = CliRunner()
 
 
-def test_callback():
-    from openapi_python_client.cli import cli
+def test_version(mocker):
+    generate = mocker.patch("openapi_python_client.cli.generate")
+    from openapi_python_client.cli import app
 
-    cli()
+    result = runner.invoke(app, ["--version", "generate"])
+
+    generate.assert_not_called()
+    assert result.exit_code == 0
+    assert "openapi-python-client version: " in result.stdout
+
+
+@pytest.fixture
+def _create_new_client(mocker):
+    return mocker.patch("openapi_python_client.create_new_client")
 
 
 class TestGenerate:
-    def test_generate_no_params(self, mocker):
-        create_new_client = mocker.patch("openapi_python_client.create_new_client")
-        from openapi_python_client.cli import generate
+    def test_generate_no_params(self, _create_new_client):
+        from openapi_python_client.cli import app
 
-        with pytest.raises(typer.Exit) as exc_info:
-            generate(url=None, path=None)
-            assert exc_info.value.exit_code == 1
-        create_new_client.assert_not_called()
+        result = runner.invoke(app, ["generate"])
 
-    def test_generate_url_and_path(self, mocker):
-        create_new_client = mocker.patch("openapi_python_client.create_new_client")
-        from openapi_python_client.cli import generate
+        assert result.exit_code == 1
+        _create_new_client.assert_not_called()
 
-        with pytest.raises(typer.Exit) as exc_info:
-            generate(url="blah", path="other_blah")
-            assert exc_info.value.exit_code == 1
-        create_new_client.assert_not_called()
+    def test_generate_url_and_path(self, _create_new_client):
+        from openapi_python_client.cli import app
 
-    def test_generate_url(self, mocker):
-        create_new_client = mocker.patch("openapi_python_client.create_new_client")
-        url = mocker.MagicMock()
-        from openapi_python_client.cli import generate
+        result = runner.invoke(app, ["generate", "--path=blah", "--url=otherblah"])
 
-        generate(url=url, path=None)
+        assert result.exit_code == 1
+        _create_new_client.assert_not_called()
 
-        create_new_client.assert_called_once_with(url=url, path=None)
+    def test_generate_url(self, _create_new_client):
+        url = "cool.url"
+        from openapi_python_client.cli import app
 
-    def test_generate_path(self, mocker):
-        create_new_client = mocker.patch("openapi_python_client.create_new_client")
-        path = mocker.MagicMock()
-        from openapi_python_client.cli import generate
+        result = runner.invoke(app, ["generate", f"--url={url}"])
 
-        generate(url=None, path=path)
+        assert result.exit_code == 0
+        _create_new_client.assert_called_once_with(url=url, path=None)
 
-        create_new_client.assert_called_once_with(url=None, path=path)
+    def test_generate_path(self, _create_new_client):
+        path = "cool/path"
+        from openapi_python_client.cli import app
+
+        result = runner.invoke(app, ["generate", f"--path={path}"])
+
+        assert result.exit_code == 0
+        _create_new_client.assert_called_once_with(url=None, path=PosixPath(path))
+
+
+@pytest.fixture
+def _update_existing_client(mocker):
+    return mocker.patch("openapi_python_client.update_existing_client")
 
 
 class TestUpdate:
-    def test_update_no_params(self, mocker):
-        update_existing_client = mocker.patch("openapi_python_client.update_existing_client")
-        from openapi_python_client.cli import update
+    def test_update_no_params(self, _update_existing_client):
+        from openapi_python_client.cli import app
 
-        with pytest.raises(typer.Exit) as exc_info:
-            update(url=None, path=None)
-            assert exc_info.value.exit_code == 1
-        update_existing_client.assert_not_called()
+        result = runner.invoke(app, ["update"])
 
-    def test_update_url_and_path(self, mocker):
-        update_existing_client = mocker.patch("openapi_python_client.update_existing_client")
-        from openapi_python_client.cli import update
+        assert result.exit_code == 1
+        _update_existing_client.assert_not_called()
 
-        with pytest.raises(typer.Exit) as exc_info:
-            update(url="blah", path="other_blah")
-            assert exc_info.value.exit_code == 1
-        update_existing_client.assert_not_called()
+    def test_update_url_and_path(self, _update_existing_client):
+        from openapi_python_client.cli import app
 
-    def test_update_url(self, mocker):
-        update_existing_client = mocker.patch("openapi_python_client.update_existing_client")
-        url = mocker.MagicMock()
-        from openapi_python_client.cli import update
+        result = runner.invoke(app, ["update", "--path=blah", "--url=otherblah"])
 
-        update(url=url, path=None)
+        assert result.exit_code == 1
+        _update_existing_client.assert_not_called()
 
-        update_existing_client.assert_called_once_with(url=url, path=None)
+    def test_update_url(self, _update_existing_client):
+        url = "cool.url"
+        from openapi_python_client.cli import app
 
-    def test_update_path(self, mocker):
-        update_existing_client = mocker.patch("openapi_python_client.update_existing_client")
-        path = mocker.MagicMock()
-        from openapi_python_client.cli import update
+        result = runner.invoke(app, ["update", f"--url={url}"])
 
-        update(url=None, path=path)
+        assert result.exit_code == 0
+        _update_existing_client.assert_called_once_with(url=url, path=None)
 
-        update_existing_client.assert_called_once_with(url=None, path=path)
+    def test_update_path(self, _update_existing_client):
+        path = "cool/path"
+        from openapi_python_client.cli import app
+
+        result = runner.invoke(app, ["update", f"--path={path}"])
+
+        assert result.exit_code == 0
+        _update_existing_client.assert_called_once_with(url=None, path=PosixPath(path))
