@@ -1,5 +1,6 @@
 import pathlib
 
+import jinja2
 import pytest
 
 
@@ -205,18 +206,34 @@ class TestProject:
 
         project = _Project(openapi=mocker.MagicMock(title="My Test API"))
         project.project_dir = mocker.MagicMock()
-        pyproject_path = mocker.MagicMock()
-        readme_path = mocker.MagicMock()
-        project.project_dir.__truediv__.side_effect = [pyproject_path, readme_path]
+        pyproject_path = mocker.MagicMock(autospec=pathlib.Path)
+        readme_path = mocker.MagicMock(autospec=pathlib.Path)
+        git_ignore_path = mocker.MagicMock(autospec=pathlib.Path)
+        paths = {
+            "pyproject.toml": pyproject_path,
+            "README.md": readme_path,
+            ".gitignore": git_ignore_path,
+        }
+        project.project_dir.__truediv__.side_effect = lambda x: paths[x]
 
-        pyproject_template = mocker.MagicMock()
-        readme_template = mocker.MagicMock()
-        project.env = mocker.MagicMock()
-        project.env.get_template.side_effect = [pyproject_template, readme_template]
+        pyproject_template = mocker.MagicMock(autospec=jinja2.Template)
+        readme_template = mocker.MagicMock(autospec=jinja2.Template)
+        git_ignore_template = mocker.MagicMock(autospec=jinja2.Template)
+        project.env = mocker.MagicMock(autospec=jinja2.Environment)
+        templates = {
+            "pyproject.toml": pyproject_template,
+            "README.md": readme_template,
+            ".gitignore": git_ignore_template,
+        }
+        project.env.get_template.side_effect = lambda x: templates[x]
 
         project._build_metadata()
 
-        project.env.get_template.assert_has_calls([mocker.call("pyproject.toml"), mocker.call("README.md")])
+        project.env.get_template.assert_has_calls([
+            mocker.call("pyproject.toml"),
+            mocker.call("README.md"),
+            mocker.call(".gitignore"),
+        ])
 
         pyproject_template.render.assert_called_once_with(
             project_name=project.project_name,
@@ -230,6 +247,8 @@ class TestProject:
             package_name=project.package_name,
         )
         readme_path.write_text.assert_called_once_with(readme_template.render())
+        git_ignore_template.render.assert_called_once()
+        git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render())
 
     def test__build_models(self, mocker):
         from openapi_python_client import _Project, OpenAPI

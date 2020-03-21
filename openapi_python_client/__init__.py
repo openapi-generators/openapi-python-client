@@ -110,6 +110,11 @@ class _Project:
             )
         )
 
+        # .gitignore
+        git_ignore_path = self.project_dir / ".gitignore"
+        git_ignore_template = self.env.get_template(".gitignore")
+        git_ignore_path.write_text(git_ignore_template.render())
+
     def _build_models(self) -> None:
         # Generate models
         models_dir = self.package_dir / "models"
