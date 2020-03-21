@@ -57,3 +57,6 @@ exclude = '''
 [tool.isort]
 line_length = 120
 multi_line_output = 3
+
+[tool.coverage.run]
+omit = ["openapi_python_client/templates/*"]
