@@ -22,7 +22,9 @@ using it (Python developers).
 I recommend you install with [pipx](https://pipxproject.github.io/pipx/)  so you don't conflict with any other packages 
 you might have: `pipx install openapi-python-client`.
 
-You can install with normal pip if you want to though: `pipx install openapi-python-client`
+Better yet, use `pipx run openapi-python-client <normal params / options>` to always use the latest version of the generator.
+
+You can install with normal pip if you want to though: `pip install openapi-python-client`
 
 Then, if you want tab completion: `openapi-python-client --install-completion`
 
