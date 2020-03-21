@@ -19,7 +19,10 @@ Additionally, because this generator is written in Python, it should be more acc
 using it (Python developers).
 
 ## Installation
-`pip install openapi-python-client`
+I recommend you install with [pipx](https://pipxproject.github.io/pipx/)  so you don't conflict with any other packages 
+you might have: `pipx install openapi-python-client`.
+
+You can install with normal pip if you want to though: `pipx install openapi-python-client`
 
 Then, if you want tab completion: `openapi-python-client --install-completion`
 
@@ -33,6 +36,8 @@ get an error.
 
 ### Update an existing client
 `openapi-python-client update --url https://my.api.com/openapi.json`
+
+> For more usage details run `openapi-python-client --help` or read [usage](usage.md)
 
 ## What You Get
 1. A `pyproject.toml` file with some basic metadata intended to be used with [Poetry].
