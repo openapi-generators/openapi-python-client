@@ -1,10 +1,11 @@
 import os
 import shutil
-from filecmp import dircmp, cmpfiles
+from filecmp import cmpfiles, dircmp
 from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
+
 from openapi_python_client.cli import app
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -68,6 +69,7 @@ class _Project:
         self._build_metadata()
         self._build_models()
         self._build_api()
+        self._reformat()
 
     def update(self) -> None:
         """ Update an existing project """
@@ -79,6 +81,11 @@ class _Project:
         self._create_package()
         self._build_models()
         self._build_api()
+        self._reformat()
+
+    def _reformat(self) -> None:
+        subprocess.run("isort --recursive --apply", cwd=self.project_dir, shell=True)
+        subprocess.run("black .", cwd=self.project_dir, shell=True)
 
     def _create_package(self) -> None:
         self.package_dir.mkdir()

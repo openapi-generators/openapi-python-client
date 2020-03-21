@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
+
 @dataclass
 class Client:
     """ A class for keeping track of data related to the API """
@@ -10,6 +11,7 @@ class Client:
     def get_headers(self) -> Dict[str, str]:
         """ Get headers to be used in all endpoints """
         return {}
+
 
 @dataclass
 class AuthenticatedClient(Client):

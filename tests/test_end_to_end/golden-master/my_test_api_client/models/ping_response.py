@@ -5,10 +5,10 @@ from datetime import datetime
 from typing import Dict, List, Optional, cast
 
 
-
 @dataclass
 class PingResponse:
     """  """
+
     success: bool
 
     def to_dict(self) -> Dict:
@@ -20,6 +20,4 @@ class PingResponse:
     def from_dict(d: Dict) -> PingResponse:
 
         success = d["success"]
-        return PingResponse(
-            success=success,
-        )
+        return PingResponse(success=success,)
