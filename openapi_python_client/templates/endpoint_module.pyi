@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from typing import Dict, List, Optional, Union
 
-import requests
+import httpx
 
 from ..client import AuthenticatedClient, Client
 from .errors import ApiResponseError
@@ -60,7 +60,7 @@ def {{ endpoint.name }}(
     {% endfor %}
     {% endif %}
 
-    response = requests.{{ endpoint.method }}(
+    response = httpx.{{ endpoint.method }}(
         url=url,
         headers=client.get_headers(),
         {% if endpoint.form_body_reference %}

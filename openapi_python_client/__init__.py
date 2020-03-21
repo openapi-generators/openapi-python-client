@@ -7,7 +7,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import requests
+import httpx
 from jinja2 import Environment, PackageLoader
 
 from .openapi_parser import OpenAPI, import_string_from_reference
@@ -38,7 +38,7 @@ def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
     if url is not None and path is not None:
         raise ValueError("Provide URL or Path, not both.")
     elif url is not None:
-        response = requests.get(url)
+        response = httpx.get(url)
         json_bytes = response.content
     elif path is not None:
         json_bytes = path.read_bytes()

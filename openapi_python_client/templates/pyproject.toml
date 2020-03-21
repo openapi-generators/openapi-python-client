@@ -14,4 +14,4 @@ include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-requests = "^2.22.0"
+httpx = "^0.12.1"

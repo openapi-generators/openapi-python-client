@@ -56,7 +56,7 @@ def test_update_existing_client(mocker):
 
 class TestGetJson:
     def test__get_json_no_url_or_path(self, mocker):
-        get = mocker.patch("requests.get")
+        get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
@@ -70,7 +70,7 @@ class TestGetJson:
         loads.assert_not_called()
 
     def test__get_json_url_and_path(self, mocker):
-        get = mocker.patch("requests.get")
+        get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
@@ -84,7 +84,7 @@ class TestGetJson:
         loads.assert_not_called()
 
     def test__get_json_url_no_path(self, mocker):
-        get = mocker.patch("requests.get")
+        get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("json.loads")
 
@@ -98,7 +98,7 @@ class TestGetJson:
         loads.assert_called_once_with(get().content)
 
     def test__get_json_path_no_url(self, mocker):
-        get = mocker.patch("requests.get")
+        get = mocker.patch("httpx.get")
         loads = mocker.patch("json.loads")
 
         from openapi_python_client import _get_json

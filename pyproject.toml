@@ -16,12 +16,12 @@ include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 
 [tool.poetry.dependencies]
 python = "==3.*,>=3.8.0"
-requests = "^2.22.0"
 jinja2 = "^2.11.1"
 stringcase = "^1.2.0"
 typer = "^0.1.0"
 colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
 shellingham = "^1.3.2"
+httpx = "^0.12.1"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"

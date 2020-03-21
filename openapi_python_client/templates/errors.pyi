@@ -1,4 +1,4 @@
-from requests import Response
+from httpx import Response
 
 class ApiResponseError(Exception):
     """ An exception raised when an unknown response occurs """
