@@ -29,9 +29,7 @@ class AModel:
     @staticmethod
     def from_dict(d: Dict) -> AModel:
 
-        an_enum_value = (
-            AnEnumValue(d["an_enum_value"]) if "an_enum_value" in d else None
-        )
+        an_enum_value = AnEnumValue(d["an_enum_value"]) if "an_enum_value" in d else None
 
         a_list_of_enums = []
         for a_list_of_enums_item in d.get("a_list_of_enums", []):

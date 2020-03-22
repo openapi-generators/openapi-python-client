@@ -23,9 +23,7 @@ async def get_list_tests__get(
     }
 
     with httpx.AsyncClient() as client:
-        response = await client.get(
-            url=url, headers=client.get_headers(), params=params,
-        )
+        response = await client.get(url=url, headers=client.get_headers(), params=params,)
 
     if response.status_code == 200:
         return [AModel.from_dict(item) for item in response.json()]
