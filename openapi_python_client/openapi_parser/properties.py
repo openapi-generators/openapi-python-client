@@ -93,25 +93,52 @@ class BooleanProperty(Property):
 
 
 @dataclass
-class ListProperty(Property):
-    """ Property for list """
+class BasicListProperty(Property):
+    """ A List of basic types """
 
-    type: Optional[str]
-    reference: Optional[Reference]
-    constructor_template: ClassVar[str] = "list_property.pyi"
+    type: str
+
+    def constructor_from_dict(self, dict_name: str) -> str:
+        """ How to set this property from a dictionary of values """
+        return f'{dict_name}.get("{self.name}", [])'
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if self.type:
-            this_type = self.type
-        elif self.reference:
-            this_type = self.reference.class_name
-        else:
-            raise ValueError(f"Could not figure out type of ListProperty {self.name}")
-
         if self.required:
-            return f"List[{this_type}]"
-        return f"Optional[List[{this_type}]]"
+            return f"List[{self.type}]"
+        return f"Optional[List[{self.type}]]"
+
+
+@dataclass
+class ReferenceListProperty(Property):
+    """ A List of References """
+
+    reference: Reference
+    constructor_template: ClassVar[str] = "reference_list_property.pyi"
+
+    def get_type_string(self) -> str:
+        """ Get a string representation of type that should be used when declaring this property """
+        if self.required:
+            return f"List[{self.reference.class_name}]"
+        return f"Optional[List[{self.reference.class_name}]]"
+
+
+@dataclass
+class EnumListProperty(Property):
+    """ List of Enum values """
+
+    values: Dict[str, str]
+    reference: Reference = field(init=False)
+    constructor_template: ClassVar[str] = "enum_list_property.pyi"
+
+    def __post_init__(self) -> None:
+        self.reference = Reference.from_ref(self.name)
+
+    def get_type_string(self) -> str:
+        """ Get a string representation of type that should be used when declaring this property """
+        if self.required:
+            return f"List[{self.reference.class_name}]"
+        return f"Optional[List[{self.reference.class_name}]]"
 
 
 @dataclass
@@ -218,13 +245,21 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
     elif data["type"] == "boolean":
         return BooleanProperty(name=name, required=required, default=data.get("default"))
     elif data["type"] == "array":
-        reference = None
         if "$ref" in data["items"]:
-            reference = Reference.from_ref(data["items"]["$ref"])
-        _type = None
+            return ReferenceListProperty(
+                name=name, required=required, default=None, reference=Reference.from_ref(data["items"]["$ref"])
+            )
+        if "enum" in data["items"]:
+            return EnumListProperty(
+                name=name, required=required, default=None, values=EnumProperty.values_from_list(data["items"]["enum"])
+            )
         if "type" in data["items"]:
-            _type = _openapi_types_to_python_type_strings[data["items"]["type"]]
-        return ListProperty(name=name, required=required, type=_type, reference=reference, default=None)
+            return BasicListProperty(
+                name=name,
+                required=required,
+                default=None,
+                type=_openapi_types_to_python_type_strings[data["items"]["type"]],
+            )
     elif data["type"] == "object":
         return DictProperty(name=name, required=required, default=data.get("default"))
     raise ValueError(f"Did not recognize type of {data}")

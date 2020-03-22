@@ -35,6 +35,7 @@ class {{ schema.reference.class_name }}:
         {% else %}
         {{ property.name }} = {{ property.constructor_from_dict("d") }}
         {% endif %}
+
         {% endfor %}
         return {{ schema.reference.class_name }}(
             {% for property in schema.required_properties + schema.optional_properties %}

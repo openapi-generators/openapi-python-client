@@ -20,4 +20,5 @@ class ABCResponse:
     def from_dict(d: Dict) -> ABCResponse:
 
         success = d["success"]
+
         return ABCResponse(success=success,)
