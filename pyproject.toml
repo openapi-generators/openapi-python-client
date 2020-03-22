@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.1.2"
+version = "0.2.0"
 description = "Generate modern Python clients from OpenAPI"
 
 authors = [

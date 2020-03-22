@@ -27,6 +27,15 @@ from {{ package_name }}.api.my_tag import get_my_data_model
 my_data: MyDataModel = get_my_data_model(client=client)
 ```
 
+Or do the same thing with an async version:
+
+```python
+from {{ package_name }}.models import MyDataModel
+from {{ package_name }}.async_api.my_tag import get_my_data_model
+
+my_data: MyDataModel = await get_my_data_model(client=client)
+```
+
 Things to know:
 1. Every path/method combo becomes a Python function with type annotations. 
 1. All path/query params, and bodies become method arguments.
