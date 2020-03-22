@@ -67,7 +67,7 @@ class Endpoint:
         body_content = body["content"]
         form_body = body_content.get("application/x-www-form-urlencoded")
         if form_body:
-            return Reference(form_body["schema"]["$ref"])
+            return Reference.from_ref(form_body["schema"]["$ref"])
         return None
 
     @staticmethod
@@ -168,7 +168,7 @@ class Schema:
             if isinstance(p, (ListProperty, RefProperty, EnumProperty)) and p.reference:
                 relative_imports.add(import_string_from_reference(p.reference))
         schema = Schema(
-            reference=Reference(d["title"]),
+            reference=Reference.from_ref(d["title"]),
             required_properties=required_properties,
             optional_properties=optional_properties,
             relative_imports=relative_imports,

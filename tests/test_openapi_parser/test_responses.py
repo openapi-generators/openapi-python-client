@@ -84,14 +84,14 @@ class TestResponseFromDict:
         ref = mocker.MagicMock()
         status_code = mocker.MagicMock(autospec=int)
         data = {"content": {"application/json": {"schema": {"$ref": ref}}}}
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         RefResponse = mocker.patch(f"{MODULE_NAME}.RefResponse")
         from openapi_python_client.openapi_parser.responses import response_from_dict
 
         response = response_from_dict(status_code=status_code, data=data)
 
-        Reference.assert_called_once_with(ref)
-        RefResponse.assert_called_once_with(status_code=status_code, reference=Reference())
+        from_ref.assert_called_once_with(ref)
+        RefResponse.assert_called_once_with(status_code=status_code, reference=from_ref())
         assert response == RefResponse()
 
     def test_response_from_dict_empty(self, mocker):
@@ -109,14 +109,14 @@ class TestResponseFromDict:
         ref = mocker.MagicMock()
         status_code = mocker.MagicMock(autospec=int)
         data = {"content": {"application/json": {"schema": {"type": "array", "items": {"$ref": ref}}}}}
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         ListRefResponse = mocker.patch(f"{MODULE_NAME}.ListRefResponse")
         from openapi_python_client.openapi_parser.responses import response_from_dict
 
         response = response_from_dict(status_code=status_code, data=data)
 
-        Reference.assert_called_once_with(ref)
-        ListRefResponse.assert_called_once_with(status_code=status_code, reference=Reference())
+        from_ref.assert_called_once_with(ref)
+        ListRefResponse.assert_called_once_with(status_code=status_code, reference=from_ref())
         assert response == ListRefResponse()
 
     def test_response_from_dict_string(self, mocker):

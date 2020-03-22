@@ -100,7 +100,7 @@ class TestEnumProperty:
     def test___post_init__(self, mocker):
         name = mocker.MagicMock()
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference", return_value=fake_reference)
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
@@ -108,12 +108,12 @@ class TestEnumProperty:
             name=name, required=True, default="second", values={"FIRST": "first", "SECOND": "second"}
         )
 
-        Reference.assert_called_once_with(name)
+        from_ref.assert_called_once_with(name)
         assert enum_property.default == "MyTestEnum.SECOND"
 
     def test_get_type_string(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        mocker.patch(f"{MODULE_NAME}.Reference", return_value=fake_reference)
+        mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
@@ -125,7 +125,7 @@ class TestEnumProperty:
 
     def test_transform(self, mocker):
         name = mocker.MagicMock()
-        mocker.patch(f"{MODULE_NAME}.Reference")
+        mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
@@ -135,7 +135,7 @@ class TestEnumProperty:
 
     def test_constructor_from_dict(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        mocker.patch(f"{MODULE_NAME}.Reference", return_value=fake_reference)
+        mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
@@ -217,15 +217,15 @@ class TestPropertyFromDict:
         data = {
             "$ref": mocker.MagicMock(),
         }
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         RefProperty = mocker.patch(f"{MODULE_NAME}.RefProperty")
 
         from openapi_python_client.openapi_parser.properties import property_from_dict
 
         p = property_from_dict(name=name, required=required, data=data)
 
-        Reference.assert_called_once_with(data["$ref"])
-        RefProperty.assert_called_once_with(name=name, required=required, reference=Reference(), default=None)
+        from_ref.assert_called_once_with(data["$ref"])
+        RefProperty.assert_called_once_with(name=name, required=required, reference=from_ref(), default=None)
         assert p == RefProperty()
 
     def test_property_from_dict_string_no_format(self, mocker):
@@ -335,15 +335,15 @@ class TestPropertyFromDict:
             "items": {"$ref": ref},
         }
         ListProperty = mocker.patch(f"{MODULE_NAME}.ListProperty")
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
         from openapi_python_client.openapi_parser.properties import property_from_dict
 
         p = property_from_dict(name=name, required=required, data=data)
 
-        Reference.assert_called_once_with(ref)
+        from_ref.assert_called_once_with(ref)
         ListProperty.assert_called_once_with(
-            name=name, required=required, default=None, type=None, reference=Reference()
+            name=name, required=required, default=None, type=None, reference=from_ref()
         )
         assert p == ListProperty()
 

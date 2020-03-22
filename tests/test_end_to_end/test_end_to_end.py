@@ -30,7 +30,9 @@ def test_end_to_end(capsys):
     gm_path = Path(__file__).parent / "golden-master"
     output_path = Path.cwd() / "my-test-api-client"
 
-    runner.invoke(app, ["generate", f"--path={openapi_path}"])
+    result = runner.invoke(app, ["generate", f"--path={openapi_path}"])
 
+    if result.exit_code != 0:
+        raise result.exception
     _compare_directories(gm_path, output_path)
     shutil.rmtree(output_path)

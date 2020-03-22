@@ -122,7 +122,7 @@ class EnumProperty(Property):
     reference: Reference = field(init=False)
 
     def __post_init__(self) -> None:
-        self.reference = Reference(self.name)
+        self.reference = Reference.from_ref(self.name)
         inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:
             self.default = f"{self.reference.class_name}.{inverse_values[self.default]}"
@@ -203,7 +203,7 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
             default=data.get("default"),
         )
     if "$ref" in data:
-        return RefProperty(name=name, required=required, reference=Reference(data["$ref"]), default=None)
+        return RefProperty(name=name, required=required, reference=Reference.from_ref(data["$ref"]), default=None)
     if data["type"] == "string":
         if "format" not in data:
             return StringProperty(
@@ -220,7 +220,7 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
     elif data["type"] == "array":
         reference = None
         if "$ref" in data["items"]:
-            reference = Reference(data["items"]["$ref"])
+            reference = Reference.from_ref(data["items"]["$ref"])
         _type = None
         if "type" in data["items"]:
             _type = _openapi_types_to_python_type_strings[data["items"]["type"]]

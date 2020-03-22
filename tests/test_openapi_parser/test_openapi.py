@@ -159,14 +159,14 @@ class TestSchema:
         property_from_dict = mocker.patch(
             f"{MODULE_NAME}.property_from_dict", side_effect=[required_property, optional_property]
         )
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         import_string_from_reference = mocker.patch(f"{MODULE_NAME}.import_string_from_reference")
 
         from openapi_python_client.openapi_parser.openapi import Schema
 
         result = Schema.from_dict(in_data)
 
-        Reference.assert_called_once_with(in_data["title"])
+        from_ref.assert_called_once_with(in_data["title"])
         property_from_dict.assert_has_calls(
             [
                 mocker.call(name="RequiredEnum", required=True, data=in_data["properties"]["RequiredEnum"]),
@@ -175,7 +175,7 @@ class TestSchema:
         )
         import_string_from_reference.assert_called_once_with(required_property.reference)
         assert result == Schema(
-            reference=Reference(),
+            reference=from_ref(),
             required_properties=[required_property],
             optional_properties=[optional_property],
             relative_imports={import_string_from_reference()},
@@ -187,14 +187,14 @@ class TestEndpoint:
     def test_parse_request_form_body(self, mocker):
         ref = mocker.MagicMock()
         body = {"content": {"application/x-www-form-urlencoded": {"schema": {"$ref": ref}}}}
-        Reference = mocker.patch(f"{MODULE_NAME}.Reference")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
         from openapi_python_client.openapi_parser.openapi import Endpoint
 
         result = Endpoint.parse_request_form_body(body)
 
-        Reference.assert_called_once_with(ref)
-        assert result == Reference()
+        from_ref.assert_called_once_with(ref)
+        assert result == from_ref()
 
     def test_parse_request_form_body_no_data(self):
         body = {"content": {}}
