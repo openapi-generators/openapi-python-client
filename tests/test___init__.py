@@ -343,31 +343,45 @@ class TestProject:
         openapi.endpoint_collections_by_tag = {tag_1: collection_1, tag_2: collection_2}
         project = _Project(openapi=openapi)
         project.package_dir = mocker.MagicMock()
+        api_errors = mocker.MagicMock(autospec=pathlib.Path)
         client_path = mocker.MagicMock()
         api_init = mocker.MagicMock(autospec=pathlib.Path)
-        api_errors = mocker.MagicMock(autospec=pathlib.Path)
         collection_1_path = mocker.MagicMock(autospec=pathlib.Path)
         collection_2_path = mocker.MagicMock(autospec=pathlib.Path)
+        async_api_init = mocker.MagicMock(autospec=pathlib.Path)
+        async_collection_1_path = mocker.MagicMock(autospec=pathlib.Path)
+        async_collection_2_path = mocker.MagicMock(autospec=pathlib.Path)
         api_paths = {
             "__init__.py": api_init,
-            "errors.py": api_errors,
             f"{tag_1}.py": collection_1_path,
             f"{tag_2}.py": collection_2_path,
         }
+        async_api_paths = {
+            "__init__.py": async_api_init,
+            f"{tag_1}.py": async_collection_1_path,
+            f"{tag_2}.py": async_collection_2_path,
+        }
         api_dir = mocker.MagicMock(autospec=pathlib.Path)
         api_dir.__truediv__.side_effect = lambda x: api_paths[x]
+        async_api_dir = mocker.MagicMock(autospec=pathlib.Path)
+        async_api_dir.__truediv__.side_effect = lambda x: async_api_paths[x]
+
         package_paths = {
             "client.py": client_path,
             "api": api_dir,
+            "async_api": async_api_dir,
+            "errors.py": api_errors,
         }
         project.package_dir.__truediv__.side_effect = lambda x: package_paths[x]
         client_template = mocker.MagicMock(autospec=Template)
         errors_template = mocker.MagicMock(autospec=Template)
         endpoint_template = mocker.MagicMock(autospec=Template)
+        async_endpoint_template = mocker.MagicMock(autospec=Template)
         templates = {
             "client.pyi": client_template,
             "errors.pyi": errors_template,
             "endpoint_module.pyi": endpoint_template,
+            "async_endpoint_module.pyi": async_endpoint_template,
         }
         mocker.patch.object(project.env, "get_template", autospec=True, side_effect=lambda x: templates[x])
         endpoint_renders = {
@@ -375,6 +389,11 @@ class TestProject:
             collection_2: mocker.MagicMock(),
         }
         endpoint_template.render.side_effect = lambda collection: endpoint_renders[collection]
+        async_endpoint_renders = {
+            collection_1: mocker.MagicMock(),
+            collection_2: mocker.MagicMock(),
+        }
+        async_endpoint_template.render.side_effect = lambda collection: async_endpoint_renders[collection]
 
         project._build_api()
 
@@ -382,16 +401,24 @@ class TestProject:
         project.env.get_template.assert_has_calls([mocker.call(key) for key in templates])
         client_template.render.assert_called_once()
         client_path.write_text.assert_called_once_with(client_template.render())
-        api_dir.mkdir.assert_called_once()
-        api_dir.__truediv__.assert_has_calls([mocker.call(key) for key in api_paths])
-        api_init.write_text.assert_called_once_with('""" Contains all methods for accessing the API """')
         errors_template.render.assert_called_once()
         api_errors.write_text.assert_called_once_with(errors_template.render())
+        api_dir.mkdir.assert_called_once()
+        api_dir.__truediv__.assert_has_calls([mocker.call(key) for key in api_paths])
+        api_init.write_text.assert_called_once_with('""" Contains synchronous methods for accessing the API """')
         endpoint_template.render.assert_has_calls(
             [mocker.call(collection=collection_1), mocker.call(collection=collection_2)]
         )
         collection_1_path.write_text.assert_called_once_with(endpoint_renders[collection_1])
         collection_2_path.write_text.assert_called_once_with(endpoint_renders[collection_2])
+        async_api_dir.mkdir.assert_called_once()
+        async_api_dir.__truediv__.assert_has_calls([mocker.call(key) for key in async_api_paths])
+        async_api_init.write_text.assert_called_once_with('""" Contains async methods for accessing the API """')
+        async_endpoint_template.render.assert_has_calls(
+            [mocker.call(collection=collection_1), mocker.call(collection=collection_2)]
+        )
+        async_collection_1_path.write_text.assert_called_once_with(async_endpoint_renders[collection_1])
+        async_collection_2_path.write_text.assert_called_once_with(async_endpoint_renders[collection_2])
 
 
 def test__reformat(mocker):
