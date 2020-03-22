@@ -1,4 +1,3 @@
-import os
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
