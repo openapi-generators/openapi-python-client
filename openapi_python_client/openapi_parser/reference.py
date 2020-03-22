@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Dict
 
 import stringcase
+
+class_overrides: Dict[str, Reference] = {}
 
 
 @dataclass
@@ -18,4 +21,9 @@ class Reference:
     def from_ref(ref: str) -> Reference:
         """ Get a Reference from the openapi #/schemas/blahblah string """
         ref_value = ref.split("/")[-1]
-        return Reference(class_name=stringcase.pascalcase(ref_value), module_name=stringcase.snakecase(ref_value),)
+        class_name = stringcase.pascalcase(ref_value)
+
+        if class_name in class_overrides:
+            return class_overrides[class_name]
+
+        return Reference(class_name=class_name, module_name=stringcase.snakecase(ref_value),)

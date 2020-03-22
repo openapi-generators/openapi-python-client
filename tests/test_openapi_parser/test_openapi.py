@@ -248,11 +248,11 @@ class TestEndpoint:
         from openapi_python_client.openapi_parser.openapi import Endpoint, Reference, RefProperty
 
         request_body = mocker.MagicMock()
-        form_body_reference = Reference(ref="a")
+        form_body_reference = Reference.from_ref(ref="a")
         parse_request_form_body = mocker.patch.object(
             Endpoint, "parse_request_form_body", return_value=form_body_reference
         )
-        json_body = RefProperty(name="name", required=True, default=None, reference=Reference("b"))
+        json_body = RefProperty(name="name", required=True, default=None, reference=Reference.from_ref("b"))
         parse_request_json_body = mocker.patch.object(Endpoint, "parse_request_json_body", return_value=json_body)
         import_string_from_reference = mocker.patch(
             f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
@@ -294,8 +294,8 @@ class TestEndpoint:
             tag="tag",
             relative_imports={"import_3"},
         )
-        ref_1 = Reference(ref="ref_1")
-        ref_2 = Reference(ref="ref_2")
+        ref_1 = Reference.from_ref(ref="ref_1")
+        ref_2 = Reference.from_ref(ref="ref_2")
         response_1 = RefResponse(status_code=200, reference=ref_1)
         response_2 = RefResponse(status_code=404, reference=ref_2)
         response_from_dict = mocker.patch(f"{MODULE_NAME}.response_from_dict", side_effect=[response_1, response_2])

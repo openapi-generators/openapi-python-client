@@ -14,10 +14,25 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
+def _process_config(path: Optional[pathlib.Path]) -> None:
+    from openapi_python_client import load_config
+
+    if not path:
+        return
+
+    try:
+        load_config(path=path)
+    except:
+        raise typer.BadParameter("Unable to parse config")
+
+
 # noinspection PyUnusedLocal
 @app.callback(name="openapi-python-client")
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
+    config: Optional[pathlib.Path] = typer.Option(
+        None, callback=_process_config, help="Path to the config file to use"
+    ),
 ) -> None:
     """ Generate a Python client from an OpenAPI JSON document """
     pass

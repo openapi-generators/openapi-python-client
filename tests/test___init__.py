@@ -437,3 +437,21 @@ def test__reformat(mocker):
             mocker.call("black .", cwd=project.project_dir, shell=True),
         ]
     )
+
+
+def test_load_config(mocker):
+    my_data = {"class_overrides": {"_MyCLASSName": {"class_name": "MyClassName", "module_name": "my_module_name"}}}
+    safe_load = mocker.patch("yaml.safe_load", return_value=my_data)
+    fake_path = mocker.MagicMock(autospec=pathlib.Path)
+
+    from openapi_python_client import load_config
+
+    load_config(path=fake_path)
+
+    fake_path.read_text.assert_called_once()
+    safe_load.assert_called_once_with(fake_path.read_text())
+    from openapi_python_client.openapi_parser import reference
+
+    assert reference.class_overrides == {
+        "_MyCLASSName": reference.Reference(class_name="MyClassName", module_name="my_module_name")
+    }

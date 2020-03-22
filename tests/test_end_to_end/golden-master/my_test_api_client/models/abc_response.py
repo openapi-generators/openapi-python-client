@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, cast
 
 
 @dataclass
-class PingResponse:
+class ABCResponse:
     """  """
 
     success: bool
@@ -17,7 +17,7 @@ class PingResponse:
         }
 
     @staticmethod
-    def from_dict(d: Dict) -> PingResponse:
+    def from_dict(d: Dict) -> ABCResponse:
 
         success = d["success"]
-        return PingResponse(success=success,)
+        return ABCResponse(success=success,)

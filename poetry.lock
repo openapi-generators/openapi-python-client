@@ -410,7 +410,7 @@ pytest = ">=2.7"
 dev = ["pre-commit", "tox"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "YAML parser and emitter for Python"
 name = "pyyaml"
 optional = false
@@ -612,7 +612,7 @@ python-versions = "*"
 version = "0.1.8"
 
 [metadata]
-content-hash = "82171beb8952aca74030e90ae71cce9a5eab64e2641ff7efb0da1844eff07b12"
+content-hash = "f4068f577f8bbb823b57028b834ab963dd364487ea87485c7ae6417f6e1fa718"
 python-versions = "==3.*,>=3.8.0"
 
 [metadata.files]

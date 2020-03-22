@@ -1,4 +1,5 @@
 from pathlib import PosixPath
+from unittest.mock import MagicMock
 
 import pytest
 from typer.testing import CliRunner
@@ -18,8 +19,37 @@ def test_version(mocker):
 
 
 @pytest.fixture
-def _create_new_client(mocker):
+def _create_new_client(mocker) -> MagicMock:
     return mocker.patch("openapi_python_client.create_new_client")
+
+
+def test_config(mocker, _create_new_client):
+    load_config = mocker.patch("openapi_python_client.load_config")
+    from openapi_python_client.cli import app
+
+    config_path = "config/path"
+    path = "cool/path"
+
+    result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={path}"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    load_config.assert_called_once_with(path=PosixPath(config_path))
+    _create_new_client.assert_called_once_with(url=None, path=PosixPath(path))
+
+
+def test_bad_config(mocker, _create_new_client):
+    load_config = mocker.patch("openapi_python_client.load_config", side_effect=ValueError("Bad Config"))
+    from openapi_python_client.cli import app
+
+    config_path = "config/path"
+    path = "cool/path"
+
+    result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={path}"])
+
+    assert result.exit_code == 2
+    assert "Unable to parse config" in result.stdout
+    load_config.assert_called_once_with(path=PosixPath(config_path))
+    _create_new_client.assert_not_called()
 
 
 class TestGenerate:
@@ -28,7 +58,7 @@ class TestGenerate:
 
         result = runner.invoke(app, ["generate"])
 
-        assert result.exit_code == 1
+        assert result.exit_code == 1, result.output
         _create_new_client.assert_not_called()
 
     def test_generate_url_and_path(self, _create_new_client):

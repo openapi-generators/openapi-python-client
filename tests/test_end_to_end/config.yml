@@ -1,0 +1,4 @@
+class_overrides:
+  _ABCResponse:
+    class_name: ABCResponse
+    module_name: abc_response

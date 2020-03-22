@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import httpx
+import yaml
 from jinja2 import Environment, PackageLoader
 
 from .openapi_parser import OpenAPI, import_string_from_reference
@@ -20,6 +21,17 @@ def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> _P
     data_dict = _get_json(url=url, path=path)
     openapi = OpenAPI.from_dict(data_dict)
     return _Project(openapi=openapi)
+
+
+def load_config(*, path: Path) -> None:
+    """ Loads config from provided Path """
+    config_data = yaml.safe_load(path.read_text())
+
+    if "class_overrides" in config_data:
+        from .openapi_parser import reference
+
+        for class_name, class_data in config_data["class_overrides"].items():
+            reference.class_overrides[class_name] = reference.Reference(**class_data)
 
 
 def create_new_client(*, url: Optional[str], path: Optional[Path]) -> None:

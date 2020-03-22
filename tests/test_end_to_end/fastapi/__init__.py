@@ -8,11 +8,11 @@ from pydantic import BaseModel
 app = FastAPI(title="My Test API", description="An API for testing openapi-python-client",)
 
 
-class PingResponse(BaseModel):
+class _ABCResponse(BaseModel):
     success: bool
 
 
-@app.get("/ping", response_model=PingResponse)
+@app.get("/ping", response_model=_ABCResponse)
 async def ping():
     """ A quick check to see if the system is running """
     return {"success": True}

@@ -27,10 +27,11 @@ def _compare_directories(first: Path, second: Path, /):
 def test_end_to_end(capsys):
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "fastapi" / "openapi.json"
+    config_path = Path(__file__).parent / "config.yml"
     gm_path = Path(__file__).parent / "golden-master"
     output_path = Path.cwd() / "my-test-api-client"
 
-    result = runner.invoke(app, ["generate", f"--path={openapi_path}"])
+    result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={openapi_path}"])
 
     if result.exit_code != 0:
         raise result.exception

@@ -10,9 +10,11 @@ if __name__ == "__main__":
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "fastapi" / "openapi.json"
     gm_path = Path(__file__).parent / "golden-master"
-    shutil.rmtree(gm_path)
+    shutil.rmtree(gm_path, ignore_errors=True)
     output_path = Path.cwd() / "my-test-api-client"
+    shutil.rmtree(output_path, ignore_errors=True)
+    config_path = Path(__file__).parent / "config.yml"
 
-    runner.invoke(app, ["generate", f"--path={openapi_path}"])
+    runner.invoke(app, [f"--config={config_path}", "generate", f"--path={openapi_path}"])
 
     output_path.rename(gm_path)

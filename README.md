@@ -51,12 +51,36 @@ get an error.
     for endpoints without a tag.  Each of these modules in turn contains one function for calling each endpoint.
     1. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
     
+For a full example you can look at tests/test_end_to_end which has a declared [FastAPI](https://fastapi.tiangolo.com/) 
+server and the resulting openapi.json file in the "fastapi" directory.  "golden-master" is the generated client from that 
+OpenAPI document.
+    
 ## OpenAPI features supported
 1. All HTTP Methods
 1. JSON and form bodies, path and query parameters
 1. float, string, int, datetimes, string enums, and custom schemas or lists containing any of those
 1. html/text or application/json responses containing any of the previous types
 1. Bearer token security
+
+## Configuration
+You can pass a YAML (or JSON) file to openapi-python-client in order to change some behavior.  The following parameters 
+are supported:
+
+### class_overrides
+Used to change the name of generated model classes, especially useful if you have a name like ABCModel which, when 
+converted to snake case for module naming will be a_b_c_model.  This param should be a mapping of existing class name 
+(usually a key in the "schemas" section of your OpenAPI document) to class_name and module_name.
+
+Example:
+```yaml
+class_overrides:
+    ABCModel:
+      class_name: ABCModel
+      module_name: abc_model
+```
+
+The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the
+ models folder.
 
 
 ## Contributors 
