@@ -15,3 +15,16 @@ include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.8"
 httpx = "^0.12.1"
+
+[tool.black]
+line-length = 120
+target_version = ['py38']
+exclude = '''
+(
+  /(
+    | \.git
+    | \.venv
+    | \.mypy_cache
+  )/
+)
+'''
