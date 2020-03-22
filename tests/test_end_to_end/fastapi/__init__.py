@@ -23,7 +23,7 @@ async def ping():
 test_router = APIRouter()
 
 
-class TestEnum(Enum):
+class AnEnum(Enum):
     """ For testing Enums in all the ways they can be used """
 
     FIRST_VALUE = "FIRST_VALUE"
@@ -36,17 +36,17 @@ class OtherModel(BaseModel):
     a_value: str
 
 
-class TestModel(BaseModel):
+class AModel(BaseModel):
     """ A Model for testing all the ways custom objects can be used """
 
-    an_enum_value: TestEnum
-    a_list_of_enums: List[TestEnum]
+    an_enum_value: AnEnum
+    a_list_of_enums: List[AnEnum]
     a_list_of_strings: List[str]
     a_list_of_objects: List[OtherModel]
 
 
-@test_router.get("/", response_model=List[TestModel])
-def test_getting_lists(statuses: List[TestEnum] = Query(...),):
+@test_router.get("/", response_model=List[AModel])
+def get_list(statuses: List[AnEnum] = Query(...),):
     """ Get users, filtered by statuses """
     return
 

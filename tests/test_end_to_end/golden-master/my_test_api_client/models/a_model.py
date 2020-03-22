@@ -10,7 +10,7 @@ from .other_model import OtherModel
 
 
 @dataclass
-class TestModel:
+class AModel:
     """ A Model for testing all the ways custom objects can be used  """
 
     an_enum_value: AnEnumValue
@@ -27,9 +27,11 @@ class TestModel:
         }
 
     @staticmethod
-    def from_dict(d: Dict) -> TestModel:
+    def from_dict(d: Dict) -> AModel:
 
-        an_enum_value = AnEnumValue(d["an_enum_value"]) if "an_enum_value" in d else None
+        an_enum_value = (
+            AnEnumValue(d["an_enum_value"]) if "an_enum_value" in d else None
+        )
 
         a_list_of_enums = []
         for a_list_of_enums_item in d.get("a_list_of_enums", []):
@@ -40,7 +42,7 @@ class TestModel:
         a_list_of_objects = []
         for a_list_of_objects_item in d.get("a_list_of_objects", []):
             a_list_of_objects.append(OtherModel.from_dict(a_list_of_objects_item))
-        return TestModel(
+        return AModel(
             an_enum_value=an_enum_value,
             a_list_of_enums=a_list_of_enums,
             a_list_of_strings=a_list_of_strings,
