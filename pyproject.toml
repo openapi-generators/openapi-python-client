@@ -36,7 +36,7 @@ mypy = ">=0.761"
 taskipy = "^1.1.3"
 safety = "^1.8.5"
 pytest-cov = "^2.8.1"
-fastapi = "^0.52.0"
+fastapi = "^0.53.2"
 
 [tool.taskipy.tasks]
 check = "isort --recursive --apply && black . && safety check && mypy openapi_python_client"
