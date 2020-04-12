@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 
 @dataclass
@@ -13,7 +13,7 @@ class ValidationError:
     msg: str
     type: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "loc": self.loc,
             "msg": self.msg,
@@ -21,7 +21,7 @@ class ValidationError:
         }
 
     @staticmethod
-    def from_dict(d: Dict) -> ValidationError:
+    def from_dict(d: Dict[str, Any]) -> ValidationError:
 
         loc = d.get("loc", [])
 

@@ -36,4 +36,9 @@ def test_end_to_end(capsys):
     if result.exit_code != 0:
         raise result.exception
     _compare_directories(gm_path, output_path)
+
+    import mypy.api
+    out, err, status = mypy.api.run([str(output_path), "--strict"])
+    assert status == 0, f"Hello Type checking client failed: {err}"
+
     shutil.rmtree(output_path)

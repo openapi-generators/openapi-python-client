@@ -236,14 +236,16 @@ class OpenAPI:
 
     @staticmethod
     def from_dict(d: Dict[str, Dict[str, Any]], /) -> OpenAPI:
-        """ Create an OpenAPI from dict """
+        """ Create an OpenAPI from dict 
+        :rtype: object
+        """
         schemas = Schema.dict(d["components"]["schemas"])
         endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])
         enums = OpenAPI._check_enums(schemas.values(), endpoint_collections_by_tag.values())
 
         return OpenAPI(
             title=d["info"]["title"],
-            description=d["info"]["description"],
+            description=d["info"].get("description"),
             version=d["info"]["version"],
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             schemas=schemas,

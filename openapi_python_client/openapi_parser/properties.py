@@ -167,7 +167,10 @@ class EnumProperty(Property):
 
     def constructor_from_dict(self, dict_name: str) -> str:
         """ How to load this property from a dict (used in generated model from_dict function """
-        return f'{self.reference.class_name}({dict_name}["{self.name}"]) if "{self.name}" in {dict_name} else None'
+        constructor = f'{self.reference.class_name}({dict_name}["{self.name}"])'
+        if not self.required:
+            constructor += f' if "{self.name}" in {dict_name} else None'
+        return constructor
 
     @staticmethod
     def values_from_list(l: List[str], /) -> Dict[str, str]:
@@ -208,7 +211,7 @@ class RefProperty(Property):
 class DictProperty(Property):
     """ Property that is a general Dict """
 
-    _type_string: ClassVar[str] = "Dict"
+    _type_string: ClassVar[str] = "Dict[Any, Any]"
 
 
 _openapi_types_to_python_type_strings = {
@@ -216,7 +219,7 @@ _openapi_types_to_python_type_strings = {
     "number": "float",
     "integer": "int",
     "boolean": "bool",
-    "object": "Dict",
+    "object": "Dict[Any, Any]",
 }
 
 
