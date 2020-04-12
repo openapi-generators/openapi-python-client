@@ -6,7 +6,7 @@ def test_snake_case_uppercase_str():
     assert utils.snake_case("HTTP RESPONSE") == "http_response"
 
 
-def test_snake_case_from_pascal_with_acronums():
+def test_snake_case_from_pascal_with_acronyms():
     assert utils.snake_case("HTTPResponse") == "http_response"
     assert utils.snake_case("APIClientHTTPResponse") == "api_client_http_response"
     assert utils.snake_case("OAuthClientHTTPResponse") == "o_auth_client_http_response"
