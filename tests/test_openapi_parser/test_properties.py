@@ -20,20 +20,22 @@ class TestProperty:
         name = mocker.MagicMock()
         p = Property(name=name, required=True, default=None)
         get_type_string = mocker.patch.object(p, "get_type_string")
+        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
 
-        assert p.to_string() == f"{name}: {get_type_string()}"
+        assert p.to_string() == f"{snake_case(name)}: {get_type_string()}"
         p.required = False
-        assert p.to_string() == f"{name}: {get_type_string()} = None"
+        assert p.to_string() == f"{snake_case(name)}: {get_type_string()} = None"
 
         p.default = "TEST"
-        assert p.to_string() == f"{name}: {get_type_string()} = TEST"
+        assert p.to_string() == f"{snake_case(name)}: {get_type_string()} = TEST"
 
     def test_transform(self, mocker):
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
         p = Property(name=name, required=True, default=None)
-        assert p.transform() == name
+        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
+        assert p.transform() == snake_case(name)
 
     def test_constructor_from_dict(self, mocker):
         from openapi_python_client.openapi_parser.properties import Property
@@ -150,14 +152,14 @@ class TestEnumProperty:
         assert enum_property.get_type_string() == "Optional[MyTestEnum]"
 
     def test_transform(self, mocker):
-        name = mocker.MagicMock()
+        name = "thePropertyName"
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
         enum_property = EnumProperty(name=name, required=True, default=None, values={})
 
-        assert enum_property.transform() == f"{name}.value"
+        assert enum_property.transform() == f"the_property_name.value"
 
     def test_constructor_from_dict(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")

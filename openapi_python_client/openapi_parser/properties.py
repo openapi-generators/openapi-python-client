@@ -168,7 +168,7 @@ class EnumProperty(Property):
 
     def transform(self) -> str:
         """ Output to the template, convert this Enum into a JSONable value """
-        return f"{self.name}.value"
+        return f"{self.python_name}.value"
 
     def constructor_from_dict(self, dict_name: str) -> str:
         """ How to load this property from a dict (used in generated model from_dict function """
