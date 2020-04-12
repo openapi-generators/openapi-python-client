@@ -36,13 +36,13 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.name}: {self.get_type_string()} = {self.default}"
+            return f"{self.python_name}: {self.get_type_string()} = {self.default}"
         else:
-            return f"{self.name}: {self.get_type_string()}"
+            return f"{self.python_name}: {self.get_type_string()}"
 
     def transform(self) -> str:
         """ What it takes to turn this object into a native python type """
-        return self.name
+        return self.python_name
 
     def constructor_from_dict(self, dict_name: str) -> str:
         """ How to load this property from a dict (used in generated model from_dict function """
