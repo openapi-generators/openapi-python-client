@@ -154,24 +154,32 @@ class Schema:
     relative_imports: Set[str]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any], /) -> Schema:
-        """ A single Schema from its dict representation """
+    def from_dict(d: Dict[str, Any], /, name: str = None) -> Schema:
+        """ A single Schema from its dict representation
+        :param d:    Dict representation of the schema
+        :param name: Name by which the schema is referenced, such as a model name.  Used to infer the type name if a `title` property is not available.
+        """
         required_set = set(d.get("required", []))
         required_properties: List[Property] = []
         optional_properties: List[Property] = []
         relative_imports: Set[str] = set()
 
-        for key, value in d["properties"].items():
-            required = key in required_set
-            p = property_from_dict(name=key, required=required, data=value)
-            if required:
-                required_properties.append(p)
-            else:
-                optional_properties.append(p)
-            if isinstance(p, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty)) and p.reference:
-                relative_imports.add(import_string_from_reference(p.reference))
+        ref = Reference.from_ref(d.get("title", name))
+
+        if "properties" in d:
+            for key, value in d["properties"].items():
+                required = key in required_set
+                p = property_from_dict(name=key, required=required, data=value)
+                if required:
+                    required_properties.append(p)
+                else:
+                    optional_properties.append(p)
+                if isinstance(p, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty)) and p.reference:
+                    # don't add an import for self-referencing schemas
+                    if p.reference.class_name != ref.class_name:
+                        relative_imports.add(import_string_from_reference(p.reference))
         schema = Schema(
-            reference=Reference.from_ref(d["title"]),
+            reference=ref,
             required_properties=required_properties,
             optional_properties=optional_properties,
             relative_imports=relative_imports,
@@ -183,8 +191,8 @@ class Schema:
     def dict(d: Dict[str, Dict[str, Any]], /) -> Dict[str, Schema]:
         """ Get a list of Schemas from an OpenAPI dict """
         result = {}
-        for data in d.values():
-            s = Schema.from_dict(data)
+        for name, data in d.items():
+            s = Schema.from_dict(data, name=name)
             result[s.reference.class_name] = s
         return result
 

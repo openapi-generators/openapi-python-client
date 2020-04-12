@@ -150,7 +150,7 @@ class _Project:
         # Generate enums
         enum_template = self.env.get_template("enum.pyi")
         for enum in self.openapi.enums.values():
-            module_path = models_dir / f"{enum.name}.py"
+            module_path = models_dir / f"{enum.reference.module_name}.py"
             module_path.write_text(enum_template.render(enum=enum))
             imports.append(import_string_from_reference(enum.reference))
 

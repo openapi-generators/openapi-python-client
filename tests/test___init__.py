@@ -274,10 +274,14 @@ class TestProject:
             "__init__.py": models_init,
             f"{schema_1.reference.module_name}.py": schema_1_module_path,
             f"{schema_2.reference.module_name}.py": schema_2_module_path,
-            f"{enum_1.name}.py": enum_1_module_path,
-            f"{enum_2.name}.py": enum_2_module_path,
+            f"{enum_1.reference.module_name}.py": enum_1_module_path,
+            f"{enum_2.reference.module_name}.py": enum_2_module_path,
         }
-        models_dir.__truediv__.side_effect = lambda x: module_paths[x]
+
+        def models_dir_get(x):
+            return module_paths[x]
+
+        models_dir.__truediv__.side_effect = models_dir_get
         project.package_dir.__truediv__.return_value = models_dir
         model_render_1 = mocker.MagicMock()
         model_render_2 = mocker.MagicMock()

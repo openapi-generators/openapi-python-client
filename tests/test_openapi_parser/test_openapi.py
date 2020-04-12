@@ -1,5 +1,7 @@
 import pytest
 
+from openapi_python_client.openapi_parser.reference import Reference
+
 MODULE_NAME = "openapi_python_client.openapi_parser.openapi"
 
 
@@ -43,7 +45,7 @@ class TestOpenAPI:
         from openapi_python_client.openapi_parser.properties import EnumProperty, StringProperty
 
         def _make_enum():
-            return EnumProperty(name=mocker.MagicMock(), required=True, default=None, values=mocker.MagicMock(),)
+            return EnumProperty(name=mocker.MagicMock(), required=True, default=None, values=mocker.MagicMock(), reference=mocker.MagicMock())
 
         # Multiple schemas with both required and optional properties for making sure iteration works correctly
         schema_1 = mocker.MagicMock()
@@ -119,7 +121,7 @@ class TestOpenAPI:
 
         schema = mocker.MagicMock()
 
-        enum_1 = EnumProperty(name=mocker.MagicMock(), required=True, default=None, values=mocker.MagicMock(),)
+        enum_1 = EnumProperty(name=mocker.MagicMock(), required=True, default=None, values=mocker.MagicMock(), reference=mocker.MagicMock())
         enum_2 = replace(enum_1, values=mocker.MagicMock())
         schema.required_properties = [enum_1, enum_2]
 
@@ -139,7 +141,7 @@ class TestSchema:
 
         result = Schema.dict(in_data)
 
-        from_dict.assert_has_calls([mocker.call(value) for value in in_data.values()])
+        from_dict.assert_has_calls([mocker.call(value, name=name) for (name, value) in in_data.items()])
         assert result == {
             schema_1.reference.class_name: schema_1,
             schema_2.reference.class_name: schema_2,
@@ -154,7 +156,7 @@ class TestSchema:
             "required": ["RequiredEnum"],
             "properties": {"RequiredEnum": mocker.MagicMock(), "OptionalString": mocker.MagicMock(),},
         }
-        required_property = EnumProperty(name="RequiredEnum", required=True, default=None, values={},)
+        required_property = EnumProperty(name="RequiredEnum", required=True, default=None, values={}, reference=Reference.from_ref("RequiredEnum"))
         optional_property = StringProperty(name="OptionalString", required=False, default=None)
         property_from_dict = mocker.patch(
             f"{MODULE_NAME}.property_from_dict", side_effect=[required_property, optional_property]
@@ -347,8 +349,8 @@ class TestEndpoint:
             tag="tag",
             relative_imports={"import_3"},
         )
-        path_prop = EnumProperty(name="path_enum", required=True, default=None, values={})
-        query_prop = EnumProperty(name="query_enum", required=False, default=None, values={})
+        path_prop = EnumProperty(name="path_enum", required=True, default=None, values={}, reference=mocker.MagicMock())
+        query_prop = EnumProperty(name="query_enum", required=False, default=None, values={}, reference=mocker.MagicMock())
         propety_from_dict = mocker.patch(f"{MODULE_NAME}.property_from_dict", side_effect=[path_prop, query_prop])
         path_schema = mocker.MagicMock()
         query_schema = mocker.MagicMock()

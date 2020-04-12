@@ -125,16 +125,16 @@ class TestEnumListProperty:
 class TestEnumProperty:
     def test___post_init__(self, mocker):
         name = mocker.MagicMock()
-        fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
-
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
         enum_property = EnumProperty(
-            name=name, required=True, default="second", values={"FIRST": "first", "SECOND": "second"}
+            name=name,
+            required=True,
+            default="second",
+            values={"FIRST": "first", "SECOND": "second"},
+            reference=(mocker.MagicMock(class_name="MyTestEnum")),
         )
 
-        from_ref.assert_called_once_with(name)
         assert enum_property.default == "MyTestEnum.SECOND"
 
     def test_get_type_string(self, mocker):
@@ -143,7 +143,7 @@ class TestEnumProperty:
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
-        enum_property = EnumProperty(name="test", required=True, default=None, values={})
+        enum_property = EnumProperty(name="test", required=True, default=None, values={}, reference=mocker.MagicMock(class_name="MyTestEnum"))
 
         assert enum_property.get_type_string() == "MyTestEnum"
         enum_property.required = False
@@ -155,17 +155,16 @@ class TestEnumProperty:
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
-        enum_property = EnumProperty(name=name, required=True, default=None, values={})
+        enum_property = EnumProperty(name=name, required=True, default=None, values={}, reference=mocker.MagicMock())
 
         assert enum_property.transform() == f"{name}.value"
 
     def test_constructor_from_dict(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
         from openapi_python_client.openapi_parser.properties import EnumProperty
 
-        enum_property = EnumProperty(name="test_enum", required=True, default=None, values={})
+        enum_property = EnumProperty(name="test_enum", required=True, default=None, values={}, reference=fake_reference)
 
         assert (
             enum_property.constructor_from_dict("my_dict")
@@ -216,6 +215,7 @@ class TestPropertyFromDict:
             "enum": mocker.MagicMock(),
         }
         EnumProperty = mocker.patch(f"{MODULE_NAME}.EnumProperty")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
         from openapi_python_client.openapi_parser.properties import property_from_dict
 
@@ -223,7 +223,7 @@ class TestPropertyFromDict:
 
         EnumProperty.values_from_list.assert_called_once_with(data["enum"])
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=None
+            name=name, required=required, values=EnumProperty.values_from_list(), default=None, reference=from_ref()
         )
         assert p == EnumProperty()
 
@@ -234,7 +234,7 @@ class TestPropertyFromDict:
             name=name, required=required, data=data,
         )
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=data["default"]
+            name=name, required=required, values=EnumProperty.values_from_list(), default=data["default"], reference=from_ref()
         )
 
     def test_property_from_dict_ref(self, mocker):
