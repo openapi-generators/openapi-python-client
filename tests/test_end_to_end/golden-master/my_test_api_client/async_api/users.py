@@ -6,7 +6,7 @@ import httpx
 from ..client import AuthenticatedClient, Client
 from ..errors import ApiResponseError
 from ..models.a_model import AModel
-from ..models.h_t_t_p_validation_error import HTTPValidationError
+from ..models.http_validation_error import HTTPValidationError
 from ..models.statuses import Statuses
 
 

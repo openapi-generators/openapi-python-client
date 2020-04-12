@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, ClassVar, Dict, List, Optional
 
+from openapi_python_client import utils
 from .reference import Reference
 
 
@@ -14,6 +15,10 @@ class Property:
 
     constructor_template: ClassVar[Optional[str]] = None
     _type_string: ClassVar[str]
+
+    @property
+    def python_name(self):
+        return utils.snake_case(self.name)
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -201,7 +206,7 @@ class RefProperty(Property):
 
     def transform(self) -> str:
         """ Convert this into a JSONable value """
-        return f"{self.name}.to_dict()"
+        return f"{self.python_name}.to_dict()"
 
 
 @dataclass

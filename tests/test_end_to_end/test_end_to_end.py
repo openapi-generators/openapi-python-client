@@ -18,7 +18,8 @@ def _compare_directories(first: Path, second: Path, /):
 
     match, mismatch, errors = cmpfiles(first, second, dc.common_files, shallow=False)
     if mismatch:
-        pytest.fail(f"{first_printable} and {second_printable} had differing files: {mismatch}", pytrace=False)
+        for error in errors:
+            pytest.fail(f"{first_printable} and {second_printable} had differing files: {mismatch}, first error is {error}", pytrace=False)
 
     for sub_path in dc.common_dirs:
         _compare_directories(first / sub_path, second / sub_path)
