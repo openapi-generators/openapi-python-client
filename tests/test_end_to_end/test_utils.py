@@ -12,7 +12,7 @@ def test_snake_case_from_pascal_with_acronums():
     assert utils.snake_case("OAuthClientHTTPResponse") == "o_auth_client_http_response"
 
 
-def test_snake_Case_from_pascal():
+def test_snake_case_from_pascal():
     assert utils.snake_case("HttpResponsePascalCase") == "http_response_pascal_case"
 
 
