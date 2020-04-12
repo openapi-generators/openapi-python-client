@@ -306,6 +306,30 @@ class TestPropertyFromDict:
         )
         DateTimeProperty.assert_called_once_with(name=name, required=required, default=data["default"])
 
+    def test_property_from_dict_string_date_format(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = {
+            "type": "string",
+            "format": "date",
+        }
+        DateProperty = mocker.patch(f"{MODULE_NAME}.DateProperty")
+
+        from openapi_python_client.openapi_parser.properties import property_from_dict
+
+        p = property_from_dict(name=name, required=required, data=data)
+        DateProperty.assert_called_once_with(name=name, required=required, default=None)
+        assert p == DateProperty()
+
+        # Test optional values
+        DateProperty.reset_mock()
+        data["default"] = mocker.MagicMock()
+
+        property_from_dict(
+            name=name, required=required, data=data,
+        )
+        DateProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+
     def test_property_from_dict_string_unsupported_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
