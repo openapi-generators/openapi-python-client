@@ -4,7 +4,16 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Generator, Iterable, List, Optional, Set, Union
 
-from .properties import EnumListProperty, EnumProperty, Property, ReferenceListProperty, RefProperty, property_from_dict
+from .properties import (
+    EnumListProperty,
+    EnumProperty,
+    Property,
+    ReferenceListProperty,
+    RefProperty,
+    property_from_dict,
+    DateTimeProperty,
+    DateProperty,
+)
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_dict
 
@@ -113,6 +122,10 @@ class Endpoint:
                 and prop.reference
             ):
                 self.relative_imports.add(import_string_from_reference(prop.reference, prefix="..models"))
+            if isinstance(prop, DateProperty):
+                self.relative_imports.add("from datetime import date")
+            if isinstance(prop, DateTimeProperty):
+                self.relative_imports.add("from datetime import datetime")
             if param_dict["in"] == ParameterLocation.QUERY:
                 self.query_parameters.append(prop)
             elif param_dict["in"] == ParameterLocation.PATH:

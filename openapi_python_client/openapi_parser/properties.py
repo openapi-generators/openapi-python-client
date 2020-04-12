@@ -68,6 +68,20 @@ class DateTimeProperty(Property):
     _type_string: ClassVar[str] = "datetime"
     constructor_template: ClassVar[str] = "datetime_property.pyi"
 
+    def transform(self) -> str:
+        return f"{self.python_name()}.isoformat()"
+
+
+@dataclass
+class DateProperty(Property):
+    """ A property of type datetime.date """
+
+    _type_string: ClassVar[str] = "date"
+    constructor_template: ClassVar[str] = "date_property.pyi"
+
+    def transform(self) -> str:
+        return f"{self.python_name()}.isoformat()"
+
 
 @dataclass
 class FloatProperty(Property):
@@ -232,12 +246,14 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
     if "$ref" in data:
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data["$ref"]), default=None)
     if data["type"] == "string":
-        if "format" not in data:
-            return StringProperty(
-                name=name, default=data.get("default"), required=required, pattern=data.get("pattern"),
-            )
-        elif data["format"] == "date-time":
-            return DateTimeProperty(name=name, required=required, default=data.get("default"))
+        if "format" in data:
+            if data.get("format") == "date-time":
+                return DateTimeProperty(name=name, required=required, default=data.get("default"))
+            elif data.get("format") == "date":
+                return DateProperty(name=name, required=required, default=data.get("default"))
+            else:
+                raise ValueError(f'Unsupported string format:{data["format"]}')
+        return StringProperty(name=name, default=data.get("default"), required=required, pattern=data.get("pattern"),)
     elif data["type"] == "number":
         return FloatProperty(name=name, default=data.get("default"), required=required)
     elif data["type"] == "integer":
