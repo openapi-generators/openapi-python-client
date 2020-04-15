@@ -2,6 +2,7 @@
 name = "openapi-python-client"
 version = "0.2.1"
 description = "Generate modern Python clients from OpenAPI"
+repository = "https://github.com/triaxtec/openapi-python-client"
 
 authors = [
     "Dylan Anthony <danthony@triaxtec.com>",
