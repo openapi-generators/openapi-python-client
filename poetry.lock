@@ -545,7 +545,7 @@ description = "Typer, build great CLIs. Easy to code. Based on Python type hints
 name = "typer"
 optional = false
 python-versions = ">=3.6"
-version = "0.1.0"
+version = "0.1.1"
 
 [package.dependencies]
 click = ">=7.1.1,<7.2.0"
@@ -943,8 +943,8 @@ typed-ast = [
     {file = "typed_ast-1.4.1.tar.gz", hash = "sha256:8c8aaad94455178e3187ab22c8b01a3837f8ee50e09cf31f1ba129eb293ec30b"},
 ]
 typer = [
-    {file = "typer-0.1.0-py3-none-any.whl", hash = "sha256:7daf5337c9840b0101ca1966544e8f2c34354f877e24381e9e51f346625386da"},
-    {file = "typer-0.1.0.tar.gz", hash = "sha256:40e5159fb5a06cd1bb494066dfa6df55754c49b6261cf25b1f99f96cf36f8132"},
+    {file = "typer-0.1.1-py3-none-any.whl", hash = "sha256:e6fdb492c2f20d2d8123b8b2f4efa060770f92664aad8d36126f53dce501e9a8"},
+    {file = "typer-0.1.1.tar.gz", hash = "sha256:180d746de86724f9f94e90fa95caa065b5af9b3b3c77fc9d4d4ca1b75adc0c01"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.1-py2-none-any.whl", hash = "sha256:910f4656f54de5993ad9304959ce9bb903f90aadc7c67a0bef07e678014e892d"},
