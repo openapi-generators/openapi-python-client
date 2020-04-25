@@ -22,7 +22,7 @@ class {{ schema.reference.class_name }}:
             "{{ property.name }}": self.{{ property.transform() }},
             {% endfor %}
             {% for property in schema.optional_properties %}
-            "{{ property.name }}": self.{{ property.transform() }} if self.{{property.python_name}} is not None else None,
+            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.python_name }} is not None else None,
                                                                                                                        {% endfor %}
         }
 
@@ -33,7 +33,7 @@ class {{ schema.reference.class_name }}:
         {% if property.constructor_template %}
         {% include property.constructor_template %}
         {% else %}
-        {{property.python_name}} = {{property.constructor_from_dict("d")}}
+        {{ property.python_name }} = {{ property.constructor_from_dict("d") }}
         {% endif %}
 
         {% endfor %}

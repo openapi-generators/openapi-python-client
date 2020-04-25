@@ -1,5 +1,6 @@
-import stringcase
 import re
+
+import stringcase
 
 
 def snake_case(value: str) -> str:

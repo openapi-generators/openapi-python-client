@@ -8,12 +8,12 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import stringcase
 import httpx
 import yaml
 from jinja2 import Environment, PackageLoader
 
 from openapi_python_client import utils
+
 from .openapi_parser import OpenAPI, import_string_from_reference
 
 __version__ = version(__package__)

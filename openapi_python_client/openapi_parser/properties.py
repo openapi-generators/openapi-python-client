@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, ClassVar, Dict, List, Optional
 
 from openapi_python_client import utils
+
 from .reference import Reference
 
 
@@ -16,9 +17,10 @@ class Property:
     constructor_template: ClassVar[Optional[str]] = None
     _type_string: ClassVar[str]
 
-    @property
-    def python_name(self):
-        return utils.snake_case(self.name)
+    python_name: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.python_name = utils.snake_case(self.name)
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
