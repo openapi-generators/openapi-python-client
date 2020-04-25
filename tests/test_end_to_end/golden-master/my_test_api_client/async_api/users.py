@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
@@ -11,7 +12,7 @@ from ..models.statuses import Statuses
 
 
 async def get_user_list(
-    *, client: Client, statuses: List[Statuses],
+    *, client: Client, statuses: List[Statuses], some_date: date, some_datetime: datetime,
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
@@ -20,6 +21,8 @@ async def get_user_list(
 
     params = {
         "statuses": statuses,
+        "some_date": some_date.isoformat(),
+        "some_datetime": some_datetime.isoformat(),
     }
 
     async with httpx.AsyncClient() as _client:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, cast
 
 from .a_list_of_enums import AListOfEnums
@@ -18,6 +18,7 @@ class AModel:
     a_list_of_strings: List[str]
     a_list_of_objects: List[OtherModel]
     a_camel_date_time: datetime
+    a_date: date
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -25,7 +26,8 @@ class AModel:
             "a_list_of_enums": self.a_list_of_enums,
             "a_list_of_strings": self.a_list_of_strings,
             "a_list_of_objects": self.a_list_of_objects,
-            "aCamelDateTime": self.a_camel_date_time,
+            "aCamelDateTime": self.a_camel_date_time.isoformat(),
+            "a_date": self.a_date.isoformat(),
         }
 
     @staticmethod
@@ -45,10 +47,13 @@ class AModel:
 
         a_camel_date_time = datetime.fromisoformat(d["aCamelDateTime"])
 
+        a_date = date.fromisoformat(d["a_date"])
+
         return AModel(
             an_enum_value=an_enum_value,
             a_list_of_enums=a_list_of_enums,
             a_list_of_strings=a_list_of_strings,
             a_list_of_objects=a_list_of_objects,
             a_camel_date_time=a_camel_date_time,
+            a_date=a_date,
         )

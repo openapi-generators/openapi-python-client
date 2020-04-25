@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.3.0 - Unreleased
 ### Additions
 - Link to the GitHub repository from PyPI (#26). Thanks @theY4Kman!
+- Support for date properties (#30, #37). Thanks @acgray!
 
 ### Fixes
 - Fixed some typing issues in generated clients and incorporate mypy into end to end tests (#32). Thanks @acgray!

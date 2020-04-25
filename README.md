@@ -58,7 +58,7 @@ OpenAPI document.
 ## OpenAPI features supported
 1. All HTTP Methods
 1. JSON and form bodies, path and query parameters
-1. float, string, int, datetimes, string enums, and custom schemas or lists containing any of those
+1. float, string, int, date, datetime, string enums, and custom schemas or lists containing any of those
 1. html/text or application/json responses containing any of the previous types
 1. Bearer token security
 
