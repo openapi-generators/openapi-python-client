@@ -1,7 +1,5 @@
 import pytest
 
-from openapi_python_client.openapi_parser.properties import DateProperty, DateTimeProperty
-
 MODULE_NAME = "openapi_python_client.openapi_parser.openapi"
 
 
@@ -45,7 +43,13 @@ class TestOpenAPI:
         from openapi_python_client.openapi_parser.properties import EnumProperty, StringProperty
 
         def _make_enum():
-            return EnumProperty(name=str(mocker.MagicMock()), required=True, default=None, values=mocker.MagicMock(),)
+            return EnumProperty(
+                name=str(mocker.MagicMock()),
+                required=True,
+                default=None,
+                values=mocker.MagicMock(),
+                reference=mocker.MagicMock(),
+            )
 
         # Multiple schemas with both required and optional properties for making sure iteration works correctly
         schema_1 = mocker.MagicMock()
@@ -121,7 +125,13 @@ class TestOpenAPI:
 
         schema = mocker.MagicMock()
 
-        enum_1 = EnumProperty(name=str(mocker.MagicMock()), required=True, default=None, values=mocker.MagicMock(),)
+        enum_1 = EnumProperty(
+            name=str(mocker.MagicMock()),
+            required=True,
+            default=None,
+            values=mocker.MagicMock(),
+            reference=mocker.MagicMock(),
+        )
         enum_2 = replace(enum_1, values=mocker.MagicMock())
         schema.required_properties = [enum_1, enum_2]
 
@@ -141,14 +151,19 @@ class TestSchema:
 
         result = Schema.dict(in_data)
 
-        from_dict.assert_has_calls([mocker.call(value) for value in in_data.values()])
+        from_dict.assert_has_calls([mocker.call(value, name=name) for (name, value) in in_data.items()])
         assert result == {
             schema_1.reference.class_name: schema_1,
             schema_2.reference.class_name: schema_2,
         }
 
     def test_from_dict(self, mocker):
-        from openapi_python_client.openapi_parser.properties import EnumProperty, StringProperty
+        from openapi_python_client.openapi_parser.properties import (
+            EnumProperty,
+            DateProperty,
+            DateTimeProperty,
+            Reference,
+        )
 
         in_data = {
             "title": mocker.MagicMock(),
@@ -160,7 +175,9 @@ class TestSchema:
                 "OptionalDate": mocker.MagicMock(),
             },
         }
-        required_property = EnumProperty(name="RequiredEnum", required=True, default=None, values={},)
+        required_property = EnumProperty(
+            name="RequiredEnum", required=True, default=None, values={}, reference=Reference.from_ref("RequiredEnum")
+        )
         optional_property = DateTimeProperty(name="OptionalDateTime", required=False, default=None)
         optional_date_property = DateProperty(name="OptionalDate", required=False, default=None)
         property_from_dict = mocker.patch(
@@ -172,7 +189,7 @@ class TestSchema:
 
         from openapi_python_client.openapi_parser.openapi import Schema
 
-        result = Schema.from_dict(in_data)
+        result = Schema.from_dict(in_data, name=mocker.MagicMock())
 
         from_ref.assert_called_once_with(in_data["title"])
         property_from_dict.assert_has_calls(
@@ -349,7 +366,7 @@ class TestEndpoint:
             )
 
     def test__add_parameters_happy(self, mocker):
-        from openapi_python_client.openapi_parser.openapi import Endpoint, EnumProperty
+        from openapi_python_client.openapi_parser.openapi import Endpoint, EnumProperty, DateTimeProperty, DateProperty
 
         endpoint = Endpoint(
             path="path",
@@ -360,7 +377,7 @@ class TestEndpoint:
             tag="tag",
             relative_imports={"import_3"},
         )
-        path_prop = EnumProperty(name="path_enum", required=True, default=None, values={})
+        path_prop = EnumProperty(name="path_enum", required=True, default=None, values={}, reference=mocker.MagicMock())
         query_prop_datetime = DateTimeProperty(name="query_datetime", required=False, default=None)
         query_prop_date = DateProperty(name="query_date", required=False, default=None)
         propety_from_dict = mocker.patch(

@@ -169,11 +169,10 @@ class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, str]
-    reference: Reference = field(init=False)
+    reference: Reference
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        self.reference = Reference.from_ref(self.name)
         inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:
             self.default = f"{self.reference.class_name}.{inverse_values[self.default]}"
@@ -254,6 +253,7 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
             name=name,
             required=required,
             values=EnumProperty.values_from_list(data["enum"]),
+            reference=Reference.from_ref(data.get("title", name)),
             default=data.get("default"),
         )
     if "$ref" in data:
