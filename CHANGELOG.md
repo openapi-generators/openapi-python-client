@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.0 - Unreleased
 ### Additions
-- Link to the GitHub repository from PyPI (#26) (Thanks @theY4Kman)
+- Link to the GitHub repository from PyPI (#26). Thanks @theY4Kman!
+
+### Fixes
+- Fixed some typing issues in generated clients and incorporate mypy into end to end tests (#32). Thanks @agray!
 
 ## 0.2.1 - 2020-03-22
 ### Fixes
