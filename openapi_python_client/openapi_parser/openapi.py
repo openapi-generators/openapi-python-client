@@ -191,10 +191,10 @@ class Schema:
 
 @dataclass
 class OpenAPI:
-    """ Top level OpenAPI spec """
+    """ Top level OpenAPI document """
 
     title: str
-    description: str
+    description: Optional[str]
     version: str
     schemas: Dict[str, Schema]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
@@ -236,9 +236,7 @@ class OpenAPI:
 
     @staticmethod
     def from_dict(d: Dict[str, Dict[str, Any]], /) -> OpenAPI:
-        """ Create an OpenAPI from dict 
-        :rtype: object
-        """
+        """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
         endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])
         enums = OpenAPI._check_enums(schemas.values(), endpoint_collections_by_tag.values())

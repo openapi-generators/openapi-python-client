@@ -32,7 +32,10 @@ class TestListRefResponse:
 
         r = ListRefResponse(200, reference=mocker.MagicMock(class_name="SuperCoolClass"))
 
-        assert r.constructor() == "[SuperCoolClass.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]"
+        assert (
+            r.constructor()
+            == "[SuperCoolClass.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]"
+        )
 
 
 class TestRefResponse:
