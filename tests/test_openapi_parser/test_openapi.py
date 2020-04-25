@@ -43,7 +43,7 @@ class TestOpenAPI:
         from openapi_python_client.openapi_parser.properties import EnumProperty, StringProperty
 
         def _make_enum():
-            return EnumProperty(name=mocker.MagicMock(), required=True, default=None, values=mocker.MagicMock(),)
+            return EnumProperty(name=str(mocker.MagicMock()), required=True, default=None, values=mocker.MagicMock(),)
 
         # Multiple schemas with both required and optional properties for making sure iteration works correctly
         schema_1 = mocker.MagicMock()
@@ -119,7 +119,7 @@ class TestOpenAPI:
 
         schema = mocker.MagicMock()
 
-        enum_1 = EnumProperty(name=mocker.MagicMock(), required=True, default=None, values=mocker.MagicMock(),)
+        enum_1 = EnumProperty(name=str(mocker.MagicMock()), required=True, default=None, values=mocker.MagicMock(),)
         enum_2 = replace(enum_1, values=mocker.MagicMock())
         schema.required_properties = [enum_1, enum_2]
 

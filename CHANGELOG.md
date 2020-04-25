@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 - Fixed some typing issues in generated clients and incorporate mypy into end to end tests (#32). Thanks @acgray!
+- Properly handle camelCase endpoint names and properties (#29, #36). Thanks @acgray!
 
 ## 0.2.1 - 2020-03-22
 ### Fixes

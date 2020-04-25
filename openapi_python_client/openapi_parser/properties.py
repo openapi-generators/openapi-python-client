@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, ClassVar, Dict, List, Optional
 
+from openapi_python_client import utils
+
 from .reference import Reference
 
 
@@ -14,6 +16,11 @@ class Property:
 
     constructor_template: ClassVar[Optional[str]] = None
     _type_string: ClassVar[str]
+
+    python_name: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.python_name = utils.snake_case(self.name)
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -31,13 +38,13 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.name}: {self.get_type_string()} = {self.default}"
+            return f"{self.python_name}: {self.get_type_string()} = {self.default}"
         else:
-            return f"{self.name}: {self.get_type_string()}"
+            return f"{self.python_name}: {self.get_type_string()}"
 
     def transform(self) -> str:
         """ What it takes to turn this object into a native python type """
-        return self.name
+        return self.python_name
 
     def constructor_from_dict(self, dict_name: str) -> str:
         """ How to load this property from a dict (used in generated model from_dict function """
@@ -57,6 +64,7 @@ class StringProperty(Property):
     _type_string: ClassVar[str] = "str"
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         if self.default is not None:
             self.default = f'"{self.default}"'
 
@@ -132,6 +140,7 @@ class EnumListProperty(Property):
     constructor_template: ClassVar[str] = "enum_list_property.pyi"
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.reference = Reference.from_ref(self.name)
 
     def get_type_string(self) -> str:
@@ -149,6 +158,7 @@ class EnumProperty(Property):
     reference: Reference = field(init=False)
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.reference = Reference.from_ref(self.name)
         inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:
@@ -163,7 +173,7 @@ class EnumProperty(Property):
 
     def transform(self) -> str:
         """ Output to the template, convert this Enum into a JSONable value """
-        return f"{self.name}.value"
+        return f"{self.python_name}.value"
 
     def constructor_from_dict(self, dict_name: str) -> str:
         """ How to load this property from a dict (used in generated model from_dict function """
@@ -204,7 +214,7 @@ class RefProperty(Property):
 
     def transform(self) -> str:
         """ Convert this into a JSONable value """
-        return f"{self.name}.to_dict()"
+        return f"{self.python_name}.to_dict()"
 
 
 @dataclass

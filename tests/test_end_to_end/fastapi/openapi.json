@@ -1,1 +1,202 @@
-{"openapi": "3.0.2", "info": {"title": "My Test API", "description": "An API for testing openapi-python-client", "version": "0.1.0"}, "paths": {"/ping": {"get": {"summary": "Ping", "description": "A quick check to see if the system is running ", "operationId": "ping_ping_get", "responses": {"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/_ABCResponse"}}}}}}}, "/tests/": {"get": {"tags": ["users"], "summary": "Get List", "description": "Get users, filtered by statuses ", "operationId": "get_list_tests__get", "parameters": [{"required": true, "schema": {"title": "Statuses", "type": "array", "items": {"enum": ["FIRST_VALUE", "SECOND_VALUE"]}}, "name": "statuses", "in": "query"}], "responses": {"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"title": "Response Get List Tests  Get", "type": "array", "items": {"$ref": "#/components/schemas/AModel"}}}}}, "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}}}}}}, "components": {"schemas": {"AModel": {"title": "AModel", "required": ["an_enum_value", "a_list_of_enums", "a_list_of_strings", "a_list_of_objects"], "type": "object", "properties": {"an_enum_value": {"title": "An Enum Value", "enum": ["FIRST_VALUE", "SECOND_VALUE"]}, "a_list_of_enums": {"title": "A List Of Enums", "type": "array", "items": {"enum": ["FIRST_VALUE", "SECOND_VALUE"]}}, "a_list_of_strings": {"title": "A List Of Strings", "type": "array", "items": {"type": "string"}}, "a_list_of_objects": {"title": "A List Of Objects", "type": "array", "items": {"$ref": "#/components/schemas/OtherModel"}}}, "description": "A Model for testing all the ways custom objects can be used "}, "HTTPValidationError": {"title": "HTTPValidationError", "type": "object", "properties": {"detail": {"title": "Detail", "type": "array", "items": {"$ref": "#/components/schemas/ValidationError"}}}}, "OtherModel": {"title": "OtherModel", "required": ["a_value"], "type": "object", "properties": {"a_value": {"title": "A Value", "type": "string"}}, "description": "A different model for calling from TestModel "}, "ValidationError": {"title": "ValidationError", "required": ["loc", "msg", "type"], "type": "object", "properties": {"loc": {"title": "Location", "type": "array", "items": {"type": "string"}}, "msg": {"title": "Message", "type": "string"}, "type": {"title": "Error Type", "type": "string"}}}, "_ABCResponse": {"title": "_ABCResponse", "required": ["success"], "type": "object", "properties": {"success": {"title": "Success", "type": "boolean"}}}}}}
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "My Test API",
+        "description": "An API for testing openapi-python-client",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/ping": {
+            "get": {
+                "summary": "Ping",
+                "description": "A quick check to see if the system is running ",
+                "operationId": "ping_ping_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/_ABCResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get List",
+                "description": "Get users, filtered by statuses ",
+                "operationId": "getUserList",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Statuses",
+                            "type": "array",
+                            "items": {
+                                "enum": [
+                                    "FIRST_VALUE",
+                                    "SECOND_VALUE"
+                                ]
+                            }
+                        },
+                        "name": "statuses",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get List Tests  Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AModel"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AModel": {
+                "title": "AModel",
+                "required": [
+                    "an_enum_value",
+                    "a_list_of_enums",
+                    "a_list_of_strings",
+                    "a_list_of_objects",
+                    "aCamelDateTime"
+                ],
+                "type": "object",
+                "properties": {
+                    "an_enum_value": {
+                        "title": "An Enum Value",
+                        "enum": [
+                            "FIRST_VALUE",
+                            "SECOND_VALUE"
+                        ]
+                    },
+                    "a_list_of_enums": {
+                        "title": "A List Of Enums",
+                        "type": "array",
+                        "items": {
+                            "enum": [
+                                "FIRST_VALUE",
+                                "SECOND_VALUE"
+                            ]
+                        }
+                    },
+                    "a_list_of_strings": {
+                        "title": "A List Of Strings",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "a_list_of_objects": {
+                        "title": "A List Of Objects",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OtherModel"
+                        }
+                    },
+                    "aCamelDateTime": {
+                        "title": "Acameldatetime",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "description": "A Model for testing all the ways custom objects can be used "
+            },
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "OtherModel": {
+                "title": "OtherModel",
+                "required": [
+                    "a_value"
+                ],
+                "type": "object",
+                "properties": {
+                    "a_value": {
+                        "title": "A Value",
+                        "type": "string"
+                    }
+                },
+                "description": "A different model for calling from TestModel "
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            },
+            "_ABCResponse": {
+                "title": "_ABCResponse",
+                "required": [
+                    "success"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "title": "Success",
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    }
+}
