@@ -64,6 +64,7 @@ class StringProperty(Property):
     _type_string: ClassVar[str] = "str"
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         if self.default is not None:
             self.default = f'"{self.default}"'
 
@@ -139,6 +140,7 @@ class EnumListProperty(Property):
     constructor_template: ClassVar[str] = "enum_list_property.pyi"
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.reference = Reference.from_ref(self.name)
 
     def get_type_string(self) -> str:
@@ -156,6 +158,7 @@ class EnumProperty(Property):
     reference: Reference = field(init=False)
 
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.reference = Reference.from_ref(self.name)
         inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:

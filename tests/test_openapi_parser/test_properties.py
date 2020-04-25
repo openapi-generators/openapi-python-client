@@ -18,9 +18,9 @@ class TestProperty:
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
+        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
         p = Property(name=name, required=True, default=None)
         get_type_string = mocker.patch.object(p, "get_type_string")
-        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
 
         assert p.to_string() == f"{snake_case(name)}: {get_type_string()}"
         p.required = False
@@ -33,14 +33,15 @@ class TestProperty:
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
-        p = Property(name=name, required=True, default=None)
         snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
+        p = Property(name=name, required=True, default=None)
         assert p.transform() == snake_case(name)
 
     def test_constructor_from_dict(self, mocker):
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
+        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
         p = Property(name=name, required=True, default=None)
         dict_name = mocker.MagicMock()
 
@@ -102,6 +103,7 @@ class TestReferenceListProperty:
 class TestEnumListProperty:
     def test___post_init__(self, mocker):
         name = mocker.MagicMock()
+        mocker.patch(f"openapi_python_client.utils.snake_case")
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
@@ -127,6 +129,7 @@ class TestEnumListProperty:
 class TestEnumProperty:
     def test___post_init__(self, mocker):
         name = mocker.MagicMock()
+        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
@@ -138,6 +141,7 @@ class TestEnumProperty:
 
         from_ref.assert_called_once_with(name)
         assert enum_property.default == "MyTestEnum.SECOND"
+        assert enum_property.python_name == snake_case(name)
 
     def test_get_type_string(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
