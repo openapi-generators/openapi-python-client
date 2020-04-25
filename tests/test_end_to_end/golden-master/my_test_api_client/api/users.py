@@ -6,17 +6,17 @@ import httpx
 from ..client import AuthenticatedClient, Client
 from ..errors import ApiResponseError
 from ..models.a_model import AModel
-from ..models.h_t_t_p_validation_error import HTTPValidationError
+from ..models.http_validation_error import HTTPValidationError
 from ..models.statuses import Statuses
 
 
-def get_list_tests__get(
+def get_user_list(
     *, client: Client, statuses: List[Statuses],
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
     """ Get users, filtered by statuses  """
-    url = f"{client.base_url}/tests/"
+    url = "{}/tests/".format(client.base_url)
 
     params = {
         "statuses": statuses,

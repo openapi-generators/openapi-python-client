@@ -14,7 +14,7 @@ def ping_ping_get(
     ABCResponse,
 ]:
     """ A quick check to see if the system is running  """
-    url = f"{client.base_url}/ping"
+    url = "{}/ping".format(client.base_url)
 
     response = httpx.get(url=url, headers=client.get_headers(),)
 

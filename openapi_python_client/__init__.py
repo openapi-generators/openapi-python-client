@@ -12,6 +12,8 @@ import httpx
 import yaml
 from jinja2 import Environment, PackageLoader
 
+from openapi_python_client import utils
+
 from .openapi_parser import OpenAPI, import_string_from_reference
 
 __version__ = version(__package__)
@@ -61,6 +63,8 @@ def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
 
 
 class _Project:
+    TEMPLATE_FILTERS = {"snakecase": utils.snake_case}
+
     def __init__(self, *, openapi: OpenAPI) -> None:
         self.openapi: OpenAPI = openapi
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
@@ -71,6 +75,8 @@ class _Project:
         self.package_name: str = self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description = f"A client library for accessing {self.openapi.title}"
+
+        self.env.filters.update(self.TEMPLATE_FILTERS)
 
     def build(self) -> None:
         """ Create the project from templates """

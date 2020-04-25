@@ -67,16 +67,17 @@ You can pass a YAML (or JSON) file to openapi-python-client in order to change s
 are supported:
 
 ### class_overrides
-Used to change the name of generated model classes, especially useful if you have a name like ABCModel which, when 
-converted to snake case for module naming will be a_b_c_model.  This param should be a mapping of existing class name 
-(usually a key in the "schemas" section of your OpenAPI document) to class_name and module_name.
+Used to change the name of generated model classes.  This param should be a mapping of existing class name 
+(usually a key in the "schemas" section of your OpenAPI document) to class_name and module_name. As an example, if the 
+name of the a model in OpenAPI (and therefore the generated class name) was something like "_PrivateInternalLongName" 
+and you want the generated client's model to be called "ShortName" in a module called "short_name" you could do this:
 
 Example:
 ```yaml
 class_overrides:
-    ABCModel:
-      class_name: ABCModel
-      module_name: abc_model
+    _PrivateInternalLongName:
+      class_name: ShortName
+      module_name: short_name
 ```
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the

@@ -21,8 +21,8 @@ class {{ schema.reference.class_name }}:
             "{{ property.name }}": self.{{ property.transform() }},
             {% endfor %}
             {% for property in schema.optional_properties %}
-            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.name }} is not None else None,
-            {% endfor %}
+            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.python_name }} is not None else None,
+                                                                                                                       {% endfor %}
         }
 
     @staticmethod
@@ -32,12 +32,12 @@ class {{ schema.reference.class_name }}:
         {% if property.constructor_template %}
         {% include property.constructor_template %}
         {% else %}
-        {{ property.name }} = {{ property.constructor_from_dict("d") }}
+        {{ property.python_name }} = {{ property.constructor_from_dict("d") }}
         {% endif %}
 
         {% endfor %}
         return {{ schema.reference.class_name }}(
             {% for property in schema.required_properties + schema.optional_properties %}
-            {{ property.name }}={{ property.name }},
+            {{ property.python_name }}={{ property.python_name }},
             {% endfor %}
         )
