@@ -1,5 +1,7 @@
 import pytest
 
+from openapi_python_client.openapi_parser.properties import DateProperty, DateTimeProperty
+
 MODULE_NAME = "openapi_python_client.openapi_parser.openapi"
 
 
@@ -152,12 +154,18 @@ class TestSchema:
             "title": mocker.MagicMock(),
             "description": mocker.MagicMock(),
             "required": ["RequiredEnum"],
-            "properties": {"RequiredEnum": mocker.MagicMock(), "OptionalString": mocker.MagicMock(),},
+            "properties": {
+                "RequiredEnum": mocker.MagicMock(),
+                "OptionalDateTime": mocker.MagicMock(),
+                "OptionalDate": mocker.MagicMock(),
+            },
         }
         required_property = EnumProperty(name="RequiredEnum", required=True, default=None, values={},)
-        optional_property = StringProperty(name="OptionalString", required=False, default=None)
+        optional_property = DateTimeProperty(name="OptionalDateTime", required=False, default=None)
+        optional_date_property = DateProperty(name="OptionalDate", required=False, default=None)
         property_from_dict = mocker.patch(
-            f"{MODULE_NAME}.property_from_dict", side_effect=[required_property, optional_property]
+            f"{MODULE_NAME}.property_from_dict",
+            side_effect=[required_property, optional_property, optional_date_property],
         )
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         import_string_from_reference = mocker.patch(f"{MODULE_NAME}.import_string_from_reference")
@@ -170,15 +178,20 @@ class TestSchema:
         property_from_dict.assert_has_calls(
             [
                 mocker.call(name="RequiredEnum", required=True, data=in_data["properties"]["RequiredEnum"]),
-                mocker.call(name="OptionalString", required=False, data=in_data["properties"]["OptionalString"]),
+                mocker.call(name="OptionalDateTime", required=False, data=in_data["properties"]["OptionalDateTime"]),
+                mocker.call(name="OptionalDate", required=False, data=in_data["properties"]["OptionalDate"]),
             ]
         )
         import_string_from_reference.assert_called_once_with(required_property.reference)
         assert result == Schema(
             reference=from_ref(),
             required_properties=[required_property],
-            optional_properties=[optional_property],
-            relative_imports={import_string_from_reference()},
+            optional_properties=[optional_property, optional_date_property],
+            relative_imports={
+                import_string_from_reference(),
+                "from datetime import datetime",
+                "from datetime import date",
+            },
             description=in_data["description"],
         )
 
@@ -348,17 +361,22 @@ class TestEndpoint:
             relative_imports={"import_3"},
         )
         path_prop = EnumProperty(name="path_enum", required=True, default=None, values={})
-        query_prop = EnumProperty(name="query_enum", required=False, default=None, values={})
-        propety_from_dict = mocker.patch(f"{MODULE_NAME}.property_from_dict", side_effect=[path_prop, query_prop])
+        query_prop_datetime = DateTimeProperty(name="query_datetime", required=False, default=None)
+        query_prop_date = DateProperty(name="query_date", required=False, default=None)
+        propety_from_dict = mocker.patch(
+            f"{MODULE_NAME}.property_from_dict", side_effect=[path_prop, query_prop_datetime, query_prop_date]
+        )
         path_schema = mocker.MagicMock()
-        query_schema = mocker.MagicMock()
+        query_datetime_schema = mocker.MagicMock()
+        query_date_schema = mocker.MagicMock()
         import_string_from_reference = mocker.patch(
-            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
+            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1"]
         )
         data = {
             "parameters": [
                 {"name": "path_prop_name", "required": True, "schema": path_schema, "in": "path"},
-                {"name": "query_prop_name", "required": False, "schema": query_schema, "in": "query"},
+                {"name": "query_datetime", "required": False, "schema": query_datetime_schema, "in": "query"},
+                {"name": "query_date", "required": False, "schema": query_date_schema, "in": "query"},
             ]
         }
 
@@ -367,15 +385,19 @@ class TestEndpoint:
         propety_from_dict.assert_has_calls(
             [
                 mocker.call(name="path_prop_name", required=True, data=path_schema),
-                mocker.call(name="query_prop_name", required=False, data=query_schema),
+                mocker.call(name="query_datetime", required=False, data=query_datetime_schema),
+                mocker.call(name="query_date", required=False, data=query_date_schema),
             ]
         )
-        import_string_from_reference.assert_has_calls(
-            [mocker.call(path_prop.reference, prefix="..models"), mocker.call(query_prop.reference, prefix="..models"),]
-        )
-        assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
+        import_string_from_reference.assert_called_once_with(path_prop.reference, prefix="..models")
+        assert endpoint.relative_imports == {
+            "import_1",
+            "import_3",
+            "from datetime import datetime",
+            "from datetime import date",
+        }
         assert endpoint.path_parameters == [path_prop]
-        assert endpoint.query_parameters == [query_prop]
+        assert endpoint.query_parameters == [query_prop_datetime, query_prop_date]
 
     def test_from_data(self, mocker):
         from openapi_python_client.openapi_parser.openapi import Endpoint

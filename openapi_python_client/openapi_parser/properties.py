@@ -77,7 +77,7 @@ class DateTimeProperty(Property):
     constructor_template: ClassVar[str] = "datetime_property.pyi"
 
     def transform(self) -> str:
-        return f"{self.python_name()}.isoformat()"
+        return f"{self.python_name}.isoformat()"
 
 
 @dataclass
@@ -88,7 +88,7 @@ class DateProperty(Property):
     constructor_template: ClassVar[str] = "date_property.pyi"
 
     def transform(self) -> str:
-        return f"{self.python_name()}.isoformat()"
+        return f"{self.python_name}.isoformat()"
 
 
 @dataclass

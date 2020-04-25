@@ -69,6 +69,30 @@ class TestStringProperty:
         assert p.get_type_string() == "Optional[str]"
 
 
+class TestDateTimeProperty:
+    def test_transform(self, mocker):
+        name = "thePropertyName"
+        mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+
+        from openapi_python_client.openapi_parser.properties import DateTimeProperty
+
+        prop = DateTimeProperty(name=name, required=True, default=None)
+
+        assert prop.transform() == f"the_property_name.isoformat()"
+
+
+class TestDateProperty:
+    def test_transform(self, mocker):
+        name = "thePropertyName"
+        mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+
+        from openapi_python_client.openapi_parser.properties import DateProperty
+
+        prop = DateProperty(name=name, required=True, default=None)
+
+        assert prop.transform() == f"the_property_name.isoformat()"
+
+
 class TestBasicListProperty:
     def test_constructor_from_dict(self):
         from openapi_python_client.openapi_parser.properties import BasicListProperty

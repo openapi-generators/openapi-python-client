@@ -48,6 +48,26 @@
                         },
                         "name": "statuses",
                         "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Some Date",
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "name": "some_date",
+                        "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Some Datetime",
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "name": "some_datetime",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -88,7 +108,8 @@
                     "a_list_of_enums",
                     "a_list_of_strings",
                     "a_list_of_objects",
-                    "aCamelDateTime"
+                    "aCamelDateTime",
+                    "a_date"
                 ],
                 "type": "object",
                 "properties": {
@@ -127,6 +148,11 @@
                         "title": "Acameldatetime",
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "a_date": {
+                        "title": "A Date",
+                        "type": "string",
+                        "format": "date"
                     }
                 },
                 "description": "A Model for testing all the ways custom objects can be used "
