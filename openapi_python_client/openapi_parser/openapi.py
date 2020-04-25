@@ -154,7 +154,7 @@ class Schema:
     relative_imports: Set[str]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any], /, name: str = None) -> Schema:
+    def from_dict(d: Dict[str, Any], /, name: str) -> Schema:
         """ A single Schema from its dict representation
         :param d:    Dict representation of the schema
         :param name: Name by which the schema is referenced, such as a model name.  Used to infer the type name if a `title` property is not available.
