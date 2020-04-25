@@ -1,6 +1,6 @@
 """ A FastAPI app used to create an OpenAPI document for end-to-end testing """
 import json
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
 from typing import List
@@ -45,10 +45,11 @@ class AModel(BaseModel):
     a_list_of_strings: List[str]
     a_list_of_objects: List[OtherModel]
     aCamelDateTime: datetime
+    a_date: date
 
 
 @test_router.get("/", response_model=List[AModel], operation_id="getUserList")
-def get_list(statuses: List[AnEnum] = Query(...),):
+def get_list(statuses: List[AnEnum] = Query(...), some_date: date = Query(...), some_datetime: datetime = Query(...)):
     """ Get users, filtered by statuses """
     return
 

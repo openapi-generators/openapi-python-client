@@ -21,3 +21,4 @@ dmypy.json
 
 /coverage.xml
 /.coverage
+htmlcov/

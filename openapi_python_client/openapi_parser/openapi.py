@@ -4,7 +4,16 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Generator, Iterable, List, Optional, Set, Union
 
-from .properties import EnumListProperty, EnumProperty, Property, ReferenceListProperty, RefProperty, property_from_dict
+from .properties import (
+    DateProperty,
+    DateTimeProperty,
+    EnumListProperty,
+    EnumProperty,
+    Property,
+    ReferenceListProperty,
+    RefProperty,
+    property_from_dict,
+)
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_dict
 
@@ -108,11 +117,16 @@ class Endpoint:
             prop = property_from_dict(
                 name=param_dict["name"], required=param_dict["required"], data=param_dict["schema"]
             )
-            if (
+            if isinstance(prop, DateProperty):
+                self.relative_imports.add("from datetime import date")
+            elif isinstance(prop, DateTimeProperty):
+                self.relative_imports.add("from datetime import datetime")
+            elif (
                 isinstance(prop, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty))
                 and prop.reference
             ):
                 self.relative_imports.add(import_string_from_reference(prop.reference, prefix="..models"))
+
             if param_dict["in"] == ParameterLocation.QUERY:
                 self.query_parameters.append(prop)
             elif param_dict["in"] == ParameterLocation.PATH:
@@ -166,18 +180,22 @@ class Schema:
 
         ref = Reference.from_ref(d.get("title", name))
 
-        if "properties" in d:
-            for key, value in d["properties"].items():
-                required = key in required_set
-                p = property_from_dict(name=key, required=required, data=value)
-                if required:
-                    required_properties.append(p)
-                else:
-                    optional_properties.append(p)
-                if isinstance(p, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty)) and p.reference:
-                    # don't add an import for self-referencing schemas
-                    if p.reference.class_name != ref.class_name:
-                        relative_imports.add(import_string_from_reference(p.reference))
+        for key, value in d.get("properties", {}).items():
+            required = key in required_set
+            p = property_from_dict(name=key, required=required, data=value)
+            if required:
+                required_properties.append(p)
+            else:
+                optional_properties.append(p)
+            if isinstance(p, DateTimeProperty):
+                relative_imports.add("from datetime import datetime")
+            elif isinstance(p, DateProperty):
+                relative_imports.add("from datetime import date")
+            elif isinstance(p, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty)) and p.reference:
+                # don't add an import for self-referencing schemas
+                if p.reference.class_name != ref.class_name:
+                    relative_imports.add(import_string_from_reference(p.reference))
+
         schema = Schema(
             reference=ref,
             required_properties=required_properties,
