@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 
 @dataclass
@@ -11,13 +11,13 @@ class OtherModel:
 
     a_value: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "a_value": self.a_value,
         }
 
     @staticmethod
-    def from_dict(d: Dict) -> OtherModel:
+    def from_dict(d: Dict[str, Any]) -> OtherModel:
 
         a_value = d["a_value"]
 

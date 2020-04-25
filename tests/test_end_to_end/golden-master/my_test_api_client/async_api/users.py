@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
@@ -22,12 +22,12 @@ async def get_list_tests__get(
         "statuses": statuses,
     }
 
-    with httpx.AsyncClient() as client:
-        response = await client.get(url=url, headers=client.get_headers(), params=params,)
+    async with httpx.AsyncClient() as _client:
+        response = await _client.get(url=url, headers=client.get_headers(), params=params,)
 
     if response.status_code == 200:
-        return [AModel.from_dict(item) for item in response.json()]
+        return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
     if response.status_code == 422:
-        return HTTPValidationError.from_dict(response.json())
+        return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
     else:
         raise ApiResponseError(response=response)

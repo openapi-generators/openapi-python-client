@@ -167,6 +167,10 @@ class TestEnumProperty:
 
         enum_property = EnumProperty(name="test_enum", required=True, default=None, values={})
 
+        assert enum_property.constructor_from_dict("my_dict") == 'MyTestEnum(my_dict["test_enum"])'
+
+        enum_property = EnumProperty(name="test_enum", required=False, default=None, values={})
+
         assert (
             enum_property.constructor_from_dict("my_dict")
             == 'MyTestEnum(my_dict["test_enum"]) if "test_enum" in my_dict else None'
@@ -392,7 +396,13 @@ class TestPropertyFromDict:
 
     @pytest.mark.parametrize(
         "openapi_type,python_type",
-        [("string", "str"), ("number", "float"), ("integer", "int"), ("boolean", "bool"), ("object", "Dict"),],
+        [
+            ("string", "str"),
+            ("number", "float"),
+            ("integer", "int"),
+            ("boolean", "bool"),
+            ("object", "Dict[Any, Any]"),
+        ],
     )
     def test_property_from_dict_simple_array(self, mocker, openapi_type, python_type):
         name = mocker.MagicMock()

@@ -191,10 +191,10 @@ class Schema:
 
 @dataclass
 class OpenAPI:
-    """ Top level OpenAPI spec """
+    """ Top level OpenAPI document """
 
     title: str
-    description: str
+    description: Optional[str]
     version: str
     schemas: Dict[str, Schema]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
@@ -243,7 +243,7 @@ class OpenAPI:
 
         return OpenAPI(
             title=d["info"]["title"],
-            description=d["info"]["description"],
+            description=d["info"].get("description"),
             version=d["info"]["version"],
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             schemas=schemas,
