@@ -33,7 +33,7 @@ class ListRefResponse(Response):
 
     def constructor(self) -> str:
         """ How the return value of this response should be constructed """
-        return f"[{self.reference.class_name}.from_dict(item) for item in response.json()]"
+        return f"[{self.reference.class_name}.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]"
 
 
 @dataclass
@@ -48,7 +48,7 @@ class RefResponse(Response):
 
     def constructor(self) -> str:
         """ How the return value of this response should be constructed """
-        return f"{self.reference.class_name}.from_dict(response.json())"
+        return f"{self.reference.class_name}.from_dict(cast(Dict[str, Any], response.json()))"
 
 
 @dataclass

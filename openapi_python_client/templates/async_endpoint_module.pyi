@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
@@ -65,8 +65,8 @@ async def {{ endpoint.name | snakecase }}(
     {% endfor %}
     {% endif %}
 
-    with httpx.AsyncClient() as client:
-        response = await client.{{ endpoint.method }}(
+    async with httpx.AsyncClient() as _client:
+        response = await _client.{{ endpoint.method }}(
             url=url,
             headers=client.get_headers(),
             {% if endpoint.form_body_reference %}

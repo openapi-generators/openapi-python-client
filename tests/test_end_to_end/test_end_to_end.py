@@ -25,7 +25,7 @@ def _compare_directories(first: Path, second: Path, /):
         _compare_directories(first / sub_path, second / sub_path)
 
 
-def test_end_to_end(capsys):
+def test_end_to_end():
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "fastapi" / "openapi.json"
     config_path = Path(__file__).parent / "config.yml"
@@ -37,4 +37,10 @@ def test_end_to_end(capsys):
     if result.exit_code != 0:
         raise result.exception
     _compare_directories(gm_path, output_path)
+
+    import mypy.api
+
+    out, err, status = mypy.api.run([str(output_path), "--strict"])
+    assert status == 0, f"Type checking client failed: {err}"
+
     shutil.rmtree(output_path)

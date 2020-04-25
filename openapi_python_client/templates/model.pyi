@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 {% for relative in schema.relative_imports %}
 {{ relative }}
@@ -16,7 +16,7 @@ class {{ schema.reference.class_name }}:
     {{ property.to_string() }}
     {% endfor %}
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             {% for property in schema.required_properties %}
             "{{ property.name }}": self.{{ property.transform() }},
@@ -27,7 +27,7 @@ class {{ schema.reference.class_name }}:
         }
 
     @staticmethod
-    def from_dict(d: Dict) -> {{ schema.reference.class_name }}:
+    def from_dict(d: Dict[str, Any]) -> {{ schema.reference.class_name }}:
         {% for property in schema.required_properties + schema.optional_properties %}
 
         {% if property.constructor_template %}

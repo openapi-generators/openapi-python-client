@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
@@ -19,6 +19,6 @@ def ping_ping_get(
     response = httpx.get(url=url, headers=client.get_headers(),)
 
     if response.status_code == 200:
-        return ABCResponse.from_dict(response.json())
+        return ABCResponse.from_dict(cast(Dict[str, Any], response.json()))
     else:
         raise ApiResponseError(response=response)
