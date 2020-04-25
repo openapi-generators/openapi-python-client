@@ -146,7 +146,7 @@ class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, str]
-    reference: Reference = field(init=True)
+    reference: Reference
 
     def __post_init__(self) -> None:
         inverse_values = {v: k for k, v in self.values.items()}
