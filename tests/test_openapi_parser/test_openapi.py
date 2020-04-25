@@ -189,7 +189,7 @@ class TestSchema:
 
         from openapi_python_client.openapi_parser.openapi import Schema
 
-        result = Schema.from_dict(in_data)
+        result = Schema.from_dict(in_data, name=mocker.MagicMock())
 
         from_ref.assert_called_once_with(in_data["title"])
         property_from_dict.assert_has_calls(
