@@ -17,6 +17,7 @@ class AModel:
     a_list_of_enums: List[AListOfEnums]
     a_list_of_strings: List[str]
     a_list_of_objects: List[OtherModel]
+    a_camel_date_time: datetime
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -24,6 +25,7 @@ class AModel:
             "a_list_of_enums": self.a_list_of_enums,
             "a_list_of_strings": self.a_list_of_strings,
             "a_list_of_objects": self.a_list_of_objects,
+            "aCamelDateTime": self.a_camel_date_time,
         }
 
     @staticmethod
@@ -40,9 +42,13 @@ class AModel:
         a_list_of_objects = []
         for a_list_of_objects_item in d.get("a_list_of_objects", []):
             a_list_of_objects.append(OtherModel.from_dict(a_list_of_objects_item))
+
+        a_camel_date_time = datetime.fromisoformat(d["aCamelDateTime"])
+
         return AModel(
             an_enum_value=an_enum_value,
             a_list_of_enums=a_list_of_enums,
             a_list_of_strings=a_list_of_strings,
             a_list_of_objects=a_list_of_objects,
+            a_camel_date_time=a_camel_date_time,
         )

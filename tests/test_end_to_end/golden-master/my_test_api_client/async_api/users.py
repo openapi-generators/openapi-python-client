@@ -10,13 +10,13 @@ from ..models.http_validation_error import HTTPValidationError
 from ..models.statuses import Statuses
 
 
-async def get_list_tests__get(
+async def get_user_list(
     *, client: Client, statuses: List[Statuses],
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
     """ Get users, filtered by statuses  """
-    url = f"{client.base_url}/tests/"
+    url = "{}/tests/".format(client.base_url)
 
     params = {
         "statuses": statuses,
