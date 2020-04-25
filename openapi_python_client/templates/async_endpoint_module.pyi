@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
@@ -12,7 +12,7 @@ from ..errors import ApiResponseError
 {% for endpoint in collection.endpoints %}
 
 
-async def {{ endpoint.name }}(
+async def {{ endpoint.name | snakecase }}(
     *,
     {# Proper client based on whether or not the endpoint requires authentication #}
     {% if endpoint.requires_security %}
@@ -42,7 +42,12 @@ async def {{ endpoint.name }}(
     {% endfor %}
 ]:
     """ {{ endpoint.description }} """
-    url = f"{client.base_url}{{ endpoint.path }}"
+    url = "{}{{ endpoint.path }}".format(
+        client.base_url
+        {%- for parameter in endpoint.path_parameters -%}
+        ,{{parameter.name}}={{parameter.python_name}}
+        {%- endfor -%}
+    )
 
     {% if endpoint.query_parameters %}
     params = {
@@ -54,14 +59,14 @@ async def {{ endpoint.name }}(
     }
     {% for parameter in endpoint.query_parameters %}
     {% if not parameter.required %}
-    if {{ parameter.name }} is not None:
-        params["{{ parameter.name }}"] = {{ parameter.transform() }}
+    if {{ parameter.python_name }} is not None:
+        params["{{ parameter.name }}"] = str({{ parameter.transform() }})
     {% endif %}
     {% endfor %}
     {% endif %}
 
-    with httpx.AsyncClient() as client:
-        response = await client.{{ endpoint.method }}(
+    async with httpx.AsyncClient() as _client:
+        response = await _client.{{ endpoint.method }}(
             url=url,
             headers=client.get_headers(),
             {% if endpoint.form_body_reference %}
