@@ -5,14 +5,14 @@ from enum import Enum
 from typing import Any, Dict, Generator, Iterable, List, Optional, Set, Union
 
 from .properties import (
+    DateProperty,
+    DateTimeProperty,
     EnumListProperty,
     EnumProperty,
     Property,
     ReferenceListProperty,
     RefProperty,
     property_from_dict,
-    DateTimeProperty,
-    DateProperty,
 )
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_dict
