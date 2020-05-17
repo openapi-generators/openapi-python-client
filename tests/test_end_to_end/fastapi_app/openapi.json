@@ -31,7 +31,7 @@
                     "users"
                 ],
                 "summary": "Get List",
-                "description": "Get users, filtered by statuses ",
+                "description": "Get a list of things ",
                 "operationId": "getUserList",
                 "parameters": [
                     {
@@ -82,6 +82,46 @@
                                         "$ref": "#/components/schemas/AModel"
                                     }
                                 }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/upload": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Upload File",
+                "description": "Upload a file ",
+                "operationId": "upload_file_tests_upload_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_upload_file_tests_upload_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
                             }
                         }
                     },
@@ -156,6 +196,20 @@
                     }
                 },
                 "description": "A Model for testing all the ways custom objects can be used "
+            },
+            "Body_upload_file_tests_upload_post": {
+                "title": "Body_upload_file_tests_upload_post",
+                "required": [
+                    "some_file"
+                ],
+                "type": "object",
+                "properties": {
+                    "some_file": {
+                        "title": "Some File",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                }
             },
             "HTTPValidationError": {
                 "title": "HTTPValidationError",

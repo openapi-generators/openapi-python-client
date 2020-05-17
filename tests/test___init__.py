@@ -265,6 +265,7 @@ class TestProject:
         project = _Project(openapi=openapi)
         project.package_dir = mocker.MagicMock()
         models_init = mocker.MagicMock()
+        types_py = mocker.MagicMock()
         models_dir = mocker.MagicMock()
         schema_1_module_path = mocker.MagicMock()
         schema_2_module_path = mocker.MagicMock()
@@ -272,6 +273,7 @@ class TestProject:
         enum_2_module_path = mocker.MagicMock()
         module_paths = {
             "__init__.py": models_init,
+            "types.py": types_py,
             f"{schema_1.reference.module_name}.py": schema_1_module_path,
             f"{schema_2.reference.module_name}.py": schema_2_module_path,
             f"{enum_1.reference.module_name}.py": enum_1_module_path,
@@ -296,7 +298,9 @@ class TestProject:
         }
         enum_template.render.side_effect = lambda enum: enum_renders[enum]
         models_init_template = mocker.MagicMock()
+        types_template = mocker.MagicMock()
         templates = {
+            "types.py": types_template,
             "model.pyi": model_template,
             "enum.pyi": enum_template,
             "models_init.pyi": models_init_template,
@@ -331,6 +335,7 @@ class TestProject:
             ]
         )
         models_init_template.render.assert_called_once_with(imports=imports)
+        types_template.render.assert_called_once()
         enum_1_module_path.write_text.assert_called_once_with(enum_render_1)
         enum_2_module_path.write_text.assert_called_once_with(enum_render_2)
 

@@ -7,6 +7,7 @@ import httpx
 from ..client import AuthenticatedClient, Client
 from ..errors import ApiResponseError
 from ..models.a_model import AModel
+from ..models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ..models.http_validation_error import HTTPValidationError
 from ..models.statuses import Statuses
 
@@ -16,7 +17,7 @@ def get_user_list(
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
-    """ Get users, filtered by statuses  """
+    """ Get a list of things  """
     url = "{}/tests/".format(client.base_url)
 
     params = {
@@ -29,6 +30,24 @@ def get_user_list(
 
     if response.status_code == 200:
         return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
+    if response.status_code == 422:
+        return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
+    else:
+        raise ApiResponseError(response=response)
+
+
+def upload_file_tests_upload_post(
+    *, client: Client, multipart_data: BodyUploadFileTestsUploadPost,
+) -> Union[
+    None, HTTPValidationError,
+]:
+    """ Upload a file  """
+    url = "{}/tests/upload".format(client.base_url)
+
+    response = httpx.post(url=url, headers=client.get_headers(), files=multipart_data.to_dict(),)
+
+    if response.status_code == 200:
+        return None
     if response.status_code == 422:
         return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
     else:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from openapi_python_client import utils
 
@@ -89,6 +89,16 @@ class DateProperty(Property):
 
     def transform(self) -> str:
         return f"{self.python_name}.isoformat()"
+
+
+@dataclass
+class FileProperty(Property):
+    """ A property used for uploading files """
+
+    _type_string: ClassVar[str] = "File"
+
+    def transform(self) -> str:
+        return f"{self.python_name}.to_tuple()"
 
 
 @dataclass
@@ -246,6 +256,23 @@ _openapi_types_to_python_type_strings = {
 }
 
 
+def _string_based_property(
+    name: str, required: bool, data: Dict[str, Any]
+) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
+    """ Construct a Property from the type "string" """
+    string_format = data.get("format")
+    if string_format is None:
+        return StringProperty(name=name, default=data.get("default"), required=required, pattern=data.get("pattern"))
+    if string_format == "date-time":
+        return DateTimeProperty(name=name, required=required, default=data.get("default"))
+    elif string_format == "date":
+        return DateProperty(name=name, required=required, default=data.get("default"))
+    elif string_format == "binary":
+        return FileProperty(name=name, required=required, default=data.get("default"))
+    else:
+        raise ValueError(f'Unsupported string format:{data["format"]}')
+
+
 def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Property:
     """ Generate a Property from the OpenAPI dictionary representation of it """
     if "enum" in data:
@@ -259,14 +286,7 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
     if "$ref" in data:
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data["$ref"]), default=None)
     if data["type"] == "string":
-        if "format" in data:
-            if data.get("format") == "date-time":
-                return DateTimeProperty(name=name, required=required, default=data.get("default"))
-            elif data.get("format") == "date":
-                return DateProperty(name=name, required=required, default=data.get("default"))
-            else:
-                raise ValueError(f'Unsupported string format:{data["format"]}')
-        return StringProperty(name=name, default=data.get("default"), required=required, pattern=data.get("pattern"),)
+        return _string_based_property(name=name, required=required, data=data)
     elif data["type"] == "number":
         return FloatProperty(name=name, default=data.get("default"), required=required)
     elif data["type"] == "integer":

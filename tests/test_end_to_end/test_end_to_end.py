@@ -29,7 +29,7 @@ def _compare_directories(first: Path, second: Path, /):
 
 def test_end_to_end():
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "fastapi" / "openapi.json"
+    openapi_path = Path(__file__).parent / "fastapi_app" / "openapi.json"
     config_path = Path(__file__).parent / "config.yml"
     gm_path = Path(__file__).parent / "golden-master"
     output_path = Path.cwd() / "my-test-api-client"
@@ -43,6 +43,6 @@ def test_end_to_end():
     import mypy.api
 
     out, err, status = mypy.api.run([str(output_path), "--strict"])
-    assert status == 0, f"Type checking client failed: {err}"
+    assert status == 0, f"Type checking client failed: {out}"
 
     shutil.rmtree(output_path)

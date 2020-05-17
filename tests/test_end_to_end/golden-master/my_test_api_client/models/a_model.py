@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import astuple, dataclass
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, cast
 
 from .a_list_of_enums import AListOfEnums
 from .an_enum_value import AnEnumValue
 from .other_model import OtherModel
+from .types import *
 
 
 @dataclass
