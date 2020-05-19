@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+from dataclasses import astuple, dataclass
+from typing import Any, Dict, List, Optional, cast
+
+from .types import *
+
+
+@dataclass
+class BodyUploadFileTestsUploadPost:
+    """  """
+
+    some_file: File
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "some_file": self.some_file.to_tuple(),
+        }
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> BodyUploadFileTestsUploadPost:
+
+        some_file = d["some_file"]
+
+        return BodyUploadFileTestsUploadPost(some_file=some_file,)

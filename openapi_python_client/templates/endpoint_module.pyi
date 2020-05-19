@@ -28,6 +28,10 @@ def {{ endpoint.name | snakecase }}(
     {% if endpoint.form_body_reference %}
     form_data: {{ endpoint.form_body_reference.class_name }},
     {% endif %}
+    {# Multipart data if any #}
+    {% if endpoint.multipart_body_reference %}
+    multipart_data: {{ endpoint.multipart_body_reference.class_name }},
+    {% endif %}
     {# JSON body if any #}
     {% if endpoint.json_body %}
     json_body: {{ endpoint.json_body.get_type_string() }},
@@ -70,6 +74,9 @@ def {{ endpoint.name | snakecase }}(
         headers=client.get_headers(),
         {% if endpoint.form_body_reference %}
         data=asdict(form_data),
+        {% endif %}
+         {% if endpoint.multipart_body_reference %}
+        files=multipart_data.to_dict(),
         {% endif %}
         {% if endpoint.json_body %}
         json={{ endpoint.json_body.transform() }},

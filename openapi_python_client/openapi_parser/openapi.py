@@ -69,6 +69,7 @@ class Endpoint:
     responses: List[Response] = field(default_factory=list)
     form_body_reference: Optional[Reference] = None
     json_body: Optional[Property] = None
+    multipart_body_reference: Optional[Reference] = None
 
     @staticmethod
     def parse_request_form_body(body: Dict[str, Any], /) -> Optional[Reference]:
@@ -77,6 +78,15 @@ class Endpoint:
         form_body = body_content.get("application/x-www-form-urlencoded")
         if form_body:
             return Reference.from_ref(form_body["schema"]["$ref"])
+        return None
+
+    @staticmethod
+    def parse_multipart_body(body: Dict[str, Any], /) -> Optional[Reference]:
+        """ Return form_body_reference """
+        body_content = body["content"]
+        body = body_content.get("multipart/form-data")
+        if body:
+            return Reference.from_ref(body["schema"]["$ref"])
         return None
 
     @staticmethod
@@ -95,9 +105,12 @@ class Endpoint:
 
         self.form_body_reference = Endpoint.parse_request_form_body(data["requestBody"])
         self.json_body = Endpoint.parse_request_json_body(data["requestBody"])
+        self.multipart_body_reference = Endpoint.parse_multipart_body(data["requestBody"])
 
         if self.form_body_reference:
             self.relative_imports.add(import_string_from_reference(self.form_body_reference, prefix="..models"))
+        if self.multipart_body_reference:
+            self.relative_imports.add(import_string_from_reference(self.multipart_body_reference, prefix="..models"))
         if (
             self.json_body is not None
             and isinstance(self.json_body, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty))

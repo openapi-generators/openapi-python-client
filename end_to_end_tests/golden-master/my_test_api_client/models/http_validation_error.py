@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import astuple, dataclass
 from typing import Any, Dict, List, Optional, cast
 
+from .types import *
 from .validation_error import ValidationError
 
 

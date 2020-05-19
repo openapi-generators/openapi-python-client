@@ -147,6 +147,10 @@ class _Project:
         models_init = models_dir / "__init__.py"
         imports = []
 
+        types_template = self.env.get_template("types.py")
+        types_path = models_dir / "types.py"
+        types_path.write_text(types_template.render())
+
         model_template = self.env.get_template("model.pyi")
         for schema in self.openapi.schemas.values():
             module_path = models_dir / f"{schema.reference.module_name}.py"

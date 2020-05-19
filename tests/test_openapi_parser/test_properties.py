@@ -93,6 +93,17 @@ class TestDateProperty:
         assert prop.transform() == f"the_property_name.isoformat()"
 
 
+class TestFileProperty:
+    def test_transform(self):
+        name = "thePropertyName"
+
+        from openapi_python_client.openapi_parser.properties import FileProperty
+
+        prop = FileProperty(name=name, required=True, default=None)
+
+        assert prop.transform() == f"the_property_name.to_tuple()"
+
+
 class TestBasicListProperty:
     def test_constructor_from_dict(self):
         from openapi_python_client.openapi_parser.properties import BasicListProperty
@@ -297,94 +308,19 @@ class TestPropertyFromDict:
         RefProperty.assert_called_once_with(name=name, required=required, reference=from_ref(), default=None)
         assert p == RefProperty()
 
-    def test_property_from_dict_string_no_format(self, mocker):
+    def test_property_from_dict_string(self, mocker):
+        _string_based_property = mocker.patch(f"{MODULE_NAME}._string_based_property")
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = {
             "type": "string",
         }
-        StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
-
         from openapi_python_client.openapi_parser.properties import property_from_dict
 
         p = property_from_dict(name=name, required=required, data=data)
 
-        StringProperty.assert_called_once_with(name=name, required=required, pattern=None, default=None)
-        assert p == StringProperty()
-
-        # Test optional values
-        StringProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
-        data["pattern"] = mocker.MagicMock()
-
-        property_from_dict(
-            name=name, required=required, data=data,
-        )
-        StringProperty.assert_called_once_with(
-            name=name, required=required, pattern=data["pattern"], default=data["default"]
-        )
-
-    def test_property_from_dict_string_datetime_format(self, mocker):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": "date-time",
-        }
-        DateTimeProperty = mocker.patch(f"{MODULE_NAME}.DateTimeProperty")
-
-        from openapi_python_client.openapi_parser.properties import property_from_dict
-
-        p = property_from_dict(name=name, required=required, data=data)
-
-        DateTimeProperty.assert_called_once_with(name=name, required=required, default=None)
-        assert p == DateTimeProperty()
-
-        # Test optional values
-        DateTimeProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
-
-        property_from_dict(
-            name=name, required=required, data=data,
-        )
-        DateTimeProperty.assert_called_once_with(name=name, required=required, default=data["default"])
-
-    def test_property_from_dict_string_date_format(self, mocker):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": "date",
-        }
-        DateProperty = mocker.patch(f"{MODULE_NAME}.DateProperty")
-
-        from openapi_python_client.openapi_parser.properties import property_from_dict
-
-        p = property_from_dict(name=name, required=required, data=data)
-        DateProperty.assert_called_once_with(name=name, required=required, default=None)
-        assert p == DateProperty()
-
-        # Test optional values
-        DateProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
-
-        property_from_dict(
-            name=name, required=required, data=data,
-        )
-        DateProperty.assert_called_once_with(name=name, required=required, default=data["default"])
-
-    def test_property_from_dict_string_unsupported_format(self, mocker):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": mocker.MagicMock(),
-        }
-
-        from openapi_python_client.openapi_parser.properties import property_from_dict
-
-        with pytest.raises(ValueError):
-            property_from_dict(name=name, required=required, data=data)
+        assert p == _string_based_property.return_value
+        _string_based_property.assert_called_once_with(name=name, required=required, data=data)
 
     @pytest.mark.parametrize(
         "openapi_type,python_type",
@@ -494,3 +430,118 @@ class TestPropertyFromDict:
 
         with pytest.raises(ValueError):
             property_from_dict(name=name, required=required, data=data)
+
+
+class TestStringBasedProperty:
+    def test__string_based_property_no_format(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = {
+            "type": "string",
+        }
+        StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
+
+        from openapi_python_client.openapi_parser.properties import _string_based_property
+
+        p = _string_based_property(name=name, required=required, data=data)
+
+        StringProperty.assert_called_once_with(name=name, required=required, pattern=None, default=None)
+        assert p == StringProperty.return_value
+
+        # Test optional values
+        StringProperty.reset_mock()
+        data["default"] = mocker.MagicMock()
+        data["pattern"] = mocker.MagicMock()
+
+        _string_based_property(
+            name=name, required=required, data=data,
+        )
+        StringProperty.assert_called_once_with(
+            name=name, required=required, pattern=data["pattern"], default=data["default"]
+        )
+
+    def test__string_based_property_datetime_format(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = {
+            "type": "string",
+            "format": "date-time",
+        }
+        DateTimeProperty = mocker.patch(f"{MODULE_NAME}.DateTimeProperty")
+
+        from openapi_python_client.openapi_parser.properties import _string_based_property
+
+        p = _string_based_property(name=name, required=required, data=data)
+
+        DateTimeProperty.assert_called_once_with(name=name, required=required, default=None)
+        assert p == DateTimeProperty.return_value
+
+        # Test optional values
+        DateTimeProperty.reset_mock()
+        data["default"] = mocker.MagicMock()
+
+        _string_based_property(
+            name=name, required=required, data=data,
+        )
+        DateTimeProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+
+    def test__string_based_property_date_format(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = {
+            "type": "string",
+            "format": "date",
+        }
+        DateProperty = mocker.patch(f"{MODULE_NAME}.DateProperty")
+
+        from openapi_python_client.openapi_parser.properties import _string_based_property
+
+        p = _string_based_property(name=name, required=required, data=data)
+        DateProperty.assert_called_once_with(name=name, required=required, default=None)
+        assert p == DateProperty.return_value
+
+        # Test optional values
+        DateProperty.reset_mock()
+        data["default"] = mocker.MagicMock()
+
+        _string_based_property(
+            name=name, required=required, data=data,
+        )
+        DateProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+
+    def test__string_based_property_binary_format(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = {
+            "type": "string",
+            "format": "binary",
+        }
+        FileProperty = mocker.patch(f"{MODULE_NAME}.FileProperty")
+
+        from openapi_python_client.openapi_parser.properties import _string_based_property
+
+        p = _string_based_property(name=name, required=required, data=data)
+        FileProperty.assert_called_once_with(name=name, required=required, default=None)
+        assert p == FileProperty.return_value
+
+        # Test optional values
+        FileProperty.reset_mock()
+        data["default"] = mocker.MagicMock()
+
+        _string_based_property(
+            name=name, required=required, data=data,
+        )
+        FileProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+
+    def test__string_based_property_unsupported_format(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = {
+            "type": "string",
+            "format": mocker.MagicMock(),
+        }
+
+        from openapi_python_client.openapi_parser.properties import _string_based_property
+
+        with pytest.raises(ValueError):
+            _string_based_property(name=name, required=required, data=data)
