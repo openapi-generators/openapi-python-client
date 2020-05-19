@@ -42,7 +42,14 @@ uvicorn = "^0.11.5"
 python-multipart = "^0.0.5"
 
 [tool.taskipy.tasks]
-check = "isort --recursive --apply && black . && safety check && mypy openapi_python_client && pytest --cov"
+check = """
+isort --recursive --apply\
+ && black .\
+ && safety check\
+ && mypy openapi_python_client\
+ && pytest --cov openapi_python_client tests\
+"""
+e2e = "python -m end_to_end_tests.regen_golden_master && pytest end_to_end_tests"
 
 [tool.black]
 line-length = 120
@@ -65,4 +72,3 @@ include_trailing_comma = true
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
-include = ["openapi_python_client/*"]

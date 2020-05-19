@@ -235,6 +235,27 @@ class TestEndpoint:
 
         assert result is None
 
+    def test_parse_multipart_body(self, mocker):
+        ref = mocker.MagicMock()
+        body = {"content": {"multipart/form-data": {"schema": {"$ref": ref}}}}
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        result = Endpoint.parse_multipart_body(body)
+
+        from_ref.assert_called_once_with(ref)
+        assert result == from_ref()
+
+    def test_parse_multipart_body_no_data(self):
+        body = {"content": {}}
+
+        from openapi_python_client.openapi_parser.openapi import Endpoint
+
+        result = Endpoint.parse_multipart_body(body)
+
+        assert result is None
+
     def test_parse_request_json_body(self, mocker):
         schema = mocker.MagicMock()
         body = {"content": {"application/json": {"schema": schema}}}
@@ -279,13 +300,17 @@ class TestEndpoint:
 
         request_body = mocker.MagicMock()
         form_body_reference = Reference.from_ref(ref="a")
+        multipart_body_reference = Reference.from_ref(ref="b")
         parse_request_form_body = mocker.patch.object(
             Endpoint, "parse_request_form_body", return_value=form_body_reference
+        )
+        parse_multipart_body = mocker.patch.object(
+            Endpoint, "parse_multipart_body", return_value=multipart_body_reference
         )
         json_body = RefProperty(name="name", required=True, default=None, reference=Reference.from_ref("b"))
         parse_request_json_body = mocker.patch.object(Endpoint, "parse_request_json_body", return_value=json_body)
         import_string_from_reference = mocker.patch(
-            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
+            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2", "import_4"]
         )
 
         endpoint = Endpoint(
@@ -302,12 +327,18 @@ class TestEndpoint:
 
         parse_request_form_body.assert_called_once_with(request_body)
         parse_request_json_body.assert_called_once_with(request_body)
+        parse_multipart_body.assert_called_once_with(request_body)
         import_string_from_reference.assert_has_calls(
-            [mocker.call(form_body_reference, prefix="..models"), mocker.call(json_body.reference, prefix="..models")]
+            [
+                mocker.call(form_body_reference, prefix="..models"),
+                mocker.call(json_body.reference, prefix="..models"),
+                mocker.call(multipart_body_reference, prefix="..models"),
+            ]
         )
-        assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
+        assert endpoint.relative_imports == {"import_1", "import_2", "import_3", "import_4"}
         assert endpoint.json_body == json_body
         assert endpoint.form_body_reference == form_body_reference
+        assert endpoint.multipart_body_reference == multipart_body_reference
 
     def test__add_responses(self, mocker):
         from openapi_python_client.openapi_parser.openapi import Endpoint, RefResponse, Reference
