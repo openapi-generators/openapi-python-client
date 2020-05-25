@@ -53,21 +53,11 @@ def {{ endpoint.name | snakecase }}(
         {%- endfor -%}
     )
 
-    {% if endpoint.query_parameters %}
-    params = {
-        {% for parameter in endpoint.query_parameters %}
-        {% if parameter.required %}
-            "{{ parameter.name }}": {{ parameter.transform() }},
-        {% endif %}
-        {% endfor %}
-    }
-    {% for parameter in endpoint.query_parameters %}
-    {% if not parameter.required %}
-    if {{ parameter.python_name }} is not None:
-        params["{{ parameter.name }}"] = str({{ parameter.transform() }})
-    {% endif %}
-    {% endfor %}
-    {% endif %}
+    {% from "endpoint_macros.py.jinja" import query_params, json_body %}
+    {{ query_params(endpoint) | indent(4) }}
+
+    {{ json_body(endpoint) | indent(4) }}
+
 
     response = httpx.{{ endpoint.method }}(
         url=url,
@@ -79,7 +69,7 @@ def {{ endpoint.name | snakecase }}(
         files=multipart_data.to_dict(),
         {% endif %}
         {% if endpoint.json_body %}
-        json={{ endpoint.json_body.transform() }},
+        json={{ endpoint.json_body.python_name }},
         {% endif %}
         {% if endpoint.query_parameters %}
         params=params,

@@ -13,8 +13,17 @@ class HTTPValidationError:
     detail: Optional[List[ValidationError]] = None
 
     def to_dict(self) -> Dict[str, Any]:
+        if self.detail is None:
+            detail = None
+        else:
+            detail = []
+            for detail_item_data in self.detail:
+                detail_item = detail_item_data.to_dict()
+
+                detail.append(detail_item)
+
         return {
-            "detail": self.detail if self.detail is not None else None,
+            "detail": detail,
         }
 
     @staticmethod

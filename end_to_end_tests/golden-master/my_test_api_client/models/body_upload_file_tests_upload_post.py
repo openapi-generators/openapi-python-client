@@ -13,8 +13,10 @@ class BodyUploadFileTestsUploadPost:
     some_file: File
 
     def to_dict(self) -> Dict[str, Any]:
+        some_file = self.some_file.to_tuple()
+
         return {
-            "some_file": self.some_file.to_tuple(),
+            "some_file": some_file,
         }
 
     @staticmethod

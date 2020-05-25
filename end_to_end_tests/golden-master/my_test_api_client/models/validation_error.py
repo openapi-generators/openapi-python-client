@@ -13,10 +13,15 @@ class ValidationError:
     type: str
 
     def to_dict(self) -> Dict[str, Any]:
+        loc = self.loc
+
+        msg = self.msg
+        type = self.type
+
         return {
-            "loc": self.loc,
-            "msg": self.msg,
-            "type": self.type,
+            "loc": loc,
+            "msg": msg,
+            "type": type,
         }
 
     @staticmethod

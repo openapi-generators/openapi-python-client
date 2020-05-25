@@ -11,8 +11,10 @@ class ABCResponse:
     success: bool
 
     def to_dict(self) -> Dict[str, Any]:
+        success = self.success
+
         return {
-            "success": self.success,
+            "success": success,
         }
 
     @staticmethod

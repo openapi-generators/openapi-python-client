@@ -1,7 +1,11 @@
 import pathlib
-from typing import Optional
+from contextlib import contextmanager
+from pprint import pformat
+from typing import Generator, Optional
 
 import typer
+
+from openapi_python_client.openapi_parser.errors import ParseError
 
 app = typer.Typer()
 
@@ -38,6 +42,25 @@ def cli(
     pass
 
 
+@contextmanager
+def handle_errors() -> Generator[None, None, None]:
+    """ Turn custom errors into formatted error messages """
+    try:
+        yield
+    except ParseError as e:
+        formatted_data = pformat(e.data)
+        typer.secho("ERROR: Unable to parse this part of your OpenAPI document: ", fg=typer.colors.BRIGHT_RED, err=True)
+        typer.secho(formatted_data, fg=typer.colors.RED, err=True)
+        if e.message:
+            typer.secho(e.message, fg=typer.colors.BRIGHT_RED, err=True)
+        gh_link = typer.style(
+            "https://github.com/triaxtec/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
+        )
+        typer.secho(f"Please open an issue at {gh_link}", fg=typer.colors.RED, err=True)
+        typer.secho()
+        raise typer.Exit(code=1)
+
+
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
@@ -52,7 +75,8 @@ def generate(
     elif url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    create_new_client(url=url, path=path)
+    with handle_errors():
+        create_new_client(url=url, path=path)
 
 
 @app.command()
@@ -69,4 +93,5 @@ def update(
     elif url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    update_existing_client(url=url, path=path)
+    with handle_errors():
+        update_existing_client(url=url, path=path)

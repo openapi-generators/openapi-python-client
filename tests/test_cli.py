@@ -4,6 +4,8 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
+from openapi_python_client.openapi_parser.errors import ParseError
+
 runner = CliRunner()
 
 
@@ -86,6 +88,21 @@ class TestGenerate:
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(url=None, path=PosixPath(path))
+
+    def test_generate_handle_errors(self, _create_new_client):
+        _create_new_client.side_effect = ParseError({"test": "data"}, "this is a message")
+        path = "cool/path"
+        from openapi_python_client.cli import app
+
+        result = runner.invoke(app, ["generate", f"--path={path}"])
+
+        assert result.exit_code == 1
+        assert result.output == (
+            "ERROR: Unable to parse this part of your OpenAPI document: \n"
+            "{'test': 'data'}\n"
+            "this is a message\n"
+            "Please open an issue at https://github.com/triaxtec/openapi-python-client/issues/new/choose\n\n"
+        )
 
 
 @pytest.fixture

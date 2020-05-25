@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Literal, TypedDict, Union
 
+from .errors import ParseError
 from .reference import Reference
 
 ContentType = Union[Literal["application/json"], Literal["text/html"]]
@@ -81,7 +82,7 @@ class _ResponseDict(TypedDict):
 def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     """ Generate a Response from the OpenAPI dictionary representation of it """
     if "content" not in data:
-        raise ValueError(f"Cannot parse response data: {data}")
+        raise ParseError(data)
 
     content = data["content"]
     content_type: ContentType
@@ -90,7 +91,7 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     elif "text/html" in content:
         content_type = "text/html"
     else:
-        raise ValueError(f"Cannot parse content type of {data}")
+        raise ParseError(data)
 
     schema_data = data["content"][content_type]["schema"]
 
@@ -102,4 +103,4 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
         return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data["items"]["$ref"]),)
     if schema_data["type"] == "string":
         return StringResponse(status_code=status_code)
-    raise ValueError(f"Cannot parse response of type {schema_data['type']}")
+    raise ParseError(data, f"Unrecognized type {schema_data['type']}")

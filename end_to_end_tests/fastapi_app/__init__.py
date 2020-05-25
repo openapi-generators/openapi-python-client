@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from fastapi import APIRouter, FastAPI, File, Query, UploadFile
 from pydantic import BaseModel
@@ -42,14 +42,12 @@ class AModel(BaseModel):
 
     an_enum_value: AnEnum
     nested_list_of_enums: List[List[AnEnum]]
-    aCamelDateTime: datetime
+    aCamelDateTime: Union[datetime, date]
     a_date: date
 
 
 @test_router.get("/", response_model=List[AModel], operation_id="getUserList")
-def get_list(
-    an_enum_value: List[AnEnum] = Query(...), some_date: date = Query(...), some_datetime: datetime = Query(...)
-):
+def get_list(an_enum_value: List[AnEnum] = Query(...), some_date: Union[date, datetime] = Query(...)):
     """ Get a list of things """
     return
 

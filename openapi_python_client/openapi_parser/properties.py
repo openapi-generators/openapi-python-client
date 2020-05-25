@@ -3,6 +3,7 @@ from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, U
 
 from openapi_python_client import utils
 
+from .errors import ParseError
 from .reference import Reference
 
 
@@ -12,14 +13,17 @@ class Property:
     Describes a single property for a schema
 
     Attributes:
-        constructor_template: Name of the template file (if any) to use when constructing this property from JSON types.
+        template: Name of the template file (if any) to use for this property. Must be stored in
+            templates/property_templates and must contain two macros: construct and transform. Construct will be used to
+            build this property from JSON data (a response from an API). Transform will be used to convert this property
+            to JSON data (when sending a request to the API).
     """
 
     name: str
     required: bool
     default: Optional[Any]
 
-    constructor_template: ClassVar[Optional[str]] = None
+    template: ClassVar[Optional[str]] = None
     _type_string: ClassVar[str]
 
     python_name: str = field(init=False)
@@ -58,10 +62,6 @@ class Property:
         else:
             return f"{self.python_name}: {self.get_type_string()}"
 
-    def transform(self) -> str:
-        """ What it takes to turn this object into a native python type """
-        return self.python_name
-
 
 @dataclass
 class StringProperty(Property):
@@ -85,10 +85,7 @@ class DateTimeProperty(Property):
     """
 
     _type_string: ClassVar[str] = "datetime"
-    constructor_template: ClassVar[str] = "datetime_property.pyi"
-
-    def transform(self) -> str:
-        return f"{self.python_name}.isoformat()"
+    template: ClassVar[str] = "datetime_property.pyi"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -109,10 +106,7 @@ class DateProperty(Property):
     """ A property of type datetime.date """
 
     _type_string: ClassVar[str] = "date"
-    constructor_template: ClassVar[str] = "date_property.pyi"
-
-    def transform(self) -> str:
-        return f"{self.python_name}.isoformat()"
+    template: ClassVar[str] = "date_property.pyi"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -133,9 +127,7 @@ class FileProperty(Property):
     """ A property used for uploading files """
 
     _type_string: ClassVar[str] = "File"
-
-    def transform(self) -> str:
-        return f"{self.python_name}.to_tuple()"
+    template: ClassVar[str] = "file_property.pyi"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -180,7 +172,7 @@ class ListProperty(Property, Generic[InnerProp]):
     """ A property representing a list (array) of other properties """
 
     inner_property: InnerProp
-    constructor_template: ClassVar[str] = "list_property.pyi"
+    template: ClassVar[str] = "list_property.pyi"
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -202,13 +194,42 @@ class ListProperty(Property, Generic[InnerProp]):
 
 
 @dataclass
+class UnionProperty(Property):
+    """ A property representing a Union (anyOf) of other properties """
+
+    inner_properties: List[Property]
+    template: ClassVar[str] = "union_property.pyi"
+
+    def get_type_string(self) -> str:
+        """ Get a string representation of type that should be used when declaring this property """
+        inner_types = [p.get_type_string() for p in self.inner_properties]
+        inner_prop_string = ", ".join(inner_types)
+        if self.required:
+            return f"Union[{inner_prop_string}]"
+        return f"Optional[Union[{inner_prop_string}]]"
+
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        for inner_prop in self.inner_properties:
+            imports.update(inner_prop.get_imports(prefix=prefix))
+        imports.add("from typing import Union")
+        return imports
+
+
+@dataclass
 class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, str]
     reference: Reference
 
-    constructor_template: ClassVar[str] = "enum_property.pyi"
+    template: ClassVar[str] = "enum_property.pyi"
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -234,10 +255,6 @@ class EnumProperty(Property):
         imports.add(f"from {prefix}.{self.reference.module_name} import {self.reference.class_name}")
         return imports
 
-    def transform(self) -> str:
-        """ Output to the template, convert this Enum into a JSONable value """
-        return f"{self.python_name}.value"
-
     @staticmethod
     def values_from_list(l: List[str], /) -> Dict[str, str]:
         """ Convert a list of values into dict of {name: value} """
@@ -260,7 +277,7 @@ class RefProperty(Property):
 
     reference: Reference
 
-    constructor_template: ClassVar[str] = "ref_property.pyi"
+    template: ClassVar[str] = "ref_property.pyi"
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -284,10 +301,6 @@ class RefProperty(Property):
             }
         )
         return imports
-
-    def transform(self) -> str:
-        """ Convert this into a JSONable value """
-        return f"{self.python_name}.to_dict()"
 
 
 @dataclass
@@ -346,6 +359,13 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
         )
     if "$ref" in data:
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data["$ref"]), default=None)
+    if "anyOf" in data:
+        sub_properties: List[Property] = []
+        for sub_prop_data in data["anyOf"]:
+            sub_properties.append(property_from_dict(name=name, required=required, data=sub_prop_data))
+        return UnionProperty(name=name, required=required, default=data.get("default"), inner_properties=sub_properties)
+    if "type" not in data:
+        raise ParseError(data)
     if data["type"] == "string":
         return _string_based_property(name=name, required=required, data=data)
     elif data["type"] == "number":
@@ -363,4 +383,4 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
         )
     elif data["type"] == "object":
         return DictProperty(name=name, required=required, default=data.get("default"))
-    raise ValueError(f"Did not recognize type of {data}")
+    raise ParseError(data)

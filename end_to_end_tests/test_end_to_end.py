@@ -33,6 +33,7 @@ def test_end_to_end():
     config_path = Path(__file__).parent / "config.yml"
     gm_path = Path(__file__).parent / "golden-master"
     output_path = Path.cwd() / "my-test-api-client"
+    shutil.rmtree(output_path, ignore_errors=True)
 
     result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={openapi_path}"])
 

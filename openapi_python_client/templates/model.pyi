@@ -16,13 +16,19 @@ class {{ schema.reference.class_name }}:
     {% endfor %}
 
     def to_dict(self) -> Dict[str, Any]:
+        {% for property in schema.required_properties + schema.optional_properties %}
+        {% if property.template %}
+        {% from "property_templates/" + property.template import transform %}
+        {{ transform(property, "self." + property.python_name, property.python_name) | indent(8) }}
+        {% else %}
+        {{ property.python_name }} =  self.{{ property.python_name }}
+        {% endif %}
+        {% endfor %}
+
         return {
-            {% for property in schema.required_properties %}
-            "{{ property.name }}": self.{{ property.transform() }},
+            {% for property in schema.required_properties + schema.optional_properties %}
+            "{{ property.name }}": {{ property.python_name }},
             {% endfor %}
-            {% for property in schema.optional_properties %}
-            "{{ property.name }}": self.{{ property.transform() }} if self.{{ property.python_name }} is not None else None,
-                                                                                                                       {% endfor %}
         }
 
     @staticmethod
@@ -33,9 +39,9 @@ class {{ schema.reference.class_name }}:
     {% else %}
         {% set property_source = 'd.get("' + property.name + '")' %}
     {% endif %}
-    {% if property.constructor_template %}
-        {% from property.constructor_template import template %}
-        {{ template(property, property_source) | indent(8) }}
+    {% if property.template %}
+        {% from "property_templates/" + property.template import construct %}
+        {{ construct(property, property_source) | indent(8) }}
     {% else %}
         {{ property.python_name }} = {{ property_source }}
     {% endif %}

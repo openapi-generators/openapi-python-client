@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for binary format strings (file payloads)
 - Support for multipart/form bodies
 - Support for any supported property within a list (array), including other lists.
+- Support for Union types ("anyOf" in OpenAPI document)
+- Better error messages when failing to parse an OpenAPI document
 
 ### Changes
 - The way most imports are handled was changed which *should* lead to fewer unused imports in generated files.

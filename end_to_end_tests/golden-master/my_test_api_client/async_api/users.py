@@ -13,17 +13,28 @@ from ..models.http_validation_error import HTTPValidationError
 
 
 async def get_user_list(
-    *, client: Client, an_enum_value: List[AnEnumValueItem], some_date: date, some_datetime: datetime,
+    *, client: Client, an_enum_value: List[AnEnumValueItem], some_date: Union[date, datetime],
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
     """ Get a list of things  """
     url = "{}/tests/".format(client.base_url)
 
+    json_an_enum_value = []
+    for an_enum_value_item_data in an_enum_value:
+        an_enum_value_item = an_enum_value_item_data.value
+
+        json_an_enum_value.append(an_enum_value_item)
+
+    if isinstance(some_date, date):
+        json_some_date = some_date.isoformat()
+
+    else:
+        json_some_date = some_date.isoformat()
+
     params = {
-        "an_enum_value": an_enum_value,
-        "some_date": some_date.isoformat(),
-        "some_datetime": some_datetime.isoformat(),
+        "an_enum_value": json_an_enum_value,
+        "some_date": json_some_date,
     }
 
     async with httpx.AsyncClient() as _client:
