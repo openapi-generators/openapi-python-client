@@ -11,6 +11,7 @@ $ openapi-python-client [OPTIONS] COMMAND [ARGS]...
 **Options**:
 
 * `--version`: Print the version and exit
+* `--config PATH`: Path to the config file to use
 * `--install-completion`: Install completion for the current shell.
 * `--show-completion`: Show completion for the current shell, to copy it or customize the installation.
 * `--help`: Show this message and exit.

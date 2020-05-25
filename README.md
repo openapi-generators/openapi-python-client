@@ -1,7 +1,10 @@
 [![triaxtec](https://circleci.com/gh/triaxtec/openapi-python-client.svg?style=svg)](https://circleci.com/gh/triaxtec/openapi-python-client)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![codecov](https://codecov.io/gh/triaxtec/openapi-python-client/branch/master/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/openapi-python-client.svg)](https://pypi.python.org/pypi/openapi-python-client/)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+[![Generic badge](https://img.shields.io/badge/type_checked-mypy-informational.svg)](https://mypy.readthedocs.io/en/stable/introduction.html)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
 
 # openapi-python-client
 Generate modern Python clients from OpenAPI
@@ -51,20 +54,21 @@ get an error.
     for endpoints without a tag.  Each of these modules in turn contains one function for calling each endpoint.
     1. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
     
-For a full example you can look at tests/test_end_to_end which has a declared [FastAPI](https://fastapi.tiangolo.com/) 
+For a full example you can look at the `test_end_to_end` directory which has a declared [FastAPI](https://fastapi.tiangolo.com/) 
 server and the resulting openapi.json file in the "fastapi" directory.  "golden-master" is the generated client from that 
 OpenAPI document.
     
 ## OpenAPI features supported
 1. All HTTP Methods
 1. JSON and form bodies, path and query parameters
+1. File uploads with multipart/form-data bodies
 1. float, string, int, date, datetime, string enums, and custom schemas or lists containing any of those
 1. html/text or application/json responses containing any of the previous types
 1. Bearer token security
 
 ## Configuration
-You can pass a YAML (or JSON) file to openapi-python-client in order to change some behavior.  The following parameters 
-are supported:
+You can pass a YAML (or JSON) file to openapi-python-client with the `--config` option in order to change some behavior.
+The following parameters are supported:
 
 ### class_overrides
 Used to change the name of generated model classes.  This param should be a mapping of existing class name 
@@ -82,10 +86,6 @@ class_overrides:
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the
  models folder.
-
-
-## Contributors 
- - Dylan Anthony <danthony@triaxtec.com> (Owner)
 
 
 [CHANGELOG.md]: CHANGELOG.md
