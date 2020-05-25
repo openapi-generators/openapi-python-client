@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     named "statuses" is an array of enum values, previously the `Enum` class declared would be called "Statuses". Now it 
     will be called "StatusesItem". If a "title" attribute was used in the OpenAPI document, that should still be respected
     and used instead of the generated name.
+- Clients now require httpx ^0.13.0 (up from ^0.12.1)
 
 ### Additions
 - Support for binary format strings (file payloads)

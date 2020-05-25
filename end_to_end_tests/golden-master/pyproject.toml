@@ -14,7 +14,7 @@ include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-httpx = "^0.12.1"
+httpx = "^0.13.0"
 
 [tool.black]
 line-length = 120
