@@ -54,20 +54,44 @@ class TestRefResponse:
         assert r.constructor() == "SuperCoolClass.from_dict(cast(Dict[str, Any], response.json()))"
 
 
-class TestStringResponse:
+class TestBasicResponse:
     def test_return_string(self):
-        from openapi_python_client.openapi_parser.responses import StringResponse
+        from openapi_python_client.openapi_parser.responses import BasicResponse
 
-        r = StringResponse(200)
+        r = BasicResponse(200, "string")
 
         assert r.return_string() == "str"
 
+        r = BasicResponse(200, "number")
+
+        assert r.return_string() == "float"
+
+        r = BasicResponse(200, "integer")
+
+        assert r.return_string() == "int"
+
+        r = BasicResponse(200, "boolean")
+
+        assert r.return_string() == "bool"
+
     def test_constructor(self):
-        from openapi_python_client.openapi_parser.responses import StringResponse
+        from openapi_python_client.openapi_parser.responses import BasicResponse
 
-        r = StringResponse(200)
+        r = BasicResponse(200, "string")
 
-        assert r.constructor() == "response.text"
+        assert r.constructor() == "str(response.text)"
+
+        r = BasicResponse(200, "number")
+
+        assert r.constructor() == "float(response.text)"
+
+        r = BasicResponse(200, "integer")
+
+        assert r.constructor() == "int(response.text)"
+
+        r = BasicResponse(200, "boolean")
+
+        assert r.constructor() == "bool(response.text)"
 
 
 class TestResponseFromDict:
@@ -122,16 +146,16 @@ class TestResponseFromDict:
         ListRefResponse.assert_called_once_with(status_code=status_code, reference=from_ref())
         assert response == ListRefResponse()
 
-    def test_response_from_dict_string(self, mocker):
+    def test_response_from_dict_basic(self, mocker):
         status_code = mocker.MagicMock(autospec=int)
         data = {"content": {"text/html": {"schema": {"type": "string"}}}}
-        StringResponse = mocker.patch(f"{MODULE_NAME}.StringResponse")
+        BasicResponse = mocker.patch(f"{MODULE_NAME}.BasicResponse")
         from openapi_python_client.openapi_parser.responses import response_from_dict
 
         response = response_from_dict(status_code=status_code, data=data)
 
-        StringResponse.assert_called_once_with(status_code=status_code)
-        assert response == StringResponse()
+        BasicResponse.assert_called_once_with(status_code=status_code, openapi_type="string")
+        assert response == BasicResponse.return_value
 
     def test_response_from_dict_unsupported_type(self):
         from openapi_python_client.openapi_parser.responses import response_from_dict

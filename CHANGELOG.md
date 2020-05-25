@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multipart/form bodies
 - Support for any supported property within a list (array), including other lists.
 - Support for Union types ("anyOf" in OpenAPI document)
+- Support for more basic response types (integer, number, boolean)
 - Better error messages when failing to parse an OpenAPI document
 
 ### Changes

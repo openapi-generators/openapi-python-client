@@ -321,15 +321,6 @@ class DictProperty(Property):
         return imports
 
 
-_openapi_types_to_python_type_strings = {
-    "string": "str",
-    "number": "float",
-    "integer": "int",
-    "boolean": "bool",
-    "object": "Dict[Any, Any]",
-}
-
-
 def _string_based_property(
     name: str, required: bool, data: Dict[str, Any]
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:

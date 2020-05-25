@@ -17,7 +17,8 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/_ABCResponse"
+                                    "title": "Response Ping Ping Get",
+                                    "type": "boolean"
                                 }
                             }
                         }
@@ -240,19 +241,6 @@
                     "type": {
                         "title": "Error Type",
                         "type": "string"
-                    }
-                }
-            },
-            "_ABCResponse": {
-                "title": "_ABCResponse",
-                "required": [
-                    "success"
-                ],
-                "type": "object",
-                "properties": {
-                    "success": {
-                        "title": "Success",
-                        "type": "boolean"
                     }
                 }
             }

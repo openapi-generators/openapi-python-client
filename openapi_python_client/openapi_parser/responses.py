@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass, field
 from typing import Any, Dict, Literal, TypedDict, Union
 
 from .errors import ParseError
@@ -53,24 +53,29 @@ class RefResponse(Response):
 
 
 @dataclass
-class StringResponse(Response):
-    """ Response is a string """
+class BasicResponse(Response):
+    """ Response is a basic type """
+
+    openapi_type: InitVar[str]
+    python_type: str = field(init=False)
+
+    def __post_init__(self, openapi_type: str) -> None:
+        self.python_type = openapi_types_to_python_type_strings[openapi_type]
 
     def return_string(self) -> str:
         """ How this Response should be represented as a return type """
-        return "str"
+        return self.python_type
 
     def constructor(self) -> str:
         """ How the return value of this response should be constructed """
-        return "response.text"
+        return f"{self.python_type}(response.text)"
 
 
-_openapi_types_to_python_type_strings = {
+openapi_types_to_python_type_strings = {
     "string": "str",
     "number": "float",
     "integer": "int",
     "boolean": "bool",
-    "object": "Dict",
 }
 
 
@@ -97,10 +102,11 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
 
     if "$ref" in schema_data:
         return RefResponse(status_code=status_code, reference=Reference.from_ref(schema_data["$ref"]),)
-    if "type" not in schema_data:
+    response_type = schema_data.get("type")
+    if response_type is None:
         return Response(status_code=status_code)
-    if schema_data["type"] == "array":
+    if response_type == "array":
         return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data["items"]["$ref"]),)
-    if schema_data["type"] == "string":
-        return StringResponse(status_code=status_code)
+    if response_type in openapi_types_to_python_type_strings:
+        return BasicResponse(status_code=status_code, openapi_type=response_type)
     raise ParseError(data, f"Unrecognized type {schema_data['type']}")

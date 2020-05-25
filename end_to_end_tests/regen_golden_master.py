@@ -19,6 +19,8 @@ if __name__ == "__main__":
     config_path = Path(__file__).parent / "config.yml"
 
     result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={openapi_path}"])
+    if result.stdout:
+        print(result.stdout)
     if result.exception:
         raise result.exception
     output_path.rename(gm_path)

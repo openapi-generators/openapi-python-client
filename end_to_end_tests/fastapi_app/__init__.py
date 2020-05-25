@@ -11,14 +11,10 @@ from pydantic import BaseModel
 app = FastAPI(title="My Test API", description="An API for testing openapi-python-client",)
 
 
-class _ABCResponse(BaseModel):
-    success: bool
-
-
-@app.get("/ping", response_model=_ABCResponse)
+@app.get("/ping", response_model=bool)
 async def ping():
     """ A quick check to see if the system is running """
-    return {"success": True}
+    return True
 
 
 test_router = APIRouter()

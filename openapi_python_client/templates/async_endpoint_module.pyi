@@ -11,6 +11,7 @@ from ..errors import ApiResponseError
 {% endfor %}
 {% for endpoint in collection.endpoints %}
 
+{% from "endpoint_macros.py.jinja" import query_params, json_body, return_type %}
 
 async def {{ endpoint.name | snakecase }}(
     *,
@@ -40,11 +41,7 @@ async def {{ endpoint.name | snakecase }}(
     {% for parameter in endpoint.query_parameters %}
     {{ parameter.to_string() }},
     {% endfor %}
-) -> Union[
-    {% for response in endpoint.responses %}
-    {{ response.return_string() }},
-    {% endfor %}
-]:
+{{ return_type(endpoint) }}
     """ {{ endpoint.description }} """
     url = "{}{{ endpoint.path }}".format(
         client.base_url
@@ -53,7 +50,6 @@ async def {{ endpoint.name | snakecase }}(
         {%- endfor -%}
     )
 
-    {% from "endpoint_macros.py.jinja" import query_params, json_body %}
     {{ query_params(endpoint) | indent(4) }}
 
     {{ json_body(endpoint) | indent(4) }}

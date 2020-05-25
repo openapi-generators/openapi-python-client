@@ -5,14 +5,10 @@ import httpx
 
 from ..client import AuthenticatedClient, Client
 from ..errors import ApiResponseError
-from ..models.abc_response import ABCResponse
 
 
-async def ping_ping_get(
-    *, client: Client,
-) -> Union[
-    ABCResponse,
-]:
+async def ping_ping_get(*, client: Client,) -> bool:
+
     """ A quick check to see if the system is running  """
     url = "{}/ping".format(client.base_url)
 
@@ -20,6 +16,6 @@ async def ping_ping_get(
         response = await _client.get(url=url, headers=client.get_headers(),)
 
     if response.status_code == 200:
-        return ABCResponse.from_dict(cast(Dict[str, Any], response.json()))
+        return bool(response.text)
     else:
         raise ApiResponseError(response=response)

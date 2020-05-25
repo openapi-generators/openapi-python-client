@@ -17,6 +17,7 @@ async def get_user_list(
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
+
     """ Get a list of things  """
     url = "{}/tests/".format(client.base_url)
 
@@ -53,6 +54,7 @@ async def upload_file_tests_upload_post(
 ) -> Union[
     None, HTTPValidationError,
 ]:
+
     """ Upload a file  """
     url = "{}/tests/upload".format(client.base_url)
 
