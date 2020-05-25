@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Union types ("anyOf" in OpenAPI document)
 - Support for more basic response types (integer, number, boolean)
 - Better error messages when failing to parse an OpenAPI document
+    - Error messages will contain some useful information about why it failed instead of just a stack trace
+    - Client will still be generated if there are errors, excluding endpoints that had errors
 
 ### Changes
 - The way most imports are handled was changed which *should* lead to fewer unused imports in generated files.

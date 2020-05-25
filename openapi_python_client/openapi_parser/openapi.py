@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Generator, Iterable, List, Optional, Set
 
+from .errors import ParseError
 from .properties import EnumProperty, ListProperty, Property, property_from_dict
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_dict
@@ -28,17 +29,25 @@ class EndpointCollection:
     tag: str
     endpoints: List[Endpoint] = field(default_factory=list)
     relative_imports: Set[str] = field(default_factory=set)
+    parse_errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
     def from_dict(d: Dict[str, Dict[str, Dict[str, Any]]], /) -> Dict[str, EndpointCollection]:
         """ Parse the openapi paths data to get EndpointCollections by tag """
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
+
         for path, path_data in d.items():
             for method, method_data in path_data.items():
-                endpoint = Endpoint.from_data(data=method_data, path=path, method=method)
-                collection = endpoints_by_tag.setdefault(endpoint.tag, EndpointCollection(tag=endpoint.tag))
-                collection.endpoints.append(endpoint)
-                collection.relative_imports.update(endpoint.relative_imports)
+                tag = method_data.get("tags", ["default"])[0]
+                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
+                try:
+                    endpoint = Endpoint.from_data(data=method_data, path=path, method=method, tag=tag)
+                    collection.endpoints.append(endpoint)
+                    collection.relative_imports.update(endpoint.relative_imports)
+                except ParseError as e:
+                    e.header = f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
+                    collection.parse_errors.append(e)
+
         return endpoints_by_tag
 
 
@@ -127,7 +136,7 @@ class Endpoint:
                 raise ValueError(f"Don't know where to put this parameter: {param_dict}")
 
     @staticmethod
-    def from_data(*, data: Dict[str, Any], path: str, method: str) -> Endpoint:
+    def from_data(*, data: Dict[str, Any], path: str, method: str, tag: str) -> Endpoint:
         """ Construct an endpoint from the OpenAPI data """
 
         endpoint = Endpoint(
@@ -136,7 +145,7 @@ class Endpoint:
             description=data.get("description"),
             name=data["operationId"],
             requires_security=bool(data.get("security")),
-            tag=data.get("tags", ["default"])[0],
+            tag=tag,
         )
         endpoint._add_parameters(data)
         endpoint._add_responses(data)

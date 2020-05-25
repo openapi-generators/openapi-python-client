@@ -15,6 +15,7 @@ from jinja2 import Environment, PackageLoader
 from openapi_python_client import utils
 
 from .openapi_parser import OpenAPI, import_string_from_reference
+from .openapi_parser.errors import MultipleParseError
 
 __version__ = version(__package__)
 
@@ -88,6 +89,7 @@ class _Project:
         self._build_models()
         self._build_api()
         self._reformat()
+        self._raise_errors()
 
     def update(self) -> None:
         """ Update an existing project """
@@ -100,10 +102,18 @@ class _Project:
         self._build_models()
         self._build_api()
         self._reformat()
+        self._raise_errors()
 
     def _reformat(self) -> None:
         subprocess.run("isort --recursive --apply", cwd=self.project_dir, shell=True)
         subprocess.run("black .", cwd=self.project_dir, shell=True)
+
+    def _raise_errors(self) -> None:
+        errors = []
+        for collection in self.openapi.endpoint_collections_by_tag.values():
+            errors.extend(collection.parse_errors)
+        if errors:
+            raise MultipleParseError(parse_errors=errors)
 
     def _create_package(self) -> None:
         self.package_dir.mkdir()

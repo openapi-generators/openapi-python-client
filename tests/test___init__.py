@@ -136,6 +136,7 @@ class TestProject:
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
         project._reformat = mocker.MagicMock()
+        project._raise_errors = mocker.MagicMock()
 
         project.build()
 
@@ -145,6 +146,7 @@ class TestProject:
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
         project._reformat.assert_called_once()
+        project._raise_errors.assert_called_once()
 
     def test_update(self, mocker):
         from openapi_python_client import _Project, shutil
@@ -157,6 +159,7 @@ class TestProject:
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
         project._reformat = mocker.MagicMock()
+        project._raise_errors = mocker.MagicMock()
 
         project.update()
 
@@ -165,6 +168,7 @@ class TestProject:
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
         project._reformat.assert_called_once()
+        project._raise_errors.assert_called_once()
 
     def test_update_missing_dir(self, mocker):
         from openapi_python_client import _Project
@@ -446,6 +450,25 @@ def test__reformat(mocker):
             mocker.call("black .", cwd=project.project_dir, shell=True),
         ]
     )
+
+
+def test__raise_errors(mocker):
+    from openapi_python_client import _Project, OpenAPI, MultipleParseError
+    from openapi_python_client.openapi_parser.openapi import EndpointCollection
+
+    openapi = mocker.MagicMock(
+        autospec=OpenAPI,
+        title="My Test API",
+        endpoint_collections_by_tag={
+            "default": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[1]),
+            "other": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[2]),
+        },
+    )
+    project = _Project(openapi=openapi)
+
+    with pytest.raises(MultipleParseError) as exc_info:
+        project._raise_errors()
+    assert exc_info.value.parse_errors == [1, 2]
 
 
 def test_load_config(mocker):

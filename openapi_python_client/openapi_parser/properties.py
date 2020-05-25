@@ -335,7 +335,7 @@ def _string_based_property(
     elif string_format == "binary":
         return FileProperty(name=name, required=required, default=data.get("default"))
     else:
-        raise ValueError(f'Unsupported string format:{data["format"]}')
+        raise ParseError(data=data, message=f'Unsupported string format:{data["format"]}')
 
 
 def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Property:

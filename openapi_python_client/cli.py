@@ -5,7 +5,7 @@ from typing import Generator, Optional
 
 import typer
 
-from openapi_python_client.openapi_parser.errors import ParseError
+from openapi_python_client.openapi_parser.errors import MultipleParseError, ParseError
 
 app = typer.Typer()
 
@@ -42,22 +42,31 @@ def cli(
     pass
 
 
+def _print_parser_error(e: ParseError) -> None:
+    formatted_data = pformat(e.data)
+    typer.secho(e.header, bold=True, fg=typer.colors.BRIGHT_RED, err=True)
+    typer.secho(formatted_data, fg=typer.colors.RED, err=True)
+    if e.message:
+        typer.secho(e.message, fg=typer.colors.BRIGHT_RED, err=True)
+    gh_link = typer.style(
+        "https://github.com/triaxtec/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
+    )
+    typer.secho(f"Please open an issue at {gh_link}", fg=typer.colors.RED, err=True)
+    typer.secho()
+
+
 @contextmanager
 def handle_errors() -> Generator[None, None, None]:
     """ Turn custom errors into formatted error messages """
     try:
         yield
     except ParseError as e:
-        formatted_data = pformat(e.data)
-        typer.secho("ERROR: Unable to parse this part of your OpenAPI document: ", fg=typer.colors.BRIGHT_RED, err=True)
-        typer.secho(formatted_data, fg=typer.colors.RED, err=True)
-        if e.message:
-            typer.secho(e.message, fg=typer.colors.BRIGHT_RED, err=True)
-        gh_link = typer.style(
-            "https://github.com/triaxtec/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
-        )
-        typer.secho(f"Please open an issue at {gh_link}", fg=typer.colors.RED, err=True)
-        typer.secho()
+        _print_parser_error(e)
+        raise typer.Exit(code=1)
+    except MultipleParseError as e:
+        typer.secho("MULTIPLE ERRORS WHILE PARSING:", underline=True, bold=True, fg=typer.colors.BRIGHT_RED, err=True)
+        for err in e.parse_errors:
+            _print_parser_error(err)
         raise typer.Exit(code=1)
 
 

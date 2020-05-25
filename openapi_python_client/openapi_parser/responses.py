@@ -109,4 +109,4 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
         return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data["items"]["$ref"]),)
     if response_type in openapi_types_to_python_type_strings:
         return BasicResponse(status_code=status_code, openapi_type=response_type)
-    raise ParseError(data, f"Unrecognized type {schema_data['type']}")
+    raise ParseError(data, message=f"Unrecognized type {schema_data['type']}")

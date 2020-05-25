@@ -456,7 +456,7 @@ class TestEndpoint:
             "security": {"blah": "bloo"},
         }
 
-        endpoint = Endpoint.from_data(data=data, path=path, method=method)
+        endpoint = Endpoint.from_data(data=data, path=path, method=method, tag="default")
 
         assert endpoint.path == path
         assert endpoint.method == method
@@ -468,10 +468,9 @@ class TestEndpoint:
         _add_responses.assert_called_once_with(data)
         _add_body.assert_called_once_with(data)
 
-        data["tags"] = ["a", "b"]
         del data["security"]
 
-        endpoint = Endpoint.from_data(data=data, path=path, method=method)
+        endpoint = Endpoint.from_data(data=data, path=path, method=method, tag="a")
 
         assert not endpoint.requires_security
         assert endpoint.tag == "a"
@@ -502,16 +501,16 @@ class TestEndpointCollection:
     def test_from_dict(self, mocker):
         from openapi_python_client.openapi_parser.openapi import EndpointCollection, Endpoint
 
-        data_1 = mocker.MagicMock()
-        data_2 = mocker.MagicMock()
-        data_3 = mocker.MagicMock()
+        data_1 = {}
+        data_2 = {"tags": ["tag_2", "tag_3"]}
+        data_3 = {}
         data = {
-            "path_1": {"method_1": data_1, "method_2": data_2,},
-            "path_2": {"method_1": data_3,},
+            "path_1": {"method_1": data_1, "method_2": data_2},
+            "path_2": {"method_1": data_3},
         }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="tag_1", relative_imports={"1", "2"})
+        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"})
         endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="tag_2", relative_imports={"2"})
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="tag_1", relative_imports={"2", "3"})
+        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"})
         endpoint_from_data = mocker.patch.object(
             Endpoint, "from_data", side_effect=[endpoint_1, endpoint_2, endpoint_3]
         )
@@ -520,12 +519,41 @@ class TestEndpointCollection:
 
         endpoint_from_data.assert_has_calls(
             [
-                mocker.call(data=data_1, path="path_1", method="method_1"),
-                mocker.call(data=data_2, path="path_1", method="method_2"),
-                mocker.call(data=data_3, path="path_2", method="method_1"),
+                mocker.call(data=data_1, path="path_1", method="method_1", tag="default"),
+                mocker.call(data=data_2, path="path_1", method="method_2", tag="tag_2"),
+                mocker.call(data=data_3, path="path_2", method="method_1", tag="default"),
             ]
         )
         assert result == {
-            "tag_1": EndpointCollection("tag_1", endpoints=[endpoint_1, endpoint_3], relative_imports={"1", "2", "3"}),
+            "default": EndpointCollection(
+                "default", endpoints=[endpoint_1, endpoint_3], relative_imports={"1", "2", "3"}
+            ),
             "tag_2": EndpointCollection("tag_2", endpoints=[endpoint_2], relative_imports={"2"}),
         }
+
+    def test_from_dict_errors(self, mocker):
+        from openapi_python_client.openapi_parser.openapi import EndpointCollection, Endpoint, ParseError
+
+        data_1 = {}
+        data_2 = {"tags": ["tag_2", "tag_3"]}
+        data_3 = {}
+        data = {
+            "path_1": {"method_1": data_1, "method_2": data_2},
+            "path_2": {"method_1": data_3},
+        }
+        endpoint_from_data = mocker.patch.object(
+            Endpoint, "from_data", side_effect=[ParseError("1"), ParseError("2"), ParseError("3")]
+        )
+
+        result = EndpointCollection.from_dict(data)
+
+        endpoint_from_data.assert_has_calls(
+            [
+                mocker.call(data=data_1, path="path_1", method="method_1", tag="default"),
+                mocker.call(data=data_2, path="path_1", method="method_2", tag="tag_2"),
+                mocker.call(data=data_3, path="path_2", method="method_1", tag="default"),
+            ]
+        )
+        assert result["default"].parse_errors[0].data == "1"
+        assert result["default"].parse_errors[1].data == "3"
+        assert result["tag_2"].parse_errors[0].data == "2"
