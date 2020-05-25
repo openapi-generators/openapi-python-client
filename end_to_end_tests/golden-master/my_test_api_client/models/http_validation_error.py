@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import astuple, dataclass
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, cast
 
-from .types import *
 from .validation_error import ValidationError
 
 
@@ -20,8 +19,10 @@ class HTTPValidationError:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> HTTPValidationError:
-
         detail = []
-        for detail_item in d.get("detail", []):
-            detail.append(ValidationError.from_dict(detail_item))
+        for detail_item_data in d.get("detail") or []:
+            detail_item = ValidationError.from_dict(detail_item_data)
+
+            detail.append(detail_item)
+
         return HTTPValidationError(detail=detail,)

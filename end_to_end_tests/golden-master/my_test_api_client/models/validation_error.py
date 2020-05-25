@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import astuple, dataclass
-from typing import Any, Dict, List, Optional, cast
-
-from .types import *
+from dataclasses import dataclass
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -23,8 +21,7 @@ class ValidationError:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> ValidationError:
-
-        loc = d.get("loc", [])
+        loc = d["loc"]
 
         msg = d["msg"]
 

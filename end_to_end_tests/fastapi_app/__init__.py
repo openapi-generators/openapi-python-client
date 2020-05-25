@@ -41,15 +41,15 @@ class AModel(BaseModel):
     """ A Model for testing all the ways custom objects can be used """
 
     an_enum_value: AnEnum
-    a_list_of_enums: List[AnEnum]
-    a_list_of_strings: List[str]
-    a_list_of_objects: List[OtherModel]
+    nested_list_of_enums: List[List[AnEnum]]
     aCamelDateTime: datetime
     a_date: date
 
 
 @test_router.get("/", response_model=List[AModel], operation_id="getUserList")
-def get_list(statuses: List[AnEnum] = Query(...), some_date: date = Query(...), some_datetime: datetime = Query(...)):
+def get_list(
+    an_enum_value: List[AnEnum] = Query(...), some_date: date = Query(...), some_datetime: datetime = Query(...)
+):
     """ Get a list of things """
     return
 

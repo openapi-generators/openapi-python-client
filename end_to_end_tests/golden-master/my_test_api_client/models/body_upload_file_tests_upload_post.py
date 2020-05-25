@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import astuple, dataclass
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict
 
-from .types import *
+from .types import File
 
 
 @dataclass
@@ -19,7 +19,6 @@ class BodyUploadFileTestsUploadPost:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> BodyUploadFileTestsUploadPost:
-
         some_file = d["some_file"]
 
         return BodyUploadFileTestsUploadPost(some_file=some_file,)
