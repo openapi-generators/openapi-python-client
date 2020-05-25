@@ -33,7 +33,7 @@ def get_user_list(
     else:
         json_some_date = some_date.isoformat()
 
-    params = {
+    params: Dict[str, Any] = {
         "an_enum_value": json_an_enum_value,
         "some_date": json_some_date,
     }
