@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
 from openapi_python_client import utils
 
@@ -8,7 +8,12 @@ from .reference import Reference
 
 @dataclass
 class Property:
-    """ Describes a single property for a schema """
+    """
+    Describes a single property for a schema
+
+    Attributes:
+        constructor_template: Name of the template file (if any) to use when constructing this property from JSON types.
+    """
 
     name: str
     required: bool
@@ -28,6 +33,17 @@ class Property:
             return self._type_string
         return f"Optional[{self._type_string}]"
 
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        if not self.required:
+            return {"from typing import Optional"}
+        return set()
+
     def to_string(self) -> str:
         """ How this should be declared in a dataclass """
         if self.default:
@@ -45,13 +61,6 @@ class Property:
     def transform(self) -> str:
         """ What it takes to turn this object into a native python type """
         return self.python_name
-
-    def constructor_from_dict(self, dict_name: str) -> str:
-        """ How to load this property from a dict (used in generated model from_dict function """
-        if self.required:
-            return f'{dict_name}["{self.name}"]'
-        else:
-            return f'{dict_name}.get("{self.name}")'
 
 
 @dataclass
@@ -71,13 +80,28 @@ class StringProperty(Property):
 
 @dataclass
 class DateTimeProperty(Property):
-    """ A property of type datetime.datetime """
+    """
+    A property of type datetime.datetime
+    """
 
     _type_string: ClassVar[str] = "datetime"
     constructor_template: ClassVar[str] = "datetime_property.pyi"
 
     def transform(self) -> str:
         return f"{self.python_name}.isoformat()"
+
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.update(
+            {"from datetime import datetime", "from typing import cast",}
+        )
+        return imports
 
 
 @dataclass
@@ -90,6 +114,19 @@ class DateProperty(Property):
     def transform(self) -> str:
         return f"{self.python_name}.isoformat()"
 
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.update(
+            {"from datetime import date", "from typing import cast",}
+        )
+        return imports
+
 
 @dataclass
 class FileProperty(Property):
@@ -99,6 +136,17 @@ class FileProperty(Property):
 
     def transform(self) -> str:
         return f"{self.python_name}.to_tuple()"
+
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.update({f"from {prefix}.types import File", "from dataclasses import astuple"})
+        return imports
 
 
 @dataclass
@@ -124,54 +172,33 @@ class BooleanProperty(Property):
     _type_string: ClassVar[str] = "bool"
 
 
+InnerProp = TypeVar("InnerProp", bound=Property)
+
+
 @dataclass
-class BasicListProperty(Property):
-    """ A List of basic types """
+class ListProperty(Property, Generic[InnerProp]):
+    """ A property representing a list (array) of other properties """
 
-    type: str
-
-    def constructor_from_dict(self, dict_name: str) -> str:
-        """ How to set this property from a dictionary of values """
-        return f'{dict_name}.get("{self.name}", [])'
+    inner_property: InnerProp
+    constructor_template: ClassVar[str] = "list_property.pyi"
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         if self.required:
-            return f"List[{self.type}]"
-        return f"Optional[List[{self.type}]]"
+            return f"List[{self.inner_property.get_type_string()}]"
+        return f"Optional[List[{self.inner_property.get_type_string()}]]"
 
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
 
-@dataclass
-class ReferenceListProperty(Property):
-    """ A List of References """
-
-    reference: Reference
-    constructor_template: ClassVar[str] = "reference_list_property.pyi"
-
-    def get_type_string(self) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        if self.required:
-            return f"List[{self.reference.class_name}]"
-        return f"Optional[List[{self.reference.class_name}]]"
-
-
-@dataclass
-class EnumListProperty(Property):
-    """ List of Enum values """
-
-    values: Dict[str, str]
-    reference: Reference = field(init=False)
-    constructor_template: ClassVar[str] = "enum_list_property.pyi"
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self.reference = Reference.from_ref(self.name)
-
-    def get_type_string(self) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        if self.required:
-            return f"List[{self.reference.class_name}]"
-        return f"Optional[List[{self.reference.class_name}]]"
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.update(self.inner_property.get_imports(prefix=prefix))
+        imports.add("from typing import List")
+        return imports
 
 
 @dataclass
@@ -180,6 +207,8 @@ class EnumProperty(Property):
 
     values: Dict[str, str]
     reference: Reference
+
+    constructor_template: ClassVar[str] = "enum_property.pyi"
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -194,16 +223,20 @@ class EnumProperty(Property):
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.add(f"from {prefix}.{self.reference.module_name} import {self.reference.class_name}")
+        return imports
+
     def transform(self) -> str:
         """ Output to the template, convert this Enum into a JSONable value """
         return f"{self.python_name}.value"
-
-    def constructor_from_dict(self, dict_name: str) -> str:
-        """ How to load this property from a dict (used in generated model from_dict function """
-        constructor = f'{self.reference.class_name}({dict_name}["{self.name}"])'
-        if not self.required:
-            constructor += f' if "{self.name}" in {dict_name} else None'
-        return constructor
 
     @staticmethod
     def values_from_list(l: List[str], /) -> Dict[str, str]:
@@ -235,6 +268,23 @@ class RefProperty(Property):
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.update(
+            {
+                f"from {prefix}.{self.reference.module_name} import {self.reference.class_name}",
+                "from typing import Dict",
+                "from typing import cast",
+            }
+        )
+        return imports
+
     def transform(self) -> str:
         """ Convert this into a JSONable value """
         return f"{self.python_name}.to_dict()"
@@ -245,6 +295,17 @@ class DictProperty(Property):
     """ Property that is a general Dict """
 
     _type_string: ClassVar[str] = "Dict[Any, Any]"
+
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        """
+        Get a set of import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names.
+        """
+        imports = super().get_imports(prefix=prefix)
+        imports.add("from typing import Dict")
+        return imports
 
 
 _openapi_types_to_python_type_strings = {
@@ -294,21 +355,12 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
     elif data["type"] == "boolean":
         return BooleanProperty(name=name, required=required, default=data.get("default"))
     elif data["type"] == "array":
-        if "$ref" in data["items"]:
-            return ReferenceListProperty(
-                name=name, required=required, default=None, reference=Reference.from_ref(data["items"]["$ref"])
-            )
-        if "enum" in data["items"]:
-            return EnumListProperty(
-                name=name, required=required, default=None, values=EnumProperty.values_from_list(data["items"]["enum"])
-            )
-        if "type" in data["items"]:
-            return BasicListProperty(
-                name=name,
-                required=required,
-                default=None,
-                type=_openapi_types_to_python_type_strings[data["items"]["type"]],
-            )
+        return ListProperty(
+            name=name,
+            required=required,
+            default=None,
+            inner_property=property_from_dict(name=f"{name}_item", required=True, data=data["items"]),
+        )
     elif data["type"] == "object":
         return DictProperty(name=name, required=required, default=data.get("default"))
     raise ValueError(f"Did not recognize type of {data}")

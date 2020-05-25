@@ -49,7 +49,8 @@ isort --recursive --apply\
  && mypy openapi_python_client\
  && pytest --cov openapi_python_client tests\
 """
-e2e = "python -m end_to_end_tests.regen_golden_master && pytest end_to_end_tests"
+gm = "python -m end_to_end_tests.regen_golden_master"
+e2e = "pytest --cov openapi_python_client end_to_end_tests"
 
 [tool.black]
 line-length = 120
@@ -69,6 +70,3 @@ exclude = '''
 line_length = 120
 multi_line_output = 3
 include_trailing_comma = true
-
-[tool.coverage.run]
-omit = ["openapi_python_client/templates/*"]

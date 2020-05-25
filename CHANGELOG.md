@@ -6,9 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## 0.4.0 - Unreleased
+### Breaking Changes
+- Classes generated to be included within lists will now be named like <ListName>Item. For example, if a property 
+    named "statuses" is an array of enum values, previously the `Enum` class declared would be called "Statuses". Now it 
+    will be called "StatusesItem". If a "title" attribute was used in the OpenAPI document, that should still be respected
+    and used instead of the generated name.
+
 ### Additions
-- Add support for binary format strings (file payloads)
-- Add support for multipart/form bodies
+- Support for binary format strings (file payloads)
+- Support for multipart/form bodies
+- Support for any supported property within a list (array), including other lists.
+
+### Changes
+- The way most imports are handled was changed which *should* lead to fewer unused imports in generated files.
 
 ## 0.3.0 - 2020-04-25
 ### Additions

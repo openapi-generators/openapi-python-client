@@ -2,18 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, Generator, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Set
 
-from .properties import (
-    DateProperty,
-    DateTimeProperty,
-    EnumListProperty,
-    EnumProperty,
-    Property,
-    ReferenceListProperty,
-    RefProperty,
-    property_from_dict,
-)
+from .properties import EnumProperty, ListProperty, Property, property_from_dict
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_dict
 
@@ -111,12 +102,8 @@ class Endpoint:
             self.relative_imports.add(import_string_from_reference(self.form_body_reference, prefix="..models"))
         if self.multipart_body_reference:
             self.relative_imports.add(import_string_from_reference(self.multipart_body_reference, prefix="..models"))
-        if (
-            self.json_body is not None
-            and isinstance(self.json_body, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty))
-            and self.json_body.reference is not None
-        ):
-            self.relative_imports.add(import_string_from_reference(self.json_body.reference, prefix="..models"))
+        if self.json_body is not None:
+            self.relative_imports.update(self.json_body.get_imports(prefix="..models"))
 
     def _add_responses(self, data: Dict[str, Any]) -> None:
         for code, response_dict in data["responses"].items():
@@ -130,15 +117,7 @@ class Endpoint:
             prop = property_from_dict(
                 name=param_dict["name"], required=param_dict["required"], data=param_dict["schema"]
             )
-            if isinstance(prop, DateProperty):
-                self.relative_imports.add("from datetime import date")
-            elif isinstance(prop, DateTimeProperty):
-                self.relative_imports.add("from datetime import datetime")
-            elif (
-                isinstance(prop, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty))
-                and prop.reference
-            ):
-                self.relative_imports.add(import_string_from_reference(prop.reference, prefix="..models"))
+            self.relative_imports.update(prop.get_imports(prefix="..models"))
 
             if param_dict["in"] == ParameterLocation.QUERY:
                 self.query_parameters.append(prop)
@@ -200,14 +179,7 @@ class Schema:
                 required_properties.append(p)
             else:
                 optional_properties.append(p)
-            if isinstance(p, DateTimeProperty):
-                relative_imports.add("from datetime import datetime")
-            elif isinstance(p, DateProperty):
-                relative_imports.add("from datetime import date")
-            elif isinstance(p, (ReferenceListProperty, EnumListProperty, RefProperty, EnumProperty)) and p.reference:
-                # don't add an import for self-referencing schemas
-                if p.reference.class_name != ref.class_name:
-                    relative_imports.add(import_string_from_reference(p.reference))
+            relative_imports.update(p.get_imports(prefix=""))
 
         schema = Schema(
             reference=ref,
@@ -237,19 +209,23 @@ class OpenAPI:
     version: str
     schemas: Dict[str, Schema]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
-    enums: Dict[str, Union[EnumProperty, EnumListProperty]]
+    enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def _check_enums(
-        schemas: Iterable[Schema], collections: Iterable[EndpointCollection]
-    ) -> Dict[str, Union[EnumProperty, EnumListProperty]]:
+    def _check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
         """
         Create EnumProperties for every enum in any schema or collection.
         Enums are deduplicated by class name.
 
         :raises AssertionError: if two Enums with the same name but different values are detected
         """
-        enums: Dict[str, Union[EnumProperty, EnumListProperty]] = {}
+        enums: Dict[str, EnumProperty] = {}
+
+        def _unpack_list_property(list_prop: ListProperty[Property]) -> Property:
+            inner = list_prop.inner_property
+            if isinstance(inner, ListProperty):
+                return _unpack_list_property(inner)
+            return inner
 
         def _iterate_properties() -> Generator[Property, None, None]:
             for schema in schemas:
@@ -261,7 +237,9 @@ class OpenAPI:
                     yield from endpoint.query_parameters
 
         for prop in _iterate_properties():
-            if not isinstance(prop, (EnumProperty, EnumListProperty)):
+            if isinstance(prop, ListProperty):
+                prop = _unpack_list_property(prop)
+            if not isinstance(prop, EnumProperty):
                 continue
 
             if prop.reference.class_name in enums:

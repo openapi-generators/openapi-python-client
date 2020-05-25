@@ -37,18 +37,16 @@ class TestProperty:
         p = Property(name=name, required=True, default=None)
         assert p.transform() == snake_case(name)
 
-    def test_constructor_from_dict(self, mocker):
+    def test_get_imports(self, mocker):
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
-        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
+        mocker.patch(f"openapi_python_client.utils.snake_case")
         p = Property(name=name, required=True, default=None)
-        dict_name = mocker.MagicMock()
-
-        assert p.constructor_from_dict(dict_name) == f'{dict_name}["{name}"]'
+        assert p.get_imports(prefix="") == set()
 
         p.required = False
-        assert p.constructor_from_dict(dict_name) == f'{dict_name}.get("{name}")'
+        assert p.get_imports(prefix="") == {"from typing import Optional"}
 
 
 class TestStringProperty:
@@ -80,6 +78,24 @@ class TestDateTimeProperty:
 
         assert prop.transform() == f"the_property_name.isoformat()"
 
+    def test_get_imports(self, mocker):
+        from openapi_python_client.openapi_parser.properties import DateTimeProperty
+
+        name = mocker.MagicMock()
+        mocker.patch(f"openapi_python_client.utils.snake_case")
+        p = DateTimeProperty(name=name, required=True, default=None)
+        assert p.get_imports(prefix="") == {
+            "from datetime import datetime",
+            "from typing import cast",
+        }
+
+        p.required = False
+        assert p.get_imports(prefix="") == {
+            "from typing import Optional",
+            "from datetime import datetime",
+            "from typing import cast",
+        }
+
 
 class TestDateProperty:
     def test_transform(self, mocker):
@@ -92,6 +108,24 @@ class TestDateProperty:
 
         assert prop.transform() == f"the_property_name.isoformat()"
 
+    def test_get_imports(self, mocker):
+        from openapi_python_client.openapi_parser.properties import DateProperty
+
+        name = mocker.MagicMock()
+        mocker.patch(f"openapi_python_client.utils.snake_case")
+        p = DateProperty(name=name, required=True, default=None)
+        assert p.get_imports(prefix="") == {
+            "from datetime import date",
+            "from typing import cast",
+        }
+
+        p.required = False
+        assert p.get_imports(prefix="") == {
+            "from typing import Optional",
+            "from datetime import date",
+            "from typing import cast",
+        }
+
 
 class TestFileProperty:
     def test_transform(self):
@@ -103,62 +137,55 @@ class TestFileProperty:
 
         assert prop.transform() == f"the_property_name.to_tuple()"
 
+    def test_get_imports(self, mocker):
+        from openapi_python_client.openapi_parser.properties import FileProperty
 
-class TestBasicListProperty:
-    def test_constructor_from_dict(self):
-        from openapi_python_client.openapi_parser.properties import BasicListProperty
-
-        p = BasicListProperty(name="test", required=True, default=None, type="MyTestType")
-
-        assert p.constructor_from_dict("d") == 'd.get("test", [])'
-
-    def test_get_type_string(self):
-        from openapi_python_client.openapi_parser.properties import BasicListProperty
-
-        p = BasicListProperty(name="test", required=True, default=None, type="MyTestType")
-
-        assert p.get_type_string() == "List[MyTestType]"
-        p.required = False
-        assert p.get_type_string() == "Optional[List[MyTestType]]"
-
-
-class TestReferenceListProperty:
-    def test_get_type_string(self, mocker):
-        from openapi_python_client.openapi_parser.properties import ReferenceListProperty, Reference
-
-        reference = mocker.MagicMock(autospec=Reference)
-        reference.class_name = "MyTestClassName"
-        p = ReferenceListProperty(name="test", required=True, default=None, reference=reference)
-
-        assert p.get_type_string() == "List[MyTestClassName]"
-        p.required = False
-        assert p.get_type_string() == "Optional[List[MyTestClassName]]"
-
-
-class TestEnumListProperty:
-    def test___post_init__(self, mocker):
         name = mocker.MagicMock()
         mocker.patch(f"openapi_python_client.utils.snake_case")
-        fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
+        prefix = "blah"
+        p = FileProperty(name=name, required=True, default=None)
+        assert p.get_imports(prefix=prefix) == {f"from {prefix}.types import File", "from dataclasses import astuple"}
 
-        from openapi_python_client.openapi_parser.properties import EnumListProperty
-
-        EnumListProperty(name=name, required=True, default=None, values={})
-
-        from_ref.assert_called_once_with(name)
-
-    def test_get_type_string(self, mocker):
-        from openapi_python_client.openapi_parser.properties import EnumListProperty
-
-        fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-        mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
-
-        p = EnumListProperty(name="test", required=True, default=None, values={})
-
-        assert p.get_type_string() == "List[MyTestEnum]"
         p.required = False
-        assert p.get_type_string() == "Optional[List[MyTestEnum]]"
+        assert p.get_imports(prefix=prefix) == {
+            "from typing import Optional",
+            f"from {prefix}.types import File",
+            "from dataclasses import astuple",
+        }
+
+
+class TestListProperty:
+    def test_get_type_string(self, mocker):
+        from openapi_python_client.openapi_parser.properties import ListProperty
+
+        inner_property = mocker.MagicMock()
+        inner_type_string = mocker.MagicMock()
+        inner_property.get_type_string.return_value = inner_type_string
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property)
+
+        assert p.get_type_string() == f"List[{inner_type_string}]"
+        p.required = False
+        assert p.get_type_string() == f"Optional[List[{inner_type_string}]]"
+
+    def test_get_type_imports(self, mocker):
+        from openapi_python_client.openapi_parser.properties import ListProperty
+
+        inner_property = mocker.MagicMock()
+        inner_import = mocker.MagicMock()
+        inner_property.get_imports.return_value = {inner_import}
+        prefix = mocker.MagicMock()
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property)
+
+        assert p.get_imports(prefix=prefix) == {
+            inner_import,
+            "from typing import List",
+        }
+        p.required = False
+        assert p.get_imports(prefix=prefix) == {
+            inner_import,
+            "from typing import List",
+            "from typing import Optional",
+        }
 
 
 class TestEnumProperty:
@@ -193,6 +220,25 @@ class TestEnumProperty:
         enum_property.required = False
         assert enum_property.get_type_string() == "Optional[MyTestEnum]"
 
+    def test_get_imports(self, mocker):
+        fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")
+        mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
+        prefix = mocker.MagicMock()
+
+        from openapi_python_client.openapi_parser.properties import EnumProperty
+
+        enum_property = EnumProperty(name="test", required=True, default=None, values={}, reference=fake_reference)
+
+        assert enum_property.get_imports(prefix=prefix) == {
+            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}"
+        }
+
+        enum_property.required = False
+        assert enum_property.get_imports(prefix=prefix) == {
+            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
+            "from typing import Optional",
+        }
+
     def test_transform(self, mocker):
         name = "thePropertyName"
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
@@ -202,24 +248,6 @@ class TestEnumProperty:
         enum_property = EnumProperty(name=name, required=True, default=None, values={}, reference=mocker.MagicMock())
 
         assert enum_property.transform() == f"the_property_name.value"
-
-    def test_constructor_from_dict(self, mocker):
-        fake_reference = mocker.MagicMock(class_name="MyTestEnum")
-
-        from openapi_python_client.openapi_parser.properties import EnumProperty
-
-        enum_property = EnumProperty(name="test_enum", required=True, default=None, values={}, reference=fake_reference)
-
-        assert enum_property.constructor_from_dict("my_dict") == 'MyTestEnum(my_dict["test_enum"])'
-
-        enum_property = EnumProperty(
-            name="test_enum", required=False, default=None, values={}, reference=fake_reference
-        )
-
-        assert (
-            enum_property.constructor_from_dict("my_dict")
-            == 'MyTestEnum(my_dict["test_enum"]) if "test_enum" in my_dict else None'
-        )
 
     def test_values_from_list(self):
         from openapi_python_client.openapi_parser.properties import EnumProperty
@@ -249,12 +277,53 @@ class TestRefProperty:
         ref_property.required = False
         assert ref_property.get_type_string() == "Optional[MyRefClass]"
 
+    def test_get_imports(self, mocker):
+        fake_reference = mocker.MagicMock(class_name="MyRefClass", module_name="my_test_enum")
+        prefix = mocker.MagicMock()
+
+        from openapi_python_client.openapi_parser.properties import RefProperty
+
+        p = RefProperty(name="test", required=True, default=None, reference=fake_reference)
+
+        assert p.get_imports(prefix=prefix) == {
+            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
+            "from typing import Dict",
+            "from typing import cast",
+        }
+
+        p.required = False
+        assert p.get_imports(prefix=prefix) == {
+            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
+            "from typing import Dict",
+            "from typing import cast",
+            "from typing import Optional",
+        }
+
     def test_transform(self, mocker):
         from openapi_python_client.openapi_parser.properties import RefProperty
 
         ref_property = RefProperty(name="super_unique_name", required=True, default=None, reference=mocker.MagicMock())
 
         assert ref_property.transform() == "super_unique_name.to_dict()"
+
+
+class TestDictProperty:
+    def test_get_imports(self, mocker):
+        from openapi_python_client.openapi_parser.properties import DictProperty
+
+        name = mocker.MagicMock()
+        mocker.patch(f"openapi_python_client.utils.snake_case")
+        prefix = mocker.MagicMock()
+        p = DictProperty(name=name, required=True, default=None)
+        assert p.get_imports(prefix=prefix) == {
+            "from typing import Dict",
+        }
+
+        p.required = False
+        assert p.get_imports(prefix=prefix) == {
+            "from typing import Optional",
+            "from typing import Dict",
+        }
 
 
 class TestPropertyFromDict:
@@ -355,69 +424,25 @@ class TestPropertyFromDict:
         )
         clazz.assert_called_once_with(name=name, required=required, default=data["default"])
 
-    def test_property_from_dict_ref_array(self, mocker):
+    def test_property_from_dict_array(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        ref = mocker.MagicMock()
         data = {
             "type": "array",
-            "items": {"$ref": ref},
+            "items": {"type": "number", "default": "0.0"},
         }
-        ReferenceListProperty = mocker.patch(f"{MODULE_NAME}.ReferenceListProperty")
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+        ListProperty = mocker.patch(f"{MODULE_NAME}.ListProperty")
+        FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
 
         from openapi_python_client.openapi_parser.properties import property_from_dict
 
         p = property_from_dict(name=name, required=required, data=data)
 
-        from_ref.assert_called_once_with(ref)
-        ReferenceListProperty.assert_called_once_with(name=name, required=required, default=None, reference=from_ref())
-        assert p == ReferenceListProperty()
-
-    def test_property_from_dict_enum_array(self, mocker):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        enum = mocker.MagicMock()
-        data = {
-            "type": "array",
-            "items": {"enum": enum},
-        }
-        values_from_list = mocker.patch(f"{MODULE_NAME}.EnumProperty.values_from_list")
-        EnumListProperty = mocker.patch(f"{MODULE_NAME}.EnumListProperty")
-
-        from openapi_python_client.openapi_parser.properties import property_from_dict
-
-        p = property_from_dict(name=name, required=required, data=data)
-
-        values_from_list.assert_called_once_with(enum)
-        EnumListProperty.assert_called_once_with(name=name, required=required, default=None, values=values_from_list())
-        assert p == EnumListProperty()
-
-    @pytest.mark.parametrize(
-        "openapi_type,python_type",
-        [
-            ("string", "str"),
-            ("number", "float"),
-            ("integer", "int"),
-            ("boolean", "bool"),
-            ("object", "Dict[Any, Any]"),
-        ],
-    )
-    def test_property_from_dict_simple_array(self, mocker, openapi_type, python_type):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = {
-            "type": "array",
-            "items": {"type": openapi_type},
-        }
-        BasicListProperty = mocker.patch(f"{MODULE_NAME}.BasicListProperty")
-
-        from openapi_python_client.openapi_parser.properties import property_from_dict
-
-        p = property_from_dict(name=name, required=required, data=data)
-
-        BasicListProperty.assert_called_once_with(name=name, required=required, default=None, type=python_type)
-        assert p == BasicListProperty()
+        FloatProperty.assert_called_once_with(name=f"{name}_item", required=True, default="0.0")
+        ListProperty.assert_called_once_with(
+            name=name, required=required, default=None, inner_property=FloatProperty.return_value
+        )
+        assert p == ListProperty.return_value
 
     def test_property_from_dict_unsupported_type(self, mocker):
         name = mocker.MagicMock()

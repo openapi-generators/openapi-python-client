@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import astuple, dataclass
-from typing import Any, Dict, List, Optional, cast
-
-from .types import *
+from dataclasses import dataclass
+from typing import Any, Dict
 
 {% for relative in schema.relative_imports %}
 {{ relative }}
@@ -29,17 +27,22 @@ class {{ schema.reference.class_name }}:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> {{ schema.reference.class_name }}:
-        {% for property in schema.required_properties + schema.optional_properties %}
+{% for property in schema.required_properties + schema.optional_properties %}
+    {% if property.required %}
+        {% set property_source = 'd["' + property.name + '"]' %}
+    {% else %}
+        {% set property_source = 'd.get("' + property.name + '")' %}
+    {% endif %}
+    {% if property.constructor_template %}
+        {% from property.constructor_template import template %}
+        {{ template(property, property_source) | indent(8) }}
+    {% else %}
+        {{ property.python_name }} = {{ property_source }}
+    {% endif %}
 
-        {% if property.constructor_template %}
-        {% include property.constructor_template %}
-        {% else %}
-        {{ property.python_name }} = {{ property.constructor_from_dict("d") }}
-        {% endif %}
-
-        {% endfor %}
+{% endfor %}
         return {{ schema.reference.class_name }}(
-            {% for property in schema.required_properties + schema.optional_properties %}
+{% for property in schema.required_properties + schema.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
-            {% endfor %}
+{% endfor %}
         )

@@ -37,7 +37,7 @@
                     {
                         "required": true,
                         "schema": {
-                            "title": "Statuses",
+                            "title": "An Enum Value",
                             "type": "array",
                             "items": {
                                 "enum": [
@@ -46,7 +46,7 @@
                                 ]
                             }
                         },
-                        "name": "statuses",
+                        "name": "an_enum_value",
                         "in": "query"
                     },
                     {
@@ -145,9 +145,7 @@
                 "title": "AModel",
                 "required": [
                     "an_enum_value",
-                    "a_list_of_enums",
-                    "a_list_of_strings",
-                    "a_list_of_objects",
+                    "nested_list_of_enums",
                     "aCamelDateTime",
                     "a_date"
                 ],
@@ -160,28 +158,17 @@
                             "SECOND_VALUE"
                         ]
                     },
-                    "a_list_of_enums": {
-                        "title": "A List Of Enums",
+                    "nested_list_of_enums": {
+                        "title": "Nested List Of Enums",
                         "type": "array",
                         "items": {
-                            "enum": [
-                                "FIRST_VALUE",
-                                "SECOND_VALUE"
-                            ]
-                        }
-                    },
-                    "a_list_of_strings": {
-                        "title": "A List Of Strings",
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "a_list_of_objects": {
-                        "title": "A List Of Objects",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/OtherModel"
+                            "type": "array",
+                            "items": {
+                                "enum": [
+                                    "FIRST_VALUE",
+                                    "SECOND_VALUE"
+                                ]
+                            }
                         }
                     },
                     "aCamelDateTime": {
@@ -223,20 +210,6 @@
                         }
                     }
                 }
-            },
-            "OtherModel": {
-                "title": "OtherModel",
-                "required": [
-                    "a_value"
-                ],
-                "type": "object",
-                "properties": {
-                    "a_value": {
-                        "title": "A Value",
-                        "type": "string"
-                    }
-                },
-                "description": "A different model for calling from TestModel "
             },
             "ValidationError": {
                 "title": "ValidationError",
