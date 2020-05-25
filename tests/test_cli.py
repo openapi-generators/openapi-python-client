@@ -128,6 +128,17 @@ class TestGenerate:
             "Please open an issue at https://github.com/triaxtec/openapi-python-client/issues/new/choose\n\n"
         )
 
+    def test_generate_handle_file_exists(self, _create_new_client):
+        error = FileExistsError()
+        _create_new_client.side_effect = error
+        path = "cool/path"
+        from openapi_python_client.cli import app
+
+        result = runner.invoke(app, ["generate", f"--path={path}"])
+
+        assert result.exit_code == 1
+        assert result.output == "Directory already exists. Delete it or use the update command.\n"
+
 
 @pytest.fixture
 def _update_existing_client(mocker):

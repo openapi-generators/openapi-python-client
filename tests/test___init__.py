@@ -435,6 +435,7 @@ class TestProject:
 
 
 def test__reformat(mocker):
+    import subprocess
     from openapi_python_client import _Project, OpenAPI
 
     sub_run = mocker.patch("subprocess.run")
@@ -446,8 +447,14 @@ def test__reformat(mocker):
 
     sub_run.assert_has_calls(
         [
-            mocker.call("isort --recursive --apply", cwd=project.project_dir, shell=True),
-            mocker.call("black .", cwd=project.project_dir, shell=True),
+            mocker.call(
+                "isort --recursive --apply",
+                cwd=project.project_dir,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            ),
+            mocker.call("black .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE),
         ]
     )
 

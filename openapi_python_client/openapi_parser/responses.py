@@ -96,7 +96,7 @@ def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
     elif "text/html" in content:
         content_type = "text/html"
     else:
-        raise ParseError(data)
+        raise ParseError(data, message=f"Unsupported content_type {content}")
 
     schema_data = data["content"][content_type]["schema"]
 

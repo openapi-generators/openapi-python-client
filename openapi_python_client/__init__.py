@@ -105,8 +105,14 @@ class _Project:
         self._raise_errors()
 
     def _reformat(self) -> None:
-        subprocess.run("isort --recursive --apply", cwd=self.project_dir, shell=True)
-        subprocess.run("black .", cwd=self.project_dir, shell=True)
+        subprocess.run(
+            "isort --recursive --apply",
+            cwd=self.project_dir,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        subprocess.run("black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     def _raise_errors(self) -> None:
         errors = []

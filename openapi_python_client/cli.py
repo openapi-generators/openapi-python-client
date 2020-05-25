@@ -68,6 +68,9 @@ def handle_errors() -> Generator[None, None, None]:
         for err in e.parse_errors:
             _print_parser_error(err)
         raise typer.Exit(code=1)
+    except FileExistsError:
+        typer.secho("Directory already exists. Delete it or use the update command.", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
 
 
 @app.command()
