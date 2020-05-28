@@ -194,7 +194,7 @@ description = "The next generation HTTP client."
 name = "httpx"
 optional = false
 python-versions = ">=3.6"
-version = "0.13.1"
+version = "0.13.2"
 
 [package.dependencies]
 certifi = "*"
@@ -735,8 +735,8 @@ httptools = [
     {file = "httptools-0.1.1.tar.gz", hash = "sha256:41b573cf33f64a8f8f3400d0a7faf48e1888582b6f6e02b82b9bd4f0bf7497ce"},
 ]
 httpx = [
-    {file = "httpx-0.13.1-py3-none-any.whl", hash = "sha256:b132a566677c66d436502484bc16376d1de5b32743d2a319f90bbbeda2acbd95"},
-    {file = "httpx-0.13.1.tar.gz", hash = "sha256:d90cc7930bb3be2522c398038a07010b7830a8d9a5d9b91cdcaedea79290e9b9"},
+    {file = "httpx-0.13.2-py3-none-any.whl", hash = "sha256:99055b98fb3dae18c86597d4f5f4315214924a87c609b53d3cb68492fbb45fcf"},
+    {file = "httpx-0.13.2.tar.gz", hash = "sha256:4387a6601839fb71f5aea57042e6b476f24ca118cc05c55f1e52ed8baaf0a45f"},
 ]
 hyperframe = [
     {file = "hyperframe-5.2.0-py2.py3-none-any.whl", hash = "sha256:5187962cb16dcc078f23cb5a4b110098d546c3f41ff2d4038a9896893bbd0b40"},
