@@ -7,7 +7,7 @@ class Client:
 
     base_url: str
 
-    def get_headers(self) -> Dict[Union[str, bytes], Union[str, bytes]]:
+    def get_headers(self) -> Dict[str, str]:
         """ Get headers to be used in all endpoints """
         return {}
 
@@ -17,6 +17,6 @@ class AuthenticatedClient(Client):
 
     token: str
 
-    def get_headers(self) -> Dict[Union[str, bytes], Union[str, bytes]]:
+    def get_headers(self) -> Dict[str, str]:
         """ Get headers to be used in authenticated endpoints """
         return {"Authorization": f"Bearer {self.token}"}
