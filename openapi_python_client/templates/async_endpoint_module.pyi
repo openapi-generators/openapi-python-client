@@ -44,14 +44,13 @@ async def {{ endpoint.name | snakecase }}(
 {{ return_type(endpoint) }}
     """ {{ endpoint.description }} """
     url = "{}{{ endpoint.path }}".format(
-        client.base_url
-        {%- for parameter in endpoint.path_parameters -%}
-        ,{{parameter.name}}={{parameter.python_name}}
-        {%- endfor -%}
+        client.base_url,
+        {% for parameter in endpoint.path_parameters %}
+        {{parameter.name}}={{parameter.python_name}},
+        {% endfor %}
     )
 
     {{ query_params(endpoint) | indent(4) }}
-
     {{ json_body(endpoint) | indent(4) }}
 
     async with httpx.AsyncClient() as _client:
@@ -61,7 +60,6 @@ async def {{ endpoint.name | snakecase }}(
             {% if endpoint.form_body_reference %}
             data=asdict(form_data),
             {% endif %}
-
             {% if endpoint.multipart_body_reference %}
             files=multipart_data.to_dict(),
             {% endif %}

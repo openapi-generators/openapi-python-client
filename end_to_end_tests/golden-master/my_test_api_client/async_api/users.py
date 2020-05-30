@@ -19,7 +19,7 @@ async def get_user_list(
 ]:
 
     """ Get a list of things  """
-    url = "{}/tests/".format(client.base_url)
+    url = "{}/tests/".format(client.base_url,)
 
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
@@ -56,7 +56,7 @@ async def upload_file_tests_upload_post(
 ]:
 
     """ Upload a file  """
-    url = "{}/tests/upload".format(client.base_url)
+    url = "{}/tests/upload".format(client.base_url,)
 
     async with httpx.AsyncClient() as _client:
         response = await _client.post(url=url, headers=client.get_headers(), files=multipart_data.to_dict(),)

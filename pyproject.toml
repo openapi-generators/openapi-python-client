@@ -66,6 +66,7 @@ exclude = '''
     | \.venv
     | \.mypy_cache
     | openapi_python_client/templates
+    | tests/test_templates
   )/
 )
 '''
@@ -74,3 +75,4 @@ exclude = '''
 line_length = 120
 multi_line_output = 3
 include_trailing_comma = true
+skip = ["tests/test_templates"]

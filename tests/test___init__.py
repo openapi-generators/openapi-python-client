@@ -484,6 +484,9 @@ def test_load_config(mocker):
     fake_path = mocker.MagicMock(autospec=pathlib.Path)
 
     from openapi_python_client import load_config
+    from openapi_python_client.openapi_parser import reference
+
+    reference.class_overrides = {}
 
     load_config(path=fake_path)
 
