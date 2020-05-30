@@ -200,41 +200,63 @@ class TestEnumProperty:
         name = mocker.MagicMock()
 
         snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
-        from openapi_python_client.openapi_parser.properties import EnumProperty
+        fake_reference = mocker.MagicMock(class_name="MyTestEnum")
+        deduped_reference = mocker.MagicMock(class_name="Deduped")
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", side_effect=[fake_reference, deduped_reference])
+        from openapi_python_client.openapi_parser import properties
 
-        enum_property = EnumProperty(
-            name=name,
-            required=True,
-            default="second",
-            values={"FIRST": "first", "SECOND": "second"},
-            reference=(mocker.MagicMock(class_name="MyTestEnum")),
+        fake_dup_enum = mocker.MagicMock()
+        properties._existing_enums = {"MyTestEnum": fake_dup_enum}
+        values = {"FIRST": "first", "SECOND": "second"}
+
+        enum_property = properties.EnumProperty(
+            name=name, required=True, default="second", values=values, title="a_title",
         )
 
+        assert enum_property.default == "Deduped.SECOND"
+        assert enum_property.python_name == snake_case(name)
+        from_ref.assert_has_calls(
+            [mocker.call("a_title"), mocker.call("MyTestEnum1"),]
+        )
+        assert enum_property.reference == deduped_reference
+        assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
+
+        # What if an Enum exists with the same name, but has the same values? Don't dedupe that.
+        fake_dup_enum.values = values
+        from_ref.reset_mock()
+        from_ref.side_effect = [fake_reference]
+        enum_property = properties.EnumProperty(
+            name=name, required=True, default="second", values=values, title="a_title",
+        )
         assert enum_property.default == "MyTestEnum.SECOND"
         assert enum_property.python_name == snake_case(name)
+        from_ref.assert_called_once_with("a_title")
+        assert enum_property.reference == fake_reference
+        assert len(properties._existing_enums) == 2
+
+        properties._existing_enums = {}
 
     def test_get_type_string(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
-        from openapi_python_client.openapi_parser.properties import EnumProperty
+        from openapi_python_client.openapi_parser import properties
 
-        enum_property = EnumProperty(
-            name="test", required=True, default=None, values={}, reference=mocker.MagicMock(class_name="MyTestEnum")
-        )
+        enum_property = properties.EnumProperty(name="test", required=True, default=None, values={}, title="a_title")
 
         assert enum_property.get_type_string() == "MyTestEnum"
         enum_property.required = False
         assert enum_property.get_type_string() == "Optional[MyTestEnum]"
+        properties._existing_enums = {}
 
     def test_get_imports(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
         prefix = mocker.MagicMock()
 
-        from openapi_python_client.openapi_parser.properties import EnumProperty
+        from openapi_python_client.openapi_parser import properties
 
-        enum_property = EnumProperty(name="test", required=True, default=None, values={}, reference=fake_reference)
+        enum_property = properties.EnumProperty(name="test", required=True, default=None, values={}, title="a_title")
 
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}"
@@ -245,6 +267,7 @@ class TestEnumProperty:
             f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
             "from typing import Optional",
         }
+        properties._existing_enums = {}
 
     def test_values_from_list(self):
         from openapi_python_client.openapi_parser.properties import EnumProperty
@@ -259,6 +282,13 @@ class TestEnumProperty:
             "A23": "a23",
             "VALUE_3": "1bc",
         }
+
+    def test_get_all_enums(self, mocker):
+        from openapi_python_client.openapi_parser import properties
+
+        properties._existing_enums = mocker.MagicMock()
+        assert properties.EnumProperty.get_all_enums() == properties._existing_enums
+        properties._existing_enums = {}
 
 
 class TestRefProperty:
@@ -324,7 +354,6 @@ class TestPropertyFromDict:
             "enum": mocker.MagicMock(),
         }
         EnumProperty = mocker.patch(f"{MODULE_NAME}.EnumProperty")
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
         from openapi_python_client.openapi_parser.properties import property_from_dict
 
@@ -332,22 +361,20 @@ class TestPropertyFromDict:
 
         EnumProperty.values_from_list.assert_called_once_with(data["enum"])
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=None, reference=from_ref()
+            name=name, required=required, values=EnumProperty.values_from_list(), default=None, title=name
         )
         assert p == EnumProperty()
 
         EnumProperty.reset_mock()
+        title = mocker.MagicMock()
         data["default"] = mocker.MagicMock()
+        data["title"] = title
 
         property_from_dict(
             name=name, required=required, data=data,
         )
         EnumProperty.assert_called_once_with(
-            name=name,
-            required=required,
-            values=EnumProperty.values_from_list(),
-            default=data["default"],
-            reference=from_ref(),
+            name=name, required=required, values=EnumProperty.values_from_list(), default=data["default"], title=title
         )
 
     def test_property_from_dict_ref(self, mocker):

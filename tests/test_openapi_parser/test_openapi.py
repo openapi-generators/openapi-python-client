@@ -16,8 +16,7 @@ class TestOpenAPI:
             "paths": mocker.MagicMock(),
             "info": {"title": mocker.MagicMock(), "description": mocker.MagicMock(), "version": mocker.MagicMock()},
         }
-        enums = mocker.MagicMock()
-        _check_enums = mocker.patch(f"{MODULE_NAME}.OpenAPI._check_enums", return_value=enums)
+        get_all_enums = mocker.patch(f"{MODULE_NAME}.EnumProperty.get_all_enums")
 
         from openapi_python_client.openapi_parser.openapi import OpenAPI
 
@@ -25,127 +24,15 @@ class TestOpenAPI:
 
         Schema.dict.assert_called_once_with(in_dict["components"]["schemas"])
         EndpointCollection.from_dict.assert_called_once_with(in_dict["paths"])
-        _check_enums.assert_called_once_with(schemas.values(), endpoint_collections_by_tag.values())
+        get_all_enums.assert_called_once_with()
         assert openapi == OpenAPI(
             title=in_dict["info"]["title"],
             description=in_dict["info"]["description"],
             version=in_dict["info"]["version"],
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             schemas=schemas,
-            enums=enums,
+            enums=get_all_enums.return_value,
         )
-
-    def test__check_enums(self, mocker):
-        # Test that all required and optional properties of all schemas are checked
-        # Test that all path and query params of all endpoints of all collections are checked
-        # Test that non EnumProperties are skipped
-        # Test that ListProperties are fully unpacked
-        from openapi_python_client.openapi_parser.openapi import EndpointCollection, OpenAPI
-        from openapi_python_client.openapi_parser.properties import EnumProperty, StringProperty, ListProperty
-
-        def _make_enum():
-            return EnumProperty(
-                name=str(mocker.MagicMock()),
-                required=True,
-                default=None,
-                values=mocker.MagicMock(),
-                reference=mocker.MagicMock(),
-            )
-
-        # Multiple schemas with both required and optional properties for making sure iteration works correctly
-        schema_1 = mocker.MagicMock()
-        schema_1_req_enum_1 = _make_enum()
-        schema_1_req_list = ListProperty(
-            name="list",
-            required=True,
-            default=None,
-            inner_property=ListProperty(
-                name="list_list", required=True, inner_property=schema_1_req_enum_1, default=None
-            ),
-        )
-        schema_1_req_enum_2 = _make_enum()
-        schema_1.required_properties = [schema_1_req_list, schema_1_req_enum_2]
-        schema_1_opt_enum_1 = _make_enum()
-        schema_1_opt_enum_2 = _make_enum()
-        non_enum = mocker.MagicMock(autospec=StringProperty)  # For checking non-enum properties
-        schema_1.optional_properties = [schema_1_opt_enum_1, schema_1_opt_enum_2, non_enum]
-        schema_2 = mocker.MagicMock()
-        schema_2_req_enum = _make_enum()
-        schema_2.required_properties = [schema_2_req_enum]
-        schema_2_opt_enum = _make_enum()
-        schema_2.optional_properties = [schema_2_opt_enum]
-        schemas = [schema_1, schema_2]
-
-        collection_1 = mocker.MagicMock(autospec=EndpointCollection)
-        collection_1_endpoint_1 = mocker.MagicMock()
-        collection_1_endpoint_1_path_enum_1 = _make_enum()
-        collection_1_endpoint_1_path_enum_2 = _make_enum()
-        collection_1_endpoint_1.path_parameters = [
-            collection_1_endpoint_1_path_enum_1,
-            collection_1_endpoint_1_path_enum_2,
-        ]
-        collection_1_endpoint_1_query_enum_1 = _make_enum()
-        collection_1_endpoint_1_query_enum_2 = _make_enum()
-        collection_1_endpoint_1.query_parameters = [
-            collection_1_endpoint_1_query_enum_1,
-            collection_1_endpoint_1_query_enum_2,
-        ]
-        collection_1_endpoint_2 = mocker.MagicMock()
-        collection_1_endpoint_2_path_enum = _make_enum()
-        collection_1_endpoint_2.path_parameters = [collection_1_endpoint_2_path_enum]
-        collection_1_endpoint_2_query_enum = _make_enum()
-        collection_1_endpoint_2.query_parameters = [collection_1_endpoint_2_query_enum]
-        collection_1.endpoints = [collection_1_endpoint_1, collection_1_endpoint_2]
-
-        collection_2 = mocker.MagicMock()
-        collection_2_endpoint = mocker.MagicMock()
-        collection_2_path_enum = _make_enum()
-        collection_2_endpoint.path_parameters = [collection_2_path_enum]
-        collection_2_query_enum = _make_enum()
-        collection_2_endpoint.query_parameters = [collection_2_query_enum]
-        collection_2.endpoints = [collection_2_endpoint]
-        collections = [collection_1, collection_2]
-
-        enums = {
-            schema_1_req_enum_1.reference.class_name: schema_1_req_enum_1,
-            schema_1_req_enum_2.reference.class_name: schema_1_req_enum_2,
-            schema_1_opt_enum_1.reference.class_name: schema_1_opt_enum_1,
-            schema_1_opt_enum_2.reference.class_name: schema_1_opt_enum_2,
-            schema_2_req_enum.reference.class_name: schema_2_req_enum,
-            schema_2_opt_enum.reference.class_name: schema_2_opt_enum,
-            collection_1_endpoint_1_path_enum_1.reference.class_name: collection_1_endpoint_1_path_enum_1,
-            collection_1_endpoint_1_path_enum_2.reference.class_name: collection_1_endpoint_1_path_enum_2,
-            collection_1_endpoint_1_query_enum_1.reference.class_name: collection_1_endpoint_1_query_enum_1,
-            collection_1_endpoint_1_query_enum_2.reference.class_name: collection_1_endpoint_1_query_enum_2,
-            collection_1_endpoint_2_path_enum.reference.class_name: collection_1_endpoint_2_path_enum,
-            collection_1_endpoint_2_query_enum.reference.class_name: collection_1_endpoint_2_query_enum,
-            collection_2_path_enum.reference.class_name: collection_2_path_enum,
-            collection_2_query_enum.reference.class_name: collection_2_query_enum,
-        }
-
-        result = OpenAPI._check_enums(schemas=schemas, collections=collections)
-
-        assert result == enums
-
-    def test__check_enums_bad_duplicate(self, mocker):
-        from dataclasses import replace
-        from openapi_python_client.openapi_parser.properties import EnumProperty
-        from openapi_python_client.openapi_parser.openapi import OpenAPI
-
-        schema = mocker.MagicMock()
-
-        enum_1 = EnumProperty(
-            name=str(mocker.MagicMock()),
-            required=True,
-            default=None,
-            values=mocker.MagicMock(),
-            reference=mocker.MagicMock(),
-        )
-        enum_2 = replace(enum_1, values=mocker.MagicMock())
-        schema.required_properties = [enum_1, enum_2]
-
-        with pytest.raises(AssertionError):
-            OpenAPI._check_enums([schema], [])
 
 
 class TestSchema:

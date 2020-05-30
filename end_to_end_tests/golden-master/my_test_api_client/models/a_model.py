@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Union, cast
 
 from .an_enum_value import AnEnumValue
-from .nested_list_of_enums_item_item import NestedListOfEnumsItemItem
+from .an_enum_value1 import AnEnumValue1
 
 
 @dataclass
@@ -13,7 +13,7 @@ class AModel:
     """ A Model for testing all the ways custom objects can be used  """
 
     an_enum_value: AnEnumValue
-    nested_list_of_enums: List[List[NestedListOfEnumsItemItem]]
+    nested_list_of_enums: List[List[AnEnumValue1]]
     a_camel_date_time: Union[datetime, date]
     a_date: date
 
@@ -53,7 +53,7 @@ class AModel:
         for nested_list_of_enums_item_data in d["nested_list_of_enums"]:
             nested_list_of_enums_item = []
             for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
-                nested_list_of_enums_item_item = NestedListOfEnumsItemItem(nested_list_of_enums_item_item_data)
+                nested_list_of_enums_item_item = AnEnumValue1(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 

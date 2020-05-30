@@ -221,51 +221,11 @@ class OpenAPI:
     enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def _check_enums(schemas: Iterable[Schema], collections: Iterable[EndpointCollection]) -> Dict[str, EnumProperty]:
-        """
-        Create EnumProperties for every enum in any schema or collection.
-        Enums are deduplicated by class name.
-
-        :raises AssertionError: if two Enums with the same name but different values are detected
-        """
-        enums: Dict[str, EnumProperty] = {}
-
-        def _unpack_list_property(list_prop: ListProperty[Property]) -> Property:
-            inner = list_prop.inner_property
-            if isinstance(inner, ListProperty):
-                return _unpack_list_property(inner)
-            return inner
-
-        def _iterate_properties() -> Generator[Property, None, None]:
-            for schema in schemas:
-                yield from schema.required_properties
-                yield from schema.optional_properties
-            for collection in collections:
-                for endpoint in collection.endpoints:
-                    yield from endpoint.path_parameters
-                    yield from endpoint.query_parameters
-
-        for prop in _iterate_properties():
-            if isinstance(prop, ListProperty):
-                prop = _unpack_list_property(prop)
-            if not isinstance(prop, EnumProperty):
-                continue
-
-            if prop.reference.class_name in enums:
-                # We already have an enum with this name, make sure the values match
-                assert (
-                    prop.values == enums[prop.reference.class_name].values
-                ), f"Encountered conflicting enum named {prop.reference.class_name}"
-
-            enums[prop.reference.class_name] = prop
-        return enums
-
-    @staticmethod
     def from_dict(d: Dict[str, Dict[str, Any]], /) -> OpenAPI:
         """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
         endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])
-        enums = OpenAPI._check_enums(schemas.values(), endpoint_collections_by_tag.values())
+        enums = EnumProperty.get_all_enums()
 
         return OpenAPI(
             title=d["info"]["title"],

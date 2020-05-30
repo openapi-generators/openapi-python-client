@@ -10,8 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Classes generated to be included within lists will now be named like <ListName>Item. For example, if a property 
     named "statuses" is an array of enum values, previously the `Enum` class declared would be called "Statuses". Now it 
     will be called "StatusesItem". If a "title" attribute was used in the OpenAPI document, that should still be respected
-    and used instead of the generated name.
-- Clients now require httpx ^0.13.0 (up from ^0.12.1)
+    and used instead of the generated name. You can restore previous names by adding "StatusesItem" to the `class_overrides`
+    section of a config file.
+- Clients now require httpx ^0.13.0 (up from ^0.12.1). See [httpx release notes](https://github.com/encode/httpx/releases/tag/0.13.0)
+    for details.
 
 ### Additions
 - Support for binary format strings (file payloads)
@@ -19,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for any supported property within a list (array), including other lists.
 - Support for Union types ("anyOf" in OpenAPI document)
 - Support for more basic response types (integer, number, boolean)
+- Support for duplicate enums. Instead of erroring, enums with the same name (title) but differing values 
+    will have a number appended to the end. So if you have two conflicting enums named `MyEnum`, one of them
+    will now be named `MyEnum1`. Note that the order in which these are processed and therefore named is entirely
+    dependent on the order they are read from the OpenAPI document, so changes to the document could result 
+    in swapping the names of conflicting Enums.
 
 ### Changes
 - The way most imports are handled was changed which *should* lead to fewer unused imports in generated files.

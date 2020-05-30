@@ -2,3 +2,9 @@ class_overrides:
   _ABCResponse:
     class_name: ABCResponse
     module_name: abc_response
+  AnEnumValueItem:
+    class_name: AnEnumValue
+    module_name: an_enum_value
+  NestedListOfEnumsItemItem:
+    class_name: AnEnumValue
+    module_name: an_enum_value

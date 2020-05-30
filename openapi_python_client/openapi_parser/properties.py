@@ -1,4 +1,6 @@
-from dataclasses import dataclass, field
+from __future__ import annotations
+
+from dataclasses import InitVar, dataclass, field
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
 from openapi_python_client import utils
@@ -222,20 +224,40 @@ class UnionProperty(Property):
         return imports
 
 
+_existing_enums: Dict[str, EnumProperty] = {}
+
+
 @dataclass
 class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, str]
-    reference: Reference
+    reference: Reference = field(init=False)
+    title: InitVar[str]
 
     template: ClassVar[str] = "enum_property.pyi"
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, title: str) -> None:  # type: ignore
         super().__post_init__()
+        reference = Reference.from_ref(title)
+        dedup_counter = 0
+        while reference.class_name in _existing_enums:
+            existing = _existing_enums[reference.class_name]
+            if self.values == existing.values:
+                break  # This is the same Enum, we're good
+            dedup_counter += 1
+            reference = Reference.from_ref(f"{reference.class_name}{dedup_counter}")
+
+        self.reference = reference
         inverse_values = {v: k for k, v in self.values.items()}
         if self.default is not None:
             self.default = f"{self.reference.class_name}.{inverse_values[self.default]}"
+        _existing_enums[self.reference.class_name] = self
+
+    @staticmethod
+    def get_all_enums() -> Dict[str, EnumProperty]:
+        """ Get all the EnumProperties that have been registered keyed by class name """
+        return _existing_enums
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -345,7 +367,7 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
             name=name,
             required=required,
             values=EnumProperty.values_from_list(data["enum"]),
-            reference=Reference.from_ref(data.get("title", name)),
+            title=data.get("title", name),
             default=data.get("default"),
         )
     if "$ref" in data:

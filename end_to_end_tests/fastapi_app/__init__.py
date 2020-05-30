@@ -27,6 +27,11 @@ class AnEnum(Enum):
     SECOND_VALUE = "SECOND_VALUE"
 
 
+class DifferentEnum(Enum):
+    FIRST_VALUE = "DIFFERENT"
+    SECOND_VALUE = "OTHER"
+
+
 class OtherModel(BaseModel):
     """ A different model for calling from TestModel """
 
@@ -37,7 +42,7 @@ class AModel(BaseModel):
     """ A Model for testing all the ways custom objects can be used """
 
     an_enum_value: AnEnum
-    nested_list_of_enums: List[List[AnEnum]]
+    nested_list_of_enums: List[List[DifferentEnum]]
     aCamelDateTime: Union[datetime, date]
     a_date: date
 

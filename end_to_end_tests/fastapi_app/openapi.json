@@ -164,8 +164,8 @@
                             "type": "array",
                             "items": {
                                 "enum": [
-                                    "FIRST_VALUE",
-                                    "SECOND_VALUE"
+                                    "DIFFERENT",
+                                    "OTHER"
                                 ]
                             }
                         }

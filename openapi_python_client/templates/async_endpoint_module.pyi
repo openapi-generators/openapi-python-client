@@ -11,7 +11,7 @@ from ..errors import ApiResponseError
 {% endfor %}
 {% for endpoint in collection.endpoints %}
 
-{% from "endpoint_macros.py.jinja" import query_params, json_body, return_type %}
+{% from "endpoint_macros.pyi" import query_params, json_body, return_type %}
 
 async def {{ endpoint.name | snakecase }}(
     *,
