@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.4.0-rc.1"
+version = "0.4.0"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -76,3 +76,7 @@ line_length = 120
 multi_line_output = 3
 include_trailing_comma = true
 skip = ["tests/test_templates"]
+
+[tool.coverage.run]
+omit = ["openapi_python_client/templates/*"]
+
