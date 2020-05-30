@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Client will still be generated if there are recoverable errors, excluding endpoints that had those errors
 - Output from isort and black when generating will now be suppressed
 
+### Fixes
+- Defaults within models dataclasses for `Dict` or `List` properties will now be properly declared as a 
+    `field` with the `default_factory` parameter to prevent errors related to mutable defaults.
+
 ## 0.3.0 - 2020-04-25
 ### Additions
 - Link to the GitHub repository from PyPI (#26). Thanks @theY4Kman!

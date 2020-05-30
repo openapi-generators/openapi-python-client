@@ -176,6 +176,11 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.pyi"
 
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.default is not None:
+            self.default = f"field(default_factory=lambda: cast({self.get_type_string()}, {self.default}))"
+
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         if self.required:
@@ -192,6 +197,9 @@ class ListProperty(Property, Generic[InnerProp]):
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
         imports.add("from typing import List")
+        if self.default is not None:
+            imports.add("from dataclasses import field")
+            imports.add("from typing import cast")
         return imports
 
 
@@ -331,6 +339,11 @@ class DictProperty(Property):
 
     _type_string: ClassVar[str] = "Dict[Any, Any]"
 
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.default is not None:
+            self.default = f"field(default_factory=lambda: cast({self.get_type_string()}, {self.default}))"
+
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere
@@ -340,6 +353,9 @@ class DictProperty(Property):
         """
         imports = super().get_imports(prefix=prefix)
         imports.add("from typing import Dict")
+        if self.default is not None:
+            imports.add("from dataclasses import field")
+            imports.add("from typing import cast")
         return imports
 
 
@@ -391,7 +407,7 @@ def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Prope
         return ListProperty(
             name=name,
             required=required,
-            default=None,
+            default=data.get("default"),
             inner_property=property_from_dict(name=f"{name}_item", required=True, data=data["items"]),
         )
     elif data["type"] == "object":

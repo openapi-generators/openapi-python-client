@@ -130,6 +130,9 @@ class TestListProperty:
         p.required = False
         assert p.get_type_string() == f"Optional[List[{inner_type_string}]]"
 
+        p = ListProperty(name="test", required=True, default=[], inner_property=inner_property)
+        assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], []))"
+
     def test_get_type_imports(self, mocker):
         from openapi_python_client.openapi_parser.properties import ListProperty
 
@@ -148,6 +151,15 @@ class TestListProperty:
             inner_import,
             "from typing import List",
             "from typing import Optional",
+        }
+
+        p.default = mocker.MagicMock()
+        assert p.get_imports(prefix=prefix) == {
+            inner_import,
+            "from typing import Optional",
+            "from typing import List",
+            "from typing import cast",
+            "from dataclasses import field",
         }
 
 
@@ -328,6 +340,12 @@ class TestRefProperty:
 
 
 class TestDictProperty:
+    def test___post_init__(self):
+        from openapi_python_client.openapi_parser.properties import DictProperty
+
+        p = DictProperty(name="blah", required=True, default={})
+        assert p.default == "field(default_factory=lambda: cast(Dict[Any, Any], {}))"
+
     def test_get_imports(self, mocker):
         from openapi_python_client.openapi_parser.properties import DictProperty
 
@@ -343,6 +361,14 @@ class TestDictProperty:
         assert p.get_imports(prefix=prefix) == {
             "from typing import Optional",
             "from typing import Dict",
+        }
+
+        p.default = mocker.MagicMock()
+        assert p.get_imports(prefix=prefix) == {
+            "from typing import Optional",
+            "from typing import Dict",
+            "from typing import cast",
+            "from dataclasses import field",
         }
 
 

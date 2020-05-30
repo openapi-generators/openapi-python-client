@@ -144,7 +144,6 @@
                 "title": "AModel",
                 "required": [
                     "an_enum_value",
-                    "nested_list_of_enums",
                     "aCamelDateTime",
                     "a_date"
                 ],
@@ -168,7 +167,16 @@
                                     "OTHER"
                                 ]
                             }
-                        }
+                        },
+                        "default": []
+                    },
+                    "some_dict": {
+                        "title": "Some Dict",
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "default": {}
                     },
                     "aCamelDateTime": {
                         "title": "Acameldatetime",

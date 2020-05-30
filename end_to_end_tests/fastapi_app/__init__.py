@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from fastapi import APIRouter, FastAPI, File, Query, UploadFile
 from pydantic import BaseModel
@@ -42,7 +42,8 @@ class AModel(BaseModel):
     """ A Model for testing all the ways custom objects can be used """
 
     an_enum_value: AnEnum
-    nested_list_of_enums: List[List[DifferentEnum]]
+    nested_list_of_enums: List[List[DifferentEnum]] = []
+    some_dict: Dict[str, str] = {}
     aCamelDateTime: Union[datetime, date]
     a_date: date
 
