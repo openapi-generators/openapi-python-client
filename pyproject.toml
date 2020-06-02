@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.4.0"
+version = "0.4.1"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -20,7 +20,7 @@ include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 
 
 [tool.poetry.dependencies]
-python = "==3.*,>=3.8.0"
+python = "^3.7"
 jinja2 = "^2.11.1"
 stringcase = "^1.2.0"
 typer = ">=0.1,<0.3"
@@ -30,6 +30,7 @@ httpx = "^0.13.0"
 black = "^19.10b0"
 isort = "^4.3.21"
 pyyaml = "^5.3.1"
+importlib_metadata = {version = "^1.6.0", python = "==3.7"}
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
@@ -58,7 +59,7 @@ e2e = "pytest --cov openapi_python_client end_to_end_tests"
 
 [tool.black]
 line-length = 120
-target_version = ['py38']
+target_version = ['py36']
 exclude = '''
 (
   /(

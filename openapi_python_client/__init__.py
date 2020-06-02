@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-from importlib.metadata import version
+import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -16,6 +16,12 @@ from openapi_python_client import utils
 
 from .openapi_parser import OpenAPI, import_string_from_reference
 from .openapi_parser.errors import MultipleParseError
+
+if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
+    from importlib_metadata import version  # type: ignore
+else:
+    from importlib.metadata import version  # type: ignore
+
 
 __version__ = version(__package__)
 

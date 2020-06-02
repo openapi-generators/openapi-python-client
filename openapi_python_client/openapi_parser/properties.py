@@ -286,7 +286,7 @@ class EnumProperty(Property):
         return imports
 
     @staticmethod
-    def values_from_list(l: List[str], /) -> Dict[str, str]:
+    def values_from_list(l: List[str]) -> Dict[str, str]:
         """ Convert a list of values into dict of {name: value} """
         output: Dict[str, str] = {}
 

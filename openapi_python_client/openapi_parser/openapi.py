@@ -32,7 +32,7 @@ class EndpointCollection:
     parse_errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
-    def from_dict(d: Dict[str, Dict[str, Dict[str, Any]]], /) -> Dict[str, EndpointCollection]:
+    def from_dict(d: Dict[str, Dict[str, Dict[str, Any]]]) -> Dict[str, EndpointCollection]:
         """ Parse the openapi paths data to get EndpointCollections by tag """
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
 
@@ -72,7 +72,7 @@ class Endpoint:
     multipart_body_reference: Optional[Reference] = None
 
     @staticmethod
-    def parse_request_form_body(body: Dict[str, Any], /) -> Optional[Reference]:
+    def parse_request_form_body(body: Dict[str, Any]) -> Optional[Reference]:
         """ Return form_body_reference """
         body_content = body["content"]
         form_body = body_content.get("application/x-www-form-urlencoded")
@@ -81,7 +81,7 @@ class Endpoint:
         return None
 
     @staticmethod
-    def parse_multipart_body(body: Dict[str, Any], /) -> Optional[Reference]:
+    def parse_multipart_body(body: Dict[str, Any]) -> Optional[Reference]:
         """ Return form_body_reference """
         body_content = body["content"]
         body = body_content.get("multipart/form-data")
@@ -90,7 +90,7 @@ class Endpoint:
         return None
 
     @staticmethod
-    def parse_request_json_body(body: Dict[str, Any], /) -> Optional[Property]:
+    def parse_request_json_body(body: Dict[str, Any]) -> Optional[Property]:
         """ Return json_body """
         body_content = body["content"]
         json_body = body_content.get("application/json")
@@ -169,7 +169,7 @@ class Schema:
     relative_imports: Set[str]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any], /, name: str) -> Schema:
+    def from_dict(d: Dict[str, Any], name: str) -> Schema:
         """ A single Schema from its dict representation
         :param d:    Dict representation of the schema
         :param name: Name by which the schema is referenced, such as a model name.  Used to infer the type name if a `title` property is not available.
@@ -200,7 +200,7 @@ class Schema:
         return schema
 
     @staticmethod
-    def dict(d: Dict[str, Dict[str, Any]], /) -> Dict[str, Schema]:
+    def dict(d: Dict[str, Dict[str, Any]]) -> Dict[str, Schema]:
         """ Get a list of Schemas from an OpenAPI dict """
         result = {}
         for name, data in d.items():
@@ -221,7 +221,7 @@ class OpenAPI:
     enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Dict[str, Any]], /) -> OpenAPI:
+    def from_dict(d: Dict[str, Dict[str, Any]]) -> OpenAPI:
         """ Create an OpenAPI from dict """
         schemas = Schema.dict(d["components"]["schemas"])
         endpoint_collections_by_tag = EndpointCollection.from_dict(d["paths"])

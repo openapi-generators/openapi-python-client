@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 from openapi_python_client.cli import app
 
 
-def _compare_directories(first: Path, second: Path, /):
+def _compare_directories(first: Path, second: Path):
     first_printable = first.relative_to(Path.cwd())
     second_printable = second.relative_to(Path.cwd())
     dc = dircmp(first, second)

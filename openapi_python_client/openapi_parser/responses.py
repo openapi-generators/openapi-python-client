@@ -1,10 +1,8 @@
 from dataclasses import InitVar, dataclass, field
-from typing import Any, Dict, Literal, TypedDict, Union
+from typing import Any, Dict
 
 from .errors import ParseError
 from .reference import Reference
-
-ContentType = Union[Literal["application/json"], Literal["text/html"]]
 
 
 @dataclass
@@ -79,18 +77,12 @@ openapi_types_to_python_type_strings = {
 }
 
 
-class _ResponseDict(TypedDict):
-    description: str
-    content: Dict[ContentType, Any]
-
-
-def response_from_dict(*, status_code: int, data: _ResponseDict) -> Response:
+def response_from_dict(*, status_code: int, data: Dict[str, Any]) -> Response:
     """ Generate a Response from the OpenAPI dictionary representation of it """
     if "content" not in data:
         raise ParseError(data)
 
     content = data["content"]
-    content_type: ContentType
     if "application/json" in content:
         content_type = "application/json"
     elif "text/html" in content:
