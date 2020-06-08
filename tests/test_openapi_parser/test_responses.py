@@ -95,11 +95,16 @@ class TestBasicResponse:
 
 
 class TestResponseFromDict:
-    def test_response_from_dict_no_content(self):
+    def test_response_from_dict_no_content(self, mocker):
         from openapi_python_client.openapi_parser.responses import response_from_dict
 
-        with pytest.raises(ValueError):
-            response_from_dict(status_code=200, data={})
+        Response = mocker.patch(f"{MODULE_NAME}.Response")
+
+        status_code = mocker.MagicMock(autospec=int)
+        response = response_from_dict(status_code=status_code, data={})
+
+        Response.assert_called_once_with(status_code=status_code)
+        assert response == Response()
 
     def test_response_from_dict_unsupported_content_type(self):
         from openapi_python_client.openapi_parser.responses import response_from_dict

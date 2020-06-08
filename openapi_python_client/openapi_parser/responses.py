@@ -80,7 +80,7 @@ openapi_types_to_python_type_strings = {
 def response_from_dict(*, status_code: int, data: Dict[str, Any]) -> Response:
     """ Generate a Response from the OpenAPI dictionary representation of it """
     if "content" not in data:
-        raise ParseError(data)
+        return Response(status_code=status_code)
 
     content = data["content"]
     if "application/json" in content:
