@@ -640,8 +640,23 @@ class TestStringBasedProperty:
             "type": "string",
             "format": mocker.MagicMock(),
         }
+        StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
         from openapi_python_client.openapi_parser.properties import _string_based_property
 
-        with pytest.raises(ValueError):
-            _string_based_property(name=name, required=required, data=data)
+        p = _string_based_property(name=name, required=required, data=data)
+
+        StringProperty.assert_called_once_with(name=name, required=required, pattern=None, default=None)
+        assert p == StringProperty.return_value
+
+        # Test optional values
+        StringProperty.reset_mock()
+        data["default"] = mocker.MagicMock()
+        data["pattern"] = mocker.MagicMock()
+
+        _string_based_property(
+            name=name, required=required, data=data,
+        )
+        StringProperty.assert_called_once_with(
+            name=name, required=required, pattern=data["pattern"], default=data["default"]
+        )

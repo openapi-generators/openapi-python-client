@@ -364,8 +364,6 @@ def _string_based_property(
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
     """ Construct a Property from the type "string" """
     string_format = data.get("format")
-    if string_format is None:
-        return StringProperty(name=name, default=data.get("default"), required=required, pattern=data.get("pattern"))
     if string_format == "date-time":
         return DateTimeProperty(name=name, required=required, default=data.get("default"))
     elif string_format == "date":
@@ -373,7 +371,7 @@ def _string_based_property(
     elif string_format == "binary":
         return FileProperty(name=name, required=required, default=data.get("default"))
     else:
-        raise ParseError(data=data, message=f'Unsupported string format:{data["format"]}')
+        return StringProperty(name=name, default=data.get("default"), required=required, pattern=data.get("pattern"))
 
 
 def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Property:
