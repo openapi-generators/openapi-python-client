@@ -48,7 +48,7 @@ python-multipart = "*"
 
 [tool.taskipy.tasks]
 check = """
-isort --recursive --apply\
+isort .\
  && black .\
  && safety check\
  && mypy openapi_python_client\
@@ -76,7 +76,7 @@ exclude = '''
 line_length = 120
 multi_line_output = 3
 include_trailing_comma = true
-skip = ["tests/test_templates"]
+skip = [".venv", "tests/test_templates"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]

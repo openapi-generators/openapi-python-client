@@ -227,7 +227,7 @@ class TestEndpoint:
         assert endpoint.multipart_body_reference == multipart_body_reference
 
     def test__add_responses(self, mocker):
-        from openapi_python_client.openapi_parser.openapi import Endpoint, RefResponse, Reference
+        from openapi_python_client.openapi_parser.openapi import Endpoint, Reference, RefResponse
 
         response_1_data = mocker.MagicMock()
         response_2_data = mocker.MagicMock()
@@ -386,7 +386,7 @@ class TestImportStringFromReference:
 
 class TestEndpointCollection:
     def test_from_dict(self, mocker):
-        from openapi_python_client.openapi_parser.openapi import EndpointCollection, Endpoint
+        from openapi_python_client.openapi_parser.openapi import Endpoint, EndpointCollection
 
         data_1 = {}
         data_2 = {"tags": ["tag_2", "tag_3"]}
@@ -419,7 +419,7 @@ class TestEndpointCollection:
         }
 
     def test_from_dict_errors(self, mocker):
-        from openapi_python_client.openapi_parser.openapi import EndpointCollection, Endpoint, ParseError
+        from openapi_python_client.openapi_parser.openapi import Endpoint, EndpointCollection, ParseError
 
         data_1 = {}
         data_2 = {"tags": ["tag_2", "tag_3"]}

@@ -27,7 +27,7 @@ jobs:
           command: |
             mkdir -p test-reports/safety test-reports/mypy test-reports/pytest
             poetry run black . --check
-            poetry run isort
+            poetry run isort . --check
             poetry run safety check --json > test-reports/safety/results.json
             poetry run mypy openapi_python_client --junit-xml=test-reports/mypy/results.xml
             poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=openapi_python_client tests
