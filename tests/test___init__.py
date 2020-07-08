@@ -451,11 +451,7 @@ def test__reformat(mocker):
     sub_run.assert_has_calls(
         [
             mocker.call(
-                "isort .",
-                cwd=project.project_dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                "isort .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             ),
             mocker.call("black .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE),
         ]
