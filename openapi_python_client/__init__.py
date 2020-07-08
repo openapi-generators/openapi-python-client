@@ -112,11 +112,7 @@ class _Project:
 
     def _reformat(self) -> None:
         subprocess.run(
-            "isort --recursive --apply",
-            cwd=self.project_dir,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            "isort .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
         subprocess.run("black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
