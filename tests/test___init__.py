@@ -451,7 +451,7 @@ def test__reformat(mocker):
     sub_run.assert_has_calls(
         [
             mocker.call(
-                "isort --recursive --apply",
+                "isort .",
                 cwd=project.project_dir,
                 shell=True,
                 stdout=subprocess.PIPE,
