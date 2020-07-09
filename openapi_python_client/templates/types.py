@@ -6,6 +6,7 @@ from typing import BinaryIO, Optional, TextIO, Tuple, Union
 @dataclass
 class File:
     """ Contains information for file uploads """
+
     payload: Union[BinaryIO, TextIO]
     file_name: Optional[str] = None
     mime_type: Optional[str] = None
