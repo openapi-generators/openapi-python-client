@@ -64,5 +64,6 @@ def test_async_endpoint_module(template, mocker):
 
     result = template.render(collection=collection)
     import black
+
     expected = (Path(__file__).parent / "async_endpoint_module.py").read_text()
     black.assert_equivalent(result, expected)
