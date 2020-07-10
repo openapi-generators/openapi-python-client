@@ -16,7 +16,7 @@ def _compare_directories(first: Path, second: Path):
     if missing_files:
         pytest.fail(f"{first_printable} or {second_printable} was missing: {missing_files}", pytrace=False)
 
-    match, mismatch, errors = cmpfiles(first, second, dc.common_files, shallow=False)
+    _, mismatch, errors = cmpfiles(first, second, dc.common_files, shallow=False)
     if mismatch:
         pytest.fail(
             f"{first_printable} and {second_printable} had differing files: {mismatch}, and errors {errors}",
