@@ -23,16 +23,37 @@ jobs:
             poetry install
 
       - run:
-          name: Run Tests
-          command: |
-            mkdir -p test-reports/safety test-reports/mypy test-reports/pytest
-            poetry run black . --check
-            poetry run isort . --check
-            poetry run safety check --json > test-reports/safety/results.json
-            poetry run mypy openapi_python_client --junit-xml=test-reports/mypy/results.xml
-            poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=openapi_python_client tests
-            poetry run pytest end_to_end_tests
-            poetry run coverage xml
+          name: Create Test Results Dir
+          command: mkdir -p test-reports/safety test-reports/mypy test-reports/pytest
+
+      - run:
+          name: Black
+          command: poetry run black . --check
+
+      - run:
+          name: isort
+          command: poetry run isort . --check
+
+      - run:
+          name: Safety
+          command: poetry run safety check --json > test-reports/safety/results.json
+
+      - run:
+          name: mypy
+          command: poetry run mypy openapi_python_client --junit-xml=test-reports/mypy/results.xml
+
+      - run:
+          name: Unit Tests
+          command: poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=openapi_python_client tests
+
+      - run:
+          name: End to End Test
+          command: poetry run pytest end_to_end_tests
+
+      - run:
+          name: Generate Coverage Report
+          command: poetry run coverage xml
+
       - store_test_results:
           path: test-reports
       - codecov/upload:

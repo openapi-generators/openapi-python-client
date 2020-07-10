@@ -26,7 +26,7 @@ def _process_config(path: Optional[pathlib.Path]) -> None:
 
     try:
         load_config(path=path)
-    except:
+    except:  # noqa
         raise typer.BadParameter("Unable to parse config")
 
 

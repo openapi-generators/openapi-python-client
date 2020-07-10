@@ -45,12 +45,14 @@ pytest-cov = "*"
 fastapi = "*"
 uvicorn = "*"
 python-multipart = "*"
+flake8 = "^3.8.3"
 
 [tool.taskipy.tasks]
 check = """
 isort .\
  && black .\
- && safety check\
+ && flake8 openapi_python_client\
+ && safety check --bare\
  && mypy openapi_python_client\
  && pytest --cov openapi_python_client tests\
 """

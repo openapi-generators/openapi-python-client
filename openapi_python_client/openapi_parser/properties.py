@@ -97,9 +97,7 @@ class DateTimeProperty(Property):
             prefix: A prefix to put before any relative (local) module names.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update(
-            {"from datetime import datetime", "from typing import cast",}
-        )
+        imports.update({"from datetime import datetime", "from typing import cast"})
         return imports
 
 
@@ -118,9 +116,7 @@ class DateProperty(Property):
             prefix: A prefix to put before any relative (local) module names.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update(
-            {"from datetime import date", "from typing import cast",}
-        )
+        imports.update({"from datetime import date", "from typing import cast"})
         return imports
 
 
@@ -286,11 +282,11 @@ class EnumProperty(Property):
         return imports
 
     @staticmethod
-    def values_from_list(l: List[str]) -> Dict[str, str]:
+    def values_from_list(values: List[str]) -> Dict[str, str]:
         """ Convert a list of values into dict of {name: value} """
         output: Dict[str, str] = {}
 
-        for i, value in enumerate(l):
+        for i, value in enumerate(values):
             if value[0].isalpha():
                 key = value.upper()
             else:

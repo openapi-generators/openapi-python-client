@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, Generator, Iterable, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from .errors import ParseError
 from .properties import EnumProperty, Property, property_from_dict
@@ -171,8 +171,11 @@ class Schema:
     @staticmethod
     def from_dict(d: Dict[str, Any], name: str) -> Schema:
         """ A single Schema from its dict representation
-        :param d:    Dict representation of the schema
-        :param name: Name by which the schema is referenced, such as a model name.  Used to infer the type name if a `title` property is not available.
+
+        Args:
+            d:    Dict representation of the schema
+            name: Name by which the schema is referenced, such as a model name.
+                Used to infer the type name if a `title` property is not available.
         """
         required_set = set(d.get("required", []))
         required_properties: List[Property] = []
