@@ -295,6 +295,14 @@ class TestEnumProperty:
             "VALUE_3": "1bc",
         }
 
+    def test_values_from_list_duplicate(self):
+        from openapi_python_client.openapi_parser.properties import EnumProperty
+
+        data = ["abc", "123", "a23", "abc"]
+
+        with pytest.raises(ValueError):
+            EnumProperty.values_from_list(data)
+
     def test_get_all_enums(self, mocker):
         from openapi_python_client.openapi_parser import properties
 
