@@ -296,7 +296,7 @@ class EnumProperty(Property):
             else:
                 key = f"VALUE_{i}"
             if key in output:
-                raise AssertionError(f"Duplicate key {key} in Enum")
+                raise ValueError(f"Duplicate key {key} in Enum")
             output[key] = value
 
         return output
