@@ -1,6 +1,7 @@
 version = 1
 
 test_patterns = ["tests/**", "end_to_end_tests/**"]
+exclude_patterns = ["tests/test_templates/*", "end_to_end_tests/golden-master/**"]
 
 [[analyzers]]
 name = "python"
@@ -8,11 +9,6 @@ enabled = true
 
   [analyzers.meta]
   runtime_version = "3.x.x"
+  max_line_length = 120
+  type_checker = "mypy"
 
-[[analyzers]]
-name = "test-coverage"
-enabled = true
-
-[[transformers]]
-name = "black"
-enabled = true
