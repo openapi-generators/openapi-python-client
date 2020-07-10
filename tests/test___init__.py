@@ -123,7 +123,7 @@ class TestProject:
         assert project.openapi == openapi
         assert project.project_name == "my-test-api-client"
         assert project.package_name == "my_test_api_client"
-        assert project.package_description == f"A client library for accessing My Test API"
+        assert project.package_description == "A client library for accessing My Test API"
 
     def test_build(self, mocker):
         from openapi_python_client import _Project

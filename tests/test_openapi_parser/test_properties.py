@@ -18,7 +18,7 @@ class TestProperty:
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
-        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
+        snake_case = mocker.patch("openapi_python_client.utils.snake_case")
         p = Property(name=name, required=True, default=None)
         get_type_string = mocker.patch.object(p, "get_type_string")
 
@@ -33,7 +33,7 @@ class TestProperty:
         from openapi_python_client.openapi_parser.properties import Property
 
         name = mocker.MagicMock()
-        mocker.patch(f"openapi_python_client.utils.snake_case")
+        mocker.patch("openapi_python_client.utils.snake_case")
         p = Property(name=name, required=True, default=None)
         assert p.get_imports(prefix="") == set()
 
@@ -64,7 +64,7 @@ class TestDateTimeProperty:
         from openapi_python_client.openapi_parser.properties import DateTimeProperty
 
         name = mocker.MagicMock()
-        mocker.patch(f"openapi_python_client.utils.snake_case")
+        mocker.patch("openapi_python_client.utils.snake_case")
         p = DateTimeProperty(name=name, required=True, default=None)
         assert p.get_imports(prefix="") == {
             "from datetime import datetime",
@@ -84,7 +84,7 @@ class TestDateProperty:
         from openapi_python_client.openapi_parser.properties import DateProperty
 
         name = mocker.MagicMock()
-        mocker.patch(f"openapi_python_client.utils.snake_case")
+        mocker.patch("openapi_python_client.utils.snake_case")
         p = DateProperty(name=name, required=True, default=None)
         assert p.get_imports(prefix="") == {
             "from datetime import date",
@@ -104,7 +104,7 @@ class TestFileProperty:
         from openapi_python_client.openapi_parser.properties import FileProperty
 
         name = mocker.MagicMock()
-        mocker.patch(f"openapi_python_client.utils.snake_case")
+        mocker.patch("openapi_python_client.utils.snake_case")
         prefix = "blah"
         p = FileProperty(name=name, required=True, default=None)
         assert p.get_imports(prefix=prefix) == {f"from {prefix}.types import File", "from dataclasses import astuple"}
@@ -175,9 +175,9 @@ class TestUnionProperty:
             name="test", required=True, default=None, inner_properties=[inner_property_1, inner_property_2]
         )
 
-        assert p.get_type_string() == f"Union[inner_type_string_1, inner_type_string_2]"
+        assert p.get_type_string() == "Union[inner_type_string_1, inner_type_string_2]"
         p.required = False
-        assert p.get_type_string() == f"Optional[Union[inner_type_string_1, inner_type_string_2]]"
+        assert p.get_type_string() == "Optional[Union[inner_type_string_1, inner_type_string_2]]"
 
     def test_get_type_imports(self, mocker):
         from openapi_python_client.openapi_parser.properties import UnionProperty
@@ -211,7 +211,7 @@ class TestEnumProperty:
     def test___post_init__(self, mocker):
         name = mocker.MagicMock()
 
-        snake_case = mocker.patch(f"openapi_python_client.utils.snake_case")
+        snake_case = mocker.patch("openapi_python_client.utils.snake_case")
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         deduped_reference = mocker.MagicMock(class_name="Deduped")
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", side_effect=[fake_reference, deduped_reference])
@@ -358,7 +358,7 @@ class TestDictProperty:
         from openapi_python_client.openapi_parser.properties import DictProperty
 
         name = mocker.MagicMock()
-        mocker.patch(f"openapi_python_client.utils.snake_case")
+        mocker.patch("openapi_python_client.utils.snake_case")
         prefix = mocker.MagicMock()
         p = DictProperty(name=name, required=True, default=None)
         assert p.get_imports(prefix=prefix) == {
