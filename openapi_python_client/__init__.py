@@ -59,7 +59,7 @@ def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
     json_bytes: bytes
     if url is not None and path is not None:
         raise ValueError("Provide URL or Path, not both.")
-    elif url is not None:
+    if url is not None:
         response = httpx.get(url)
         json_bytes = response.content
     elif path is not None:

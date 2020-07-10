@@ -84,7 +84,7 @@ def generate(
     if not url and not path:
         typer.secho("You must either provide --url or --path", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    elif url and path:
+    if url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
     with handle_errors():
@@ -102,7 +102,7 @@ def update(
     if not url and not path:
         typer.secho("You must either provide --url or --path", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    elif url and path:
+    if url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
     with handle_errors():
