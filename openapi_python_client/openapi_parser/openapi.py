@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Any, Dict, Generator, Iterable, List, Optional, Set
 
 from .errors import ParseError
-from .properties import EnumProperty, ListProperty, Property, property_from_dict
+from .properties import EnumProperty, Property, property_from_dict
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_dict
 
