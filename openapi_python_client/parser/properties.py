@@ -520,7 +520,9 @@ def _property_from_data(
             nullable=data.nullable,
         )
     if not data.type:
-        return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
+        return PropertyError(
+            data=data, detail="Schemas must either have one of enum, anyOf, oneOf, allOf, or type defined."
+        )
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data)
     elif data.type == "number":
