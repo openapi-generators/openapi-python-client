@@ -43,9 +43,8 @@ taskipy = "*"
 safety = "*"
 pytest-cov = "*"
 fastapi = "*"
-uvicorn = "*"
 python-multipart = "*"
-flake8 = "^3.8.3"
+flake8 = "*"
 
 [tool.taskipy.tasks]
 check = """
@@ -57,11 +56,11 @@ isort .\
  && pytest --cov openapi_python_client tests\
 """
 gm = "python -m end_to_end_tests.regen_golden_master"
-e2e = "pytest --cov openapi_python_client end_to_end_tests"
+e2e = "pytest openapi_python_client end_to_end_tests"
 
 [tool.black]
 line-length = 120
-target_version = ['py36']
+target_version = ['py37']
 exclude = '''
 (
   /(
