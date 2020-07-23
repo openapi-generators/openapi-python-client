@@ -1,5 +1,3 @@
-import uvicorn
+from . import generate_openapi_json
 
-from . import app
-
-uvicorn.run(app)
+generate_openapi_json()

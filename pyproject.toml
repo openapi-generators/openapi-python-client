@@ -56,6 +56,7 @@ isort .\
  && mypy openapi_python_client\
  && pytest --cov openapi_python_client tests\
 """
+openapi = "python -m end_to_end_tests.fastapi_app"
 gm = "python -m end_to_end_tests.regen_golden_master"
 e2e = "pytest openapi_python_client end_to_end_tests"
 
