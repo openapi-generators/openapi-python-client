@@ -260,9 +260,9 @@ class TestProject:
         from openapi_python_client import GeneratorData, _Project
 
         openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
-        schema_1 = mocker.MagicMock()
-        schema_2 = mocker.MagicMock()
-        openapi.schemas = {"1": schema_1, "2": schema_2}
+        model_1 = mocker.MagicMock()
+        model_2 = mocker.MagicMock()
+        openapi.models = {"1": model_1, "2": model_2}
         enum_1 = mocker.MagicMock()
         enum_2 = mocker.MagicMock()
         openapi.enums = {"1": enum_1, "2": enum_2}
@@ -271,15 +271,15 @@ class TestProject:
         models_init = mocker.MagicMock()
         types_py = mocker.MagicMock()
         models_dir = mocker.MagicMock()
-        schema_1_module_path = mocker.MagicMock()
-        schema_2_module_path = mocker.MagicMock()
+        model_1_module_path = mocker.MagicMock()
+        model_2_module_path = mocker.MagicMock()
         enum_1_module_path = mocker.MagicMock()
         enum_2_module_path = mocker.MagicMock()
         module_paths = {
             "__init__.py": models_init,
             "types.py": types_py,
-            f"{schema_1.reference.module_name}.py": schema_1_module_path,
-            f"{schema_2.reference.module_name}.py": schema_2_module_path,
+            f"{model_1.reference.module_name}.py": model_1_module_path,
+            f"{model_2.reference.module_name}.py": model_2_module_path,
             f"{enum_1.reference.module_name}.py": enum_1_module_path,
             f"{enum_2.reference.module_name}.py": enum_2_module_path,
         }
@@ -327,13 +327,13 @@ class TestProject:
         models_dir.mkdir.assert_called_once()
         models_dir.__truediv__.assert_has_calls([mocker.call(key) for key in module_paths])
         project.env.get_template.assert_has_calls([mocker.call(key) for key in templates])
-        model_template.render.assert_has_calls([mocker.call(schema=schema_1), mocker.call(schema=schema_2)])
-        schema_1_module_path.write_text.assert_called_once_with(model_render_1)
-        schema_2_module_path.write_text.assert_called_once_with(model_render_2)
+        model_template.render.assert_has_calls([mocker.call(model=model_1), mocker.call(model=model_2)])
+        model_1_module_path.write_text.assert_called_once_with(model_render_1)
+        model_2_module_path.write_text.assert_called_once_with(model_render_2)
         import_string_from_reference.assert_has_calls(
             [
-                mocker.call(schema_1.reference),
-                mocker.call(schema_2.reference),
+                mocker.call(model_1.reference),
+                mocker.call(model_2.reference),
                 mocker.call(enum_1.reference),
                 mocker.call(enum_2.reference),
             ]
