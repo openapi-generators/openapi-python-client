@@ -1,3 +1,4 @@
+import openapi_schema_pydantic as oai
 import pytest
 
 MODULE_NAME = "openapi_python_client.openapi_parser.properties"
@@ -380,64 +381,56 @@ class TestDictProperty:
         }
 
 
-class TestPropertyFromDict:
-    def test_property_from_dict_enum(self, mocker):
+class TestPropertyFromData:
+    def test_property_from_data_enum(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "enum": mocker.MagicMock(),
-        }
+        data = mocker.MagicMock(title=None)
         EnumProperty = mocker.patch(f"{MODULE_NAME}.EnumProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
-        p = property_from_dict(name=name, required=required, data=data)
+        p = property_from_data(name=name, required=required, data=data)
 
-        EnumProperty.values_from_list.assert_called_once_with(data["enum"])
+        EnumProperty.values_from_list.assert_called_once_with(data.enum)
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=None, title=name
+            name=name, required=required, values=EnumProperty.values_from_list(), default=data.default, title=name
         )
         assert p == EnumProperty()
 
         EnumProperty.reset_mock()
-        title = mocker.MagicMock()
-        data["default"] = mocker.MagicMock()
-        data["title"] = title
+        data.title = mocker.MagicMock()
 
-        property_from_dict(
+        property_from_data(
             name=name, required=required, data=data,
         )
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=data["default"], title=title
+            name=name, required=required, values=EnumProperty.values_from_list(), default=data.default, title=data.title
         )
 
-    def test_property_from_dict_ref(self, mocker):
+    def test_property_from_data_ref(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "$ref": mocker.MagicMock(),
-        }
+        data = oai.Reference.construct(ref=mocker.MagicMock())
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         RefProperty = mocker.patch(f"{MODULE_NAME}.RefProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
-        p = property_from_dict(name=name, required=required, data=data)
+        p = property_from_data(name=name, required=required, data=data)
 
-        from_ref.assert_called_once_with(data["$ref"])
+        from_ref.assert_called_once_with(data.ref)
         RefProperty.assert_called_once_with(name=name, required=required, reference=from_ref(), default=None)
         assert p == RefProperty()
 
-    def test_property_from_dict_string(self, mocker):
+    def test_property_from_data_string(self, mocker):
         _string_based_property = mocker.patch(f"{MODULE_NAME}._string_based_property")
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "string",
-        }
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        data = oai.Schema.construct(type="string")
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
-        p = property_from_dict(name=name, required=required, data=data)
+        p = property_from_data(name=name, required=required, data=data)
 
         assert p == _string_based_property.return_value
         _string_based_property.assert_called_once_with(name=name, required=required, data=data)
@@ -451,43 +444,38 @@ class TestPropertyFromDict:
             ("object", "DictProperty"),
         ],
     )
-    def test_property_from_dict_simple_types(self, mocker, openapi_type, python_type):
+    def test_property_from_data_simple_types(self, mocker, openapi_type, python_type):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": openapi_type,
-        }
+        data = oai.Schema.construct(type=openapi_type)
         clazz = mocker.patch(f"{MODULE_NAME}.{python_type}")
 
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
-        p = property_from_dict(name=name, required=required, data=data)
+        p = property_from_data(name=name, required=required, data=data)
 
         clazz.assert_called_once_with(name=name, required=required, default=None)
         assert p == clazz()
 
         # Test optional values
         clazz.reset_mock()
-        data["default"] = mocker.MagicMock()
+        data.default = mocker.MagicMock()
 
-        property_from_dict(
+        property_from_data(
             name=name, required=required, data=data,
         )
-        clazz.assert_called_once_with(name=name, required=required, default=data["default"])
+        clazz.assert_called_once_with(name=name, required=required, default=data.default)
 
-    def test_property_from_dict_array(self, mocker):
+    def test_property_from_data_array(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "array",
-            "items": {"type": "number", "default": "0.0"},
-        }
+        data = oai.Schema(type="array", items={"type": "number", "default": "0.0"},)
         ListProperty = mocker.patch(f"{MODULE_NAME}.ListProperty")
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
-        p = property_from_dict(name=name, required=required, data=data)
+        p = property_from_data(name=name, required=required, data=data)
 
         FloatProperty.assert_called_once_with(name=f"{name}_item", required=True, default="0.0")
         ListProperty.assert_called_once_with(
@@ -495,19 +483,17 @@ class TestPropertyFromDict:
         )
         assert p == ListProperty.return_value
 
-    def test_property_from_dict_union(self, mocker):
+    def test_property_from_data_union(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "anyOf": [{"type": "number", "default": "0.0"}, {"type": "integer", "default": "0"},],
-        }
+        data = oai.Schema(anyOf=[{"type": "number", "default": "0.0"}, {"type": "integer", "default": "0"},])
         UnionProperty = mocker.patch(f"{MODULE_NAME}.UnionProperty")
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
         IntProperty = mocker.patch(f"{MODULE_NAME}.IntProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
-        p = property_from_dict(name=name, required=required, data=data)
+        p = property_from_data(name=name, required=required, data=data)
 
         FloatProperty.assert_called_once_with(name=name, required=required, default="0.0")
         IntProperty.assert_called_once_with(name=name, required=required, default="0")
@@ -519,34 +505,30 @@ class TestPropertyFromDict:
         )
         assert p == UnionProperty.return_value
 
-    def test_property_from_dict_unsupported_type(self, mocker):
+    def test_property_from_data_unsupported_type(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": mocker.MagicMock(),
-        }
+        data = oai.Schema.construct(type=mocker.MagicMock())
 
         from openapi_python_client.openapi_parser.errors import ParseError
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
         with pytest.raises(ParseError):
-            property_from_dict(name=name, required=required, data=data)
+            property_from_data(name=name, required=required, data=data)
 
-    def test_property_from_dict_no_valid_props_in_data(self):
+    def test_property_from_data_no_valid_props_in_data(self):
         from openapi_python_client.openapi_parser.errors import ParseError
-        from openapi_python_client.openapi_parser.properties import property_from_dict
+        from openapi_python_client.openapi_parser.properties import property_from_data
 
         with pytest.raises(ParseError):
-            property_from_dict(name="blah", required=True, data={})
+            property_from_data(name="blah", required=True, data=oai.Schema())
 
 
 class TestStringBasedProperty:
     def test__string_based_property_no_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "string",
-        }
+        data = oai.Schema.construct(type="string")
         StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
         from openapi_python_client.openapi_parser.properties import _string_based_property
@@ -558,23 +540,18 @@ class TestStringBasedProperty:
 
         # Test optional values
         StringProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
-        data["pattern"] = mocker.MagicMock()
+        data.default = mocker.MagicMock()
+        data.pattern = mocker.MagicMock()
 
         _string_based_property(
             name=name, required=required, data=data,
         )
-        StringProperty.assert_called_once_with(
-            name=name, required=required, pattern=data["pattern"], default=data["default"]
-        )
+        StringProperty.assert_called_once_with(name=name, required=required, pattern=data.pattern, default=data.default)
 
     def test__string_based_property_datetime_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": "date-time",
-        }
+        data = oai.Schema.construct(type="string", schema_format="date-time")
         DateTimeProperty = mocker.patch(f"{MODULE_NAME}.DateTimeProperty")
 
         from openapi_python_client.openapi_parser.properties import _string_based_property
@@ -586,20 +563,17 @@ class TestStringBasedProperty:
 
         # Test optional values
         DateTimeProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
+        data.default = mocker.MagicMock()
 
         _string_based_property(
             name=name, required=required, data=data,
         )
-        DateTimeProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+        DateTimeProperty.assert_called_once_with(name=name, required=required, default=data.default)
 
     def test__string_based_property_date_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": "date",
-        }
+        data = oai.Schema.construct(type="string", schema_format="date")
         DateProperty = mocker.patch(f"{MODULE_NAME}.DateProperty")
 
         from openapi_python_client.openapi_parser.properties import _string_based_property
@@ -610,20 +584,17 @@ class TestStringBasedProperty:
 
         # Test optional values
         DateProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
+        data.default = mocker.MagicMock()
 
         _string_based_property(
             name=name, required=required, data=data,
         )
-        DateProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+        DateProperty.assert_called_once_with(name=name, required=required, default=data.default)
 
     def test__string_based_property_binary_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": "binary",
-        }
+        data = oai.Schema.construct(type="string", schema_format="binary")
         FileProperty = mocker.patch(f"{MODULE_NAME}.FileProperty")
 
         from openapi_python_client.openapi_parser.properties import _string_based_property
@@ -634,20 +605,17 @@ class TestStringBasedProperty:
 
         # Test optional values
         FileProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
+        data.default = mocker.MagicMock()
 
         _string_based_property(
             name=name, required=required, data=data,
         )
-        FileProperty.assert_called_once_with(name=name, required=required, default=data["default"])
+        FileProperty.assert_called_once_with(name=name, required=required, default=data.default)
 
     def test__string_based_property_unsupported_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = {
-            "type": "string",
-            "format": mocker.MagicMock(),
-        }
+        data = oai.Schema.construct(type="string", schema_format=mocker.MagicMock())
         StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
         from openapi_python_client.openapi_parser.properties import _string_based_property
@@ -659,12 +627,10 @@ class TestStringBasedProperty:
 
         # Test optional values
         StringProperty.reset_mock()
-        data["default"] = mocker.MagicMock()
-        data["pattern"] = mocker.MagicMock()
+        data.default = mocker.MagicMock()
+        data.pattern = mocker.MagicMock()
 
         _string_based_property(
             name=name, required=required, data=data,
         )
-        StringProperty.assert_called_once_with(
-            name=name, required=required, pattern=data["pattern"], default=data["default"]
-        )
+        StringProperty.assert_called_once_with(name=name, required=required, pattern=data.pattern, default=data.default)

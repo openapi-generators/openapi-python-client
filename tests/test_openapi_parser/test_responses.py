@@ -1,3 +1,4 @@
+import openapi_schema_pydantic as oai
 import pytest
 
 MODULE_NAME = "openapi_python_client.openapi_parser.responses"
@@ -94,76 +95,103 @@ class TestBasicResponse:
         assert r.constructor() == "bool(response.text)"
 
 
-class TestResponseFromDict:
-    def test_response_from_dict_no_content(self, mocker):
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+class TestResponseFromData:
+    def test_response_from_data_no_content(self, mocker):
+        from openapi_python_client.openapi_parser.responses import response_from_data
 
         Response = mocker.patch(f"{MODULE_NAME}.Response")
 
         status_code = mocker.MagicMock(autospec=int)
-        response = response_from_dict(status_code=status_code, data={})
+        response = response_from_data(status_code=status_code, data=oai.Response.construct())
 
         Response.assert_called_once_with(status_code=status_code)
         assert response == Response()
 
-    def test_response_from_dict_unsupported_content_type(self):
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+    def test_response_from_data_unsupported_content_type(self):
+        from openapi_python_client.openapi_parser.responses import response_from_data
 
         with pytest.raises(ValueError):
-            response_from_dict(status_code=200, data={"content": {"not/real": {}}})
+            response_from_data(status_code=200, data=oai.Response.construct(content={"not/real": {}}))
 
-    def test_response_from_dict_ref(self, mocker):
+    def test_response_from_data_ref(self, mocker):
         ref = mocker.MagicMock()
         status_code = mocker.MagicMock(autospec=int)
-        data = {"content": {"application/json": {"schema": {"$ref": ref}}}}
+        data = oai.Response.construct(
+            content={"application/json": oai.MediaType.construct(media_type_schema=oai.Reference.construct(ref=ref))}
+        )
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         RefResponse = mocker.patch(f"{MODULE_NAME}.RefResponse")
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+        from openapi_python_client.openapi_parser.responses import response_from_data
 
-        response = response_from_dict(status_code=status_code, data=data)
+        response = response_from_data(status_code=status_code, data=data)
 
         from_ref.assert_called_once_with(ref)
         RefResponse.assert_called_once_with(status_code=status_code, reference=from_ref())
         assert response == RefResponse()
 
-    def test_response_from_dict_empty(self, mocker):
+    def test_response_from_data_empty(self, mocker):
         status_code = mocker.MagicMock(autospec=int)
-        data = {"content": {"application/json": {"schema": {}}}}
+        data = oai.Response.construct()
         Response = mocker.patch(f"{MODULE_NAME}.Response")
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+        from openapi_python_client.openapi_parser.responses import response_from_data
 
-        response = response_from_dict(status_code=status_code, data=data)
+        response = response_from_data(status_code=status_code, data=data)
 
         Response.assert_called_once_with(status_code=status_code)
         assert response == Response()
 
-    def test_response_from_dict_array(self, mocker):
+    def test_response_from_data_no_response_type(self, mocker):
+        status_code = mocker.MagicMock(autospec=int)
+        data = oai.Response.construct(
+            content={"application/json": oai.MediaType.construct(media_type_schema=oai.Schema.construct(type=None))}
+        )
+        Response = mocker.patch(f"{MODULE_NAME}.Response")
+        from openapi_python_client.openapi_parser.responses import response_from_data
+
+        response = response_from_data(status_code=status_code, data=data)
+
+        Response.assert_called_once_with(status_code=status_code)
+        assert response == Response()
+
+    def test_response_from_data_array(self, mocker):
         ref = mocker.MagicMock()
         status_code = mocker.MagicMock(autospec=int)
-        data = {"content": {"application/json": {"schema": {"type": "array", "items": {"$ref": ref}}}}}
+        data = oai.Response.construct(
+            content={
+                "application/json": oai.MediaType.construct(
+                    media_type_schema=oai.Schema.construct(type="array", items=oai.Reference.construct(ref=ref))
+                )
+            }
+        )
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         ListRefResponse = mocker.patch(f"{MODULE_NAME}.ListRefResponse")
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+        from openapi_python_client.openapi_parser.responses import response_from_data
 
-        response = response_from_dict(status_code=status_code, data=data)
+        response = response_from_data(status_code=status_code, data=data)
 
         from_ref.assert_called_once_with(ref)
         ListRefResponse.assert_called_once_with(status_code=status_code, reference=from_ref())
         assert response == ListRefResponse()
 
-    def test_response_from_dict_basic(self, mocker):
+    def test_response_from_data_basic(self, mocker):
         status_code = mocker.MagicMock(autospec=int)
-        data = {"content": {"text/html": {"schema": {"type": "string"}}}}
+        data = oai.Response.construct(
+            content={"text/html": oai.MediaType.construct(media_type_schema=oai.Schema.construct(type="string"))}
+        )
         BasicResponse = mocker.patch(f"{MODULE_NAME}.BasicResponse")
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+        from openapi_python_client.openapi_parser.responses import response_from_data
 
-        response = response_from_dict(status_code=status_code, data=data)
+        response = response_from_data(status_code=status_code, data=data)
 
         BasicResponse.assert_called_once_with(status_code=status_code, openapi_type="string")
         assert response == BasicResponse.return_value
 
     def test_response_from_dict_unsupported_type(self):
-        from openapi_python_client.openapi_parser.responses import response_from_dict
+        from openapi_python_client.openapi_parser.responses import response_from_data
+
+        data = oai.Response.construct(
+            content={"text/html": oai.MediaType.construct(media_type_schema=oai.Schema.construct(type="BLAH"))}
+        )
 
         with pytest.raises(ValueError):
-            response_from_dict(status_code=200, data={"content": {"application/json": {"schema": {"type": "blah"}}}})
+            response_from_data(status_code=200, data=data)

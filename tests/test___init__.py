@@ -8,7 +8,7 @@ def test__get_project_for_url_or_path(mocker):
     data_dict = mocker.MagicMock()
     _get_json = mocker.patch("openapi_python_client._get_json", return_value=data_dict)
     openapi = mocker.MagicMock()
-    from_dict = mocker.patch("openapi_python_client.openapi_parser.OpenAPI.from_dict", return_value=openapi)
+    from_dict = mocker.patch("openapi_python_client.openapi_parser.GeneratorData.from_dict", return_value=openapi)
     _Project = mocker.patch("openapi_python_client._Project")
     url = mocker.MagicMock()
     path = mocker.MagicMock()
@@ -257,9 +257,9 @@ class TestProject:
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render())
 
     def test__build_models(self, mocker):
-        from openapi_python_client import OpenAPI, _Project
+        from openapi_python_client import GeneratorData, _Project
 
-        openapi = mocker.MagicMock(autospec=OpenAPI, title="My Test API")
+        openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
         schema_1 = mocker.MagicMock()
         schema_2 = mocker.MagicMock()
         openapi.schemas = {"1": schema_1, "2": schema_2}
@@ -348,9 +348,9 @@ class TestProject:
 
         from jinja2 import Template
 
-        from openapi_python_client import OpenAPI, _Project
+        from openapi_python_client import GeneratorData, _Project
 
-        openapi = mocker.MagicMock(autospec=OpenAPI, title="My Test API")
+        openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
         tag_1 = mocker.MagicMock(autospec=str)
         tag_2 = mocker.MagicMock(autospec=str)
         collection_1 = mocker.MagicMock()
@@ -439,10 +439,10 @@ class TestProject:
 def test__reformat(mocker):
     import subprocess
 
-    from openapi_python_client import OpenAPI, _Project
+    from openapi_python_client import GeneratorData, _Project
 
     sub_run = mocker.patch("subprocess.run")
-    openapi = mocker.MagicMock(autospec=OpenAPI, title="My Test API")
+    openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
     project = _Project(openapi=openapi)
     project.project_dir = mocker.MagicMock(autospec=pathlib.Path)
 
@@ -459,11 +459,11 @@ def test__reformat(mocker):
 
 
 def test__raise_errors(mocker):
-    from openapi_python_client import MultipleParseError, OpenAPI, _Project
+    from openapi_python_client import GeneratorData, MultipleParseError, _Project
     from openapi_python_client.openapi_parser.openapi import EndpointCollection
 
     openapi = mocker.MagicMock(
-        autospec=OpenAPI,
+        autospec=GeneratorData,
         title="My Test API",
         endpoint_collections_by_tag={
             "default": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[1]),

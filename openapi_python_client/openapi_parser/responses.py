@@ -1,5 +1,7 @@
 from dataclasses import InitVar, dataclass, field
-from typing import Any, Dict
+from typing import Union
+
+import openapi_schema_pydantic as oai
 
 from .errors import ParseError
 from .reference import Reference
@@ -77,28 +79,29 @@ openapi_types_to_python_type_strings = {
 }
 
 
-def response_from_dict(*, status_code: int, data: Dict[str, Any]) -> Response:
+def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Reference]) -> Response:
     """ Generate a Response from the OpenAPI dictionary representation of it """
-    if "content" not in data:
+
+    if isinstance(data, oai.Reference) or data.content is None:
         return Response(status_code=status_code)
 
-    content = data["content"]
+    content = data.content
+    schema_data = None
     if "application/json" in content:
-        content_type = "application/json"
+        schema_data = data.content["application/json"].media_type_schema
     elif "text/html" in content:
-        content_type = "text/html"
-    else:
+        schema_data = data.content["text/html"].media_type_schema
+
+    if schema_data is None:
         raise ParseError(data, message=f"Unsupported content_type {content}")
 
-    schema_data = data["content"][content_type]["schema"]
-
-    if "$ref" in schema_data:
-        return RefResponse(status_code=status_code, reference=Reference.from_ref(schema_data["$ref"]),)
-    response_type = schema_data.get("type")
+    if isinstance(schema_data, oai.Reference):
+        return RefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.ref),)
+    response_type = schema_data.type
     if response_type is None:
         return Response(status_code=status_code)
-    if response_type == "array":
-        return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data["items"]["$ref"]),)
+    if response_type == "array" and isinstance(schema_data.items, oai.Reference):
+        return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.items.ref),)
     if response_type in openapi_types_to_python_type_strings:
         return BasicResponse(status_code=status_code, openapi_type=response_type)
-    raise ParseError(data, message=f"Unrecognized type {schema_data['type']}")
+    raise ParseError(data, message=f"Unrecognized type {schema_data.type}")

@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import InitVar, dataclass, field
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
-from openapi_python_client import utils
+import openapi_schema_pydantic as oai
 
+from .. import utils
 from .errors import ParseError
 from .reference import Reference
 
@@ -357,54 +358,54 @@ class DictProperty(Property):
 
 
 def _string_based_property(
-    name: str, required: bool, data: Dict[str, Any]
+    name: str, required: bool, data: oai.Schema
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
     """ Construct a Property from the type "string" """
-    string_format = data.get("format")
+    string_format = data.schema_format
     if string_format == "date-time":
-        return DateTimeProperty(name=name, required=required, default=data.get("default"))
+        return DateTimeProperty(name=name, required=required, default=data.default)
     elif string_format == "date":
-        return DateProperty(name=name, required=required, default=data.get("default"))
+        return DateProperty(name=name, required=required, default=data.default)
     elif string_format == "binary":
-        return FileProperty(name=name, required=required, default=data.get("default"))
+        return FileProperty(name=name, required=required, default=data.default)
     else:
-        return StringProperty(name=name, default=data.get("default"), required=required, pattern=data.get("pattern"))
+        return StringProperty(name=name, default=data.default, required=required, pattern=data.pattern)
 
 
-def property_from_dict(name: str, required: bool, data: Dict[str, Any]) -> Property:
+def property_from_data(name: str, required: bool, data: Union[oai.Reference, oai.Schema]) -> Property:
     """ Generate a Property from the OpenAPI dictionary representation of it """
-    if "enum" in data:
+    if isinstance(data, oai.Reference):
+        return RefProperty(name=name, required=required, reference=Reference.from_ref(data.ref), default=None)
+    if data.enum:
         return EnumProperty(
             name=name,
             required=required,
-            values=EnumProperty.values_from_list(data["enum"]),
-            title=data.get("title", name),
-            default=data.get("default"),
+            values=EnumProperty.values_from_list(data.enum),
+            title=data.title or name,
+            default=data.default,
         )
-    if "$ref" in data:
-        return RefProperty(name=name, required=required, reference=Reference.from_ref(data["$ref"]), default=None)
-    if "anyOf" in data:
+    if data.anyOf:
         sub_properties: List[Property] = []
-        for sub_prop_data in data["anyOf"]:
-            sub_properties.append(property_from_dict(name=name, required=required, data=sub_prop_data))
-        return UnionProperty(name=name, required=required, default=data.get("default"), inner_properties=sub_properties)
-    if "type" not in data:
+        for sub_prop_data in data.anyOf:
+            sub_properties.append(property_from_data(name=name, required=required, data=sub_prop_data))
+        return UnionProperty(name=name, required=required, default=data.default, inner_properties=sub_properties)
+    if not data.type:
         raise ParseError(data)
-    if data["type"] == "string":
+    if data.type == "string":
         return _string_based_property(name=name, required=required, data=data)
-    elif data["type"] == "number":
-        return FloatProperty(name=name, default=data.get("default"), required=required)
-    elif data["type"] == "integer":
-        return IntProperty(name=name, default=data.get("default"), required=required)
-    elif data["type"] == "boolean":
-        return BooleanProperty(name=name, required=required, default=data.get("default"))
-    elif data["type"] == "array":
+    elif data.type == "number":
+        return FloatProperty(name=name, default=data.default, required=required)
+    elif data.type == "integer":
+        return IntProperty(name=name, default=data.default, required=required)
+    elif data.type == "boolean":
+        return BooleanProperty(name=name, required=required, default=data.default)
+    elif data.type == "array" and data.items:
         return ListProperty(
             name=name,
             required=required,
-            default=data.get("default"),
-            inner_property=property_from_dict(name=f"{name}_item", required=True, data=data["items"]),
+            default=data.default,
+            inner_property=property_from_data(name=f"{name}_item", required=True, data=data.items),
         )
-    elif data["type"] == "object":
-        return DictProperty(name=name, required=required, default=data.get("default"))
+    elif data.type == "object":
+        return DictProperty(name=name, required=required, default=data.default)
     raise ParseError(data)

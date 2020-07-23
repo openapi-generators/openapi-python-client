@@ -14,7 +14,7 @@ from jinja2 import Environment, PackageLoader
 
 from openapi_python_client import utils
 
-from .openapi_parser import OpenAPI, import_string_from_reference
+from .openapi_parser import GeneratorData, import_string_from_reference
 from .openapi_parser.errors import MultipleParseError
 
 if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
@@ -28,7 +28,7 @@ __version__ = version(__package__)
 
 def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> _Project:
     data_dict = _get_json(url=url, path=path)
-    openapi = OpenAPI.from_dict(data_dict)
+    openapi = GeneratorData.from_dict(data_dict)
     return _Project(openapi=openapi)
 
 
@@ -72,8 +72,8 @@ def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
 class _Project:
     TEMPLATE_FILTERS = {"snakecase": utils.snake_case}
 
-    def __init__(self, *, openapi: OpenAPI) -> None:
-        self.openapi: OpenAPI = openapi
+    def __init__(self, *, openapi: GeneratorData) -> None:
+        self.openapi: GeneratorData = openapi
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
         self.project_name: str = f"{openapi.title.replace(' ', '-').lower()}-client"
