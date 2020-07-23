@@ -8,7 +8,7 @@ MODULE_NAME = "openapi_python_client.openapi_parser.openapi"
 
 class TestGeneratorData:
     def test_from_dict(self, mocker):
-        Schema = mocker.patch(f"{MODULE_NAME}.Schema")
+        Model = mocker.patch(f"{MODULE_NAME}.Model")
         EndpointCollection = mocker.patch(f"{MODULE_NAME}.EndpointCollection")
         OpenAPI = mocker.patch(f"{MODULE_NAME}.oai.OpenAPI")
         openapi = OpenAPI.parse_obj.return_value
@@ -21,7 +21,7 @@ class TestGeneratorData:
         generator_data = GeneratorData.from_dict(in_dict)
 
         OpenAPI.parse_obj.assert_called_once_with(in_dict)
-        Schema.build.assert_called_once_with(schemas=openapi.components.schemas)
+        Model.build.assert_called_once_with(schemas=openapi.components.schemas)
         EndpointCollection.from_data.assert_called_once_with(data=openapi.paths)
         get_all_enums.assert_called_once_with()
         assert generator_data == GeneratorData(
@@ -29,31 +29,31 @@ class TestGeneratorData:
             description=openapi.info.description,
             version=openapi.info.version,
             endpoint_collections_by_tag=EndpointCollection.from_data.return_value,
-            schemas=Schema.build.return_value,
+            models=Model.build.return_value,
             enums=get_all_enums.return_value,
         )
 
         # Test no components
         openapi.components = None
-        Schema.build.reset_mock()
+        Model.build.reset_mock()
 
         generator_data = GeneratorData.from_dict(in_dict)
 
-        Schema.build.assert_not_called()
-        assert generator_data.schemas == {}
+        Model.build.assert_not_called()
+        assert generator_data.models == {}
 
 
-class TestSchema:
+class TestModel:
     def test_build(self, mocker):
-        from_data = mocker.patch(f"{MODULE_NAME}.Schema.from_data")
+        from_data = mocker.patch(f"{MODULE_NAME}.Model.from_data")
         in_data = {1: mocker.MagicMock(), 2: mocker.MagicMock()}
         schema_1 = mocker.MagicMock()
         schema_2 = mocker.MagicMock()
         from_data.side_effect = [schema_1, schema_2]
 
-        from openapi_python_client.openapi_parser.openapi import Schema
+        from openapi_python_client.openapi_parser.openapi import Model
 
-        result = Schema.build(schemas=in_data)
+        result = Model.build(schemas=in_data)
 
         from_data.assert_has_calls([mocker.call(data=value, name=name) for (name, value) in in_data.items()])
         assert result == {
@@ -81,9 +81,9 @@ class TestSchema:
         )
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
 
-        from openapi_python_client.openapi_parser.openapi import Schema
+        from openapi_python_client.openapi_parser.openapi import Model
 
-        result = Schema.from_data(data=in_data, name=mocker.MagicMock())
+        result = Model.from_data(data=in_data, name=mocker.MagicMock())
 
         from_ref.assert_called_once_with(in_data.title)
         property_from_data.assert_has_calls(
@@ -94,7 +94,7 @@ class TestSchema:
         )
         required_property.get_imports.assert_called_once_with(prefix="")
         optional_property.get_imports.assert_called_once_with(prefix="")
-        assert result == Schema(
+        assert result == Model(
             reference=from_ref(),
             required_properties=[required_property],
             optional_properties=[optional_property],
@@ -103,10 +103,10 @@ class TestSchema:
         )
 
     def test_from_data_parse_error_on_reference(self):
-        from openapi_python_client.openapi_parser.openapi import Schema
+        from openapi_python_client.openapi_parser.openapi import Model
 
         with pytest.raises(ParseError):
-            Schema.from_data(data=oai.Reference.construct(), name="")
+            Model.from_data(data=oai.Reference.construct(), name="")
 
 
 class TestEndpoint:

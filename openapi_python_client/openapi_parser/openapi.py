@@ -167,9 +167,9 @@ class Endpoint:
 
 
 @dataclass
-class Schema:
+class Model:
     """
-    Describes a schema, AKA data model used in requests.
+    A data model used by the API- usually a Schema with type "object".
 
     These will all be converted to dataclasses in the client
     """
@@ -181,8 +181,8 @@ class Schema:
     relative_imports: Set[str]
 
     @staticmethod
-    def from_data(*, data: Union[oai.Reference, oai.Schema], name: str) -> Schema:
-        """ A single Schema from its OAI data
+    def from_data(*, data: Union[oai.Reference, oai.Schema], name: str) -> Model:
+        """ A single Model from its OAI data
 
         Args:
             data: Data of a single Schema
@@ -207,21 +207,21 @@ class Schema:
                 optional_properties.append(p)
             relative_imports.update(p.get_imports(prefix=""))
 
-        schema = Schema(
+        model = Model(
             reference=ref,
             required_properties=required_properties,
             optional_properties=optional_properties,
             relative_imports=relative_imports,
             description=data.description or "",
         )
-        return schema
+        return model
 
     @staticmethod
-    def build(*, schemas: Dict[str, Union[oai.Reference, oai.Schema]]) -> Dict[str, Schema]:
+    def build(*, schemas: Dict[str, Union[oai.Reference, oai.Schema]]) -> Dict[str, Model]:
         """ Get a list of Schemas from an OpenAPI dict """
         result = {}
         for name, data in schemas.items():
-            s = Schema.from_data(data=data, name=name)
+            s = Model.from_data(data=data, name=name)
             result[s.reference.class_name] = s
         return result
 
@@ -233,7 +233,7 @@ class GeneratorData:
     title: str
     description: Optional[str]
     version: str
-    schemas: Dict[str, Schema]
+    models: Dict[str, Model]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
     enums: Dict[str, EnumProperty]
 
@@ -242,9 +242,9 @@ class GeneratorData:
         """ Create an OpenAPI from dict """
         openapi = oai.OpenAPI.parse_obj(d)
         if openapi.components is None or openapi.components.schemas is None:
-            schemas = {}
+            models = {}
         else:
-            schemas = Schema.build(schemas=openapi.components.schemas)
+            models = Model.build(schemas=openapi.components.schemas)
         endpoint_collections_by_tag = EndpointCollection.from_data(data=openapi.paths)
         enums = EnumProperty.get_all_enums()
 
@@ -253,6 +253,6 @@ class GeneratorData:
             description=openapi.info.description,
             version=openapi.info.version,
             endpoint_collections_by_tag=endpoint_collections_by_tag,
-            schemas=schemas,
+            models=models,
             enums=enums,
         )

@@ -3,20 +3,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict
 
-{% for relative in schema.relative_imports %}
+{% for relative in model.relative_imports %}
 {{ relative }}
 {% endfor %}
 
 
 @dataclass
-class {{ schema.reference.class_name }}:
-    """ {{ schema.description }} """
-    {% for property in schema.required_properties + schema.optional_properties %}
+class {{ model.reference.class_name }}:
+    """ {{ model.description }} """
+    {% for property in model.required_properties + model.optional_properties %}
     {{ property.to_string() }}
     {% endfor %}
 
     def to_dict(self) -> Dict[str, Any]:
-        {% for property in schema.required_properties + schema.optional_properties %}
+        {% for property in model.required_properties + model.optional_properties %}
         {% if property.template %}
         {% from "property_templates/" + property.template import transform %}
         {{ transform(property, "self." + property.python_name, property.python_name) | indent(8) }}
@@ -26,14 +26,14 @@ class {{ schema.reference.class_name }}:
         {% endfor %}
 
         return {
-            {% for property in schema.required_properties + schema.optional_properties %}
+            {% for property in model.required_properties + model.optional_properties %}
             "{{ property.name }}": {{ property.python_name }},
             {% endfor %}
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> {{ schema.reference.class_name }}:
-{% for property in schema.required_properties + schema.optional_properties %}
+    def from_dict(d: Dict[str, Any]) -> {{ model.reference.class_name }}:
+{% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
         {% set property_source = 'd["' + property.name + '"]' %}
     {% else %}
@@ -47,8 +47,8 @@ class {{ schema.reference.class_name }}:
     {% endif %}
 
 {% endfor %}
-        return {{ schema.reference.class_name }}(
-{% for property in schema.required_properties + schema.optional_properties %}
+        return {{ model.reference.class_name }}(
+{% for property in model.required_properties + model.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
 {% endfor %}
         )

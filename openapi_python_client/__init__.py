@@ -170,10 +170,10 @@ class _Project:
         types_path.write_text(types_template.render())
 
         model_template = self.env.get_template("model.pyi")
-        for schema in self.openapi.schemas.values():
-            module_path = models_dir / f"{schema.reference.module_name}.py"
-            module_path.write_text(model_template.render(schema=schema))
-            imports.append(import_string_from_reference(schema.reference))
+        for model in self.openapi.models.values():
+            module_path = models_dir / f"{model.reference.module_name}.py"
+            module_path.write_text(model_template.render(model=model))
+            imports.append(import_string_from_reference(model.reference))
 
         # Generate enums
         enum_template = self.env.get_template("enum.pyi")
