@@ -31,7 +31,7 @@ black = "^19.10b0"
 isort = "^5.0.5"
 pyyaml = "^5.3.1"
 importlib_metadata = {version = "^1.6.0", python = "==3.7"}
-openapi-schema-pydantic = {git = "https://github.com/dbanty/openapi-schema-pydantic"}
+openapi-schema-pydantic = {git = "https://github.com/kuimono/openapi-schema-pydantic"}
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
