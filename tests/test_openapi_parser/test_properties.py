@@ -1,12 +1,14 @@
-import openapi_schema_pydantic as oai
 import pytest
 
-MODULE_NAME = "openapi_python_client.openapi_parser.properties"
+import openapi_python_client.schema as oai
+from openapi_python_client.parser.errors import PropertyError
+
+MODULE_NAME = "openapi_python_client.parser.properties"
 
 
 class TestProperty:
     def test_get_type_string(self):
-        from openapi_python_client.openapi_parser.properties import Property
+        from openapi_python_client.parser.properties import Property
 
         p = Property(name="test", required=True, default=None)
         p._type_string = "TestType"
@@ -16,7 +18,7 @@ class TestProperty:
         assert p.get_type_string() == "Optional[TestType]"
 
     def test_to_string(self, mocker):
-        from openapi_python_client.openapi_parser.properties import Property
+        from openapi_python_client.parser.properties import Property
 
         name = mocker.MagicMock()
         snake_case = mocker.patch("openapi_python_client.utils.snake_case")
@@ -31,7 +33,7 @@ class TestProperty:
         assert p.to_string() == f"{snake_case(name)}: {get_type_string()} = TEST"
 
     def test_get_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import Property
+        from openapi_python_client.parser.properties import Property
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
@@ -44,14 +46,14 @@ class TestProperty:
 
 class TestStringProperty:
     def test___post_init__(self):
-        from openapi_python_client.openapi_parser.properties import StringProperty
+        from openapi_python_client.parser.properties import StringProperty
 
         sp = StringProperty(name="test", required=True, default="A Default Value",)
 
         assert sp.default == '"A Default Value"'
 
     def test_get_type_string(self):
-        from openapi_python_client.openapi_parser.properties import StringProperty
+        from openapi_python_client.parser.properties import StringProperty
 
         p = StringProperty(name="test", required=True, default=None)
 
@@ -62,7 +64,7 @@ class TestStringProperty:
 
 class TestDateTimeProperty:
     def test_get_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import DateTimeProperty
+        from openapi_python_client.parser.properties import DateTimeProperty
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
@@ -82,7 +84,7 @@ class TestDateTimeProperty:
 
 class TestDateProperty:
     def test_get_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import DateProperty
+        from openapi_python_client.parser.properties import DateProperty
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
@@ -102,7 +104,7 @@ class TestDateProperty:
 
 class TestFileProperty:
     def test_get_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import FileProperty
+        from openapi_python_client.parser.properties import FileProperty
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
@@ -120,7 +122,7 @@ class TestFileProperty:
 
 class TestListProperty:
     def test_get_type_string(self, mocker):
-        from openapi_python_client.openapi_parser.properties import ListProperty
+        from openapi_python_client.parser.properties import ListProperty
 
         inner_property = mocker.MagicMock()
         inner_type_string = mocker.MagicMock()
@@ -135,7 +137,7 @@ class TestListProperty:
         assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], []))"
 
     def test_get_type_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import ListProperty
+        from openapi_python_client.parser.properties import ListProperty
 
         inner_property = mocker.MagicMock()
         inner_import = mocker.MagicMock()
@@ -166,7 +168,7 @@ class TestListProperty:
 
 class TestUnionProperty:
     def test_get_type_string(self, mocker):
-        from openapi_python_client.openapi_parser.properties import UnionProperty
+        from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
         inner_property_1.get_type_string.return_value = "inner_type_string_1"
@@ -181,7 +183,7 @@ class TestUnionProperty:
         assert p.get_type_string() == "Optional[Union[inner_type_string_1, inner_type_string_2]]"
 
     def test_get_type_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import UnionProperty
+        from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
         inner_import_1 = mocker.MagicMock()
@@ -215,8 +217,10 @@ class TestEnumProperty:
         snake_case = mocker.patch("openapi_python_client.utils.snake_case")
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         deduped_reference = mocker.MagicMock(class_name="Deduped")
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref", side_effect=[fake_reference, deduped_reference])
-        from openapi_python_client.openapi_parser import properties
+        from_ref = mocker.patch(
+            f"{MODULE_NAME}.Reference.from_ref", side_effect=[fake_reference, deduped_reference, deduped_reference]
+        )
+        from openapi_python_client.parser import properties
 
         fake_dup_enum = mocker.MagicMock()
         properties._existing_enums = {"MyTestEnum": fake_dup_enum}
@@ -228,10 +232,15 @@ class TestEnumProperty:
 
         assert enum_property.default == "Deduped.SECOND"
         assert enum_property.python_name == snake_case(name)
-        from_ref.assert_has_calls(
-            [mocker.call("a_title"), mocker.call("MyTestEnum1"),]
-        )
+        from_ref.assert_has_calls([mocker.call("a_title"), mocker.call("MyTestEnum1")])
         assert enum_property.reference == deduped_reference
+        assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
+
+        # Test encountering exactly the same Enum again
+        assert (
+            properties.EnumProperty(name=name, required=True, default="second", values=values, title="a_title",)
+            == enum_property
+        )
         assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
 
         # What if an Enum exists with the same name, but has the same values? Don't dedupe that.
@@ -253,7 +262,7 @@ class TestEnumProperty:
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
 
-        from openapi_python_client.openapi_parser import properties
+        from openapi_python_client.parser import properties
 
         enum_property = properties.EnumProperty(name="test", required=True, default=None, values={}, title="a_title")
 
@@ -267,7 +276,7 @@ class TestEnumProperty:
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
         prefix = mocker.MagicMock()
 
-        from openapi_python_client.openapi_parser import properties
+        from openapi_python_client.parser import properties
 
         enum_property = properties.EnumProperty(name="test", required=True, default=None, values={}, title="a_title")
 
@@ -283,7 +292,7 @@ class TestEnumProperty:
         properties._existing_enums = {}
 
     def test_values_from_list(self):
-        from openapi_python_client.openapi_parser.properties import EnumProperty
+        from openapi_python_client.parser.properties import EnumProperty
 
         data = ["abc", "123", "a23", "1bc"]
 
@@ -297,7 +306,7 @@ class TestEnumProperty:
         }
 
     def test_values_from_list_duplicate(self):
-        from openapi_python_client.openapi_parser.properties import EnumProperty
+        from openapi_python_client.parser.properties import EnumProperty
 
         data = ["abc", "123", "a23", "abc"]
 
@@ -305,7 +314,7 @@ class TestEnumProperty:
             EnumProperty.values_from_list(data)
 
     def test_get_all_enums(self, mocker):
-        from openapi_python_client.openapi_parser import properties
+        from openapi_python_client.parser import properties
 
         properties._existing_enums = mocker.MagicMock()
         assert properties.EnumProperty.get_all_enums() == properties._existing_enums
@@ -314,7 +323,7 @@ class TestEnumProperty:
 
 class TestRefProperty:
     def test_get_type_string(self, mocker):
-        from openapi_python_client.openapi_parser.properties import RefProperty
+        from openapi_python_client.parser.properties import RefProperty
 
         ref_property = RefProperty(
             name="test", required=True, default=None, reference=mocker.MagicMock(class_name="MyRefClass")
@@ -329,7 +338,7 @@ class TestRefProperty:
         fake_reference = mocker.MagicMock(class_name="MyRefClass", module_name="my_test_enum")
         prefix = mocker.MagicMock()
 
-        from openapi_python_client.openapi_parser.properties import RefProperty
+        from openapi_python_client.parser.properties import RefProperty
 
         p = RefProperty(name="test", required=True, default=None, reference=fake_reference)
 
@@ -350,13 +359,13 @@ class TestRefProperty:
 
 class TestDictProperty:
     def test___post_init__(self):
-        from openapi_python_client.openapi_parser.properties import DictProperty
+        from openapi_python_client.parser.properties import DictProperty
 
         p = DictProperty(name="blah", required=True, default={})
         assert p.default == "field(default_factory=lambda: cast(Dict[Any, Any], {}))"
 
     def test_get_imports(self, mocker):
-        from openapi_python_client.openapi_parser.properties import DictProperty
+        from openapi_python_client.parser.properties import DictProperty
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
@@ -388,7 +397,7 @@ class TestPropertyFromData:
         data = mocker.MagicMock(title=None)
         EnumProperty = mocker.patch(f"{MODULE_NAME}.EnumProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.properties import property_from_data
 
         p = property_from_data(name=name, required=required, data=data)
 
@@ -415,7 +424,7 @@ class TestPropertyFromData:
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
         RefProperty = mocker.patch(f"{MODULE_NAME}.RefProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.properties import property_from_data
 
         p = property_from_data(name=name, required=required, data=data)
 
@@ -428,7 +437,7 @@ class TestPropertyFromData:
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema.construct(type="string")
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.properties import property_from_data
 
         p = property_from_data(name=name, required=required, data=data)
 
@@ -450,7 +459,7 @@ class TestPropertyFromData:
         data = oai.Schema.construct(type=openapi_type)
         clazz = mocker.patch(f"{MODULE_NAME}.{python_type}")
 
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.properties import property_from_data
 
         p = property_from_data(name=name, required=required, data=data)
 
@@ -473,7 +482,7 @@ class TestPropertyFromData:
         ListProperty = mocker.patch(f"{MODULE_NAME}.ListProperty")
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.properties import property_from_data
 
         p = property_from_data(name=name, required=required, data=data)
 
@@ -483,6 +492,28 @@ class TestPropertyFromData:
         )
         assert p == ListProperty.return_value
 
+    def test_property_from_data_array_no_items(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Schema(type="array")
+
+        from openapi_python_client.parser.properties import property_from_data
+
+        p = property_from_data(name=name, required=required, data=data)
+
+        assert p == PropertyError(data=data, detail="type array must have items defined")
+
+    def test_property_from_data_array_invalid_items(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Schema(type="array", items={},)
+
+        from openapi_python_client.parser.properties import property_from_data
+
+        p = property_from_data(name=name, required=required, data=data)
+
+        assert p == PropertyError(data=oai.Schema(), detail=f"invalid data in items of array {name}")
+
     def test_property_from_data_union(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
@@ -491,7 +522,7 @@ class TestPropertyFromData:
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
         IntProperty = mocker.patch(f"{MODULE_NAME}.IntProperty")
 
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.properties import property_from_data
 
         p = property_from_data(name=name, required=required, data=data)
 
@@ -505,23 +536,37 @@ class TestPropertyFromData:
         )
         assert p == UnionProperty.return_value
 
+    def test_property_from_data_union_bad_type(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Schema(anyOf=[{}])
+
+        from openapi_python_client.parser.properties import property_from_data
+
+        p = property_from_data(name=name, required=required, data=data)
+
+        assert p == PropertyError(detail=f"Invalid property in union {name}", data=oai.Schema())
+
     def test_property_from_data_unsupported_type(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema.construct(type=mocker.MagicMock())
 
-        from openapi_python_client.openapi_parser.errors import ParseError
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.errors import PropertyError
+        from openapi_python_client.parser.properties import property_from_data
 
-        with pytest.raises(ParseError):
-            property_from_data(name=name, required=required, data=data)
+        assert property_from_data(name=name, required=required, data=data) == PropertyError(
+            data=data, detail=f"unknown type {data.type}"
+        )
 
     def test_property_from_data_no_valid_props_in_data(self):
-        from openapi_python_client.openapi_parser.errors import ParseError
-        from openapi_python_client.openapi_parser.properties import property_from_data
+        from openapi_python_client.parser.errors import PropertyError
+        from openapi_python_client.parser.properties import property_from_data
 
-        with pytest.raises(ParseError):
-            property_from_data(name="blah", required=True, data=oai.Schema())
+        data = oai.Schema()
+        assert property_from_data(name="blah", required=True, data=data) == PropertyError(
+            data=data, detail="Schemas must either have one of enum, anyOf, or type defined."
+        )
 
 
 class TestStringBasedProperty:
@@ -531,7 +576,7 @@ class TestStringBasedProperty:
         data = oai.Schema.construct(type="string")
         StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
-        from openapi_python_client.openapi_parser.properties import _string_based_property
+        from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
 
@@ -554,7 +599,7 @@ class TestStringBasedProperty:
         data = oai.Schema.construct(type="string", schema_format="date-time")
         DateTimeProperty = mocker.patch(f"{MODULE_NAME}.DateTimeProperty")
 
-        from openapi_python_client.openapi_parser.properties import _string_based_property
+        from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
 
@@ -576,7 +621,7 @@ class TestStringBasedProperty:
         data = oai.Schema.construct(type="string", schema_format="date")
         DateProperty = mocker.patch(f"{MODULE_NAME}.DateProperty")
 
-        from openapi_python_client.openapi_parser.properties import _string_based_property
+        from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
         DateProperty.assert_called_once_with(name=name, required=required, default=None)
@@ -597,7 +642,7 @@ class TestStringBasedProperty:
         data = oai.Schema.construct(type="string", schema_format="binary")
         FileProperty = mocker.patch(f"{MODULE_NAME}.FileProperty")
 
-        from openapi_python_client.openapi_parser.properties import _string_based_property
+        from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
         FileProperty.assert_called_once_with(name=name, required=required, default=None)
@@ -618,7 +663,7 @@ class TestStringBasedProperty:
         data = oai.Schema.construct(type="string", schema_format=mocker.MagicMock())
         StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
-        from openapi_python_client.openapi_parser.properties import _string_based_property
+        from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
 

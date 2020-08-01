@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence
 
 import httpx
 import yaml
@@ -14,8 +14,8 @@ from jinja2 import Environment, PackageLoader
 
 from openapi_python_client import utils
 
-from .openapi_parser import GeneratorData, import_string_from_reference
-from .openapi_parser.errors import MultipleParseError
+from .parser import GeneratorData, import_string_from_reference
+from .parser.errors import GeneratorError
 
 if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
     from importlib_metadata import version  # type: ignore
@@ -37,22 +37,32 @@ def load_config(*, path: Path) -> None:
     config_data = yaml.safe_load(path.read_text())
 
     if "class_overrides" in config_data:
-        from .openapi_parser import reference
+        from .parser import reference
 
         for class_name, class_data in config_data["class_overrides"].items():
             reference.class_overrides[class_name] = reference.Reference(**class_data)
 
 
-def create_new_client(*, url: Optional[str], path: Optional[Path]) -> None:
-    """ Generate the client library """
+def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
+    """
+    Generate the client library
+
+    Returns:
+         A list containing any errors encountered when generating.
+    """
     project = _get_project_for_url_or_path(url=url, path=path)
-    project.build()
+    return project.build()
 
 
-def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> None:
-    """ Update an existing client library """
+def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
+    """
+    Update an existing client library
+
+    Returns:
+         A list containing any errors encountered when generating.
+    """
     project = _get_project_for_url_or_path(url=url, path=path)
-    project.update()
+    return project.update()
 
 
 def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
@@ -85,19 +95,22 @@ class _Project:
 
         self.env.filters.update(self.TEMPLATE_FILTERS)
 
-    def build(self) -> None:
+    def build(self) -> Sequence[GeneratorError]:
         """ Create the project from templates """
 
         print(f"Generating {self.project_name}")
-        self.project_dir.mkdir()
+        try:
+            self.project_dir.mkdir()
+        except FileExistsError:
+            return [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
         self._create_package()
         self._build_metadata()
         self._build_models()
         self._build_api()
         self._reformat()
-        self._raise_errors()
+        return self._get_errors()
 
-    def update(self) -> None:
+    def update(self) -> Sequence[GeneratorError]:
         """ Update an existing project """
 
         if not self.package_dir.is_dir():
@@ -108,7 +121,7 @@ class _Project:
         self._build_models()
         self._build_api()
         self._reformat()
-        self._raise_errors()
+        return self._get_errors()
 
     def _reformat(self) -> None:
         subprocess.run(
@@ -116,12 +129,12 @@ class _Project:
         )
         subprocess.run("black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    def _raise_errors(self) -> None:
+    def _get_errors(self) -> Sequence[GeneratorError]:
         errors = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
-        if errors:
-            raise MultipleParseError(parse_errors=errors)
+        errors.extend(self.openapi.schemas.errors)
+        return errors
 
     def _create_package(self) -> None:
         self.package_dir.mkdir()
@@ -170,7 +183,7 @@ class _Project:
         types_path.write_text(types_template.render())
 
         model_template = self.env.get_template("model.pyi")
-        for model in self.openapi.models.values():
+        for model in self.openapi.schemas.models.values():
             module_path = models_dir / f"{model.reference.module_name}.py"
             module_path.write_text(model_template.render(model=model))
             imports.append(import_string_from_reference(model.reference))

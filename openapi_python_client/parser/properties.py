@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import InitVar, dataclass, field
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
-import openapi_schema_pydantic as oai
-
+from .. import schema as oai
 from .. import utils
-from .errors import ParseError
+from .errors import PropertyError
 from .reference import Reference
 
 
@@ -372,7 +371,9 @@ def _string_based_property(
         return StringProperty(name=name, default=data.default, required=required, pattern=data.pattern)
 
 
-def property_from_data(name: str, required: bool, data: Union[oai.Reference, oai.Schema]) -> Property:
+def property_from_data(
+    name: str, required: bool, data: Union[oai.Reference, oai.Schema]
+) -> Union[Property, PropertyError]:
     """ Generate a Property from the OpenAPI dictionary representation of it """
     if isinstance(data, oai.Reference):
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data.ref), default=None)
@@ -387,10 +388,13 @@ def property_from_data(name: str, required: bool, data: Union[oai.Reference, oai
     if data.anyOf:
         sub_properties: List[Property] = []
         for sub_prop_data in data.anyOf:
-            sub_properties.append(property_from_data(name=name, required=required, data=sub_prop_data))
+            sub_prop = property_from_data(name=name, required=required, data=sub_prop_data)
+            if isinstance(sub_prop, PropertyError):
+                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)
+            sub_properties.append(sub_prop)
         return UnionProperty(name=name, required=required, default=data.default, inner_properties=sub_properties)
     if not data.type:
-        raise ParseError(data)
+        return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data)
     elif data.type == "number":
@@ -399,13 +403,13 @@ def property_from_data(name: str, required: bool, data: Union[oai.Reference, oai
         return IntProperty(name=name, default=data.default, required=required)
     elif data.type == "boolean":
         return BooleanProperty(name=name, required=required, default=data.default)
-    elif data.type == "array" and data.items:
-        return ListProperty(
-            name=name,
-            required=required,
-            default=data.default,
-            inner_property=property_from_data(name=f"{name}_item", required=True, data=data.items),
-        )
+    elif data.type == "array":
+        if data.items is None:
+            return PropertyError(data=data, detail="type array must have items defined")
+        inner_prop = property_from_data(name=f"{name}_item", required=True, data=data.items)
+        if isinstance(inner_prop, PropertyError):
+            return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}")
+        return ListProperty(name=name, required=required, default=data.default, inner_property=inner_prop,)
     elif data.type == "object":
         return DictProperty(name=name, required=required, default=data.default)
-    raise ParseError(data)
+    return PropertyError(data=data, detail=f"unknown type {data.type}")

@@ -4,8 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
-from openapi_python_client import MultipleParseError
-from openapi_python_client.openapi_parser.errors import ParseError
+from openapi_python_client.parser.errors import GeneratorError, ParseError
 
 runner = CliRunner()
 
@@ -23,7 +22,7 @@ def test_version(mocker):
 
 @pytest.fixture
 def _create_new_client(mocker) -> MagicMock:
-    return mocker.patch("openapi_python_client.create_new_client")
+    return mocker.patch("openapi_python_client.create_new_client", return_value=[])
 
 
 def test_config(mocker, _create_new_client):
@@ -91,7 +90,7 @@ class TestGenerate:
         _create_new_client.assert_called_once_with(url=None, path=PosixPath(path))
 
     def test_generate_handle_errors(self, _create_new_client):
-        _create_new_client.side_effect = ParseError({"test": "data"}, message="this is a message")
+        _create_new_client.return_value = [GeneratorError(detail="this is a message")]
         path = "cool/path"
         from openapi_python_client.cli import app
 
@@ -99,17 +98,17 @@ class TestGenerate:
 
         assert result.exit_code == 1
         assert result.output == (
-            "ERROR: Unable to parse this part of your OpenAPI document: \n"
-            "{'test': 'data'}\n"
-            "this is a message\n"
-            "Please open an issue at https://github.com/triaxtec/openapi-python-client/issues/new/choose\n\n"
+            "Error(s) encountered while generating, client was not created\n"
+            "Unable to generate the client\n"
+            "this is a message\n\n"
+            "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
+            "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"
         )
 
     def test_generate_handle_multiple_parse_error(self, _create_new_client):
-        error_1 = ParseError({"test": "data"}, message="this is a message")
-        error_2 = ParseError({"other": "data"}, message="this is another message", header="Custom Header")
-        error = MultipleParseError([error_1, error_2])
-        _create_new_client.side_effect = error
+        error_1 = ParseError(data={"test": "data"}, detail="this is a message")
+        error_2 = ParseError(data={"other": "data"}, detail="this is another message", header="Custom Header")
+        _create_new_client.return_value = [error_1, error_2]
         path = "cool/path"
         from openapi_python_client.cli import app
 
@@ -117,27 +116,16 @@ class TestGenerate:
 
         assert result.exit_code == 1
         assert result.output == (
-            "MULTIPLE ERRORS WHILE PARSING:\n"
-            "ERROR: Unable to parse this part of your OpenAPI document: \n"
-            "{'test': 'data'}\n"
+            "Warning(s) encountered while generating. Client was generated, but some pieces may be missing\n"
+            "Unable to parse this part of your OpenAPI document: \n"
             "this is a message\n"
-            "Please open an issue at https://github.com/triaxtec/openapi-python-client/issues/new/choose\n\n"
+            "{'test': 'data'}\n\n"
             "Custom Header\n"
-            "{'other': 'data'}\n"
             "this is another message\n"
-            "Please open an issue at https://github.com/triaxtec/openapi-python-client/issues/new/choose\n\n"
+            "{'other': 'data'}\n\n"
+            "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
+            "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"
         )
-
-    def test_generate_handle_file_exists(self, _create_new_client):
-        error = FileExistsError()
-        _create_new_client.side_effect = error
-        path = "cool/path"
-        from openapi_python_client.cli import app
-
-        result = runner.invoke(app, ["generate", f"--path={path}"])
-
-        assert result.exit_code == 1
-        assert result.output == "Directory already exists. Delete it or use the update command.\n"
 
 
 @pytest.fixture

@@ -1,8 +1,7 @@
 from dataclasses import InitVar, dataclass, field
 from typing import Union
 
-import openapi_schema_pydantic as oai
-
+from .. import schema as oai
 from .errors import ParseError
 from .reference import Reference
 
@@ -79,7 +78,7 @@ openapi_types_to_python_type_strings = {
 }
 
 
-def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Reference]) -> Response:
+def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Reference]) -> Union[Response, ParseError]:
     """ Generate a Response from the OpenAPI dictionary representation of it """
 
     if isinstance(data, oai.Reference) or data.content is None:
@@ -93,7 +92,7 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
         schema_data = data.content["text/html"].media_type_schema
 
     if schema_data is None:
-        raise ParseError(data, message=f"Unsupported content_type {content}")
+        return ParseError(data=data, detail=f"Unsupported content_type {content}")
 
     if isinstance(schema_data, oai.Reference):
         return RefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.ref),)
@@ -104,4 +103,4 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
         return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.items.ref),)
     if response_type in openapi_types_to_python_type_strings:
         return BasicResponse(status_code=status_code, openapi_type=response_type)
-    raise ParseError(data, message=f"Unrecognized type {schema_data.type}")
+    return ParseError(data=data, detail=f"Unrecognized type {schema_data.type}")

@@ -1,5 +1,5 @@
 def test_from_ref():
-    from openapi_python_client.openapi_parser.reference import Reference
+    from openapi_python_client.parser.reference import Reference
 
     r = Reference.from_ref("#/components/schemas/PingResponse")
 
@@ -8,7 +8,7 @@ def test_from_ref():
 
 
 def test_from_ref_class_overrides():
-    from openapi_python_client.openapi_parser.reference import Reference, class_overrides
+    from openapi_python_client.parser.reference import Reference, class_overrides
 
     ref = "#/components/schemas/_MyResponse"
     class_overrides["_MyResponse"] = Reference(class_name="MyResponse", module_name="my_response")

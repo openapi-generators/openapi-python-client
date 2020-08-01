@@ -3,12 +3,14 @@ import pathlib
 import jinja2
 import pytest
 
+from openapi_python_client import GeneratorError
+
 
 def test__get_project_for_url_or_path(mocker):
     data_dict = mocker.MagicMock()
     _get_json = mocker.patch("openapi_python_client._get_json", return_value=data_dict)
     openapi = mocker.MagicMock()
-    from_dict = mocker.patch("openapi_python_client.openapi_parser.GeneratorData.from_dict", return_value=openapi)
+    from_dict = mocker.patch("openapi_python_client.parser.GeneratorData.from_dict", return_value=openapi)
     _Project = mocker.patch("openapi_python_client._Project")
     url = mocker.MagicMock()
     path = mocker.MagicMock()
@@ -136,9 +138,9 @@ class TestProject:
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
         project._reformat = mocker.MagicMock()
-        project._raise_errors = mocker.MagicMock()
+        project._get_errors = mocker.MagicMock()
 
-        project.build()
+        result = project.build()
 
         project.project_dir.mkdir.assert_called_once()
         project._create_package.assert_called_once()
@@ -146,7 +148,20 @@ class TestProject:
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
         project._reformat.assert_called_once()
-        project._raise_errors.assert_called_once()
+        project._get_errors.assert_called_once()
+        assert result == project._get_errors.return_value
+
+    def test_build_file_exists(self, mocker):
+        from openapi_python_client import _Project
+
+        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project.project_dir = mocker.MagicMock()
+        project.project_dir.mkdir.side_effect = FileExistsError
+        result = project.build()
+
+        project.project_dir.mkdir.assert_called_once()
+
+        assert result == [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
 
     def test_update(self, mocker):
         from openapi_python_client import _Project, shutil
@@ -159,16 +174,17 @@ class TestProject:
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
         project._reformat = mocker.MagicMock()
-        project._raise_errors = mocker.MagicMock()
+        project._get_errors = mocker.MagicMock()
 
-        project.update()
+        result = project.update()
 
         rmtree.assert_called_once_with(project.package_dir)
         project._create_package.assert_called_once()
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
         project._reformat.assert_called_once()
-        project._raise_errors.assert_called_once()
+        project._get_errors.assert_called_once()
+        assert result == project._get_errors.return_value
 
     def test_update_missing_dir(self, mocker):
         from openapi_python_client import _Project
@@ -262,7 +278,7 @@ class TestProject:
         openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
         model_1 = mocker.MagicMock()
         model_2 = mocker.MagicMock()
-        openapi.models = {"1": model_1, "2": model_2}
+        openapi.schemas.models = {"1": model_1, "2": model_2}
         enum_1 = mocker.MagicMock()
         enum_2 = mocker.MagicMock()
         openapi.enums = {"1": enum_1, "2": enum_2}
@@ -458,9 +474,9 @@ def test__reformat(mocker):
     )
 
 
-def test__raise_errors(mocker):
-    from openapi_python_client import GeneratorData, MultipleParseError, _Project
-    from openapi_python_client.openapi_parser.openapi import EndpointCollection
+def test__get_errors(mocker):
+    from openapi_python_client import GeneratorData, _Project
+    from openapi_python_client.parser.openapi import EndpointCollection, Schemas
 
     openapi = mocker.MagicMock(
         autospec=GeneratorData,
@@ -469,12 +485,11 @@ def test__raise_errors(mocker):
             "default": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[1]),
             "other": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[2]),
         },
+        schemas=mocker.MagicMock(autospec=Schemas, errors=[3]),
     )
     project = _Project(openapi=openapi)
 
-    with pytest.raises(MultipleParseError) as exc_info:
-        project._raise_errors()
-    assert exc_info.value.parse_errors == [1, 2]
+    assert project._get_errors() == [1, 2, 3]
 
 
 def test_load_config(mocker):
@@ -483,7 +498,7 @@ def test_load_config(mocker):
     fake_path = mocker.MagicMock(autospec=pathlib.Path)
 
     from openapi_python_client import load_config
-    from openapi_python_client.openapi_parser import reference
+    from openapi_python_client.parser import reference
 
     reference.class_overrides = {}
 
@@ -491,7 +506,7 @@ def test_load_config(mocker):
 
     fake_path.read_text.assert_called_once()
     safe_load.assert_called_once_with(fake_path.read_text())
-    from openapi_python_client.openapi_parser import reference
+    from openapi_python_client.parser import reference
 
     assert reference.class_overrides == {
         "_MyCLASSName": reference.Reference(class_name="MyClassName", module_name="my_module_name")
