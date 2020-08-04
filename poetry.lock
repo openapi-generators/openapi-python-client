@@ -378,7 +378,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.6.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Data validation and settings management using python 3.6 type hinting"
 name = "pydantic"
 optional = false
@@ -655,7 +655,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "3cde9f5cefa40a9df6be41884093442ad82887de44484c7c114cbf58b237fc88"
+content-hash = "094cb77e0fc8d2ef8fdd0dc99331fb3b6288216c20228679b164443ca50cbd8e"
 lock-version = "1.0"
 python-versions = "^3.7"
 
