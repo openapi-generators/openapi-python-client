@@ -263,6 +263,11 @@ class EnumProperty(Property):
         """ Get all the EnumProperties that have been registered keyed by class name """
         return _existing_enums
 
+    @staticmethod
+    def get_enum(name: str) -> Optional[EnumProperty]:
+        """ Get all the EnumProperties that have been registered keyed by class name """
+        return _existing_enums.get(name)
+
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """
 
@@ -304,7 +309,12 @@ class RefProperty(Property):
 
     reference: Reference
 
-    template: ClassVar[str] = "ref_property.pyi"
+    @property
+    def template(self) -> str:  # type: ignore
+        enum = EnumProperty.get_enum(self.reference.class_name)
+        if enum:
+            return "enum_property.pyi"
+        return "ref_property.pyi"
 
     def get_type_string(self) -> str:
         """ Get a string representation of type that should be used when declaring this property """

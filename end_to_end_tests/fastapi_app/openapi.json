@@ -41,10 +41,7 @@
                             "title": "An Enum Value",
                             "type": "array",
                             "items": {
-                                "enum": [
-                                    "FIRST_VALUE",
-                                    "SECOND_VALUE"
-                                ]
+                                "$ref": "#/components/schemas/AnEnum"
                             }
                         },
                         "name": "an_enum_value",
@@ -150,11 +147,7 @@
                 "type": "object",
                 "properties": {
                     "an_enum_value": {
-                        "title": "An Enum Value",
-                        "enum": [
-                            "FIRST_VALUE",
-                            "SECOND_VALUE"
-                        ]
+                        "$ref": "#/components/schemas/AnEnum"
                     },
                     "nested_list_of_enums": {
                         "title": "Nested List Of Enums",
@@ -162,10 +155,7 @@
                         "items": {
                             "type": "array",
                             "items": {
-                                "enum": [
-                                    "DIFFERENT",
-                                    "OTHER"
-                                ]
+                                "$ref": "#/components/schemas/DifferentEnum"
                             }
                         },
                         "default": []
@@ -199,6 +189,14 @@
                 },
                 "description": "A Model for testing all the ways custom objects can be used "
             },
+            "AnEnum": {
+                "title": "AnEnum",
+                "enum": [
+                    "FIRST_VALUE",
+                    "SECOND_VALUE"
+                ],
+                "description": "For testing Enums in all the ways they can be used "
+            },
             "Body_upload_file_tests_upload_post": {
                 "title": "Body_upload_file_tests_upload_post",
                 "required": [
@@ -212,6 +210,14 @@
                         "format": "binary"
                     }
                 }
+            },
+            "DifferentEnum": {
+                "title": "DifferentEnum",
+                "enum": [
+                    "DIFFERENT",
+                    "OTHER"
+                ],
+                "description": "An enumeration."
             },
             "HTTPValidationError": {
                 "title": "HTTPValidationError",
