@@ -228,6 +228,24 @@ class TestProject:
         assert project.package_name == "my_test_api_client"
         assert project.package_description == "A client library for accessing My Test API"
 
+    def test_project_and_package_name_overrides(self, mocker):
+        openapi = mocker.MagicMock(title="My Test API")
+
+        import openapi_python_client as opc
+        from openapi_python_client import _Project
+
+        opc.project_name_override = "my-special-project-name"
+        project = _Project(openapi=openapi)
+
+        assert project.project_name == "my-special-project-name"
+        assert project.package_name == "my_special_project_name"
+
+        opc.package_name_override = "my_special_package_name"
+        project = _Project(openapi=openapi)
+
+        assert project.project_name == "my-special-project-name"
+        assert project.package_name == "my_special_package_name"
+
     def test_build(self, mocker):
         from openapi_python_client import _Project
 
@@ -594,16 +612,22 @@ def test__get_errors(mocker):
 
 
 def test_load_config(mocker):
-    my_data = {"class_overrides": {"_MyCLASSName": {"class_name": "MyClassName", "module_name": "my_module_name"}}}
+    my_data = {
+        "class_overrides": {"_MyCLASSName": {"class_name": "MyClassName", "module_name": "my_module_name"}},
+        "client_project_name_override": "special-project-name",
+        "client_package_name_override": "special_package_name",
+    }
     safe_load = mocker.patch("yaml.safe_load", return_value=my_data)
     fake_path = mocker.MagicMock(autospec=pathlib.Path)
 
-    from openapi_python_client import load_config
+    import openapi_python_client as opc
     from openapi_python_client.parser import reference
 
     reference.class_overrides = {}
+    opc.project_name_override = None
+    opc.package_name_override = None
 
-    load_config(path=fake_path)
+    opc.load_config(path=fake_path)
 
     fake_path.read_text.assert_called_once()
     safe_load.assert_called_once_with(fake_path.read_text())
@@ -612,3 +636,5 @@ def test_load_config(mocker):
     assert reference.class_overrides == {
         "_MyCLASSName": reference.Reference(class_name="MyClassName", module_name="my_module_name")
     }
+    assert opc.project_name_override == "special-project-name"
+    assert opc.package_name_override == "special_package_name"

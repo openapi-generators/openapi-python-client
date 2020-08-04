@@ -25,6 +25,9 @@ else:
 
 __version__ = version(__package__)
 
+project_name_override: Optional[str] = None
+package_name_override: Optional[str] = None
+
 
 def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[_Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
@@ -45,6 +48,10 @@ def load_config(*, path: Path) -> None:
 
         for class_name, class_data in config_data["class_overrides"].items():
             reference.class_overrides[class_name] = reference.Reference(**class_data)
+
+    global project_name_override, package_name_override
+    project_name_override = config_data.get("client_project_name_override")
+    package_name_override = config_data.get("client_package_name_override")
 
 
 def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
@@ -100,10 +107,10 @@ class _Project:
         self.openapi: GeneratorData = openapi
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
-        self.project_name: str = f"{openapi.title.replace(' ', '-').lower()}-client"
+        self.project_name: str = project_name_override or f"{openapi.title.replace(' ', '-').lower()}-client"
         self.project_dir: Path = Path.cwd() / self.project_name
 
-        self.package_name: str = self.project_name.replace("-", "_")
+        self.package_name: str = package_name_override or self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description = f"A client library for accessing {self.openapi.title}"
 
