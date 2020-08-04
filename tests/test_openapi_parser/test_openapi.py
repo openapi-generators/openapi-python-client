@@ -133,14 +133,13 @@ class TestSchemas:
         assert result.errors[0] == ParseError(data=ref_schema, detail="Reference schemas are not supported.")
 
     def test_build_enums(self, mocker):
-        from openapi_python_client.parser.properties import EnumProperty, _existing_enums
         from openapi_python_client.parser.openapi import Schemas
 
         from_data = mocker.patch(f"{MODULE_NAME}.Model.from_data")
         enum_property = mocker.patch(f"{MODULE_NAME}.EnumProperty")
         in_data = {"1": mocker.MagicMock(enum=["val1", "val2", "val3"])}
 
-        result = Schemas.build(schemas=in_data)
+        Schemas.build(schemas=in_data)
 
         enum_property.assert_called()
         from_data.assert_not_called()

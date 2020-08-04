@@ -323,8 +323,8 @@ class TestEnumProperty:
     def test_get_enum(self):
         from openapi_python_client.parser import properties
 
-        properties._existing_enums = {'test': "an enum"}
-        assert properties.EnumProperty.get_enum('test') == "an enum"
+        properties._existing_enums = {"test": "an enum"}
+        assert properties.EnumProperty.get_enum("test") == "an enum"
         properties._existing_enums = {}
 
 
