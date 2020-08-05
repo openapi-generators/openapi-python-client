@@ -15,7 +15,7 @@ class OAuthFlow(BaseModel):
     This MUST be in the form of a URL.
     """
 
-    tokenUrl: Optional[AnyUrl] = None
+    tokenUrl: Optional[str] = None
     """
     **REQUIRED** for `oauth2 ("password", "clientCredentials", "authorizationCode")`.
     The token URL to be used for this flow.
