@@ -25,6 +25,25 @@ def test__get_project_for_url_or_path(mocker):
     assert project == _Project()
 
 
+def test__get_project_for_url_or_path_generator_error(mocker):
+    data_dict = mocker.MagicMock()
+    _get_document = mocker.patch("openapi_python_client._get_document", return_value=data_dict)
+    error = GeneratorError()
+    from_dict = mocker.patch("openapi_python_client.parser.GeneratorData.from_dict", return_value=error)
+    _Project = mocker.patch("openapi_python_client._Project")
+    url = mocker.MagicMock()
+    path = mocker.MagicMock()
+
+    from openapi_python_client import _get_project_for_url_or_path
+
+    project = _get_project_for_url_or_path(url=url, path=path)
+
+    _get_document.assert_called_once_with(url=url, path=path)
+    from_dict.assert_called_once_with(data_dict)
+    _Project.assert_not_called()
+    assert project == error
+
+
 def test_create_new_client(mocker):
     project = mocker.MagicMock()
     _get_project_for_url_or_path = mocker.patch(
@@ -35,10 +54,27 @@ def test_create_new_client(mocker):
 
     from openapi_python_client import create_new_client
 
-    create_new_client(url=url, path=path)
+    result = create_new_client(url=url, path=path)
 
     _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
     project.build.assert_called_once()
+    assert result == project.build.return_value
+
+
+def test_create_new_client_project_error(mocker):
+    error = GeneratorError()
+    _get_project_for_url_or_path = mocker.patch(
+        "openapi_python_client._get_project_for_url_or_path", return_value=error
+    )
+    url = mocker.MagicMock()
+    path = mocker.MagicMock()
+
+    from openapi_python_client import create_new_client
+
+    result = create_new_client(url=url, path=path)
+
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    assert result == [error]
 
 
 def test_update_existing_client(mocker):
@@ -51,10 +87,27 @@ def test_update_existing_client(mocker):
 
     from openapi_python_client import update_existing_client
 
-    update_existing_client(url=url, path=path)
+    result = update_existing_client(url=url, path=path)
 
     _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
     project.update.assert_called_once()
+    assert result == project.update.return_value
+
+
+def test_update_existing_client_project_error(mocker):
+    error = GeneratorError()
+    _get_project_for_url_or_path = mocker.patch(
+        "openapi_python_client._get_project_for_url_or_path", return_value=error
+    )
+    url = mocker.MagicMock()
+    path = mocker.MagicMock()
+
+    from openapi_python_client import update_existing_client
+
+    result = update_existing_client(url=url, path=path)
+
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    assert result == [error]
 
 
 class TestGetJson:

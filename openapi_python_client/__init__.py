@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence, Union
 
 import httpx
 import yaml
@@ -25,9 +25,11 @@ else:
 __version__ = version(__package__)
 
 
-def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> _Project:
+def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[_Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     openapi = GeneratorData.from_dict(data_dict)
+    if isinstance(openapi, GeneratorError):
+        return openapi
     return _Project(openapi=openapi)
 
 
@@ -50,6 +52,8 @@ def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[G
          A list containing any errors encountered when generating.
     """
     project = _get_project_for_url_or_path(url=url, path=path)
+    if isinstance(project, GeneratorError):
+        return [project]
     return project.build()
 
 
@@ -61,6 +65,8 @@ def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Seque
          A list containing any errors encountered when generating.
     """
     project = _get_project_for_url_or_path(url=url, path=path)
+    if isinstance(project, GeneratorError):
+        return [project]
     return project.update()
 
 
