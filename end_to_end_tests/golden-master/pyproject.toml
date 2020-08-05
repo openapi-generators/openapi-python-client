@@ -33,3 +33,7 @@ exclude = '''
 line_length = 120
 multi_line_output = 3
 include_trailing_comma = true
+
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"

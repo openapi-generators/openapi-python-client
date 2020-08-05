@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Additions
 - The generator can now handle many more errors gracefully, skipping the things it can't generate and continuing
     with the pieces it can.
-- Support for Enums declared in "components/schemas" and references to them. (#120)
+- Support for Enums declared in "components/schemas" and references to them (#102).
+- Generated clients can now be installed via pip (#120).
     
 ### Internal Changes
 - Switched OpenAPI document parsing to use Pydantic based on a vendored version of 
