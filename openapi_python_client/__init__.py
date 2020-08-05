@@ -1,7 +1,6 @@
 """ Generate modern Python clients from OpenAPI """
 from __future__ import annotations
 
-import json
 import shutil
 import subprocess
 import sys
@@ -27,7 +26,7 @@ __version__ = version(__package__)
 
 
 def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> _Project:
-    data_dict = _get_json(url=url, path=path)
+    data_dict = _get_document(url=url, path=path)
     openapi = GeneratorData.from_dict(data_dict)
     return _Project(openapi=openapi)
 
@@ -65,18 +64,18 @@ def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Seque
     return project.update()
 
 
-def _get_json(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
-    json_bytes: bytes
+def _get_document(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
+    yaml_bytes: bytes
     if url is not None and path is not None:
         raise ValueError("Provide URL or Path, not both.")
     if url is not None:
         response = httpx.get(url)
-        json_bytes = response.content
+        yaml_bytes = response.content
     elif path is not None:
-        json_bytes = path.read_bytes()
+        yaml_bytes = path.read_bytes()
     else:
         raise ValueError("No URL or Path provided")
-    return json.loads(json_bytes)
+    return yaml.safe_load(yaml_bytes)
 
 
 class _Project:

@@ -8,7 +8,7 @@ from openapi_python_client import GeneratorError
 
 def test__get_project_for_url_or_path(mocker):
     data_dict = mocker.MagicMock()
-    _get_json = mocker.patch("openapi_python_client._get_json", return_value=data_dict)
+    _get_document = mocker.patch("openapi_python_client._get_document", return_value=data_dict)
     openapi = mocker.MagicMock()
     from_dict = mocker.patch("openapi_python_client.parser.GeneratorData.from_dict", return_value=openapi)
     _Project = mocker.patch("openapi_python_client._Project")
@@ -19,7 +19,7 @@ def test__get_project_for_url_or_path(mocker):
 
     project = _get_project_for_url_or_path(url=url, path=path)
 
-    _get_json.assert_called_once_with(url=url, path=path)
+    _get_document.assert_called_once_with(url=url, path=path)
     from_dict.assert_called_once_with(data_dict)
     _Project.assert_called_once_with(openapi=openapi)
     assert project == _Project()
@@ -58,56 +58,56 @@ def test_update_existing_client(mocker):
 
 
 class TestGetJson:
-    def test__get_json_no_url_or_path(self, mocker):
+    def test__get_document_no_url_or_path(self, mocker):
         get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
-        loads = mocker.patch("json.loads")
+        loads = mocker.patch("yaml.safe_load")
 
-        from openapi_python_client import _get_json
+        from openapi_python_client import _get_document
 
         with pytest.raises(ValueError):
-            _get_json(url=None, path=None)
+            _get_document(url=None, path=None)
 
         get.assert_not_called()
         Path.assert_not_called()
         loads.assert_not_called()
 
-    def test__get_json_url_and_path(self, mocker):
+    def test__get_document_url_and_path(self, mocker):
         get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
-        loads = mocker.patch("json.loads")
+        loads = mocker.patch("yaml.safe_load")
 
-        from openapi_python_client import _get_json
+        from openapi_python_client import _get_document
 
         with pytest.raises(ValueError):
-            _get_json(url=mocker.MagicMock(), path=mocker.MagicMock())
+            _get_document(url=mocker.MagicMock(), path=mocker.MagicMock())
 
         get.assert_not_called()
         Path.assert_not_called()
         loads.assert_not_called()
 
-    def test__get_json_url_no_path(self, mocker):
+    def test__get_document_url_no_path(self, mocker):
         get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
-        loads = mocker.patch("json.loads")
+        loads = mocker.patch("yaml.safe_load")
 
-        from openapi_python_client import _get_json
+        from openapi_python_client import _get_document
 
         url = mocker.MagicMock()
-        _get_json(url=url, path=None)
+        _get_document(url=url, path=None)
 
         get.assert_called_once_with(url)
         Path.assert_not_called()
         loads.assert_called_once_with(get().content)
 
-    def test__get_json_path_no_url(self, mocker):
+    def test__get_document_path_no_url(self, mocker):
         get = mocker.patch("httpx.get")
-        loads = mocker.patch("json.loads")
+        loads = mocker.patch("yaml.safe_load")
 
-        from openapi_python_client import _get_json
+        from openapi_python_client import _get_document
 
         path = mocker.MagicMock()
-        _get_json(url=None, path=path)
+        _get_document(url=None, path=path)
 
         get.assert_not_called()
         path.read_bytes.assert_called_once()
