@@ -25,8 +25,8 @@ def _create_new_client(mocker) -> MagicMock:
     return mocker.patch("openapi_python_client.create_new_client", return_value=[])
 
 
-def test_config(mocker, _create_new_client):
-    load_config = mocker.patch("openapi_python_client.load_config")
+def test_config_arg(mocker, _create_new_client):
+    load_config = mocker.patch("openapi_python_client.config.Config.load_from_path")
     from openapi_python_client.cli import app
 
     config_path = "config/path"
@@ -40,7 +40,9 @@ def test_config(mocker, _create_new_client):
 
 
 def test_bad_config(mocker, _create_new_client):
-    load_config = mocker.patch("openapi_python_client.load_config", side_effect=ValueError("Bad Config"))
+    load_config = mocker.patch(
+        "openapi_python_client.config.Config.load_from_path", side_effect=ValueError("Bad Config")
+    )
     from openapi_python_client.cli import app
 
     config_path = "config/path"
