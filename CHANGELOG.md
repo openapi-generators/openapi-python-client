@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 - Relative paths are now allowed in securitySchemes/OAuthFlow/tokenUrl (#130).
 - Schema validation errors will no longer print a stack trace (#131).
-
+- Invalid YAML/URL will no longer print stack trace (#128)
 
 ## 0.5.0 - 2020-08-05
 ### Changes

@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Union
 
+import httpcore
 import httpx
 import yaml
 from jinja2 import Environment, PackageLoader
@@ -27,6 +28,8 @@ __version__ = version(__package__)
 
 def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[_Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
+    if isinstance(data_dict, GeneratorError):
+        return data_dict
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
@@ -70,18 +73,24 @@ def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Seque
     return project.update()
 
 
-def _get_document(*, url: Optional[str], path: Optional[Path]) -> Dict[str, Any]:
+def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
     if url is not None and path is not None:
-        raise ValueError("Provide URL or Path, not both.")
+        return GeneratorError(header="Provide URL or Path, not both.")
     if url is not None:
-        response = httpx.get(url)
-        yaml_bytes = response.content
+        try:
+            response = httpx.get(url)
+            yaml_bytes = response.content
+        except (httpx.HTTPError, httpcore.NetworkError):
+            return GeneratorError(header="Could not get OpenAPI document from provided URL")
     elif path is not None:
         yaml_bytes = path.read_bytes()
     else:
-        raise ValueError("No URL or Path provided")
-    return yaml.safe_load(yaml_bytes)
+        return GeneratorError(header="No URL or Path provided")
+    try:
+        return yaml.safe_load(yaml_bytes)
+    except yaml.YAMLError:
+        return GeneratorError(header="Invalid YAML from provided source")
 
 
 class _Project:
