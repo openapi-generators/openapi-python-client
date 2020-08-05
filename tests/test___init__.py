@@ -1,7 +1,9 @@
 import pathlib
 
+import httpcore
 import jinja2
 import pytest
+import yaml
 
 from openapi_python_client import GeneratorError
 
@@ -41,6 +43,23 @@ def test__get_project_for_url_or_path_generator_error(mocker):
     _get_document.assert_called_once_with(url=url, path=path)
     from_dict.assert_called_once_with(data_dict)
     _Project.assert_not_called()
+    assert project == error
+
+
+def test__get_project_for_url_or_path_document_error(mocker):
+    error = GeneratorError()
+    _get_document = mocker.patch("openapi_python_client._get_document", return_value=error)
+
+    from_dict = mocker.patch("openapi_python_client.parser.GeneratorData.from_dict")
+    url = mocker.MagicMock()
+    path = mocker.MagicMock()
+
+    from openapi_python_client import _get_project_for_url_or_path
+
+    project = _get_project_for_url_or_path(url=url, path=path)
+
+    _get_document.assert_called_once_with(url=url, path=path)
+    from_dict.assert_not_called()
     assert project == error
 
 
@@ -118,9 +137,9 @@ class TestGetJson:
 
         from openapi_python_client import _get_document
 
-        with pytest.raises(ValueError):
-            _get_document(url=None, path=None)
+        result = _get_document(url=None, path=None)
 
+        assert result == GeneratorError(header="No URL or Path provided")
         get.assert_not_called()
         Path.assert_not_called()
         loads.assert_not_called()
@@ -132,10 +151,25 @@ class TestGetJson:
 
         from openapi_python_client import _get_document
 
-        with pytest.raises(ValueError):
-            _get_document(url=mocker.MagicMock(), path=mocker.MagicMock())
+        result = _get_document(url=mocker.MagicMock(), path=mocker.MagicMock())
 
+        assert result == GeneratorError(header="Provide URL or Path, not both.")
         get.assert_not_called()
+        Path.assert_not_called()
+        loads.assert_not_called()
+
+    def test__get_document_bad_url(self, mocker):
+        get = mocker.patch("httpx.get", side_effect=httpcore.NetworkError)
+        Path = mocker.patch("openapi_python_client.Path")
+        loads = mocker.patch("yaml.safe_load")
+
+        from openapi_python_client import _get_document
+
+        url = mocker.MagicMock()
+        result = _get_document(url=url, path=None)
+
+        assert result == GeneratorError(header="Could not get OpenAPI document from provided URL")
+        get.assert_called_once_with(url)
         Path.assert_not_called()
         loads.assert_not_called()
 
@@ -165,6 +199,20 @@ class TestGetJson:
         get.assert_not_called()
         path.read_bytes.assert_called_once()
         loads.assert_called_once_with(path.read_bytes())
+
+    def test__get_document_bad_yaml(self, mocker):
+        get = mocker.patch("httpx.get")
+        loads = mocker.patch("yaml.safe_load", side_effect=yaml.YAMLError)
+
+        from openapi_python_client import _get_document
+
+        path = mocker.MagicMock()
+        result = _get_document(url=None, path=path)
+
+        get.assert_not_called()
+        path.read_bytes.assert_called_once()
+        loads.assert_called_once_with(path.read_bytes())
+        assert result == GeneratorError(header="Invalid YAML from provided source")
 
 
 class TestProject:
