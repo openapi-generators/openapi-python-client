@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     with the pieces it can.
 - Support for Enums declared in "components/schemas" and references to them (#102).
 - Generated clients can now be installed via pip (#120).
+- Support for YAML OpenAPI documents (#111)
     
 ### Internal Changes
 - Switched OpenAPI document parsing to use Pydantic based on a vendored version of 
