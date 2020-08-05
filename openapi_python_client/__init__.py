@@ -19,7 +19,7 @@ from .parser.errors import GeneratorError
 if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
     from importlib_metadata import version
 else:
-    from importlib.metadata import version  #type: ignore
+    from importlib.metadata import version  # type: ignore
 
 
 __version__ = version(__package__)
