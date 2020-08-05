@@ -1,4 +1,8 @@
+from pydantic import ValidationError
+from pydantic.error_wrappers import ErrorWrapper
+
 import openapi_python_client.schema as oai
+from openapi_python_client import GeneratorError
 from openapi_python_client.parser.errors import ParseError
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
@@ -39,6 +43,28 @@ class TestGeneratorData:
 
         Schemas.build.assert_not_called()
         assert generator_data.schemas == Schemas()
+
+    def test_from_dict_invalid_schema(self, mocker):
+        Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
+
+        in_dict = {}
+
+        from openapi_python_client.parser.openapi import GeneratorData
+
+        generator_data = GeneratorData.from_dict(in_dict)
+
+        assert generator_data == GeneratorError(
+            header="Failed to parse OpenAPI document",
+            detail=(
+                "2 validation errors for OpenAPI\n"
+                "info\n"
+                "  field required (type=value_error.missing)\n"
+                "paths\n"
+                "  field required (type=value_error.missing)"
+            ),
+        )
+        Schemas.build.assert_not_called()
+        Schemas.assert_not_called()
 
 
 class TestModel:

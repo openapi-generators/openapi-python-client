@@ -5,8 +5,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
+from pydantic import ValidationError
+
 from .. import schema as oai
-from .errors import ParseError, PropertyError
+from .errors import GeneratorError, ParseError, PropertyError
 from .properties import EnumProperty, Property, property_from_data
 from .reference import Reference
 from .responses import ListRefResponse, RefResponse, Response, response_from_data
@@ -288,9 +290,12 @@ class GeneratorData:
     enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Dict[str, Any]]) -> GeneratorData:
+    def from_dict(d: Dict[str, Dict[str, Any]]) -> Union[GeneratorData, GeneratorError]:
         """ Create an OpenAPI from dict """
-        openapi = oai.OpenAPI.parse_obj(d)
+        try:
+            openapi = oai.OpenAPI.parse_obj(d)
+        except ValidationError as e:
+            return GeneratorError(header="Failed to parse OpenAPI document", detail=str(e))
         if openapi.components is None or openapi.components.schemas is None:
             schemas = Schemas()
         else:
