@@ -1,4 +1,4 @@
-from pathlib import PosixPath
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -35,8 +35,8 @@ def test_config(mocker, _create_new_client):
     result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={path}"], catch_exceptions=False)
 
     assert result.exit_code == 0
-    load_config.assert_called_once_with(path=PosixPath(config_path))
-    _create_new_client.assert_called_once_with(url=None, path=PosixPath(path))
+    load_config.assert_called_once_with(path=Path(config_path))
+    _create_new_client.assert_called_once_with(url=None, path=Path(path))
 
 
 def test_bad_config(mocker, _create_new_client):
@@ -50,7 +50,7 @@ def test_bad_config(mocker, _create_new_client):
 
     assert result.exit_code == 2
     assert "Unable to parse config" in result.stdout
-    load_config.assert_called_once_with(path=PosixPath(config_path))
+    load_config.assert_called_once_with(path=Path(config_path))
     _create_new_client.assert_not_called()
 
 
@@ -87,7 +87,7 @@ class TestGenerate:
         result = runner.invoke(app, ["generate", f"--path={path}"])
 
         assert result.exit_code == 0
-        _create_new_client.assert_called_once_with(url=None, path=PosixPath(path))
+        _create_new_client.assert_called_once_with(url=None, path=Path(path))
 
     def test_generate_handle_errors(self, _create_new_client):
         _create_new_client.return_value = [GeneratorError(detail="this is a message")]
@@ -166,4 +166,4 @@ class TestUpdate:
         result = runner.invoke(app, ["update", f"--path={path}"])
 
         assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(url=None, path=PosixPath(path))
+        _update_existing_client.assert_called_once_with(url=None, path=Path(path))

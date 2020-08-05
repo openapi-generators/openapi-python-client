@@ -4,19 +4,19 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union, cast
 
-from .an_enum_value import AnEnumValue
-from .an_enum_value1 import AnEnumValue1
+from .an_enum import AnEnum
+from .different_enum import DifferentEnum
 
 
 @dataclass
 class AModel:
     """ A Model for testing all the ways custom objects can be used  """
 
-    an_enum_value: AnEnumValue
+    an_enum_value: AnEnum
     a_camel_date_time: Union[datetime, date]
     a_date: date
-    nested_list_of_enums: Optional[List[List[AnEnumValue1]]] = field(
-        default_factory=lambda: cast(Optional[List[List[AnEnumValue1]]], [])
+    nested_list_of_enums: Optional[List[List[DifferentEnum]]] = field(
+        default_factory=lambda: cast(Optional[List[List[DifferentEnum]]], [])
     )
     some_dict: Optional[Dict[Any, Any]] = field(default_factory=lambda: cast(Optional[Dict[Any, Any]], {}))
 
@@ -56,7 +56,7 @@ class AModel:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> AModel:
-        an_enum_value = AnEnumValue(d["an_enum_value"])
+        an_enum_value = AnEnum(d["an_enum_value"])
 
         def _parse_a_camel_date_time(data: Dict[str, Any]) -> Union[datetime, date]:
             a_camel_date_time: Union[datetime, date]
@@ -78,7 +78,7 @@ class AModel:
         for nested_list_of_enums_item_data in d.get("nested_list_of_enums") or []:
             nested_list_of_enums_item = []
             for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
-                nested_list_of_enums_item_item = AnEnumValue1(nested_list_of_enums_item_item_data)
+                nested_list_of_enums_item_item = DifferentEnum(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 

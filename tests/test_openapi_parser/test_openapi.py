@@ -105,19 +105,11 @@ class TestModel:
 
         assert result == parse_error
 
-    def test_from_data_parse_error_on_reference(self):
-        from openapi_python_client.parser.openapi import Model
-
-        data = oai.Reference.construct()
-        assert Model.from_data(data=data, name="") == ParseError(
-            data=data, detail="Reference schemas are not supported."
-        )
-
 
 class TestSchemas:
     def test_build(self, mocker):
         from_data = mocker.patch(f"{MODULE_NAME}.Model.from_data")
-        in_data = {1: mocker.MagicMock(), 2: mocker.MagicMock(), 3: mocker.MagicMock()}
+        in_data = {"1": mocker.MagicMock(enum=None), "2": mocker.MagicMock(enum=None), "3": mocker.MagicMock(enum=None)}
         schema_1 = mocker.MagicMock()
         schema_2 = mocker.MagicMock()
         error = ParseError()
@@ -131,6 +123,26 @@ class TestSchemas:
         assert result == Schemas(
             models={schema_1.reference.class_name: schema_1, schema_2.reference.class_name: schema_2,}, errors=[error]
         )
+
+    def test_build_parse_error_on_reference(self):
+        from openapi_python_client.parser.openapi import Schemas
+
+        ref_schema = oai.Reference.construct()
+        in_data = {1: ref_schema}
+        result = Schemas.build(schemas=in_data)
+        assert result.errors[0] == ParseError(data=ref_schema, detail="Reference schemas are not supported.")
+
+    def test_build_enums(self, mocker):
+        from openapi_python_client.parser.openapi import Schemas
+
+        from_data = mocker.patch(f"{MODULE_NAME}.Model.from_data")
+        enum_property = mocker.patch(f"{MODULE_NAME}.EnumProperty")
+        in_data = {"1": mocker.MagicMock(enum=["val1", "val2", "val3"])}
+
+        Schemas.build(schemas=in_data)
+
+        enum_property.assert_called()
+        from_data.assert_not_called()
 
 
 class TestEndpoint:

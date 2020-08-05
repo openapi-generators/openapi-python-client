@@ -7,13 +7,13 @@ import httpx
 from ..client import AuthenticatedClient, Client
 from ..errors import ApiResponseError
 from ..models.a_model import AModel
-from ..models.an_enum_value import AnEnumValue
+from ..models.an_enum import AnEnum
 from ..models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ..models.http_validation_error import HTTPValidationError
 
 
 async def get_user_list(
-    *, client: Client, an_enum_value: List[AnEnumValue], some_date: Union[date, datetime],
+    *, client: Client, an_enum_value: List[AnEnum], some_date: Union[date, datetime],
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:

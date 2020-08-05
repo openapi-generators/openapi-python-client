@@ -320,8 +320,28 @@ class TestEnumProperty:
         assert properties.EnumProperty.get_all_enums() == properties._existing_enums
         properties._existing_enums = {}
 
+    def test_get_enum(self):
+        from openapi_python_client.parser import properties
+
+        properties._existing_enums = {"test": "an enum"}
+        assert properties.EnumProperty.get_enum("test") == "an enum"
+        properties._existing_enums = {}
+
 
 class TestRefProperty:
+    def test_template(self, mocker):
+        from openapi_python_client.parser.properties import RefProperty
+
+        ref_property = RefProperty(
+            name="test", required=True, default=None, reference=mocker.MagicMock(class_name="MyRefClass")
+        )
+
+        assert ref_property.template == "ref_property.pyi"
+
+        mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value="an enum")
+
+        assert ref_property.template == "enum_property.pyi"
+
     def test_get_type_string(self, mocker):
         from openapi_python_client.parser.properties import RefProperty
 
