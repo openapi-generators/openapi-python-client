@@ -18,7 +18,6 @@ packages = [
 ]
 include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 
-
 [tool.poetry.dependencies]
 python = "^3.7"
 jinja2 = "^2.11.1"
@@ -84,3 +83,6 @@ skip = [".venv", "tests/test_templates"]
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
 
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
