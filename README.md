@@ -86,6 +86,16 @@ class_overrides:
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the
  models folder.
+ 
+ ### project_name_override and package_name_override
+Used to change the name of generated client library project/package. If the project name is changed but an override for the package name
+isn't provided, the package name will be converted from the project name using the standard convention (replacing `-`'s with `_`'s).
+
+Example:
+```yaml
+project_name_override: my-special-project-name
+package_name_override: my_extra_special_package_name
+```
 
 
 [CHANGELOG.md]: CHANGELOG.md
