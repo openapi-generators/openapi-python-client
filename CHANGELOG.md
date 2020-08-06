@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## 0.5.2 - unreleased
+## 0.5.2 - 2020-08-06
 ### Additions
 - Added `project_name_override` and `package_name_override` config options to override the name of the generated project/package (#123)
 - The generated library's version is now the same as the OpenAPI doc's version (#134)
