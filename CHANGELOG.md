@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.5.2 - unreleased
 ### Fixes
-- The generated library's version is now the same as the OpenAPI doc's version
+- The generated library's version is now the same as the OpenAPI doc's version (#134)
 
 ## 0.5.1 - 2020-08-05
 ### Fixes
