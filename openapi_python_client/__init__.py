@@ -168,7 +168,10 @@ class _Project:
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
             pyproject_template.render(
-                project_name=self.project_name, package_name=self.package_name, version=self.version, description=self.package_description
+                project_name=self.project_name,
+                package_name=self.package_name,
+                version=self.version,
+                description=self.package_description,
             )
         )
 
