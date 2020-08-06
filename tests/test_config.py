@@ -29,7 +29,7 @@ class TestLoadConfig:
         config = Config(project_name_override="project-name", package_name_override="package_name")
         config.load_config()
 
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        assert _Project.project_name_override == "project-name"
-        assert _Project.package_name_override == "package_name"
+        assert Project.project_name_override == "project-name"
+        assert Project.package_name_override == "package_name"

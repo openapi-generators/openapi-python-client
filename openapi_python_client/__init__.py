@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Sequence, Union
 
 import httpcore
 import httpx
+import yaml
 from jinja2 import Environment, PackageLoader
 
 from openapi_python_client import utils
@@ -24,18 +25,15 @@ else:
 
 __version__ = version(__package__)
 
-project_name_override: Optional[str] = None
-package_name_override: Optional[str] = None
 
-
-def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[_Project, GeneratorError]:
+def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
         return data_dict
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return _Project(openapi=openapi)
+    return Project(openapi=openapi)
 
 
 def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
@@ -84,7 +82,7 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
         return GeneratorError(header="Invalid YAML from provided source")
 
 
-class _Project:
+class Project:
     TEMPLATE_FILTERS = {"snakecase": utils.snake_case}
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None

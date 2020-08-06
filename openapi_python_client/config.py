@@ -24,10 +24,10 @@ class Config(BaseModel):
             for class_name, class_data in self.class_overrides.items():
                 reference.class_overrides[class_name] = reference.Reference(**dict(class_data))
 
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        _Project.project_name_override = self.project_name_override
-        _Project.package_name_override = self.package_name_override
+        Project.project_name_override = self.project_name_override
+        Project.package_name_override = self.package_name_override
 
     @staticmethod
     def load_from_path(path: Path) -> None:
