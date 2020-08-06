@@ -18,7 +18,7 @@ from .parser import GeneratorData, import_string_from_reference
 from .parser.errors import GeneratorError
 
 if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
-    from importlib_metadata import version  # type: ignore
+    from importlib_metadata import version
 else:
     from importlib.metadata import version  # type: ignore
 
@@ -26,25 +26,14 @@ else:
 __version__ = version(__package__)
 
 
-def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[_Project, GeneratorError]:
+def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
         return data_dict
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return _Project(openapi=openapi)
-
-
-def load_config(*, path: Path) -> None:
-    """ Loads config from provided Path """
-    config_data = yaml.safe_load(path.read_text())
-
-    if "class_overrides" in config_data:
-        from .parser import reference
-
-        for class_name, class_data in config_data["class_overrides"].items():
-            reference.class_overrides[class_name] = reference.Reference(**class_data)
+    return Project(openapi=openapi)
 
 
 def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
@@ -93,17 +82,19 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
         return GeneratorError(header="Invalid YAML from provided source")
 
 
-class _Project:
+class Project:
     TEMPLATE_FILTERS = {"snakecase": utils.snake_case}
+    project_name_override: Optional[str] = None
+    package_name_override: Optional[str] = None
 
     def __init__(self, *, openapi: GeneratorData) -> None:
         self.openapi: GeneratorData = openapi
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
-        self.project_name: str = f"{openapi.title.replace(' ', '-').lower()}-client"
+        self.project_name: str = self.project_name_override or f"{openapi.title.replace(' ', '-').lower()}-client"
         self.project_dir: Path = Path.cwd() / self.project_name
 
-        self.package_name: str = self.project_name.replace("-", "_")
+        self.package_name: str = self.package_name_override or self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description: str = f"A client library for accessing {self.openapi.title}"
         self.version: str = openapi.version

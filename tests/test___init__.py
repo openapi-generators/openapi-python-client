@@ -13,7 +13,7 @@ def test__get_project_for_url_or_path(mocker):
     _get_document = mocker.patch("openapi_python_client._get_document", return_value=data_dict)
     openapi = mocker.MagicMock()
     from_dict = mocker.patch("openapi_python_client.parser.GeneratorData.from_dict", return_value=openapi)
-    _Project = mocker.patch("openapi_python_client._Project")
+    _Project = mocker.patch("openapi_python_client.Project")
     url = mocker.MagicMock()
     path = mocker.MagicMock()
 
@@ -32,7 +32,7 @@ def test__get_project_for_url_or_path_generator_error(mocker):
     _get_document = mocker.patch("openapi_python_client._get_document", return_value=data_dict)
     error = GeneratorError()
     from_dict = mocker.patch("openapi_python_client.parser.GeneratorData.from_dict", return_value=error)
-    _Project = mocker.patch("openapi_python_client._Project")
+    _Project = mocker.patch("openapi_python_client.Project")
     url = mocker.MagicMock()
     path = mocker.MagicMock()
 
@@ -219,19 +219,36 @@ class TestProject:
     def test___init__(self, mocker):
         openapi = mocker.MagicMock(title="My Test API")
 
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        project = _Project(openapi=openapi)
+        project = Project(openapi=openapi)
 
         assert project.openapi == openapi
         assert project.project_name == "my-test-api-client"
         assert project.package_name == "my_test_api_client"
         assert project.package_description == "A client library for accessing My Test API"
 
-    def test_build(self, mocker):
-        from openapi_python_client import _Project
+    def test_project_and_package_name_overrides(self, mocker):
+        openapi = mocker.MagicMock(title="My Test API")
 
-        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        from openapi_python_client import Project
+
+        Project.project_name_override = "my-special-project-name"
+        project = Project(openapi=openapi)
+
+        assert project.project_name == "my-special-project-name"
+        assert project.package_name == "my_special_project_name"
+
+        Project.package_name_override = "my_special_package_name"
+        project = Project(openapi=openapi)
+
+        assert project.project_name == "my-special-project-name"
+        assert project.package_name == "my_special_package_name"
+
+    def test_build(self, mocker):
+        from openapi_python_client import Project
+
+        project = Project(openapi=mocker.MagicMock(title="My Test API"))
         project.project_dir = mocker.MagicMock()
         project.package_dir = mocker.MagicMock()
         project._build_metadata = mocker.MagicMock()
@@ -253,9 +270,9 @@ class TestProject:
         assert result == project._get_errors.return_value
 
     def test_build_file_exists(self, mocker):
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project = Project(openapi=mocker.MagicMock(title="My Test API"))
         project.project_dir = mocker.MagicMock()
         project.project_dir.mkdir.side_effect = FileExistsError
         result = project.build()
@@ -265,10 +282,10 @@ class TestProject:
         assert result == [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
 
     def test_update(self, mocker):
-        from openapi_python_client import _Project, shutil
+        from openapi_python_client import Project, shutil
 
         rmtree = mocker.patch.object(shutil, "rmtree")
-        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project = Project(openapi=mocker.MagicMock(title="My Test API"))
         project.package_dir = mocker.MagicMock()
         project._build_metadata = mocker.MagicMock()
         project._build_models = mocker.MagicMock()
@@ -288,9 +305,9 @@ class TestProject:
         assert result == project._get_errors.return_value
 
     def test_update_missing_dir(self, mocker):
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project = Project(openapi=mocker.MagicMock(title="My Test API"))
         project.package_dir = mocker.MagicMock()
         project.package_dir.is_dir.return_value = False
         project._build_models = mocker.MagicMock()
@@ -302,9 +319,9 @@ class TestProject:
         project._build_models.assert_not_called()
 
     def test__create_package(self, mocker):
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project = Project(openapi=mocker.MagicMock(title="My Test API"))
         project.package_dir = mocker.MagicMock()
         package_init_template = mocker.MagicMock()
         project.env = mocker.MagicMock()
@@ -327,9 +344,9 @@ class TestProject:
         pytyped_path.write_text.assert_called_once_with("# Marker file for PEP 561")
 
     def test__build_metadata(self, mocker):
-        from openapi_python_client import _Project
+        from openapi_python_client import Project
 
-        project = _Project(openapi=mocker.MagicMock(title="My Test API"))
+        project = Project(openapi=mocker.MagicMock(title="My Test API"))
         project.project_dir = mocker.MagicMock()
         pyproject_path = mocker.MagicMock(autospec=pathlib.Path)
         readme_path = mocker.MagicMock(autospec=pathlib.Path)
@@ -375,7 +392,7 @@ class TestProject:
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render())
 
     def test__build_models(self, mocker):
-        from openapi_python_client import GeneratorData, _Project
+        from openapi_python_client import GeneratorData, Project
 
         openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
         model_1 = mocker.MagicMock()
@@ -384,7 +401,7 @@ class TestProject:
         enum_1 = mocker.MagicMock()
         enum_2 = mocker.MagicMock()
         openapi.enums = {"1": enum_1, "2": enum_2}
-        project = _Project(openapi=openapi)
+        project = Project(openapi=openapi)
         project.package_dir = mocker.MagicMock()
         models_init = mocker.MagicMock()
         types_py = mocker.MagicMock()
@@ -466,7 +483,7 @@ class TestProject:
 
         from jinja2 import Template
 
-        from openapi_python_client import GeneratorData, _Project
+        from openapi_python_client import GeneratorData, Project
 
         openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
         tag_1 = mocker.MagicMock(autospec=str)
@@ -474,7 +491,7 @@ class TestProject:
         collection_1 = mocker.MagicMock()
         collection_2 = mocker.MagicMock()
         openapi.endpoint_collections_by_tag = {tag_1: collection_1, tag_2: collection_2}
-        project = _Project(openapi=openapi)
+        project = Project(openapi=openapi)
         project.package_dir = mocker.MagicMock()
         api_errors = mocker.MagicMock(autospec=pathlib.Path)
         client_path = mocker.MagicMock()
@@ -557,11 +574,11 @@ class TestProject:
 def test__reformat(mocker):
     import subprocess
 
-    from openapi_python_client import GeneratorData, _Project
+    from openapi_python_client import GeneratorData, Project
 
     sub_run = mocker.patch("subprocess.run")
     openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
-    project = _Project(openapi=openapi)
+    project = Project(openapi=openapi)
     project.project_dir = mocker.MagicMock(autospec=pathlib.Path)
 
     project._reformat()
@@ -577,7 +594,7 @@ def test__reformat(mocker):
 
 
 def test__get_errors(mocker):
-    from openapi_python_client import GeneratorData, _Project
+    from openapi_python_client import GeneratorData, Project
     from openapi_python_client.parser.openapi import EndpointCollection, Schemas
 
     openapi = mocker.MagicMock(
@@ -589,27 +606,6 @@ def test__get_errors(mocker):
         },
         schemas=mocker.MagicMock(autospec=Schemas, errors=[3]),
     )
-    project = _Project(openapi=openapi)
+    project = Project(openapi=openapi)
 
     assert project._get_errors() == [1, 2, 3]
-
-
-def test_load_config(mocker):
-    my_data = {"class_overrides": {"_MyCLASSName": {"class_name": "MyClassName", "module_name": "my_module_name"}}}
-    safe_load = mocker.patch("yaml.safe_load", return_value=my_data)
-    fake_path = mocker.MagicMock(autospec=pathlib.Path)
-
-    from openapi_python_client import load_config
-    from openapi_python_client.parser import reference
-
-    reference.class_overrides = {}
-
-    load_config(path=fake_path)
-
-    fake_path.read_text.assert_called_once()
-    safe_load.assert_called_once_with(fake_path.read_text())
-    from openapi_python_client.parser import reference
-
-    assert reference.class_overrides == {
-        "_MyCLASSName": reference.Reference(class_name="MyClassName", module_name="my_module_name")
-    }

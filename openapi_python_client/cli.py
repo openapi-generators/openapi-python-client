@@ -18,13 +18,13 @@ def _version_callback(value: bool) -> None:
 
 
 def _process_config(path: Optional[pathlib.Path]) -> None:
-    from openapi_python_client import load_config
+    from .config import Config
 
     if not path:
         return
 
     try:
-        load_config(path=path)
+        Config.load_from_path(path=path)
     except:  # noqa
         raise typer.BadParameter("Unable to parse config")
 
