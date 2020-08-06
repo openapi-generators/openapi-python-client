@@ -378,6 +378,7 @@ class TestProject:
         pyproject_template.render.assert_called_once_with(
             project_name=project.project_name,
             package_name=project.package_name,
+            version=project.version,
             description=project.package_description,
         )
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render())

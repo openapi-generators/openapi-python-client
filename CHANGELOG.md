@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.5.2 - unreleased
 ### Additions
 - Added `project_name_override` and `package_name_override` config options to override the name of the generated project/package (#123)
+- The generated library's version is now the same as the OpenAPI doc's version (#134)
+
 
 ## 0.5.1 - 2020-08-05
 ### Fixes
 - Relative paths are now allowed in securitySchemes/OAuthFlow/tokenUrl (#130).
 - Schema validation errors will no longer print a stack trace (#131).
 - Invalid YAML/URL will no longer print stack trace (#128)
+
 
 ## 0.5.0 - 2020-08-05
 ### Changes
