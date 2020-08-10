@@ -61,7 +61,13 @@ async def upload_file(some_file: UploadFile = File(...)):
     return (some_file.filename, some_file.content_type, data)
 
 
-app.include_router(test_router, prefix="/tests", tags=["users"])
+@test_router.post("/json_body")
+def json_body(body: AModel):
+    """ Try sending a JSON body """
+    return
+
+
+app.include_router(test_router, prefix="/tests", tags=["tests"])
 
 
 def generate_openapi_json():

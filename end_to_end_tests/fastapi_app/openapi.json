@@ -29,7 +29,7 @@
         "/tests/": {
             "get": {
                 "tags": [
-                    "users"
+                    "tests"
                 ],
                 "summary": "Get List",
                 "description": "Get a list of things ",
@@ -97,7 +97,7 @@
         "/tests/upload": {
             "post": {
                 "tags": [
-                    "users"
+                    "tests"
                 ],
                 "summary": "Upload File",
                 "description": "Upload a file ",
@@ -107,6 +107,46 @@
                         "multipart/form-data": {
                             "schema": {
                                 "$ref": "#/components/schemas/Body_upload_file_tests_upload_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/json_body": {
+            "post": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Json Body",
+                "description": "Try sending a JSON body ",
+                "operationId": "json_body_tests_json_body_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AModel"
                             }
                         }
                     },

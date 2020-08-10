@@ -65,7 +65,7 @@ def {{ endpoint.name | snakecase }}(
         files=multipart_data.to_dict(),
         {% endif %}
         {% if endpoint.json_body %}
-        json={{ endpoint.json_body.python_name }},
+        json={{ "json_" + endpoint.json_body.python_name }},
         {% endif %}
         {% if endpoint.query_parameters %}
         params=params,
