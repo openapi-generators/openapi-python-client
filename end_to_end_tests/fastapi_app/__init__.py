@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-from fastapi import APIRouter, FastAPI, File, Query, UploadFile
+from fastapi import APIRouter, FastAPI, File, Header, Query, UploadFile
 from pydantic import BaseModel
 
 app = FastAPI(title="My Test API", description="An API for testing openapi-python-client",)
@@ -55,7 +55,7 @@ def get_list(an_enum_value: List[AnEnum] = Query(...), some_date: Union[date, da
 
 
 @test_router.post("/upload")
-async def upload_file(some_file: UploadFile = File(...)):
+async def upload_file(some_file: UploadFile = File(...), keep_alive: bool = Header(None)):
     """ Upload a file """
     data = await some_file.read()
     return (some_file.filename, some_file.content_type, data)

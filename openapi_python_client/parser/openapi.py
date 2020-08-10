@@ -19,6 +19,7 @@ class ParameterLocation(str, Enum):
 
     QUERY = "query"
     PATH = "path"
+    HEADER = "header"
 
 
 def import_string_from_reference(reference: Reference, prefix: str = "") -> str:
@@ -78,6 +79,7 @@ class Endpoint:
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: List[Property] = field(default_factory=list)
     path_parameters: List[Property] = field(default_factory=list)
+    header_parameters: List[Property] = field(default_factory=list)
     responses: List[Response] = field(default_factory=list)
     form_body_reference: Optional[Reference] = None
     json_body: Optional[Property] = None
@@ -164,6 +166,8 @@ class Endpoint:
                 endpoint.query_parameters.append(prop)
             elif param.param_in == ParameterLocation.PATH:
                 endpoint.path_parameters.append(prop)
+            elif param.param_in == ParameterLocation.HEADER:
+                endpoint.header_parameters.append(prop)
             else:
                 return ParseError(data=param, detail="Parameter must be declared in path or query")
         return endpoint

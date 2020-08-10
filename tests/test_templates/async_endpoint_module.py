@@ -15,6 +15,7 @@ async def pascal_case(
     client: Client,
     path_param_1: str,
     query_param_1: str,
+    header_param_1: str,
 ) -> str:
 
     """ GET endpoint """
@@ -23,13 +24,17 @@ async def pascal_case(
         pathParam1=path_param_1,
     )
 
+    headers = client.get_headers()
+    headers["header-param-1"] = header_param_1
+
+
     params: Dict[str, Any] = {
         "queryParam": query_param_1,
     }
     async with httpx.AsyncClient() as _client:
         response = await _client.get(
             url=url,
-            headers=client.get_headers(),
+            headers=headers,
             params=params,
         )
 
@@ -55,10 +60,16 @@ async def camel_case(
         client.base_url,
     )
 
+    headers = client.get_headers()
+
+
+
+
+
     async with httpx.AsyncClient() as _client:
         response = await _client.post(
             url=url,
-            headers=client.get_headers(),
+            headers=headers,
             data=asdict(form_data),
             files=multipart_data.to_dict(),
             json=json_json_body,

@@ -21,6 +21,8 @@ async def get_user_list(
     """ Get a list of things  """
     url = "{}/tests/".format(client.base_url,)
 
+    headers = client.get_headers()
+
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
         an_enum_value_item = an_enum_value_item_data.value
@@ -39,7 +41,7 @@ async def get_user_list(
     }
 
     async with httpx.AsyncClient() as _client:
-        response = await _client.get(url=url, headers=client.get_headers(), params=params,)
+        response = await _client.get(url=url, headers=headers, params=params,)
 
     if response.status_code == 200:
         return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
@@ -50,7 +52,7 @@ async def get_user_list(
 
 
 async def upload_file_tests_upload_post(
-    *, client: Client, multipart_data: BodyUploadFileTestsUploadPost,
+    *, client: Client, multipart_data: BodyUploadFileTestsUploadPost, keep_alive: Optional[bool] = None,
 ) -> Union[
     None, HTTPValidationError,
 ]:
@@ -58,8 +60,12 @@ async def upload_file_tests_upload_post(
     """ Upload a file  """
     url = "{}/tests/upload".format(client.base_url,)
 
+    headers = client.get_headers()
+    if keep_alive is not None:
+        headers["keep-alive"] = keep_alive
+
     async with httpx.AsyncClient() as _client:
-        response = await _client.post(url=url, headers=client.get_headers(), files=multipart_data.to_dict(),)
+        response = await _client.post(url=url, headers=headers, files=multipart_data.to_dict(),)
 
     if response.status_code == 200:
         return None

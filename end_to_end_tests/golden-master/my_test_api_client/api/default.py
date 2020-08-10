@@ -12,7 +12,9 @@ def ping_ping_get(*, client: Client,) -> bool:
     """ A quick check to see if the system is running  """
     url = "{}/ping".format(client.base_url)
 
-    response = httpx.get(url=url, headers=client.get_headers(),)
+    headers = client.get_headers()
+
+    response = httpx.get(url=url, headers=headers,)
 
     if response.status_code == 200:
         return bool(response.text)

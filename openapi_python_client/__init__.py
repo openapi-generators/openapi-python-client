@@ -83,7 +83,7 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
 
 
 class Project:
-    TEMPLATE_FILTERS = {"snakecase": utils.snake_case}
+    TEMPLATE_FILTERS = {"snakecase": utils.snake_case, "spinalcase": utils.spinal_case}
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
 

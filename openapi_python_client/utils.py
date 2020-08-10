@@ -11,3 +11,7 @@ def snake_case(value: str) -> str:
 
 def pascal_case(value: str) -> str:
     return stringcase.pascalcase(value)
+
+
+def spinal_case(value: str) -> str:
+    return stringcase.spinalcase(value)
