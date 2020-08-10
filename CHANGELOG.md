@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## 0.5.3 - Unrelease
+### Additions
+- Added support for header parameters (#117)
+
 ### Fixes
 - JSON bodies will now be assigned correctly in generated clients(#139 & #147). Thanks @pawamoy!
 

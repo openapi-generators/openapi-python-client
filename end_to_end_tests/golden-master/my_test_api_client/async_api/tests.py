@@ -21,7 +21,7 @@ async def get_user_list(
     """ Get a list of things  """
     url = "{}/tests/".format(client.base_url,)
 
-    headers = client.get_headers()
+    headers: Dict[str, Any] = client.get_headers()
 
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
@@ -60,7 +60,7 @@ async def upload_file_tests_upload_post(
     """ Upload a file  """
     url = "{}/tests/upload".format(client.base_url,)
 
-    headers = client.get_headers()
+    headers: Dict[str, Any] = client.get_headers()
     if keep_alive is not None:
         headers["keep-alive"] = keep_alive
 
@@ -84,10 +84,12 @@ async def json_body_tests_json_body_post(
     """ Try sending a JSON body  """
     url = "{}/tests/json_body".format(client.base_url,)
 
+    headers: Dict[str, Any] = client.get_headers()
+
     json_json_body = json_body.to_dict()
 
     async with httpx.AsyncClient() as _client:
-        response = await _client.post(url=url, headers=client.get_headers(), json=json_json_body,)
+        response = await _client.post(url=url, headers=headers, json=json_json_body,)
 
     if response.status_code == 200:
         return None

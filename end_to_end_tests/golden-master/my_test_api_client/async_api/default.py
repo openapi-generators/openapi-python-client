@@ -12,7 +12,7 @@ async def ping_ping_get(*, client: Client,) -> bool:
     """ A quick check to see if the system is running  """
     url = "{}/ping".format(client.base_url,)
 
-    headers = client.get_headers()
+    headers: Dict[str, Any] = client.get_headers()
 
     async with httpx.AsyncClient() as _client:
         response = await _client.get(url=url, headers=headers,)

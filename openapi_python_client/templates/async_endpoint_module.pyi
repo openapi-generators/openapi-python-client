@@ -53,7 +53,7 @@ async def {{ endpoint.name | snakecase }}(
         {% endfor %}
     )
 
-    headers = client.get_headers()
+    headers: Dict[str, Any] = client.get_headers()
     {{ header_params(endpoint) | indent(4) }}
 
     {{ query_params(endpoint) | indent(4) }}

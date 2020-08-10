@@ -24,7 +24,7 @@ async def pascal_case(
         pathParam1=path_param_1,
     )
 
-    headers = client.get_headers()
+    headers: Dict[str, Any] = client.get_headers()
     headers["header-param-1"] = header_param_1
 
 
@@ -60,7 +60,7 @@ async def camel_case(
         client.base_url,
     )
 
-    headers = client.get_headers()
+    headers: Dict[str, Any] = client.get_headers()
 
 
 
