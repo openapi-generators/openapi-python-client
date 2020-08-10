@@ -12,14 +12,14 @@ from ..models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploa
 from ..models.http_validation_error import HTTPValidationError
 
 
-def get_user_list(
+async def get_user_list(
     *, client: Client, an_enum_value: List[AnEnum], some_date: Union[date, datetime],
 ) -> Union[
     List[AModel], HTTPValidationError,
 ]:
 
     """ Get a list of things  """
-    url = "{}/tests/".format(client.base_url)
+    url = "{}/tests/".format(client.base_url,)
 
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
@@ -38,7 +38,8 @@ def get_user_list(
         "some_date": json_some_date,
     }
 
-    response = httpx.get(url=url, headers=client.get_headers(), params=params,)
+    async with httpx.AsyncClient() as _client:
+        response = await _client.get(url=url, headers=client.get_headers(), params=params,)
 
     if response.status_code == 200:
         return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
@@ -48,16 +49,39 @@ def get_user_list(
         raise ApiResponseError(response=response)
 
 
-def upload_file_tests_upload_post(
+async def upload_file_tests_upload_post(
     *, client: Client, multipart_data: BodyUploadFileTestsUploadPost,
 ) -> Union[
     None, HTTPValidationError,
 ]:
 
     """ Upload a file  """
-    url = "{}/tests/upload".format(client.base_url)
+    url = "{}/tests/upload".format(client.base_url,)
 
-    response = httpx.post(url=url, headers=client.get_headers(), files=multipart_data.to_dict(),)
+    async with httpx.AsyncClient() as _client:
+        response = await _client.post(url=url, headers=client.get_headers(), files=multipart_data.to_dict(),)
+
+    if response.status_code == 200:
+        return None
+    if response.status_code == 422:
+        return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
+    else:
+        raise ApiResponseError(response=response)
+
+
+async def json_body_tests_json_body_post(
+    *, client: Client, json_body: AModel,
+) -> Union[
+    None, HTTPValidationError,
+]:
+
+    """ Try sending a JSON body  """
+    url = "{}/tests/json_body".format(client.base_url,)
+
+    json_json_body = json_body.to_dict()
+
+    async with httpx.AsyncClient() as _client:
+        response = await _client.post(url=url, headers=client.get_headers(), json=json_json_body,)
 
     if response.status_code == 200:
         return None

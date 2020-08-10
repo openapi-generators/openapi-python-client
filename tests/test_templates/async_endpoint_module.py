@@ -61,7 +61,7 @@ async def camel_case(
             headers=client.get_headers(),
             data=asdict(form_data),
             files=multipart_data.to_dict(),
-            json=json_body,
+            json=json_json_body,
         )
 
     if response.status_code == 200:
