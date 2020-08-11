@@ -59,9 +59,9 @@ openapi = "python -m end_to_end_tests.fastapi_app"
 gm = "python -m end_to_end_tests.regen_golden_master"
 e2e = "pytest openapi_python_client end_to_end_tests"
 oge = """
-python -m end_to_end_tests.fastapi_app\
-&& python -m end_to_end_tests.regen_golden_master\
-&& pytest openapi_python_client end_to_end_tests\
+task openapi\
+&& task gm\
+&& task e2e\
 """
 
 [tool.black]
