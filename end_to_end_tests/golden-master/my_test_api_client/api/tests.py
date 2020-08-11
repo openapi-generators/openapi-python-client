@@ -21,6 +21,8 @@ def get_user_list(
     """ Get a list of things  """
     url = "{}/tests/".format(client.base_url)
 
+    headers: Dict[str, Any] = client.get_headers()
+
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
         an_enum_value_item = an_enum_value_item_data.value
@@ -38,7 +40,7 @@ def get_user_list(
         "some_date": json_some_date,
     }
 
-    response = httpx.get(url=url, headers=client.get_headers(), params=params,)
+    response = httpx.get(url=url, headers=headers, params=params,)
 
     if response.status_code == 200:
         return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
@@ -49,7 +51,7 @@ def get_user_list(
 
 
 def upload_file_tests_upload_post(
-    *, client: Client, multipart_data: BodyUploadFileTestsUploadPost,
+    *, client: Client, multipart_data: BodyUploadFileTestsUploadPost, keep_alive: Optional[bool] = None,
 ) -> Union[
     None, HTTPValidationError,
 ]:
@@ -57,7 +59,11 @@ def upload_file_tests_upload_post(
     """ Upload a file  """
     url = "{}/tests/upload".format(client.base_url)
 
-    response = httpx.post(url=url, headers=client.get_headers(), files=multipart_data.to_dict(),)
+    headers: Dict[str, Any] = client.get_headers()
+    if keep_alive is not None:
+        headers["keep-alive"] = keep_alive
+
+    response = httpx.post(url=url, headers=headers, files=multipart_data.to_dict(),)
 
     if response.status_code == 200:
         return None
@@ -76,9 +82,11 @@ def json_body_tests_json_body_post(
     """ Try sending a JSON body  """
     url = "{}/tests/json_body".format(client.base_url)
 
+    headers: Dict[str, Any] = client.get_headers()
+
     json_json_body = json_body.to_dict()
 
-    response = httpx.post(url=url, headers=client.get_headers(), json=json_json_body,)
+    response = httpx.post(url=url, headers=headers, json=json_json_body,)
 
     if response.status_code == 200:
         return None

@@ -1,3 +1,16 @@
+{% macro header_params(endpoint) %}
+{% if endpoint.header_parameters %}
+    {% for parameter in endpoint.header_parameters %}
+        {% if parameter.required %}
+headers["{{ parameter.python_name | spinalcase}}"] = {{ parameter.python_name }}
+        {% else %}
+if {{ parameter.python_name }} is not None:
+    headers["{{ parameter.python_name | spinalcase}}"] = {{ parameter.python_name }}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% endmacro %}
+
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
     {% for property in endpoint.query_parameters %}

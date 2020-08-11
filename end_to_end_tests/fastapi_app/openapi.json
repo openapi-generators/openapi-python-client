@@ -102,6 +102,17 @@
                 "summary": "Upload File",
                 "description": "Upload a file ",
                 "operationId": "upload_file_tests_upload_post",
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Keep-Alive",
+                            "type": "boolean"
+                        },
+                        "name": "keep-alive",
+                        "in": "header"
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {

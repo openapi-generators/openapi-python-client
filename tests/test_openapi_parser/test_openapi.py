@@ -452,9 +452,15 @@ class TestEndpoint:
         query_prop = mocker.MagicMock(autospec=Property)
         query_prop_import = mocker.MagicMock()
         query_prop.get_imports = mocker.MagicMock(return_value={query_prop_import})
-        property_from_data = mocker.patch(f"{MODULE_NAME}.property_from_data", side_effect=[path_prop, query_prop])
+        header_prop = mocker.MagicMock(autospec=Property)
+        header_prop_import = mocker.MagicMock()
+        header_prop.get_imports = mocker.MagicMock(return_value={header_prop_import})
+        property_from_data = mocker.patch(
+            f"{MODULE_NAME}.property_from_data", side_effect=[path_prop, query_prop, header_prop]
+        )
         path_schema = mocker.MagicMock()
         query_schema = mocker.MagicMock()
+        header_schema = mocker.MagicMock()
         data = oai.Operation.construct(
             parameters=[
                 oai.Parameter.construct(
@@ -462,6 +468,9 @@ class TestEndpoint:
                 ),
                 oai.Parameter.construct(
                     name="query_prop_name", required=False, param_schema=query_schema, param_in="query"
+                ),
+                oai.Parameter.construct(
+                    name="header_prop_name", required=False, param_schema=header_schema, param_in="header"
                 ),
                 oai.Reference.construct(),  # Should be ignored
                 oai.Parameter.construct(),  # Should be ignored
@@ -474,17 +483,16 @@ class TestEndpoint:
             [
                 mocker.call(name="path_prop_name", required=True, data=path_schema),
                 mocker.call(name="query_prop_name", required=False, data=query_schema),
+                mocker.call(name="header_prop_name", required=False, data=header_schema),
             ]
         )
         path_prop.get_imports.assert_called_once_with(prefix="..models")
         query_prop.get_imports.assert_called_once_with(prefix="..models")
-        assert endpoint.relative_imports == {
-            "import_3",
-            path_prop_import,
-            query_prop_import,
-        }
+        header_prop.get_imports.assert_called_once_with(prefix="..models")
+        assert endpoint.relative_imports == {"import_3", path_prop_import, query_prop_import, header_prop_import}
         assert endpoint.path_parameters == [path_prop]
         assert endpoint.query_parameters == [query_prop]
+        assert endpoint.header_parameters == [header_prop]
 
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint

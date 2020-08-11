@@ -58,6 +58,11 @@ isort .\
 openapi = "python -m end_to_end_tests.fastapi_app"
 gm = "python -m end_to_end_tests.regen_golden_master"
 e2e = "pytest openapi_python_client end_to_end_tests"
+oge = """
+task openapi\
+&& task gm\
+&& task e2e\
+"""
 
 [tool.black]
 line-length = 120

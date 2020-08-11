@@ -16,6 +16,9 @@ def test_async_endpoint_module(template, mocker):
     query_param = mocker.MagicMock(template=None, python_name="query_param_1")
     query_param.name = "queryParam"
     query_param.to_string.return_value = "query_param_1: str"
+    header_param = mocker.MagicMock(template=None, python_name="header_param_1")
+    header_param.name = "headerParam"
+    header_param.to_string.return_value = "header_param_1: str"
     get_response = mocker.MagicMock(status_code=200)
     get_response.return_string.return_value = "str"
     get_response.constructor.return_value = "str(response.text)"
@@ -23,6 +26,7 @@ def test_async_endpoint_module(template, mocker):
         requires_security=False,
         path_parameters=[path_param],
         query_parameters=[query_param],
+        header_parameters=[header_param],
         form_body_reference=None,
         multipart_body_reference=None,
         json_body=None,
