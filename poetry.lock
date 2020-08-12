@@ -173,7 +173,7 @@ description = "The next generation HTTP client."
 name = "httpx"
 optional = false
 python-versions = ">=3.6"
-version = "0.14.0"
+version = "0.14.1"
 
 [package.dependencies]
 certifi = "*"
@@ -728,8 +728,8 @@ httpcore = [
     {file = "httpcore-0.10.1.tar.gz", hash = "sha256:85295a081d5cca79b1a4d5190456bc869f2f220170b7749e882ac880b087a600"},
 ]
 httpx = [
-    {file = "httpx-0.14.0-py3-none-any.whl", hash = "sha256:38f030c97cc18da9ff03dda6765ebad4b4900fef1fd5b2f1db260ad3b19d2ee0"},
-    {file = "httpx-0.14.0.tar.gz", hash = "sha256:e9aaab2a10826186b8cdf88b6eadb473b3c9b7b4cfe3e78503de8bd70ccd5358"},
+    {file = "httpx-0.14.1-py3-none-any.whl", hash = "sha256:2be72b6932f185319031a553a474c298df3982a6ad8b23e6477a832cd2e54067"},
+    {file = "httpx-0.14.1.tar.gz", hash = "sha256:0c557173821c1e453396325b3fef768d2bca9078f7300d431735177654e0f9b1"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
