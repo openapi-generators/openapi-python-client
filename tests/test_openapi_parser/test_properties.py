@@ -278,7 +278,7 @@ class TestListProperty:
         inner_enum_property._validate_default.return_value = "AnEnum.val1"
 
         p = ListProperty(name="a name", required=True, default=["val1"], inner_property=inner_enum_property)
-        assert p.default == f"field(default_factory=lambda: cast(List[AnEnum], [AnEnum.val1]))"
+        assert p.default == "field(default_factory=lambda: cast(List[AnEnum], [AnEnum.val1]))"
 
 
 class TestUnionProperty:
