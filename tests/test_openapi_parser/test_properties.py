@@ -1,10 +1,7 @@
-from datetime import date, datetime
-
 import pytest
 
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError, ValidationError
-from openapi_python_client.parser.reference import Reference
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -67,7 +64,7 @@ class TestProperty:
             p._validate_default("a default value")
 
         with pytest.raises(ValidationError):
-            p = Property(name="a name", required=True, default="")
+            Property(name="a name", required=True, default="")
 
 
 class TestStringProperty:
@@ -110,7 +107,7 @@ class TestDateTimeProperty:
         from openapi_python_client.parser.properties import DateTimeProperty
 
         with pytest.raises(ValidationError):
-            p = DateTimeProperty(name="a name", required=True, default="not a datetime")
+            DateTimeProperty(name="a name", required=True, default="not a datetime")
 
         p = DateTimeProperty(name="a name", required=True, default="2017-07-21T17:32:28Z")
         assert p.default == "datetime.datetime(2017, 7, 21, 17, 32, 28, tzinfo=datetime.timezone.utc)"
@@ -139,7 +136,7 @@ class TestDateProperty:
         from openapi_python_client.parser.properties import DateProperty
 
         with pytest.raises(ValidationError):
-            p = DateProperty(name="a name", required=True, default="not a date")
+            DateProperty(name="a name", required=True, default="not a date")
 
         p = DateProperty(name="a name", required=True, default="1010-10-10")
         assert p.default == "datetime.date(1010, 10, 10)"
@@ -166,10 +163,10 @@ class TestFileProperty:
         from openapi_python_client.parser.properties import FileProperty
 
         # should be okay if default isn't specified
-        p = FileProperty(name="a name", required=True, default=None)
+        FileProperty(name="a name", required=True, default=None)
 
         with pytest.raises(ValidationError):
-            p = FileProperty(name="a name", required=True, default="")
+            FileProperty(name="a name", required=True, default="")
 
 
 class TestFloatProperty:
@@ -177,13 +174,13 @@ class TestFloatProperty:
         from openapi_python_client.parser.properties import FloatProperty
 
         # should be okay if default isn't specified
-        p = FloatProperty(name="a name", required=True, default=None)
+        FloatProperty(name="a name", required=True, default=None)
 
         p = FloatProperty(name="a name", required=True, default="123.123")
         assert p.default == 123.123
 
         with pytest.raises(ValidationError):
-            p = FloatProperty(name="a name", required=True, default="not a float")
+            FloatProperty(name="a name", required=True, default="not a float")
 
 
 class TestIntProperty:
@@ -191,13 +188,13 @@ class TestIntProperty:
         from openapi_python_client.parser.properties import IntProperty
 
         # should be okay if default isn't specified
-        p = IntProperty(name="a name", required=True, default=None)
+        IntProperty(name="a name", required=True, default=None)
 
         p = IntProperty(name="a name", required=True, default="123")
         assert p.default == 123
 
         with pytest.raises(ValidationError):
-            p = IntProperty(name="a name", required=True, default="not an int")
+            IntProperty(name="a name", required=True, default="not an int")
 
 
 class TestBooleanProperty:
@@ -205,7 +202,7 @@ class TestBooleanProperty:
         from openapi_python_client.parser.properties import BooleanProperty
 
         # should be okay if default isn't specified
-        p = BooleanProperty(name="a name", required=True, default=None)
+        BooleanProperty(name="a name", required=True, default=None)
 
         p = BooleanProperty(name="a name", required=True, default="Literally anything will work")
         assert p.default == True
@@ -268,7 +265,7 @@ class TestListProperty:
         assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], ['y']))"
 
         with pytest.raises(ValidationError):
-            p = ListProperty(name="a name", required=True, default="x", inner_property=inner_property)
+            ListProperty(name="a name", required=True, default="x", inner_property=inner_property)
 
     def test__validate_default_enum_items(self, mocker):
         from openapi_python_client.parser.properties import ListProperty, RefProperty
@@ -342,7 +339,7 @@ class TestUnionProperty:
         inner_property_2._validate_default.side_effect = ValidationError()
 
         with pytest.raises(ValidationError):
-            p = UnionProperty(
+            UnionProperty(
                 name="test", required=True, default="a value", inner_properties=[inner_property_1, inner_property_2]
             )
 
@@ -476,7 +473,7 @@ class TestEnumProperty:
         assert enum_property.default == "MyTestEnum.TEST"
 
         with pytest.raises(ValidationError):
-            enum_property = properties.EnumProperty(
+            properties.EnumProperty(
                 name="test", required=True, default="bad_val", values={"TEST": "test"}, title="a_title"
             )
 
@@ -535,7 +532,7 @@ class TestRefProperty:
         from openapi_python_client.parser.properties import RefProperty
 
         with pytest.raises(ValidationError):
-            p = RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock())
+            RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock())
 
         enum_property = mocker.MagicMock()
         enum_property._validate_default.return_value = "val1"
@@ -573,10 +570,10 @@ class TestDictProperty:
     def test__validate_default(self):
         from openapi_python_client.parser.properties import DictProperty
 
-        p = DictProperty(name="a name", required=True, default={"key": "value"})
+        DictProperty(name="a name", required=True, default={"key": "value"})
 
         with pytest.raises(ValidationError):
-            p = DictProperty(name="a name", required=True, default="not a dict")
+            DictProperty(name="a name", required=True, default="not a dict")
 
 
 class TestPropertyFromData:
