@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Union
 
 from fastapi import APIRouter, Body, FastAPI, File, Header, Query, UploadFile
 from pydantic import BaseModel
+from starlette.responses import FileResponse
 
 app = FastAPI(title="My Test API", description="An API for testing openapi-python-client",)
 
@@ -82,6 +83,15 @@ def test_defaults(
     enum_prop: AnEnum = Query(default=AnEnum.FIRST_VALUE),
     dict_prop: Dict[str, str] = Body(default={"key": "val"}),
 ):
+    return
+
+
+@test_router.get(
+    "/test_octet_stream",
+    response_class=FileResponse,
+    responses={200: {"content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}}}},
+)
+def test_octet_stream():
     return
 
 

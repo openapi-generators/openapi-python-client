@@ -176,3 +176,19 @@ async def test_defaults_tests_test_defaults_post(
         return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
     else:
         raise ApiResponseError(response=response)
+
+
+async def test_octet_stream_tests_test_octet_stream_get(*, client: Client,) -> bytes:
+
+    """  """
+    url = "{}/tests/test_octet_stream".format(client.base_url,)
+
+    headers: Dict[str, Any] = client.get_headers()
+
+    async with httpx.AsyncClient() as _client:
+        response = await _client.get(url=url, headers=headers,)
+
+    if response.status_code == 200:
+        return bytes(response.content)
+    else:
+        raise ApiResponseError(response=response)

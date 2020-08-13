@@ -334,6 +334,28 @@
                     }
                 }
             }
+        },
+        "/tests/test_octet_stream": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Test Octet Stream",
+                "operationId": "test_octet_stream_tests_test_octet_stream_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
