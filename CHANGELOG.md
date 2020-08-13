@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## 0.5.3 - Unreleased
+## 0.5.3 - 2020-08-13
 ### Security
 - All values that become file/directory names are sanitized to address path traversal vulnerabilities (CVE-2020-15141)
 - All values that get placed into python files (everything from enum names, to endpoint descriptions, to default values) are validated and/or saniziatied to address arbitrary code execution vulnerabilities (CVE-2020-15142)
