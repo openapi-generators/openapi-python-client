@@ -70,6 +70,21 @@ class BasicResponse(Response):
         return f"{self.python_type}(response.text)"
 
 
+@dataclass
+class BytesResponse(Response):
+    """ Response is a basic type """
+
+    python_type: str = "bytes"
+
+    def return_string(self) -> str:
+        """ How this Response should be represented as a return type """
+        return self.python_type
+
+    def constructor(self) -> str:
+        """ How the return value of this response should be constructed """
+        return f"{self.python_type}(response.content)"
+
+
 openapi_types_to_python_type_strings = {
     "string": "str",
     "number": "float",
@@ -88,6 +103,8 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
     schema_data = None
     if "application/json" in content:
         schema_data = data.content["application/json"].media_type_schema
+    elif "application/octet-stream" in content:
+        return BytesResponse(status_code=status_code)
     elif "text/html" in content:
         schema_data = data.content["text/html"].media_type_schema
 

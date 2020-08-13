@@ -94,6 +94,22 @@ class TestBasicResponse:
         assert r.constructor() == "bool(response.text)"
 
 
+class TestBytesResponse:
+    def test_return_string(self):
+        from openapi_python_client.parser.responses import BytesResponse
+
+        b = BytesResponse(200)
+
+        assert b.return_string() == "bytes"
+
+    def test_constructor(self):
+        from openapi_python_client.parser.responses import BytesResponse
+
+        b = BytesResponse(200)
+
+        assert b.constructor() == "bytes(response.content)"
+
+
 class TestResponseFromData:
     def test_response_from_data_no_content(self, mocker):
         from openapi_python_client.parser.responses import response_from_data
@@ -199,3 +215,15 @@ class TestResponseFromData:
         )
 
         assert response_from_data(status_code=200, data=data) == ParseError(data=data, detail="Unrecognized type BLAH")
+
+    def test_response_from_data_octet_stream(self, mocker):
+        status_code = mocker.MagicMock(autospec=int)
+        data = oai.Response.construct(
+            content={"application/octet-stream": oai.MediaType.construct(media_type_schema=mocker.MagicMock())}
+        )
+        BytesResponse = mocker.patch(f"{MODULE_NAME}.BytesResponse")
+        from openapi_python_client.parser.responses import response_from_data
+
+        response = response_from_data(status_code=status_code, data=data)
+
+        assert response == BytesResponse()
