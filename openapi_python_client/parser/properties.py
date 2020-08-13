@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import InitVar, dataclass, field
+from datetime import date, datetime
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
 from .. import schema as oai
 from .. import utils
-from .errors import PropertyError
+from .errors import PropertyError, ValidationError
 from .reference import Reference
 
 
@@ -19,6 +20,9 @@ class Property:
             templates/property_templates and must contain two macros: construct and transform. Construct will be used to
             build this property from JSON data (a response from an API). Transform will be used to convert this property
             to JSON data (when sending a request to the API).
+
+    Raises:
+        ValidationError: Raised when the default value fails to be converted to the expected type
     """
 
     name: str
@@ -32,10 +36,16 @@ class Property:
 
     def __post_init__(self) -> None:
         self.python_name = utils.snake_case(self.name)
+        if self.default is not None:
+            self.default = self._validate_default(default=self.default)
 
-    def get_type_string(self) -> str:
+    def _validate_default(self, default: Any) -> Any:
+        """ Check that the default value is valid for the property's type + perform any necessary sanitization """
+        raise ValidationError
+
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if self.required:
+        if self.required or no_optional:
             return self._type_string
         return f"Optional[{self._type_string}]"
 
@@ -74,10 +84,8 @@ class StringProperty(Property):
 
     _type_string: ClassVar[str] = "str"
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        if self.default is not None:
-            self.default = f'"{self.default}"'
+    def _validate_default(self, default: Any) -> str:
+        return f'"{utils.remove_string_escapes(default)}"'
 
 
 @dataclass
@@ -86,7 +94,7 @@ class DateTimeProperty(Property):
     A property of type datetime.datetime
     """
 
-    _type_string: ClassVar[str] = "datetime"
+    _type_string: ClassVar[str] = "datetime.datetime"
     template: ClassVar[str] = "datetime_property.pyi"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -97,15 +105,23 @@ class DateTimeProperty(Property):
             prefix: A prefix to put before any relative (local) module names.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({"from datetime import datetime", "from typing import cast"})
+        imports.update({"import datetime", "from typing import cast"})
         return imports
+
+    def _validate_default(self, default: Any) -> str:
+        for format_string in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S%z"):
+            try:
+                return repr(datetime.strptime(default, format_string))
+            except (TypeError, ValueError):
+                continue
+        raise ValidationError
 
 
 @dataclass
 class DateProperty(Property):
     """ A property of type datetime.date """
 
-    _type_string: ClassVar[str] = "date"
+    _type_string: ClassVar[str] = "datetime.date"
     template: ClassVar[str] = "date_property.pyi"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -116,8 +132,14 @@ class DateProperty(Property):
             prefix: A prefix to put before any relative (local) module names.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({"from datetime import date", "from typing import cast"})
+        imports.update({"import datetime", "from typing import cast"})
         return imports
+
+    def _validate_default(self, default: Any) -> str:
+        try:
+            return repr(date.fromisoformat(default))
+        except (TypeError, ValueError) as e:
+            raise ValidationError() from e
 
 
 @dataclass
@@ -146,6 +168,12 @@ class FloatProperty(Property):
     default: Optional[float] = None
     _type_string: ClassVar[str] = "float"
 
+    def _validate_default(self, default: Any) -> float:
+        try:
+            return float(default)
+        except (TypeError, ValueError) as e:
+            raise ValidationError() from e
+
 
 @dataclass
 class IntProperty(Property):
@@ -154,12 +182,22 @@ class IntProperty(Property):
     default: Optional[int] = None
     _type_string: ClassVar[str] = "int"
 
+    def _validate_default(self, default: Any) -> int:
+        try:
+            return int(default)
+        except (TypeError, ValueError) as e:
+            raise ValidationError() from e
+
 
 @dataclass
 class BooleanProperty(Property):
     """ Property for bool """
 
     _type_string: ClassVar[str] = "bool"
+
+    def _validate_default(self, default: Any) -> bool:
+        # no try/except needed as anything that comes from the initial load from json/yaml will be boolable
+        return bool(default)
 
 
 InnerProp = TypeVar("InnerProp", bound=Property)
@@ -172,14 +210,9 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.pyi"
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        if self.default is not None:
-            self.default = f"field(default_factory=lambda: cast({self.get_type_string()}, {self.default}))"
-
-    def get_type_string(self) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if self.required:
+        if self.required or no_optional:
             return f"List[{self.inner_property.get_type_string()}]"
         return f"Optional[List[{self.inner_property.get_type_string()}]]"
 
@@ -198,6 +231,16 @@ class ListProperty(Property, Generic[InnerProp]):
             imports.add("from typing import cast")
         return imports
 
+    def _validate_default(self, default: Any) -> str:
+        if not isinstance(default, list):
+            raise ValidationError()
+
+        default = list(map(self.inner_property._validate_default, default))
+        if isinstance(self.inner_property, RefProperty):  # Fix enums to use the actual value
+            default = str(default).replace("'", "")
+
+        return f"field(default_factory=lambda: cast({self.get_type_string()}, {default}))"
+
 
 @dataclass
 class UnionProperty(Property):
@@ -206,11 +249,11 @@ class UnionProperty(Property):
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.pyi"
 
-    def get_type_string(self) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         inner_types = [p.get_type_string() for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
-        if self.required:
+        if self.required or no_optional:
             return f"Union[{inner_prop_string}]"
         return f"Optional[Union[{inner_prop_string}]]"
 
@@ -227,6 +270,15 @@ class UnionProperty(Property):
         imports.add("from typing import Union")
         return imports
 
+    def _validate_default(self, default: Any) -> Any:
+        for property in self.inner_properties:
+            try:
+                val = property._validate_default(default)
+                return val
+            except ValidationError:
+                continue
+        raise ValidationError()
+
 
 _existing_enums: Dict[str, EnumProperty] = {}
 
@@ -242,7 +294,6 @@ class EnumProperty(Property):
     template: ClassVar[str] = "enum_property.pyi"
 
     def __post_init__(self, title: str) -> None:  # type: ignore
-        super().__post_init__()
         reference = Reference.from_ref(title)
         dedup_counter = 0
         while reference.class_name in _existing_enums:
@@ -253,9 +304,7 @@ class EnumProperty(Property):
             reference = Reference.from_ref(f"{reference.class_name}{dedup_counter}")
 
         self.reference = reference
-        inverse_values = {v: k for k, v in self.values.items()}
-        if self.default is not None:
-            self.default = f"{self.reference.class_name}.{inverse_values[self.default]}"
+        super().__post_init__()
         _existing_enums[self.reference.class_name] = self
 
     @staticmethod
@@ -268,10 +317,10 @@ class EnumProperty(Property):
         """ Get all the EnumProperties that have been registered keyed by class name """
         return _existing_enums.get(name)
 
-    def get_type_string(self) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
 
-        if self.required:
+        if self.required or no_optional:
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
@@ -298,9 +347,17 @@ class EnumProperty(Property):
                 key = f"VALUE_{i}"
             if key in output:
                 raise ValueError(f"Duplicate key {key} in Enum")
-            output[key] = value
+            sanitized_key = utils.fix_keywords(utils.sanitize(key))
+            output[sanitized_key] = utils.remove_string_escapes(value)
 
         return output
+
+    def _validate_default(self, default: Any) -> str:
+        inverse_values = {v: k for k, v in self.values.items()}
+        try:
+            return f"{self.reference.class_name}.{inverse_values[default]}"
+        except KeyError as e:
+            raise ValidationError() from e
 
 
 @dataclass
@@ -316,9 +373,9 @@ class RefProperty(Property):
             return "enum_property.pyi"
         return "ref_property.pyi"
 
-    def get_type_string(self) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if self.required:
+        if self.required or no_optional:
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
@@ -339,17 +396,20 @@ class RefProperty(Property):
         )
         return imports
 
+    def _validate_default(self, default: Any) -> Any:
+        enum = EnumProperty.get_enum(self.reference.class_name)
+        if enum:
+            return enum._validate_default(default)
+        else:
+            raise ValidationError
+
 
 @dataclass
 class DictProperty(Property):
     """ Property that is a general Dict """
 
     _type_string: ClassVar[str] = "Dict[Any, Any]"
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        if self.default is not None:
-            self.default = f"field(default_factory=lambda: cast({self.get_type_string()}, {self.default}))"
+    template: ClassVar[str] = "dict_property.pyi"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -364,6 +424,11 @@ class DictProperty(Property):
             imports.add("from dataclasses import field")
             imports.add("from typing import cast")
         return imports
+
+    def _validate_default(self, default: Any) -> str:
+        if isinstance(default, dict):
+            return repr(default)
+        raise ValidationError
 
 
 def _string_based_property(
@@ -381,10 +446,11 @@ def _string_based_property(
         return StringProperty(name=name, default=data.default, required=required, pattern=data.pattern)
 
 
-def property_from_data(
+def _property_from_data(
     name: str, required: bool, data: Union[oai.Reference, oai.Schema]
 ) -> Union[Property, PropertyError]:
     """ Generate a Property from the OpenAPI dictionary representation of it """
+    name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data.ref), default=None)
     if data.enum:
@@ -423,3 +489,12 @@ def property_from_data(
     elif data.type == "object":
         return DictProperty(name=name, required=required, default=data.default)
     return PropertyError(data=data, detail=f"unknown type {data.type}")
+
+
+def property_from_data(
+    name: str, required: bool, data: Union[oai.Reference, oai.Schema]
+) -> Union[Property, PropertyError]:
+    try:
+        return _property_from_data(name=name, required=required, data=data)
+    except ValidationError:
+        return PropertyError(detail="Failed to validate default value", data=data)

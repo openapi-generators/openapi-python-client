@@ -96,7 +96,9 @@ class Project:
 
         self.package_name: str = self.package_name_override or self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
-        self.package_description: str = f"A client library for accessing {self.openapi.title}"
+        self.package_description: str = utils.remove_string_escapes(
+            f"A client library for accessing {self.openapi.title}"
+        )
         self.version: str = openapi.version
 
         self.env.filters.update(self.TEMPLATE_FILTERS)

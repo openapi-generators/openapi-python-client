@@ -22,3 +22,15 @@ def test_snake_case_from_camel():
 
 def test_kebab_case():
     assert utils.kebab_case("keep_alive") == "keep-alive"
+
+
+def test__sanitize():
+    assert utils.sanitize("something*~with lots_- of weird things}=") == "somethingwith lots_- of weird things"
+
+
+def test_no_string_escapes():
+    assert utils.remove_string_escapes('an "evil" string') == 'an \\"evil\\" string'
+
+
+def test__fix_keywords():
+    assert utils.fix_keywords("None") == "None_"

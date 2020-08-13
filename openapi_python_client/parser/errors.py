@@ -37,3 +37,7 @@ class PropertyError(ParseError):
     """ Error raised when there's a problem creating a Property """
 
     header = "Problem creating a Property: "
+
+
+class ValidationError(Exception):
+    pass

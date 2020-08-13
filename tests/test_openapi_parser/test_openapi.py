@@ -2,7 +2,7 @@ from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
 
 import openapi_python_client.schema as oai
-from openapi_python_client import GeneratorError
+from openapi_python_client import GeneratorError, utils
 from openapi_python_client.parser.errors import ParseError
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
@@ -545,6 +545,8 @@ class TestEndpoint:
             security={"blah": "bloo"},
             responses=mocker.MagicMock(),
         )
+
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
 
         endpoint = Endpoint.from_data(data=data, path=path, method=method, tag="default")
 

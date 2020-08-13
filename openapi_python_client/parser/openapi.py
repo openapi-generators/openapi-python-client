@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 from pydantic import ValidationError
 
 from .. import schema as oai
+from .. import utils
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import EnumProperty, Property, property_from_data
 from .reference import Reference
@@ -182,7 +183,7 @@ class Endpoint:
         endpoint = Endpoint(
             path=path,
             method=method,
-            description=data.description,
+            description=utils.remove_string_escapes(data.description) if data.description else "",
             name=data.operationId,
             requires_security=bool(data.security),
             tag=tag,
