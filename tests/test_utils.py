@@ -20,5 +20,5 @@ def test_snake_case_from_camel():
     assert utils.snake_case("httpResponseLowerCamel") == "http_response_lower_camel"
 
 
-def test_spinal_case():
-    assert utils.spinal_case("keep_alive") == "keep-alive"
+def test_kebab_case():
+    assert utils.kebab_case("keep_alive") == "keep-alive"

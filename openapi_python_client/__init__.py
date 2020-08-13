@@ -83,7 +83,7 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
 
 
 class Project:
-    TEMPLATE_FILTERS = {"snakecase": utils.snake_case, "spinalcase": utils.spinal_case}
+    TEMPLATE_FILTERS = {"snakecase": utils.snake_case, "kebabcase": utils.kebab_case}
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
 
@@ -91,7 +91,7 @@ class Project:
         self.openapi: GeneratorData = openapi
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
-        self.project_name: str = self.project_name_override or f"{openapi.title.replace(' ', '-').lower()}-client"
+        self.project_name: str = self.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
         self.project_dir: Path = Path.cwd() / self.project_name
 
         self.package_name: str = self.package_name_override or self.project_name.replace("-", "_")
@@ -231,6 +231,7 @@ class Project:
         endpoint_template = self.env.get_template("endpoint_module.pyi")
         async_endpoint_template = self.env.get_template("async_endpoint_module.pyi")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
+            tag = utils.snake_case(tag)
             module_path = api_dir / f"{tag}.py"
             module_path.write_text(endpoint_template.render(collection=collection))
             async_module_path = async_api_dir / f"{tag}.py"

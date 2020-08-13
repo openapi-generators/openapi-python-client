@@ -2,10 +2,10 @@
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters %}
         {% if parameter.required %}
-headers["{{ parameter.python_name | spinalcase}}"] = {{ parameter.python_name }}
+headers["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
         {% else %}
 if {{ parameter.python_name }} is not None:
-    headers["{{ parameter.python_name | spinalcase}}"] = {{ parameter.python_name }}
+    headers["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
         {% endif %}
     {% endfor %}
 {% endif %}

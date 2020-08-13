@@ -486,8 +486,8 @@ class TestProject:
         from openapi_python_client import GeneratorData, Project
 
         openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
-        tag_1 = mocker.MagicMock(autospec=str)
-        tag_2 = mocker.MagicMock(autospec=str)
+        tag_1 = "a_tag"
+        tag_2 = "another_tag"
         collection_1 = mocker.MagicMock()
         collection_2 = mocker.MagicMock()
         openapi.endpoint_collections_by_tag = {tag_1: collection_1, tag_2: collection_2}

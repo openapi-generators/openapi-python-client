@@ -7,9 +7,6 @@ from typer.testing import CliRunner
 from openapi_python_client.cli import app
 
 if __name__ == "__main__":
-    from .fastapi_app import generate_openapi_json
-
-    generate_openapi_json()
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "fastapi_app" / "openapi.json"
     gm_path = Path(__file__).parent / "golden-master"
