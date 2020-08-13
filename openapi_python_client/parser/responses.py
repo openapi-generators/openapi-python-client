@@ -104,7 +104,7 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
     if "application/json" in content:
         schema_data = data.content["application/json"].media_type_schema
     elif "application/octet-stream" in content:
-        schema_data = data.content["application/octet-stream"].media_type_schema
+        return BytesResponse(status_code=status_code)
     elif "text/html" in content:
         schema_data = data.content["text/html"].media_type_schema
 
@@ -118,8 +118,6 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
         return Response(status_code=status_code)
     if response_type == "array" and isinstance(schema_data.items, oai.Reference):
         return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.items.ref),)
-    if response_type == "string" and schema_data.schema_format in {"binary", "base64"}:
-        return BytesResponse(status_code=status_code)
     if response_type in openapi_types_to_python_type_strings:
         return BasicResponse(status_code=status_code, openapi_type=response_type)
     return ParseError(data=data, detail=f"Unrecognized type {schema_data.type}")

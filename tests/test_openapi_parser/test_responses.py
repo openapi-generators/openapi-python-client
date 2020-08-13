@@ -219,11 +219,7 @@ class TestResponseFromData:
     def test_response_from_data_octet_stream(self, mocker):
         status_code = mocker.MagicMock(autospec=int)
         data = oai.Response.construct(
-            content={
-                "application/octet-stream": oai.MediaType.construct(
-                    media_type_schema=oai.Schema.construct(type="string", schema_format="binary")
-                )
-            }
+            content={"application/octet-stream": oai.MediaType.construct(media_type_schema=mocker.MagicMock())}
         )
         BytesResponse = mocker.patch(f"{MODULE_NAME}.BytesResponse")
         from openapi_python_client.parser.responses import response_from_data
