@@ -28,6 +28,7 @@ class Property:
 
     name: str
     required: bool
+    nullable: bool
     default: Optional[Any]
 
     template: ClassVar[Optional[str]] = None
@@ -45,8 +46,13 @@ class Property:
         raise ValidationError
 
     def get_type_string(self, no_optional: bool = False) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        if self.required or no_optional:
+        """
+        Get a string representation of type that should be used when declaring this property
+
+        Args:
+            no_optional: Do not include Optional even if the value is optional (needed for isinstance checks)
+        """
+        if no_optional or (self.required and not self.nullable):
             return self._type_string
         return f"Optional[{self._type_string}]"
 
@@ -213,7 +219,7 @@ class ListProperty(Property, Generic[InnerProp]):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if self.required or no_optional:
+        if no_optional or (self.required and not self.nullable):
             return f"List[{self.inner_property.get_type_string()}]"
         return f"Optional[List[{self.inner_property.get_type_string()}]]"
 
@@ -254,7 +260,7 @@ class UnionProperty(Property):
         """ Get a string representation of type that should be used when declaring this property """
         inner_types = [p.get_type_string() for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
-        if self.required or no_optional:
+        if no_optional or (self.required and not self.nullable):
             return f"Union[{inner_prop_string}]"
         return f"Optional[Union[{inner_prop_string}]]"
 
@@ -321,7 +327,7 @@ class EnumProperty(Property):
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
 
-        if self.required or no_optional:
+        if no_optional or (self.required and not self.nullable):
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
@@ -376,7 +382,7 @@ class RefProperty(Property):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if self.required or no_optional:
+        if no_optional or (self.required and not self.nullable):
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
@@ -438,13 +444,15 @@ def _string_based_property(
     """ Construct a Property from the type "string" """
     string_format = data.schema_format
     if string_format == "date-time":
-        return DateTimeProperty(name=name, required=required, default=data.default)
+        return DateTimeProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
     elif string_format == "date":
-        return DateProperty(name=name, required=required, default=data.default)
+        return DateProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
     elif string_format == "binary":
-        return FileProperty(name=name, required=required, default=data.default)
+        return FileProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
     else:
-        return StringProperty(name=name, default=data.default, required=required, pattern=data.pattern)
+        return StringProperty(
+            name=name, default=data.default, required=required, pattern=data.pattern, nullable=data.nullable,
+        )
 
 
 def _property_from_data(
@@ -453,7 +461,9 @@ def _property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        return RefProperty(name=name, required=required, reference=Reference.from_ref(data.ref), default=None)
+        return RefProperty(
+            name=name, required=required, reference=Reference.from_ref(data.ref), default=None, nullable=False,
+        )
     if data.enum:
         return EnumProperty(
             name=name,
@@ -461,6 +471,7 @@ def _property_from_data(
             values=EnumProperty.values_from_list(data.enum),
             title=data.title or name,
             default=data.default,
+            nullable=data.nullable,
         )
     if data.anyOf or data.oneOf:
         sub_properties: List[Property] = []
@@ -469,26 +480,30 @@ def _property_from_data(
             if isinstance(sub_prop, PropertyError):
                 return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)
             sub_properties.append(sub_prop)
-        return UnionProperty(name=name, required=required, default=data.default, inner_properties=sub_properties)
+        return UnionProperty(
+            name=name, required=required, default=data.default, inner_properties=sub_properties, nullable=data.nullable,
+        )
     if not data.type:
         return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data)
     elif data.type == "number":
-        return FloatProperty(name=name, default=data.default, required=required)
+        return FloatProperty(name=name, default=data.default, required=required, nullable=data.nullable,)
     elif data.type == "integer":
-        return IntProperty(name=name, default=data.default, required=required)
+        return IntProperty(name=name, default=data.default, required=required, nullable=data.nullable,)
     elif data.type == "boolean":
-        return BooleanProperty(name=name, required=required, default=data.default)
+        return BooleanProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
     elif data.type == "array":
         if data.items is None:
             return PropertyError(data=data, detail="type array must have items defined")
         inner_prop = property_from_data(name=f"{name}_item", required=True, data=data.items)
         if isinstance(inner_prop, PropertyError):
             return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}")
-        return ListProperty(name=name, required=required, default=data.default, inner_property=inner_prop,)
+        return ListProperty(
+            name=name, required=required, default=data.default, inner_property=inner_prop, nullable=data.nullable,
+        )
     elif data.type == "object":
-        return DictProperty(name=name, required=required, default=data.default)
+        return DictProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
     return PropertyError(data=data, detail=f"unknown type {data.type}")
 
 

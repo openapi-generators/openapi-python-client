@@ -406,7 +406,7 @@ class Schema(BaseModel):
     Other than the JSON Schema subset fields, the following fields MAY be used for further schema documentation:
     """
 
-    nullable: Optional[bool] = None
+    nullable: bool = False
     """
     A `true` value adds `"null"` to the allowed type specified by the `type` keyword,
     only if `type` is explicitly defined within the same Schema Object.

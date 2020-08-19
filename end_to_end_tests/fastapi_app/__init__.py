@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 from fastapi import APIRouter, Body, FastAPI, File, Header, Query, UploadFile
 from pydantic import BaseModel
