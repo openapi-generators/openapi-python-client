@@ -760,7 +760,7 @@ class TestPropertyFromData:
     def test_property_from_data_union(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema(anyOf=[{"type": "number", "default": "0.0"}, {"type": "integer", "default": "0"},])
+        data = oai.Schema(anyOf=[{"type": "number", "default": "0.0"}], oneOf=[{"type": "integer", "default": "0"},])
         UnionProperty = mocker.patch(f"{MODULE_NAME}.UnionProperty")
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
         IntProperty = mocker.patch(f"{MODULE_NAME}.IntProperty")

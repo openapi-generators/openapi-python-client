@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import InitVar, dataclass, field
 from datetime import date, datetime
+from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
 from .. import schema as oai
@@ -472,9 +473,9 @@ def _property_from_data(
             default=data.default,
             nullable=data.nullable,
         )
-    if data.anyOf:
+    if data.anyOf or data.oneOf:
         sub_properties: List[Property] = []
-        for sub_prop_data in data.anyOf:
+        for sub_prop_data in chain(data.anyOf, data.oneOf):
             sub_prop = property_from_data(name=name, required=required, data=sub_prop_data)
             if isinstance(sub_prop, PropertyError):
                 return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)

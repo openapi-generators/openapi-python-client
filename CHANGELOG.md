@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Additions
 - Added support for octet-stream content type (#116)
 - Support for [nullable](https://swagger.io/docs/specification/data-models/data-types/#null) (#99)
+- Union properties defined using oneOf (#98)
 
 
 ## 0.5.3 - 2020-08-13
