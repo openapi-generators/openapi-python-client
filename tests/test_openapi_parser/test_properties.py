@@ -12,20 +12,25 @@ class TestProperty:
 
         validate_default = mocker.patch(f"{MODULE_NAME}.Property._validate_default")
 
-        Property(name="a name", required=True, default=None)
+        Property(name="a name", required=True, default=None, nullable=False)
         validate_default.assert_not_called()
 
-        Property(name="a name", required=True, default="the default value")
+        Property(name="a name", required=True, default="the default value", nullable=False)
         validate_default.assert_called_with(default="the default value")
 
     def test_get_type_string(self):
         from openapi_python_client.parser.properties import Property
 
-        p = Property(name="test", required=True, default=None)
+        p = Property(name="test", required=True, default=None, nullable=False)
         p._type_string = "TestType"
 
         assert p.get_type_string() == "TestType"
         p.required = False
+        assert p.get_type_string() == "Optional[TestType]"
+        assert p.get_type_string(True) == "TestType"
+
+        p.required = False
+        p.nullable = True
         assert p.get_type_string() == "Optional[TestType]"
 
     def test_to_string(self, mocker):
@@ -33,7 +38,7 @@ class TestProperty:
 
         name = mocker.MagicMock()
         snake_case = mocker.patch("openapi_python_client.utils.snake_case")
-        p = Property(name=name, required=True, default=None)
+        p = Property(name=name, required=True, default=None, nullable=False)
         get_type_string = mocker.patch.object(p, "get_type_string")
 
         assert p.to_string() == f"{snake_case(name)}: {get_type_string()}"
@@ -48,7 +53,7 @@ class TestProperty:
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
-        p = Property(name=name, required=True, default=None)
+        p = Property(name=name, required=True, default=None, nullable=False)
         assert p.get_imports(prefix="") == set()
 
         p.required = False
@@ -58,20 +63,20 @@ class TestProperty:
         from openapi_python_client.parser.properties import Property
 
         # should be okay if default isn't specified
-        p = Property(name="a name", required=True, default=None)
+        p = Property(name="a name", required=True, default=None, nullable=False)
 
         with pytest.raises(ValidationError):
             p._validate_default("a default value")
 
         with pytest.raises(ValidationError):
-            Property(name="a name", required=True, default="")
+            Property(name="a name", required=True, default="", nullable=False)
 
 
 class TestStringProperty:
     def test_get_type_string(self):
         from openapi_python_client.parser.properties import StringProperty
 
-        p = StringProperty(name="test", required=True, default=None)
+        p = StringProperty(name="test", required=True, default=None, nullable=False)
 
         assert p.get_type_string() == "str"
         p.required = False
@@ -80,7 +85,7 @@ class TestStringProperty:
     def test__validate_default(self):
         from openapi_python_client.parser.properties import StringProperty
 
-        p = StringProperty(name="a name", required=True, default="the default value")
+        p = StringProperty(name="a name", required=True, default="the default value", nullable=False)
         assert p.default == '"the default value"'
 
 
@@ -90,7 +95,7 @@ class TestDateTimeProperty:
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
-        p = DateTimeProperty(name=name, required=True, default=None)
+        p = DateTimeProperty(name=name, required=True, default=None, nullable=False)
         assert p.get_imports(prefix="") == {
             "import datetime",
             "from typing import cast",
@@ -107,9 +112,9 @@ class TestDateTimeProperty:
         from openapi_python_client.parser.properties import DateTimeProperty
 
         with pytest.raises(ValidationError):
-            DateTimeProperty(name="a name", required=True, default="not a datetime")
+            DateTimeProperty(name="a name", required=True, default="not a datetime", nullable=False)
 
-        p = DateTimeProperty(name="a name", required=True, default="2017-07-21T17:32:28Z")
+        p = DateTimeProperty(name="a name", required=True, default="2017-07-21T17:32:28Z", nullable=False)
         assert p.default == "datetime.datetime(2017, 7, 21, 17, 32, 28, tzinfo=datetime.timezone.utc)"
 
 
@@ -119,7 +124,7 @@ class TestDateProperty:
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
-        p = DateProperty(name=name, required=True, default=None)
+        p = DateProperty(name=name, required=True, default=None, nullable=False)
         assert p.get_imports(prefix="") == {
             "import datetime",
             "from typing import cast",
@@ -136,9 +141,9 @@ class TestDateProperty:
         from openapi_python_client.parser.properties import DateProperty
 
         with pytest.raises(ValidationError):
-            DateProperty(name="a name", required=True, default="not a date")
+            DateProperty(name="a name", required=True, default="not a date", nullable=False)
 
-        p = DateProperty(name="a name", required=True, default="1010-10-10")
+        p = DateProperty(name="a name", required=True, default="1010-10-10", nullable=False)
         assert p.default == "datetime.date(1010, 10, 10)"
 
 
@@ -149,7 +154,7 @@ class TestFileProperty:
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
         prefix = "blah"
-        p = FileProperty(name=name, required=True, default=None)
+        p = FileProperty(name=name, required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {f"from {prefix}.types import File", "from dataclasses import astuple"}
 
         p.required = False
@@ -163,10 +168,10 @@ class TestFileProperty:
         from openapi_python_client.parser.properties import FileProperty
 
         # should be okay if default isn't specified
-        FileProperty(name="a name", required=True, default=None)
+        FileProperty(name="a name", required=True, default=None, nullable=False)
 
         with pytest.raises(ValidationError):
-            FileProperty(name="a name", required=True, default="")
+            FileProperty(name="a name", required=True, default="", nullable=False)
 
 
 class TestFloatProperty:
@@ -174,13 +179,13 @@ class TestFloatProperty:
         from openapi_python_client.parser.properties import FloatProperty
 
         # should be okay if default isn't specified
-        FloatProperty(name="a name", required=True, default=None)
+        FloatProperty(name="a name", required=True, default=None, nullable=False)
 
-        p = FloatProperty(name="a name", required=True, default="123.123")
+        p = FloatProperty(name="a name", required=True, default="123.123", nullable=False)
         assert p.default == 123.123
 
         with pytest.raises(ValidationError):
-            FloatProperty(name="a name", required=True, default="not a float")
+            FloatProperty(name="a name", required=True, default="not a float", nullable=False)
 
 
 class TestIntProperty:
@@ -188,13 +193,13 @@ class TestIntProperty:
         from openapi_python_client.parser.properties import IntProperty
 
         # should be okay if default isn't specified
-        IntProperty(name="a name", required=True, default=None)
+        IntProperty(name="a name", required=True, default=None, nullable=False)
 
-        p = IntProperty(name="a name", required=True, default="123")
+        p = IntProperty(name="a name", required=True, default="123", nullable=False)
         assert p.default == 123
 
         with pytest.raises(ValidationError):
-            IntProperty(name="a name", required=True, default="not an int")
+            IntProperty(name="a name", required=True, default="not an int", nullable=False)
 
 
 class TestBooleanProperty:
@@ -202,9 +207,9 @@ class TestBooleanProperty:
         from openapi_python_client.parser.properties import BooleanProperty
 
         # should be okay if default isn't specified
-        BooleanProperty(name="a name", required=True, default=None)
+        BooleanProperty(name="a name", required=True, default=None, nullable=False)
 
-        p = BooleanProperty(name="a name", required=True, default="Literally anything will work")
+        p = BooleanProperty(name="a name", required=True, default="Literally anything will work", nullable=False)
         assert p.default == True
 
 
@@ -215,13 +220,13 @@ class TestListProperty:
         inner_property = mocker.MagicMock()
         inner_type_string = mocker.MagicMock()
         inner_property.get_type_string.return_value = inner_type_string
-        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property)
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
 
         assert p.get_type_string() == f"List[{inner_type_string}]"
         p.required = False
         assert p.get_type_string() == f"Optional[List[{inner_type_string}]]"
 
-        p = ListProperty(name="test", required=True, default=[], inner_property=inner_property)
+        p = ListProperty(name="test", required=True, default=[], inner_property=inner_property, nullable=False)
         assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], []))"
 
     def test_get_type_imports(self, mocker):
@@ -231,7 +236,7 @@ class TestListProperty:
         inner_import = mocker.MagicMock()
         inner_property.get_imports.return_value = {inner_import}
         prefix = mocker.MagicMock()
-        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property)
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
 
         assert p.get_imports(prefix=prefix) == {
             inner_import,
@@ -261,11 +266,11 @@ class TestListProperty:
         inner_property.get_type_string.return_value = inner_type_string
         inner_property._validate_default.return_value = "y"
 
-        p = ListProperty(name="a name", required=True, default=["x"], inner_property=inner_property)
+        p = ListProperty(name="a name", required=True, default=["x"], inner_property=inner_property, nullable=False)
         assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], ['y']))"
 
         with pytest.raises(ValidationError):
-            ListProperty(name="a name", required=True, default="x", inner_property=inner_property)
+            ListProperty(name="a name", required=True, default="x", inner_property=inner_property, nullable=False)
 
     def test__validate_default_enum_items(self, mocker):
         from openapi_python_client.parser.properties import ListProperty, RefProperty
@@ -274,7 +279,9 @@ class TestListProperty:
         inner_enum_property.get_type_string.return_value = "AnEnum"
         inner_enum_property._validate_default.return_value = "AnEnum.val1"
 
-        p = ListProperty(name="a name", required=True, default=["val1"], inner_property=inner_enum_property)
+        p = ListProperty(
+            name="a name", required=True, default=["val1"], inner_property=inner_enum_property, nullable=False
+        )
         assert p.default == "field(default_factory=lambda: cast(List[AnEnum], [AnEnum.val1]))"
 
 
@@ -287,7 +294,11 @@ class TestUnionProperty:
         inner_property_2 = mocker.MagicMock()
         inner_property_2.get_type_string.return_value = "inner_type_string_2"
         p = UnionProperty(
-            name="test", required=True, default=None, inner_properties=[inner_property_1, inner_property_2]
+            name="test",
+            required=True,
+            default=None,
+            inner_properties=[inner_property_1, inner_property_2],
+            nullable=False,
         )
 
         assert p.get_type_string() == "Union[inner_type_string_1, inner_type_string_2]"
@@ -305,7 +316,11 @@ class TestUnionProperty:
         inner_property_2.get_imports.return_value = {inner_import_2}
         prefix = mocker.MagicMock()
         p = UnionProperty(
-            name="test", required=True, default=None, inner_properties=[inner_property_1, inner_property_2]
+            name="test",
+            required=True,
+            default=None,
+            inner_properties=[inner_property_1, inner_property_2],
+            nullable=False,
         )
 
         assert p.get_imports(prefix=prefix) == {
@@ -331,7 +346,11 @@ class TestUnionProperty:
         inner_property_2.get_type_string.return_value = "inner_type_string_2"
         inner_property_2._validate_default.return_value = "the default value"
         p = UnionProperty(
-            name="test", required=True, default="a value", inner_properties=[inner_property_1, inner_property_2]
+            name="test",
+            required=True,
+            default="a value",
+            inner_properties=[inner_property_1, inner_property_2],
+            nullable=False,
         )
 
         assert p.default == "the default value"
@@ -340,7 +359,11 @@ class TestUnionProperty:
 
         with pytest.raises(ValidationError):
             UnionProperty(
-                name="test", required=True, default="a value", inner_properties=[inner_property_1, inner_property_2]
+                name="test",
+                required=True,
+                default="a value",
+                inner_properties=[inner_property_1, inner_property_2],
+                nullable=False,
             )
 
 
@@ -361,7 +384,7 @@ class TestEnumProperty:
         values = {"FIRST": "first", "SECOND": "second"}
 
         enum_property = properties.EnumProperty(
-            name=name, required=True, default="second", values=values, title="a_title",
+            name=name, required=True, default="second", values=values, title="a_title", nullable=False
         )
 
         assert enum_property.default == "Deduped.SECOND"
@@ -372,7 +395,9 @@ class TestEnumProperty:
 
         # Test encountering exactly the same Enum again
         assert (
-            properties.EnumProperty(name=name, required=True, default="second", values=values, title="a_title",)
+            properties.EnumProperty(
+                name=name, required=True, default="second", values=values, title="a_title", nullable=False
+            )
             == enum_property
         )
         assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
@@ -382,7 +407,7 @@ class TestEnumProperty:
         from_ref.reset_mock()
         from_ref.side_effect = [fake_reference]
         enum_property = properties.EnumProperty(
-            name=name, required=True, default="second", values=values, title="a_title",
+            name=name, required=True, default="second", values=values, title="a_title", nullable=False
         )
         assert enum_property.default == "MyTestEnum.SECOND"
         assert enum_property.python_name == snake_case(name)
@@ -398,7 +423,9 @@ class TestEnumProperty:
 
         from openapi_python_client.parser import properties
 
-        enum_property = properties.EnumProperty(name="test", required=True, default=None, values={}, title="a_title")
+        enum_property = properties.EnumProperty(
+            name="test", required=True, default=None, values={}, title="a_title", nullable=False
+        )
 
         assert enum_property.get_type_string() == "MyTestEnum"
         enum_property.required = False
@@ -412,7 +439,9 @@ class TestEnumProperty:
 
         from openapi_python_client.parser import properties
 
-        enum_property = properties.EnumProperty(name="test", required=True, default=None, values={}, title="a_title")
+        enum_property = properties.EnumProperty(
+            name="test", required=True, default=None, values={}, title="a_title", nullable=False
+        )
 
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}"
@@ -468,13 +497,13 @@ class TestEnumProperty:
         from openapi_python_client.parser import properties
 
         enum_property = properties.EnumProperty(
-            name="test", required=True, default="test", values={"TEST": "test"}, title="a_title"
+            name="test", required=True, default="test", values={"TEST": "test"}, title="a_title", nullable=False
         )
         assert enum_property.default == "MyTestEnum.TEST"
 
         with pytest.raises(ValidationError):
             properties.EnumProperty(
-                name="test", required=True, default="bad_val", values={"TEST": "test"}, title="a_title"
+                name="test", required=True, default="bad_val", values={"TEST": "test"}, title="a_title", nullable=False
             )
 
         properties._existing_enums = {}
@@ -485,7 +514,11 @@ class TestRefProperty:
         from openapi_python_client.parser.properties import RefProperty
 
         ref_property = RefProperty(
-            name="test", required=True, default=None, reference=mocker.MagicMock(class_name="MyRefClass")
+            name="test",
+            required=True,
+            default=None,
+            reference=mocker.MagicMock(class_name="MyRefClass"),
+            nullable=False,
         )
 
         assert ref_property.template == "ref_property.pyi"
@@ -498,7 +531,11 @@ class TestRefProperty:
         from openapi_python_client.parser.properties import RefProperty
 
         ref_property = RefProperty(
-            name="test", required=True, default=None, reference=mocker.MagicMock(class_name="MyRefClass")
+            name="test",
+            required=True,
+            default=None,
+            reference=mocker.MagicMock(class_name="MyRefClass"),
+            nullable=False,
         )
 
         assert ref_property.get_type_string() == "MyRefClass"
@@ -512,7 +549,7 @@ class TestRefProperty:
 
         from openapi_python_client.parser.properties import RefProperty
 
-        p = RefProperty(name="test", required=True, default=None, reference=fake_reference)
+        p = RefProperty(name="test", required=True, default=None, reference=fake_reference, nullable=False)
 
         assert p.get_imports(prefix=prefix) == {
             f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
@@ -532,12 +569,12 @@ class TestRefProperty:
         from openapi_python_client.parser.properties import RefProperty
 
         with pytest.raises(ValidationError):
-            RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock())
+            RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
 
         enum_property = mocker.MagicMock()
         enum_property._validate_default.return_value = "val1"
         mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value=enum_property)
-        p = RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock())
+        p = RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
         assert p.default == "val1"
 
 
@@ -548,7 +585,7 @@ class TestDictProperty:
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
         prefix = mocker.MagicMock()
-        p = DictProperty(name=name, required=True, default=None)
+        p = DictProperty(name=name, required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
             "from typing import Dict",
         }
@@ -570,10 +607,10 @@ class TestDictProperty:
     def test__validate_default(self):
         from openapi_python_client.parser.properties import DictProperty
 
-        DictProperty(name="a name", required=True, default={"key": "value"})
+        DictProperty(name="a name", required=True, default={"key": "value"}, nullable=False)
 
         with pytest.raises(ValidationError):
-            DictProperty(name="a name", required=True, default="not a dict")
+            DictProperty(name="a name", required=True, default="not a dict", nullable=False)
 
 
 class TestPropertyFromData:
@@ -590,7 +627,12 @@ class TestPropertyFromData:
 
         EnumProperty.values_from_list.assert_called_once_with(data.enum)
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=data.default, title=name
+            name=name,
+            required=required,
+            values=EnumProperty.values_from_list(),
+            default=data.default,
+            title=name,
+            nullable=data.nullable,
         )
         assert p == EnumProperty()
 
@@ -601,7 +643,12 @@ class TestPropertyFromData:
             name=name, required=required, data=data,
         )
         EnumProperty.assert_called_once_with(
-            name=name, required=required, values=EnumProperty.values_from_list(), default=data.default, title=data.title
+            name=name,
+            required=required,
+            values=EnumProperty.values_from_list(),
+            default=data.default,
+            title=data.title,
+            nullable=data.nullable,
         )
 
     def test_property_from_data_ref(self, mocker):
@@ -617,7 +664,9 @@ class TestPropertyFromData:
         p = property_from_data(name=name, required=required, data=data)
 
         from_ref.assert_called_once_with(data.ref)
-        RefProperty.assert_called_once_with(name=name, required=required, reference=from_ref(), default=None)
+        RefProperty.assert_called_once_with(
+            name=name, required=required, reference=from_ref(), default=None, nullable=False
+        )
         assert p == RefProperty()
 
     def test_property_from_data_string(self, mocker):
@@ -654,17 +703,18 @@ class TestPropertyFromData:
 
         p = property_from_data(name=name, required=required, data=data)
 
-        clazz.assert_called_once_with(name=name, required=required, default=None)
+        clazz.assert_called_once_with(name=name, required=required, default=None, nullable=False)
         assert p == clazz()
 
         # Test optional values
         clazz.reset_mock()
         data.default = mocker.MagicMock()
+        data.nullable = mocker.MagicMock()
 
         property_from_data(
             name=name, required=required, data=data,
         )
-        clazz.assert_called_once_with(name=name, required=required, default=data.default)
+        clazz.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
     def test_property_from_data_array(self, mocker):
         name = mocker.MagicMock()
@@ -678,9 +728,9 @@ class TestPropertyFromData:
 
         p = property_from_data(name=name, required=required, data=data)
 
-        FloatProperty.assert_called_once_with(name=name, required=True, default="0.0")
+        FloatProperty.assert_called_once_with(name=name, required=True, default="0.0", nullable=False)
         ListProperty.assert_called_once_with(
-            name=name, required=required, default=None, inner_property=FloatProperty.return_value
+            name=name, required=required, default=None, inner_property=FloatProperty.return_value, nullable=False
         )
         assert p == ListProperty.return_value
 
@@ -720,13 +770,14 @@ class TestPropertyFromData:
 
         p = property_from_data(name=name, required=required, data=data)
 
-        FloatProperty.assert_called_once_with(name=name, required=required, default="0.0")
-        IntProperty.assert_called_once_with(name=name, required=required, default="0")
+        FloatProperty.assert_called_once_with(name=name, required=required, default="0.0", nullable=False)
+        IntProperty.assert_called_once_with(name=name, required=required, default="0", nullable=False)
         UnionProperty.assert_called_once_with(
             name=name,
             required=required,
             default=None,
             inner_properties=[FloatProperty.return_value, IntProperty.return_value],
+            nullable=False,
         )
         assert p == UnionProperty.return_value
 
@@ -779,14 +830,16 @@ class TestStringBasedProperty:
     def test__string_based_property_no_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema.construct(type="string")
+        data = oai.Schema.construct(type="string", nullable=mocker.MagicMock())
         StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
         from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
 
-        StringProperty.assert_called_once_with(name=name, required=required, pattern=None, default=None)
+        StringProperty.assert_called_once_with(
+            name=name, required=required, pattern=None, default=None, nullable=data.nullable
+        )
         assert p == StringProperty.return_value
 
         # Test optional values
@@ -797,19 +850,21 @@ class TestStringBasedProperty:
         _string_based_property(
             name=name, required=required, data=data,
         )
-        StringProperty.assert_called_once_with(name=name, required=required, pattern=data.pattern, default=data.default)
+        StringProperty.assert_called_once_with(
+            name=name, required=required, pattern=data.pattern, default=data.default, nullable=data.nullable
+        )
 
     def test__string_based_property_datetime_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema.construct(type="string", schema_format="date-time")
+        data = oai.Schema.construct(type="string", schema_format="date-time", nullable=mocker.MagicMock())
         DateTimeProperty = mocker.patch(f"{MODULE_NAME}.DateTimeProperty")
 
         from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
 
-        DateTimeProperty.assert_called_once_with(name=name, required=required, default=None)
+        DateTimeProperty.assert_called_once_with(name=name, required=required, default=None, nullable=data.nullable)
         assert p == DateTimeProperty.return_value
 
         # Test optional values
@@ -819,18 +874,20 @@ class TestStringBasedProperty:
         _string_based_property(
             name=name, required=required, data=data,
         )
-        DateTimeProperty.assert_called_once_with(name=name, required=required, default=data.default)
+        DateTimeProperty.assert_called_once_with(
+            name=name, required=required, default=data.default, nullable=data.nullable
+        )
 
     def test__string_based_property_date_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema.construct(type="string", schema_format="date")
+        data = oai.Schema.construct(type="string", schema_format="date", nullable=mocker.MagicMock())
         DateProperty = mocker.patch(f"{MODULE_NAME}.DateProperty")
 
         from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
-        DateProperty.assert_called_once_with(name=name, required=required, default=None)
+        DateProperty.assert_called_once_with(name=name, required=required, default=None, nullable=data.nullable)
         assert p == DateProperty.return_value
 
         # Test optional values
@@ -840,18 +897,18 @@ class TestStringBasedProperty:
         _string_based_property(
             name=name, required=required, data=data,
         )
-        DateProperty.assert_called_once_with(name=name, required=required, default=data.default)
+        DateProperty.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
     def test__string_based_property_binary_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema.construct(type="string", schema_format="binary")
+        data = oai.Schema.construct(type="string", schema_format="binary", nullable=mocker.MagicMock())
         FileProperty = mocker.patch(f"{MODULE_NAME}.FileProperty")
 
         from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
-        FileProperty.assert_called_once_with(name=name, required=required, default=None)
+        FileProperty.assert_called_once_with(name=name, required=required, default=None, nullable=data.nullable)
         assert p == FileProperty.return_value
 
         # Test optional values
@@ -861,19 +918,22 @@ class TestStringBasedProperty:
         _string_based_property(
             name=name, required=required, data=data,
         )
-        FileProperty.assert_called_once_with(name=name, required=required, default=data.default)
+        FileProperty.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
     def test__string_based_property_unsupported_format(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema.construct(type="string", schema_format=mocker.MagicMock())
+        data.nullable = mocker.MagicMock()
         StringProperty = mocker.patch(f"{MODULE_NAME}.StringProperty")
 
         from openapi_python_client.parser.properties import _string_based_property
 
         p = _string_based_property(name=name, required=required, data=data)
 
-        StringProperty.assert_called_once_with(name=name, required=required, pattern=None, default=None)
+        StringProperty.assert_called_once_with(
+            name=name, required=required, pattern=None, default=None, nullable=data.nullable
+        )
         assert p == StringProperty.return_value
 
         # Test optional values
@@ -884,4 +944,6 @@ class TestStringBasedProperty:
         _string_based_property(
             name=name, required=required, data=data,
         )
-        StringProperty.assert_called_once_with(name=name, required=required, pattern=data.pattern, default=data.default)
+        StringProperty.assert_called_once_with(
+            name=name, required=required, pattern=data.pattern, default=data.default, nullable=data.nullable
+        )

@@ -273,6 +273,7 @@ class Schemas:
                     required=True,
                     default=data.default,
                     values=EnumProperty.values_from_list(data.enum),
+                    nullable=data.nullable,
                 )
                 continue
             s = Model.from_data(data=data, name=name)
