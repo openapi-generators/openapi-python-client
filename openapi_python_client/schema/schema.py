@@ -241,7 +241,7 @@ class Schema(BaseModel):
     value.
     """
 
-    oneOf: Optional[List[Union[Reference, "Schema"]]] = None
+    oneOf: List[Union[Reference, "Schema"]] = []
     """
     **From OpenAPI spec:
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.**
@@ -258,7 +258,7 @@ class Schema(BaseModel):
     keyword's value.
     """
 
-    anyOf: Optional[List[Union[Reference, "Schema"]]] = None
+    anyOf: List[Union[Reference, "Schema"]] = []
     """
     **From OpenAPI spec:
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.**
