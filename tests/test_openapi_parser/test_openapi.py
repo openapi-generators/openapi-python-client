@@ -323,11 +323,11 @@ class TestEndpoint:
         parse_multipart_body.assert_called_once_with(request_body)
         import_string_from_reference.assert_has_calls(
             [
-                mocker.call(form_body_reference, prefix="..models"),
-                mocker.call(multipart_body_reference, prefix="..models"),
+                mocker.call(form_body_reference, prefix="...models"),
+                mocker.call(multipart_body_reference, prefix="...models"),
             ]
         )
-        json_body.get_imports.assert_called_once_with(prefix="..models")
+        json_body.get_imports.assert_called_once_with(prefix="...models")
         assert endpoint.relative_imports == {"import_1", "import_2", "import_3", json_body_imports}
         assert endpoint.json_body == json_body
         assert endpoint.form_body_reference == form_body_reference
@@ -394,7 +394,7 @@ class TestEndpoint:
             [mocker.call(status_code=200, data=response_1_data), mocker.call(status_code=404, data=response_2_data),]
         )
         import_string_from_reference.assert_has_calls(
-            [mocker.call(ref_1, prefix="..models"), mocker.call(ref_2, prefix="..models"),]
+            [mocker.call(ref_1, prefix="...models"), mocker.call(ref_2, prefix="...models"),]
         )
         assert endpoint.responses == [response_1, response_2]
         assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
@@ -486,9 +486,9 @@ class TestEndpoint:
                 mocker.call(name="header_prop_name", required=False, data=header_schema),
             ]
         )
-        path_prop.get_imports.assert_called_once_with(prefix="..models")
-        query_prop.get_imports.assert_called_once_with(prefix="..models")
-        header_prop.get_imports.assert_called_once_with(prefix="..models")
+        path_prop.get_imports.assert_called_once_with(prefix="...models")
+        query_prop.get_imports.assert_called_once_with(prefix="...models")
+        header_prop.get_imports.assert_called_once_with(prefix="...models")
         assert endpoint.relative_imports == {"import_3", path_prop_import, query_prop_import, header_prop_import}
         assert endpoint.path_parameters == [path_prop]
         assert endpoint.query_parameters == [query_prop]
@@ -638,10 +638,8 @@ class TestEndpointCollection:
             ],
         )
         assert result == {
-            "default": EndpointCollection(
-                "default", endpoints=[endpoint_1, endpoint_3], relative_imports={"1", "2", "3"}
-            ),
-            "tag_2": EndpointCollection("tag_2", endpoints=[endpoint_2], relative_imports={"2"}),
+            "default": EndpointCollection("default", endpoints=[endpoint_1, endpoint_3]),
+            "tag_2": EndpointCollection("tag_2", endpoints=[endpoint_2]),
         }
 
     def test_from_data_errors(self, mocker):

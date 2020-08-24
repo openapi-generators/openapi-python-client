@@ -1,1 +1,1 @@
-""" Contains synchronous methods for accessing the API """
+""" Contains methods for accessing the API """

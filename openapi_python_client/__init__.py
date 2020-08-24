@@ -16,6 +16,7 @@ from openapi_python_client import utils
 
 from .parser import GeneratorData, import_string_from_reference
 from .parser.errors import GeneratorError
+from .utils import snake_case
 
 if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
     from importlib_metadata import version
@@ -219,22 +220,19 @@ class Project:
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
         api_init = api_dir / "__init__.py"
-        api_init.write_text('""" Contains synchronous methods for accessing the API """')
-
-        async_api_dir = self.package_dir / "async_api"
-        async_api_dir.mkdir()
-        async_api_init = async_api_dir / "__init__.py"
-        async_api_init.write_text('""" Contains async methods for accessing the API """')
+        api_init.write_text('""" Contains methods for accessing the API """')
 
         api_errors = self.package_dir / "errors.py"
         errors_template = self.env.get_template("errors.pyi")
         api_errors.write_text(errors_template.render())
 
         endpoint_template = self.env.get_template("endpoint_module.pyi")
-        async_endpoint_template = self.env.get_template("async_endpoint_module.pyi")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
             tag = utils.snake_case(tag)
-            module_path = api_dir / f"{tag}.py"
-            module_path.write_text(endpoint_template.render(collection=collection))
-            async_module_path = async_api_dir / f"{tag}.py"
-            async_module_path.write_text(async_endpoint_template.render(collection=collection))
+            tag_dir = api_dir / tag
+            tag_dir.mkdir()
+            (tag_dir / "__init__.py").touch()
+
+            for endpoint in collection.endpoints:
+                module_path = tag_dir / f"{snake_case(endpoint.name)}.py"
+                module_path.write_text(endpoint_template.render(endpoint=endpoint))

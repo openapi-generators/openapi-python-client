@@ -34,7 +34,6 @@ class EndpointCollection:
 
     tag: str
     endpoints: List[Endpoint] = field(default_factory=list)
-    relative_imports: Set[str] = field(default_factory=set)
     parse_errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
@@ -60,7 +59,6 @@ class EndpointCollection:
                     continue
 
                 collection.endpoints.append(endpoint)
-                collection.relative_imports.update(endpoint.relative_imports)
 
         return endpoints_by_tag
 
@@ -128,14 +126,16 @@ class Endpoint:
         endpoint.multipart_body_reference = Endpoint.parse_multipart_body(data.requestBody)
 
         if endpoint.form_body_reference:
-            endpoint.relative_imports.add(import_string_from_reference(endpoint.form_body_reference, prefix="..models"))
+            endpoint.relative_imports.add(
+                import_string_from_reference(endpoint.form_body_reference, prefix="...models")
+            )
         if endpoint.multipart_body_reference:
             endpoint.relative_imports.add(
-                import_string_from_reference(endpoint.multipart_body_reference, prefix="..models")
+                import_string_from_reference(endpoint.multipart_body_reference, prefix="...models")
             )
         if json_body is not None:
             endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..models"))
+            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="...models"))
         return endpoint
 
     @staticmethod
@@ -146,7 +146,7 @@ class Endpoint:
             if isinstance(response, ParseError):
                 return ParseError(detail=f"cannot parse response of endpoint {endpoint.name}", data=response.data)
             if isinstance(response, (RefResponse, ListRefResponse)):
-                endpoint.relative_imports.add(import_string_from_reference(response.reference, prefix="..models"))
+                endpoint.relative_imports.add(import_string_from_reference(response.reference, prefix="...models"))
             endpoint.responses.append(response)
         return endpoint
 
@@ -161,7 +161,7 @@ class Endpoint:
             prop = property_from_data(name=param.name, required=param.required, data=param.param_schema)
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data)
-            endpoint.relative_imports.update(prop.get_imports(prefix="..models"))
+            endpoint.relative_imports.update(prop.get_imports(prefix="...models"))
 
             if param.param_in == ParameterLocation.QUERY:
                 endpoint.query_parameters.append(prop)
