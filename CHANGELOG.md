@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.0 - Unreleased
+### Breaking Changes
+- Reorganized api calls in generated clients. `async_api` will no longer be generated. Each path operation will now 
+    have it's own module under its tag. For example, if there was a generated function `api.my_tag.my_function()` it is 
+    replaced with `api.my_tag.my_function.sync()`. The async version can be called with `asyncio()` instead of `sync()`.
+- Removed support for mutable default values (e.g. dicts, lists). They may be added back in a future version given enough 
+    demand, but the existing implementation was not up to this project's standards.
+
 
 ## 0.5.4 - Unreleased
 ### Additions

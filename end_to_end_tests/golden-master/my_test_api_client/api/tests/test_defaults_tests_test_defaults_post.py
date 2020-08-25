@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import asdict, field
+from dataclasses import asdict
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
@@ -20,9 +20,7 @@ def _get_kwargs(
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
-    list_prop: Optional[List[AnEnum]] = field(
-        default_factory=lambda: cast(Optional[List[AnEnum]], [AnEnum.FIRST_VALUE, AnEnum.SECOND_VALUE])
-    ),
+    list_prop: Optional[List[AnEnum]] = None,
     union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
     enum_prop: Optional[AnEnum] = None,
 ) -> Dict[str, Any]:
@@ -105,9 +103,7 @@ def sync(
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
-    list_prop: Optional[List[AnEnum]] = field(
-        default_factory=lambda: cast(Optional[List[AnEnum]], [AnEnum.FIRST_VALUE, AnEnum.SECOND_VALUE])
-    ),
+    list_prop: Optional[List[AnEnum]] = None,
     union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
     enum_prop: Optional[AnEnum] = None,
 ) -> Union[
@@ -144,9 +140,7 @@ async def asyncio(
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
-    list_prop: Optional[List[AnEnum]] = field(
-        default_factory=lambda: cast(Optional[List[AnEnum]], [AnEnum.FIRST_VALUE, AnEnum.SECOND_VALUE])
-    ),
+    list_prop: Optional[List[AnEnum]] = None,
     union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
     enum_prop: Optional[AnEnum] = None,
 ) -> Union[

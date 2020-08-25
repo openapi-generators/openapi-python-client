@@ -226,9 +226,6 @@ class TestListProperty:
         p.required = False
         assert p.get_type_string() == f"Optional[List[{inner_type_string}]]"
 
-        p = ListProperty(name="test", required=True, default=[], inner_property=inner_property, nullable=False)
-        assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], []))"
-
     def test_get_type_imports(self, mocker):
         from openapi_python_client.parser.properties import ListProperty
 
@@ -249,40 +246,13 @@ class TestListProperty:
             "from typing import Optional",
         }
 
-        p.default = mocker.MagicMock()
-        assert p.get_imports(prefix=prefix) == {
-            inner_import,
-            "from typing import Optional",
-            "from typing import List",
-            "from typing import cast",
-            "from dataclasses import field",
-        }
-
     def test__validate_default(self, mocker):
         from openapi_python_client.parser.properties import ListProperty
 
         inner_property = mocker.MagicMock()
-        inner_type_string = mocker.MagicMock()
-        inner_property.get_type_string.return_value = inner_type_string
-        inner_property._validate_default.return_value = "y"
 
         p = ListProperty(name="a name", required=True, default=["x"], inner_property=inner_property, nullable=False)
-        assert p.default == f"field(default_factory=lambda: cast(List[{inner_type_string}], ['y']))"
-
-        with pytest.raises(ValidationError):
-            ListProperty(name="a name", required=True, default="x", inner_property=inner_property, nullable=False)
-
-    def test__validate_default_enum_items(self, mocker):
-        from openapi_python_client.parser.properties import ListProperty, RefProperty
-
-        inner_enum_property = mocker.MagicMock(spec=RefProperty)
-        inner_enum_property.get_type_string.return_value = "AnEnum"
-        inner_enum_property._validate_default.return_value = "AnEnum.val1"
-
-        p = ListProperty(
-            name="a name", required=True, default=["val1"], inner_property=inner_enum_property, nullable=False
-        )
-        assert p.default == "field(default_factory=lambda: cast(List[AnEnum], [AnEnum.val1]))"
+        assert p.default is None
 
 
 class TestUnionProperty:
@@ -607,10 +577,9 @@ class TestDictProperty:
     def test__validate_default(self):
         from openapi_python_client.parser.properties import DictProperty
 
-        DictProperty(name="a name", required=True, default={"key": "value"}, nullable=False)
+        p = DictProperty(name="a name", required=True, default={"key": "value"}, nullable=False)
 
-        with pytest.raises(ValidationError):
-            DictProperty(name="a name", required=True, default="not a dict", nullable=False)
+        assert p.default is None
 
 
 class TestPropertyFromData:

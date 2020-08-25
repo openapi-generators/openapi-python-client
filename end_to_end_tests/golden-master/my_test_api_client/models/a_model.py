@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union, cast
 
 from .an_enum import AnEnum
@@ -16,9 +16,7 @@ class AModel:
     some_dict: Dict[Any, Any]
     a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
-    nested_list_of_enums: Optional[List[List[DifferentEnum]]] = field(
-        default_factory=lambda: cast(Optional[List[List[DifferentEnum]]], [])
-    )
+    nested_list_of_enums: Optional[List[List[DifferentEnum]]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         an_enum_value = self.an_enum_value.value

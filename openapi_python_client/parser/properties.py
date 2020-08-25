@@ -233,20 +233,10 @@ class ListProperty(Property, Generic[InnerProp]):
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
         imports.add("from typing import List")
-        if self.default is not None:
-            imports.add("from dataclasses import field")
-            imports.add("from typing import cast")
         return imports
 
-    def _validate_default(self, default: Any) -> str:
-        if not isinstance(default, list):
-            raise ValidationError()
-
-        default = list(map(self.inner_property._validate_default, default))
-        if isinstance(self.inner_property, RefProperty):  # Fix enums to use the actual value
-            default = str(default).replace("'", "")
-
-        return f"field(default_factory=lambda: cast({self.get_type_string()}, {default}))"
+    def _validate_default(self, default: Any) -> None:
+        return None
 
 
 @dataclass
@@ -432,10 +422,8 @@ class DictProperty(Property):
             imports.add("from typing import cast")
         return imports
 
-    def _validate_default(self, default: Any) -> str:
-        if isinstance(default, dict):
-            return repr(default)
-        raise ValidationError
+    def _validate_default(self, default: Any) -> None:
+        return None
 
 
 def _string_based_property(
