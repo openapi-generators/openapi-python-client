@@ -44,20 +44,25 @@ jobs:
 
       - run:
           name: Unit Tests
-          command: poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=openapi_python_client tests
+          command: |
+            poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=openapi_python_client tests
+            poetry run coverage xml
+
+      - codecov/upload:
+          file: coverage.xml
 
       - run:
           name: End to End Test
-          command: poetry run pytest end_to_end_tests
+          command: |
+            poetry run pytest --junitxml=test-reports/pytest/results.xml --cov=openapi_python_client end_to_end_tests
+            poetry run coverage xml
 
-      - run:
-          name: Generate Coverage Report
-          command: poetry run coverage xml
+      - codecov/upload:
+          file: coverage.xml
 
       - store_test_results:
           path: test-reports
-      - codecov/upload:
-          file: coverage.xml
+
       - run:
           command: poetry run pip uninstall openapi-python-client -y
           name: Uninstall Package
