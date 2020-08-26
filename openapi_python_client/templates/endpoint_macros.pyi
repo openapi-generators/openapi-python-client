@@ -57,13 +57,13 @@ if {{ property.python_name }} is not None:
 
 {% macro return_type(endpoint) %}
 {% if endpoint.responses | length == 1 %}
-) -> {{ endpoint.responses[0].return_string() }}:
-{% else %}
-) -> Union[
+{{ endpoint.responses[0].return_string() }}
+{%- else %}
+Union[
     {% for response in endpoint.responses %}
     {{ response.return_string() }},
     {% endfor %}
-]:
+]
 {%- endif %}
 {% endmacro %}
 

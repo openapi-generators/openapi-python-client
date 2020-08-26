@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...errors import ApiResponseError
+from ...types import Response
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -47,20 +47,26 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response {{ return_type(endpoint) }}
+def _parse_response(*, response: httpx.Response) -> Optional[{{ return_type(endpoint) }}]:
     {% for response in endpoint.responses %}
     if response.status_code == {{ response.status_code }}:
         return {{ response.constructor() }}
     {% endfor %}
-    else:
-        raise ApiResponseError(response=response)
+    return None
 
 
-def sync(
+def _build_response(*, response: httpx.Response) -> Response[{{ return_type(endpoint) }}]:
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(response=response),
+    )
+
+
+def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
-{{ return_type(endpoint) }}
-    """ {{ endpoint.description }} """
-
+) -> Response[{{ return_type(endpoint) }}]:
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -69,13 +75,22 @@ def sync(
         **kwargs,
     )
 
-    return _parse_response(response=response)
+    return _build_response(response=response)
 
 
-async def asyncio(
+def sync(
     {{ arguments(endpoint) | indent(4) }}
-{{ return_type(endpoint) }}
+) -> Optional[{{ return_type(endpoint) }}]:
     """ {{ endpoint.description }} """
+
+    return sync_detailed(
+        {{ kwargs(endpoint) }}
+    ).parsed
+
+
+async def asyncio_detailed(
+    {{ arguments(endpoint) | indent(4) }}
+) -> Response[{{ return_type(endpoint) }}]:
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -85,4 +100,14 @@ async def asyncio(
             **kwargs
         )
 
-    return _parse_response(response=response)
+    return _build_response(response=response)
+
+
+async def asyncio(
+    {{ arguments(endpoint) | indent(4) }}
+) -> Optional[{{ return_type(endpoint) }}]:
+    """ {{ endpoint.description }} """
+
+    return (await asyncio_detailed(
+        {{ kwargs(endpoint) }}
+    )).parsed

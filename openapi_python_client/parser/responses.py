@@ -112,12 +112,18 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
         return ParseError(data=data, detail=f"Unsupported content_type {content}")
 
     if isinstance(schema_data, oai.Reference):
-        return RefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.ref),)
+        return RefResponse(
+            status_code=status_code,
+            reference=Reference.from_ref(schema_data.ref),
+        )
     response_type = schema_data.type
     if response_type is None:
         return Response(status_code=status_code)
     if response_type == "array" and isinstance(schema_data.items, oai.Reference):
-        return ListRefResponse(status_code=status_code, reference=Reference.from_ref(schema_data.items.ref),)
+        return ListRefResponse(
+            status_code=status_code,
+            reference=Reference.from_ref(schema_data.items.ref),
+        )
     if response_type in openapi_types_to_python_type_strings:
         return BasicResponse(status_code=status_code, openapi_type=response_type)
     return ParseError(data=data, detail=f"Unrecognized type {schema_data.type}")

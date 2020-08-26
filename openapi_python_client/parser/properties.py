@@ -164,7 +164,7 @@ class FileProperty(Property):
             prefix: A prefix to put before any relative (local) module names.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({f"from {prefix}.types import File", "from dataclasses import astuple"})
+        imports.update({"from ..types import File", "from dataclasses import astuple"})
         return imports
 
 
@@ -432,14 +432,33 @@ def _string_based_property(
     """ Construct a Property from the type "string" """
     string_format = data.schema_format
     if string_format == "date-time":
-        return DateTimeProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
+        return DateTimeProperty(
+            name=name,
+            required=required,
+            default=data.default,
+            nullable=data.nullable,
+        )
     elif string_format == "date":
-        return DateProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
+        return DateProperty(
+            name=name,
+            required=required,
+            default=data.default,
+            nullable=data.nullable,
+        )
     elif string_format == "binary":
-        return FileProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
+        return FileProperty(
+            name=name,
+            required=required,
+            default=data.default,
+            nullable=data.nullable,
+        )
     else:
         return StringProperty(
-            name=name, default=data.default, required=required, pattern=data.pattern, nullable=data.nullable,
+            name=name,
+            default=data.default,
+            required=required,
+            pattern=data.pattern,
+            nullable=data.nullable,
         )
 
 
@@ -450,7 +469,11 @@ def _property_from_data(
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return RefProperty(
-            name=name, required=required, reference=Reference.from_ref(data.ref), default=None, nullable=False,
+            name=name,
+            required=required,
+            reference=Reference.from_ref(data.ref),
+            default=None,
+            nullable=False,
         )
     if data.enum:
         return EnumProperty(
@@ -469,18 +492,37 @@ def _property_from_data(
                 return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)
             sub_properties.append(sub_prop)
         return UnionProperty(
-            name=name, required=required, default=data.default, inner_properties=sub_properties, nullable=data.nullable,
+            name=name,
+            required=required,
+            default=data.default,
+            inner_properties=sub_properties,
+            nullable=data.nullable,
         )
     if not data.type:
         return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data)
     elif data.type == "number":
-        return FloatProperty(name=name, default=data.default, required=required, nullable=data.nullable,)
+        return FloatProperty(
+            name=name,
+            default=data.default,
+            required=required,
+            nullable=data.nullable,
+        )
     elif data.type == "integer":
-        return IntProperty(name=name, default=data.default, required=required, nullable=data.nullable,)
+        return IntProperty(
+            name=name,
+            default=data.default,
+            required=required,
+            nullable=data.nullable,
+        )
     elif data.type == "boolean":
-        return BooleanProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
+        return BooleanProperty(
+            name=name,
+            required=required,
+            default=data.default,
+            nullable=data.nullable,
+        )
     elif data.type == "array":
         if data.items is None:
             return PropertyError(data=data, detail="type array must have items defined")
@@ -488,10 +530,19 @@ def _property_from_data(
         if isinstance(inner_prop, PropertyError):
             return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}")
         return ListProperty(
-            name=name, required=required, default=data.default, inner_property=inner_prop, nullable=data.nullable,
+            name=name,
+            required=required,
+            default=data.default,
+            inner_property=inner_prop,
+            nullable=data.nullable,
         )
     elif data.type == "object":
-        return DictProperty(name=name, required=required, default=data.default, nullable=data.nullable,)
+        return DictProperty(
+            name=name,
+            required=required,
+            default=data.default,
+            nullable=data.nullable,
+        )
     return PropertyError(data=data, detail=f"unknown type {data.type}")
 
 

@@ -134,7 +134,11 @@ class Project:
 
     def _reformat(self) -> None:
         subprocess.run(
-            "isort .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            "isort .",
+            cwd=self.project_dir,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         subprocess.run("black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -155,6 +159,10 @@ class Project:
 
         pytyped = self.package_dir / "py.typed"
         pytyped.write_text("# Marker file for PEP 561")
+
+        types_template = self.env.get_template("types.py")
+        types_path = self.package_dir / "types.py"
+        types_path.write_text(types_template.render())
 
     def _build_metadata(self) -> None:
         # Create a pyproject.toml file
@@ -190,10 +198,6 @@ class Project:
         models_init = models_dir / "__init__.py"
         imports = []
 
-        types_template = self.env.get_template("types.py")
-        types_path = models_dir / "types.py"
-        types_path.write_text(types_template.render())
-
         model_template = self.env.get_template("model.pyi")
         for model in self.openapi.schemas.models.values():
             module_path = models_dir / f"{model.reference.module_name}.py"
@@ -221,10 +225,6 @@ class Project:
         api_dir.mkdir()
         api_init = api_dir / "__init__.py"
         api_init.write_text('""" Contains methods for accessing the API """')
-
-        api_errors = self.package_dir / "errors.py"
-        errors_template = self.env.get_template("errors.pyi")
-        api_errors.write_text(errors_template.render())
 
         endpoint_template = self.env.get_template("endpoint_module.pyi")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():

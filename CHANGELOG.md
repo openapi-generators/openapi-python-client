@@ -9,8 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reorganized api calls in generated clients. `async_api` will no longer be generated. Each path operation will now 
     have it's own module under its tag. For example, if there was a generated function `api.my_tag.my_function()` it is 
     replaced with `api.my_tag.my_function.sync()`. The async version can be called with `asyncio()` instead of `sync()`.
+    (#167)
 - Removed support for mutable default values (e.g. dicts, lists). They may be added back in a future version given enough 
-    demand, but the existing implementation was not up to this project's standards.
+    demand, but the existing implementation was not up to this project's standards. (#170)
+- Removed generated `errors` module (and the `ApiResponseError` therein). Instead of raising an exception on failure, 
+  the `sync()` and `asyncio()` functions for a path operation will return `None`. This means all return types are now 
+  `Optional`, so mypy will require you to handle potential errors (or explicitly ignore them).
+- Moved `models.types` generated module up a level, so just `types`.
+
+### Additions
+- Every generated API module will have a `sync_detailed()` and `asyncio_detailed()` function which work like their 
+  non-detailed counterparts, but return a `types.Response[T]` instead of an `Optional[T]` (where T is the parsed body type).
+  `types.Response` contains `status_code`, `content` (bytes of returned content), `headers`, and `parsed` (the 
+  parsed return type you would get from the non-detailed function). (#115)
 
 
 ## 0.5.4 - Unreleased

@@ -216,7 +216,7 @@ class Model:
 
     @staticmethod
     def from_data(*, data: oai.Schema, name: str) -> Union[Model, ParseError]:
-        """ A single Model from its OAI data
+        """A single Model from its OAI data
 
         Args:
             data: Data of a single Schema

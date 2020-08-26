@@ -5,9 +5,9 @@ from typing import Any, Dict, List, Optional, Union, cast
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...errors import ApiResponseError
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
+from ...types import Response
 
 
 def _get_kwargs(
@@ -82,15 +82,58 @@ def _get_kwargs(
 
 def _parse_response(
     *, response: httpx.Response
-) -> Union[
-    None, HTTPValidationError,
-]:
+) -> Optional[Union[None, HTTPValidationError,]]:
     if response.status_code == 200:
         return None
     if response.status_code == 422:
         return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
-    else:
-        raise ApiResponseError(response=response)
+    return None
+
+
+def _build_response(
+    *, response: httpx.Response
+) -> Response[Union[None, HTTPValidationError,]]:
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(response=response),
+    )
+
+
+def sync_detailed(
+    *,
+    client: Client,
+    json_body: Dict[Any, Any],
+    string_prop: Optional[str] = "the default string",
+    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
+    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    float_prop: Optional[float] = 3.14,
+    int_prop: Optional[int] = 7,
+    boolean_prop: Optional[bool] = False,
+    list_prop: Optional[List[AnEnum]] = None,
+    union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
+    enum_prop: Optional[AnEnum] = None,
+) -> Response[Union[None, HTTPValidationError,]]:
+    kwargs = _get_kwargs(
+        client=client,
+        json_body=json_body,
+        string_prop=string_prop,
+        datetime_prop=datetime_prop,
+        date_prop=date_prop,
+        float_prop=float_prop,
+        int_prop=int_prop,
+        boolean_prop=boolean_prop,
+        list_prop=list_prop,
+        union_prop=union_prop,
+        enum_prop=enum_prop,
+    )
+
+    response = httpx.post(
+        **kwargs,
+    )
+
+    return _build_response(response=response)
 
 
 def sync(
@@ -106,12 +149,10 @@ def sync(
     list_prop: Optional[List[AnEnum]] = None,
     union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
     enum_prop: Optional[AnEnum] = None,
-) -> Union[
-    None, HTTPValidationError,
-]:
+) -> Optional[Union[None, HTTPValidationError,]]:
     """  """
 
-    kwargs = _get_kwargs(
+    return sync_detailed(
         client=client,
         json_body=json_body,
         string_prop=string_prop,
@@ -123,14 +164,10 @@ def sync(
         list_prop=list_prop,
         union_prop=union_prop,
         enum_prop=enum_prop,
-    )
-
-    response = httpx.post(**kwargs,)
-
-    return _parse_response(response=response)
+    ).parsed
 
 
-async def asyncio(
+async def asyncio_detailed(
     *,
     client: Client,
     json_body: Dict[Any, Any],
@@ -143,10 +180,7 @@ async def asyncio(
     list_prop: Optional[List[AnEnum]] = None,
     union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
     enum_prop: Optional[AnEnum] = None,
-) -> Union[
-    None, HTTPValidationError,
-]:
-    """  """
+) -> Response[Union[None, HTTPValidationError,]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -164,4 +198,37 @@ async def asyncio(
     async with httpx.AsyncClient() as _client:
         response = await _client.post(**kwargs)
 
-    return _parse_response(response=response)
+    return _build_response(response=response)
+
+
+async def asyncio(
+    *,
+    client: Client,
+    json_body: Dict[Any, Any],
+    string_prop: Optional[str] = "the default string",
+    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
+    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    float_prop: Optional[float] = 3.14,
+    int_prop: Optional[int] = 7,
+    boolean_prop: Optional[bool] = False,
+    list_prop: Optional[List[AnEnum]] = None,
+    union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
+    enum_prop: Optional[AnEnum] = None,
+) -> Optional[Union[None, HTTPValidationError,]]:
+    """  """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            json_body=json_body,
+            string_prop=string_prop,
+            datetime_prop=datetime_prop,
+            date_prop=date_prop,
+            float_prop=float_prop,
+            int_prop=int_prop,
+            boolean_prop=boolean_prop,
+            list_prop=list_prop,
+            union_prop=union_prop,
+            enum_prop=enum_prop,
+        )
+    ).parsed

@@ -34,4 +34,6 @@ class HTTPValidationError:
 
             detail.append(detail_item)
 
-        return HTTPValidationError(detail=detail,)
+        return HTTPValidationError(
+            detail=detail,
+        )

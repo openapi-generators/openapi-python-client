@@ -32,4 +32,8 @@ class ValidationError:
 
         type = d["type"]
 
-        return ValidationError(loc=loc, msg=msg, type=type,)
+        return ValidationError(
+            loc=loc,
+            msg=msg,
+            type=type,
+        )

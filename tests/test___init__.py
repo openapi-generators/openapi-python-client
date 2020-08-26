@@ -318,31 +318,6 @@ class TestProject:
         project.package_dir.is_dir.assert_called_once()
         project._build_models.assert_not_called()
 
-    def test__create_package(self, mocker):
-        from openapi_python_client import Project
-
-        project = Project(openapi=mocker.MagicMock(title="My Test API"))
-        project.package_dir = mocker.MagicMock()
-        package_init_template = mocker.MagicMock()
-        project.env = mocker.MagicMock()
-        project.env.get_template.return_value = package_init_template
-        package_init_path = mocker.MagicMock(autospec=pathlib.Path)
-        pytyped_path = mocker.MagicMock(autospec=pathlib.Path)
-        paths = {
-            "__init__.py": package_init_path,
-            "py.typed": pytyped_path,
-        }
-
-        project.package_dir.__truediv__.side_effect = lambda x: paths[x]
-
-        project._create_package()
-
-        project.package_dir.mkdir.assert_called_once()
-        project.env.get_template.assert_called_once_with("package_init.pyi")
-        package_init_template.render.assert_called_once_with(description=project.package_description)
-        package_init_path.write_text.assert_called_once_with(package_init_template.render())
-        pytyped_path.write_text.assert_called_once_with("# Marker file for PEP 561")
-
     def test__build_metadata(self, mocker):
         from openapi_python_client import Project
 
@@ -391,93 +366,6 @@ class TestProject:
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render())
 
-    def test__build_models(self, mocker):
-        from openapi_python_client import GeneratorData, Project
-
-        openapi = mocker.MagicMock(autospec=GeneratorData, title="My Test API")
-        model_1 = mocker.MagicMock()
-        model_2 = mocker.MagicMock()
-        openapi.schemas.models = {"1": model_1, "2": model_2}
-        enum_1 = mocker.MagicMock()
-        enum_2 = mocker.MagicMock()
-        openapi.enums = {"1": enum_1, "2": enum_2}
-        project = Project(openapi=openapi)
-        project.package_dir = mocker.MagicMock()
-        models_init = mocker.MagicMock()
-        types_py = mocker.MagicMock()
-        models_dir = mocker.MagicMock()
-        model_1_module_path = mocker.MagicMock()
-        model_2_module_path = mocker.MagicMock()
-        enum_1_module_path = mocker.MagicMock()
-        enum_2_module_path = mocker.MagicMock()
-        module_paths = {
-            "__init__.py": models_init,
-            "types.py": types_py,
-            f"{model_1.reference.module_name}.py": model_1_module_path,
-            f"{model_2.reference.module_name}.py": model_2_module_path,
-            f"{enum_1.reference.module_name}.py": enum_1_module_path,
-            f"{enum_2.reference.module_name}.py": enum_2_module_path,
-        }
-
-        def models_dir_get(x):
-            return module_paths[x]
-
-        models_dir.__truediv__.side_effect = models_dir_get
-        project.package_dir.__truediv__.return_value = models_dir
-        model_render_1 = mocker.MagicMock()
-        model_render_2 = mocker.MagicMock()
-        model_template = mocker.MagicMock()
-        model_template.render.side_effect = [model_render_1, model_render_2]
-        enum_render_1 = mocker.MagicMock()
-        enum_render_2 = mocker.MagicMock()
-        enum_template = mocker.MagicMock()
-        enum_renders = {
-            enum_1: enum_render_1,
-            enum_2: enum_render_2,
-        }
-        enum_template.render.side_effect = lambda enum: enum_renders[enum]
-        models_init_template = mocker.MagicMock()
-        types_template = mocker.MagicMock()
-        templates = {
-            "types.py": types_template,
-            "model.pyi": model_template,
-            "enum.pyi": enum_template,
-            "models_init.pyi": models_init_template,
-        }
-        project.env = mocker.MagicMock()
-        project.env.get_template.side_effect = lambda x: templates[x]
-        imports = [
-            "import_schema_1",
-            "import_schema_2",
-            "import_enum_1",
-            "import_enum_2",
-        ]
-        import_string_from_reference = mocker.patch(
-            "openapi_python_client.import_string_from_reference", side_effect=imports
-        )
-
-        project._build_models()
-
-        project.package_dir.__truediv__.assert_called_once_with("models")
-        models_dir.mkdir.assert_called_once()
-        models_dir.__truediv__.assert_has_calls([mocker.call(key) for key in module_paths])
-        project.env.get_template.assert_has_calls([mocker.call(key) for key in templates])
-        model_template.render.assert_has_calls([mocker.call(model=model_1), mocker.call(model=model_2)])
-        model_1_module_path.write_text.assert_called_once_with(model_render_1)
-        model_2_module_path.write_text.assert_called_once_with(model_render_2)
-        import_string_from_reference.assert_has_calls(
-            [
-                mocker.call(model_1.reference),
-                mocker.call(model_2.reference),
-                mocker.call(enum_1.reference),
-                mocker.call(enum_2.reference),
-            ]
-        )
-        models_init_template.render.assert_called_once_with(imports=imports)
-        types_template.render.assert_called_once()
-        enum_1_module_path.write_text.assert_called_once_with(enum_render_1)
-        enum_2_module_path.write_text.assert_called_once_with(enum_render_2)
-
 
 def test__reformat(mocker):
     import subprocess
@@ -494,7 +382,11 @@ def test__reformat(mocker):
     sub_run.assert_has_calls(
         [
             mocker.call(
-                "isort .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                "isort .",
+                cwd=project.project_dir,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             ),
             mocker.call("black .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE),
         ]

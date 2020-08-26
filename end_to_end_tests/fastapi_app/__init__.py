@@ -9,7 +9,10 @@ from fastapi import APIRouter, Body, FastAPI, File, Header, Query, UploadFile
 from pydantic import BaseModel
 from starlette.responses import FileResponse
 
-app = FastAPI(title="My Test API", description="An API for testing openapi-python-client",)
+app = FastAPI(
+    title="My Test API",
+    description="An API for testing openapi-python-client",
+)
 
 
 @app.get("/ping", response_model=bool)
@@ -51,7 +54,8 @@ class AModel(BaseModel):
 
 @test_router.get("/", response_model=List[AModel], operation_id="getUserList")
 def get_list(
-    an_enum_value: List[AnEnum] = Query(...), some_date: Union[date, datetime] = Query(...),
+    an_enum_value: List[AnEnum] = Query(...),
+    some_date: Union[date, datetime] = Query(...),
 ):
     """ Get a list of things """
     return

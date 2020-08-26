@@ -155,12 +155,12 @@ class TestFileProperty:
         mocker.patch("openapi_python_client.utils.snake_case")
         prefix = "blah"
         p = FileProperty(name=name, required=True, default=None, nullable=False)
-        assert p.get_imports(prefix=prefix) == {f"from {prefix}.types import File", "from dataclasses import astuple"}
+        assert p.get_imports(prefix=prefix) == {"from ..types import File", "from dataclasses import astuple"}
 
         p.required = False
         assert p.get_imports(prefix=prefix) == {
             "from typing import Optional",
-            f"from {prefix}.types import File",
+            "from ..types import File",
             "from dataclasses import astuple",
         }
 
@@ -609,7 +609,9 @@ class TestPropertyFromData:
         data.title = mocker.MagicMock()
 
         property_from_data(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         EnumProperty.assert_called_once_with(
             name=name,
@@ -681,14 +683,19 @@ class TestPropertyFromData:
         data.nullable = mocker.MagicMock()
 
         property_from_data(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         clazz.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
     def test_property_from_data_array(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema(type="array", items={"type": "number", "default": "0.0"},)
+        data = oai.Schema(
+            type="array",
+            items={"type": "number", "default": "0.0"},
+        )
         ListProperty = mocker.patch(f"{MODULE_NAME}.ListProperty")
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
@@ -717,7 +724,10 @@ class TestPropertyFromData:
     def test_property_from_data_array_invalid_items(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema(type="array", items={},)
+        data = oai.Schema(
+            type="array",
+            items={},
+        )
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
         from openapi_python_client.parser.properties import property_from_data
@@ -729,7 +739,12 @@ class TestPropertyFromData:
     def test_property_from_data_union(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema(anyOf=[{"type": "number", "default": "0.0"}], oneOf=[{"type": "integer", "default": "0"},])
+        data = oai.Schema(
+            anyOf=[{"type": "number", "default": "0.0"}],
+            oneOf=[
+                {"type": "integer", "default": "0"},
+            ],
+        )
         UnionProperty = mocker.patch(f"{MODULE_NAME}.UnionProperty")
         FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
         IntProperty = mocker.patch(f"{MODULE_NAME}.IntProperty")
@@ -817,7 +832,9 @@ class TestStringBasedProperty:
         data.pattern = mocker.MagicMock()
 
         _string_based_property(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         StringProperty.assert_called_once_with(
             name=name, required=required, pattern=data.pattern, default=data.default, nullable=data.nullable
@@ -841,7 +858,9 @@ class TestStringBasedProperty:
         data.default = mocker.MagicMock()
 
         _string_based_property(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         DateTimeProperty.assert_called_once_with(
             name=name, required=required, default=data.default, nullable=data.nullable
@@ -864,7 +883,9 @@ class TestStringBasedProperty:
         data.default = mocker.MagicMock()
 
         _string_based_property(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         DateProperty.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
@@ -885,7 +906,9 @@ class TestStringBasedProperty:
         data.default = mocker.MagicMock()
 
         _string_based_property(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         FileProperty.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
@@ -911,7 +934,9 @@ class TestStringBasedProperty:
         data.pattern = mocker.MagicMock()
 
         _string_based_property(
-            name=name, required=required, data=data,
+            name=name,
+            required=required,
+            data=data,
         )
         StringProperty.assert_called_once_with(
             name=name, required=required, pattern=data.pattern, default=data.default, nullable=data.nullable

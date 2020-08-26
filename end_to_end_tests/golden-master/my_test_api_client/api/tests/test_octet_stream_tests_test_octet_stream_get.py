@@ -4,10 +4,13 @@ from typing import Any, Dict, List, Optional, Union, cast
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...errors import ApiResponseError
+from ...types import Response
 
 
-def _get_kwargs(*, client: Client,) -> Dict[str, Any]:
+def _get_kwargs(
+    *,
+    client: Client,
+) -> Dict[str, Any]:
     url = "{}/tests/test_octet_stream".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
@@ -18,31 +21,69 @@ def _get_kwargs(*, client: Client,) -> Dict[str, Any]:
     }
 
 
-def _parse_response(*, response: httpx.Response) -> bytes:
-
+def _parse_response(*, response: httpx.Response) -> Optional[bytes]:
     if response.status_code == 200:
         return bytes(response.content)
-    else:
-        raise ApiResponseError(response=response)
+    return None
 
 
-def sync(*, client: Client,) -> bytes:
+def _build_response(*, response: httpx.Response) -> Response[bytes]:
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(response=response),
+    )
 
+
+def sync_detailed(
+    *,
+    client: Client,
+) -> Response[bytes]:
+    kwargs = _get_kwargs(
+        client=client,
+    )
+
+    response = httpx.get(
+        **kwargs,
+    )
+
+    return _build_response(response=response)
+
+
+def sync(
+    *,
+    client: Client,
+) -> Optional[bytes]:
     """  """
 
-    kwargs = _get_kwargs(client=client,)
-
-    response = httpx.get(**kwargs,)
-
-    return _parse_response(response=response)
+    return sync_detailed(
+        client=client,
+    ).parsed
 
 
-async def asyncio(*, client: Client,) -> bytes:
-
-    """  """
-    kwargs = _get_kwargs(client=client,)
+async def asyncio_detailed(
+    *,
+    client: Client,
+) -> Response[bytes]:
+    kwargs = _get_kwargs(
+        client=client,
+    )
 
     async with httpx.AsyncClient() as _client:
         response = await _client.get(**kwargs)
 
-    return _parse_response(response=response)
+    return _build_response(response=response)
+
+
+async def asyncio(
+    *,
+    client: Client,
+) -> Optional[bytes]:
+    """  """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+        )
+    ).parsed
