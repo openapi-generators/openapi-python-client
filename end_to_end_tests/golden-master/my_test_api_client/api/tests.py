@@ -50,6 +50,66 @@ def get_user_list(
         raise ApiResponseError(response=response)
 
 
+def get_basic_list_of_strings(*, client: Client,) -> List[str]:
+
+    """ Get a list of strings  """
+    url = "{}/tests/basic_lists/strings".format(client.base_url)
+
+    headers: Dict[str, Any] = client.get_headers()
+
+    response = httpx.get(url=url, headers=headers,)
+
+    if response.status_code == 200:
+        return [str(item) for item in cast(List[str], response.json())]
+    else:
+        raise ApiResponseError(response=response)
+
+
+def get_basic_list_of_integers(*, client: Client,) -> List[int]:
+
+    """ Get a list of integers  """
+    url = "{}/tests/basic_lists/integers".format(client.base_url)
+
+    headers: Dict[str, Any] = client.get_headers()
+
+    response = httpx.get(url=url, headers=headers,)
+
+    if response.status_code == 200:
+        return [int(item) for item in cast(List[int], response.json())]
+    else:
+        raise ApiResponseError(response=response)
+
+
+def get_basic_list_of_floats(*, client: Client,) -> List[float]:
+
+    """ Get a list of floats  """
+    url = "{}/tests/basic_lists/floats".format(client.base_url)
+
+    headers: Dict[str, Any] = client.get_headers()
+
+    response = httpx.get(url=url, headers=headers,)
+
+    if response.status_code == 200:
+        return [float(item) for item in cast(List[float], response.json())]
+    else:
+        raise ApiResponseError(response=response)
+
+
+def get_basic_list_of_booleans(*, client: Client,) -> List[bool]:
+
+    """ Get a list of booleans  """
+    url = "{}/tests/basic_lists/booleans".format(client.base_url)
+
+    headers: Dict[str, Any] = client.get_headers()
+
+    response = httpx.get(url=url, headers=headers,)
+
+    if response.status_code == 200:
+        return [bool(item) for item in cast(List[bool], response.json())]
+    else:
+        raise ApiResponseError(response=response)
+
+
 def upload_file_tests_upload_post(
     *, client: Client, multipart_data: BodyUploadFileTestsUploadPost, keep_alive: Optional[bool] = None,
 ) -> Union[
