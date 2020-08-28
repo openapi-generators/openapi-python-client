@@ -20,6 +20,8 @@ def _get_kwargs(
     return {
         "url": url,
         "headers": headers,
+        "cookies": client.get_cookies(),
+        "timeout": client.get_timeout(),
         "data": asdict(form_data),
         "files": multipart_data.to_dict(),
         "json": json_json_body,

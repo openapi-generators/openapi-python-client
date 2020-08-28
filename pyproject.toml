@@ -31,6 +31,7 @@ isort = "^5.0.5"
 pyyaml = "^5.3.1"
 importlib_metadata = {version = "^1.6.0", python = "==3.7"}
 pydantic = "^1.6.1"
+attrs = "^20.1.0"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"

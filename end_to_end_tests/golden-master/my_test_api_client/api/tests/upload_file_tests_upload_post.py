@@ -18,12 +18,15 @@ def _get_kwargs(
     url = "{}/tests/upload".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+
     if keep_alive is not None:
         headers["keep-alive"] = keep_alive
 
     return {
         "url": url,
         "headers": headers,
+        "cookies": client.get_cookies(),
+        "timeout": client.get_timeout(),
         "files": multipart_data.to_dict(),
     }
 

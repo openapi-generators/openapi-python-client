@@ -23,6 +23,7 @@ def _get_kwargs(
     )
 
     headers: Dict[str, Any] = client.get_headers()
+
     {{ header_params(endpoint) | indent(4) }}
 
     {{ query_params(endpoint) | indent(4) }}
@@ -32,6 +33,8 @@ def _get_kwargs(
     return {
         "url": url,
         "headers": headers,
+        "cookies": client.get_cookies(),
+        "timeout": client.get_timeout(),
         {% if endpoint.form_body_reference %}
         "data": asdict(form_data),
         {% endif %}

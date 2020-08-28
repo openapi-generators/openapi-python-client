@@ -75,6 +75,8 @@ def _get_kwargs(
     return {
         "url": url,
         "headers": headers,
+        "cookies": client.get_cookies(),
+        "timeout": client.get_timeout(),
         "json": json_json_body,
         "params": params,
     }

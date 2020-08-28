@@ -16,12 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the `sync()` and `asyncio()` functions for a path operation will return `None`. This means all return types are now 
   `Optional`, so mypy will require you to handle potential errors (or explicitly ignore them).
 - Moved `models.types` generated module up a level, so just `types`.
+- `Client` and `AuthenticatedClient` are now declared using the `attrs` package instead of builtin `dataclass`
 
 ### Additions
 - Every generated API module will have a `sync_detailed()` and `asyncio_detailed()` function which work like their 
   non-detailed counterparts, but return a `types.Response[T]` instead of an `Optional[T]` (where T is the parsed body type).
   `types.Response` contains `status_code`, `content` (bytes of returned content), `headers`, and `parsed` (the 
   parsed return type you would get from the non-detailed function). (#115)
+- It's now possible to include custom headers and cookies in requests, as well as set a custom timeout. This can be done 
+    either by directly setting those parameters on a `Client` (e.g. `my_client.headers = {"Header": "Value"}`) or using 
+    a fluid api (e.g. `my_endpoint.sync(my_client.with_cookies({"MyCookie": "cookie"}).with_timeout(10.0))`).
 
 
 ## 0.5.4 - Unreleased
