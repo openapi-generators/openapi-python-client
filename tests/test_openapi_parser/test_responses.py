@@ -54,6 +54,46 @@ class TestRefResponse:
         assert r.constructor() == "SuperCoolClass.from_dict(cast(Dict[str, Any], response.json()))"
 
 
+class TestListBasicResponse:
+    def test_return_string(self):
+        from openapi_python_client.parser.responses import ListBasicResponse
+
+        r = ListBasicResponse(200, "string")
+
+        assert r.return_string() == "List[str]"
+
+        r = ListBasicResponse(200, "number")
+
+        assert r.return_string() == "List[float]"
+
+        r = ListBasicResponse(200, "integer")
+
+        assert r.return_string() == "List[int]"
+
+        r = ListBasicResponse(200, "boolean")
+
+        assert r.return_string() == "List[bool]"
+
+    def test_constructor(self):
+        from openapi_python_client.parser.responses import ListBasicResponse
+
+        r = ListBasicResponse(200, "string")
+
+        assert r.constructor() == "[str(item) for item in cast(List[str], response.json())]"
+
+        r = ListBasicResponse(200, "number")
+
+        assert r.constructor() == "[float(item) for item in cast(List[float], response.json())]"
+
+        r = ListBasicResponse(200, "integer")
+
+        assert r.constructor() == "[int(item) for item in cast(List[int], response.json())]"
+
+        r = ListBasicResponse(200, "boolean")
+
+        assert r.constructor() == "[bool(item) for item in cast(List[bool], response.json())]"
+
+
 class TestBasicResponse:
     def test_return_string(self):
         from openapi_python_client.parser.responses import BasicResponse
@@ -192,6 +232,23 @@ class TestResponseFromData:
         from_ref.assert_called_once_with(ref)
         ListRefResponse.assert_called_once_with(status_code=status_code, reference=from_ref())
         assert response == ListRefResponse()
+
+    def test_response_from_basic_array(self, mocker):
+        status_code = mocker.MagicMock(autospec=int)
+        data = oai.Response.construct(
+            content={
+                "application/json": oai.MediaType.construct(
+                    media_type_schema=oai.Schema.construct(type="array", items=oai.Schema.construct(type="string"))
+                )
+            }
+        )
+        ListBasicResponse = mocker.patch(f"{MODULE_NAME}.ListBasicResponse")
+        from openapi_python_client.parser.responses import response_from_data
+
+        response = response_from_data(status_code=status_code, data=data)
+
+        ListBasicResponse.assert_called_once_with(status_code=status_code, openapi_type="string")
+        assert response == ListBasicResponse.return_value
 
     def test_response_from_data_basic(self, mocker):
         status_code = mocker.MagicMock(autospec=int)

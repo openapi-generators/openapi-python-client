@@ -57,6 +57,30 @@ def get_list(
     return
 
 
+@test_router.get("/basic_lists/strings", response_model=List[str], operation_id="getBasicListOfStrings")
+def get_basic_list_of_strings():
+    """ Get a list of strings """
+    return
+
+
+@test_router.get("/basic_lists/integers", response_model=List[int], operation_id="getBasicListOfIntegers")
+def get_basic_list_of_integers():
+    """ Get a list of integers """
+    return
+
+
+@test_router.get("/basic_lists/floats", response_model=List[float], operation_id="getBasicListOfFloats")
+def get_basic_list_of_floats():
+    """ Get a list of floats """
+    return
+
+
+@test_router.get("/basic_lists/booleans", response_model=List[bool], operation_id="getBasicListOfBooleans")
+def get_basic_list_of_booleans():
+    """ Get a list of booleans """
+    return
+
+
 @test_router.post("/upload")
 async def upload_file(some_file: UploadFile = File(...), keep_alive: bool = Header(None)):
     """ Upload a file """
