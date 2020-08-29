@@ -5,12 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## 0.5.4 - Unreleased
+## 0.5.4 - 2020-08-29
 ### Additions
-- Added support for octet-stream content type (#116)
+- Support for octet-stream content type (#116)
 - Support for [nullable](https://swagger.io/docs/specification/data-models/data-types/#null) (#99)
-- Union properties defined using oneOf (#98)
-- Added support for lists of strings, integers, floats and booleans (#165). Thanks @Maistho!
+- Union properties can be defined using oneOf (#98)
+- Support for lists of strings, integers, floats and booleans as responses (#165). Thanks @Maistho!
 
 
 ## 0.5.3 - 2020-08-13
