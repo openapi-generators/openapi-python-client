@@ -1,4 +1,4 @@
-""" Regenerate golden-master """
+""" Regenerate golden-record """
 import shutil
 from pathlib import Path
 
@@ -9,8 +9,8 @@ from openapi_python_client.cli import app
 if __name__ == "__main__":
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "fastapi_app" / "openapi.json"
-    gm_path = Path(__file__).parent / "golden-master"
-    shutil.rmtree(gm_path, ignore_errors=True)
+    gr_path = Path(__file__).parent / "golden-record"
+    shutil.rmtree(gr_path, ignore_errors=True)
     output_path = Path.cwd() / "my-test-api-client"
     shutil.rmtree(output_path, ignore_errors=True)
     config_path = Path(__file__).parent / "config.yml"
@@ -20,4 +20,4 @@ if __name__ == "__main__":
         print(result.stdout)
     if result.exception:
         raise result.exception
-    output_path.rename(gm_path)
+    output_path.rename(gr_path)

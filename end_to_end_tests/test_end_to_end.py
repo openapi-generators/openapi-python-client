@@ -31,7 +31,7 @@ def test_end_to_end():
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "fastapi_app" / "openapi.json"
     config_path = Path(__file__).parent / "config.yml"
-    gm_path = Path(__file__).parent / "golden-master"
+    gr_path = Path(__file__).parent / "golden-record"
     output_path = Path.cwd() / "my-test-api-client"
     shutil.rmtree(output_path, ignore_errors=True)
 
@@ -39,7 +39,7 @@ def test_end_to_end():
 
     if result.exit_code != 0:
         raise result.exception
-    _compare_directories(gm_path, output_path)
+    _compare_directories(gr_path, output_path)
 
     import mypy.api
 

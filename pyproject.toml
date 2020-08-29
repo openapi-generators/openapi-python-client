@@ -57,17 +57,17 @@ isort .\
  && pytest --cov openapi_python_client tests\
 """
 openapi = "python -m end_to_end_tests.fastapi_app"
-gm = "python -m end_to_end_tests.regen_golden_master"
+gr = "python -m end_to_end_tests.regen_golden_record"
 e2e = "pytest openapi_python_client end_to_end_tests"
-oge = """
+ogre = """
 task openapi\
-&& task gm\
+&& task gr\
 && task e2e\
 """
 
 [tool.black]
 line-length = 120
-target_version = ['py37']
+target_version = ['py38']
 exclude = '''
 (
   /(
@@ -82,8 +82,7 @@ exclude = '''
 
 [tool.isort]
 line_length = 120
-multi_line_output = 3
-include_trailing_comma = true
+profile = "black"
 skip = [".venv", "tests/test_templates"]
 
 [tool.coverage.run]
