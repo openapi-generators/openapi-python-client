@@ -94,6 +94,110 @@
                 }
             }
         },
+        "/tests/basic_lists/strings": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Get Basic List Of Strings",
+                "description": "Get a list of strings ",
+                "operationId": "getBasicListOfStrings",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Basic List Of Strings Tests Basic Lists Strings Get",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/basic_lists/integers": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Get Basic List Of Integers",
+                "description": "Get a list of integers ",
+                "operationId": "getBasicListOfIntegers",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Basic List Of Integers Tests Basic Lists Integers Get",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/basic_lists/floats": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Get Basic List Of Floats",
+                "description": "Get a list of floats ",
+                "operationId": "getBasicListOfFloats",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Basic List Of Floats Tests Basic Lists Floats Get",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/basic_lists/booleans": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Get Basic List Of Booleans",
+                "description": "Get a list of booleans ",
+                "operationId": "getBasicListOfBooleans",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Basic List Of Booleans Tests Basic Lists Booleans Get",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/tests/upload": {
             "post": {
                 "tags": [

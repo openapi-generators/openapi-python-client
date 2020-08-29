@@ -52,6 +52,25 @@ class RefResponse(Response):
 
 
 @dataclass
+class ListBasicResponse(Response):
+    """ Response is a list of some basic type """
+
+    openapi_type: InitVar[str]
+    python_type: str = field(init=False)
+
+    def __post_init__(self, openapi_type: str) -> None:
+        self.python_type = openapi_types_to_python_type_strings[openapi_type]
+
+    def return_string(self) -> str:
+        """ How this Response should be represented as a return type """
+        return f"List[{self.python_type}]"
+
+    def constructor(self) -> str:
+        """ How the return value of this response should be constructed """
+        return f"[{self.python_type}(item) for item in cast(List[{self.python_type}], response.json())]"
+
+
+@dataclass
 class BasicResponse(Response):
     """ Response is a basic type """
 
@@ -124,6 +143,12 @@ def response_from_data(*, status_code: int, data: Union[oai.Response, oai.Refere
             status_code=status_code,
             reference=Reference.from_ref(schema_data.items.ref),
         )
+    if (
+        response_type == "array"
+        and isinstance(schema_data.items, oai.Schema)
+        and schema_data.items.type in openapi_types_to_python_type_strings
+    ):
+        return ListBasicResponse(status_code=status_code, openapi_type=schema_data.items.type)
     if response_type in openapi_types_to_python_type_strings:
         return BasicResponse(status_code=status_code, openapi_type=response_type)
     return ParseError(data=data, detail=f"Unrecognized type {schema_data.type}")
