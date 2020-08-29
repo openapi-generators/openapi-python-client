@@ -373,10 +373,19 @@ class TestEndpoint:
 
         response = Endpoint._add_responses(endpoint, data)
 
-        response_from_data.assert_called_once_with(status_code=200, data=response_1_data)
-        assert response == ParseError(
-            detail=f"cannot parse response of endpoint {endpoint.name}", data=parse_error.data
+        response_from_data.assert_has_calls(
+            [mocker.call(status_code=200, data=response_1_data), mocker.call(status_code=404, data=response_2_data)]
         )
+        assert response.errors == [
+            ParseError(
+                detail=f"Cannot parse response for status code 200, response will be ommitted from generated client",
+                data=parse_error.data,
+            ),
+            ParseError(
+                detail=f"Cannot parse response for status code 404, response will be ommitted from generated client",
+                data=parse_error.data,
+            ),
+        ]
 
     def test__add_responses(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Reference, RefResponse
@@ -691,7 +700,9 @@ class TestEndpointCollection:
             "path_2": oai.PathItem.construct(get=path_2_get),
         }
         endpoint_from_data = mocker.patch.object(
-            Endpoint, "from_data", side_effect=[ParseError(data="1"), ParseError(data="2"), ParseError(data="3")]
+            Endpoint,
+            "from_data",
+            side_effect=[ParseError(data="1"), ParseError(data="2"), mocker.MagicMock(errors=[ParseError(data="3")])],
         )
 
         result = EndpointCollection.from_data(data=data)

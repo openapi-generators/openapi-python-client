@@ -24,7 +24,7 @@ def _get_kwargs(
     union_prop: Optional[Union[Optional[float], Optional[str]]] = "not a float",
     enum_prop: Optional[AnEnum] = None,
 ) -> Dict[str, Any]:
-    url = "{}/tests/test_defaults".format(client.base_url)
+    url = "{}/tests/defaults".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
 

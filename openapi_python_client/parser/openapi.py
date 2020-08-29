@@ -57,7 +57,9 @@ class EndpointCollection:
                     )
                     collection.parse_errors.append(endpoint)
                     continue
-
+                for error in endpoint.errors:
+                    error.header = f"WARNING parsing {method.upper()} {path} within {tag}."
+                    collection.parse_errors.append(error)
                 collection.endpoints.append(endpoint)
 
         return endpoints_by_tag
@@ -83,6 +85,7 @@ class Endpoint:
     form_body_reference: Optional[Reference] = None
     json_body: Optional[Property] = None
     multipart_body_reference: Optional[Reference] = None
+    errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
     def parse_request_form_body(body: oai.RequestBody) -> Optional[Reference]:
@@ -139,12 +142,21 @@ class Endpoint:
         return endpoint
 
     @staticmethod
-    def _add_responses(endpoint: Endpoint, data: oai.Responses) -> Union[Endpoint, ParseError]:
+    def _add_responses(endpoint: Endpoint, data: oai.Responses) -> Endpoint:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
             response = response_from_data(status_code=int(code), data=response_data)
             if isinstance(response, ParseError):
-                return ParseError(detail=f"cannot parse response of endpoint {endpoint.name}", data=response.data)
+                endpoint.errors.append(
+                    ParseError(
+                        detail=(
+                            f"Cannot parse response for status code {code}, "
+                            f"response will be ommitted from generated client"
+                        ),
+                        data=response.data,
+                    )
+                )
+                continue
             if isinstance(response, (RefResponse, ListRefResponse)):
                 endpoint.relative_imports.add(import_string_from_reference(response.reference, prefix="...models"))
             endpoint.responses.append(response)
@@ -193,8 +205,6 @@ class Endpoint:
         if isinstance(result, ParseError):
             return result
         result = Endpoint._add_responses(result, data.responses)
-        if isinstance(result, ParseError):
-            return result
         result = Endpoint._add_body(result, data)
 
         return result

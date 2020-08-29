@@ -30,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - It's now possible to include custom headers and cookies in requests, as well as set a custom timeout. This can be done
   either by directly setting those parameters on a `Client` (e.g. `my_client.headers = {"Header": "Value"}`) or using
   a fluid api (e.g. `my_endpoint.sync(my_client.with_cookies({"MyCookie": "cookie"}).with_timeout(10.0))`).
+- Unsupported content types or no responses at all will no longer result in an endpoint being completely skipped. Instead, 
+  only the `detailed` versions of the endpoint will be generated, where the resulting `Response.parsed` is always `None`.
+  (#141)
+  
+### Changes
+
+- The format of any errors/warnings has been spaced out a bit.
 
 ## 0.5.4 - 2020-08-29
 

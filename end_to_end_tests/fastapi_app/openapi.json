@@ -289,13 +289,13 @@
                 }
             }
         },
-        "/tests/test_defaults": {
+        "/tests/defaults": {
             "post": {
                 "tags": [
                     "tests"
                 ],
-                "summary": "Test Defaults",
-                "operationId": "test_defaults_tests_test_defaults_post",
+                "summary": "Defaults",
+                "operationId": "defaults_tests_defaults_post",
                 "parameters": [
                     {
                         "required": false,
@@ -439,18 +439,62 @@
                 }
             }
         },
-        "/tests/test_octet_stream": {
+        "/tests/octet_stream": {
             "get": {
                 "tags": [
                     "tests"
                 ],
-                "summary": "Test Octet Stream",
-                "operationId": "test_octet_stream_tests_test_octet_stream_get",
+                "summary": "Octet Stream",
+                "operationId": "octet_stream_tests_octet_stream_get",
                 "responses": {
                     "200": {
                         "description": "Successful Response",
                         "content": {
                             "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/no_response": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "No Response",
+                "operationId": "no_response_tests_no_response_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/unsupported_content": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Unsupported Content",
+                "operationId": "unsupported_content_tests_unsupported_content_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            },
+                            "not_real/content-type": {
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"

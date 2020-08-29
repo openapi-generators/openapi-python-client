@@ -100,14 +100,14 @@ class TestGenerate:
 
         assert result.exit_code == 1
         assert result.output == (
-            "Error(s) encountered while generating, client was not created\n"
-            "Unable to generate the client\n"
-            "this is a message\n\n"
+            "Error(s) encountered while generating, client was not created\n\n"
+            "Unable to generate the client\n\n"
+            "this is a message\n\n\n"
             "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
             "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"
         )
 
-    def test_generate_handle_multiple_parse_error(self, _create_new_client):
+    def test_generate_handle_multiple_warnings(self, _create_new_client):
         error_1 = ParseError(data={"test": "data"}, detail="this is a message")
         error_2 = ParseError(data={"other": "data"}, detail="this is another message", header="Custom Header")
         _create_new_client.return_value = [error_1, error_2]
@@ -116,14 +116,14 @@ class TestGenerate:
 
         result = runner.invoke(app, ["generate", f"--path={path}"])
 
-        assert result.exit_code == 1
+        assert result.exit_code == 0
         assert result.output == (
-            "Warning(s) encountered while generating. Client was generated, but some pieces may be missing\n"
-            "Unable to parse this part of your OpenAPI document: \n"
-            "this is a message\n"
+            "Warning(s) encountered while generating. Client was generated, but some pieces may be missing\n\n"
+            "Unable to parse this part of your OpenAPI document: \n\n"
+            "this is a message\n\n"
             "{'test': 'data'}\n\n"
-            "Custom Header\n"
-            "this is another message\n"
+            "Custom Header\n\n"
+            "this is another message\n\n"
             "{'other': 'data'}\n\n"
             "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
             "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"

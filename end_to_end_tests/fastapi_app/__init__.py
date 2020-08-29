@@ -98,8 +98,8 @@ def json_body(body: AModel):
     return
 
 
-@test_router.post("/test_defaults")
-def test_defaults(
+@test_router.post("/defaults")
+def defaults(
     string_prop: str = Query(default="the default string"),
     datetime_prop: datetime = Query(default=datetime(1010, 10, 10)),
     date_prop: date = Query(default=date(1010, 10, 10)),
@@ -115,12 +115,25 @@ def test_defaults(
 
 
 @test_router.get(
-    "/test_octet_stream",
+    "/octet_stream",
     response_class=FileResponse,
     responses={200: {"content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}}}},
 )
-def test_octet_stream():
+def octet_stream():
     return
+
+
+@test_router.get("/no_response")
+def no_response():
+    pass
+
+
+@test_router.get(
+    "/unsupported_content",
+    responses={200: {"content": {"not_real/content-type": {"schema": {"type": "string", "format": "binary"}}}}},
+)
+def unsupported_content():
+    pass
 
 
 app.include_router(test_router, prefix="/tests", tags=["tests"])
