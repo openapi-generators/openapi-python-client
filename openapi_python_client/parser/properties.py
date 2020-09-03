@@ -63,7 +63,7 @@ class Property:
         Args:
             prefix: A prefix to put before any relative (local) module names.
         """
-        if not self.required:
+        if self.nullable or not self.required:
             return {"from typing import Optional"}
         return set()
 
