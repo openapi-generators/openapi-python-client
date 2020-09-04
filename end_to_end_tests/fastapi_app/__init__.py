@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from fastapi import APIRouter, Body, FastAPI, File, Header, Query, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette.responses import FileResponse
 
 app = FastAPI(
@@ -47,7 +47,7 @@ class AModel(BaseModel):
 
     an_enum_value: AnEnum
     nested_list_of_enums: List[List[DifferentEnum]] = []
-    some_dict: Dict[str, str]
+    some_dict: Dict[str, str] = Field(..., nullable=True)
     aCamelDateTime: Union[datetime, date]
     a_date: date
 

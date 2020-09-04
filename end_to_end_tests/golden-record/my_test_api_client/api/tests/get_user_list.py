@@ -47,9 +47,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(
-    *, response: httpx.Response
-) -> Optional[Union[List[AModel], HTTPValidationError,]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[List[AModel], HTTPValidationError]]:
     if response.status_code == 200:
         return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
     if response.status_code == 422:
@@ -57,9 +55,7 @@ def _parse_response(
     return None
 
 
-def _build_response(
-    *, response: httpx.Response
-) -> Response[Union[List[AModel], HTTPValidationError,]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[List[AModel], HTTPValidationError]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -73,7 +69,7 @@ def sync_detailed(
     client: Client,
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Response[Union[List[AModel], HTTPValidationError,]]:
+) -> Response[Union[List[AModel], HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
@@ -92,7 +88,7 @@ def sync(
     client: Client,
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Optional[Union[List[AModel], HTTPValidationError,]]:
+) -> Optional[Union[List[AModel], HTTPValidationError]]:
     """ Get a list of things  """
 
     return sync_detailed(
@@ -107,7 +103,7 @@ async def asyncio_detailed(
     client: Client,
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Response[Union[List[AModel], HTTPValidationError,]]:
+) -> Response[Union[List[AModel], HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
@@ -125,7 +121,7 @@ async def asyncio(
     client: Client,
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Optional[Union[List[AModel], HTTPValidationError,]]:
+) -> Optional[Union[List[AModel], HTTPValidationError]]:
     """ Get a list of things  """
 
     return (

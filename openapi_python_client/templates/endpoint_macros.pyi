@@ -63,7 +63,7 @@ None
 {%- else %}
 Union[
     {% for response in endpoint.responses %}
-    {{ response.return_string() }},
+    {{ response.return_string() }}{{ "," if not loop.last }}
     {% endfor %}
 ]
 {%- endif %}
