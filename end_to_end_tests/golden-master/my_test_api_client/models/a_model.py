@@ -13,7 +13,7 @@ class AModel:
     """ A Model for testing all the ways custom objects can be used  """
 
     an_enum_value: AnEnum
-    some_dict: Dict[Any, Any]
+    some_dict: Optional[Dict[Any, Any]]
     a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
     nested_list_of_enums: Optional[List[List[DifferentEnum]]] = field(

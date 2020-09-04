@@ -493,7 +493,8 @@
                         "type": "object",
                         "additionalProperties": {
                             "type": "string"
-                        }
+                        },
+                        "nullable": true
                     },
                     "aCamelDateTime": {
                         "title": "Acameldatetime",

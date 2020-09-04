@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.5.5 - Unreleased
 ### Fixes
 - Improved trailing comma handling in endpoint generation (#178 & #179). Thanks @dtkav!
+- `Optional` is now properly imported for `nullable` fields (#177 & #180). Thanks @dtkav!
 
 
 ## 0.5.4 - 2020-08-29
