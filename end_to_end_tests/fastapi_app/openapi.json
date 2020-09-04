@@ -535,6 +535,7 @@
                     "some_dict": {
                         "title": "Some Dict",
                         "type": "object",
+                        "nullable": true,
                         "additionalProperties": {
                             "type": "string"
                         }
