@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
@@ -33,11 +31,11 @@ class EndpointCollection:
     """ A bunch of endpoints grouped under a tag that will become a module """
 
     tag: str
-    endpoints: List[Endpoint] = field(default_factory=list)
+    endpoints: List["Endpoint"] = field(default_factory=list)
     parse_errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
-    def from_data(*, data: Dict[str, oai.PathItem]) -> Dict[str, EndpointCollection]:
+    def from_data(*, data: Dict[str, oai.PathItem]) -> Dict[str, "EndpointCollection"]:
         """ Parse the openapi paths data to get EndpointCollections by tag """
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
 
@@ -115,7 +113,7 @@ class Endpoint:
         return None
 
     @staticmethod
-    def _add_body(endpoint: Endpoint, data: oai.Operation) -> Union[ParseError, Endpoint]:
+    def _add_body(endpoint: "Endpoint", data: oai.Operation) -> Union[ParseError, "Endpoint"]:
         """ Adds form or JSON body to Endpoint if included in data """
         endpoint = deepcopy(endpoint)
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
@@ -138,11 +136,11 @@ class Endpoint:
             )
         if json_body is not None:
             endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="...models"))
+            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..."))
         return endpoint
 
     @staticmethod
-    def _add_responses(endpoint: Endpoint, data: oai.Responses) -> Endpoint:
+    def _add_responses(endpoint: "Endpoint", data: oai.Responses) -> "Endpoint":
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
             response = response_from_data(status_code=int(code), data=response_data)
@@ -163,7 +161,7 @@ class Endpoint:
         return endpoint
 
     @staticmethod
-    def _add_parameters(endpoint: Endpoint, data: oai.Operation) -> Union[Endpoint, ParseError]:
+    def _add_parameters(endpoint: "Endpoint", data: oai.Operation) -> Union["Endpoint", ParseError]:
         endpoint = deepcopy(endpoint)
         if data.parameters is None:
             return endpoint
@@ -173,7 +171,7 @@ class Endpoint:
             prop = property_from_data(name=param.name, required=param.required, data=param.param_schema)
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data)
-            endpoint.relative_imports.update(prop.get_imports(prefix="...models"))
+            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
             if param.param_in == ParameterLocation.QUERY:
                 endpoint.query_parameters.append(prop)
@@ -186,7 +184,7 @@ class Endpoint:
         return endpoint
 
     @staticmethod
-    def from_data(*, data: oai.Operation, path: str, method: str, tag: str) -> Union[Endpoint, ParseError]:
+    def from_data(*, data: oai.Operation, path: str, method: str, tag: str) -> Union["Endpoint", ParseError]:
         """ Construct an endpoint from the OpenAPI data """
 
         if data.operationId is None:
@@ -225,7 +223,7 @@ class Model:
     relative_imports: Set[str]
 
     @staticmethod
-    def from_data(*, data: oai.Schema, name: str) -> Union[Model, ParseError]:
+    def from_data(*, data: oai.Schema, name: str) -> Union["Model", ParseError]:
         """A single Model from its OAI data
 
         Args:
@@ -249,7 +247,7 @@ class Model:
                 required_properties.append(p)
             else:
                 optional_properties.append(p)
-            relative_imports.update(p.get_imports(prefix=""))
+            relative_imports.update(p.get_imports(prefix=".."))
 
         model = Model(
             reference=ref,
@@ -269,7 +267,7 @@ class Schemas:
     errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
-    def build(*, schemas: Dict[str, Union[oai.Reference, oai.Schema]]) -> Schemas:
+    def build(*, schemas: Dict[str, Union[oai.Reference, oai.Schema]]) -> "Schemas":
         """ Get a list of Schemas from an OpenAPI dict """
         result = Schemas()
         for name, data in schemas.items():
@@ -306,7 +304,7 @@ class GeneratorData:
     enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Dict[str, Any]]) -> Union[GeneratorData, GeneratorError]:
+    def from_dict(d: Dict[str, Dict[str, Any]]) -> Union["GeneratorData", GeneratorError]:
         """ Create an OpenAPI from dict """
         try:
             openapi = oai.OpenAPI.parse_obj(d)

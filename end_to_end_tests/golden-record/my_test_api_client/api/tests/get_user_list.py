@@ -1,8 +1,9 @@
 import datetime
-from dataclasses import asdict
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
+from attr import asdict
+from dateutil.parser import isoparse
 
 from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
@@ -15,7 +16,7 @@ def _get_kwargs(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    some_date: datetime.date,
 ) -> Dict[str, Any]:
     url = "{}/tests/".format(client.base_url)
 
@@ -27,11 +28,7 @@ def _get_kwargs(
 
         json_an_enum_value.append(an_enum_value_item)
 
-    if isinstance(some_date, datetime.date):
-        json_some_date = some_date.isoformat()
-
-    else:
-        json_some_date = some_date.isoformat()
+    json_some_date = some_date.isoformat()
 
     params: Dict[str, Any] = {
         "an_enum_value": json_an_enum_value,
@@ -68,7 +65,7 @@ def sync_detailed(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    some_date: datetime.date,
 ) -> Response[Union[List[AModel], HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -87,7 +84,7 @@ def sync(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    some_date: datetime.date,
 ) -> Optional[Union[List[AModel], HTTPValidationError]]:
     """ Get a list of things  """
 
@@ -102,7 +99,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    some_date: datetime.date,
 ) -> Response[Union[List[AModel], HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -120,7 +117,7 @@ async def asyncio(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    some_date: datetime.date,
 ) -> Optional[Union[List[AModel], HTTPValidationError]]:
     """ Get a list of things  """
 

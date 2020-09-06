@@ -1,7 +1,7 @@
 """ A FastAPI app used to create an OpenAPI document for end-to-end testing """
 import json
 from datetime import date, datetime
-from enum import Enum
+from enum import Enum, IntEnum
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -133,6 +133,16 @@ def no_response():
     responses={200: {"content": {"not_real/content-type": {"schema": {"type": "string", "format": "binary"}}}}},
 )
 def unsupported_content():
+    pass
+
+
+class AnIntEnum(IntEnum):
+    FIRST = 1
+    SECOND = 2
+
+
+@test_router.post("/int_enum")
+def int_enum(int_enum: AnIntEnum):
     pass
 
 

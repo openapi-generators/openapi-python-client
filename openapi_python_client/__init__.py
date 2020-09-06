@@ -1,5 +1,4 @@
 """ Generate modern Python clients from OpenAPI """
-from __future__ import annotations
 
 import shutil
 import subprocess
@@ -18,69 +17,12 @@ from .parser import GeneratorData, import_string_from_reference
 from .parser.errors import GeneratorError
 from .utils import snake_case
 
-if sys.version_info.minor == 7:  # version did not exist in 3.7, need to use a backport
+if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
     from importlib_metadata import version
 else:
     from importlib.metadata import version  # type: ignore
 
-
 __version__ = version(__package__)
-
-
-def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[Project, GeneratorError]:
-    data_dict = _get_document(url=url, path=path)
-    if isinstance(data_dict, GeneratorError):
-        return data_dict
-    openapi = GeneratorData.from_dict(data_dict)
-    if isinstance(openapi, GeneratorError):
-        return openapi
-    return Project(openapi=openapi)
-
-
-def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
-    """
-    Generate the client library
-
-    Returns:
-         A list containing any errors encountered when generating.
-    """
-    project = _get_project_for_url_or_path(url=url, path=path)
-    if isinstance(project, GeneratorError):
-        return [project]
-    return project.build()
-
-
-def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
-    """
-    Update an existing client library
-
-    Returns:
-         A list containing any errors encountered when generating.
-    """
-    project = _get_project_for_url_or_path(url=url, path=path)
-    if isinstance(project, GeneratorError):
-        return [project]
-    return project.update()
-
-
-def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
-    yaml_bytes: bytes
-    if url is not None and path is not None:
-        return GeneratorError(header="Provide URL or Path, not both.")
-    if url is not None:
-        try:
-            response = httpx.get(url)
-            yaml_bytes = response.content
-        except (httpx.HTTPError, httpcore.NetworkError):
-            return GeneratorError(header="Could not get OpenAPI document from provided URL")
-    elif path is not None:
-        yaml_bytes = path.read_bytes()
-    else:
-        return GeneratorError(header="No URL or Path provided")
-    try:
-        return yaml.safe_load(yaml_bytes)
-    except yaml.YAMLError:
-        return GeneratorError(header="Invalid YAML from provided source")
 
 
 class Project:
@@ -205,10 +147,14 @@ class Project:
             imports.append(import_string_from_reference(model.reference))
 
         # Generate enums
-        enum_template = self.env.get_template("enum.pyi")
+        str_enum_template = self.env.get_template("str_enum.pyi")
+        int_enum_template = self.env.get_template("int_enum.pyi")
         for enum in self.openapi.enums.values():
             module_path = models_dir / f"{enum.reference.module_name}.py"
-            module_path.write_text(enum_template.render(enum=enum))
+            if enum.value_type is int:
+                module_path.write_text(int_enum_template.render(enum=enum))
+            else:
+                module_path.write_text(str_enum_template.render(enum=enum))
             imports.append(import_string_from_reference(enum.reference))
 
         models_init_template = self.env.get_template("models_init.pyi")
@@ -236,3 +182,59 @@ class Project:
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{snake_case(endpoint.name)}.py"
                 module_path.write_text(endpoint_template.render(endpoint=endpoint))
+
+
+def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[Project, GeneratorError]:
+    data_dict = _get_document(url=url, path=path)
+    if isinstance(data_dict, GeneratorError):
+        return data_dict
+    openapi = GeneratorData.from_dict(data_dict)
+    if isinstance(openapi, GeneratorError):
+        return openapi
+    return Project(openapi=openapi)
+
+
+def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
+    """
+    Generate the client library
+
+    Returns:
+         A list containing any errors encountered when generating.
+    """
+    project = _get_project_for_url_or_path(url=url, path=path)
+    if isinstance(project, GeneratorError):
+        return [project]
+    return project.build()
+
+
+def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
+    """
+    Update an existing client library
+
+    Returns:
+         A list containing any errors encountered when generating.
+    """
+    project = _get_project_for_url_or_path(url=url, path=path)
+    if isinstance(project, GeneratorError):
+        return [project]
+    return project.update()
+
+
+def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
+    yaml_bytes: bytes
+    if url is not None and path is not None:
+        return GeneratorError(header="Provide URL or Path, not both.")
+    if url is not None:
+        try:
+            response = httpx.get(url)
+            yaml_bytes = response.content
+        except (httpx.HTTPError, httpcore.NetworkError):
+            return GeneratorError(header="Could not get OpenAPI document from provided URL")
+    elif path is not None:
+        yaml_bytes = path.read_bytes()
+    else:
+        return GeneratorError(header="No URL or Path provided")
+    try:
+        return yaml.safe_load(yaml_bytes)
+    except yaml.YAMLError:
+        return GeneratorError(header="Invalid YAML from provided source")

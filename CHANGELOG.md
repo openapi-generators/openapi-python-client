@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the `sync()` and `asyncio()` functions for a path operation will return `None`. This means all return types are now
   `Optional`, so mypy will require you to handle potential errors (or explicitly ignore them).
 - Moved `models.types` generated module up a level, so just `types`.
-- `Client` and `AuthenticatedClient` are now declared using the `attrs` package instead of builtin `dataclass`
+- All generated classes that were `dataclass` now use the `attrs` package instead
 
 ### Additions
 
@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unsupported content types or no responses at all will no longer result in an endpoint being completely skipped. Instead, 
   only the `detailed` versions of the endpoint will be generated, where the resulting `Response.parsed` is always `None`.
   (#141)
+- Support for Python 3.6 (#137 & #154)
+- Support for enums with integer values
   
 ### Changes
 

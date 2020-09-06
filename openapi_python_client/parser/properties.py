@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 from dataclasses import InitVar, dataclass, field
-from datetime import date, datetime
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, Type, TypeVar, Union
+
+from dateutil.parser import isoparse
 
 from .. import schema as oai
 from .. import utils
@@ -61,7 +60,8 @@ class Property:
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         if self.nullable or not self.required:
             return {"from typing import Optional"}
@@ -92,7 +92,7 @@ class StringProperty(Property):
     _type_string: ClassVar[str] = "str"
 
     def _validate_default(self, default: Any) -> str:
-        return f'"{utils.remove_string_escapes(default)}"'
+        return f"{utils.remove_string_escapes(default)!r}"
 
 
 @dataclass
@@ -109,19 +109,19 @@ class DateTimeProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({"import datetime", "from typing import cast"})
+        imports.update({"import datetime", "from typing import cast", "from dateutil.parser import isoparse"})
         return imports
 
     def _validate_default(self, default: Any) -> str:
-        for format_string in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S%z"):
-            try:
-                return repr(datetime.strptime(default, format_string))
-            except (TypeError, ValueError):
-                continue
-        raise ValidationError
+        try:
+            isoparse(default)
+        except (TypeError, ValueError) as e:
+            raise ValidationError from e
+        return f"isoparse({default!r})"
 
 
 @dataclass
@@ -136,17 +136,19 @@ class DateProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({"import datetime", "from typing import cast"})
+        imports.update({"import datetime", "from typing import cast", "from dateutil.parser import isoparse"})
         return imports
 
     def _validate_default(self, default: Any) -> str:
         try:
-            return repr(date.fromisoformat(default))
+            isoparse(default).date()
         except (TypeError, ValueError) as e:
             raise ValidationError() from e
+        return f"isoparse({default!r}).date()"
 
 
 @dataclass
@@ -161,10 +163,11 @@ class FileProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({"from ..types import File", "from dataclasses import astuple"})
+        imports.update({f"from {prefix}types import File"})
         return imports
 
 
@@ -228,7 +231,8 @@ class ListProperty(Property, Generic[InnerProp]):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
@@ -259,7 +263,8 @@ class UnionProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
         for inner_prop in self.inner_properties:
@@ -277,16 +282,18 @@ class UnionProperty(Property):
         raise ValidationError()
 
 
-_existing_enums: Dict[str, EnumProperty] = {}
+_existing_enums: Dict[str, "EnumProperty"] = {}
+ValueType = Union[str, int]
 
 
 @dataclass
 class EnumProperty(Property):
     """ A property that should use an enum """
 
-    values: Dict[str, str]
+    values: Dict[str, ValueType]
     reference: Reference = field(init=False)
     title: InitVar[str]
+    value_type: Type[ValueType] = field(init=False)
 
     template: ClassVar[str] = "enum_property.pyi"
 
@@ -301,16 +308,21 @@ class EnumProperty(Property):
             reference = Reference.from_ref(f"{reference.class_name}{dedup_counter}")
 
         self.reference = reference
+
+        for value in self.values.values():
+            self.value_type = type(value)
+            break
+
         super().__post_init__()
         _existing_enums[self.reference.class_name] = self
 
     @staticmethod
-    def get_all_enums() -> Dict[str, EnumProperty]:
+    def get_all_enums() -> Dict[str, "EnumProperty"]:
         """ Get all the EnumProperties that have been registered keyed by class name """
         return _existing_enums
 
     @staticmethod
-    def get_enum(name: str) -> Optional[EnumProperty]:
+    def get_enum(name: str) -> Optional["EnumProperty"]:
         """ Get all the EnumProperties that have been registered keyed by class name """
         return _existing_enums.get(name)
 
@@ -326,18 +338,22 @@ class EnumProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.add(f"from {prefix}.{self.reference.module_name} import {self.reference.class_name}")
+        imports.add(f"from {prefix}models.{self.reference.module_name} import {self.reference.class_name}")
         return imports
 
     @staticmethod
-    def values_from_list(values: List[str]) -> Dict[str, str]:
+    def values_from_list(values: List[ValueType]) -> Dict[str, ValueType]:
         """ Convert a list of values into dict of {name: value} """
-        output: Dict[str, str] = {}
+        output: Dict[str, ValueType] = {}
 
         for i, value in enumerate(values):
+            if isinstance(value, int):
+                output[f"VALUE_{value}"] = value
+                continue
             if value[0].isalpha():
                 key = value.upper()
             else:
@@ -381,12 +397,13 @@ class RefProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                f"from {prefix}.{self.reference.module_name} import {self.reference.class_name}",
+                f"from {prefix}models.{self.reference.module_name} import {self.reference.class_name}",
                 "from typing import Dict",
                 "from typing import cast",
             }
@@ -413,7 +430,8 @@ class DictProperty(Property):
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
-            prefix: A prefix to put before any relative (local) module names.
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
         imports.add("from typing import Dict")

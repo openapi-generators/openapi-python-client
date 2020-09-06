@@ -51,16 +51,8 @@
                         "required": true,
                         "schema": {
                             "title": "Some Date",
-                            "anyOf": [
-                                {
-                                    "type": "string",
-                                    "format": "date"
-                                },
-                                {
-                                    "type": "string",
-                                    "format": "date-time"
-                                }
-                            ]
+                            "type": "string",
+                            "format": "date"
                         },
                         "name": "some_date",
                         "in": "query"
@@ -504,6 +496,45 @@
                     }
                 }
             }
+        },
+        "/tests/int_enum": {
+            "post": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Int Enum",
+                "operationId": "int_enum_tests_int_enum_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/AnIntEnum"
+                        },
+                        "name": "int_enum",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -542,16 +573,8 @@
                     },
                     "aCamelDateTime": {
                         "title": "Acameldatetime",
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "date-time"
-                            },
-                            {
-                                "type": "string",
-                                "format": "date"
-                            }
-                        ]
+                        "type": "string",
+                        "format": "date"
                     },
                     "a_date": {
                         "title": "A Date",
@@ -568,6 +591,15 @@
                     "SECOND_VALUE"
                 ],
                 "description": "For testing Enums in all the ways they can be used "
+            },
+            "AnIntEnum": {
+                "title": "AnIntEnum",
+                "enum": [
+                    1,
+                    2
+                ],
+                "type": "integer",
+                "description": "An enumeration."
             },
             "Body_upload_file_tests_upload_post": {
                 "title": "Body_upload_file_tests_upload_post",

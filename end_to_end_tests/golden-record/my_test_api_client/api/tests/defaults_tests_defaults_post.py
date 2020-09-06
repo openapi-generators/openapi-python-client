@@ -1,8 +1,9 @@
 import datetime
-from dataclasses import asdict
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
+from attr import asdict
+from dateutil.parser import isoparse
 
 from ...client import AuthenticatedClient, Client
 from ...models.an_enum import AnEnum
@@ -15,8 +16,8 @@ def _get_kwargs(
     client: Client,
     json_body: Dict[Any, Any],
     string_prop: Optional[str] = "the default string",
-    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
-    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Optional[datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
@@ -104,8 +105,8 @@ def sync_detailed(
     client: Client,
     json_body: Dict[Any, Any],
     string_prop: Optional[str] = "the default string",
-    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
-    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Optional[datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
@@ -139,8 +140,8 @@ def sync(
     client: Client,
     json_body: Dict[Any, Any],
     string_prop: Optional[str] = "the default string",
-    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
-    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Optional[datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
@@ -170,8 +171,8 @@ async def asyncio_detailed(
     client: Client,
     json_body: Dict[Any, Any],
     string_prop: Optional[str] = "the default string",
-    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
-    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Optional[datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,
@@ -204,8 +205,8 @@ async def asyncio(
     client: Client,
     json_body: Dict[Any, Any],
     string_prop: Optional[str] = "the default string",
-    datetime_prop: Optional[datetime.datetime] = datetime.datetime(1010, 10, 10, 0, 0),
-    date_prop: Optional[datetime.date] = datetime.date(1010, 10, 10),
+    datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Optional[datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Optional[float] = 3.14,
     int_prop: Optional[int] = 7,
     boolean_prop: Optional[bool] = False,

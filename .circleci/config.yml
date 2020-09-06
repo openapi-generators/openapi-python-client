@@ -78,4 +78,4 @@ workflows:
       - test:
           matrix:
             parameters:
-              python-version: ["3.7", "3.8"]
+              python-version: ["3.6", "3.7", "3.8"]

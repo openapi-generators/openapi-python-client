@@ -1,12 +1,11 @@
-from __future__ import annotations
-
-from dataclasses import astuple, dataclass
 from typing import Any, Dict
+
+import attr
 
 from ..types import File
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPost:
     """  """
 
@@ -20,7 +19,7 @@ class BodyUploadFileTestsUploadPost:
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> BodyUploadFileTestsUploadPost:
+    def from_dict(d: Dict[str, Any]) -> "BodyUploadFileTestsUploadPost":
         some_file = d["some_file"]
 
         return BodyUploadFileTestsUploadPost(

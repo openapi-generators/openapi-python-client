@@ -1,7 +1,7 @@
-from dataclasses import asdict
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
+from attr import asdict
 
 from ...client import AuthenticatedClient, Client
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost

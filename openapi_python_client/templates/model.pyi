@@ -1,14 +1,13 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from typing import Any, Dict
+
+import attr
 
 {% for relative in model.relative_imports %}
 {{ relative }}
 {% endfor %}
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class {{ model.reference.class_name }}:
     """ {{ model.description }} """
     {% for property in model.required_properties + model.optional_properties %}
@@ -32,7 +31,7 @@ class {{ model.reference.class_name }}:
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> {{ model.reference.class_name }}:
+    def from_dict(d: Dict[str, Any]) -> "{{ model.reference.class_name }}":
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
         {% set property_source = 'd["' + property.name + '"]' %}

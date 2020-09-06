@@ -103,8 +103,8 @@ class TestModel:
                 mocker.call(name="OptionalDateTime", required=False, data=in_data.properties["OptionalDateTime"]),
             ]
         )
-        required_property.get_imports.assert_called_once_with(prefix="")
-        optional_property.get_imports.assert_called_once_with(prefix="")
+        required_property.get_imports.assert_called_once_with(prefix="..")
+        optional_property.get_imports.assert_called_once_with(prefix="..")
         assert result == Model(
             reference=from_ref(),
             required_properties=[required_property],
@@ -344,7 +344,7 @@ class TestEndpoint:
                 mocker.call(multipart_body_reference, prefix="...models"),
             ]
         )
-        json_body.get_imports.assert_called_once_with(prefix="...models")
+        json_body.get_imports.assert_called_once_with(prefix="...")
         assert endpoint.relative_imports == {"import_1", "import_2", "import_3", json_body_imports}
         assert endpoint.json_body == json_body
         assert endpoint.form_body_reference == form_body_reference
@@ -533,9 +533,9 @@ class TestEndpoint:
                 mocker.call(name="header_prop_name", required=False, data=header_schema),
             ]
         )
-        path_prop.get_imports.assert_called_once_with(prefix="...models")
-        query_prop.get_imports.assert_called_once_with(prefix="...models")
-        header_prop.get_imports.assert_called_once_with(prefix="...models")
+        path_prop.get_imports.assert_called_once_with(prefix="...")
+        query_prop.get_imports.assert_called_once_with(prefix="...")
+        header_prop.get_imports.assert_called_once_with(prefix="...")
         assert endpoint.relative_imports == {"import_3", path_prop_import, query_prop_import, header_prop_import}
         assert endpoint.path_parameters == [path_prop]
         assert endpoint.query_parameters == [query_prop]

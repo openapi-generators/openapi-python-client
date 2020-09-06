@@ -86,7 +86,7 @@ class TestStringProperty:
         from openapi_python_client.parser.properties import StringProperty
 
         p = StringProperty(name="a name", required=True, default="the default value", nullable=False)
-        assert p.default == '"the default value"'
+        assert p.default == "'the default value'"
 
 
 class TestDateTimeProperty:
@@ -96,16 +96,18 @@ class TestDateTimeProperty:
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
         p = DateTimeProperty(name=name, required=True, default=None, nullable=False)
-        assert p.get_imports(prefix="") == {
+        assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
+            "from dateutil.parser import isoparse",
         }
 
         p.required = False
-        assert p.get_imports(prefix="") == {
+        assert p.get_imports(prefix="...") == {
             "from typing import Optional",
             "import datetime",
             "from typing import cast",
+            "from dateutil.parser import isoparse",
         }
 
     def test__validate_default(self):
@@ -115,7 +117,7 @@ class TestDateTimeProperty:
             DateTimeProperty(name="a name", required=True, default="not a datetime", nullable=False)
 
         p = DateTimeProperty(name="a name", required=True, default="2017-07-21T17:32:28Z", nullable=False)
-        assert p.default == "datetime.datetime(2017, 7, 21, 17, 32, 28, tzinfo=datetime.timezone.utc)"
+        assert p.default == "isoparse('2017-07-21T17:32:28Z')"
 
 
 class TestDateProperty:
@@ -125,16 +127,18 @@ class TestDateProperty:
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
         p = DateProperty(name=name, required=True, default=None, nullable=False)
-        assert p.get_imports(prefix="") == {
+        assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
+            "from dateutil.parser import isoparse",
         }
 
         p.required = False
-        assert p.get_imports(prefix="") == {
+        assert p.get_imports(prefix="..") == {
             "from typing import Optional",
             "import datetime",
             "from typing import cast",
+            "from dateutil.parser import isoparse",
         }
 
     def test__validate_default(self):
@@ -144,7 +148,7 @@ class TestDateProperty:
             DateProperty(name="a name", required=True, default="not a date", nullable=False)
 
         p = DateProperty(name="a name", required=True, default="1010-10-10", nullable=False)
-        assert p.default == "datetime.date(1010, 10, 10)"
+        assert p.default == "isoparse('1010-10-10').date()"
 
 
 class TestFileProperty:
@@ -153,15 +157,14 @@ class TestFileProperty:
 
         name = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.snake_case")
-        prefix = "blah"
+        prefix = ".."
         p = FileProperty(name=name, required=True, default=None, nullable=False)
-        assert p.get_imports(prefix=prefix) == {"from ..types import File", "from dataclasses import astuple"}
+        assert p.get_imports(prefix=prefix) == {"from ..types import File"}
 
         p.required = False
         assert p.get_imports(prefix=prefix) == {
             "from typing import Optional",
             "from ..types import File",
-            "from dataclasses import astuple",
         }
 
     def test__validate_default(self):
@@ -414,12 +417,12 @@ class TestEnumProperty:
         )
 
         assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}"
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}"
         }
 
         enum_property.required = False
         assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
             "from typing import Optional",
         }
         properties._existing_enums = {}
@@ -427,7 +430,7 @@ class TestEnumProperty:
     def test_values_from_list(self):
         from openapi_python_client.parser.properties import EnumProperty
 
-        data = ["abc", "123", "a23", "1bc"]
+        data = ["abc", "123", "a23", "1bc", 4]
 
         result = EnumProperty.values_from_list(data)
 
@@ -436,6 +439,7 @@ class TestEnumProperty:
             "VALUE_1": "123",
             "A23": "a23",
             "VALUE_3": "1bc",
+            "VALUE_4": 4,
         }
 
     def test_values_from_list_duplicate(self):
@@ -522,14 +526,14 @@ class TestRefProperty:
         p = RefProperty(name="test", required=True, default=None, reference=fake_reference, nullable=False)
 
         assert p.get_imports(prefix=prefix) == {
-            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
             "from typing import Dict",
             "from typing import cast",
         }
 
         p.required = False
         assert p.get_imports(prefix=prefix) == {
-            f"from {prefix}.{fake_reference.module_name} import {fake_reference.class_name}",
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
             "from typing import Dict",
             "from typing import cast",
             "from typing import Optional",

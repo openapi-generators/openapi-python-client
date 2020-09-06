@@ -1,12 +1,11 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, cast
 
-from .validation_error import ValidationError
+import attr
+
+from ..models.validation_error import ValidationError
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class HTTPValidationError:
     """  """
 
@@ -27,7 +26,7 @@ class HTTPValidationError:
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> HTTPValidationError:
+    def from_dict(d: Dict[str, Any]) -> "HTTPValidationError":
         detail = []
         for detail_item_data in d.get("detail") or []:
             detail_item = ValidationError.from_dict(detail_item_data)

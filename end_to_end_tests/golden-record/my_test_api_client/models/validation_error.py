@@ -1,10 +1,9 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from typing import Any, Dict, List
 
+import attr
 
-@dataclass
+
+@attr.s(auto_attribs=True)
 class ValidationError:
     """  """
 
@@ -25,7 +24,7 @@ class ValidationError:
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> ValidationError:
+    def from_dict(d: Dict[str, Any]) -> "ValidationError":
         loc = d["loc"]
 
         msg = d["msg"]

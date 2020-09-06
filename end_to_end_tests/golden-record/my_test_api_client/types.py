@@ -1,9 +1,10 @@
 """ Contains some shared types for properties """
-from dataclasses import dataclass
 from typing import BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
 
+import attr
 
-@dataclass
+
+@attr.s(auto_attribs=True)
 class File:
     """ Contains information for file uploads """
 
@@ -19,7 +20,7 @@ class File:
 T = TypeVar("T")
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class Response(Generic[T]):
     """ A response from an endpoint """
 
