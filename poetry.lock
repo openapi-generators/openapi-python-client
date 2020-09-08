@@ -173,7 +173,7 @@ description = "The next generation HTTP client."
 name = "httpx"
 optional = false
 python-versions = ">=3.6"
-version = "0.14.2"
+version = "0.14.3"
 
 [package.dependencies]
 certifi = "*"
@@ -644,6 +644,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
 content-hash = "8b2c160c2618a876691c235f6e1efd9cc70ed1945a56b33c37446d1477030319"
+lock-version = "1.0"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -736,8 +737,8 @@ httpcore = [
     {file = "httpcore-0.10.1.tar.gz", hash = "sha256:85295a081d5cca79b1a4d5190456bc869f2f220170b7749e882ac880b087a600"},
 ]
 httpx = [
-    {file = "httpx-0.14.2-py3-none-any.whl", hash = "sha256:1e46926afdfdb68f926c90870682db71bc4121f53dc6b56f39a067ca9026e1d2"},
-    {file = "httpx-0.14.2.tar.gz", hash = "sha256:51c63dbc2d68eb70b5812aed8161b236fd04ecbd9727ae265a0f422398aea6f9"},
+    {file = "httpx-0.14.3-py3-none-any.whl", hash = "sha256:3f2aa21d927ac56bfabdb82d079cf5ddd5b3147130dedc5fe8fed3a24e7a8d34"},
+    {file = "httpx-0.14.3.tar.gz", hash = "sha256:96bd4de4e6b742d672e2338720baf98518efaf85c86e0b48218e1bef9f272333"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
