@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import attr
 from dateutil.parser import isoparse
@@ -14,7 +14,7 @@ class AModel:
 
     an_enum_value: AnEnum
     some_dict: Optional[Dict[Any, Any]]
-    a_camel_date_time: datetime.date
+    a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
     nested_list_of_enums: Optional[List[List[DifferentEnum]]] = None
 
@@ -23,7 +23,11 @@ class AModel:
 
         some_dict = self.some_dict
 
-        a_camel_date_time = self.a_camel_date_time.isoformat()
+        if isinstance(self.a_camel_date_time, datetime.datetime):
+            a_camel_date_time = self.a_camel_date_time.isoformat()
+
+        else:
+            a_camel_date_time = self.a_camel_date_time.isoformat()
 
         a_date = self.a_date.isoformat()
 
@@ -54,7 +58,19 @@ class AModel:
 
         some_dict = d["some_dict"]
 
-        a_camel_date_time = isoparse(d["aCamelDateTime"]).date()
+        def _parse_a_camel_date_time(data: Dict[str, Any]) -> Union[datetime.datetime, datetime.date]:
+            a_camel_date_time: Union[datetime.datetime, datetime.date]
+            try:
+                a_camel_date_time = isoparse(d["aCamelDateTime"])
+
+                return a_camel_date_time
+            except:
+                pass
+            a_camel_date_time = isoparse(d["aCamelDateTime"]).date()
+
+            return a_camel_date_time
+
+        a_camel_date_time = _parse_a_camel_date_time(d["aCamelDateTime"])
 
         a_date = isoparse(d["a_date"]).date()
 

@@ -430,7 +430,7 @@ class TestEnumProperty:
     def test_values_from_list(self):
         from openapi_python_client.parser.properties import EnumProperty
 
-        data = ["abc", "123", "a23", "1bc", 4]
+        data = ["abc", "123", "a23", "1bc", 4, -3]
 
         result = EnumProperty.values_from_list(data)
 
@@ -440,6 +440,7 @@ class TestEnumProperty:
             "A23": "a23",
             "VALUE_3": "1bc",
             "VALUE_4": 4,
+            "VALUE_NEGATIVE_3": -3,
         }
 
     def test_values_from_list_duplicate(self):

@@ -137,6 +137,7 @@ def unsupported_content():
 
 
 class AnIntEnum(IntEnum):
+    NEGATIVE = -1
     FIRST = 1
     SECOND = 2
 

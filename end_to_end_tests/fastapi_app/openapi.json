@@ -51,8 +51,16 @@
                         "required": true,
                         "schema": {
                             "title": "Some Date",
-                            "type": "string",
-                            "format": "date"
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            ]
                         },
                         "name": "some_date",
                         "in": "query"
@@ -573,8 +581,16 @@
                     },
                     "aCamelDateTime": {
                         "title": "Acameldatetime",
-                        "type": "string",
-                        "format": "date"
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date"
+                            }
+                        ]
                     },
                     "a_date": {
                         "title": "A Date",
@@ -595,6 +611,7 @@
             "AnIntEnum": {
                 "title": "AnIntEnum",
                 "enum": [
+                    -1,
                     1,
                     2
                 ],

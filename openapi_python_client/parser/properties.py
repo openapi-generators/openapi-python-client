@@ -352,7 +352,10 @@ class EnumProperty(Property):
 
         for i, value in enumerate(values):
             if isinstance(value, int):
-                output[f"VALUE_{value}"] = value
+                if value < 0:
+                    output[f"VALUE_NEGATIVE_{-value}"] = value
+                else:
+                    output[f"VALUE_{value}"] = value
                 continue
             if value[0].isalpha():
                 key = value.upper()
