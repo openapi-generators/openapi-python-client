@@ -173,12 +173,18 @@ class TestModel:
                     "Float": oai.Schema.construct(type="number", format="float")
                 },
             ),
+            # Intentionally no properties defined
+            "RefC": oai.Schema.construct(
+                title=mocker.MagicMock(),
+                description=mocker.MagicMock(),
+            ),
         }
 
         model_schema = oai.Schema.construct(
             allOf=[
                 oai.Reference.construct(ref="#/components/schemas/RefA"),
                 oai.Reference.construct(ref="#/components/schemas/RefB"),
+                oai.Reference.construct(ref="#/components/schemas/RefC"),
                 oai.Schema.construct(
                     title=mocker.MagicMock(),
                     description=mocker.MagicMock(),
@@ -195,7 +201,6 @@ class TestModel:
 
         model = Model.from_data(data=model_schema, name="Model")
         model.resolve_references(schemas)
-        print(f"{model=}")
         assert sorted(p.name for p in model.required_properties) == ["DateTime", "Float", "String"]
         assert all(p.required for p in model.required_properties)
         assert sorted(p.name for p in model.optional_properties) == ["Enum", "Int"]
