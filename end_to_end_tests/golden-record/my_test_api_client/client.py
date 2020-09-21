@@ -3,11 +3,11 @@ from typing import Dict
 import attr
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class Client:
     """ A class for keeping track of data related to the API """
 
-    base_url: str
+    base_url: str = attr.ib()
     cookies: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     headers: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     timeout: float = attr.ib(5.0, kw_only=True)
@@ -35,7 +35,7 @@ class Client:
         return attr.evolve(self, timeout=timeout)
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class AuthenticatedClient(Client):
     """ A Client which has been authenticated for use on secured endpoints """
 
