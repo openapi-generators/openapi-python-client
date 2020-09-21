@@ -1,7 +1,7 @@
 """ A FastAPI app used to create an OpenAPI document for end-to-end testing """
 import json
 from datetime import date, datetime
-from enum import Enum
+from enum import Enum, IntEnum
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -9,7 +9,10 @@ from fastapi import APIRouter, Body, FastAPI, File, Header, Query, UploadFile
 from pydantic import BaseModel, Field
 from starlette.responses import FileResponse
 
-app = FastAPI(title="My Test API", description="An API for testing openapi-python-client",)
+app = FastAPI(
+    title="My Test API",
+    description="An API for testing openapi-python-client",
+)
 
 
 @app.get("/ping", response_model=bool)
@@ -51,7 +54,8 @@ class AModel(BaseModel):
 
 @test_router.get("/", response_model=List[AModel], operation_id="getUserList")
 def get_list(
-    an_enum_value: List[AnEnum] = Query(...), some_date: Union[date, datetime] = Query(...),
+    an_enum_value: List[AnEnum] = Query(...),
+    some_date: Union[date, datetime] = Query(...),
 ):
     """ Get a list of things """
     return
@@ -94,8 +98,8 @@ def json_body(body: AModel):
     return
 
 
-@test_router.post("/test_defaults")
-def test_defaults(
+@test_router.post("/defaults")
+def defaults(
     string_prop: str = Query(default="the default string"),
     datetime_prop: datetime = Query(default=datetime(1010, 10, 10)),
     date_prop: date = Query(default=date(1010, 10, 10)),
@@ -111,12 +115,36 @@ def test_defaults(
 
 
 @test_router.get(
-    "/test_octet_stream",
+    "/octet_stream",
     response_class=FileResponse,
     responses={200: {"content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}}}},
 )
-def test_octet_stream():
+def octet_stream():
     return
+
+
+@test_router.get("/no_response")
+def no_response():
+    pass
+
+
+@test_router.get(
+    "/unsupported_content",
+    responses={200: {"content": {"not_real/content-type": {"schema": {"type": "string", "format": "binary"}}}}},
+)
+def unsupported_content():
+    pass
+
+
+class AnIntEnum(IntEnum):
+    NEGATIVE = -1
+    FIRST = 1
+    SECOND = 2
+
+
+@test_router.post("/int_enum")
+def int_enum(int_enum: AnIntEnum):
+    pass
 
 
 app.include_router(test_router, prefix="/tests", tags=["tests"])

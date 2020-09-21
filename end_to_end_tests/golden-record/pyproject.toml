@@ -1,15 +1,15 @@
 [tool.poetry]
-name = "{{ project_name }}"
-version = "{{ version }}"
-description = "{{ description }}"
+name = "my-test-api-client"
+version = "0.1.0"
+description = "A client library for accessing My Test API"
 
 authors = []
 
 readme = "README.md"
 packages = [
-    {include = "{{ package_name }}"},
+    {include = "my_test_api_client"},
 ]
-include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
+include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 
 
 [tool.poetry.dependencies]

@@ -43,40 +43,41 @@ def cli(
 
 def _print_parser_error(e: GeneratorError, color: str) -> None:
     typer.secho(e.header, bold=True, fg=color, err=True)
+    typer.echo()
     if e.detail:
         typer.secho(e.detail, fg=color, err=True)
+        typer.echo()
 
     if isinstance(e, ParseError) and e.data is not None:
         formatted_data = pformat(e.data)
         typer.secho(formatted_data, fg=color, err=True)
 
-    typer.secho()
+    typer.echo()
 
 
 def handle_errors(errors: Sequence[GeneratorError]) -> None:
     """ Turn custom errors into formatted error messages """
     if len(errors) == 0:
         return
+    error_level = ErrorLevel.WARNING
+    message = "Warning(s) encountered while generating. Client was generated, but some pieces may be missing"
+    header_color = typer.colors.BRIGHT_YELLOW
     color = typer.colors.YELLOW
     for error in errors:
         if error.level == ErrorLevel.ERROR:
-            typer.secho(
-                "Error(s) encountered while generating, client was not created",
-                underline=True,
-                bold=True,
-                fg=typer.colors.BRIGHT_RED,
-                err=True,
-            )
+            error_level = ErrorLevel.ERROR
+            message = "Error(s) encountered while generating, client was not created"
             color = typer.colors.RED
+            header_color = typer.colors.BRIGHT_RED
             break
-    else:
-        typer.secho(
-            "Warning(s) encountered while generating. Client was generated, but some pieces may be missing",
-            underline=True,
-            bold=True,
-            fg=typer.colors.BRIGHT_YELLOW,
-            err=True,
-        )
+    typer.secho(
+        message,
+        underline=True,
+        bold=True,
+        fg=header_color,
+        err=True,
+    )
+    typer.echo()
 
     for err in errors:
         _print_parser_error(err, color)
@@ -90,7 +91,9 @@ def handle_errors(errors: Sequence[GeneratorError]) -> None:
         fg=typer.colors.BLUE,
         err=True,
     )
-    raise typer.Exit(code=1)
+
+    if error_level == ErrorLevel.ERROR:
+        raise typer.Exit(code=1)
 
 
 @app.command()
