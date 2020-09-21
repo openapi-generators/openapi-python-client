@@ -7,7 +7,7 @@ import attr
 class Client:
     """ A class for keeping track of data related to the API """
 
-    base_url: str = attr.ib()
+    base_url: str
     cookies: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     headers: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     timeout: float = attr.ib(5.0, kw_only=True)
