@@ -29,7 +29,7 @@ httpx = ">=0.13,<0.15"
 black = ">=20.8b1"
 isort = "^5.0.5"
 pyyaml = "^5.3.1"
-importlib_metadata = {version = "^1.6.0", python = "<3.8"}
+importlib_metadata = {version = ">=1.6,<3.0", python = "<3.8"}
 pydantic = "^1.6.1"
 attrs = "^20.1.0"
 python-dateutil = "^2.8.1"
