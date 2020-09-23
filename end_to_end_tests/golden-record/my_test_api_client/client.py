@@ -3,7 +3,7 @@ from typing import Dict
 import attr
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class Client:
     """ A class for keeping track of data related to the API """
 
@@ -35,7 +35,7 @@ class Client:
         return attr.evolve(self, timeout=timeout)
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class AuthenticatedClient(Client):
     """ A Client which has been authenticated for use on secured endpoints """
 
