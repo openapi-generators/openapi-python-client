@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.5.5"
+version = "0.6.0"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -19,18 +19,20 @@ packages = [
 include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 jinja2 = "^2.11.1"
 stringcase = "^1.2.0"
-typer = ">=0.1,<0.4"
+typer = "^0.3"
 colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
 shellingham = "^1.3.2"
 httpx = ">=0.13,<0.15"
 black = "^19.10b0"
 isort = "^4.3.21"
 pyyaml = "^5.3.1"
-importlib_metadata = {version = "^1.6.0", python = "==3.7"}
+importlib_metadata = {version = "^1.6.0", python = "<3.8"}
 pydantic = "^1.6.1"
+attrs = "^20.1.0"
+python-dateutil = "^2.8.1"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
@@ -56,17 +58,17 @@ isort .\
  && pytest --cov openapi_python_client tests\
 """
 openapi = "python -m end_to_end_tests.fastapi_app"
-gm = "python -m end_to_end_tests.regen_golden_master"
+gr = "python -m end_to_end_tests.regen_golden_record"
 e2e = "pytest openapi_python_client end_to_end_tests"
-oge = """
+ogre = """
 task openapi\
-&& task gm\
+&& task gr\
 && task e2e\
 """
 
 [tool.black]
 line-length = 120
-target_version = ['py37']
+target_version = ['py36']
 exclude = '''
 (
   /(
@@ -81,8 +83,7 @@ exclude = '''
 
 [tool.isort]
 line_length = 120
-multi_line_output = 3
-include_trailing_comma = true
+profile = "black"
 skip = [".venv", "tests/test_templates"]
 
 [tool.coverage.run]

@@ -1,10 +1,10 @@
 {% macro construct(property, source) %}
 {% if property.required %}
-{{ property.python_name }} = datetime.date.fromisoformat({{ source }})
+{{ property.python_name }} = isoparse({{ source }}).date()
 {% else %}
 {{ property.python_name }} = None
 if {{ source }} is not None:
-    {{ property.python_name }} = datetime.date.fromisoformat(cast(str, {{ source }}))
+    {{ property.python_name }} = isoparse(cast(str, {{ source }})).date()
 {% endif %}
 {% endmacro %}
 

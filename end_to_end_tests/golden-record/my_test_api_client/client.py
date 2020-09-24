@@ -2,6 +2,7 @@ from typing import Dict
 
 import attr
 
+
 @attr.s(auto_attribs=True)
 class Client:
     """ A class for keeping track of data related to the API """
@@ -32,6 +33,7 @@ class Client:
     def with_timeout(self, timeout: float) -> "Client":
         """ Get a new client matching this one with a new timeout (in seconds) """
         return attr.evolve(self, timeout=timeout)
+
 
 @attr.s(auto_attribs=True)
 class AuthenticatedClient(Client):

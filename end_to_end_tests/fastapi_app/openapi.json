@@ -289,13 +289,13 @@
                 }
             }
         },
-        "/tests/test_defaults": {
+        "/tests/defaults": {
             "post": {
                 "tags": [
                     "tests"
                 ],
-                "summary": "Test Defaults",
-                "operationId": "test_defaults_tests_test_defaults_post",
+                "summary": "Defaults",
+                "operationId": "defaults_tests_defaults_post",
                 "parameters": [
                     {
                         "required": false,
@@ -439,13 +439,13 @@
                 }
             }
         },
-        "/tests/test_octet_stream": {
+        "/tests/octet_stream": {
             "get": {
                 "tags": [
                     "tests"
                 ],
-                "summary": "Test Octet Stream",
-                "operationId": "test_octet_stream_tests_test_octet_stream_get",
+                "summary": "Octet Stream",
+                "operationId": "octet_stream_tests_octet_stream_get",
                 "responses": {
                     "200": {
                         "description": "Successful Response",
@@ -454,6 +454,89 @@
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/no_response": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "No Response",
+                "operationId": "no_response_tests_no_response_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/unsupported_content": {
+            "get": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Unsupported Content",
+                "operationId": "unsupported_content_tests_unsupported_content_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            },
+                            "not_real/content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests/int_enum": {
+            "post": {
+                "tags": [
+                    "tests"
+                ],
+                "summary": "Int Enum",
+                "operationId": "int_enum_tests_int_enum_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/AnIntEnum"
+                        },
+                        "name": "int_enum",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
                                 }
                             }
                         }
@@ -524,6 +607,16 @@
                     "SECOND_VALUE"
                 ],
                 "description": "For testing Enums in all the ways they can be used "
+            },
+            "AnIntEnum": {
+                "title": "AnIntEnum",
+                "enum": [
+                    -1,
+                    1,
+                    2
+                ],
+                "type": "integer",
+                "description": "An enumeration."
             },
             "Body_upload_file_tests_upload_post": {
                 "title": "Body_upload_file_tests_upload_post",
