@@ -15,8 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Properly remove spaces from generated Enum keys (#198). Thanks @bowenwr!
 
-### Added
+### Additions
 
+- Endpoints without operationIds will have a name generated from their method and path (#92). Thanks @Kerybas & @dtkav!
 - Note to README about supported OpenAPI versions (#176). Thanks @filippog!
 
 ## 0.6.0 - 2020-09-21
