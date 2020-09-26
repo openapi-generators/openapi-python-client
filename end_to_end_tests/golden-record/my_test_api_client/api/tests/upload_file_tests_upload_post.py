@@ -1,9 +1,8 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 
 import httpx
-from attr import asdict
 
-from ...client import AuthenticatedClient, Client
+from ...client import Client
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response

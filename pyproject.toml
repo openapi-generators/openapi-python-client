@@ -33,6 +33,7 @@ pydantic = "^1.6.1"
 attrs = "^20.1.0"
 python-dateutil = "^2.8.1"
 httpx = "^0.15.4"
+autoflake = "^1.4"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"

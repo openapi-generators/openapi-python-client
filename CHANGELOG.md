@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Additions
 
 - Endpoints without operationIds will have a name generated from their method and path (#92). Thanks @Kerybas & @dtkav!
+- autoflake will be run on generated clients to clean up unused imports / variables (#138). Thanks @pawamoy!
 - Note to README about supported OpenAPI versions (#176). Thanks @filippog!
 
 ## 0.6.0 - 2020-09-21

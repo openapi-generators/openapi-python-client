@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 import attr
 from dateutil.parser import isoparse
@@ -64,7 +64,7 @@ class AModel:
                 a_camel_date_time = isoparse(d["aCamelDateTime"])
 
                 return a_camel_date_time
-            except:
+            except:  # noqa: E722
                 pass
             a_camel_date_time = isoparse(d["aCamelDateTime"]).date()
 
