@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Properly remove spaces from generated Enum keys (#198). Thanks @bowenwr!
 
+### Added
+
+- Note to README about supported OpenAPI versions (#176). Thanks @filippog!
+
 ## 0.6.0 - 2020-09-21
 
 ### Breaking Changes
