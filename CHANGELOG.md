@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.1 - 2020-09-26
+
+### Changes
+
+- Use httpx ^0.15.0 in generated clients
+
+### Fixes
+
+- Properly remove spaces from generated Enum keys (#198). Thanks @bowenwr!
+
+### Additions
+
+- Endpoints without operationIds will have a name generated from their method and path (#92). Thanks @Kerybas & @dtkav!
+- autoflake will be run on generated clients to clean up unused imports / variables (#138). Thanks @pawamoy!
+- Note to README about supported OpenAPI versions (#176). Thanks @filippog!
+
 ## 0.6.0 - 2020-09-21
 
 ### Breaking Changes
@@ -30,21 +46,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - It's now possible to include custom headers and cookies in requests, as well as set a custom timeout. This can be done
   either by directly setting those parameters on a `Client` (e.g. `my_client.headers = {"Header": "Value"}`) or using
   a fluid api (e.g. `my_endpoint.sync(my_client.with_cookies({"MyCookie": "cookie"}).with_timeout(10.0))`).
-- Unsupported content types or no responses at all will no longer result in an endpoint being completely skipped. Instead, 
+- Unsupported content types or no responses at all will no longer result in an endpoint being completely skipped. Instead,
   only the `detailed` versions of the endpoint will be generated, where the resulting `Response.parsed` is always `None`.
   (#141)
 - Support for Python 3.6 (#137 & #154)
 - Support for enums with integer values
-  
+
 ### Changes
 
 - The format of any errors/warnings has been spaced out a bit.
 
 ## 0.5.5 - 2020-09-04
+
 ### Fixes
+
 - Improved trailing comma handling in endpoint generation (#178 & #179). Thanks @dtkav!
 - `Optional` is now properly imported for `nullable` fields (#177 & #180). Thanks @dtkav!
-
 
 ## 0.5.4 - 2020-08-29
 

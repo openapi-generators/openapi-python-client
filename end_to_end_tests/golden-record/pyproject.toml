@@ -14,7 +14,7 @@ include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-httpx = "^0.13.3"
+httpx = "^0.15.0"
 attrs = "^20.1.0"
 python-dateutil = "^2.8.1"
 

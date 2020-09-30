@@ -7,7 +7,7 @@ def _parse_{{ property.python_name }}(data: Dict[str, Any]) -> {{ property.get_t
     {% from "property_templates/" + inner_property.template import construct %}
         {{ construct(inner_property, source) | indent(8) }}
         return {{ property.python_name }}
-    except:
+    except: # noqa: E722
         pass
     {% elif inner_property.template and loop.last %}{# Don't do try/except for the last one #}
     {% from "property_templates/" + inner_property.template import construct %}

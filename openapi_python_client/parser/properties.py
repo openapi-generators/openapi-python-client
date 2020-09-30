@@ -363,9 +363,8 @@ class EnumProperty(Property):
                 key = f"VALUE_{i}"
             if key in output:
                 raise ValueError(f"Duplicate key {key} in Enum")
-            sanitized_key = utils.fix_keywords(utils.sanitize(key))
+            sanitized_key = utils.snake_case(key).upper()
             output[sanitized_key] = utils.remove_string_escapes(value)
-
         return output
 
     def _validate_default(self, default: Any) -> str:

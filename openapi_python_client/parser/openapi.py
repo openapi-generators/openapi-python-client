@@ -66,6 +66,16 @@ class EndpointCollection:
         return endpoints_by_tag
 
 
+def generate_operation_id(*, path: str, method: str) -> str:
+    """ Generate an operationId from a path """
+    clean_path = path.replace("{", "").replace("}", "").replace("/", "_")
+    if clean_path.startswith("_"):
+        clean_path = clean_path[1:]
+    if clean_path.endswith("_"):
+        clean_path = clean_path[:-1]
+    return f"{method}_{clean_path}"
+
+
 @dataclass
 class Endpoint:
     """
@@ -191,13 +201,15 @@ class Endpoint:
         """ Construct an endpoint from the OpenAPI data """
 
         if data.operationId is None:
-            return ParseError(data=data, detail="Path operations with operationId are not yet supported")
+            name = generate_operation_id(path=path, method=method)
+        else:
+            name = data.operationId
 
         endpoint = Endpoint(
             path=path,
             method=method,
             description=utils.remove_string_escapes(data.description) if data.description else "",
-            name=data.operationId,
+            name=name,
             requires_security=bool(data.security),
             tag=tag,
         )

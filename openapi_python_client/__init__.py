@@ -76,6 +76,13 @@ class Project:
 
     def _reformat(self) -> None:
         subprocess.run(
+            "autoflake -i -r --remove-all-unused-imports --remove-unused-variables .",
+            cwd=self.package_dir,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        subprocess.run(
             "isort .",
             cwd=self.project_dir,
             shell=True,

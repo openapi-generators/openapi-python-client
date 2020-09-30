@@ -642,7 +642,7 @@ class TestEndpoint:
 
         assert result == parse_error
 
-    def test_from_data(self, mocker):
+    def test_from_data_standard(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 
         path = mocker.MagicMock()
@@ -677,8 +677,56 @@ class TestEndpoint:
         _add_responses.assert_called_once_with(_add_parameters.return_value, data.responses)
         _add_body.assert_called_once_with(_add_responses.return_value, data)
 
-        data.security = None
-        _add_parameters.reset_mock()
+    def test_from_data_no_operation_id(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        path = "/path/with/{param}/"
+        method = "get"
+        _add_parameters = mocker.patch.object(Endpoint, "_add_parameters")
+        _add_responses = mocker.patch.object(Endpoint, "_add_responses")
+        _add_body = mocker.patch.object(Endpoint, "_add_body")
+        data = oai.Operation.construct(
+            description=mocker.MagicMock(),
+            operationId=None,
+            security={"blah": "bloo"},
+            responses=mocker.MagicMock(),
+        )
+
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
+
+        endpoint = Endpoint.from_data(data=data, path=path, method=method, tag="default")
+
+        assert endpoint == _add_body.return_value
+
+        _add_parameters.assert_called_once_with(
+            Endpoint(
+                path=path,
+                method=method,
+                description=data.description,
+                name="get_path_with_param",
+                requires_security=True,
+                tag="default",
+            ),
+            data,
+        )
+        _add_responses.assert_called_once_with(_add_parameters.return_value, data.responses)
+        _add_body.assert_called_once_with(_add_responses.return_value, data)
+
+    def test_from_data_no_security(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        data = oai.Operation.construct(
+            description=mocker.MagicMock(),
+            operationId=mocker.MagicMock(),
+            security=None,
+            responses=mocker.MagicMock(),
+        )
+        _add_parameters = mocker.patch.object(Endpoint, "_add_parameters")
+        _add_responses = mocker.patch.object(Endpoint, "_add_responses")
+        _add_body = mocker.patch.object(Endpoint, "_add_body")
+        path = mocker.MagicMock()
+        method = mocker.MagicMock()
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
 
         Endpoint.from_data(data=data, path=path, method=method, tag="a")
 
@@ -693,11 +741,8 @@ class TestEndpoint:
             ),
             data,
         )
-
-        data.operationId = None
-        assert Endpoint.from_data(data=data, path=path, method=method, tag="a") == ParseError(
-            data=data, detail="Path operations with operationId are not yet supported"
-        )
+        _add_responses.assert_called_once_with(_add_parameters.return_value, data.responses)
+        _add_body.assert_called_once_with(_add_responses.return_value, data)
 
 
 class TestImportStringFromReference:

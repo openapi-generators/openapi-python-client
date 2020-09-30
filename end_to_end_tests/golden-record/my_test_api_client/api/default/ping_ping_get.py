@@ -1,9 +1,8 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, Optional
 
 import httpx
-from attr import asdict
 
-from ...client import AuthenticatedClient, Client
+from ...client import Client
 from ...types import Response
 
 

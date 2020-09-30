@@ -2,10 +2,9 @@ import datetime
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
-from attr import asdict
 from dateutil.parser import isoparse
 
-from ...client import AuthenticatedClient, Client
+from ...client import Client
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response

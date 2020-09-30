@@ -7,7 +7,10 @@
 
 # openapi-python-client
 
-Generate modern Python clients from OpenAPI
+Generate modern Python clients from OpenAPI 3.x documents.
+
+_This generator does not support OpenAPI 2.x FKA Swagger. If you need to use an older document, try upgrading it to
+version 3 first with one of many available converters._
 
 **This project is still in development and does not support all OpenAPI features**
 
