@@ -45,7 +45,6 @@ mypy = "*"
 taskipy = "*"
 safety = "*"
 pytest-cov = "*"
-fastapi = "*"
 python-multipart = "*"
 flake8 = "*"
 
@@ -58,12 +57,10 @@ isort .\
  && mypy openapi_python_client\
  && pytest --cov openapi_python_client tests\
 """
-openapi = "python -m end_to_end_tests.fastapi_app"
-gr = "python -m end_to_end_tests.regen_golden_record"
+regen = "python -m end_to_end_tests.regen_golden_record"
 e2e = "pytest openapi_python_client end_to_end_tests"
-ogre = """
-task openapi\
-&& task gr\
+re = """
+task regen\
 && task e2e\
 """
 

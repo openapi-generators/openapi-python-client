@@ -64,9 +64,8 @@ get an error.
       for endpoints without a tag. Each of these modules in turn contains one function for calling each endpoint.
    1. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
 
-For a full example you can look at the `test_end_to_end` directory which has a declared [FastAPI](https://fastapi.tiangolo.com/)
-server and the resulting openapi.json file in the "fastapi" directory. "golden-record" is the generated client from that
-OpenAPI document.
+For a full example you can look at the `end_to_end_tests` directory which has an `openapi.json` file.
+"golden-record" in that same directory is the generated client from that OpenAPI document.
 
 ## OpenAPI features supported
 

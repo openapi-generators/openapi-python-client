@@ -29,7 +29,7 @@ def _compare_directories(first: Path, second: Path):
 
 def test_end_to_end():
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "fastapi_app" / "openapi.json"
+    openapi_path = Path(__file__).parent / "openapi.json"
     config_path = Path(__file__).parent / "config.yml"
     gr_path = Path(__file__).parent / "golden-record"
     output_path = Path.cwd() / "my-test-api-client"

@@ -8,7 +8,7 @@ from openapi_python_client.cli import app
 
 if __name__ == "__main__":
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "fastapi_app" / "openapi.json"
+    openapi_path = Path(__file__).parent / "openapi.json"
     gr_path = Path(__file__).parent / "golden-record"
     shutil.rmtree(gr_path, ignore_errors=True)
     output_path = Path.cwd() / "my-test-api-client"

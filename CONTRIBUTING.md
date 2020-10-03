@@ -17,22 +17,19 @@
 
 1. Write some code and make sure it's covered by unit tests. All unit tests are in the `tests` directory and the file
    structure should mirror the structure of the source code in the `openapi_python_client` directory.
-2. When in a Poetry shell (`poetry shell`) run `task check` in order to run most of the same checks CI runs. This will 
-    auto-reformat the code, check type annotations, run unit tests, check code coverage, and lint the code.
+2. When in a Poetry shell (`poetry shell`) run `task check` in order to run most of the same checks CI runs. This will
+   auto-reformat the code, check type annotations, run unit tests, check code coverage, and lint the code.
 3. If you're writing a new feature, try to add it to the end to end test.
-   1. If adding support for a new OpenAPI feature
-      1. add the relevant feature to our FastAPI app in `end_to_end_tests/fastapi_app`.
-      2. Regenerate the OpenAPI document with `task openapi`.
-      3. Check `end_to_end_tests/openapi.json` to confirm it has the new feature you're trying to test.
-   2. Regenerate the "golden record" with `task gr`. This is a client generated from the OpenAPI document used for end to end testing.
+   1. If adding support for a new OpenAPI feature, add it somewhere in `end_to_end_tests/openapi.json`
+   2. Regenerate the "golden record" with `task regen`. This is a client generated from the OpenAPI document used for end to end testing.
    3. Check the changes to `end_to_end_tests/golden-record` to confirm only what you intended to change did change and that the changes look correct.
-4. Run the end to end tests with `task e2e`. This will generate a client against `end_to_end_tests/openapi.json` and 
-    compare it with `end_to_end_tests/golden-record`. The test will fail if **anything is different**. The end to end 
-    test is not included in `task check` as it takes longer to run and doesn't provide very useful feedback in the 
-    event of failure. If this test does fail, the easiest way to check what's wrong is to run `task gr` and check 
-    the diff of `golden-record`.
-5. Include a summary of your changes in `CHANGELOG.md`. If there isn't an "Unreleased" version in the CHANGELOG yet, 
-    go ahead and add one.
+4. Run the end to end tests with `task e2e`. This will generate a client against `end_to_end_tests/openapi.json` and
+   compare it with `end_to_end_tests/golden-record`. The test will fail if **anything is different**. The end to end
+   test is not included in `task check` as it takes longer to run and doesn't provide very useful feedback in the
+   event of failure. If this test does fail, the easiest way to check what's wrong is to run `task regen` and check
+   the diff of `golden-record`.
+5. Include a summary of your changes in `CHANGELOG.md`. If there isn't an "Unreleased" version in the CHANGELOG yet,
+   go ahead and add one.
 
 ## Creating a Pull Request
 
