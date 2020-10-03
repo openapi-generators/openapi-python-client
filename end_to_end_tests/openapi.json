@@ -6,26 +6,6 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/ping": {
-      "get": {
-        "summary": "Ping",
-        "description": "A quick check to see if the system is running ",
-        "operationId": "ping_ping_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Ping Ping Get",
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/tests/": {
       "get": {
         "tags": ["tests"],
@@ -510,6 +490,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/inline_objects": {
+      "post": {
+        "tags": ["tests"],
+        "summary": "Test Inline Objects",
+        "operationId": "test_inline_objects",
+        "requestBody": {
+          "description": "An inline body object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a_property": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inline object response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "a_property": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }

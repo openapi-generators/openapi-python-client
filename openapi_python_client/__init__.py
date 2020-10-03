@@ -95,7 +95,7 @@ class Project:
         errors = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
-        errors.extend(self.openapi.schemas.errors)
+        errors.extend(self.openapi.errors)
         return errors
 
     def _create_package(self) -> None:
@@ -148,7 +148,7 @@ class Project:
         imports = []
 
         model_template = self.env.get_template("model.pyi")
-        for model in self.openapi.schemas.models.values():
+        for model in self.openapi.models.values():
             module_path = models_dir / f"{model.reference.module_name}.py"
             module_path.write_text(model_template.render(model=model))
             imports.append(import_string_from_reference(model.reference))

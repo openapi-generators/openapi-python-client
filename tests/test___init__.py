@@ -411,7 +411,7 @@ def test__get_errors(mocker):
             "default": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[1]),
             "other": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[2]),
         },
-        schemas=mocker.MagicMock(autospec=Schemas, errors=[3]),
+        errors=[3],
     )
     project = Project(openapi=openapi)
 
