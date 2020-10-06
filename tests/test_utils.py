@@ -1,3 +1,5 @@
+import pytest
+
 from openapi_python_client import utils
 
 
@@ -34,3 +36,10 @@ def test_no_string_escapes():
 
 def test__fix_keywords():
     assert utils.fix_keywords("None") == "None_"
+
+
+def to_valid_python_identifier():
+    assert utils.to_valid_python_identifier("valid") == "valid"
+    assert utils.to_valid_python_identifier("1") == "field_1"
+    with pytest.raises(ValueError):
+        utils.to_valid_python_identifier("&")
