@@ -34,3 +34,29 @@ def kebab_case(value: str) -> str:
 
 def remove_string_escapes(value: str) -> str:
     return value.replace('"', r"\"")
+
+
+def to_valid_python_identifier(value: str) -> str:
+    """
+    Given a string, attempt to coerce it into a valid Python identifier.
+
+    If valid, return it unmodified.
+
+    If invalid, prepend a fixed prefix. This resolves some problems caused by the string's leading
+    character.
+
+    If that prefix does not make it a valid identifier - there are unsupported non-leading
+    characters - raise a ValueError.
+
+    See:
+        https://docs.python.org/3/reference/lexical_analysis.html#identifiers
+    """
+    if value.isidentifier():
+        return value
+
+    new_value = f"field_{value}"
+
+    if new_value.isidentifier():
+        return new_value
+
+    raise ValueError(f"Cannot convert {value} to a valid python identifier")
