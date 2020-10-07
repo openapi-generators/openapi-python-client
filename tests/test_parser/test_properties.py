@@ -36,24 +36,21 @@ class TestProperty:
     def test_to_string(self, mocker):
         from openapi_python_client.parser.properties import Property
 
-        name = mocker.MagicMock()
-        snake_case = mocker.patch("openapi_python_client.utils.snake_case")
+        name = "test"
         p = Property(name=name, required=True, default=None, nullable=False)
         get_type_string = mocker.patch.object(p, "get_type_string")
 
-        assert p.to_string() == f"{snake_case(name)}: {get_type_string()}"
+        assert p.to_string() == f"{name}: {get_type_string()}"
         p.required = False
-        assert p.to_string() == f"{snake_case(name)}: {get_type_string()} = None"
+        assert p.to_string() == f"{name}: {get_type_string()} = None"
 
         p.default = "TEST"
-        assert p.to_string() == f"{snake_case(name)}: {get_type_string()} = TEST"
+        assert p.to_string() == f"{name}: {get_type_string()} = TEST"
 
-    def test_get_imports(self, mocker):
+    def test_get_imports(self):
         from openapi_python_client.parser.properties import Property
 
-        name = mocker.MagicMock()
-        mocker.patch("openapi_python_client.utils.snake_case")
-        p = Property(name=name, required=True, default=None, nullable=False)
+        p = Property(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix="") == set()
 
         p.required = False
@@ -90,12 +87,10 @@ class TestStringProperty:
 
 
 class TestDateTimeProperty:
-    def test_get_imports(self, mocker):
+    def test_get_imports(self):
         from openapi_python_client.parser.properties import DateTimeProperty
 
-        name = mocker.MagicMock()
-        mocker.patch("openapi_python_client.utils.snake_case")
-        p = DateTimeProperty(name=name, required=True, default=None, nullable=False)
+        p = DateTimeProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
@@ -121,12 +116,10 @@ class TestDateTimeProperty:
 
 
 class TestDateProperty:
-    def test_get_imports(self, mocker):
+    def test_get_imports(self):
         from openapi_python_client.parser.properties import DateProperty
 
-        name = mocker.MagicMock()
-        mocker.patch("openapi_python_client.utils.snake_case")
-        p = DateProperty(name=name, required=True, default=None, nullable=False)
+        p = DateProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
@@ -152,13 +145,11 @@ class TestDateProperty:
 
 
 class TestFileProperty:
-    def test_get_imports(self, mocker):
+    def test_get_imports(self):
         from openapi_python_client.parser.properties import FileProperty
 
-        name = mocker.MagicMock()
-        mocker.patch("openapi_python_client.utils.snake_case")
         prefix = ".."
-        p = FileProperty(name=name, required=True, default=None, nullable=False)
+        p = FileProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {"from ..types import File"}
 
         p.required = False
@@ -342,9 +333,8 @@ class TestUnionProperty:
 
 class TestEnumProperty:
     def test___post_init__(self, mocker):
-        name = mocker.MagicMock()
+        name = "test"
 
-        snake_case = mocker.patch("openapi_python_client.utils.snake_case")
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
         deduped_reference = mocker.MagicMock(class_name="Deduped")
         from_ref = mocker.patch(
@@ -361,7 +351,7 @@ class TestEnumProperty:
         )
 
         assert enum_property.default == "Deduped.SECOND"
-        assert enum_property.python_name == snake_case(name)
+        assert enum_property.python_name == name
         from_ref.assert_has_calls([mocker.call("a_title"), mocker.call("MyTestEnum1")])
         assert enum_property.reference == deduped_reference
         assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
@@ -383,7 +373,7 @@ class TestEnumProperty:
             name=name, required=True, default="second", values=values, title="a_title", nullable=False
         )
         assert enum_property.default == "MyTestEnum.SECOND"
-        assert enum_property.python_name == snake_case(name)
+        assert enum_property.python_name == name
         from_ref.assert_called_once_with("a_title")
         assert enum_property.reference == fake_reference
         assert len(properties._existing_enums) == 2
@@ -558,10 +548,8 @@ class TestDictProperty:
     def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import DictProperty
 
-        name = mocker.MagicMock()
-        mocker.patch("openapi_python_client.utils.snake_case")
         prefix = mocker.MagicMock()
-        p = DictProperty(name=name, required=True, default=None, nullable=False)
+        p = DictProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
             "from typing import Dict",
         }

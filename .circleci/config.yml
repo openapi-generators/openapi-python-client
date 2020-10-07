@@ -36,7 +36,7 @@ jobs:
 
       - run:
           name: Safety
-          command: poetry run safety check --json > test-reports/safety/results.json
+          command: poetry export -f requirements.txt | poetry run safety check --stdin
 
       - run:
           name: mypy
@@ -78,4 +78,4 @@ workflows:
       - test:
           matrix:
             parameters:
-              python-version: ["3.6", "3.7", "3.8"]
+              python-version: ["3.6", "3.7", "3.8", "3.9"]

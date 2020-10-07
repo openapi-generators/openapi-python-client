@@ -584,6 +584,10 @@
             "title": "A Date",
             "type": "string",
             "format": "date"
+          },
+          "1_leading_digit": {
+            "title": "Leading Digit",
+            "type": "string"
           }
         },
         "description": "A Model for testing all the ways custom objects can be used "
