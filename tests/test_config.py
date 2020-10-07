@@ -33,3 +33,12 @@ class TestLoadConfig:
 
         assert Project.project_name_override == "project-name"
         assert Project.package_name_override == "package_name"
+
+    def test_field_prefix(self):
+        Config(field_prefix="blah").load_config()
+
+        from openapi_python_client import utils
+
+        assert utils.FIELD_PREFIX == "blah"
+
+        utils.FIELD_PREFIX = "field"

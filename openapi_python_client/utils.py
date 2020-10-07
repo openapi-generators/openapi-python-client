@@ -5,6 +5,7 @@ import stringcase
 
 
 def sanitize(value: str) -> str:
+    """ Removes every character that isn't 0-9, A-Z, a-z, ' ', -, or _ """
     return re.sub(r"[^\w _\-]+", "", value)
 
 
@@ -36,27 +37,21 @@ def remove_string_escapes(value: str) -> str:
     return value.replace('"', r"\"")
 
 
+# This can be changed by config.Config.load_config
+FIELD_PREFIX = "field"
+
+
 def to_valid_python_identifier(value: str) -> str:
     """
-    Given a string, attempt to coerce it into a valid Python identifier.
-
-    If valid, return it unmodified.
-
-    If invalid, prepend a fixed prefix. This resolves some problems caused by the string's leading
-    character.
-
-    If that prefix does not make it a valid identifier - there are unsupported non-leading
-    characters - raise a ValueError.
+    Given a string, attempt to coerce it into a valid Python identifier by stripping out invalid characters and, if
+    necessary, prepending a prefix.
 
     See:
         https://docs.python.org/3/reference/lexical_analysis.html#identifiers
     """
-    if value.isidentifier():
-        return value
-
-    new_value = f"field_{value}"
+    new_value = fix_keywords(sanitize(value))
 
     if new_value.isidentifier():
         return new_value
 
-    raise ValueError(f"Cannot convert {value} to a valid python identifier")
+    return f"{FIELD_PREFIX}_{new_value}"

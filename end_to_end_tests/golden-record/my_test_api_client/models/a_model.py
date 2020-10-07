@@ -17,7 +17,7 @@ class AModel:
     a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
     nested_list_of_enums: Optional[List[List[DifferentEnum]]] = None
-    field_1_leading_digit: Optional[str] = None
+    attr_1_leading_digit: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         an_enum_value = self.an_enum_value.value
@@ -45,7 +45,7 @@ class AModel:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
-        field_1_leading_digit = self.field_1_leading_digit
+        attr_1_leading_digit = self.attr_1_leading_digit
 
         return {
             "an_enum_value": an_enum_value,
@@ -53,7 +53,7 @@ class AModel:
             "aCamelDateTime": a_camel_date_time,
             "a_date": a_date,
             "nested_list_of_enums": nested_list_of_enums,
-            "1_leading_digit": field_1_leading_digit,
+            "1_leading_digit": attr_1_leading_digit,
         }
 
     @staticmethod
@@ -88,7 +88,7 @@ class AModel:
 
             nested_list_of_enums.append(nested_list_of_enums_item)
 
-        field_1_leading_digit = d.get("1_leading_digit")
+        attr_1_leading_digit = d.get("1_leading_digit")
 
         return AModel(
             an_enum_value=an_enum_value,
@@ -96,5 +96,5 @@ class AModel:
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,
             nested_list_of_enums=nested_list_of_enums,
-            field_1_leading_digit=field_1_leading_digit,
+            attr_1_leading_digit=attr_1_leading_digit,
         )
