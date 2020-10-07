@@ -41,4 +41,4 @@ class TestLoadConfig:
 
         assert utils.FIELD_PREFIX == "blah"
 
-        utils.FIELD_PREFIX = "field"
+        utils.FIELD_PREFIX = "field_"

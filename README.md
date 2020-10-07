@@ -115,12 +115,12 @@ package_name_override: my_extra_special_package_name
 ### field_prefix
 
 When generating properties, the `name` attribute of the OpenAPI schema will be used. When the `name` is not a valid 
-Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field".
+Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field_".
 
 Example:
 
 ```yaml
-field_prefix: attr
+field_prefix: attr_
 ```
 
 [changelog.md]: CHANGELOG.md

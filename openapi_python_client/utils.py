@@ -38,7 +38,7 @@ def remove_string_escapes(value: str) -> str:
 
 
 # This can be changed by config.Config.load_config
-FIELD_PREFIX = "field"
+FIELD_PREFIX = "field_"
 
 
 def to_valid_python_identifier(value: str) -> str:
@@ -54,4 +54,4 @@ def to_valid_python_identifier(value: str) -> str:
     if new_value.isidentifier():
         return new_value
 
-    return f"{FIELD_PREFIX}_{new_value}"
+    return f"{FIELD_PREFIX}{new_value}"
