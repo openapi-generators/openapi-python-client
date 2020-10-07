@@ -5,6 +5,7 @@ import stringcase
 
 
 def sanitize(value: str) -> str:
+    """ Removes every character that isn't 0-9, A-Z, a-z, ' ', -, or _ """
     return re.sub(r"[^\w _\-]+", "", value)
 
 
@@ -34,3 +35,23 @@ def kebab_case(value: str) -> str:
 
 def remove_string_escapes(value: str) -> str:
     return value.replace('"', r"\"")
+
+
+# This can be changed by config.Config.load_config
+FIELD_PREFIX = "field_"
+
+
+def to_valid_python_identifier(value: str) -> str:
+    """
+    Given a string, attempt to coerce it into a valid Python identifier by stripping out invalid characters and, if
+    necessary, prepending a prefix.
+
+    See:
+        https://docs.python.org/3/reference/lexical_analysis.html#identifiers
+    """
+    new_value = fix_keywords(sanitize(value))
+
+    if new_value.isidentifier():
+        return new_value
+
+    return f"{FIELD_PREFIX}{new_value}"

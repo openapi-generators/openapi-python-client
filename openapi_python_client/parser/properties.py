@@ -36,7 +36,7 @@ class Property:
     python_name: str = field(init=False)
 
     def __post_init__(self) -> None:
-        self.python_name = utils.snake_case(self.name)
+        self.python_name = utils.to_valid_python_identifier(utils.snake_case(self.name))
         if self.default is not None:
             self.default = self._validate_default(default=self.default)
 
