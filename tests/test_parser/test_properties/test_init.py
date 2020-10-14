@@ -1,7 +1,7 @@
 import pytest
 
 import openapi_python_client.schema as oai
-from openapi_python_client.parser.errors import PropertyError, ValidationError
+from openapi_python_client.parser.errors import ParseError, PropertyError, ValidationError
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -343,42 +343,54 @@ class TestEnumProperty:
         from openapi_python_client.parser import properties
 
         fake_dup_enum = mocker.MagicMock()
-        properties._existing_enums = {"MyTestEnum": fake_dup_enum}
         values = {"FIRST": "first", "SECOND": "second"}
 
         enum_property = properties.EnumProperty(
-            name=name, required=True, default="second", values=values, title="a_title", nullable=False
+            name=name,
+            required=True,
+            default="second",
+            values=values,
+            title="a_title",
+            nullable=False,
+            existing_enums={"MyTestEnum": fake_dup_enum},
         )
 
         assert enum_property.default == "Deduped.SECOND"
         assert enum_property.python_name == name
         from_ref.assert_has_calls([mocker.call("a_title"), mocker.call("MyTestEnum1")])
         assert enum_property.reference == deduped_reference
-        assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
 
         # Test encountering exactly the same Enum again
         assert (
             properties.EnumProperty(
-                name=name, required=True, default="second", values=values, title="a_title", nullable=False
+                name=name,
+                required=True,
+                default="second",
+                values=values,
+                title="a_title",
+                nullable=False,
+                existing_enums={"MyTestEnum": fake_dup_enum, "Deduped": enum_property},
             )
             == enum_property
         )
-        assert properties._existing_enums == {"MyTestEnum": fake_dup_enum, "Deduped": enum_property}
 
         # What if an Enum exists with the same name, but has the same values? Don't dedupe that.
         fake_dup_enum.values = values
         from_ref.reset_mock()
         from_ref.side_effect = [fake_reference]
         enum_property = properties.EnumProperty(
-            name=name, required=True, default="second", values=values, title="a_title", nullable=False
+            name=name,
+            required=True,
+            default="second",
+            values=values,
+            title="a_title",
+            nullable=False,
+            existing_enums={"MyTestEnum": fake_dup_enum, "Deduped": enum_property},
         )
         assert enum_property.default == "MyTestEnum.SECOND"
         assert enum_property.python_name == name
         from_ref.assert_called_once_with("a_title")
         assert enum_property.reference == fake_reference
-        assert len(properties._existing_enums) == 2
-
-        properties._existing_enums = {}
 
     def test_get_type_string(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum")
@@ -387,13 +399,12 @@ class TestEnumProperty:
         from openapi_python_client.parser import properties
 
         enum_property = properties.EnumProperty(
-            name="test", required=True, default=None, values={}, title="a_title", nullable=False
+            name="test", required=True, default=None, values={}, title="a_title", nullable=False, existing_enums={}
         )
 
         assert enum_property.get_type_string() == "MyTestEnum"
         enum_property.required = False
         assert enum_property.get_type_string() == "Optional[MyTestEnum]"
-        properties._existing_enums = {}
 
     def test_get_imports(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")
@@ -403,7 +414,7 @@ class TestEnumProperty:
         from openapi_python_client.parser import properties
 
         enum_property = properties.EnumProperty(
-            name="test", required=True, default=None, values={}, title="a_title", nullable=False
+            name="test", required=True, default=None, values={}, title="a_title", nullable=False, existing_enums={}
         )
 
         assert enum_property.get_imports(prefix=prefix) == {
@@ -415,7 +426,6 @@ class TestEnumProperty:
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
             "from typing import Optional",
         }
-        properties._existing_enums = {}
 
     def test_values_from_list(self):
         from openapi_python_client.parser.properties import EnumProperty
@@ -442,20 +452,6 @@ class TestEnumProperty:
         with pytest.raises(ValueError):
             EnumProperty.values_from_list(data)
 
-    def test_get_all_enums(self, mocker):
-        from openapi_python_client.parser import properties
-
-        properties._existing_enums = mocker.MagicMock()
-        assert properties.EnumProperty.get_all_enums() == properties._existing_enums
-        properties._existing_enums = {}
-
-    def test_get_enum(self):
-        from openapi_python_client.parser import properties
-
-        properties._existing_enums = {"test": "an enum"}
-        assert properties.EnumProperty.get_enum("test") == "an enum"
-        properties._existing_enums = {}
-
     def test__validate_default(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
@@ -463,85 +459,95 @@ class TestEnumProperty:
         from openapi_python_client.parser import properties
 
         enum_property = properties.EnumProperty(
-            name="test", required=True, default="test", values={"TEST": "test"}, title="a_title", nullable=False
+            name="test",
+            required=True,
+            default="test",
+            values={"TEST": "test"},
+            title="a_title",
+            nullable=False,
+            existing_enums={},
         )
         assert enum_property.default == "MyTestEnum.TEST"
 
         with pytest.raises(ValidationError):
             properties.EnumProperty(
-                name="test", required=True, default="bad_val", values={"TEST": "test"}, title="a_title", nullable=False
+                name="test",
+                required=True,
+                default="bad_val",
+                values={"TEST": "test"},
+                title="a_title",
+                nullable=False,
+                existing_enums={},
             )
 
-        properties._existing_enums = {}
 
-
-class TestRefProperty:
-    def test_template(self, mocker):
-        from openapi_python_client.parser.properties import RefProperty
-
-        ref_property = RefProperty(
-            name="test",
-            required=True,
-            default=None,
-            reference=mocker.MagicMock(class_name="MyRefClass"),
-            nullable=False,
-        )
-
-        assert ref_property.template == "ref_property.pyi"
-
-        mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value="an enum")
-
-        assert ref_property.template == "enum_property.pyi"
-
-    def test_get_type_string(self, mocker):
-        from openapi_python_client.parser.properties import RefProperty
-
-        ref_property = RefProperty(
-            name="test",
-            required=True,
-            default=None,
-            reference=mocker.MagicMock(class_name="MyRefClass"),
-            nullable=False,
-        )
-
-        assert ref_property.get_type_string() == "MyRefClass"
-
-        ref_property.required = False
-        assert ref_property.get_type_string() == "Optional[MyRefClass]"
-
-    def test_get_imports(self, mocker):
-        fake_reference = mocker.MagicMock(class_name="MyRefClass", module_name="my_test_enum")
-        prefix = mocker.MagicMock()
-
-        from openapi_python_client.parser.properties import RefProperty
-
-        p = RefProperty(name="test", required=True, default=None, reference=fake_reference, nullable=False)
-
-        assert p.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Dict",
-            "from typing import cast",
-        }
-
-        p.required = False
-        assert p.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Dict",
-            "from typing import cast",
-            "from typing import Optional",
-        }
-
-    def test__validate_default(self, mocker):
-        from openapi_python_client.parser.properties import RefProperty
-
-        with pytest.raises(ValidationError):
-            RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
-
-        enum_property = mocker.MagicMock()
-        enum_property._validate_default.return_value = "val1"
-        mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value=enum_property)
-        p = RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
-        assert p.default == "val1"
+# class TestRefProperty:
+#     def test_template(self, mocker):
+#         from openapi_python_client.parser.properties import RefProperty
+#
+#         ref_property = RefProperty(
+#             name="test",
+#             required=True,
+#             default=None,
+#             reference=mocker.MagicMock(class_name="MyRefClass"),
+#             nullable=False,
+#         )
+#
+#         assert ref_property.template == "ref_property.pyi"
+#
+#         mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value="an enum")
+#
+#         assert ref_property.template == "enum_property.pyi"
+#
+#     def test_get_type_string(self, mocker):
+#         from openapi_python_client.parser.properties import RefProperty
+#
+#         ref_property = RefProperty(
+#             name="test",
+#             required=True,
+#             default=None,
+#             reference=mocker.MagicMock(class_name="MyRefClass"),
+#             nullable=False,
+#         )
+#
+#         assert ref_property.get_type_string() == "MyRefClass"
+#
+#         ref_property.required = False
+#         assert ref_property.get_type_string() == "Optional[MyRefClass]"
+#
+#     def test_get_imports(self, mocker):
+#         fake_reference = mocker.MagicMock(class_name="MyRefClass", module_name="my_test_enum")
+#         prefix = mocker.MagicMock()
+#
+#         from openapi_python_client.parser.properties import RefProperty
+#
+#         p = RefProperty(name="test", required=True, default=None, reference=fake_reference, nullable=False)
+#
+#         assert p.get_imports(prefix=prefix) == {
+#             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
+#             "from typing import Dict",
+#             "from typing import cast",
+#         }
+#
+#         p.required = False
+#         assert p.get_imports(prefix=prefix) == {
+#             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
+#             "from typing import Dict",
+#             "from typing import cast",
+#             "from typing import Optional",
+#         }
+#
+#     def test__validate_default(self, mocker):
+#         from openapi_python_client.parser.properties import RefProperty
+#
+#         with pytest.raises(ValidationError):
+#             RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
+#
+#         enum_property = mocker.MagicMock()
+#         enum_property._validate_default.return_value = "val1"
+#         mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value=enum_property)
+#         p = RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
+#         assert p.default == "val1"
 
 
 class TestDictProperty:
@@ -584,9 +590,11 @@ class TestPropertyFromData:
         EnumProperty = mocker.patch(f"{MODULE_NAME}.EnumProperty")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
-        from openapi_python_client.parser.properties import property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        p = property_from_data(name=name, required=required, data=data)
+        schemas = Schemas(enums={"blah": mocker.MagicMock()})
+
+        prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
         EnumProperty.values_from_list.assert_called_once_with(data.enum)
         EnumProperty.assert_called_once_with(
@@ -596,56 +604,79 @@ class TestPropertyFromData:
             default=data.default,
             title=name,
             nullable=data.nullable,
+            existing_enums=schemas.enums,
         )
-        assert p == EnumProperty()
+        assert prop == EnumProperty.return_value
+        assert schemas != new_schemas, "Provided Schemas was mutated"
+        assert new_schemas.enums == {
+            "blah": new_schemas.enums["blah"],
+            EnumProperty.return_value.reference.class_name: EnumProperty.return_value,
+        }
 
-        EnumProperty.reset_mock()
-        data.title = mocker.MagicMock()
+    def test_property_from_data_ref_enum(self, mocker):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        property_from_data(
-            name=name,
-            required=required,
-            data=data,
-        )
-        EnumProperty.assert_called_once_with(
-            name=name,
-            required=required,
-            values=EnumProperty.values_from_list(),
-            default=data.default,
-            title=data.title,
-            nullable=data.nullable,
-        )
-
-    def test_property_from_data_ref(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Reference.construct(ref=mocker.MagicMock())
         from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
-        RefProperty = mocker.patch(f"{MODULE_NAME}.RefProperty")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        enum = mocker.MagicMock()
+        schemas = Schemas(enums={from_ref.return_value.class_name: enum})
 
-        from openapi_python_client.parser.properties import property_from_data
-
-        p = property_from_data(name=name, required=required, data=data)
+        prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
         from_ref.assert_called_once_with(data.ref)
-        RefProperty.assert_called_once_with(
-            name=name, required=required, reference=from_ref(), default=None, nullable=False
-        )
-        assert p == RefProperty()
+        assert prop == enum
+        assert schemas == new_schemas
+
+    def test_property_from_data_ref_model(self, mocker):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Reference.construct(ref=mocker.MagicMock())
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        model = mocker.MagicMock()
+        schemas = Schemas(models={from_ref.return_value.class_name: model})
+
+        prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
+
+        from_ref.assert_called_once_with(data.ref)
+        assert prop == model
+        assert schemas == new_schemas
+
+    def test_property_from_data_ref_not_found(self, mocker):
+        from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
+
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Reference.construct(ref=mocker.MagicMock())
+        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        schemas = Schemas()
+
+        prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
+
+        from_ref.assert_called_once_with(data.ref)
+        assert prop == PropertyError(data=data, detail="Could not find reference in parsed models or enums")
+        assert schemas == new_schemas
 
     def test_property_from_data_string(self, mocker):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
         _string_based_property = mocker.patch(f"{MODULE_NAME}._string_based_property")
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema.construct(type="string")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        schemas = Schemas()
 
-        from openapi_python_client.parser.properties import property_from_data
-
-        p = property_from_data(name=name, required=required, data=data)
+        p, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
         assert p == _string_based_property.return_value
+        assert schemas == new_schemas
         _string_based_property.assert_called_once_with(name=name, required=required, data=data)
 
     @pytest.mark.parametrize(
@@ -654,22 +685,23 @@ class TestPropertyFromData:
             ("number", "FloatProperty"),
             ("integer", "IntProperty"),
             ("boolean", "BooleanProperty"),
-            ("object", "DictProperty"),
         ],
     )
     def test_property_from_data_simple_types(self, mocker, openapi_type, python_type):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema.construct(type=openapi_type)
         clazz = mocker.patch(f"{MODULE_NAME}.{python_type}")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        schemas = Schemas()
 
-        from openapi_python_client.parser.properties import property_from_data
-
-        p = property_from_data(name=name, required=required, data=data)
+        p, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
         clazz.assert_called_once_with(name=name, required=required, default=None, nullable=False)
-        assert p == clazz()
+        assert p == clazz.return_value
+        assert new_schemas == schemas
 
         # Test optional values
         clazz.reset_mock()
@@ -680,56 +712,151 @@ class TestPropertyFromData:
             name=name,
             required=required,
             data=data,
+            schemas=schemas,
         )
         clazz.assert_called_once_with(name=name, required=required, default=data.default, nullable=data.nullable)
 
     def test_property_from_data_array(self, mocker):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema(
             type="array",
             items={"type": "number", "default": "0.0"},
         )
-        ListProperty = mocker.patch(f"{MODULE_NAME}.ListProperty")
-        FloatProperty = mocker.patch(f"{MODULE_NAME}.FloatProperty")
+        build_list_property = mocker.patch(f"{MODULE_NAME}.build_list_property")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        schemas = Schemas()
 
-        from openapi_python_client.parser.properties import property_from_data
+        response = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
-        p = property_from_data(name=name, required=required, data=data)
+        assert response == build_list_property.return_value
+        build_list_property.assert_called_once_with(data=data, name=name, required=required, schemas=schemas)
 
-        FloatProperty.assert_called_once_with(name=name, required=True, default="0.0", nullable=False)
-        ListProperty.assert_called_once_with(
-            name=name, required=required, default=None, inner_property=FloatProperty.return_value, nullable=False
-        )
-        assert p == ListProperty.return_value
+    def test_property_from_data_union(self, mocker):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
-    def test_property_from_data_array_no_items(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema(type="array")
+        data = oai.Schema.construct(
+            anyOf=[{"type": "number", "default": "0.0"}],
+            oneOf=[
+                {"type": "integer", "default": "0"},
+            ],
+        )
+        build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        schemas = Schemas()
 
-        from openapi_python_client.parser.properties import property_from_data
+        response = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
-        p = property_from_data(name=name, required=required, data=data)
+        assert response == build_union_property.return_value
+        build_union_property.assert_called_once_with(data=data, name=name, required=required, schemas=schemas)
+
+    def test_property_from_data_unsupported_type(self, mocker):
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Schema.construct(type=mocker.MagicMock())
+
+        from openapi_python_client.parser.errors import PropertyError
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        assert property_from_data(name=name, required=required, data=data, schemas=Schemas()) == (
+            PropertyError(data=data, detail=f"unknown type {data.type}"),
+            Schemas(),
+        )
+
+    def test_property_from_data_no_valid_props_in_data(self):
+        from openapi_python_client.parser.errors import PropertyError
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        schemas = Schemas()
+        data = oai.Schema()
+
+        err, new_schemas = property_from_data(name="blah", required=True, data=data, schemas=schemas)
+
+        assert err == PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
+        assert new_schemas == schemas
+
+    def test_property_from_data_validation_error(self, mocker):
+        from openapi_python_client.parser.errors import PropertyError
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        mocker.patch(f"{MODULE_NAME}._property_from_data").side_effect = ValidationError()
+        schemas = Schemas()
+
+        data = oai.Schema()
+        err, new_schemas = property_from_data(name="blah", required=True, data=data, schemas=schemas)
+        assert err == PropertyError(detail="Failed to validate default value", data=data)
+        assert new_schemas == schemas
+
+
+class TestBuildListProperty:
+    def test_build_list_property_no_items(self, mocker):
+        from openapi_python_client.parser import properties
+
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Schema.construct(type="array")
+        property_from_data = mocker.patch.object(properties, "property_from_data")
+        schemas = properties.Schemas()
+
+        p, new_schemas = properties.build_list_property(name=name, required=required, data=data, schemas=schemas)
 
         assert p == PropertyError(data=data, detail="type array must have items defined")
+        assert new_schemas == schemas
+        property_from_data.assert_not_called()
 
-    def test_property_from_data_array_invalid_items(self, mocker):
+    def test_build_list_property_invalid_items(self, mocker):
+        from openapi_python_client.parser import properties
+
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Schema(
             type="array",
             items={},
         )
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+        schemas = properties.Schemas()
+        second_schemas = properties.Schemas(errors=["error"])
+        property_from_data = mocker.patch.object(
+            properties, "property_from_data", return_value=(properties.PropertyError(data="blah"), second_schemas)
+        )
 
-        from openapi_python_client.parser.properties import property_from_data
+        p, new_schemas = properties.build_list_property(name=name, required=required, data=data, schemas=schemas)
 
-        p = property_from_data(name=name, required=required, data=data)
+        assert p == PropertyError(data="blah", detail=f"invalid data in items of array {name}")
+        assert new_schemas == second_schemas
+        assert schemas != new_schemas, "Schema was mutated"
+        property_from_data.assert_called_once_with(name=f"{name}_item", required=True, data=data.items, schemas=schemas)
 
-        assert p == PropertyError(data=oai.Schema(), detail=f"invalid data in items of array {name}")
+    def test_build_list_property(self, mocker):
+        from openapi_python_client.parser import properties
 
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Schema(
+            type="array",
+            items={},
+        )
+        schemas = properties.Schemas()
+        second_schemas = properties.Schemas(errors=["error"])
+        property_from_data = mocker.patch.object(
+            properties, "property_from_data", return_value=(mocker.MagicMock(), second_schemas)
+        )
+        mocker.patch("openapi_python_client.utils.snake_case", return_value=name)
+        mocker.patch("openapi_python_client.utils.to_valid_python_identifier", return_value=name)
+
+        p, new_schemas = properties.build_list_property(name=name, required=required, data=data, schemas=schemas)
+
+        assert isinstance(p, properties.ListProperty)
+        assert p.inner_property == property_from_data.return_value[0]
+        assert new_schemas == second_schemas
+        assert schemas != new_schemas, "Schema was mutated"
+        property_from_data.assert_called_once_with(name=f"{name}_item", required=True, data=data.items, schemas=schemas)
+
+
+class TestBuildUnionProperty:
     def test_property_from_data_union(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
@@ -770,38 +897,6 @@ class TestPropertyFromData:
         p = property_from_data(name=name, required=required, data=data)
 
         assert p == PropertyError(detail=f"Invalid property in union {name}", data=oai.Schema())
-
-    def test_property_from_data_unsupported_type(self, mocker):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Schema.construct(type=mocker.MagicMock())
-
-        from openapi_python_client.parser.errors import PropertyError
-        from openapi_python_client.parser.properties import property_from_data
-
-        assert property_from_data(name=name, required=required, data=data) == PropertyError(
-            data=data, detail=f"unknown type {data.type}"
-        )
-
-    def test_property_from_data_no_valid_props_in_data(self):
-        from openapi_python_client.parser.errors import PropertyError
-        from openapi_python_client.parser.properties import property_from_data
-
-        data = oai.Schema()
-        assert property_from_data(name="blah", required=True, data=data) == PropertyError(
-            data=data, detail="Schemas must either have one of enum, anyOf, or type defined."
-        )
-
-    def test_property_from_data_validation_error(self, mocker):
-        from openapi_python_client.parser.errors import PropertyError
-        from openapi_python_client.parser.properties import property_from_data
-
-        mocker.patch(f"{MODULE_NAME}._property_from_data").side_effect = ValidationError()
-
-        data = oai.Schema()
-        assert property_from_data(name="blah", required=True, data=data) == PropertyError(
-            detail="Failed to validate default value", data=data
-        )
 
 
 class TestStringBasedProperty:
@@ -935,3 +1030,130 @@ class TestStringBasedProperty:
         StringProperty.assert_called_once_with(
             name=name, required=required, pattern=data.pattern, default=data.default, nullable=data.nullable
         )
+
+
+def test_model_from_data(mocker):
+    from openapi_python_client.parser.properties import Property
+
+    in_data = oai.Schema.construct(
+        title=mocker.MagicMock(),
+        description=mocker.MagicMock(),
+        required=["RequiredEnum"],
+        properties={
+            "RequiredEnum": mocker.MagicMock(),
+            "OptionalDateTime": mocker.MagicMock(),
+        },
+    )
+    required_property = mocker.MagicMock(autospec=Property)
+    required_imports = mocker.MagicMock()
+    required_property.get_imports.return_value = {required_imports}
+    optional_property = mocker.MagicMock(autospec=Property)
+    optional_imports = mocker.MagicMock()
+    optional_property.get_imports.return_value = {optional_imports}
+    property_from_data = mocker.patch(
+        f"{MODULE_NAME}.property_from_data",
+        side_effect=[required_property, optional_property],
+    )
+    from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+
+    from openapi_python_client.parser.model import Model, model_from_data
+
+    result = model_from_data(data=in_data, name=mocker.MagicMock())
+
+    from_ref.assert_called_once_with(in_data.title)
+    property_from_data.assert_has_calls(
+        [
+            mocker.call(name="RequiredEnum", required=True, data=in_data.properties["RequiredEnum"]),
+            mocker.call(name="OptionalDateTime", required=False, data=in_data.properties["OptionalDateTime"]),
+        ]
+    )
+    required_property.get_imports.assert_called_once_with(prefix="..")
+    optional_property.get_imports.assert_called_once_with(prefix="..")
+    assert result == Model(
+        reference=from_ref(),
+        required_properties=[required_property],
+        optional_properties=[optional_property],
+        relative_imports={
+            required_imports,
+            optional_imports,
+        },
+        description=in_data.description,
+    )
+
+
+def test_model_from_data_property_parse_error(mocker):
+    in_data = oai.Schema.construct(
+        title=mocker.MagicMock(),
+        description=mocker.MagicMock(),
+        required=["RequiredEnum"],
+        properties={
+            "RequiredEnum": mocker.MagicMock(),
+            "OptionalDateTime": mocker.MagicMock(),
+        },
+    )
+    parse_error = ParseError(data=mocker.MagicMock())
+    property_from_data = mocker.patch(
+        f"{MODULE_NAME}.property_from_data",
+        return_value=parse_error,
+    )
+    from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
+
+    from openapi_python_client.parser.model import model_from_data
+
+    result = model_from_data(data=in_data, name=mocker.MagicMock())
+
+    from_ref.assert_called_once_with(in_data.title)
+    property_from_data.assert_called_once_with(
+        name="RequiredEnum", required=True, data=in_data.properties["RequiredEnum"]
+    )
+
+    assert result == parse_error
+
+
+def test_build_schemas(mocker):
+    build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
+    in_data = {"1": mocker.MagicMock(enum=None), "2": mocker.MagicMock(enum=None), "3": mocker.MagicMock(enum=None)}
+    model_1 = mocker.MagicMock()
+    schemas_1 = mocker.MagicMock()
+    model_2 = mocker.MagicMock()
+    schemas_2 = mocker.MagicMock()
+    error = PropertyError()
+    schemas_3 = mocker.MagicMock(errors=[])
+    build_model_property.side_effect = [(model_1, schemas_1), (model_2, schemas_2), (error, schemas_3)]
+
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+
+    result = build_schemas(components=in_data)
+
+    build_model_property.assert_has_calls(
+        [
+            mocker.call(data=in_data["1"], name="1", schemas=Schemas(), required=True),
+            mocker.call(data=in_data["2"], name="2", schemas=schemas_1, required=True),
+            mocker.call(data=in_data["3"], name="3", schemas=schemas_2, required=True),
+        ]
+    )
+    assert result == schemas_3
+    assert result.errors == [error]
+
+
+def test_build_parse_error_on_reference():
+    from openapi_python_client.parser.openapi import build_schemas
+
+    ref_schema = oai.Reference.construct()
+    in_data = {"1": ref_schema}
+    result = build_schemas(components=in_data)
+    assert result.errors[0] == PropertyError(data=ref_schema, detail="Reference schemas are not supported.")
+
+
+def test_build_enums(mocker):
+    from openapi_python_client.parser.openapi import build_schemas
+
+    build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
+    schemas = mocker.MagicMock()
+    build_enum_property = mocker.patch(f"{MODULE_NAME}.build_enum_property", return_value=(mocker.MagicMock(), schemas))
+    in_data = {"1": mocker.MagicMock(enum=["val1", "val2", "val3"])}
+
+    build_schemas(components=in_data)
+
+    build_enum_property.assert_called()
+    build_model_property.assert_not_called()

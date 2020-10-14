@@ -21,10 +21,10 @@ def _get_kwargs(
     headers: Dict[str, Any] = client.get_headers()
 
     json_an_enum_value = []
-    for an_enum_value_item_data in an_enum_value:
-        an_enum_value_item = an_enum_value_item_data.value
+    for an_enum_data in an_enum_value:
+        an_enum = an_enum_data.value
 
-        json_an_enum_value.append(an_enum_value_item)
+        json_an_enum_value.append(an_enum)
 
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
