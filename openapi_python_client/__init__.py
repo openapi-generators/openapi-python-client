@@ -76,7 +76,7 @@ class Project:
 
     def _reformat(self) -> None:
         subprocess.run(
-            "autoflake -i -r --remove-all-unused-imports --remove-unused-variables .",
+            "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
             cwd=self.package_dir,
             shell=True,
             stdout=subprocess.PIPE,
