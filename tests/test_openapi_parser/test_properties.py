@@ -26,7 +26,7 @@ class TestProperty:
 
         assert p.get_type_string() == "TestType"
         p.required = False
-        assert p.get_type_string() == "Optional[TestType]"
+        assert p.get_type_string() == "TestType"
         assert p.get_type_string(True) == "TestType"
 
         p.required = False
@@ -41,7 +41,12 @@ class TestProperty:
         get_type_string = mocker.patch.object(p, "get_type_string")
 
         assert p.to_string() == f"{name}: {get_type_string()}"
+
         p.required = False
+        assert p.to_string() == f"{name}: {get_type_string()} = cast({get_type_string()}, UNSET)"
+
+        p.required = True
+        p.nullable = True
         assert p.to_string() == f"{name}: {get_type_string()} = None"
 
         p.default = "TEST"
@@ -54,7 +59,7 @@ class TestProperty:
         assert p.get_imports(prefix="") == set()
 
         p.required = False
-        assert p.get_imports(prefix="") == {"from typing import Optional"}
+        assert p.get_imports(prefix="") == {"from typing import cast, Optional", "from types import UNSET, Unset"}
 
     def test__validate_default(self):
         from openapi_python_client.parser.properties import Property
@@ -77,6 +82,8 @@ class TestStringProperty:
 
         assert p.get_type_string() == "str"
         p.required = False
+        assert p.get_type_string() == "str"
+        p.nullable = True
         assert p.get_type_string() == "Optional[str]"
 
     def test__validate_default(self):
@@ -99,10 +106,20 @@ class TestDateTimeProperty:
 
         p.required = False
         assert p.get_imports(prefix="...") == {
-            "from typing import Optional",
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = True
+        assert p.get_imports(prefix="...") == {
+            "import datetime",
+            "from typing import cast",
+            "from dateutil.parser import isoparse",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self):
@@ -127,11 +144,21 @@ class TestDateProperty:
         }
 
         p.required = False
-        assert p.get_imports(prefix="..") == {
-            "from typing import Optional",
+        assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = True
+        assert p.get_imports(prefix="...") == {
+            "import datetime",
+            "from typing import cast",
+            "from dateutil.parser import isoparse",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self):
@@ -148,14 +175,24 @@ class TestFileProperty:
     def test_get_imports(self):
         from openapi_python_client.parser.properties import FileProperty
 
-        prefix = ".."
+        prefix = "..."
         p = FileProperty(name="test", required=True, default=None, nullable=False)
-        assert p.get_imports(prefix=prefix) == {"from ..types import File"}
+        assert p.get_imports(prefix=prefix) == {
+            "from ...types import File",
+        }
 
         p.required = False
         assert p.get_imports(prefix=prefix) == {
-            "from typing import Optional",
-            "from ..types import File",
+            "from ...types import File",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = True
+        assert p.get_imports(prefix=prefix) == {
+            "from ...types import File",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self):
@@ -217,7 +254,11 @@ class TestListProperty:
         p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
 
         assert p.get_type_string() == f"List[{inner_type_string}]"
+
         p.required = False
+        assert p.get_type_string() == f"List[{inner_type_string}]"
+
+        p.nullable = True
         assert p.get_type_string() == f"Optional[List[{inner_type_string}]]"
 
     def test_get_type_imports(self, mocker):
@@ -226,18 +267,28 @@ class TestListProperty:
         inner_property = mocker.MagicMock()
         inner_import = mocker.MagicMock()
         inner_property.get_imports.return_value = {inner_import}
-        prefix = mocker.MagicMock()
+        prefix = "..."
         p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
 
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import List",
         }
+
         p.required = False
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import List",
-            "from typing import Optional",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = True
+        assert p.get_imports(prefix=prefix) == {
+            inner_import,
+            "from typing import List",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self, mocker):
@@ -266,7 +317,11 @@ class TestUnionProperty:
         )
 
         assert p.get_type_string() == "Union[inner_type_string_1, inner_type_string_2]"
+
         p.required = False
+        assert p.get_type_string() == "Union[inner_type_string_1, inner_type_string_2]"
+
+        p.nullable = True
         assert p.get_type_string() == "Optional[Union[inner_type_string_1, inner_type_string_2]]"
 
     def test_get_type_imports(self, mocker):
@@ -278,7 +333,7 @@ class TestUnionProperty:
         inner_property_2 = mocker.MagicMock()
         inner_import_2 = mocker.MagicMock()
         inner_property_2.get_imports.return_value = {inner_import_2}
-        prefix = mocker.MagicMock()
+        prefix = "..."
         p = UnionProperty(
             name="test",
             required=True,
@@ -292,12 +347,23 @@ class TestUnionProperty:
             inner_import_2,
             "from typing import Union",
         }
+
         p.required = False
         assert p.get_imports(prefix=prefix) == {
             inner_import_1,
             inner_import_2,
             "from typing import Union",
-            "from typing import Optional",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = True
+        assert p.get_imports(prefix=prefix) == {
+            inner_import_1,
+            inner_import_2,
+            "from typing import Union",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self, mocker):
@@ -391,14 +457,19 @@ class TestEnumProperty:
         )
 
         assert enum_property.get_type_string() == "MyTestEnum"
+
         enum_property.required = False
+        assert enum_property.get_type_string() == "MyTestEnum"
+
+        enum_property.nullable = True
         assert enum_property.get_type_string() == "Optional[MyTestEnum]"
+
         properties._existing_enums = {}
 
     def test_get_imports(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")
         mocker.patch(f"{MODULE_NAME}.Reference.from_ref", return_value=fake_reference)
-        prefix = mocker.MagicMock()
+        prefix = "..."
 
         from openapi_python_client.parser import properties
 
@@ -407,14 +478,23 @@ class TestEnumProperty:
         )
 
         assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}"
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
         }
 
         enum_property.required = False
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Optional",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
+
+        enum_property.nullable = True
+        assert enum_property.get_imports(prefix=prefix) == {
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
         properties._existing_enums = {}
 
     def test_values_from_list(self):
@@ -507,11 +587,14 @@ class TestRefProperty:
         assert ref_property.get_type_string() == "MyRefClass"
 
         ref_property.required = False
+        assert ref_property.get_type_string() == "MyRefClass"
+
+        ref_property.nullable = True
         assert ref_property.get_type_string() == "Optional[MyRefClass]"
 
     def test_get_imports(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyRefClass", module_name="my_test_enum")
-        prefix = mocker.MagicMock()
+        prefix = "..."
 
         from openapi_python_client.parser.properties import RefProperty
 
@@ -528,7 +611,17 @@ class TestRefProperty:
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
             "from typing import Dict",
             "from typing import cast",
-            "from typing import Optional",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = True
+        assert p.get_imports(prefix=prefix) == {
+            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
+            "from typing import Dict",
+            "from typing import cast",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self, mocker):
@@ -548,7 +641,7 @@ class TestDictProperty:
     def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import DictProperty
 
-        prefix = mocker.MagicMock()
+        prefix = "..."
         p = DictProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
             "from typing import Dict",
@@ -556,16 +649,25 @@ class TestDictProperty:
 
         p.required = False
         assert p.get_imports(prefix=prefix) == {
-            "from typing import Optional",
             "from typing import Dict",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
+        }
+
+        p.nullable = False
+        assert p.get_imports(prefix=prefix) == {
+            "from typing import Dict",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
         p.default = mocker.MagicMock()
         assert p.get_imports(prefix=prefix) == {
-            "from typing import Optional",
             "from typing import Dict",
             "from typing import cast",
             "from dataclasses import field",
+            "from typing import cast, Optional",
+            "from ...types import UNSET, Unset",
         }
 
     def test__validate_default(self):

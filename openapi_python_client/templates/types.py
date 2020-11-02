@@ -1,5 +1,5 @@
 """ Contains some shared types for properties """
-from typing import BinaryIO, Generic, MutableMapping, NewType, Optional, TextIO, Tuple, TypeVar, Union, Any
+from typing import Any, BinaryIO, Generic, MutableMapping, NewType, Optional, TextIO, Tuple, TypeVar, Union
 
 import attr
 

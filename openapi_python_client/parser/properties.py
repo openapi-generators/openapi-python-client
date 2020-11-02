@@ -64,7 +64,7 @@ class Property:
             back to the root of the generated client.
         """
         if self.nullable or not self.required:
-            return {"from typing import Any, cast, Optional", f"from {prefix}types import UNSET, Unset"}
+            return {"from typing import cast, Optional", f"from {prefix}types import UNSET, Unset"}
         return set()
 
     def to_string(self) -> str:

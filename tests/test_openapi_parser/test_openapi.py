@@ -80,7 +80,7 @@ class TestModel:
                 "OptionalDateTime": mocker.MagicMock(),
             },
         )
-        required_property = mocker.MagicMock(autospec=Property)
+        required_property = mocker.MagicMock(autospec=Property, required=True, nullable=False)
         required_imports = mocker.MagicMock()
         required_property.get_imports.return_value = {required_imports}
         optional_property = mocker.MagicMock(autospec=Property)
