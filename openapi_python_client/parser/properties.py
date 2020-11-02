@@ -51,7 +51,7 @@ class Property:
         Args:
             no_optional: Do not include Optional even if the value is optional (needed for isinstance checks)
         """
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or not self.nullable:
             return self._type_string
         return f"Optional[{self._type_string}]"
 
@@ -64,7 +64,7 @@ class Property:
             back to the root of the generated client.
         """
         if self.nullable or not self.required:
-            return {"from typing import Optional", "from typing import cast", f"from {prefix}types import UNSET"}
+            return {"from typing import Any, cast, Optional", f"from {prefix}types import UNSET, Unset"}
         return set()
 
     def to_string(self) -> str:
@@ -72,7 +72,7 @@ class Property:
         if self.default:
             default = self.default
         elif not self.required:
-            default = "cast(None, UNSET)"
+            default = f"cast({self.get_type_string()}, UNSET)"
         elif self.nullable:
             default = "None"
         else:
@@ -224,7 +224,7 @@ class ListProperty(Property, Generic[InnerProp]):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or not self.nullable:
             return f"List[{self.inner_property.get_type_string()}]"
         return f"Optional[List[{self.inner_property.get_type_string()}]]"
 
@@ -256,7 +256,7 @@ class UnionProperty(Property):
         """ Get a string representation of type that should be used when declaring this property """
         inner_types = [p.get_type_string() for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or not self.nullable:
             return f"Union[{inner_prop_string}]"
         return f"Optional[Union[{inner_prop_string}]]"
 
@@ -331,7 +331,7 @@ class EnumProperty(Property):
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
 
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or not self.nullable:
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 
@@ -392,7 +392,7 @@ class RefProperty(Property):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or not self.nullable:
             return self.reference.class_name
         return f"Optional[{self.reference.class_name}]"
 

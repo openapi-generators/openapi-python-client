@@ -255,7 +255,7 @@ class Model:
             p = property_from_data(name=key, required=required, data=value)
             if isinstance(p, ParseError):
                 return p
-            if required:
+            if p.required and not p.nullable:
                 required_properties.append(p)
             else:
                 optional_properties.append(p)

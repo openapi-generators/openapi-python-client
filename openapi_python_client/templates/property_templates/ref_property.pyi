@@ -11,19 +11,19 @@ if {{ source }} is not None:
 {% macro transform(property, source, destination) %}
 {% if property.required %}
 {% if property.nullable %}
-{{ destination }} = {{ source }}.to_dict() if {{ source }} else None
+{{ destination }} = {{ source }}.to_dict(exclude_unset=True) if {{ source }} else None
 {% else %}
-{{ destination }} = {{ source }}.to_dict()
+{{ destination }} = {{ source }}.to_dict(exclude_unset=True)
 {% endif %}
 {% else %}
 if {{ source }} is UNSET:
     {{ destination }} = UNSET
 {% if property.nullable %}
 else:
-    {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
+    {{ destination }} = {{ source }}.to_dict(exclude_unset=True) if {{ source }} else None
 {% else %}
 else:
-    {{ destination }} = {{ source }}.to_dict()
+    {{ destination }} = {{ source }}.to_dict(exclude_unset=True)
 {% endif %}
 {% endif %}
 {% endmacro %}

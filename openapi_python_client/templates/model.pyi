@@ -18,8 +18,8 @@ class {{ model.reference.class_name }}:
 
     def to_dict(
         self,
-        include: Optional[Set[str]],
-        exclude: Optional[Set[str]],
+        include: Optional[Set[str]] = None,
+        exclude: Optional[Set[str]] = None,
         exclude_unset: bool = False,
         exclude_none: bool = False,
     ) -> Dict[str, Any]:
@@ -58,7 +58,7 @@ class {{ model.reference.class_name }}:
     {% if property.required %}
         {% set property_source = 'd["' + property.name + '"]' %}
     {% else %}
-        {% set property_source = 'd.get("' + property.name + '")' %}
+        {% set property_source = 'd.get("' + property.name + '", UNSET)' %}
     {% endif %}
     {% if property.template %}
         {% from "property_templates/" + property.template import construct %}

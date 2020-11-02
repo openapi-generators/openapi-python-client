@@ -29,7 +29,7 @@ if {{ source }} is UNSET:
 {% if property.nullable %}
 {% if property.required %}
 if {{ source }} is None:
-{% else %}{# There's an if UNSET statement before this }
+{% else %}{# There's an if UNSET statement before this #}
 elif {{ source }} is None:
 {% endif %}
     {{ destination }}: {{ property.get_type_string() }} = None
