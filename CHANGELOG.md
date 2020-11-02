@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prefix generated identifiers to allow leading digits in field names (#206 - @kalzoo).
 
 ### Additions
+- Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
 
 ## 0.6.1 - 2020-09-26
 
