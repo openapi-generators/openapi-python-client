@@ -64,7 +64,7 @@ class Property:
             back to the root of the generated client.
         """
         if self.nullable or not self.required:
-            return {"from typing import Optional"}
+            return {"from typing import Optional", "from typing import cast", f"from {prefix}types import UNSET"}
         return set()
 
     def to_string(self) -> str:
@@ -72,12 +72,14 @@ class Property:
         if self.default:
             default = self.default
         elif not self.required:
+            default = "cast(None, UNSET)"
+        elif self.nullable:
             default = "None"
         else:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string()} = {self.default}"
+            return f"{self.python_name}: {self.get_type_string()} = {default}"
         else:
             return f"{self.python_name}: {self.get_type_string()}"
 

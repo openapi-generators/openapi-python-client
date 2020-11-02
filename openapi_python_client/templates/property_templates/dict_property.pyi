@@ -9,9 +9,9 @@ if {{ source }} is not None:
 {% endmacro %}
 
 {% macro transform(property, source, destination) %}
-{% if property.required %}
-{{ destination }} = {{ source }}
-{% else %}
+{% if property.nullable %}
 {{ destination }} = {{ source }} if {{ source }} else None
+{% else %}
+{{ destination }} = {{ source }}
 {% endif %}
 {% endmacro %}

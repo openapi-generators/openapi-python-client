@@ -10,8 +10,20 @@ if {{ source }} is not None:
 
 {% macro transform(property, source, destination) %}
 {% if property.required %}
-{{ destination }} = {{ source }}.value
-{% else %}
+{% if property.nullable %}
 {{ destination }} = {{ source }}.value if {{ source }} else None
+{% else %}
+{{ destination }} = {{ source }}.value
+{% endif %}
+{% else %}
+if {{ source }} is UNSET:
+    {{ destination }} = UNSET
+{% if property.nullable %}
+else:
+    {{ destination }} = {{ source }}.value if {{ source }} else None
+{% else %}
+else:
+    {{ destination }} = {{ source }}.value
+{% endif %}
 {% endif %}
 {% endmacro %}

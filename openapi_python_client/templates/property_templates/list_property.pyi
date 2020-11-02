@@ -33,7 +33,10 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro transform(property, source, destination) %}
 {% set inner_property = property.inner_property %}
-{% if not property.required %}
+
+
+{% if property.required %}
+{% if property.nullable %}
 if {{ source }} is None:
     {{ destination }} = None
 else:
@@ -41,4 +44,16 @@ else:
 {% else %}
 {{ _transform(property, source, destination) }}
 {% endif %}
+{% else %}
+if {{ source }} is UNSET:
+    {{ destination }} = UNSET
+{% if property.nullable %}
+elif {{ source }} is None:
+    {{ destination }} = None
+{% endif %}
+else:
+    {{ _transform(property, source, destination) | indent(4)}}
+{% endif %}
+
+
 {% endmacro %}

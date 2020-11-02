@@ -10,8 +10,20 @@ if {{ source }} is not None:
 
 {% macro transform(property, source, destination) %}
 {% if property.required %}
-{{ destination }} = {{ source }}.to_dict()
-{% else %}
+{% if property.nullable %}
 {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
+{% else %}
+{{ destination }} = {{ source }}.to_dict()
+{% endif %}
+{% else %}
+if {{ source }} is UNSET:
+    {{ destination }} = UNSET
+{% if property.nullable %}
+else:
+    {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
+{% else %}
+else:
+    {{ destination }} = {{ source }}.to_dict()
+{% endif %}
 {% endif %}
 {% endmacro %}

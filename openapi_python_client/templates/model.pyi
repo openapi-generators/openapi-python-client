@@ -1,6 +1,8 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Set
 
 import attr
+
+from ..types import UNSET
 
 {% for relative in model.relative_imports %}
 {{ relative }}
@@ -14,7 +16,13 @@ class {{ model.reference.class_name }}:
     {{ property.to_string() }}
     {% endfor %}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(
+        self,
+        include: Optional[Set[str]],
+        exclude: Optional[Set[str]],
+        exclude_unset: bool = False,
+        exclude_none: bool = False,
+    ) -> Dict[str, Any]:
         {% for property in model.required_properties + model.optional_properties %}
         {% if property.template %}
         {% from "property_templates/" + property.template import transform %}
@@ -24,11 +32,25 @@ class {{ model.reference.class_name }}:
         {% endif %}
         {% endfor %}
 
-        return {
+        all_properties = {
             {% for property in model.required_properties + model.optional_properties %}
             "{{ property.name }}": {{ property.python_name }},
             {% endfor %}
         }
+
+        trimmed_properties: Dict[str, Any] = {}
+        for property_name, property_value in all_properties.items():
+            if include is not None and property_name not in include:
+                continue
+            if exclude is not None and property_name in exclude:
+                continue
+            if exclude_unset and property_value is UNSET:
+                continue
+            if exclude_none and property_value is None:
+                continue
+            trimmed_properties[property_name] = property_value
+
+        return trimmed_properties
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "{{ model.reference.class_name }}":
