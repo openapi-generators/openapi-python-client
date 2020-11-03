@@ -382,7 +382,7 @@ def test__reformat(mocker):
     sub_run.assert_has_calls(
         [
             mocker.call(
-                "autoflake -i -r --remove-all-unused-imports --remove-unused-variables .",
+                "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
                 cwd=project.package_dir,
                 shell=True,
                 stdout=subprocess.PIPE,

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Prefix generated identifiers to allow leading digits in field names (#206 - @kalzoo).
+- Prevent autoflake from removing `__init__.py` imports during generation. (#223 - Thanks @fyhertz!)
 - Update minimum Pydantic version to support Python 3.9
 
 ### Additions
