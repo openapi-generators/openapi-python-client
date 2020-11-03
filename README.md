@@ -114,13 +114,23 @@ package_name_override: my_extra_special_package_name
 
 ### field_prefix
 
-When generating properties, the `name` attribute of the OpenAPI schema will be used. When the `name` is not a valid 
-Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field_".
+When generating properties, the `name` attribute of the OpenAPI schema will be used. When the `name` is not a valid
+Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field\_".
 
 Example:
 
 ```yaml
 field_prefix: attr_
+```
+
+### package_version_override
+
+Specify the package version of the generated client. If unset, the client will use the version of the OpenAPI spec.
+
+Example:
+
+```yaml
+package_version_override: 1.2.3
 ```
 
 [changelog.md]: CHANGELOG.md
