@@ -416,3 +416,27 @@ def test__get_errors(mocker):
     project = Project(openapi=openapi)
 
     assert project._get_errors() == [1, 2, 3]
+
+
+def test__custom_templates(mocker):
+    from openapi_python_client import GeneratorData, Project
+    from openapi_python_client.parser.openapi import EndpointCollection, Schemas
+
+    openapi = mocker.MagicMock(
+        autospec=GeneratorData,
+        title="My Test API",
+        endpoint_collections_by_tag={
+            "default": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[1]),
+            "other": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[2]),
+        },
+        schemas=mocker.MagicMock(autospec=Schemas, errors=[3]),
+    )
+
+    project = Project(openapi=openapi)
+    assert isinstance(project.env.loader, jinja2.PackageLoader)
+
+    project = Project(openapi=openapi, custom_template_path='../end_to_end_tests/test_custom_templates')
+    assert isinstance(project.env.loader, jinja2.ChoiceLoader)
+    assert len(project.env.loader.loaders) == 2
+    assert isinstance(project.env.loader.loaders[0], jinja2.ChoiceLoader)
+    assert isinstance(project.env.loader.loaders[1], jinja2.PackageLoader)
