@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional, Sequence, Union
 import httpcore
 import httpx
 import yaml
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader, ChoiceLoader, FileSystemLoader
 
 from openapi_python_client import utils
 
@@ -30,8 +30,15 @@ class Project:
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
 
-    def __init__(self, *, openapi: GeneratorData) -> None:
+    def __init__(self, *, openapi: GeneratorData, custom_template_path: Optional[str] = None) -> None:
         self.openapi: GeneratorData = openapi
+
+        package_loader = PackageLoader(__package__)
+        if custom_template_path is not None:
+            loader = ChoiceLoader([FileSystemLoader(custom_template_path), package_loader,])
+        else:
+            loader = package_loader
+        self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
         self.env: Environment = Environment(loader=PackageLoader(__package__), trim_blocks=True, lstrip_blocks=True)
 
         self.project_name: str = self.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
@@ -191,37 +198,37 @@ class Project:
                 module_path.write_text(endpoint_template.render(endpoint=endpoint))
 
 
-def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path]) -> Union[Project, GeneratorError]:
+def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
         return data_dict
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return Project(openapi=openapi)
+    return Project(openapi=openapi, custom_template_path=custom_template_path)
 
 
-def create_new_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
+def create_new_client(*, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None) -> Sequence[GeneratorError]:
     """
     Generate the client library
 
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path)
+    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path)
     if isinstance(project, GeneratorError):
         return [project]
     return project.build()
 
 
-def update_existing_client(*, url: Optional[str], path: Optional[Path]) -> Sequence[GeneratorError]:
+def update_existing_client(*, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None) -> Sequence[GeneratorError]:
     """
     Update an existing client library
 
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path)
+    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path)
     if isinstance(project, GeneratorError):
         return [project]
     return project.update()
