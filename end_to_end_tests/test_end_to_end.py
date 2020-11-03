@@ -57,11 +57,15 @@ def test_end_to_end_w_custom_templates():
     output_path = Path.cwd() / "my-test-api-client-custom"
     shutil.rmtree(output_path, ignore_errors=True)
 
-    result = runner.invoke(app, [
-        f"--config={config_path}",
-        "generate",
-        f"--path={openapi_path}",
-        "--custom-template-path=end_to_end_tests/test_custom_templates"])
+    result = runner.invoke(
+        app,
+        [
+            f"--config={config_path}",
+            "generate",
+            f"--path={openapi_path}",
+            "--custom-template-path=end_to_end_tests/test_custom_templates",
+        ],
+    )
 
     if result.exit_code != 0:
         raise result.exception

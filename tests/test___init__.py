@@ -435,7 +435,7 @@ def test__custom_templates(mocker):
     project = Project(openapi=openapi)
     assert isinstance(project.env.loader, jinja2.PackageLoader)
 
-    project = Project(openapi=openapi, custom_template_path='../end_to_end_tests/test_custom_templates')
+    project = Project(openapi=openapi, custom_template_path="../end_to_end_tests/test_custom_templates")
     assert isinstance(project.env.loader, jinja2.ChoiceLoader)
     assert len(project.env.loader.loaders) == 2
     assert isinstance(project.env.loader.loaders[0], jinja2.FileSystemLoader)
