@@ -36,7 +36,7 @@ def test_config_arg(mocker, _create_new_client):
 
     assert result.exit_code == 0
     load_config.assert_called_once_with(path=Path(config_path))
-    _create_new_client.assert_called_once_with(url=None, path=Path(path))
+    _create_new_client.assert_called_once_with(url=None, path=Path(path), custom_template_path=None)
 
 
 def test_bad_config(mocker, _create_new_client):
@@ -80,7 +80,7 @@ class TestGenerate:
         result = runner.invoke(app, ["generate", f"--url={url}"])
 
         assert result.exit_code == 0
-        _create_new_client.assert_called_once_with(url=url, path=None)
+        _create_new_client.assert_called_once_with(url=url, path=None, custom_template_path=None)
 
     def test_generate_path(self, _create_new_client):
         path = "cool/path"
@@ -89,7 +89,7 @@ class TestGenerate:
         result = runner.invoke(app, ["generate", f"--path={path}"])
 
         assert result.exit_code == 0
-        _create_new_client.assert_called_once_with(url=None, path=Path(path))
+        _create_new_client.assert_called_once_with(url=None, path=Path(path), custom_template_path=None)
 
     def test_generate_handle_errors(self, _create_new_client):
         _create_new_client.return_value = [GeneratorError(detail="this is a message")]
@@ -159,7 +159,7 @@ class TestUpdate:
         result = runner.invoke(app, ["update", f"--url={url}"])
 
         assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(url=url, path=None)
+        _update_existing_client.assert_called_once_with(url=url, path=None, custom_template_path=None)
 
     def test_update_path(self, _update_existing_client):
         path = "cool/path"
@@ -168,4 +168,4 @@ class TestUpdate:
         result = runner.invoke(app, ["update", f"--path={path}"])
 
         assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(url=None, path=Path(path))
+        _update_existing_client.assert_called_once_with(url=None, path=Path(path), custom_template_path=None)
