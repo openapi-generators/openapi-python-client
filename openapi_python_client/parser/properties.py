@@ -64,7 +64,7 @@ class Property:
             back to the root of the generated client.
         """
         if self.nullable or not self.required:
-            return {"from typing import cast, Optional", f"from {prefix}types import UNSET, Unset"}
+            return {"from typing import Union, Optional", f"from {prefix}types import UNSET, Unset"}
         return set()
 
     def to_string(self) -> str:
@@ -72,7 +72,7 @@ class Property:
         if self.default:
             default = self.default
         elif not self.required:
-            default = f"cast({self.get_type_string()}, UNSET)"
+            default = "UNSET"
         elif self.nullable:
             default = "None"
         else:
@@ -224,9 +224,12 @@ class ListProperty(Property, Generic[InnerProp]):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if no_optional or not self.nullable:
-            return f"List[{self.inner_property.get_type_string()}]"
-        return f"Optional[List[{self.inner_property.get_type_string()}]]"
+        type_string = f"List[{self.inner_property.get_type_string()}]"
+        if not no_optional and self.nullable:
+            type_string = f"Optional[{type_string}]" 
+        if not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
