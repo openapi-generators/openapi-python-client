@@ -25,14 +25,19 @@ class TestLoadConfig:
         assert reference.class_overrides["Class1"] == reference.Reference(**override1)
         assert reference.class_overrides["Class2"] == reference.Reference(**override2)
 
-    def test_project_and_package_name_overrides(self):
-        config = Config(project_name_override="project-name", package_name_override="package_name")
+    def test_project_and_package_name_and_package_version_overrides(self):
+        config = Config(
+            project_name_override="project-name",
+            package_name_override="package_name",
+            package_version_override="package_version",
+        )
         config.load_config()
 
         from openapi_python_client import Project
 
         assert Project.project_name_override == "project-name"
         assert Project.package_name_override == "package_name"
+        assert Project.package_version_override == "package_version"
 
     def test_field_prefix(self):
         Config(field_prefix="blah").load_config()

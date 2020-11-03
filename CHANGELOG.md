@@ -12,8 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Prefix generated identifiers to allow leading digits in field names (#206 - @kalzoo).
+- Update minimum Pydantic version to support Python 3.9
 
 ### Additions
+
+- Allow specifying the generated client's version using `package_version_override` in a config file. (#225 - Thanks @fyhertz!)
 
 ## 0.6.1 - 2020-09-26
 
