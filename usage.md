@@ -1,6 +1,6 @@
 # `openapi-python-client`
 
-Generate a Python client from an OpenAPI JSON document 
+Generate a Python client from an OpenAPI JSON document
 
 **Usage**:
 
@@ -10,20 +10,20 @@ $ openapi-python-client [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
-* `--version`: Print the version and exit
-* `--config PATH`: Path to the config file to use
-* `--install-completion`: Install completion for the current shell.
-* `--show-completion`: Show completion for the current shell, to copy it or customize the installation.
-* `--help`: Show this message and exit.
+- `--version`: Print the version and exit
+- `--config PATH`: Path to the config file to use
+- `--install-completion`: Install completion for the current shell.
+- `--show-completion`: Show completion for the current shell, to copy it or customize the installation.
+- `--help`: Show this message and exit.
 
 **Commands**:
 
-* `generate`: Generate a new OpenAPI Client library
-* `update`: Update an existing OpenAPI Client library
+- `generate`: Generate a new OpenAPI Client library
+- `update`: Update an existing OpenAPI Client library
 
 ## `openapi-python-client generate`
 
-Generate a new OpenAPI Client library 
+Generate a new OpenAPI Client library
 
 **Usage**:
 
@@ -33,13 +33,13 @@ $ openapi-python-client generate [OPTIONS]
 
 **Options**:
 
-* `--url TEXT`: A URL to read the JSON from
-* `--path PATH`: A path to the JSON file
-* `--help`: Show this message and exit.
+- `--url TEXT`: A URL to read the JSON from
+- `--path PATH`: A path to the JSON file
+- `--help`: Show this message and exit.
 
 ## `openapi-python-client update`
 
-Update an existing OpenAPI Client library 
+Update an existing OpenAPI Client library
 
 **Usage**:
 
@@ -49,7 +49,6 @@ $ openapi-python-client update [OPTIONS]
 
 **Options**:
 
-* `--url TEXT`: A URL to read the JSON from
-* `--path PATH`: A path to the JSON file
-* `--help`: Show this message and exit.
-
+- `--url TEXT`: A URL to read the JSON from
+- `--path PATH`: A path to the JSON file
+- `--help`: Show this message and exit.
