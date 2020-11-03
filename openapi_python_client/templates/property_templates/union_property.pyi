@@ -36,9 +36,9 @@ elif {{ source }} is None:
 {% endif %}
 {% for inner_property in property.inner_properties %}
     {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
-if isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True) }}):
+if isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True, no_unset=True) }}):
     {% elif not loop.last %}
-elif isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True) }}):
+elif isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True, no_unset=True) }}):
     {% else %}
 else:
     {% endif %}

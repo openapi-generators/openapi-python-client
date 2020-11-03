@@ -1,10 +1,14 @@
 """ Contains some shared types for properties """
-from typing import Any, BinaryIO, Generic, MutableMapping, NewType, Optional, TextIO, Tuple, TypeVar, Union
+from typing import BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
 
 import attr
 
-Unset = NewType("Unset", object)
-UNSET: Any = Unset(object())
+
+class Unset:
+    pass
+
+
+UNSET: Unset = Unset()
 
 
 @attr.s(auto_attribs=True)

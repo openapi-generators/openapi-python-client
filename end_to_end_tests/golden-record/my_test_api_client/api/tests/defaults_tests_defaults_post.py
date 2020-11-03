@@ -7,22 +7,22 @@ from dateutil.parser import isoparse
 from ...client import Client
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     client: Client,
     json_body: Dict[Any, Any],
-    string_prop: str = "the default string",
-    datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
-    float_prop: float = 3.14,
-    int_prop: int = 7,
-    boolean_prop: bool = cast(bool, UNSET),
-    list_prop: List[AnEnum] = cast(List[AnEnum], UNSET),
-    union_prop: Union[float, str] = "not a float",
-    enum_prop: AnEnum = cast(AnEnum, UNSET),
+    string_prop: Union[Unset, str] = "the default string",
+    datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
+    float_prop: Union[Unset, float] = 3.14,
+    int_prop: Union[Unset, int] = 7,
+    boolean_prop: Union[Unset, bool] = UNSET,
+    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -48,7 +48,7 @@ def _get_kwargs(
             json_list_prop.append(list_prop_item)
 
     if union_prop is UNSET:
-        json_union_prop: Union[float, str] = UNSET
+        json_union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = UNSET
     elif isinstance(union_prop, float):
         json_union_prop = union_prop
     else:
@@ -112,15 +112,15 @@ def sync_detailed(
     *,
     client: Client,
     json_body: Dict[Any, Any],
-    string_prop: str = "the default string",
-    datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
-    float_prop: float = 3.14,
-    int_prop: int = 7,
-    boolean_prop: bool = cast(bool, UNSET),
-    list_prop: List[AnEnum] = cast(List[AnEnum], UNSET),
-    union_prop: Union[float, str] = "not a float",
-    enum_prop: AnEnum = cast(AnEnum, UNSET),
+    string_prop: Union[Unset, str] = "the default string",
+    datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
+    float_prop: Union[Unset, float] = 3.14,
+    int_prop: Union[Unset, int] = 7,
+    boolean_prop: Union[Unset, bool] = UNSET,
+    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -147,15 +147,15 @@ def sync(
     *,
     client: Client,
     json_body: Dict[Any, Any],
-    string_prop: str = "the default string",
-    datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
-    float_prop: float = 3.14,
-    int_prop: int = 7,
-    boolean_prop: bool = cast(bool, UNSET),
-    list_prop: List[AnEnum] = cast(List[AnEnum], UNSET),
-    union_prop: Union[float, str] = "not a float",
-    enum_prop: AnEnum = cast(AnEnum, UNSET),
+    string_prop: Union[Unset, str] = "the default string",
+    datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
+    float_prop: Union[Unset, float] = 3.14,
+    int_prop: Union[Unset, int] = 7,
+    boolean_prop: Union[Unset, bool] = UNSET,
+    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -178,15 +178,15 @@ async def asyncio_detailed(
     *,
     client: Client,
     json_body: Dict[Any, Any],
-    string_prop: str = "the default string",
-    datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
-    float_prop: float = 3.14,
-    int_prop: int = 7,
-    boolean_prop: bool = cast(bool, UNSET),
-    list_prop: List[AnEnum] = cast(List[AnEnum], UNSET),
-    union_prop: Union[float, str] = "not a float",
-    enum_prop: AnEnum = cast(AnEnum, UNSET),
+    string_prop: Union[Unset, str] = "the default string",
+    datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
+    float_prop: Union[Unset, float] = 3.14,
+    int_prop: Union[Unset, int] = 7,
+    boolean_prop: Union[Unset, bool] = UNSET,
+    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -212,15 +212,15 @@ async def asyncio(
     *,
     client: Client,
     json_body: Dict[Any, Any],
-    string_prop: str = "the default string",
-    datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
-    float_prop: float = 3.14,
-    int_prop: int = 7,
-    boolean_prop: bool = cast(bool, UNSET),
-    list_prop: List[AnEnum] = cast(List[AnEnum], UNSET),
-    union_prop: Union[float, str] = "not a float",
-    enum_prop: AnEnum = cast(AnEnum, UNSET),
+    string_prop: Union[Unset, str] = "the default string",
+    datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
+    float_prop: Union[Unset, float] = 3.14,
+    int_prop: Union[Unset, int] = 7,
+    boolean_prop: Union[Unset, bool] = UNSET,
+    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 

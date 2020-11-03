@@ -17,7 +17,7 @@ def _get_kwargs(
 
     headers: Dict[str, Any] = client.get_headers()
 
-    json_json_body = json_body.to_dict(exclude_unset=True)
+    json_json_body = json_body.to_dict()
 
     return {
         "url": url,

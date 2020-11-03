@@ -3,8 +3,9 @@ from typing import Any, BinaryIO, Generic, MutableMapping, NewType, Optional, Te
 
 import attr
 
-Unset = NewType("Unset", object)
-UNSET: Any = Unset(object())
+class Unset:
+    pass
+UNSET: Unset = Unset()
 
 
 @attr.s(auto_attribs=True)

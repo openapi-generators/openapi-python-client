@@ -1,12 +1,12 @@
 import datetime
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 import attr
 from dateutil.parser import isoparse
 
 from ..models.an_enum import AnEnum
 from ..models.different_enum import DifferentEnum
-from ..types import UNSET
+from ..types import UNSET, Unset
 
 
 @attr.s(auto_attribs=True)
@@ -17,20 +17,14 @@ class AModel:
     a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
     required_not_nullable: str
-    nested_list_of_enums: List[List[DifferentEnum]] = cast(List[List[DifferentEnum]], UNSET)
+    nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     some_dict: Optional[Dict[Any, Any]] = None
-    attr_1_leading_digit: str = cast(str, UNSET)
+    attr_1_leading_digit: Union[Unset, str] = UNSET
     required_nullable: Optional[str] = None
-    not_required_nullable: Optional[str] = cast(Optional[str], UNSET)
-    not_required_not_nullable: str = cast(str, UNSET)
+    not_required_nullable: Union[Unset, Optional[str]] = UNSET
+    not_required_not_nullable: Union[Unset, str] = UNSET
 
-    def to_dict(
-        self,
-        include: Optional[Set[str]] = None,
-        exclude: Optional[Set[str]] = None,
-        exclude_unset: bool = False,
-        exclude_none: bool = False,
-    ) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         an_enum_value = self.an_enum_value.value
 
         if isinstance(self.a_camel_date_time, datetime.datetime):
@@ -64,32 +58,24 @@ class AModel:
         not_required_nullable = self.not_required_nullable
         not_required_not_nullable = self.not_required_not_nullable
 
-        all_properties = {
+        field_dict = {
             "an_enum_value": an_enum_value,
             "aCamelDateTime": a_camel_date_time,
             "a_date": a_date,
             "required_not_nullable": required_not_nullable,
-            "nested_list_of_enums": nested_list_of_enums,
             "some_dict": some_dict,
-            "1_leading_digit": attr_1_leading_digit,
             "required_nullable": required_nullable,
-            "not_required_nullable": not_required_nullable,
-            "not_required_not_nullable": not_required_not_nullable,
         }
+        if nested_list_of_enums is not UNSET:
+            field_dict["nested_list_of_enums"] = nested_list_of_enums
+        if attr_1_leading_digit is not UNSET:
+            field_dict["1_leading_digit"] = attr_1_leading_digit
+        if not_required_nullable is not UNSET:
+            field_dict["not_required_nullable"] = not_required_nullable
+        if not_required_not_nullable is not UNSET:
+            field_dict["not_required_not_nullable"] = not_required_not_nullable
 
-        trimmed_properties: Dict[str, Any] = {}
-        for property_name, property_value in all_properties.items():
-            if include is not None and property_name not in include:
-                continue
-            if exclude is not None and property_name in exclude:
-                continue
-            if exclude_unset and property_value is UNSET:
-                continue
-            if exclude_none and property_value is None:
-                continue
-            trimmed_properties[property_name] = property_value
-
-        return trimmed_properties
+        return field_dict
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "AModel":

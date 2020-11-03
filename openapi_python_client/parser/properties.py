@@ -44,16 +44,19 @@ class Property:
         """ Check that the default value is valid for the property's type + perform any necessary sanitization """
         raise ValidationError
 
-    def get_type_string(self, no_optional: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
         """
         Get a string representation of type that should be used when declaring this property
 
         Args:
             no_optional: Do not include Optional even if the value is optional (needed for isinstance checks)
         """
-        if no_optional or not self.nullable:
-            return self._type_string
-        return f"Optional[{self._type_string}]"
+        type_string = self._type_string
+        if not no_optional and self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not no_unset and not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -222,12 +225,12 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         type_string = f"List[{self.inner_property.get_type_string()}]"
         if not no_optional and self.nullable:
             type_string = f"Optional[{type_string}]" 
-        if not self.required:
+        if not no_unset and not self.required:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
@@ -255,13 +258,16 @@ class UnionProperty(Property):
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         inner_types = [p.get_type_string() for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
-        if no_optional or not self.nullable:
-            return f"Union[{inner_prop_string}]"
-        return f"Optional[Union[{inner_prop_string}]]"
+        type_string = f"Union[{inner_prop_string}]"
+        if not no_optional and self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not no_unset and not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -331,12 +337,14 @@ class EnumProperty(Property):
         """ Get all the EnumProperties that have been registered keyed by class name """
         return _existing_enums.get(name)
 
-    def get_type_string(self, no_optional: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-
-        if no_optional or not self.nullable:
-            return self.reference.class_name
-        return f"Optional[{self.reference.class_name}]"
+        type_string = self.reference.class_name
+        if not no_optional and self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not no_unset and not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -393,11 +401,14 @@ class RefProperty(Property):
             return "enum_property.pyi"
         return "ref_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if no_optional or not self.nullable:
-            return self.reference.class_name
-        return f"Optional[{self.reference.class_name}]"
+        type_string = self.reference.class_name
+        if not no_optional and self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not no_unset and not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
