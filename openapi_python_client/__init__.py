@@ -2,6 +2,7 @@
 
 import shutil
 import subprocess
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Union
@@ -37,7 +38,7 @@ class Project:
         if custom_template_path is not None:
             loader = ChoiceLoader(
                 [
-                    FileSystemLoader(custom_template_path),
+                    FileSystemLoader(os.path.abspath(custom_template_path)),
                     package_loader,
                 ]
             )
