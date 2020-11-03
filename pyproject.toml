@@ -75,6 +75,8 @@ exclude = '''
     | \.mypy_cache
     | openapi_python_client/templates
     | tests/test_templates
+    | end_to_end_tests/test_custom_templates
+    | end_to_end_tests/golden-record-custom
   )/
 )
 '''
