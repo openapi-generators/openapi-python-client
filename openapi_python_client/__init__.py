@@ -35,7 +35,12 @@ class Project:
 
         package_loader = PackageLoader(__package__)
         if custom_template_path is not None:
-            loader = ChoiceLoader([FileSystemLoader(custom_template_path), package_loader,])
+            loader = ChoiceLoader(
+                [
+                    FileSystemLoader(custom_template_path),
+                    package_loader,
+                ]
+            )
         else:
             loader = package_loader
         self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
@@ -198,7 +203,9 @@ class Project:
                 module_path.write_text(endpoint_template.render(endpoint=endpoint))
 
 
-def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None) -> Union[Project, GeneratorError]:
+def _get_project_for_url_or_path(
+    url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None
+) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
         return data_dict
@@ -208,7 +215,9 @@ def _get_project_for_url_or_path(url: Optional[str], path: Optional[Path], custo
     return Project(openapi=openapi, custom_template_path=custom_template_path)
 
 
-def create_new_client(*, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None) -> Sequence[GeneratorError]:
+def create_new_client(
+    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None
+) -> Sequence[GeneratorError]:
     """
     Generate the client library
 
@@ -221,7 +230,9 @@ def create_new_client(*, url: Optional[str], path: Optional[Path], custom_templa
     return project.build()
 
 
-def update_existing_client(*, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None) -> Sequence[GeneratorError]:
+def update_existing_client(
+    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None
+) -> Sequence[GeneratorError]:
     """
     Update an existing client library
 
