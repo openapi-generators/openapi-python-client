@@ -24,4 +24,4 @@ dmypy.json
 htmlcov/
 
 # Generated end to end test data
-tmp/my-test-api-client
+my-test-api-client
