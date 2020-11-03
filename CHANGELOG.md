@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Additions
 
+- Allow specifying the generated client's version using `package_version_override` in a config file. (#225 - Thanks @fyhertz!)
+
 ## 0.6.1 - 2020-09-26
 
 ### Changes
