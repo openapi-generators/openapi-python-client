@@ -54,7 +54,7 @@ def test_end_to_end_w_custom_templates():
     openapi_path = Path(__file__).parent / "openapi.json"
     config_path = Path(__file__).parent / "config.yml"
     gr_path = Path(__file__).parent / "golden-record-custom"
-    output_path = Path.cwd() / "my-test-api-client-custom"
+    output_path = Path.cwd() / "my-test-api-client"
     shutil.rmtree(output_path, ignore_errors=True)
 
     result = runner.invoke(
@@ -70,10 +70,5 @@ def test_end_to_end_w_custom_templates():
     if result.exit_code != 0:
         raise result.exception
     _compare_directories(gr_path, output_path)
-
-    import mypy.api
-
-    out, err, status = mypy.api.run([str(output_path), "--strict"])
-    assert status == 0, f"Type checking client failed: {out}"
 
     shutil.rmtree(output_path)
