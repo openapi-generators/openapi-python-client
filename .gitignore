@@ -19,6 +19,8 @@ dmypy.json
 # JetBrains
 .idea/
 
+test-reports/
+
 /coverage.xml
 /.coverage
 htmlcov/
