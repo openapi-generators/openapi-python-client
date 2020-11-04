@@ -2,7 +2,6 @@
 
 import shutil
 import subprocess
-import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Union
@@ -31,14 +30,14 @@ class Project:
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
 
-    def __init__(self, *, openapi: GeneratorData, custom_template_path: Optional[str] = None) -> None:
+    def __init__(self, *, openapi: GeneratorData, custom_template_path: Optional[Path] = None) -> None:
         self.openapi: GeneratorData = openapi
 
         package_loader = PackageLoader(__package__)
         if custom_template_path is not None:
             loader = ChoiceLoader(
                 [
-                    FileSystemLoader(os.path.abspath(custom_template_path)),
+                    FileSystemLoader(str(custom_template_path)),
                     package_loader,
                 ]
             )
@@ -204,7 +203,7 @@ class Project:
 
 
 def _get_project_for_url_or_path(
-    url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None
+    url: Optional[str], path: Optional[Path], custom_template_path: Optional[Path] = None
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
@@ -216,7 +215,7 @@ def _get_project_for_url_or_path(
 
 
 def create_new_client(
-    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None
+    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[Path] = None
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -231,7 +230,7 @@ def create_new_client(
 
 
 def update_existing_client(
-    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[str] = None
+    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[Path] = None
 ) -> Sequence[GeneratorError]:
     """
     Update an existing client library
