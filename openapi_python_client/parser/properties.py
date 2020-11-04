@@ -229,7 +229,7 @@ class ListProperty(Property, Generic[InnerProp]):
         """ Get a string representation of type that should be used when declaring this property """
         type_string = f"List[{self.inner_property.get_type_string()}]"
         if not no_optional and self.nullable:
-            type_string = f"Optional[{type_string}]" 
+            type_string = f"Optional[{type_string}]"
         if not no_unset and not self.required:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
@@ -260,7 +260,7 @@ class UnionProperty(Property):
 
     def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        inner_types = [p.get_type_string() for p in self.inner_properties]
+        inner_types = [p.get_type_string(no_unset=True) for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
         type_string = f"Union[{inner_prop_string}]"
         if not no_optional and self.nullable:

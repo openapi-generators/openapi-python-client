@@ -36,13 +36,10 @@ class AModel:
         a_date = self.a_date.isoformat()
 
         required_not_nullable = self.required_not_nullable
-
-        if self.nested_list_of_enums is UNSET:
-            nested_list_of_enums = UNSET
-        else:
+        nested_list_of_enums: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
-
                 nested_list_of_enums_item = []
                 for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
                     nested_list_of_enums_item_item = nested_list_of_enums_item_item_data.value

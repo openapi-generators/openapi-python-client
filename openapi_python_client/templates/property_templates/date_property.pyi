@@ -16,13 +16,11 @@ if {{ source }} is not None:
 {{ destination }} = {{ source }}.isoformat()
 {% endif %}
 {% else %}
-if {{ source }} is UNSET:
-    {{ destination }} = UNSET
+{{ destination }}: Union[Unset, str] = UNSET
+if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-else:
     {{ destination }} = {{ source }}.isoformat() if {{ source }} else None
 {% else %}
-else:
     {{ destination }} = {{ source }}.isoformat()
 {% endif %}
 {% endif %}

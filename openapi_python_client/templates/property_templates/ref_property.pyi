@@ -16,13 +16,11 @@ if {{ source }} is not None:
 {{ destination }} = {{ source }}.to_dict()
 {% endif %}
 {% else %}
-if {{ source }} is UNSET:
-    {{ destination }} = UNSET
+{{ destination }}: {{ property.get_type_string() }} = UNSET
+if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-else:
     {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
 {% else %}
-else:
     {{ destination }} = {{ source }}.to_dict()
 {% endif %}
 {% endif %}

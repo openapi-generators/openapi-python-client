@@ -21,42 +21,39 @@ def _get_kwargs(
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
-    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    union_prop: Union[Unset, Union[float, str]] = "not a float",
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
 
-    if datetime_prop is UNSET:
-        json_datetime_prop = UNSET
-    else:
+    json_datetime_prop: Union[Unset, str] = UNSET
+    if not isinstance(datetime_prop, Unset):
         json_datetime_prop = datetime_prop.isoformat()
 
-    if date_prop is UNSET:
-        json_date_prop = UNSET
-    else:
+    json_date_prop: Union[Unset, str] = UNSET
+    if not isinstance(date_prop, Unset):
         json_date_prop = date_prop.isoformat()
 
-    if list_prop is UNSET:
-        json_list_prop = UNSET
-    else:
+    json_list_prop: Union[Unset, List[Any]] = UNSET
+    if not isinstance(list_prop, Unset):
         json_list_prop = []
         for list_prop_item_data in list_prop:
             list_prop_item = list_prop_item_data.value
 
             json_list_prop.append(list_prop_item)
 
-    if union_prop is UNSET:
-        json_union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = UNSET
+    json_union_prop: Union[Unset, Union[float, str]]
+    if isinstance(union_prop, Unset):
+        json_union_prop = UNSET
     elif isinstance(union_prop, float):
         json_union_prop = union_prop
     else:
         json_union_prop = union_prop
 
-    if enum_prop is UNSET:
-        json_enum_prop = UNSET
-    else:
+    json_enum_prop: Union[Unset, AnEnum] = UNSET
+    if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop.value
 
     params: Dict[str, Any] = {}
@@ -119,7 +116,7 @@ def sync_detailed(
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
-    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    union_prop: Union[Unset, Union[float, str]] = "not a float",
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
@@ -154,7 +151,7 @@ def sync(
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
-    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    union_prop: Union[Unset, Union[float, str]] = "not a float",
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
@@ -185,7 +182,7 @@ async def asyncio_detailed(
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
-    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    union_prop: Union[Unset, Union[float, str]] = "not a float",
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
@@ -219,7 +216,7 @@ async def asyncio(
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
-    union_prop: Union[Unset, Union[Union[Unset, float], Union[Unset, str]]] = "not a float",
+    union_prop: Union[Unset, Union[float, str]] = "not a float",
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """

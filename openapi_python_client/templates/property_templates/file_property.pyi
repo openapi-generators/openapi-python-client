@@ -11,13 +11,11 @@
 {{ destination }} = {{ source }}.to_tuple()
 {% endif %}
 {% else %}
-if {{ source }} is UNSET:
-    {{ destination }} = UNSET
+{{ destination }}: {{ property.get_type_string() }} = UNSET
+if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-else:
     {{ destination }} = {{ source }}.to_tuple() if {{ source }} else None
 {% else %}
-else:
     {{ destination }} = {{ source }}.to_tuple()
 {% endif %}
 {% endif %}

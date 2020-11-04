@@ -12,7 +12,6 @@ class ValidationError:
     type: str
 
     def to_dict(self) -> Dict[str, Any]:
-
         loc = self.loc
 
         msg = self.msg

@@ -23,8 +23,9 @@ def _parse_{{ property.python_name }}(data: Dict[str, Any]) -> {{ property.get_t
 
 {% macro transform(property, source, destination) %}
 {% if not property.required %}
-if {{ source }} is UNSET:
-    {{ destination }}: {{ property.get_type_string() }} = UNSET
+{{ destination }}: {{ property.get_type_string() }}
+if isinstance({{ source }}, Unset):
+    {{ destination }} = UNSET
 {% endif %}
 {% if property.nullable %}
 {% if property.required %}

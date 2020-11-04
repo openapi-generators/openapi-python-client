@@ -33,8 +33,6 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro transform(property, source, destination) %}
 {% set inner_property = property.inner_property %}
-
-
 {% if property.required %}
 {% if property.nullable %}
 if {{ source }} is None:
@@ -45,14 +43,16 @@ else:
 {{ _transform(property, source, destination) }}
 {% endif %}
 {% else %}
-if {{ source }} is UNSET:
-    {{ destination }} = UNSET
+{{ destination }}: Union[Unset, List[Any]] = UNSET
+if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-elif {{ source }} is None:
-    {{ destination }} = None
-{% endif %}
-else:
+    if {{ source }} is None:
+        {{ destination }} = None
+    else:
+        {{ _transform(property, source, destination) | indent(4)}}
+{% else %}
     {{ _transform(property, source, destination) | indent(4)}}
+{% endif %}
 {% endif %}
 
 
