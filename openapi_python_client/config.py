@@ -14,6 +14,7 @@ class Config(BaseModel):
     class_overrides: Optional[Dict[str, ClassOverride]]
     project_name_override: Optional[str]
     package_name_override: Optional[str]
+    package_version_override: Optional[str]
     field_prefix: Optional[str]
 
     def load_config(self) -> None:
@@ -29,6 +30,7 @@ class Config(BaseModel):
 
         Project.project_name_override = self.project_name_override
         Project.package_name_override = self.package_name_override
+        Project.package_version_override = self.package_version_override
 
         if self.field_prefix is not None:
             utils.FIELD_PREFIX = self.field_prefix

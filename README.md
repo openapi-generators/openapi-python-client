@@ -1,9 +1,10 @@
 [![triaxtec](https://circleci.com/gh/triaxtec/openapi-python-client.svg?style=svg)](https://circleci.com/gh/triaxtec/openapi-python-client)
 [![codecov](https://codecov.io/gh/triaxtec/openapi-python-client/branch/main/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
-[![PyPI version shields.io](https://img.shields.io/pypi/v/openapi-python-client.svg)](https://pypi.python.org/pypi/openapi-python-client/)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 [![Generic badge](https://img.shields.io/badge/type_checked-mypy-informational.svg)](https://mypy.readthedocs.io/en/stable/introduction.html)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/openapi-python-client.svg)](https://pypi.python.org/pypi/openapi-python-client/)
+[![Downloads](https://static.pepy.tech/personalized-badge/openapi-python-client?period=total&units=international_system&left_color=blue&right_color=green&left_text=Downloads)](https://pepy.tech/project/openapi-python-client)
 
 # openapi-python-client
 
@@ -52,6 +53,18 @@ get an error.
 `openapi-python-client update --url https://my.api.com/openapi.json`
 
 > For more usage details run `openapi-python-client --help` or read [usage](usage.md)
+
+### Using custom templates
+
+This feature leverages Jinja2's [ChoiceLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.ChoiceLoader) and [FileSystemLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.FileSystemLoader). This means you do _not_ need to customize every template. Simply copy the template(s) you want to customize from [the default template directory](openapi_python_client/templates) to your own custom template directory (file names _must_ match exactly) and pass the template directory through the `custom-template-path` flag to the `generate` and `update` commands. For instance,
+
+```
+openapi-python-client update \
+  --url https://my.api.com/openapi.json \
+  --custom-template-path=relative/path/to/mytemplates
+```
+
+_Be forewarned, this is a beta-level feature in the sense that the API exposed in the templates is undocumented and unstable._
 
 ## What You Get
 
@@ -114,13 +127,23 @@ package_name_override: my_extra_special_package_name
 
 ### field_prefix
 
-When generating properties, the `name` attribute of the OpenAPI schema will be used. When the `name` is not a valid 
-Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field_".
+When generating properties, the `name` attribute of the OpenAPI schema will be used. When the `name` is not a valid
+Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field\_".
 
 Example:
 
 ```yaml
 field_prefix: attr_
+```
+
+### package_version_override
+
+Specify the package version of the generated client. If unset, the client will use the version of the OpenAPI spec.
+
+Example:
+
+```yaml
+package_version_override: 1.2.3
 ```
 
 [changelog.md]: CHANGELOG.md
