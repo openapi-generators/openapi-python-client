@@ -23,7 +23,7 @@ def test__get_project_for_url_or_path(mocker):
 
     _get_document.assert_called_once_with(url=url, path=path)
     from_dict.assert_called_once_with(data_dict)
-    _Project.assert_called_once_with(openapi=openapi)
+    _Project.assert_called_once_with(openapi=openapi, custom_template_path=None)
     assert project == _Project()
 
 
@@ -75,7 +75,7 @@ def test_create_new_client(mocker):
 
     result = create_new_client(url=url, path=path)
 
-    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path, custom_template_path=None)
     project.build.assert_called_once()
     assert result == project.build.return_value
 
@@ -92,7 +92,7 @@ def test_create_new_client_project_error(mocker):
 
     result = create_new_client(url=url, path=path)
 
-    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path, custom_template_path=None)
     assert result == [error]
 
 
@@ -108,7 +108,7 @@ def test_update_existing_client(mocker):
 
     result = update_existing_client(url=url, path=path)
 
-    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path, custom_template_path=None)
     project.update.assert_called_once()
     assert result == project.update.return_value
 
@@ -125,7 +125,7 @@ def test_update_existing_client_project_error(mocker):
 
     result = update_existing_client(url=url, path=path)
 
-    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path)
+    _get_project_for_url_or_path.assert_called_once_with(url=url, path=path, custom_template_path=None)
     assert result == [error]
 
 
@@ -416,3 +416,27 @@ def test__get_errors(mocker):
     project = Project(openapi=openapi)
 
     assert project._get_errors() == [1, 2, 3]
+
+
+def test__custom_templates(mocker):
+    from openapi_python_client import GeneratorData, Project
+    from openapi_python_client.parser.openapi import EndpointCollection, Schemas
+
+    openapi = mocker.MagicMock(
+        autospec=GeneratorData,
+        title="My Test API",
+        endpoint_collections_by_tag={
+            "default": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[1]),
+            "other": mocker.MagicMock(autospec=EndpointCollection, parse_errors=[2]),
+        },
+        schemas=mocker.MagicMock(autospec=Schemas, errors=[3]),
+    )
+
+    project = Project(openapi=openapi)
+    assert isinstance(project.env.loader, jinja2.PackageLoader)
+
+    project = Project(openapi=openapi, custom_template_path="../end_to_end_tests/test_custom_templates")
+    assert isinstance(project.env.loader, jinja2.ChoiceLoader)
+    assert len(project.env.loader.loaders) == 2
+    assert isinstance(project.env.loader.loaders[0], jinja2.FileSystemLoader)
+    assert isinstance(project.env.loader.loaders[1], jinja2.PackageLoader)

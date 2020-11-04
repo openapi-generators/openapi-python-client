@@ -19,11 +19,5 @@ dmypy.json
 # JetBrains
 .idea/
 
-test-reports/
-
 /coverage.xml
 /.coverage
-htmlcov/
-
-# Generated end to end test data
-my-test-api-client

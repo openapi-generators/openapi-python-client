@@ -54,6 +54,19 @@ get an error.
 
 > For more usage details run `openapi-python-client --help` or read [usage](usage.md)
 
+
+### Using custom templates
+
+This feature leverages Jinja2's [ChoiceLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.ChoiceLoader) and [FileSystemLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.FileSystemLoader). This means you do _not_ need to customize every template. Simply copy the template(s) you want to customize from [the default template directory](openapi_python_client/templates) to your own custom template directory (file names _must_ match exactly) and pass the template directory through the `custom_template_path` flag to the `generate` and `update` commands. For instance, 
+
+```
+openapi-python-client update \
+  --url https://my.api.com/openapi.json \
+  --custom-template-path=relative/path/to/mytemplates
+```
+
+_Be forewarned, this is a beta-level feature in the sense that the API exposed in the templates is undocumented and unstable._
+
 ## What You Get
 
 1. A `pyproject.toml` file with some basic metadata intended to be used with [Poetry].
