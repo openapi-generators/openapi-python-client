@@ -1,6 +1,6 @@
-import httpx
 from typing import Optional
 
+import httpx
 
 Client = httpx.Client
 

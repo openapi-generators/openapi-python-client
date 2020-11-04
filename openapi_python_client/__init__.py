@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional, Sequence, Union
 import httpcore
 import httpx
 import yaml
-from jinja2 import Environment, PackageLoader, ChoiceLoader, FileSystemLoader
+from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 from openapi_python_client import utils
 
@@ -35,6 +35,7 @@ class Project:
         self.openapi: GeneratorData = openapi
 
         package_loader = PackageLoader(__package__)
+        loader: BaseLoader
         if custom_template_path is not None:
             loader = ChoiceLoader(
                 [

@@ -12,7 +12,9 @@ if __name__ == "__main__":
     openapi_path = Path(__file__).parent / "openapi.json"
 
     output_path = Path.cwd() / "my-test-api-client"
-    if sys.argv[1] == "custom":
+
+    custom = len(sys.argv) >= 2 and sys.argv[1] == "custom"
+    if custom:
         gr_path = Path(__file__).parent / "golden-record-custom"
     else:
         gr_path = Path(__file__).parent / "golden-record"
@@ -21,7 +23,7 @@ if __name__ == "__main__":
     shutil.rmtree(output_path, ignore_errors=True)
     config_path = Path(__file__).parent / "config.yml"
 
-    if sys.argv[1] == "custom":
+    if custom:
         result = runner.invoke(
             app,
             [

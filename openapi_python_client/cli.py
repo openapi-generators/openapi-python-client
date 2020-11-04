@@ -109,7 +109,7 @@ custom_template_path_options = {
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
-    custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),
+    custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
 ) -> None:
     """ Generate a new OpenAPI Client library """
     from . import create_new_client
@@ -128,7 +128,7 @@ def generate(
 def update(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
-    custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),
+    custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
 ) -> None:
     """ Update an existing OpenAPI Client library """
     from . import update_existing_client
