@@ -44,11 +44,16 @@ class Property:
         Get a string representation of type that should be used when declaring this property
 
         Args:
-            no_optional: Do not include Optional even if the value is optional (needed for isinstance checks)
+            no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
         """
-        if no_optional or (self.required and not self.nullable):
+        type_string = self._type_string
+        if no_optional:
             return self._type_string
-        return f"Optional[{self._type_string}]"
+        if self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     # noinspection PyUnusedLocal
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -59,20 +64,23 @@ class Property:
             prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
             back to the root of the generated client.
         """
-        if self.nullable or not self.required:
-            return {"from typing import Optional"}
-        return set()
+        imports = set()
+        if self.nullable:
+            imports.add("from typing import Optional")
+        if not self.required:
+            imports.add(f"from {prefix}types import UNSET, Unset")
+        return imports
 
     def to_string(self) -> str:
         """ How this should be declared in a dataclass """
         if self.default:
             default = self.default
         elif not self.required:
-            default = "None"
+            default = "UNSET"
         else:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string()} = {self.default}"
+            return f"{self.python_name}: {self.get_type_string()} = {default}"
         else:
             return f"{self.python_name}: {self.get_type_string()}"

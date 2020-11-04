@@ -154,9 +154,14 @@ class ListProperty(Property, Generic[InnerProp]):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if no_optional or (self.required and not self.nullable):
-            return f"List[{self.inner_property.get_type_string()}]"
-        return f"Optional[List[{self.inner_property.get_type_string()}]]"
+        type_string = f"List[{self.inner_property.get_type_string()}]"
+        if no_optional:
+            return type_string
+        if self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -184,11 +189,16 @@ class UnionProperty(Property):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        inner_types = [p.get_type_string() for p in self.inner_properties]
+        inner_types = [p.get_type_string(no_optional=True) for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
-        if no_optional or (self.required and not self.nullable):
-            return f"Union[{inner_prop_string}]"
-        return f"Optional[Union[{inner_prop_string}]]"
+        type_string = f"Union[{inner_prop_string}]"
+        if no_optional:
+            return type_string
+        if self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not self.required:
+            type_string = f"Union[Unset, {type_string}]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -300,7 +310,7 @@ def build_model_property(
         prop, schemas = property_from_data(name=key, required=required, data=value, schemas=schemas)
         if isinstance(prop, PropertyError):
             return prop, schemas
-        if required:
+        if required and not prop.nullable:
             required_properties.append(prop)
         else:
             optional_properties.append(prop)

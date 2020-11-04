@@ -1,6 +1,8 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Set
 
 import attr
+
+from ..types import UNSET, Unset
 
 {% for relative in model.relative_imports %}
 {{ relative }}
@@ -24,11 +26,22 @@ class {{ model.reference.class_name }}:
         {% endif %}
         {% endfor %}
 
-        return {
+
+        field_dict = {
             {% for property in model.required_properties + model.optional_properties %}
+            {% if property.required %}
             "{{ property.name }}": {{ property.python_name }},
+            {% endif %}
             {% endfor %}
         }
+        {% for property in model.optional_properties %}
+        {% if not property.required %}
+        if {{ property.python_name }} is not UNSET:
+            field_dict["{{ property.name }}"] = {{ property.python_name }}
+        {% endif %}
+        {% endfor %}
+
+        return field_dict
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "{{ model.reference.class_name }}":
@@ -36,7 +49,7 @@ class {{ model.reference.class_name }}:
     {% if property.required %}
         {% set property_source = 'd["' + property.name + '"]' %}
     {% else %}
-        {% set property_source = 'd.get("' + property.name + '")' %}
+        {% set property_source = 'd.get("' + property.name + '", UNSET)' %}
     {% endif %}
     {% if property.template %}
         {% from "property_templates/" + property.template import construct %}

@@ -4,6 +4,13 @@ from typing import BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, T
 import attr
 
 
+class Unset:
+    pass
+
+
+UNSET: Unset = Unset()
+
+
 @attr.s(auto_attribs=True)
 class File:
     """ Contains information for file uploads """
