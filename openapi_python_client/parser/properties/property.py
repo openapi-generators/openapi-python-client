@@ -68,6 +68,7 @@ class Property:
         if self.nullable:
             imports.add("from typing import Optional")
         if not self.required:
+            imports.add("from typing import Union")
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 

@@ -14,7 +14,7 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     client: Client,
-    json_body: Dict[Any, Any],
+    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -23,7 +23,7 @@ def _get_kwargs(
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, Union[float, str]] = "not a float",
-    enum_prop: Union[Unset, AnEnum] = UNSET,
+    an_enum: AnEnum,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -53,11 +53,11 @@ def _get_kwargs(
     else:
         json_union_prop = union_prop
 
-    json_enum_prop: Union[Unset, AnEnum] = UNSET
-    if not isinstance(enum_prop, Unset):
-        json_enum_prop = enum_prop.value
+    json_an_enum = an_enum.value
 
-    params: Dict[str, Any] = {}
+    params: Dict[str, Any] = {
+        "AnEnum": json_an_enum,
+    }
     if string_prop is not UNSET:
         params["string_prop"] = string_prop
     if datetime_prop is not UNSET:
@@ -74,8 +74,6 @@ def _get_kwargs(
         params["list_prop"] = json_list_prop
     if union_prop is not UNSET:
         params["union_prop"] = json_union_prop
-    if enum_prop is not UNSET:
-        params["enum_prop"] = json_enum_prop
 
     json_json_body = json_body.to_dict()
 
@@ -109,7 +107,7 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPVal
 def sync_detailed(
     *,
     client: Client,
-    json_body: Dict[Any, Any],
+    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -118,7 +116,7 @@ def sync_detailed(
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, Union[float, str]] = "not a float",
-    enum_prop: Union[Unset, AnEnum] = UNSET,
+    an_enum: AnEnum,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -131,7 +129,7 @@ def sync_detailed(
         boolean_prop=boolean_prop,
         list_prop=list_prop,
         union_prop=union_prop,
-        enum_prop=enum_prop,
+        an_enum=an_enum,
     )
 
     response = httpx.post(
@@ -144,7 +142,7 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    json_body: Dict[Any, Any],
+    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -153,7 +151,7 @@ def sync(
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, Union[float, str]] = "not a float",
-    enum_prop: Union[Unset, AnEnum] = UNSET,
+    an_enum: AnEnum,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -168,14 +166,14 @@ def sync(
         boolean_prop=boolean_prop,
         list_prop=list_prop,
         union_prop=union_prop,
-        enum_prop=enum_prop,
+        an_enum=an_enum,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Client,
-    json_body: Dict[Any, Any],
+    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -184,7 +182,7 @@ async def asyncio_detailed(
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, Union[float, str]] = "not a float",
-    enum_prop: Union[Unset, AnEnum] = UNSET,
+    an_enum: AnEnum,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -197,7 +195,7 @@ async def asyncio_detailed(
         boolean_prop=boolean_prop,
         list_prop=list_prop,
         union_prop=union_prop,
-        enum_prop=enum_prop,
+        an_enum=an_enum,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -209,7 +207,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    json_body: Dict[Any, Any],
+    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -218,7 +216,7 @@ async def asyncio(
     boolean_prop: Union[Unset, bool] = UNSET,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, Union[float, str]] = "not a float",
-    enum_prop: Union[Unset, AnEnum] = UNSET,
+    an_enum: AnEnum,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -234,6 +232,6 @@ async def asyncio(
             boolean_prop=boolean_prop,
             list_prop=list_prop,
             union_prop=union_prop,
-            enum_prop=enum_prop,
+            an_enum=an_enum,
         )
     ).parsed

@@ -1,7 +1,7 @@
 import pytest
 
 import openapi_python_client.schema as oai
-from openapi_python_client.parser.errors import ParseError, PropertyError, ValidationError
+from openapi_python_client.parser.errors import PropertyError, ValidationError
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -51,7 +51,7 @@ class TestProperty:
 
         p.required = True
         p.nullable = True
-        assert p.to_string() == f"{name}: {get_type_string()} = None"
+        assert p.to_string() == f"{name}: {get_type_string()}"
 
         p.default = "TEST"
         assert p.to_string() == f"{name}: {get_type_string()} = TEST"
@@ -63,7 +63,14 @@ class TestProperty:
         assert p.get_imports(prefix="") == set()
 
         p.required = False
-        assert p.get_imports(prefix="") == {"from typing import Union, Optional", "from types import UNSET, Unset"}
+        assert p.get_imports(prefix="") == {"from types import UNSET, Unset", "from typing import Union"}
+
+        p.nullable = True
+        assert p.get_imports(prefix="") == {
+            "from types import UNSET, Unset",
+            "from typing import Optional",
+            "from typing import Union",
+        }
 
     def test__validate_default(self):
         from openapi_python_client.parser.properties import Property
@@ -120,7 +127,7 @@ class TestDateTimeProperty:
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
@@ -129,7 +136,8 @@ class TestDateTimeProperty:
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -159,7 +167,7 @@ class TestDateProperty:
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
@@ -168,7 +176,8 @@ class TestDateProperty:
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -195,14 +204,15 @@ class TestFileProperty:
         p.required = False
         assert p.get_imports(prefix=prefix) == {
             "from ...types import File",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
         p.nullable = True
         assert p.get_imports(prefix=prefix) == {
             "from ...types import File",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -295,7 +305,7 @@ class TestListProperty:
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import List",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
@@ -303,7 +313,8 @@ class TestListProperty:
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import List",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -374,7 +385,7 @@ class TestUnionProperty:
             inner_import_1,
             inner_import_2,
             "from typing import Union",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
@@ -383,7 +394,7 @@ class TestUnionProperty:
             inner_import_1,
             inner_import_2,
             "from typing import Union",
-            "from typing import Union, Optional",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -520,14 +531,15 @@ class TestEnumProperty:
         enum_property.required = False
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
         enum_property.nullable = True
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -667,14 +679,15 @@ class TestDictProperty:
         p.required = False
         assert p.get_imports(prefix=prefix) == {
             "from typing import Dict",
-            "from typing import Union, Optional",
+            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
-        p.nullable = False
+        p.nullable = True
         assert p.get_imports(prefix=prefix) == {
             "from typing import Dict",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -683,7 +696,8 @@ class TestDictProperty:
             "from typing import Dict",
             "from typing import cast",
             "from dataclasses import field",
-            "from typing import Union, Optional",
+            "from typing import Union",
+            "from typing import Optional",
             "from ...types import UNSET, Unset",
         }
 
@@ -984,9 +998,9 @@ class TestBuildUnionProperty:
         IntProperty = mocker.patch(f"{MODULE_NAME}.IntProperty")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
-        from openapi_python_client.parser.properties import property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        p = property_from_data(name=name, required=required, data=data)
+        p, s = property_from_data(name=name, required=required, data=data, schemas=Schemas())
 
         FloatProperty.assert_called_once_with(name=name, required=required, default="0.0", nullable=False)
         IntProperty.assert_called_once_with(name=name, required=required, default="0", nullable=False)
@@ -998,6 +1012,7 @@ class TestBuildUnionProperty:
             nullable=False,
         )
         assert p == UnionProperty.return_value
+        assert s == Schemas()
 
     def test_property_from_data_union_bad_type(self, mocker):
         name = mocker.MagicMock()
@@ -1005,9 +1020,9 @@ class TestBuildUnionProperty:
         data = oai.Schema(anyOf=[{}])
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
-        from openapi_python_client.parser.properties import property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        p = property_from_data(name=name, required=required, data=data)
+        p, s = property_from_data(name=name, required=required, data=data, schemas=Schemas())
 
         assert p == PropertyError(detail=f"Invalid property in union {name}", data=oai.Schema())
 

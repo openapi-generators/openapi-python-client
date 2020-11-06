@@ -4,10 +4,11 @@ import httpx
 
 Client = httpx.Client
 
-from typing import Optional
+from typing import Union
 
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ...models.http_validation_error import HTTPValidationError
+from ...types import UNSET, Unset
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[
@@ -37,12 +38,12 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[
 def httpx_request(*,
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
-    keep_alive: Optional[bool] = None,
+    keep_alive: Union[Unset, bool] = UNSET,
 ) -> httpx.Response[Union[
     None,
     HTTPValidationError
 ]]:
-    if keep_alive is not None:
+    if keep_alive is not UNSET:
         headers["keep-alive"] = keep_alive
 
     

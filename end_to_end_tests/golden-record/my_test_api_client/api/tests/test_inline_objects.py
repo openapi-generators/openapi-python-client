@@ -4,7 +4,7 @@ import httpx
 
 from ...client import Client
 from ...models.json_body import JsonBody
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -16,7 +16,9 @@ def _get_kwargs(
 
     headers: Dict[str, Any] = client.get_headers()
 
-    json_json_body = json_body.to_dict() if json_body else None
+    json_json_body: Optional[JsonBody] = UNSET
+    if not isinstance(json_body, Unset):
+        json_json_body = json_body.to_dict()
 
     return {
         "url": url,

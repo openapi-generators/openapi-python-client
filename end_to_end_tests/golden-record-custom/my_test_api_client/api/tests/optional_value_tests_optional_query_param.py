@@ -4,10 +4,10 @@ import httpx
 
 Client = httpx.Client
 
-from typing import Dict, cast
+from typing import List, Union
 
-from ...models.a_model import AModel
 from ...models.http_validation_error import HTTPValidationError
+from ...types import UNSET, Unset
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
@@ -30,15 +30,21 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, H
 def httpx_request(
     *,
     client: Client,
-    json_body: AModel,
+    query_param: Union[Unset, List[str]] = UNSET,
 ) -> httpx.Response[Union[None, HTTPValidationError]]:
 
-    json_json_body = json_body.to_dict()
+    json_query_param: Union[Unset, List[Any]] = UNSET
+    if not isinstance(query_param, Unset):
+        json_query_param = query_param
+
+    params: Dict[str, Any] = {}
+    if query_param is not UNSET:
+        params["query_param"] = json_query_param
 
     response = client.request(
-        "post",
-        "/tests/json_body",
-        json=json_json_body,
+        "get",
+        "/tests/optional_query_param/",
+        params=params,
     )
 
     return _build_response(response=response)

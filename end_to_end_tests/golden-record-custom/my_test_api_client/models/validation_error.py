@@ -17,11 +17,13 @@ class ValidationError:
         msg = self.msg
         type = self.type
 
-        return {
+        field_dict = {
             "loc": loc,
             "msg": msg,
             "type": type,
         }
+
+        return field_dict
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "ValidationError":

@@ -4,8 +4,6 @@ import httpx
 
 Client = httpx.Client
 
-from typing import Dict, cast
-
 from ...models.an_int_enum import AnIntEnum
 from ...models.http_validation_error import HTTPValidationError
 
@@ -30,13 +28,13 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, H
 def httpx_request(
     *,
     client: Client,
-    int_enum: AnIntEnum,
+    an_int_enum: AnIntEnum,
 ) -> httpx.Response[Union[None, HTTPValidationError]]:
 
-    json_int_enum = int_enum.value
+    json_an_int_enum = an_int_enum.value
 
     params: Dict[str, Any] = {
-        "int_enum": json_int_enum,
+        "AnIntEnum": json_an_int_enum,
     }
 
     response = client.request(

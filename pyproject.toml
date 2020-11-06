@@ -59,7 +59,7 @@ isort .\
 """
 regen = "python -m end_to_end_tests.regen_golden_record"
 regen_custom = "python -m end_to_end_tests.regen_golden_record custom"
-e2e = "pytest openapi_python_client end_to_end_tests"
+e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = """
 task regen\
 && task regen_custom\
