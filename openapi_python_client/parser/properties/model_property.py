@@ -1,11 +1,12 @@
-from dataclasses import dataclass
 from typing import ClassVar, List, Set
+
+import attr
 
 from ..reference import Reference
 from .property import Property
 
 
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class ModelProperty(Property):
     """ A property which refers to another Schema """
 

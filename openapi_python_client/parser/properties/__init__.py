@@ -1,33 +1,29 @@
-from dataclasses import dataclass, replace
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union
 
-from dateutil.parser import isoparse
+import attr
 
 from ... import schema as oai
 from ... import utils
 from ..errors import PropertyError, ValidationError
 from ..reference import Reference
+from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty
 from .property import Property
 from .schemas import Schemas
 
 
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class StringProperty(Property):
     """ A property of type str """
 
     max_length: Optional[int] = None
     pattern: Optional[str] = None
-
     _type_string: ClassVar[str] = "str"
 
-    def _validate_default(self, default: Any) -> str:
-        return f"{utils.remove_string_escapes(default)!r}"
 
-
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class DateTimeProperty(Property):
     """
     A property of type datetime.datetime
@@ -48,15 +44,8 @@ class DateTimeProperty(Property):
         imports.update({"import datetime", "from typing import cast", "from dateutil.parser import isoparse"})
         return imports
 
-    def _validate_default(self, default: Any) -> str:
-        try:
-            isoparse(default)
-        except (TypeError, ValueError) as e:
-            raise ValidationError from e
-        return f"isoparse({default!r})"
 
-
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class DateProperty(Property):
     """ A property of type datetime.date """
 
@@ -75,15 +64,8 @@ class DateProperty(Property):
         imports.update({"import datetime", "from typing import cast", "from dateutil.parser import isoparse"})
         return imports
 
-    def _validate_default(self, default: Any) -> str:
-        try:
-            isoparse(default).date()
-        except (TypeError, ValueError) as e:
-            raise ValidationError() from e
-        return f"isoparse({default!r}).date()"
 
-
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class FileProperty(Property):
     """ A property used for uploading files """
 
@@ -103,49 +85,31 @@ class FileProperty(Property):
         return imports
 
 
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class FloatProperty(Property):
     """ A property of type float """
 
-    default: Optional[float] = None
     _type_string: ClassVar[str] = "float"
 
-    def _validate_default(self, default: Any) -> float:
-        try:
-            return float(default)
-        except (TypeError, ValueError) as e:
-            raise ValidationError() from e
 
-
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class IntProperty(Property):
     """ A property of type int """
 
-    default: Optional[int] = None
     _type_string: ClassVar[str] = "int"
 
-    def _validate_default(self, default: Any) -> int:
-        try:
-            return int(default)
-        except (TypeError, ValueError) as e:
-            raise ValidationError() from e
 
-
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class BooleanProperty(Property):
     """ Property for bool """
 
     _type_string: ClassVar[str] = "bool"
 
-    def _validate_default(self, default: Any) -> bool:
-        # no try/except needed as anything that comes from the initial load from json/yaml will be boolable
-        return bool(default)
-
 
 InnerProp = TypeVar("InnerProp", bound=Property)
 
 
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class ListProperty(Property, Generic[InnerProp]):
     """ A property representing a list (array) of other properties """
 
@@ -176,11 +140,8 @@ class ListProperty(Property, Generic[InnerProp]):
         imports.add("from typing import List")
         return imports
 
-    def _validate_default(self, default: Any) -> None:
-        return None
 
-
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class UnionProperty(Property):
     """ A property representing a Union (anyOf) of other properties """
 
@@ -214,41 +175,6 @@ class UnionProperty(Property):
         imports.add("from typing import Union")
         return imports
 
-    def _validate_default(self, default: Any) -> Any:
-        for property in self.inner_properties:
-            try:
-                val = property._validate_default(default)
-                return val
-            except ValidationError:
-                continue
-        raise ValidationError()
-
-
-@dataclass
-class DictProperty(Property):
-    """ Property that is a general Dict """
-
-    _type_string: ClassVar[str] = "Dict[Any, Any]"
-    template: ClassVar[str] = "dict_property.pyi"
-
-    def get_imports(self, *, prefix: str) -> Set[str]:
-        """
-        Get a set of import strings that should be included when this property is used somewhere
-
-        Args:
-            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
-            back to the root of the generated client.
-        """
-        imports = super().get_imports(prefix=prefix)
-        imports.add("from typing import Dict")
-        if self.default is not None:
-            imports.add("from dataclasses import field")
-            imports.add("from typing import cast")
-        return imports
-
-    def _validate_default(self, default: Any) -> None:
-        return None
-
 
 def _string_based_property(
     name: str, required: bool, data: oai.Schema
@@ -259,27 +185,27 @@ def _string_based_property(
         return DateTimeProperty(
             name=name,
             required=required,
-            default=data.default,
+            default=convert("datetime.datetime", data.default),
             nullable=data.nullable,
         )
     elif string_format == "date":
         return DateProperty(
             name=name,
             required=required,
-            default=data.default,
+            default=convert("datetime.date", data.default),
             nullable=data.nullable,
         )
     elif string_format == "binary":
         return FileProperty(
             name=name,
             required=required,
-            default=data.default,
+            default=None,
             nullable=data.nullable,
         )
     else:
         return StringProperty(
             name=name,
-            default=data.default,
+            default=convert("str", data.default),
             required=required,
             pattern=data.pattern,
             nullable=data.nullable,
@@ -327,23 +253,54 @@ def build_model_property(
         required=required,
         name=name,
     )
-    schemas = replace(schemas, models={**schemas.models, prop.reference.class_name: prop})
+    schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
     return prop, schemas
 
 
 def build_enum_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, enum: List[Union[str, int]]
-) -> Tuple[EnumProperty, Schemas]:
+) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
+
+    reference = Reference.from_ref(data.title or name)
+    values = EnumProperty.values_from_list(enum)
+
+    dedup_counter = 0  # TODO: use the parent names instead of a counter for deduping
+    while reference.class_name in schemas.enums:
+        existing = schemas.enums[reference.class_name]
+        if values == existing.values:
+            break  # This is the same Enum, we're good
+        dedup_counter += 1
+        reference = Reference.from_ref(f"{reference.class_name}{dedup_counter}")
+
+    for value in values.values():
+        value_type = type(value)
+        break
+    else:
+        return PropertyError(data=data, detail="No values provided for Enum"), schemas
+
+    default = None
+    if data.default is not None:
+        inverse_values = {v: k for k, v in values.items()}
+        try:
+            default = f"{reference.class_name}.{inverse_values[data.default]}"
+        except KeyError:
+            return (
+                PropertyError(
+                    detail=f"{data.default} is an invalid default for enum {reference.class_name}", data=data
+                ),
+                schemas,
+            )
+
     prop = EnumProperty(
         name=name,
         required=required,
-        values=EnumProperty.values_from_list(enum),
-        title=data.title or name,
-        default=data.default,
+        default=default,
         nullable=data.nullable,
-        existing_enums=schemas.enums,
+        reference=reference,
+        values=values,
+        value_type=value_type,
     )
-    schemas = replace(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
+    schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
     return prop, schemas
 
 
@@ -356,11 +313,13 @@ def build_union_property(
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
         sub_properties.append(sub_prop)
+
+    default = convert_chain((prop._type_string for prop in sub_properties), data.default)
     return (
         UnionProperty(
             name=name,
             required=required,
-            default=data.default,
+            default=default,
             inner_properties=sub_properties,
             nullable=data.nullable,
         ),
@@ -380,7 +339,7 @@ def build_list_property(
         ListProperty(
             name=name,
             required=required,
-            default=data.default,
+            default=None,
             inner_property=inner_prop,
             nullable=data.nullable,
         ),
@@ -398,29 +357,27 @@ def _property_from_data(
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         reference = Reference.from_ref(data.ref)
-        if reference.class_name in schemas.enums:
-            existing = schemas.enums[reference.class_name]
+        existing = schemas.enums.get(reference.class_name) or schemas.models.get(reference.class_name)
+        if existing:
             return (
-                replace(existing, required=required, name=name, title=reference.class_name, existing_enums={}),
+                attr.evolve(existing, required=required, name=name),
                 schemas,
             )
-        elif reference.class_name in schemas.models:
-            return replace(schemas.models[reference.class_name], required=required, name=name), schemas
-        else:
-            return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+        return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
     if data.enum:
         return build_enum_property(data=data, name=name, required=required, schemas=schemas, enum=data.enum)
     if data.anyOf or data.oneOf:
         return build_union_property(data=data, name=name, required=required, schemas=schemas)
     if not data.type:
         return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined."), schemas
+
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data), schemas
     elif data.type == "number":
         return (
             FloatProperty(
                 name=name,
-                default=data.default,
+                default=convert("float", data.default),
                 required=required,
                 nullable=data.nullable,
             ),
@@ -430,7 +387,7 @@ def _property_from_data(
         return (
             IntProperty(
                 name=name,
-                default=data.default,
+                default=convert("int", data.default),
                 required=required,
                 nullable=data.nullable,
             ),
@@ -441,7 +398,7 @@ def _property_from_data(
             BooleanProperty(
                 name=name,
                 required=required,
-                default=data.default,
+                default=convert("bool", data.default),
                 nullable=data.nullable,
             ),
             schemas,

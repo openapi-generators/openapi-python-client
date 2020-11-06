@@ -1,11 +1,11 @@
-from dataclasses import dataclass, field
-from typing import Any, ClassVar, Optional, Set
+from typing import ClassVar, Optional, Set
+
+import attr
 
 from ... import utils
-from ..errors import ValidationError
 
 
-@dataclass
+@attr.s(auto_attribs=True, frozen=True, slots=True)
 class Property:
     """
     Describes a single property for a schema
@@ -23,21 +23,14 @@ class Property:
     name: str
     required: bool
     nullable: bool
-    default: Optional[Any]
+    _type_string: ClassVar[str] = ""
+    default: Optional[str] = attr.ib()
+    python_name: str = attr.ib(init=False)
 
     template: ClassVar[Optional[str]] = None
-    _type_string: ClassVar[str]
 
-    python_name: str = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.python_name = utils.to_valid_python_identifier(utils.snake_case(self.name))
-        if self.default is not None:
-            self.default = self._validate_default(default=self.default)
-
-    def _validate_default(self, default: Any) -> Any:
-        """ Check that the default value is valid for the property's type + perform any necessary sanitization """
-        raise ValidationError
+    def __attrs_post_init__(self) -> None:
+        object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(self.name)))
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """
@@ -74,6 +67,7 @@ class Property:
 
     def to_string(self) -> str:
         """ How this should be declared in a dataclass """
+        default: Optional[str]
         if self.default is not None:
             default = self.default
         elif not self.required:
