@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.7.0 - Unreleased
 
+### Breaking Changes
+
+- `UNSET`, the value given to any request/response field that is not `required` and wasn't specified, is falsey.
+   Anywhere that such a value may arise (such as a response that has non-required fields) must be carefully checked as
+   `if my_model.not_required_bool` could be False even though a concrete value wasn't actually returned.
+
 ### Additions
 
 - Added a `--custom-template-path` option for providing custom jinja2 templates (#231 - Thanks @erichulburd!).
+- Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
 
 ## 0.6.2 - 2020-11-03
 
@@ -20,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update minimum Pydantic version to support Python 3.9
 
 ### Additions
-- Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
 
 - Allow specifying the generated client's version using `package_version_override` in a config file. (#225 - Thanks @fyhertz!)
 

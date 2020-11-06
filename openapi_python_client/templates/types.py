@@ -5,7 +5,8 @@ import attr
 
 
 class Unset:
-    pass
+    def __bool__(self):
+        return False
 
 
 UNSET: Unset = Unset()
