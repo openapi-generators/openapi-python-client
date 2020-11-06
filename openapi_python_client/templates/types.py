@@ -5,7 +5,7 @@ import attr
 
 
 class Unset:
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return False
 
 
