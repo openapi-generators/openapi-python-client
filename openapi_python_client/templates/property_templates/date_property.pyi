@@ -10,8 +10,18 @@ if {{ source }} is not None:
 
 {% macro transform(property, source, destination) %}
 {% if property.required %}
-{{ destination }} = {{ source }}.isoformat()
-{% else %}
+{% if property.nullable %}
 {{ destination }} = {{ source }}.isoformat() if {{ source }} else None
+{% else %}
+{{ destination }} = {{ source }}.isoformat()
+{% endif %}
+{% else %}
+{{ destination }}: Union[Unset, str] = UNSET
+if not isinstance({{ source }}, Unset):
+{% if property.nullable %}
+    {{ destination }} = {{ source }}.isoformat() if {{ source }} else None
+{% else %}
+    {{ destination }} = {{ source }}.isoformat()
+{% endif %}
 {% endif %}
 {% endmacro %}

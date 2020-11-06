@@ -23,11 +23,20 @@ def _parse_{{ property.python_name }}(data: Dict[str, Any]) -> {{ property.get_t
 
 {% macro transform(property, source, destination) %}
 {% if not property.required %}
+{{ destination }}: {{ property.get_type_string() }}
+if isinstance({{ source }}, Unset):
+    {{ destination }} = UNSET
+{% endif %}
+{% if property.nullable %}
+{% if property.required %}
 if {{ source }} is None:
+{% else %}{# There's an if UNSET statement before this #}
+elif {{ source }} is None:
+{% endif %}
     {{ destination }}: {{ property.get_type_string() }} = None
 {% endif %}
 {% for inner_property in property.inner_properties %}
-    {% if loop.first and property.required %}{# No if None statement before this #}
+    {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
 if isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True) }}):
     {% elif not loop.last %}
 elif isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True) }}):

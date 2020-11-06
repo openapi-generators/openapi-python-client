@@ -55,7 +55,7 @@ isort .\
  && flake8 openapi_python_client\
  && safety check --bare\
  && mypy openapi_python_client\
- && pytest --cov openapi_python_client tests\
+ && pytest --cov openapi_python_client tests --cov-report=term-missing\
 """
 regen = "python -m end_to_end_tests.regen_golden_record"
 regen_custom = "python -m end_to_end_tests.regen_golden_record custom"

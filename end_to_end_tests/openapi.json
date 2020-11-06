@@ -28,7 +28,9 @@
     },
     "/tests/": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Get List",
         "description": "Get a list of things ",
         "operationId": "getUserList",
@@ -94,7 +96,9 @@
     },
     "/tests/basic_lists/strings": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Get Basic List Of Strings",
         "description": "Get a list of strings ",
         "operationId": "getBasicListOfStrings",
@@ -118,7 +122,9 @@
     },
     "/tests/basic_lists/integers": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Get Basic List Of Integers",
         "description": "Get a list of integers ",
         "operationId": "getBasicListOfIntegers",
@@ -142,7 +148,9 @@
     },
     "/tests/basic_lists/floats": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Get Basic List Of Floats",
         "description": "Get a list of floats ",
         "operationId": "getBasicListOfFloats",
@@ -166,7 +174,9 @@
     },
     "/tests/basic_lists/booleans": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Get Basic List Of Booleans",
         "description": "Get a list of booleans ",
         "operationId": "getBasicListOfBooleans",
@@ -190,7 +200,9 @@
     },
     "/tests/upload": {
       "post": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Upload File",
         "description": "Upload a file ",
         "operationId": "upload_file_tests_upload_post",
@@ -239,7 +251,9 @@
     },
     "/tests/json_body": {
       "post": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Json Body",
         "description": "Try sending a JSON body ",
         "operationId": "json_body_tests_json_body_post",
@@ -277,7 +291,9 @@
     },
     "/tests/defaults": {
       "post": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Defaults",
         "operationId": "defaults_tests_defaults_post",
         "parameters": [
@@ -351,7 +367,10 @@
               "items": {
                 "$ref": "#/components/schemas/AnEnum"
               },
-              "default": ["FIRST_VALUE", "SECOND_VALUE"]
+              "default": [
+                "FIRST_VALUE",
+                "SECOND_VALUE"
+              ]
             },
             "name": "list_prop",
             "in": "query"
@@ -422,7 +441,9 @@
     },
     "/tests/octet_stream": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Octet Stream",
         "operationId": "octet_stream_tests_octet_stream_get",
         "responses": {
@@ -442,7 +463,9 @@
     },
     "/tests/no_response": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "No Response",
         "operationId": "no_response_tests_no_response_get",
         "responses": {
@@ -459,7 +482,9 @@
     },
     "/tests/unsupported_content": {
       "get": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Unsupported Content",
         "operationId": "unsupported_content_tests_unsupported_content_get",
         "responses": {
@@ -482,7 +507,9 @@
     },
     "/tests/int_enum": {
       "post": {
-        "tags": ["tests"],
+        "tags": [
+          "tests"
+        ],
         "summary": "Int Enum",
         "operationId": "int_enum_tests_int_enum_post",
         "parameters": [
@@ -516,13 +543,61 @@
           }
         }
       }
+    },
+    "/tests/optional_query_param/": {
+      "get": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Optional Query Params test",
+        "description": "Test optional query parameters",
+        "operationId": "optional_value_tests_optional_query_param",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Query Param",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "string1",
+                "string2"
+              ]
+            },
+            "name": "query_param",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "some_dict", "aCamelDateTime", "a_date"],
+        "required": ["an_enum_value", "some_dict", "aCamelDateTime", "a_date", "required_nullable", "required_not_nullable"],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -568,6 +643,26 @@
           "1_leading_digit": {
             "title": "Leading Digit",
             "type": "string"
+          },
+          "required_nullable": {
+            "title": "Required AND Nullable",
+            "type": "string",
+            "nullable": true
+          },
+          "required_not_nullable": {
+            "title": "Required NOT Nullable",
+            "type": "string",
+            "nullable": false
+          },
+          "not_required_nullable": {
+            "title": "NOT Required AND nullable",
+            "type": "string",
+            "nullable": true
+          },
+          "not_required_not_nullable": {
+            "title": "NOT Required AND NOT Nullable",
+            "type": "string",
+            "nullable": false
           }
         },
         "description": "A Model for testing all the ways custom objects can be used "

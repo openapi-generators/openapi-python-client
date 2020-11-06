@@ -4,7 +4,7 @@
         {% if parameter.required %}
 headers["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
         {% else %}
-if {{ parameter.python_name }} is not None:
+if {{ parameter.python_name }} is not UNSET:
     headers["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
         {% endif %}
     {% endfor %}
@@ -33,7 +33,7 @@ params: Dict[str, Any] = {
 }
     {% for property in endpoint.query_parameters %}
         {% if not property.required %}
-if {{ property.python_name }} is not None:
+if {{ property.python_name }} is not UNSET:
             {% if property.template %}
     params["{{ property.name }}"] = {{ "json_" + property.python_name }}
             {% else %}
