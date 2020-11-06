@@ -194,10 +194,10 @@ class UnionProperty(Property):
         type_string = f"Union[{inner_prop_string}]"
         if no_optional:
             return type_string
+        if not self.required:
+            type_string = f"Union[Unset, {inner_prop_string}]"
         if self.nullable:
             type_string = f"Optional[{type_string}]"
-        if not self.required:
-            type_string = f"Union[Unset, {type_string}]"
         return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -399,9 +399,13 @@ def _property_from_data(
     if isinstance(data, oai.Reference):
         reference = Reference.from_ref(data.ref)
         if reference.class_name in schemas.enums:
-            return schemas.enums[reference.class_name], schemas
+            existing = schemas.enums[reference.class_name]
+            return (
+                replace(existing, required=required, name=name, title=reference.class_name, existing_enums={}),
+                schemas,
+            )
         elif reference.class_name in schemas.models:
-            return schemas.models[reference.class_name], schemas
+            return replace(schemas.models[reference.class_name], required=required, name=name), schemas
         else:
             return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
     if data.enum:

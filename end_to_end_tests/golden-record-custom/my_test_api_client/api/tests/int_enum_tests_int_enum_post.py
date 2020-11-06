@@ -28,13 +28,13 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, H
 def httpx_request(
     *,
     client: Client,
-    an_int_enum: AnIntEnum,
+    int_enum: AnIntEnum,
 ) -> httpx.Response[Union[None, HTTPValidationError]]:
 
-    json_an_int_enum = an_int_enum.value
+    json_int_enum = int_enum.value
 
     params: Dict[str, Any] = {
-        "AnIntEnum": json_an_int_enum,
+        "int_enum": json_int_enum,
     }
 
     response = client.request(

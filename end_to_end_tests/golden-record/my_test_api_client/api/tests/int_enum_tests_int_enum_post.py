@@ -11,16 +11,16 @@ from ...types import Response
 def _get_kwargs(
     *,
     client: Client,
-    an_int_enum: AnIntEnum,
+    int_enum: AnIntEnum,
 ) -> Dict[str, Any]:
     url = "{}/tests/int_enum".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
 
-    json_an_int_enum = an_int_enum.value
+    json_int_enum = int_enum.value
 
     params: Dict[str, Any] = {
-        "AnIntEnum": json_an_int_enum,
+        "int_enum": json_int_enum,
     }
 
     return {
@@ -52,11 +52,11 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPVal
 def sync_detailed(
     *,
     client: Client,
-    an_int_enum: AnIntEnum,
+    int_enum: AnIntEnum,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        an_int_enum=an_int_enum,
+        int_enum=int_enum,
     )
 
     response = httpx.post(
@@ -69,24 +69,24 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    an_int_enum: AnIntEnum,
+    int_enum: AnIntEnum,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
     return sync_detailed(
         client=client,
-        an_int_enum=an_int_enum,
+        int_enum=int_enum,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Client,
-    an_int_enum: AnIntEnum,
+    int_enum: AnIntEnum,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        an_int_enum=an_int_enum,
+        int_enum=int_enum,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -98,13 +98,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    an_int_enum: AnIntEnum,
+    int_enum: AnIntEnum,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
     return (
         await asyncio_detailed(
             client=client,
-            an_int_enum=an_int_enum,
+            int_enum=int_enum,
         )
     ).parsed

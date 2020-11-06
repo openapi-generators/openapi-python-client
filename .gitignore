@@ -26,4 +26,5 @@ test-reports/
 htmlcov/
 
 # Generated end to end test data
-my-test-api-client
+my-test-api-client/
+custom-e2e/

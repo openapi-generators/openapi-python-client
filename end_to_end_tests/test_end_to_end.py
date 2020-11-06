@@ -52,9 +52,9 @@ def test_end_to_end():
 def test_end_to_end_w_custom_templates():
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "openapi.json"
-    config_path = Path(__file__).parent / "config.yml"
+    config_path = Path(__file__).parent / "custom_config.yml"
     gr_path = Path(__file__).parent / "golden-record-custom"
-    output_path = Path.cwd() / "my-test-api-client"
+    output_path = Path.cwd() / "custom-e2e"
     shutil.rmtree(output_path, ignore_errors=True)
 
     result = runner.invoke(

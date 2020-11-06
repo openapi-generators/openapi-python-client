@@ -74,7 +74,7 @@ class Property:
 
     def to_string(self) -> str:
         """ How this should be declared in a dataclass """
-        if self.default:
+        if self.default is not None:
             default = self.default
         elif not self.required:
             default = "UNSET"

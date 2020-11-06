@@ -40,10 +40,10 @@ def _get_kwargs(
     json_list_prop: Union[Unset, List[Any]] = UNSET
     if not isinstance(list_prop, Unset):
         json_list_prop = []
-        for an_enum_data in list_prop:
-            an_enum = an_enum_data.value
+        for list_prop_item_data in list_prop:
+            list_prop_item = list_prop_item_data.value
 
-            json_list_prop.append(an_enum)
+            json_list_prop.append(list_prop_item)
 
     json_union_prop: Union[Unset, float, str]
     if isinstance(union_prop, Unset):
@@ -53,11 +53,11 @@ def _get_kwargs(
     else:
         json_union_prop = union_prop
 
-    json_an_enum = enum_prop.value
+    json_enum_prop: Union[Unset, AnEnum] = UNSET
+    if not isinstance(enum_prop, Unset):
+        json_enum_prop = enum_prop.value
 
-    params: Dict[str, Any] = {
-        "AnEnum": json_an_enum,
-    }
+    params: Dict[str, Any] = {}
     if string_prop is not UNSET:
         params["string_prop"] = string_prop
     if datetime_prop is not UNSET:
@@ -74,6 +74,8 @@ def _get_kwargs(
         params["list_prop"] = json_list_prop
     if union_prop is not UNSET:
         params["union_prop"] = json_union_prop
+    if enum_prop is not UNSET:
+        params["enum_prop"] = json_enum_prop
 
     json_json_body = json_body.to_dict()
 

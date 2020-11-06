@@ -754,37 +754,67 @@ class TestPropertyFromData:
         }
 
     def test_property_from_data_ref_enum(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
+        from openapi_python_client.parser.properties import EnumProperty, Schemas, property_from_data
 
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Reference.construct(ref=mocker.MagicMock())
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
-        enum = mocker.MagicMock()
-        schemas = Schemas(enums={from_ref.return_value.class_name: enum})
+        name = "some_enum"
+        data = oai.Reference.construct(ref="MyEnum")
+        existing_enum = EnumProperty(
+            name="an_enum",
+            required=True,
+            nullable=False,
+            default=None,
+            values={"A": "a"},
+            title="MyEnum",
+            existing_enums={},
+        )
+        schemas = Schemas(enums={"MyEnum": existing_enum})
 
-        prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
+        prop, new_schemas = property_from_data(name=name, required=False, data=data, schemas=schemas)
 
-        from_ref.assert_called_once_with(data.ref)
-        assert prop == enum
+        assert prop == EnumProperty(
+            name="some_enum",
+            required=False,
+            nullable=False,
+            default=None,
+            values={"A": "a"},
+            title="MyEnum",
+            existing_enums={},
+        )
         assert schemas == new_schemas
 
     def test_property_from_data_ref_model(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
+        from openapi_python_client.parser.properties import ModelProperty, Reference, Schemas, property_from_data
 
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Reference.construct(ref=mocker.MagicMock())
-        from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
-        model = mocker.MagicMock()
-        schemas = Schemas(models={from_ref.return_value.class_name: model})
+        name = "new_name"
+        required = False
+        class_name = "MyModel"
+        data = oai.Reference.construct(ref=class_name)
+        existing_model = ModelProperty(
+            name="old_name",
+            required=True,
+            nullable=False,
+            default=None,
+            reference=Reference(class_name=class_name, module_name="my_model"),
+            required_properties=[],
+            optional_properties=[],
+            description="",
+            relative_imports=set(),
+        )
+        schemas = Schemas(models={class_name: existing_model})
 
         prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas)
 
-        from_ref.assert_called_once_with(data.ref)
-        assert prop == model
+        assert prop == ModelProperty(
+            name=name,
+            required=required,
+            nullable=False,
+            default=None,
+            reference=Reference(class_name=class_name, module_name="my_model"),
+            required_properties=[],
+            optional_properties=[],
+            description="",
+            relative_imports=set(),
+        )
         assert schemas == new_schemas
 
     def test_property_from_data_ref_not_found(self, mocker):

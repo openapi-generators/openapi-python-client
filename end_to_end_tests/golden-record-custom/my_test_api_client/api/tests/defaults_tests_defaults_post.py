@@ -35,7 +35,7 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, H
 def httpx_request(
     *,
     client: Client,
-    json_body: Dict[Any, Any],
+    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -58,10 +58,10 @@ def httpx_request(
     json_list_prop: Union[Unset, List[Any]] = UNSET
     if not isinstance(list_prop, Unset):
         json_list_prop = []
-        for an_enum_data in list_prop:
-            an_enum = an_enum_data.value
+        for list_prop_item_data in list_prop:
+            list_prop_item = list_prop_item_data.value
 
-            json_list_prop.append(an_enum)
+            json_list_prop.append(list_prop_item)
 
     json_union_prop: Union[Unset, float, str]
     if isinstance(union_prop, Unset):
