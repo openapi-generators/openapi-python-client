@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- `UNSET`, the value given to any request/response field that is not `required` and wasn't specified, is falsey.
-   Anywhere that such a value may arise (such as a response that has non-required fields) must be carefully checked as
-   `if my_model.not_required_bool` could be False even though a concrete value wasn't actually returned.
+- Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`. 
+- Values that are `UNSET` will not be sent along in API calls
 
 ### Additions
 
