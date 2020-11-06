@@ -395,7 +395,6 @@ class TestUnionProperty:
             inner_import_1,
             inner_import_2,
             "from typing import Union",
-            "from typing import Union",
             "from ...types import UNSET, Unset",
         }
 
@@ -608,118 +607,6 @@ class TestEnumProperty:
                 nullable=False,
                 existing_enums={},
             )
-
-
-# class TestRefProperty:
-#     def test_template(self, mocker):
-#         from openapi_python_client.parser.properties import RefProperty
-#
-#         ref_property = RefProperty(
-#             name="test",
-#             required=True,
-#             default=None,
-#             reference=mocker.MagicMock(class_name="MyRefClass"),
-#             nullable=False,
-#         )
-#
-#         assert ref_property.template == "ref_property.pyi"
-#
-#         mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value="an enum")
-#
-#         assert ref_property.template == "enum_property.pyi"
-#
-#     def test_get_type_string(self, mocker):
-#         from openapi_python_client.parser.properties import RefProperty
-#
-#         ref_property = RefProperty(
-#             name="test",
-#             required=True,
-#             default=None,
-#             reference=mocker.MagicMock(class_name="MyRefClass"),
-#             nullable=False,
-#         )
-#
-#         assert ref_property.get_type_string() == "MyRefClass"
-#
-#         ref_property.required = False
-#         assert ref_property.get_type_string() == "Optional[MyRefClass]"
-#
-#     def test_get_imports(self, mocker):
-#         fake_reference = mocker.MagicMock(class_name="MyRefClass", module_name="my_test_enum")
-#         prefix = mocker.MagicMock()
-#
-#         from openapi_python_client.parser.properties import RefProperty
-#
-#         p = RefProperty(name="test", required=True, default=None, reference=fake_reference, nullable=False)
-#
-#         assert p.get_imports(prefix=prefix) == {
-#             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-#             "from typing import Dict",
-#             "from typing import cast",
-#         }
-#
-#         p.required = False
-#         assert p.get_imports(prefix=prefix) == {
-#             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-#             "from typing import Dict",
-#             "from typing import cast",
-#             "from typing import Optional",
-#         }
-#
-#     def test__validate_default(self, mocker):
-#         from openapi_python_client.parser.properties import RefProperty
-#
-#         with pytest.raises(ValidationError):
-#             RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
-#
-#         enum_property = mocker.MagicMock()
-#         enum_property._validate_default.return_value = "val1"
-#         mocker.patch(f"{MODULE_NAME}.EnumProperty.get_enum", return_value=enum_property)
-#         p = RefProperty(name="a name", required=True, default="", reference=mocker.MagicMock(), nullable=False)
-#         assert p.default == "val1"
-
-
-class TestDictProperty:
-    def test_get_imports(self, mocker):
-        from openapi_python_client.parser.properties import DictProperty
-
-        prefix = "..."
-        p = DictProperty(name="test", required=True, default=None, nullable=False)
-        assert p.get_imports(prefix=prefix) == {
-            "from typing import Dict",
-        }
-
-        p.required = False
-        assert p.get_imports(prefix=prefix) == {
-            "from typing import Dict",
-            "from typing import Union",
-            "from ...types import UNSET, Unset",
-        }
-
-        p.nullable = True
-        assert p.get_imports(prefix=prefix) == {
-            "from typing import Dict",
-            "from typing import Union",
-            "from typing import Optional",
-            "from ...types import UNSET, Unset",
-        }
-
-        p.default = mocker.MagicMock()
-        assert p.get_imports(prefix=prefix) == {
-            "from typing import Dict",
-            "from typing import cast",
-            "from dataclasses import field",
-            "from typing import Union",
-            "from typing import Optional",
-            "from ...types import UNSET, Unset",
-        }
-
-    def test__validate_default(self):
-        from openapi_python_client.parser.properties import DictProperty
-
-        p = DictProperty(name="a name", required=True, default={"key": "value"}, nullable=False)
-
-        assert p.default is None
 
 
 class TestPropertyFromData:

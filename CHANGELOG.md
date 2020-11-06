@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.7.0 - Unreleased
 
+### Breaking Changes
+
+- Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`. 
+- Values that are `UNSET` will not be sent along in API calls
+
 ### Additions
 
 - Added a `--custom-template-path` option for providing custom jinja2 templates (#231 - Thanks @erichulburd!).
+- Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
 
 ## 0.6.2 - 2020-11-03
 
