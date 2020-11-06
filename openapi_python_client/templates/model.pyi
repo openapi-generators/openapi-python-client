@@ -13,7 +13,14 @@ from ..types import UNSET, Unset
 class {{ model.reference.class_name }}:
     """ {{ model.description }} """
     {% for property in model.required_properties + model.optional_properties %}
+    {% if property.default is none and property.required %}
     {{ property.to_string() }}
+    {% endif %}
+    {% endfor %}
+    {% for property in model.required_properties + model.optional_properties %}
+    {% if property.default is not none or not property.required %}
+    {{ property.to_string() }}
+    {% endif %}
     {% endfor %}
 
     def to_dict(self) -> Dict[str, Any]:

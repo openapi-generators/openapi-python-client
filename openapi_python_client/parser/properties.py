@@ -74,12 +74,10 @@ class Property:
 
     def to_string(self) -> str:
         """ How this should be declared in a dataclass """
-        if self.default:
+        if self.default is not None:
             default = self.default
         elif not self.required:
             default = "UNSET"
-        elif self.nullable:
-            default = "None"
         else:
             default = None
 
@@ -267,10 +265,12 @@ class UnionProperty(Property):
         inner_types = [p.get_type_string(no_optional=True) for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
         type_string = f"Union[{inner_prop_string}]"
-        if not no_optional and self.nullable:
+        if no_optional:
+            return type_string
+        if not self.required:
+            type_string = f"Union[Unset, {inner_prop_string}]"
+        if self.nullable:
             type_string = f"Optional[{type_string}]"
-        if not no_unset and not self.required:
-            type_string = f"Union[Unset, {type_string}]"
         return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:

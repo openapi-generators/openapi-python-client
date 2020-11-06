@@ -17,10 +17,10 @@ class AModel:
     a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
     required_not_nullable: str
+    some_dict: Optional[Dict[Any, Any]]
+    required_nullable: Optional[str]
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
-    some_dict: Optional[Dict[Any, Any]] = None
     attr_1_leading_digit: Union[Unset, str] = UNSET
-    required_nullable: Optional[str] = None
     not_required_nullable: Union[Unset, Optional[str]] = UNSET
     not_required_not_nullable: Union[Unset, str] = UNSET
 
