@@ -4,7 +4,7 @@ import httpx
 
 Client = httpx.Client
 
-from typing import List, Union
+from typing import List, Optional, Union
 
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Unset

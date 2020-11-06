@@ -4,7 +4,7 @@ import httpx
 
 Client = httpx.Client
 
-from typing import Union
+from typing import Optional, Union
 
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ...models.http_validation_error import HTTPValidationError

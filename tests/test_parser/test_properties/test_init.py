@@ -30,12 +30,15 @@ class TestProperty:
 
         p.nullable = True
         assert p.get_type_string() == f"Optional[{base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.required = False
         assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.nullable = False
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
     def test_to_string(self, mocker):
         from openapi_python_client.parser.properties import Property
@@ -280,12 +283,15 @@ class TestListProperty:
 
         p.nullable = True
         assert p.get_type_string() == f"Optional[{base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.required = False
         assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.nullable = False
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
     def test_get_type_imports(self, mocker):
         from openapi_python_client.parser.properties import ListProperty
@@ -349,12 +355,16 @@ class TestUnionProperty:
 
         p.nullable = True
         assert p.get_type_string() == f"Optional[{base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
+        base_type_string_with_unset = f"Union[Unset, inner_type_string_1, inner_type_string_2]"
         p.required = False
-        assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string() == f"Optional[{base_type_string_with_unset}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.nullable = False
-        assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
+        assert p.get_type_string() == base_type_string_with_unset
+        assert p.get_type_string(no_optional=True) == base_type_string
 
     def test_get_type_imports(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty
@@ -506,12 +516,15 @@ class TestEnumProperty:
 
         p.nullable = True
         assert p.get_type_string() == f"Optional[{base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.required = False
         assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
         p.nullable = False
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
+        assert p.get_type_string(no_optional=True) == base_type_string
 
     def test_get_imports(self, mocker):
         fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")

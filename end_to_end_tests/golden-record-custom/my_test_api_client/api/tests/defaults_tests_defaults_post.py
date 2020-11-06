@@ -35,16 +35,16 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, H
 def httpx_request(
     *,
     client: Client,
-    json_body: DictProp,
+    json_body: Dict[Any, Any],
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
-    boolean_prop: Union[Unset, bool] = UNSET,
+    boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
-    union_prop: Union[Unset, Union[float, str]] = "not a float",
-    an_enum: AnEnum,
+    union_prop: Union[Unset, float, str] = "not a float",
+    enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> httpx.Response[Union[None, HTTPValidationError]]:
 
     json_datetime_prop: Union[Unset, str] = UNSET
@@ -63,7 +63,7 @@ def httpx_request(
 
             json_list_prop.append(an_enum)
 
-    json_union_prop: Union[Unset, Union[float, str]]
+    json_union_prop: Union[Unset, float, str]
     if isinstance(union_prop, Unset):
         json_union_prop = UNSET
     elif isinstance(union_prop, float):
@@ -71,11 +71,11 @@ def httpx_request(
     else:
         json_union_prop = union_prop
 
-    json_an_enum = an_enum.value
+    json_enum_prop: Union[Unset, AnEnum] = UNSET
+    if not isinstance(enum_prop, Unset):
+        json_enum_prop = enum_prop.value
 
-    params: Dict[str, Any] = {
-        "AnEnum": json_an_enum,
-    }
+    params: Dict[str, Any] = {}
     if string_prop is not UNSET:
         params["string_prop"] = string_prop
     if datetime_prop is not UNSET:
@@ -92,6 +92,8 @@ def httpx_request(
         params["list_prop"] = json_list_prop
     if union_prop is not UNSET:
         params["union_prop"] = json_union_prop
+    if enum_prop is not UNSET:
+        params["enum_prop"] = json_enum_prop
 
     json_json_body = json_body.to_dict()
 
