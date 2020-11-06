@@ -44,17 +44,19 @@ class Property:
         """ Check that the default value is valid for the property's type + perform any necessary sanitization """
         raise ValidationError
 
-    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """
         Get a string representation of type that should be used when declaring this property
 
         Args:
-            no_optional: Do not include Optional even if the value is optional (needed for isinstance checks)
+            no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
         """
         type_string = self._type_string
-        if not no_optional and self.nullable:
+        if no_optional:
+            return type_string
+        if self.nullable:
             type_string = f"Optional[{type_string}]"
-        if not no_unset and not self.required:
+        if not self.required:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
@@ -225,12 +227,14 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         type_string = f"List[{self.inner_property.get_type_string()}]"
-        if not no_optional and self.nullable:
+        if no_optional:
+            return type_string
+        if self.nullable:
             type_string = f"Optional[{type_string}]"
-        if not no_unset and not self.required:
+        if not self.required:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
@@ -258,9 +262,9 @@ class UnionProperty(Property):
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        inner_types = [p.get_type_string(no_unset=True) for p in self.inner_properties]
+        inner_types = [p.get_type_string(no_optional=True) for p in self.inner_properties]
         inner_prop_string = ", ".join(inner_types)
         type_string = f"Union[{inner_prop_string}]"
         if not no_optional and self.nullable:
@@ -337,12 +341,14 @@ class EnumProperty(Property):
         """ Get all the EnumProperties that have been registered keyed by class name """
         return _existing_enums.get(name)
 
-    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         type_string = self.reference.class_name
-        if not no_optional and self.nullable:
+        if no_optional:
+            return type_string
+        if self.nullable:
             type_string = f"Optional[{type_string}]"
-        if not no_unset and not self.required:
+        if not self.required:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
@@ -401,12 +407,14 @@ class RefProperty(Property):
             return "enum_property.pyi"
         return "ref_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False, no_unset: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
         type_string = self.reference.class_name
-        if not no_optional and self.nullable:
+        if no_optional:
+            return type_string
+        if self.nullable:
             type_string = f"Optional[{type_string}]"
-        if not no_unset and not self.required:
+        if not self.required:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
