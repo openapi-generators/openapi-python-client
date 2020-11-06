@@ -5,16 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.7.0 - Unreleased
 
-### Changes
+### Additions
+
+- Added a `--custom-template-path` option for providing custom jinja2 templates (#231 - Thanks @erichulburd!).
+
+## 0.6.2 - 2020-11-03
 
 ### Fixes
 
 - Prefix generated identifiers to allow leading digits in field names (#206 - @kalzoo).
+- Prevent autoflake from removing `__init__.py` imports during generation. (#223 - Thanks @fyhertz!)
+- Update minimum Pydantic version to support Python 3.9
 
 ### Additions
 - Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
+
+- Allow specifying the generated client's version using `package_version_override` in a config file. (#225 - Thanks @fyhertz!)
 
 ## 0.6.1 - 2020-09-26
 
