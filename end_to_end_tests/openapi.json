@@ -381,22 +381,6 @@
             "in": "query"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "title": "Dict Prop",
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {
-                  "key": "val"
-                }
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -619,7 +603,7 @@
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "some_dict", "aCamelDateTime", "a_date", "required_nullable", "required_not_nullable"],
+        "required": ["an_enum_value", "aCamelDateTime", "a_date", "required_nullable", "required_not_nullable"],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -635,14 +619,6 @@
               }
             },
             "default": []
-          },
-          "some_dict": {
-            "title": "Some Dict",
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "nullable": true
           },
           "aCamelDateTime": {
             "title": "Acameldatetime",

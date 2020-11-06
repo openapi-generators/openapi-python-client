@@ -5,12 +5,11 @@ import httpx
 Client = httpx.Client
 
 import datetime
-from typing import Dict, List, Union, cast
+from typing import List, Union, cast
 
 from dateutil.parser import isoparse
 
 from ...models.an_enum import AnEnum
-from ...models.dict_prop import DictProp
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Unset
 
@@ -35,7 +34,6 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, H
 def httpx_request(
     *,
     client: Client,
-    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -95,12 +93,9 @@ def httpx_request(
     if enum_prop is not UNSET:
         params["enum_prop"] = json_enum_prop
 
-    json_json_body = json_body.to_dict()
-
     response = client.request(
         "post",
         "/tests/defaults",
-        json=json_json_body,
         params=params,
     )
 

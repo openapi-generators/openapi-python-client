@@ -22,9 +22,14 @@ class ModelProperty(Property):
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
-        if no_optional or (self.required and not self.nullable):
-            return self.reference.class_name
-        return f"Optional[{self.reference.class_name}]"
+        type_string = self.reference.class_name
+        if no_optional:
+            return type_string
+        if self.nullable:
+            type_string = f"Optional[{type_string}]"
+        if not self.required:
+            type_string = f"Union[{type_string}, Unset]"
+        return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """

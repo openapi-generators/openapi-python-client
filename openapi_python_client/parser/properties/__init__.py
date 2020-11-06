@@ -422,17 +422,42 @@ def property_from_data(
         return PropertyError(detail="Failed to validate default value", data=data), schemas
 
 
+def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> Union[Schemas, PropertyError]:
+    if data.enum is not None:
+        prop, schemas = build_enum_property(data=data, name=name, required=True, schemas=schemas, enum=data.enum)
+    else:
+        prop, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True)
+    if isinstance(prop, PropertyError):
+        return prop
+    else:
+        return schemas
+
+
 def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) -> Schemas:
     """ Get a list of Schemas from an OpenAPI dict """
     schemas = Schemas()
-    for name, data in components.items():
-        if isinstance(data, oai.Reference):
-            schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
-            continue
-        if data.enum is not None:
-            prop, schemas = build_enum_property(data=data, name=name, required=True, schemas=schemas, enum=data.enum)
-            continue
-        model, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True)
-        if isinstance(model, PropertyError):
-            schemas.errors.append(model)
+    to_process = components.items()
+    processing = True
+    errors = []
+
+    # References could have forward References so keep going as long as we are making progress
+    while processing:
+        processing = False
+        errors = []
+        next_round = []
+        # Only accumulate errors from the last round, since we might fix some along the way
+        for name, data in to_process:
+            if isinstance(data, oai.Reference):
+                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
+                continue
+            schemas_or_err = update_schemas_with_data(name, data, schemas)
+            if isinstance(schemas_or_err, PropertyError):
+                next_round.append((name, data))
+                errors.append(schemas_or_err)
+            else:
+                schemas = schemas_or_err
+                processing = True  # We made some progress this round, do another after it's done
+        to_process = next_round
+    schemas.errors.extend(errors)
+
     return schemas

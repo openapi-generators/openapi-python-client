@@ -6,7 +6,6 @@ from dateutil.parser import isoparse
 
 from ...client import Client
 from ...models.an_enum import AnEnum
-from ...models.dict_prop import DictProp
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
 
@@ -14,7 +13,6 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     client: Client,
-    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -77,14 +75,11 @@ def _get_kwargs(
     if enum_prop is not UNSET:
         params["enum_prop"] = json_enum_prop
 
-    json_json_body = json_body.to_dict()
-
     return {
         "url": url,
         "headers": headers,
         "cookies": client.get_cookies(),
         "timeout": client.get_timeout(),
-        "json": json_json_body,
         "params": params,
     }
 
@@ -109,7 +104,6 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPVal
 def sync_detailed(
     *,
     client: Client,
-    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -122,7 +116,6 @@ def sync_detailed(
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        json_body=json_body,
         string_prop=string_prop,
         datetime_prop=datetime_prop,
         date_prop=date_prop,
@@ -144,7 +137,6 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -159,7 +151,6 @@ def sync(
 
     return sync_detailed(
         client=client,
-        json_body=json_body,
         string_prop=string_prop,
         datetime_prop=datetime_prop,
         date_prop=date_prop,
@@ -175,7 +166,6 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -188,7 +178,6 @@ async def asyncio_detailed(
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        json_body=json_body,
         string_prop=string_prop,
         datetime_prop=datetime_prop,
         date_prop=date_prop,
@@ -209,7 +198,6 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    json_body: DictProp,
     string_prop: Union[Unset, str] = "the default string",
     datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
@@ -225,7 +213,6 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            json_body=json_body,
             string_prop=string_prop,
             datetime_prop=datetime_prop,
             date_prop=date_prop,
