@@ -1,24 +1,22 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import httpx
 
 from ...client import Client
 from ...models.json_body import JsonBody
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 def _get_kwargs(
     *,
     client: Client,
-    json_body: Union[JsonBody, Unset],
+    json_body: JsonBody,
 ) -> Dict[str, Any]:
     url = "{}/tests/inline_objects".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
 
-    json_json_body: Dict[str, Any] = UNSET
-    if not isinstance(json_body, Unset):
-        json_json_body = json_body.to_dict()
+    json_json_body = json_body.to_dict()
 
     return {
         "url": url,
@@ -41,7 +39,7 @@ def _build_response(*, response: httpx.Response) -> Response[None]:
 def sync_detailed(
     *,
     client: Client,
-    json_body: Union[JsonBody, Unset],
+    json_body: JsonBody,
 ) -> Response[None]:
     kwargs = _get_kwargs(
         client=client,
@@ -58,7 +56,7 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Client,
-    json_body: Union[JsonBody, Unset],
+    json_body: JsonBody,
 ) -> Response[None]:
     kwargs = _get_kwargs(
         client=client,

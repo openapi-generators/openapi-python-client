@@ -232,11 +232,11 @@ def build_model_property(
     ref = Reference.from_ref(data.title or name)
 
     for key, value in (data.properties or {}).items():
-        required = key in required_set
+        prop_required = key in required_set
         prop, schemas = property_from_data(name=key, required=required, data=value, schemas=schemas)
         if isinstance(prop, PropertyError):
             return prop, schemas
-        if required and not prop.nullable:
+        if prop_required and not prop.nullable:
             required_properties.append(prop)
         else:
             optional_properties.append(prop)

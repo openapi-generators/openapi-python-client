@@ -2,10 +2,7 @@ import httpx
 
 Client = httpx.Client
 
-from typing import Dict, Union
-
 from ...models.json_body import JsonBody
-from ...types import UNSET, Unset
 
 
 def _build_response(*, response: httpx.Response) -> httpx.Response[None]:
@@ -20,12 +17,10 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[None]:
 def httpx_request(
     *,
     client: Client,
-    json_body: Union[JsonBody, Unset],
+    json_body: JsonBody,
 ) -> httpx.Response[None]:
 
-    json_json_body: Dict[str, Any] = UNSET
-    if not isinstance(json_body, Unset):
-        json_json_body = json_body.to_dict()
+    json_json_body = json_body.to_dict()
 
     response = client.request(
         "post",
