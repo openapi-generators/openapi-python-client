@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 import attr
 
@@ -27,7 +27,7 @@ class ValidationError:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "ValidationError":
-        loc = d["loc"]
+        loc = cast(List[str], d["loc"])
 
         msg = d["msg"]
 

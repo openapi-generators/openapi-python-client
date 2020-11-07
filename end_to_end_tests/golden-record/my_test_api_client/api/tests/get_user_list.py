@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
@@ -48,9 +48,17 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[List[AModel], HTTPValidationError]]:
     if response.status_code == 200:
-        return [AModel.from_dict(item) for item in cast(List[Dict[str, Any]], response.json())]
+        response_200 = []
+        for response_200_item_data in response.json():
+            response_200_item = AModel.from_dict(response_200_item_data)
+
+            response_200.append(response_200_item)
+
+        return response_200
     if response.status_code == 422:
-        return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
     return None
 
 

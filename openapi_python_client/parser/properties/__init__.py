@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
@@ -12,6 +12,14 @@ from .enum_property import EnumProperty
 from .model_property import ModelProperty
 from .property import Property
 from .schemas import Schemas
+
+
+@attr.s(auto_attribs=True, frozen=True, slots=True)
+class NoneProperty(Property):
+    """ A property that is always None (used for empty schemas) """
+
+    _type_string: ClassVar[str] = "None"
+    template: ClassVar[Optional[str]] = "none_property.pyi"
 
 
 @attr.s(auto_attribs=True, frozen=True, slots=True)
@@ -81,7 +89,7 @@ class FileProperty(Property):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({f"from {prefix}types import File"})
+        imports.update({f"from {prefix}types import File", "from io import BytesIO"})
         return imports
 
 
@@ -137,7 +145,7 @@ class ListProperty(Property, Generic[InnerProp]):
         """
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
-        imports.add("from typing import List")
+        imports.add("from typing import cast, List")
         return imports
 
 
@@ -369,7 +377,7 @@ def _property_from_data(
     if data.anyOf or data.oneOf:
         return build_union_property(data=data, name=name, required=required, schemas=schemas)
     if not data.type:
-        return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined."), schemas
+        return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
 
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data), schemas
@@ -423,6 +431,7 @@ def property_from_data(
 
 
 def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> Union[Schemas, PropertyError]:
+    prop: Union[PropertyError, ModelProperty, EnumProperty]
     if data.enum is not None:
         prop, schemas = build_enum_property(data=data, name=name, required=True, schemas=schemas, enum=data.enum)
     else:
@@ -436,9 +445,9 @@ def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> U
 def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) -> Schemas:
     """ Get a list of Schemas from an OpenAPI dict """
     schemas = Schemas()
-    to_process = components.items()
+    to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     processing = True
-    errors = []
+    errors: List[PropertyError] = []
 
     # References could have forward References so keep going as long as we are making progress
     while processing:

@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import Any, Dict
 
 import attr
@@ -22,7 +23,7 @@ class BodyUploadFileTestsUploadPost:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "BodyUploadFileTestsUploadPost":
-        some_file = d["some_file"]
+        some_file = File(payload=BytesIO(d["some_file"]))
 
         return BodyUploadFileTestsUploadPost(
             some_file=some_file,

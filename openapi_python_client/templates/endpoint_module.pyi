@@ -57,7 +57,13 @@ def _get_kwargs(
 def _parse_response(*, response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
     if response.status_code == {{ response.status_code }}:
-        return {{ response.constructor() }}
+        {% if response.prop.template %}
+            {% from "property_templates/" + response.prop.template import construct %}
+        {{ construct(response.prop, response.source) | indent(8) }}
+        {% else %}
+        {{ response.prop.python_name }} = {{ response.source }}
+        {% endif %}
+        return {{ response.prop.python_name }}
     {% endfor %}
     return None
 {% endif %}

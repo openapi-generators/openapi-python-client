@@ -245,8 +245,9 @@ class TestEndpoint:
         assert endpoint.multipart_body_reference == multipart_body_reference
 
     def test__add_responses_error(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
 
+        schemas = Schemas()
         response_1_data = mocker.MagicMock()
         response_2_data = mocker.MagicMock()
         data = {
@@ -263,12 +264,15 @@ class TestEndpoint:
             relative_imports={"import_3"},
         )
         parse_error = ParseError(data=mocker.MagicMock())
-        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=parse_error)
+        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
 
-        response = Endpoint._add_responses(endpoint, data)
+        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas)
 
         response_from_data.assert_has_calls(
-            [mocker.call(status_code=200, data=response_1_data), mocker.call(status_code=404, data=response_2_data)]
+            [
+                mocker.call(status_code=200, data=response_1_data, schemas=schemas),
+                mocker.call(status_code=404, data=response_2_data, schemas=schemas),
+            ]
         )
         assert response.errors == [
             ParseError(
@@ -282,7 +286,8 @@ class TestEndpoint:
         ]
 
     def test__add_responses(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Reference, RefResponse
+        from openapi_python_client.parser.openapi import Endpoint, Response
+        from openapi_python_client.parser.properties import DateProperty, DateTimeProperty
 
         response_1_data = mocker.MagicMock()
         response_2_data = mocker.MagicMock()
@@ -299,31 +304,39 @@ class TestEndpoint:
             tag="tag",
             relative_imports={"import_3"},
         )
-        ref_1 = Reference.from_ref(ref="ref_1")
-        ref_2 = Reference.from_ref(ref="ref_2")
-        response_1 = RefResponse(status_code=200, reference=ref_1)
-        response_2 = RefResponse(status_code=404, reference=ref_2)
-        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", side_effect=[response_1, response_2])
-        import_string_from_reference = mocker.patch(
-            f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
+        schemas = mocker.MagicMock()
+        schemas_1 = mocker.MagicMock()
+        schemas_2 = mocker.MagicMock()
+        response_1 = Response(
+            status_code=200,
+            source="source",
+            prop=DateTimeProperty(name="datetime", required=True, nullable=False, default=None),
+        )
+        response_2 = Response(
+            status_code=404,
+            source="source",
+            prop=DateProperty(name="date", required=True, nullable=False, default=None),
+        )
+        response_from_data = mocker.patch(
+            f"{MODULE_NAME}.response_from_data", side_effect=[(response_1, schemas_1), (response_2, schemas_2)]
         )
 
-        endpoint = Endpoint._add_responses(endpoint, data)
+        endpoint, response_schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas)
 
         response_from_data.assert_has_calls(
             [
-                mocker.call(status_code=200, data=response_1_data),
-                mocker.call(status_code=404, data=response_2_data),
-            ]
-        )
-        import_string_from_reference.assert_has_calls(
-            [
-                mocker.call(ref_1, prefix="...models"),
-                mocker.call(ref_2, prefix="...models"),
+                mocker.call(status_code=200, data=response_1_data, schemas=schemas),
+                mocker.call(status_code=404, data=response_2_data, schemas=schemas_1),
             ]
         )
         assert endpoint.responses == [response_1, response_2]
-        assert endpoint.relative_imports == {"import_1", "import_2", "import_3"}
+        assert endpoint.relative_imports == {
+            "from dateutil.parser import isoparse",
+            "from typing import cast",
+            "import datetime",
+            "import_3",
+        }
+        assert response_schemas == schemas_2
 
     def test__add_parameters_handles_no_params(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
@@ -486,7 +499,8 @@ class TestEndpoint:
         _add_parameters = mocker.patch.object(
             Endpoint, "_add_parameters", return_value=(mocker.MagicMock(), param_schemas)
         )
-        _add_responses = mocker.patch.object(Endpoint, "_add_responses", return_value=parse_error)
+        response_schemas = mocker.MagicMock()
+        _add_responses = mocker.patch.object(Endpoint, "_add_responses", return_value=(parse_error, response_schemas))
         data = oai.Operation.construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
@@ -497,7 +511,7 @@ class TestEndpoint:
 
         result = Endpoint.from_data(data=data, path=path, method=method, tag="default", schemas=initial_schemas)
 
-        assert result == (parse_error, param_schemas)
+        assert result == (parse_error, response_schemas)
 
     def test_from_data_standard(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
@@ -507,7 +521,11 @@ class TestEndpoint:
         param_schemas = mocker.MagicMock()
         param_endpoint = mocker.MagicMock()
         _add_parameters = mocker.patch.object(Endpoint, "_add_parameters", return_value=(param_endpoint, param_schemas))
-        _add_responses = mocker.patch.object(Endpoint, "_add_responses")
+        response_schemas = mocker.MagicMock()
+        response_endpoint = mocker.MagicMock()
+        _add_responses = mocker.patch.object(
+            Endpoint, "_add_responses", return_value=(response_endpoint, response_schemas)
+        )
         body_schemas = mocker.MagicMock()
         body_endpoint = mocker.MagicMock()
         _add_body = mocker.patch.object(Endpoint, "_add_body", return_value=(body_endpoint, body_schemas))
@@ -537,8 +555,8 @@ class TestEndpoint:
             data=data,
             schemas=initial_schemas,
         )
-        _add_responses.assert_called_once_with(param_endpoint, data.responses)
-        _add_body.assert_called_once_with(endpoint=_add_responses.return_value, data=data, schemas=param_schemas)
+        _add_responses.assert_called_once_with(endpoint=param_endpoint, data=data.responses, schemas=param_schemas)
+        _add_body.assert_called_once_with(endpoint=response_endpoint, data=data, schemas=response_schemas)
 
     def test_from_data_no_operation_id(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
@@ -548,7 +566,9 @@ class TestEndpoint:
         _add_parameters = mocker.patch.object(
             Endpoint, "_add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock())
         )
-        _add_responses = mocker.patch.object(Endpoint, "_add_responses")
+        _add_responses = mocker.patch.object(
+            Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock())
+        )
         _add_body = mocker.patch.object(Endpoint, "_add_body", return_value=(mocker.MagicMock(), mocker.MagicMock()))
         data = oai.Operation.construct(
             description=mocker.MagicMock(),
@@ -575,9 +595,11 @@ class TestEndpoint:
             data=data,
             schemas=schemas,
         )
-        _add_responses.assert_called_once_with(_add_parameters.return_value[0], data.responses)
+        _add_responses.assert_called_once_with(
+            endpoint=_add_parameters.return_value[0], data=data.responses, schemas=_add_parameters.return_value[1]
+        )
         _add_body.assert_called_once_with(
-            endpoint=_add_responses.return_value, data=data, schemas=_add_parameters.return_value[1]
+            endpoint=_add_responses.return_value[0], data=data, schemas=_add_responses.return_value[1]
         )
 
     def test_from_data_no_security(self, mocker):
@@ -592,7 +614,9 @@ class TestEndpoint:
         _add_parameters = mocker.patch.object(
             Endpoint, "_add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock())
         )
-        _add_responses = mocker.patch.object(Endpoint, "_add_responses")
+        _add_responses = mocker.patch.object(
+            Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock())
+        )
         _add_body = mocker.patch.object(Endpoint, "_add_body", return_value=(mocker.MagicMock(), mocker.MagicMock()))
         path = mocker.MagicMock()
         method = mocker.MagicMock()
@@ -613,9 +637,11 @@ class TestEndpoint:
             data=data,
             schemas=schemas,
         )
-        _add_responses.assert_called_once_with(_add_parameters.return_value[0], data.responses)
+        _add_responses.assert_called_once_with(
+            endpoint=_add_parameters.return_value[0], data=data.responses, schemas=_add_parameters.return_value[1]
+        )
         _add_body.assert_called_once_with(
-            endpoint=_add_responses.return_value, data=data, schemas=_add_parameters.return_value[1]
+            endpoint=_add_responses.return_value[0], data=data, schemas=_add_responses.return_value[1]
         )
 
 

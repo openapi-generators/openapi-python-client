@@ -10,7 +10,7 @@ from .. import utils
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .reference import Reference
-from .responses import ListRefResponse, RefResponse, Response, response_from_data
+from .responses import Response, response_from_data
 
 
 class ParameterLocation(str, Enum):
@@ -158,10 +158,10 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def _add_responses(endpoint: "Endpoint", data: oai.Responses) -> "Endpoint":
+    def _add_responses(*, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-            response = response_from_data(status_code=int(code), data=response_data)
+            response, schemas = response_from_data(status_code=int(code), data=response_data, schemas=schemas)
             if isinstance(response, ParseError):
                 endpoint.errors.append(
                     ParseError(
@@ -173,10 +173,9 @@ class Endpoint:
                     )
                 )
                 continue
-            if isinstance(response, (RefResponse, ListRefResponse)):
-                endpoint.relative_imports.add(import_string_from_reference(response.reference, prefix="...models"))
+            endpoint.relative_imports |= response.prop.get_imports(prefix="...")
             endpoint.responses.append(response)
-        return endpoint
+        return endpoint, schemas
 
     @staticmethod
     def _add_parameters(
@@ -228,7 +227,7 @@ class Endpoint:
         result, schemas = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas)
         if isinstance(result, ParseError):
             return result, schemas
-        result = Endpoint._add_responses(result, data.responses)
+        result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas)
         result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas)
 
         return result, schemas

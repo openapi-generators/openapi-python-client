@@ -154,11 +154,13 @@ class TestFileProperty:
         prefix = "..."
         p = FileProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
+            "from io import BytesIO",
             "from ...types import File",
         }
 
         p = FileProperty(name="test", required=False, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
+            "from io import BytesIO",
             "from ...types import File",
             "from typing import Union",
             "from ...types import UNSET, Unset",
@@ -166,6 +168,7 @@ class TestFileProperty:
 
         p = FileProperty(name="test", required=False, default=None, nullable=True)
         assert p.get_imports(prefix=prefix) == {
+            "from io import BytesIO",
             "from ...types import File",
             "from typing import Union",
             "from typing import Optional",
@@ -209,13 +212,13 @@ class TestListProperty:
 
         assert p.get_imports(prefix=prefix) == {
             inner_import,
-            "from typing import List",
+            "from typing import cast, List",
         }
 
         p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=False)
         assert p.get_imports(prefix=prefix) == {
             inner_import,
-            "from typing import List",
+            "from typing import cast, List",
             "from typing import Union",
             "from ...types import UNSET, Unset",
         }
@@ -223,7 +226,7 @@ class TestListProperty:
         p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=True)
         assert p.get_imports(prefix=prefix) == {
             inner_import,
-            "from typing import List",
+            "from typing import cast, List",
             "from typing import Union",
             "from typing import Optional",
             "from ...types import UNSET, Unset",
@@ -718,15 +721,14 @@ class TestPropertyFromData:
         )
 
     def test_property_from_data_no_valid_props_in_data(self):
-        from openapi_python_client.parser.errors import PropertyError
-        from openapi_python_client.parser.properties import Schemas, property_from_data
+        from openapi_python_client.parser.properties import NoneProperty, Schemas, property_from_data
 
         schemas = Schemas()
         data = oai.Schema()
 
-        err, new_schemas = property_from_data(name="blah", required=True, data=data, schemas=schemas)
+        prop, new_schemas = property_from_data(name="blah", required=True, data=data, schemas=schemas)
 
-        assert err == PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
+        assert prop == NoneProperty(name="blah", required=True, nullable=False, default=None)
         assert new_schemas == schemas
 
     def test_property_from_data_validation_error(self, mocker):
@@ -838,16 +840,16 @@ class TestBuildUnionProperty:
         assert s == Schemas()
 
     def test_property_from_data_union_bad_type(self, mocker):
-        name = mocker.MagicMock()
+        name = "bad_union"
         required = mocker.MagicMock()
-        data = oai.Schema(anyOf=[{}])
+        data = oai.Schema(anyOf=[{"type": "garbage"}])
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
         p, s = property_from_data(name=name, required=required, data=data, schemas=Schemas())
 
-        assert p == PropertyError(detail=f"Invalid property in union {name}", data=oai.Schema())
+        assert p == PropertyError(detail=f"Invalid property in union {name}", data=oai.Schema(type="garbage"))
 
 
 class TestStringBasedProperty:
@@ -934,94 +936,23 @@ class TestStringBasedProperty:
         assert p == StringProperty(name=name, required=required, nullable=True, default=None)
 
 
-# def test_model_from_data(mocker):
-#     from openapi_python_client.parser.properties import Property
-#
-#     in_data = oai.Schema.construct(
-#         title=mocker.MagicMock(),
-#         description=mocker.MagicMock(),
-#         required=["RequiredEnum"],
-#         properties={
-#             "RequiredEnum": mocker.MagicMock(),
-#             "OptionalDateTime": mocker.MagicMock(),
-#         },
-#     )
-#     required_property = mocker.MagicMock(autospec=Property)
-#     required_imports = mocker.MagicMock()
-#     required_property.get_imports.return_value = {required_imports}
-#     optional_property = mocker.MagicMock(autospec=Property)
-#     optional_imports = mocker.MagicMock()
-#     optional_property.get_imports.return_value = {optional_imports}
-#     property_from_data = mocker.patch(
-#         f"{MODULE_NAME}.property_from_data",
-#         side_effect=[required_property, optional_property],
-#     )
-#     from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
-#
-#     from openapi_python_client.parser.properties import model_from_data
-#
-#     result = model_from_data(data=in_data, name=mocker.MagicMock())
-#
-#     from_ref.assert_called_once_with(in_data.title)
-#     property_from_data.assert_has_calls(
-#         [
-#             mocker.call(name="RequiredEnum", required=True, data=in_data.properties["RequiredEnum"]),
-#             mocker.call(name="OptionalDateTime", required=False, data=in_data.properties["OptionalDateTime"]),
-#         ]
-#     )
-#     required_property.get_imports.assert_called_once_with(prefix="..")
-#     optional_property.get_imports.assert_called_once_with(prefix="..")
-#     assert result == Model(
-#         reference=from_ref(),
-#         required_properties=[required_property],
-#         optional_properties=[optional_property],
-#         relative_imports={
-#             required_imports,
-#             optional_imports,
-#         },
-#         description=in_data.description,
-#     )
-#
-#
-# def test_model_from_data_property_parse_error(mocker):
-#     in_data = oai.Schema.construct(
-#         title=mocker.MagicMock(),
-#         description=mocker.MagicMock(),
-#         required=["RequiredEnum"],
-#         properties={
-#             "RequiredEnum": mocker.MagicMock(),
-#             "OptionalDateTime": mocker.MagicMock(),
-#         },
-#     )
-#     parse_error = ParseError(data=mocker.MagicMock())
-#     property_from_data = mocker.patch(
-#         f"{MODULE_NAME}.property_from_data",
-#         return_value=parse_error,
-#     )
-#     from_ref = mocker.patch(f"{MODULE_NAME}.Reference.from_ref")
-#
-#     from openapi_python_client.parser.model import model_from_data
-#
-#     result = model_from_data(data=in_data, name=mocker.MagicMock())
-#
-#     from_ref.assert_called_once_with(in_data.title)
-#     property_from_data.assert_called_once_with(
-#         name="RequiredEnum", required=True, data=in_data.properties["RequiredEnum"]
-#     )
-#
-#     assert result == parse_error
-
-
 def test_build_schemas(mocker):
     build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
     in_data = {"1": mocker.MagicMock(enum=None), "2": mocker.MagicMock(enum=None), "3": mocker.MagicMock(enum=None)}
     model_1 = mocker.MagicMock()
     schemas_1 = mocker.MagicMock()
     model_2 = mocker.MagicMock()
-    schemas_2 = mocker.MagicMock()
+    schemas_2 = mocker.MagicMock(errors=[])
     error = PropertyError()
-    schemas_3 = mocker.MagicMock(errors=[])
-    build_model_property.side_effect = [(model_1, schemas_1), (model_2, schemas_2), (error, schemas_3)]
+    schemas_3 = mocker.MagicMock()
+
+    # This loops through one for each, then again to retry the error
+    build_model_property.side_effect = [
+        (model_1, schemas_1),
+        (model_2, schemas_2),
+        (error, schemas_3),
+        (error, schemas_3),
+    ]
 
     from openapi_python_client.parser.properties import Schemas, build_schemas
 
@@ -1032,9 +963,11 @@ def test_build_schemas(mocker):
             mocker.call(data=in_data["1"], name="1", schemas=Schemas(), required=True),
             mocker.call(data=in_data["2"], name="2", schemas=schemas_1, required=True),
             mocker.call(data=in_data["3"], name="3", schemas=schemas_2, required=True),
+            mocker.call(data=in_data["3"], name="3", schemas=schemas_2, required=True),
         ]
     )
-    assert result == schemas_3
+    # schemas_3 was the last to come back from build_model_property, but it should be ignored because it's an error
+    assert result == schemas_2
     assert result.errors == [error]
 
 

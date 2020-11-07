@@ -4,17 +4,19 @@ import httpx
 
 Client = httpx.Client
 
-from typing import Dict, cast
-
 from ...models.a_model import AModel
 from ...models.http_validation_error import HTTPValidationError
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
     if response.status_code == 200:
-        return None
+        response_200 = None
+
+        return response_200
     if response.status_code == 422:
-        return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
     return None
 
 

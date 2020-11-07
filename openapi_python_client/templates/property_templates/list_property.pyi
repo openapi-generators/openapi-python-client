@@ -12,7 +12,7 @@ for {{ inner_source }} in ({{ source }} or []):
     {{ construct(inner_property, inner_source) | indent(4) }}
     {{ property.python_name }}.append({{ inner_property.python_name }})
 {% else %}
-{{ property.python_name }} = {{ source }}
+{{ property.python_name }} = cast({{ property.get_type_string(no_optional=True) }}, {{ source }})
 {% endif %}
 {% endmacro %}
 

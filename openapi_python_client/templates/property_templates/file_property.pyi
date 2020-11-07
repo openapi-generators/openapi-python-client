@@ -1,6 +1,7 @@
 {% macro construct(property, source) %}
-{# Receiving files not supported (yet) #}
-{{ property.python_name }} = {{ source }}
+{{ property.python_name }} = File(
+     payload = BytesIO({{ source }})
+)
 {% endmacro %}
 
 {% macro transform(property, source, destination) %}

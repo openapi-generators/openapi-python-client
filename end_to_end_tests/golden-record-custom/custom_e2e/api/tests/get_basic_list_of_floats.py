@@ -4,10 +4,14 @@ import httpx
 
 Client = httpx.Client
 
+from typing import List, cast
+
 
 def _parse_response(*, response: httpx.Response) -> Optional[List[float]]:
     if response.status_code == 200:
-        return [float(item) for item in cast(List[float], response.json())]
+        response_200 = cast(List[float], response.json())
+
+        return response_200
     return None
 
 

@@ -32,19 +32,17 @@ def _get_kwargs(
     }
 
 
-def _parse_response(
-    *, response: httpx.Response
-) -> Optional[Union[str, int,]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[str, int]]:
     if response.status_code == 200:
-        return str(response.text)
+        response_one = response.json()
+        return response_one
     if response.status_code == 201:
-        return int(response.text)
+        response_one = response.json()
+        return response_one
     return None
 
 
-def _build_response(
-    *, response: httpx.Response
-) -> Response[Union[str, int,]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[str, int]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -59,7 +57,7 @@ def sync_detailed(
     form_data: FormBody,
     multipart_data: MultiPartBody,
     json_body: Json,
-) -> Response[Union[str, int,]]:
+) -> Response[Union[str, int]]:
     kwargs = _get_kwargs(
         client=client,
         form_data=form_data,
@@ -80,7 +78,7 @@ def sync(
     form_data: FormBody,
     multipart_data: MultiPartBody,
     json_body: Json,
-) -> Optional[Union[str, int,]]:
+) -> Optional[Union[str, int]]:
     """ POST endpoint """
 
     return sync_detailed(
@@ -97,7 +95,7 @@ async def asyncio_detailed(
     form_data: FormBody,
     multipart_data: MultiPartBody,
     json_body: Json,
-) -> Response[Union[str, int,]]:
+) -> Response[Union[str, int]]:
     kwargs = _get_kwargs(
         client=client,
         form_data=form_data,
@@ -117,7 +115,7 @@ async def asyncio(
     form_data: FormBody,
     multipart_data: MultiPartBody,
     json_body: Json,
-) -> Optional[Union[str, int,]]:
+) -> Optional[Union[str, int]]:
     """ POST endpoint """
 
     return (

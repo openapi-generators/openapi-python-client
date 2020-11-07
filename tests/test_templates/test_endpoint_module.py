@@ -24,12 +24,14 @@ def test_async_module(template, mocker):
     multipart_body_reference = mocker.MagicMock(class_name="MultiPartBody")
     json_body = mocker.MagicMock(template=None, python_name="json_body")
     json_body.get_type_string.return_value = "Json"
-    post_response_1 = mocker.MagicMock(status_code=200)
-    post_response_1.return_string.return_value = "str"
-    post_response_1.constructor.return_value = "str(response.text)"
-    post_response_2 = mocker.MagicMock(status_code=201)
-    post_response_2.return_string.return_value = "int"
-    post_response_2.constructor.return_value = "int(response.text)"
+    post_response_1 = mocker.MagicMock(
+        status_code=200, source="response.json()", prop=mocker.MagicMock(template=None, python_name="response_one")
+    )
+    post_response_1.prop.get_type_string.return_value = "str"
+    post_response_2 = mocker.MagicMock(
+        status_code=201, source="response.json()", prop=mocker.MagicMock(template=None, python_name="response_one")
+    )
+    post_response_2.prop.get_type_string.return_value = "int"
     post_endpoint = mocker.MagicMock(
         name="camelCase",
         requires_security=True,
@@ -47,6 +49,7 @@ def test_async_module(template, mocker):
     post_endpoint.name = "camelCase"
 
     result = template.render(endpoint=post_endpoint)
+
     import black
 
     expected = (Path(__file__).parent / "endpoint_module.py").read_text()

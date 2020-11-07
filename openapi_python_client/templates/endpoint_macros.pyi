@@ -59,11 +59,11 @@ if {{ property.python_name }} is not UNSET:
 {% if endpoint.responses | length == 0 %}
 None
 {%- elif endpoint.responses | length == 1 %}
-{{ endpoint.responses[0].return_string() }}
+{{ endpoint.responses[0].prop.get_type_string() }}
 {%- else %}
 Union[
     {% for response in endpoint.responses %}
-    {{ response.return_string() }}{{ "," if not loop.last }}
+    {{ response.prop.get_type_string() }}{{ "," if not loop.last }}
     {% endfor %}
 ]
 {%- endif %}

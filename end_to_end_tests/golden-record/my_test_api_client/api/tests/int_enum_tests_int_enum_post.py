@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
@@ -34,9 +34,13 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
     if response.status_code == 200:
-        return None
+        response_200 = None
+
+        return response_200
     if response.status_code == 422:
-        return HTTPValidationError.from_dict(cast(Dict[str, Any], response.json()))
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
     return None
 
 
