@@ -2,6 +2,8 @@ from typing import Optional
 
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 import datetime
@@ -28,8 +30,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[List[AModel],
     return None
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[Union[List[AModel], HTTPValidationError]]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[Union[List[AModel], HTTPValidationError]]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -42,7 +44,7 @@ def httpx_request(
     client: Client,
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
-) -> httpx.Response[Union[List[AModel], HTTPValidationError]]:
+) -> Response[Union[List[AModel], HTTPValidationError]]:
 
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:

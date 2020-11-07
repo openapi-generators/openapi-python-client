@@ -2,6 +2,8 @@ from typing import Optional
 
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 from ...models.json_body import JsonBody
@@ -16,8 +18,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[Response_200]:
     return None
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[Response_200]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[Response_200]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -29,7 +31,7 @@ def httpx_request(
     *,
     client: Client,
     json_body: JsonBody,
-) -> httpx.Response[Response_200]:
+) -> Response[Response_200]:
 
     json_json_body = json_body.to_dict()
 

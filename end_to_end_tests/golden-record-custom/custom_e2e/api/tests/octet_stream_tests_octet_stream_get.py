@@ -2,6 +2,8 @@ from typing import Optional
 
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 from io import BytesIO
@@ -17,8 +19,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[File]:
     return None
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[File]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[File]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -29,7 +31,7 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[File]:
 def httpx_request(
     *,
     client: Client,
-) -> httpx.Response[File]:
+) -> Response[File]:
 
     response = client.request(
         "get",

@@ -2,6 +2,8 @@ from typing import Optional
 
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 from typing import Dict, List, Union
@@ -22,8 +24,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPVal
     return None
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, HTTPValidationError]]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -35,7 +37,7 @@ def httpx_request(
     *,
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
-) -> httpx.Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[None, HTTPValidationError]]:
 
     json_query_param: Union[Unset, List[Any]] = UNSET
     if not isinstance(query_param, Unset):

@@ -1,10 +1,12 @@
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[None]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[None]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -15,7 +17,7 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[None]:
 def httpx_request(
     *,
     client: Client,
-) -> httpx.Response[None]:
+) -> Response[None]:
 
     response = client.request(
         "get",

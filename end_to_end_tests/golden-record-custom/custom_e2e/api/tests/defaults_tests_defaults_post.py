@@ -2,6 +2,8 @@ from typing import Optional
 
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 import datetime
@@ -26,8 +28,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPVal
     return None
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[Union[None, HTTPValidationError]]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -47,7 +49,7 @@ def httpx_request(
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
     enum_prop: Union[Unset, AnEnum] = UNSET,
-) -> httpx.Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[None, HTTPValidationError]]:
 
     json_datetime_prop: Union[Unset, str] = UNSET
     if not isinstance(datetime_prop, Unset):
