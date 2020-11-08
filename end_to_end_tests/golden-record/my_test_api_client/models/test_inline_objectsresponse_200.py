@@ -4,7 +4,7 @@ import attr
 
 
 @attr.s(auto_attribs=True)
-class JsonBody:
+class TestInlineObjectsresponse_200:
     """  """
 
     a_property: str
@@ -19,9 +19,9 @@ class JsonBody:
         return field_dict
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "JsonBody":
+    def from_dict(d: Dict[str, Any]) -> "TestInlineObjectsresponse_200":
         a_property = d["a_property"]
 
-        return JsonBody(
+        return TestInlineObjectsresponse_200(
             a_property=a_property,
         )

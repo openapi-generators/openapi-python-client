@@ -119,13 +119,19 @@ class Endpoint:
 
     @staticmethod
     def parse_request_json_body(
-        *, body: oai.RequestBody, schemas: Schemas
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
         """ Return json_body """
         body_content = body.content
         json_body = body_content.get("application/json")
         if json_body is not None and json_body.media_type_schema is not None:
-            return property_from_data("json_body", required=True, data=json_body.media_type_schema, schemas=schemas)
+            return property_from_data(
+                name="json_body",
+                required=True,
+                data=json_body.media_type_schema,
+                schemas=schemas,
+                parent_name=parent_name,
+            )
         return None, schemas
 
     @staticmethod
@@ -138,7 +144,9 @@ class Endpoint:
             return endpoint, schemas
 
         endpoint.form_body_reference = Endpoint.parse_request_form_body(data.requestBody)
-        json_body, schemas = Endpoint.parse_request_json_body(body=data.requestBody, schemas=schemas)
+        json_body, schemas = Endpoint.parse_request_json_body(
+            body=data.requestBody, schemas=schemas, parent_name=endpoint.name
+        )
         if isinstance(json_body, ParseError):
             return ParseError(detail=f"cannot parse body of endpoint {endpoint.name}", data=json_body.data), schemas
 
@@ -161,7 +169,9 @@ class Endpoint:
     def _add_responses(*, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-            response, schemas = response_from_data(status_code=int(code), data=response_data, schemas=schemas)
+            response, schemas = response_from_data(
+                status_code=int(code), data=response_data, schemas=schemas, parent_name=endpoint.name
+            )
             if isinstance(response, ParseError):
                 endpoint.errors.append(
                     ParseError(
@@ -188,7 +198,11 @@ class Endpoint:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
             prop, schemas = property_from_data(
-                name=param.name, required=param.required, data=param.param_schema, schemas=schemas
+                name=param.name,
+                required=param.required,
+                data=param.param_schema,
+                schemas=schemas,
+                parent_name=endpoint.name,
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas

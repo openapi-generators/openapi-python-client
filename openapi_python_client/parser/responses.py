@@ -32,7 +32,7 @@ def empty_response(status_code: int, response_name: str) -> Response:
 
 
 def response_from_data(
-    *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas
+    *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas, parent_name: str
 ) -> Tuple[Union[Response, ParseError], Schemas]:
     """ Generate a Response from the OpenAPI dictionary representation of it """
 
@@ -58,7 +58,13 @@ def response_from_data(
             schemas,
         )
 
-    prop, schemas = property_from_data(name=response_name, required=True, data=schema_data, schemas=schemas)
+    prop, schemas = property_from_data(
+        name=response_name,
+        required=True,
+        data=schema_data,
+        schemas=schemas,
+        parent_name=f"{parent_name}",
+    )
 
     if isinstance(prop, PropertyError):
         return prop, schemas

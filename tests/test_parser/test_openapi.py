@@ -126,9 +126,11 @@ class TestEndpoint:
         property_from_data = mocker.patch(f"{MODULE_NAME}.property_from_data")
         schemas = Schemas()
 
-        result = Endpoint.parse_request_json_body(body=body, schemas=schemas)
+        result = Endpoint.parse_request_json_body(body=body, schemas=schemas, parent_name="parent")
 
-        property_from_data.assert_called_once_with("json_body", required=True, data=schema, schemas=schemas)
+        property_from_data.assert_called_once_with(
+            name="json_body", required=True, data=schema, schemas=schemas, parent_name="parent"
+        )
         assert result == property_from_data.return_value
 
     def test_parse_request_json_body_no_data(self):
@@ -137,7 +139,7 @@ class TestEndpoint:
         body = oai.RequestBody.construct(content={})
         schemas = Schemas()
 
-        result = Endpoint.parse_request_json_body(body=body, schemas=schemas)
+        result = Endpoint.parse_request_json_body(body=body, schemas=schemas, parent_name="parent")
 
         assert result == (None, schemas)
 
@@ -230,7 +232,7 @@ class TestEndpoint:
 
         assert response_schemas == parsed_schemas
         parse_request_form_body.assert_called_once_with(request_body)
-        parse_request_json_body.assert_called_once_with(body=request_body, schemas=initial_schemas)
+        parse_request_json_body.assert_called_once_with(body=request_body, schemas=initial_schemas, parent_name="name")
         parse_multipart_body.assert_called_once_with(request_body)
         import_string_from_reference.assert_has_calls(
             [
@@ -270,8 +272,8 @@ class TestEndpoint:
 
         response_from_data.assert_has_calls(
             [
-                mocker.call(status_code=200, data=response_1_data, schemas=schemas),
-                mocker.call(status_code=404, data=response_2_data, schemas=schemas),
+                mocker.call(status_code=200, data=response_1_data, schemas=schemas, parent_name="name"),
+                mocker.call(status_code=404, data=response_2_data, schemas=schemas, parent_name="name"),
             ]
         )
         assert response.errors == [
@@ -325,8 +327,8 @@ class TestEndpoint:
 
         response_from_data.assert_has_calls(
             [
-                mocker.call(status_code=200, data=response_1_data, schemas=schemas),
-                mocker.call(status_code=404, data=response_2_data, schemas=schemas_1),
+                mocker.call(status_code=200, data=response_1_data, schemas=schemas, parent_name="name"),
+                mocker.call(status_code=404, data=response_2_data, schemas=schemas_1, parent_name="name"),
             ]
         )
         assert endpoint.responses == [response_1, response_2]
@@ -455,9 +457,15 @@ class TestEndpoint:
 
         property_from_data.assert_has_calls(
             [
-                mocker.call(name="path_prop_name", required=True, data=path_schema, schemas=initial_schemas),
-                mocker.call(name="query_prop_name", required=False, data=query_schema, schemas=schemas_1),
-                mocker.call(name="header_prop_name", required=False, data=header_schema, schemas=schemas_2),
+                mocker.call(
+                    name="path_prop_name", required=True, data=path_schema, schemas=initial_schemas, parent_name="name"
+                ),
+                mocker.call(
+                    name="query_prop_name", required=False, data=query_schema, schemas=schemas_1, parent_name="name"
+                ),
+                mocker.call(
+                    name="header_prop_name", required=False, data=header_schema, schemas=schemas_2, parent_name="name"
+                ),
             ]
         )
         path_prop.get_imports.assert_called_once_with(prefix="...")

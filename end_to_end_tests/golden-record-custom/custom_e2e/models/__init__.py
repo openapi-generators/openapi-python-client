@@ -6,6 +6,6 @@ from .an_int_enum import AnIntEnum
 from .body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from .different_enum import DifferentEnum
 from .http_validation_error import HTTPValidationError
-from .json_body import JsonBody
-from .response_200 import Response_200
+from .test_inline_objectsjson_body import TestInlineObjectsjsonBody
+from .test_inline_objectsresponse_200 import TestInlineObjectsresponse_200
 from .validation_error import ValidationError

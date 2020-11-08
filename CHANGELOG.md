@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Response schema handling was unified with input schema handling, meaning that responses will behave differently than before. 
     Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
 - Instead of skipping input properties with no type, enum, anyOf, or oneOf declared, the property will be declared as `None`.
+- Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property 
+    declared in an endpoint will be named like {endpoint_name}_{previous_class_name}. Classes will no longer be
+    deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming 
+    scheme, there will be an error instead.
 
 ### Additions
 

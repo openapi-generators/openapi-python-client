@@ -221,7 +221,7 @@ def _string_based_property(
 
 
 def build_model_property(
-    *, data: oai.Schema, name: str, schemas: Schemas, required: bool
+    *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str]
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
     """
     A single ModelProperty from its OAI data
@@ -237,11 +237,16 @@ def build_model_property(
     optional_properties: List[Property] = []
     relative_imports: Set[str] = set()
 
-    ref = Reference.from_ref(data.title or name)
+    class_name = data.title or name
+    if parent_name:
+        class_name = f"{utils.pascal_case(parent_name)}{class_name}"
+    ref = Reference.from_ref(class_name)
 
     for key, value in (data.properties or {}).items():
         prop_required = key in required_set
-        prop, schemas = property_from_data(name=key, required=required, data=value, schemas=schemas)
+        prop, schemas = property_from_data(
+            name=key, required=required, data=value, schemas=schemas, parent_name=class_name
+        )
         if isinstance(prop, PropertyError):
             return prop, schemas
         if prop_required and not prop.nullable:
@@ -266,19 +271,44 @@ def build_model_property(
 
 
 def build_enum_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, enum: List[Union[str, int]]
+    *,
+    data: oai.Schema,
+    name: str,
+    required: bool,
+    schemas: Schemas,
+    enum: List[Union[str, int]],
+    parent_name: Optional[str],
 ) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
+    """
+    Create an EnumProperty from schema data.
 
-    reference = Reference.from_ref(data.title or name)
+    Args:
+        data: The OpenAPI Schema which defines this enum.
+        name: The name to use for variables which receive this Enum's value (e.g. model property name)
+        required: Whether or not this Property is required in the calling context
+        schemas: The Schemas which have been defined so far (used to prevent naming collisions)
+        enum: The enum from the provided data. Required separately here to prevent extra type checking.
+        parent_name: The context in which this EnumProperty is defined, used to create more specific class names.
+
+    Returns:
+        A tuple containing either the created property or a PropertyError describing what went wrong AND update schemas.
+    """
+
+    class_name = data.title or name
+    if parent_name:
+        class_name = f"{utils.pascal_case(parent_name)}{class_name}"
+    reference = Reference.from_ref(class_name)
     values = EnumProperty.values_from_list(enum)
 
-    dedup_counter = 0  # TODO: use the parent names instead of a counter for deduping
-    while reference.class_name in schemas.enums:
+    if reference.class_name in schemas.enums:
         existing = schemas.enums[reference.class_name]
-        if values == existing.values:
-            break  # This is the same Enum, we're good
-        dedup_counter += 1
-        reference = Reference.from_ref(f"{reference.class_name}{dedup_counter}")
+        if values != existing.values:
+            return (
+                PropertyError(
+                    detail=f"Found conflicting enums named {reference.class_name} with incompatible values.", data=data
+                ),
+                schemas,
+            )
 
     for value in values.values():
         value_type = type(value)
@@ -313,11 +343,13 @@ def build_enum_property(
 
 
 def build_union_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas
+    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
     for sub_prop_data in chain(data.anyOf, data.oneOf):
-        sub_prop, schemas = property_from_data(name=name, required=required, data=sub_prop_data, schemas=schemas)
+        sub_prop, schemas = property_from_data(
+            name=name, required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
+        )
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
         sub_properties.append(sub_prop)
@@ -336,11 +368,13 @@ def build_union_property(
 
 
 def build_list_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas
+    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
-    inner_prop, schemas = property_from_data(name=f"{name}_item", required=True, data=data.items, schemas=schemas)
+    inner_prop, schemas = property_from_data(
+        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=f"{parent_name}_{name}"
+    )
     if isinstance(inner_prop, PropertyError):
         return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}"), schemas
     return (
@@ -360,6 +394,7 @@ def _property_from_data(
     required: bool,
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
+    parent_name: str,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
@@ -373,9 +408,11 @@ def _property_from_data(
             )
         return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
     if data.enum:
-        return build_enum_property(data=data, name=name, required=required, schemas=schemas, enum=data.enum)
+        return build_enum_property(
+            data=data, name=name, required=required, schemas=schemas, enum=data.enum, parent_name=parent_name
+        )
     if data.anyOf or data.oneOf:
-        return build_union_property(data=data, name=name, required=required, schemas=schemas)
+        return build_union_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
     if not data.type:
         return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
 
@@ -412,20 +449,22 @@ def _property_from_data(
             schemas,
         )
     elif data.type == "array":
-        return build_list_property(data=data, name=name, required=required, schemas=schemas)
+        return build_list_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
     elif data.type == "object":
-        return build_model_property(data=data, name=name, schemas=schemas, required=required)
+        return build_model_property(data=data, name=name, schemas=schemas, required=required, parent_name=parent_name)
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
 
 
 def property_from_data(
+    *,
     name: str,
     required: bool,
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
+    parent_name: str,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     try:
-        return _property_from_data(name=name, required=required, data=data, schemas=schemas)
+        return _property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name=parent_name)
     except ValidationError:
         return PropertyError(detail="Failed to validate default value", data=data), schemas
 
@@ -433,9 +472,11 @@ def property_from_data(
 def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> Union[Schemas, PropertyError]:
     prop: Union[PropertyError, ModelProperty, EnumProperty]
     if data.enum is not None:
-        prop, schemas = build_enum_property(data=data, name=name, required=True, schemas=schemas, enum=data.enum)
+        prop, schemas = build_enum_property(
+            data=data, name=name, required=True, schemas=schemas, enum=data.enum, parent_name=None
+        )
     else:
-        prop, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True)
+        prop, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True, parent_name=None)
     if isinstance(prop, PropertyError):
         return prop
     else:
