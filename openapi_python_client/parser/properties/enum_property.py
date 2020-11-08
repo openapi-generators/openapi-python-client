@@ -11,7 +11,7 @@ from .property import Property
 ValueType = Union[str, int]
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class EnumProperty(Property):
     """ A property that should use an enum """
 

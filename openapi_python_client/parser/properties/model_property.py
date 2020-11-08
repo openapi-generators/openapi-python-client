@@ -6,7 +6,7 @@ from ..reference import Reference
 from .property import Property
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class ModelProperty(Property):
     """ A property which refers to another Schema """
 

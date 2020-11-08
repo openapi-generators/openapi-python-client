@@ -14,7 +14,7 @@ from .property import Property
 from .schemas import Schemas
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class NoneProperty(Property):
     """ A property that is always None (used for empty schemas) """
 
@@ -22,7 +22,7 @@ class NoneProperty(Property):
     template: ClassVar[Optional[str]] = "none_property.pyi"
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class StringProperty(Property):
     """ A property of type str """
 
@@ -31,7 +31,7 @@ class StringProperty(Property):
     _type_string: ClassVar[str] = "str"
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class DateTimeProperty(Property):
     """
     A property of type datetime.datetime
@@ -53,7 +53,7 @@ class DateTimeProperty(Property):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class DateProperty(Property):
     """ A property of type datetime.date """
 
@@ -73,7 +73,7 @@ class DateProperty(Property):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class FileProperty(Property):
     """ A property used for uploading files """
 
@@ -93,21 +93,21 @@ class FileProperty(Property):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class FloatProperty(Property):
     """ A property of type float """
 
     _type_string: ClassVar[str] = "float"
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class IntProperty(Property):
     """ A property of type int """
 
     _type_string: ClassVar[str] = "int"
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class BooleanProperty(Property):
     """ Property for bool """
 
@@ -117,7 +117,7 @@ class BooleanProperty(Property):
 InnerProp = TypeVar("InnerProp", bound=Property)
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class ListProperty(Property, Generic[InnerProp]):
     """ A property representing a list (array) of other properties """
 
@@ -149,7 +149,7 @@ class ListProperty(Property, Generic[InnerProp]):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class UnionProperty(Property):
     """ A property representing a Union (anyOf) of other properties """
 

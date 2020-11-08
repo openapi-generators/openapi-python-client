@@ -7,7 +7,7 @@ from .errors import ParseError, PropertyError
 from .properties import NoneProperty, Property, Schemas, property_from_data
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class Response:
     """ Describes a single response for an endpoint """
 

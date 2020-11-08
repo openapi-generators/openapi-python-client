@@ -9,7 +9,7 @@ from .enum_property import EnumProperty
 from .model_property import ModelProperty
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class Schemas:
     """ Structure for containing all defined, shareable, and resuabled schemas (attr classes and Enums) """
 

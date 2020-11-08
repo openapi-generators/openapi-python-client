@@ -5,7 +5,7 @@ import attr
 from ... import utils
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@attr.s(auto_attribs=True, frozen=True)
 class Property:
     """
     Describes a single property for a schema
