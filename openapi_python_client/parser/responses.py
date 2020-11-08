@@ -1,3 +1,5 @@
+__all__ = ["Response", "response_from_data"]
+
 from typing import Tuple, Union
 
 import attr
@@ -63,7 +65,7 @@ def response_from_data(
         required=True,
         data=schema_data,
         schemas=schemas,
-        parent_name=f"{parent_name}",
+        parent_name=parent_name,
     )
 
     if isinstance(prop, PropertyError):

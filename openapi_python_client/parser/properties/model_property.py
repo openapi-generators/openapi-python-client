@@ -17,8 +17,7 @@ class ModelProperty(Property):
     description: str
     relative_imports: Set[str]
 
-    template: ClassVar[str] = "ref_property.pyi"
-    # TODO: change to model_property.pyi
+    template: ClassVar[str] = "model_property.pyi"
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
