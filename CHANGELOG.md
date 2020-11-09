@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     The previous behavior was a combination of skipping and using generic Dicts for these schemas.
 - Response schema handling was unified with input schema handling, meaning that responses will behave differently than before. 
     Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
+    - As a result of this, endpoints that used to return `bytes` when content-type was application/octet-stream will now return a `File` object if the type of the data is "binary", just like if you were submitting that type instead of receiving it.
 - Instead of skipping input properties with no type, enum, anyOf, or oneOf declared, the property will be declared as `None`.
 - Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property 
     declared in an endpoint will be named like {endpoint_name}_{previous_class_name}. Classes will no longer be
