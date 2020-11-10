@@ -11,11 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`. 
 - Values that are `UNSET` will not be sent along in API calls
+- Schemas defined with `type=object` will now be converted into classes, just like if they were created as ref components. 
+    The previous behavior was a combination of skipping and using generic Dicts for these schemas.
+- Response schema handling was unified with input schema handling, meaning that responses will behave differently than before. 
+    Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
+    - As a result of this, endpoints that used to return `bytes` when content-type was application/octet-stream will now return a `File` object if the type of the data is "binary", just like if you were submitting that type instead of receiving it.
+- Instead of skipping input properties with no type, enum, anyOf, or oneOf declared, the property will be declared as `None`.
+- Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property 
+    declared in an endpoint will be named like {endpoint_name}_{previous_class_name}. Classes will no longer be
+    deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming 
+    scheme, there will be an error instead.
 
 ### Additions
 
 - Added a `--custom-template-path` option for providing custom jinja2 templates (#231 - Thanks @erichulburd!).
 - Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
+- Support for all the same schemas in responses as are supported in parameters.
 
 ## 0.6.2 - 2020-11-03
 

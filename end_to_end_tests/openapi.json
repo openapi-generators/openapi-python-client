@@ -6,26 +6,6 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/ping": {
-      "get": {
-        "summary": "Ping",
-        "description": "A quick check to see if the system is running ",
-        "operationId": "ping_ping_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Ping Ping Get",
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/tests/": {
       "get": {
         "tags": [
@@ -401,22 +381,6 @@
             "in": "query"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "title": "Dict Prop",
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {
-                  "key": "val"
-                }
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -544,6 +508,48 @@
         }
       }
     },
+    "/tests/inline_objects": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Test Inline Objects",
+        "operationId": "test_inline_objects",
+        "requestBody": {
+          "description": "An inline body object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a_property": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inline object response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "a_property": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tests/optional_query_param/": {
       "get": {
         "tags": [
@@ -597,7 +603,7 @@
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "some_dict", "aCamelDateTime", "a_date", "required_nullable", "required_not_nullable"],
+        "required": ["an_enum_value", "aCamelDateTime", "a_date", "required_nullable", "required_not_nullable"],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -613,14 +619,6 @@
               }
             },
             "default": []
-          },
-          "some_dict": {
-            "title": "Some Dict",
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "nullable": true
           },
           "aCamelDateTime": {
             "title": "Acameldatetime",

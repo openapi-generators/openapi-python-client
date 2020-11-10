@@ -2,6 +2,8 @@ from typing import Optional
 
 import httpx
 
+from ...types import Response
+
 Client = httpx.Client
 
 {% for relative in endpoint.relative_imports %}
@@ -18,15 +20,21 @@ Client = httpx.Client
 def _parse_response(*, response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
     if response.status_code == {{ response.status_code }}:
-        return {{ response.constructor() }}
+        {% if response.prop.template %}
+            {% from "property_templates/" + response.prop.template import construct %}
+        {{ construct(response.prop, response.source) | indent(8) }}
+        {% else %}
+        {{ response.prop.python_name }} = {{ response.source }}
+        {% endif %}
+        return {{ response.prop.python_name }}
     {% endfor %}
     return None
 {% endif %}
 
 
 
-def _build_response(*, response: httpx.Response) -> httpx.Response[{{ return_string }}]:
-    return httpx.Response(
+def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}]:
+    return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
@@ -38,7 +46,7 @@ def _build_response(*, response: httpx.Response) -> httpx.Response[{{ return_str
     )
 
 
-def httpx_request({{ arguments(endpoint) | indent(4) }}) -> httpx.Response[{{ return_string }}]:
+def httpx_request({{ arguments(endpoint) | indent(4) }}) -> Response[{{ return_string }}]:
     {{ header_params(endpoint) | indent(4) }}
     {{ query_params(endpoint) | indent(4) }}
     {{ json_body(endpoint) | indent(4) }}

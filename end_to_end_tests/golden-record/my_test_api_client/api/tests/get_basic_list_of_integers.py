@@ -24,7 +24,9 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[List[int]]:
     if response.status_code == 200:
-        return [int(item) for item in cast(List[int], response.json())]
+        response_200 = cast(List[int], response.json())
+
+        return response_200
     return None
 
 
