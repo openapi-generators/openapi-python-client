@@ -245,7 +245,7 @@ def build_model_property(
     for key, value in (data.properties or {}).items():
         prop_required = key in required_set
         prop, schemas = property_from_data(
-            name=key, required=required, data=value, schemas=schemas, parent_name=class_name
+            name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name
         )
         if isinstance(prop, PropertyError):
             return prop, schemas
