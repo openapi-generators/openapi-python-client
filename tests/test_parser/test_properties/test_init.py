@@ -1074,9 +1074,15 @@ def test_build_model_property():
         default=None,
         reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
         required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
-        optional_properties=[DateTimeProperty(name="opt", required=True, nullable=False, default=None)],
+        optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
         description=data.description,
-        relative_imports={"from dateutil.parser import isoparse", "from typing import cast", "import datetime"},
+        relative_imports={
+            "from dateutil.parser import isoparse",
+            "from typing import cast",
+            "import datetime",
+            "from ..types import UNSET, Unset",
+            "from typing import Union",
+        },
     )
 
 
