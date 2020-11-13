@@ -8,7 +8,7 @@ if {{ source }} is not None:
 {% endif %}
 {% endmacro %}
 
-{% macro transform(property, source, destination) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% if property.nullable %}
 {{ destination }} = {{ source }} if {{ source }} else None
 {% else %}

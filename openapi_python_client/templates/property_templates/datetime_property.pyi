@@ -8,7 +8,7 @@ if {{ source }} is not None:
 {% endif %}
 {% endmacro %}
 
-{% macro transform(property, source, destination) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.isoformat() if {{ source }} else None
@@ -16,7 +16,7 @@ if {{ source }} is not None:
 {{ destination }} = {{ source }}.isoformat()
 {% endif %}
 {% else %}
-{{ destination }}: Union[Unset, str] = UNSET
+{{ destination }}{% if declare_type %}: Union[Unset, str]{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
     {{ destination }} = {{ source }}.isoformat() if {{ source }} else None

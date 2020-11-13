@@ -21,9 +21,10 @@ def _parse_{{ property.python_name }}(data: Dict[str, Any]) -> {{ property.get_t
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
 
-{% macro transform(property, source, destination) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% if not property.required %}
-{{ destination }}: {{ property.get_type_string() }}
+{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %}
+
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
 {% endif %}
@@ -33,7 +34,7 @@ if {{ source }} is None:
 {% else %}{# There's an if UNSET statement before this #}
 elif {{ source }} is None:
 {% endif %}
-    {{ destination }}: {{ property.get_type_string() }} = None
+    {{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = None
 {% endif %}
 {% for inner_property in property.inner_properties %}
     {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
@@ -45,7 +46,7 @@ else:
     {% endif %}
 {% if inner_property.template %}
 {% from "property_templates/" + inner_property.template import transform %}
-    {{ transform(inner_property, source, destination) | indent(4) }}
+    {{ transform(inner_property, source, destination, declare_type=False) | indent(4) }}
 {% else %}
     {{ destination }} = {{ source }}
 {% endif %}

@@ -2,6 +2,6 @@
 {{ property.python_name }} = None
 {% endmacro %}
 
-{% macro transform(property, source, destination) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {{ destination }} =  None
 {% endmacro %}
