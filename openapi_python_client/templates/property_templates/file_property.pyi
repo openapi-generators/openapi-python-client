@@ -1,4 +1,4 @@
-{% macro construct(property, source) %}
+{% macro construct(property, source, initial_value=None) %}
 {{ property.python_name }} = File(
      payload = BytesIO({{ source }})
 )

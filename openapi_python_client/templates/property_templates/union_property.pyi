@@ -1,17 +1,17 @@
-{% macro construct(property, source) %}
-def _parse_{{ property.python_name }}(data: Dict[str, Any]) -> {{ property.get_type_string() }}:
+{% macro construct(property, source, initial_value=None) %}
+def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string() }}:
     {{ property.python_name }}: {{ property.get_type_string() }}
     {% for inner_property in property.inner_properties %}
     {% if inner_property.template and not loop.last %}
     try:
     {% from "property_templates/" + inner_property.template import construct %}
-        {{ construct(inner_property, source) | indent(8) }}
+        {{ construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
         return {{ property.python_name }}
     except: # noqa: E722
         pass
     {% elif inner_property.template and loop.last %}{# Don't do try/except for the last one #}
     {% from "property_templates/" + inner_property.template import construct %}
-    {{ construct(inner_property, source) | indent(4) }}
+    {{ construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
     return {{ property.python_name }}
     {% else %}
     return {{ source }}

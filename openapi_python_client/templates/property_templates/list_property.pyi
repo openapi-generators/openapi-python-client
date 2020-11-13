@@ -1,8 +1,8 @@
-{% macro construct(property, source) %}
+{% macro construct(property, source, initial_value="[]") %}
 {% set inner_property = property.inner_property %}
 {% if inner_property.template %}
 {% set inner_source = inner_property.python_name + "_data" %}
-{{ property.python_name }} = []
+{{ property.python_name }} = {{ initial_value }}
 {% if property.required %}
 for {{ inner_source }} in ({{ source }}):
 {% else %}
