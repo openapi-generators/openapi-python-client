@@ -53,7 +53,7 @@ def _get_kwargs(
 
     json_enum_prop: Union[Unset, AnEnum] = UNSET
     if not isinstance(enum_prop, Unset):
-        json_enum_prop = enum_prop.value
+        json_enum_prop = enum_prop
 
     params: Dict[str, Any] = {}
     if string_prop is not UNSET:
