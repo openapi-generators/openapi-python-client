@@ -75,6 +75,7 @@ class AModel:
         an_enum_value = AnEnum(d["an_enum_value"])
 
         def _parse_a_camel_date_time(data: Any) -> Union[datetime.datetime, datetime.date]:
+            data = None if isinstance(data, Unset) else data
             a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
                 a_camel_date_time = isoparse(data)

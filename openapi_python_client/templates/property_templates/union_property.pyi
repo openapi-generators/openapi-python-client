@@ -1,5 +1,6 @@
 {% macro construct(property, source, initial_value=None) %}
 def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string() }}:
+    data = None if isinstance(data, Unset) else data
     {{ property.python_name }}: {{ property.get_type_string() }}
     {% for inner_property in property.inner_properties %}
     {% if inner_property.template and not loop.last %}

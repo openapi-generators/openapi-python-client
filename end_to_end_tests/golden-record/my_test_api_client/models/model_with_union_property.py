@@ -36,6 +36,7 @@ class ModelWithUnionProperty:
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "ModelWithUnionProperty":
         def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
+            data = None if isinstance(data, Unset) else data
             a_property: Union[Unset, AnEnum, AnIntEnum]
             try:
                 a_property = UNSET
