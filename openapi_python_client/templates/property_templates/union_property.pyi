@@ -45,7 +45,7 @@ else:
     {% endif %}
 {% if inner_property.template %}
 {% from "property_templates/" + inner_property.template import transform %}
-    {{ transform(inner_property, source, destination) | indent(8) }}
+    {{ transform(inner_property, source, destination) | indent(4) }}
 {% else %}
     {{ destination }} = {{ source }}
 {% endif %}
