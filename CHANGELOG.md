@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a `--custom-template-path` option for providing custom jinja2 templates (#231 - Thanks @erichulburd!).
 - Better compatibility for "required" (whether or not the field must be included) and "nullable" (whether or not the field can be null) (#205 & #208). Thanks @bowenwr & @emannguitar!
 - Support for all the same schemas in responses as are supported in parameters.
+- In template macros: added `declare_type` param to `transform` and `initial_value` param to `construct` to improve flexibility (#241 - Thanks @packyg!).
+
+### Fixes
+
+- Fixed spacing and generation of properties of type `Union` in generated models (#241 - Thanks @packyg!).
 
 ## 0.6.2 - 2020-11-03
 
