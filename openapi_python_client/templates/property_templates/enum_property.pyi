@@ -1,14 +1,14 @@
-{% macro construct(property, source) %}
+{% macro construct(property, source, initial_value="None") %}
 {% if property.required %}
 {{ property.python_name }} = {{ property.reference.class_name }}({{ source }})
 {% else %}
-{{ property.python_name }} = None
+{{ property.python_name }} = {{ initial_value }}
 if {{ source }} is not None:
     {{ property.python_name }} = {{ property.reference.class_name }}({{ source }})
 {% endif %}
 {% endmacro %}
 
-{% macro transform(property, source, destination) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.value if {{ source }} else None
@@ -16,12 +16,12 @@ if {{ source }} is not None:
 {{ destination }} = {{ source }}.value
 {% endif %}
 {% else %}
-{{ destination }}: {{ property.get_type_string() }} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-    {{ destination }} = {{ source }}.value if {{ source }} else None
+    {{ destination }} = {{ source }} if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}.value
+    {{ destination }} = {{ source }}
 {% endif %}
 {% endif %}
 {% endmacro %}

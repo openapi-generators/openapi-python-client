@@ -727,6 +727,18 @@
             "type": "string"
           }
         }
+      },
+      "ModelWithUnionProperty": {
+        "title": "ModelWithUnionProperty",
+        "type": "object",
+        "properties": {
+          "a_property": {
+            "oneOf": [
+              {"$ref": "#/components/schemas/AnEnum"},
+              {"$ref": "#/components/schemas/AnIntEnum"}
+            ]
+          }
+        }
       }
     }
   }
