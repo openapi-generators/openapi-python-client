@@ -74,15 +74,16 @@ class AModel:
     def from_dict(d: Dict[str, Any]) -> "AModel":
         an_enum_value = AnEnum(d["an_enum_value"])
 
-        def _parse_a_camel_date_time(data: Dict[str, Any]) -> Union[datetime.datetime, datetime.date]:
+        def _parse_a_camel_date_time(data: Any) -> Union[datetime.datetime, datetime.date]:
+            data = None if isinstance(data, Unset) else data
             a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
-                a_camel_date_time = isoparse(d["aCamelDateTime"])
+                a_camel_date_time = isoparse(data)
 
                 return a_camel_date_time
             except:  # noqa: E722
                 pass
-            a_camel_date_time = isoparse(d["aCamelDateTime"]).date()
+            a_camel_date_time = isoparse(data).date()
 
             return a_camel_date_time
 
