@@ -375,6 +375,23 @@
           {
             "required": false,
             "schema": {
+              "title": "Union Prop With Ref",
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/components/schemas/AnEnum"
+                }
+              ],
+              "default": 0.6
+            },
+            "name": "union_prop_with_ref",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "$ref": "#/components/schemas/AnEnum"
             },
             "name": "enum_prop",
