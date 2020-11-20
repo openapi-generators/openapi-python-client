@@ -26,7 +26,7 @@ __version__ = version(__package__)
 
 
 class Project:
-    TEMPLATE_FILTERS = {"snakecase": utils.snake_case, "kebabcase": utils.kebab_case}
+    TEMPLATE_FILTERS = {"snakecase": utils.snake_case, "kebabcase": utils.kebab_case, "pascalcase": utils.pascal_case}
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
