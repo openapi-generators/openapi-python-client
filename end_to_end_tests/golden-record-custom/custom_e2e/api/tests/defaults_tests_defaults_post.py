@@ -48,6 +48,7 @@ def httpx_request(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
+    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
 
@@ -75,6 +76,16 @@ def httpx_request(
     else:
         json_union_prop = union_prop
 
+    json_union_prop_with_ref: Union[Unset, float, AnEnum]
+    if isinstance(union_prop_with_ref, Unset):
+        json_union_prop_with_ref = UNSET
+    elif isinstance(union_prop_with_ref, float):
+        json_union_prop_with_ref = union_prop_with_ref
+    else:
+        json_union_prop_with_ref = UNSET
+        if not isinstance(union_prop_with_ref, Unset):
+            json_union_prop_with_ref = union_prop_with_ref
+
     json_enum_prop: Union[Unset, AnEnum] = UNSET
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop
@@ -96,6 +107,8 @@ def httpx_request(
         params["list_prop"] = json_list_prop
     if union_prop is not UNSET:
         params["union_prop"] = json_union_prop
+    if union_prop_with_ref is not UNSET:
+        params["union_prop_with_ref"] = json_union_prop_with_ref
     if enum_prop is not UNSET:
         params["enum_prop"] = json_enum_prop
 

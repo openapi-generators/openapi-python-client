@@ -21,6 +21,7 @@ def _get_kwargs(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
+    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
@@ -51,6 +52,16 @@ def _get_kwargs(
     else:
         json_union_prop = union_prop
 
+    json_union_prop_with_ref: Union[Unset, float, AnEnum]
+    if isinstance(union_prop_with_ref, Unset):
+        json_union_prop_with_ref = UNSET
+    elif isinstance(union_prop_with_ref, float):
+        json_union_prop_with_ref = union_prop_with_ref
+    else:
+        json_union_prop_with_ref = UNSET
+        if not isinstance(union_prop_with_ref, Unset):
+            json_union_prop_with_ref = union_prop_with_ref
+
     json_enum_prop: Union[Unset, AnEnum] = UNSET
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop
@@ -72,6 +83,8 @@ def _get_kwargs(
         params["list_prop"] = json_list_prop
     if union_prop is not UNSET:
         params["union_prop"] = json_union_prop
+    if union_prop_with_ref is not UNSET:
+        params["union_prop_with_ref"] = json_union_prop_with_ref
     if enum_prop is not UNSET:
         params["enum_prop"] = json_enum_prop
 
@@ -116,6 +129,7 @@ def sync_detailed(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
+    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
@@ -128,6 +142,7 @@ def sync_detailed(
         boolean_prop=boolean_prop,
         list_prop=list_prop,
         union_prop=union_prop,
+        union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
     )
 
@@ -149,6 +164,7 @@ def sync(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
+    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
@@ -163,6 +179,7 @@ def sync(
         boolean_prop=boolean_prop,
         list_prop=list_prop,
         union_prop=union_prop,
+        union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
     ).parsed
 
@@ -178,6 +195,7 @@ async def asyncio_detailed(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
+    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
@@ -190,6 +208,7 @@ async def asyncio_detailed(
         boolean_prop=boolean_prop,
         list_prop=list_prop,
         union_prop=union_prop,
+        union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
     )
 
@@ -210,6 +229,7 @@ async def asyncio(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
+    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
@@ -225,6 +245,7 @@ async def asyncio(
             boolean_prop=boolean_prop,
             list_prop=list_prop,
             union_prop=union_prop,
+            union_prop_with_ref=union_prop_with_ref,
             enum_prop=enum_prop,
         )
     ).parsed
