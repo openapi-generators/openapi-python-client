@@ -23,8 +23,11 @@ Now call your endpoint and use your models:
 ```python
 from custom_e2e.models import MyDataModel
 from custom_e2e.api.my_tag import get_my_data_model
+from custom_e2e.types import Response
 
-my_data: MyDataModel = get_my_data_model(client=client)
+my_data: MyDataModel = get_my_data_model.sync(client=client)
+# or if you need more info (e.g. status_code)
+response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
 ```
 
 Or do the same thing with an async version:
@@ -32,19 +35,22 @@ Or do the same thing with an async version:
 ```python
 from custom_e2e.models import MyDataModel
 from custom_e2e.async_api.my_tag import get_my_data_model
+from custom_e2e.types import Response
 
-my_data: MyDataModel = await get_my_data_model(client=client)
+my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
+response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)
 ```
 
 Things to know:
-1. Every path/method combo becomes a Python function with type annotations. 
+1. Every path/method combo becomes a Python module with four functions:
+    1. `sync`: Blocking request that returns parsed data (if successful) or `None`
+    1. `sync_detailed`: Blocking request that always returns a `Request`, optionally with `parsed` set if the request was successful.
+    1. `asyncio`: Like `sync` but the async instead of blocking
+    1. `asyncio_detailed`: Like `sync_detailed` by async instead of blocking
+     
 1. All path/query params, and bodies become method arguments.
 1. If your endpoint had any tags on it, the first tag will be used as a module name for the function (my_tag above)
-1. Any endpoint which did not have a tag will be in `custom_e2e.api.default`
-1. If the API returns a response code that was not declared in the OpenAPI document, a 
-    `custom_e2e.api.errors.ApiResponseError` wil be raised 
-    with the `response` attribute set to the `httpx.Response` that was received.
-    
+1. Any endpoint which did not have a tag will be in `custom_e2e.api.default`    
 
 ## Building / publishing this Client
 This project uses [Poetry](https://python-poetry.org/) to manage dependencies  and packaging.  Here are the basics:
