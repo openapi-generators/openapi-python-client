@@ -7,6 +7,6 @@ from .body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from .different_enum import DifferentEnum
 from .http_validation_error import HTTPValidationError
 from .model_with_union_property import ModelWithUnionProperty
-from .test_inline_objectsjson_body import TestInlineObjectsjsonBody
-from .test_inline_objectsresponse_200 import TestInlineObjectsresponse_200
+from .test_inline_objects_json_body import TestInlineObjects_JsonBody
+from .test_inline_objects_response_200 import TestInlineObjects_Response_200
 from .validation_error import ValidationError
