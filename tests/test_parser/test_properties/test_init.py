@@ -501,14 +501,14 @@ class TestPropertyFromData:
             required=True,
             nullable=False,
             values={"A": "A", "B": "B", "C": "C"},
-            reference=Reference(class_name="Parent_AnEnum", module_name="parent_an_enum"),
+            reference=Reference(class_name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
-            default="Parent_AnEnum.B",
+            default="ParentAnEnum.B",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.enums == {
             "AnEnum": schemas.enums["AnEnum"],
-            "Parent_AnEnum": prop,
+            "ParentAnEnum": prop,
         }
 
     def test_property_from_data_int_enum(self, mocker):
@@ -532,14 +532,14 @@ class TestPropertyFromData:
             required=True,
             nullable=False,
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
-            reference=Reference(class_name="Parent_AnEnum", module_name="parent_an_enum"),
+            reference=Reference(class_name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
-            default="Parent_AnEnum.VALUE_3",
+            default="ParentAnEnum.VALUE_3",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.enums == {
             "AnEnum": schemas.enums["AnEnum"],
-            "Parent_AnEnum": prop,
+            "ParentAnEnum": prop,
         }
 
     def test_property_from_data_ref_enum(self):
@@ -1065,14 +1065,14 @@ def test_build_model_property():
     assert new_schemas != schemas
     assert new_schemas.models == {
         "OtherModel": None,
-        "Parent_MyModel": model,
+        "ParentMyModel": model,
     }
     assert model == ModelProperty(
         name="prop",
         required=True,
         nullable=False,
         default=None,
-        reference=Reference(class_name="Parent_MyModel", module_name="parent_my_model"),
+        reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
         required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
         optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
         description=data.description,

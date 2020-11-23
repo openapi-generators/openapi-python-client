@@ -239,7 +239,7 @@ def build_model_property(
 
     class_name = data.title or name
     if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}_{utils.pascal_case(class_name)}"
+        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     ref = Reference.from_ref(class_name)
 
     for key, value in (data.properties or {}).items():
@@ -296,7 +296,7 @@ def build_enum_property(
 
     class_name = data.title or name
     if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}_{utils.pascal_case(class_name)}"
+        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     reference = Reference.from_ref(class_name)
     values = EnumProperty.values_from_list(enum)
 
