@@ -820,7 +820,7 @@ class TestBuildListProperty:
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
-            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent_name"
+            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent"
         )
 
     def test_build_list_property(self, mocker):
@@ -849,7 +849,7 @@ class TestBuildListProperty:
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
-            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent_prop"
+            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent"
         )
 
 
