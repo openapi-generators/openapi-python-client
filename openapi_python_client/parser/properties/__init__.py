@@ -239,7 +239,7 @@ def build_model_property(
 
     class_name = data.title or name
     if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}{class_name}"
+        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     ref = Reference.from_ref(class_name)
 
     for key, value in (data.properties or {}).items():
@@ -296,7 +296,7 @@ def build_enum_property(
 
     class_name = data.title or name
     if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}{class_name}"
+        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     reference = Reference.from_ref(class_name)
     values = EnumProperty.values_from_list(enum)
 
@@ -373,7 +373,7 @@ def build_list_property(
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
-        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=f"{parent_name}_{name}"
+        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name
     )
     if isinstance(inner_prop, PropertyError):
         return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}"), schemas

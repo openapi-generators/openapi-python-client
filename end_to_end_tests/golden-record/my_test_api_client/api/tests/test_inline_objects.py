@@ -3,15 +3,15 @@ from typing import Any, Dict, Optional
 import httpx
 
 from ...client import Client
-from ...models.test_inline_objectsjson_body import TestInlineObjectsjsonBody
-from ...models.test_inline_objectsresponse_200 import TestInlineObjectsresponse_200
+from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
+from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse_200
 from ...types import Response
 
 
 def _get_kwargs(
     *,
     client: Client,
-    json_body: TestInlineObjectsjsonBody,
+    json_body: TestInlineObjectsJsonBody,
 ) -> Dict[str, Any]:
     url = "{}/tests/inline_objects".format(client.base_url)
 
@@ -28,15 +28,15 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[TestInlineObjectsresponse_200]:
+def _parse_response(*, response: httpx.Response) -> Optional[TestInlineObjectsResponse_200]:
     if response.status_code == 200:
-        response_200 = TestInlineObjectsresponse_200.from_dict(response.json())
+        response_200 = TestInlineObjectsResponse_200.from_dict(response.json())
 
         return response_200
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[TestInlineObjectsresponse_200]:
+def _build_response(*, response: httpx.Response) -> Response[TestInlineObjectsResponse_200]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -48,8 +48,8 @@ def _build_response(*, response: httpx.Response) -> Response[TestInlineObjectsre
 def sync_detailed(
     *,
     client: Client,
-    json_body: TestInlineObjectsjsonBody,
-) -> Response[TestInlineObjectsresponse_200]:
+    json_body: TestInlineObjectsJsonBody,
+) -> Response[TestInlineObjectsResponse_200]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -65,8 +65,8 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    json_body: TestInlineObjectsjsonBody,
-) -> Optional[TestInlineObjectsresponse_200]:
+    json_body: TestInlineObjectsJsonBody,
+) -> Optional[TestInlineObjectsResponse_200]:
     """  """
 
     return sync_detailed(
@@ -78,8 +78,8 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-    json_body: TestInlineObjectsjsonBody,
-) -> Response[TestInlineObjectsresponse_200]:
+    json_body: TestInlineObjectsJsonBody,
+) -> Response[TestInlineObjectsResponse_200]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -94,8 +94,8 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    json_body: TestInlineObjectsjsonBody,
-) -> Optional[TestInlineObjectsresponse_200]:
+    json_body: TestInlineObjectsJsonBody,
+) -> Optional[TestInlineObjectsResponse_200]:
     """  """
 
     return (

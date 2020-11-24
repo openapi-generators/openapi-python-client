@@ -6,7 +6,7 @@ from ..types import UNSET, Unset
 
 
 @attr.s(auto_attribs=True)
-class TestInlineObjectsresponse_200:
+class TestInlineObjectsJsonBody:
     """  """
 
     a_property: Union[Unset, str] = UNSET
@@ -21,9 +21,9 @@ class TestInlineObjectsresponse_200:
         return field_dict
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "TestInlineObjectsresponse_200":
+    def from_dict(d: Dict[str, Any]) -> "TestInlineObjectsJsonBody":
         a_property = d.get("a_property", UNSET)
 
-        return TestInlineObjectsresponse_200(
+        return TestInlineObjectsJsonBody(
             a_property=a_property,
         )
