@@ -17,24 +17,30 @@ class ValidationError:
         msg = self.msg
         type = self.type
 
-        field_dict = {
-            "loc": loc,
-            "msg": msg,
-            "type": type,
-        }
+        field_dict: Dict[str, Any] = {}
+        field_dict.update(
+            {
+                "loc": loc,
+                "msg": msg,
+                "type": type,
+            }
+        )
 
         return field_dict
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "ValidationError":
-        loc = cast(List[str], d["loc"])
+    def from_dict(src_dict: Dict[str, Any]) -> "ValidationError":
+        d = src_dict.copy()
+        loc = cast(List[str], d.pop("loc"))
 
-        msg = d["msg"]
+        msg = d.pop("msg")
 
-        type = d["type"]
+        type = d.pop("type")
 
-        return ValidationError(
+        validation_error = ValidationError(
             loc=loc,
             msg=msg,
             type=type,
         )
+
+        return validation_error

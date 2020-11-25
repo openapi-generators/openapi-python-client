@@ -14,16 +14,20 @@ class TestInlineObjectsJsonBody:
     def to_dict(self) -> Dict[str, Any]:
         a_property = self.a_property
 
-        field_dict = {}
+        field_dict: Dict[str, Any] = {}
+        field_dict.update({})
         if a_property is not UNSET:
             field_dict["a_property"] = a_property
 
         return field_dict
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "TestInlineObjectsJsonBody":
-        a_property = d.get("a_property", UNSET)
+    def from_dict(src_dict: Dict[str, Any]) -> "TestInlineObjectsJsonBody":
+        d = src_dict.copy()
+        a_property = d.pop("a_property", UNSET)
 
-        return TestInlineObjectsJsonBody(
+        test_inline_objects_json_body = TestInlineObjectsJsonBody(
             a_property=a_property,
         )
+
+        return test_inline_objects_json_body
