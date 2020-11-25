@@ -756,6 +756,33 @@
             ]
           }
         }
+      },
+      "FreeFormModel": {
+        "title": "FreeFormModel",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ModelWithAdditionalPropertiesInlined": {
+        "title": "ModelWithAdditionalPropertiesInlined",
+        "type": "object",
+        "properties": {
+          "a_number": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "extra_props_prop": {"type": "string"}
+          }
+        }
+      },
+      "ModelWithAdditionalPropertiesRefed": {
+        "title": "ModelWithAdditionalPropertiesRefed",
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AnEnum"
+        }
       }
     }
   }
