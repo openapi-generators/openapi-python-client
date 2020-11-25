@@ -255,6 +255,20 @@ def build_model_property(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
+    if data.additionalProperties is not None and not isinstance(data.additionalProperties, bool):
+        additional_properties, schemas = property_from_data(
+            name="AdditionalProperties",
+            required=False,
+            data=data.additionalProperties,
+            schemas=schemas,
+            parent_name=class_name,
+        )
+        if isinstance(additional_properties, PropertyError):
+            return additional_properties, schemas
+        relative_imports.update(additional_properties.get_imports(prefix=".."))
+    else:
+        additional_properties = data.additionalProperties
+
     prop = ModelProperty(
         reference=ref,
         required_properties=required_properties,
@@ -265,6 +279,7 @@ def build_model_property(
         nullable=data.nullable,
         required=required,
         name=name,
+        additional_properties=additional_properties,
     )
     schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
     return prop, schemas
