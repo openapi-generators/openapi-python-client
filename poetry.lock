@@ -278,6 +278,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "mslex"
+version = "0.3.0"
+description = "shlex for windows"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "mypy"
 version = "0.790"
 description = "Optional static typing for Python"
@@ -567,13 +575,14 @@ python-versions = "*"
 
 [[package]]
 name = "taskipy"
-version = "1.5.0"
+version = "1.5.1"
 description = "tasks runner for python projects"
 category = "dev"
 optional = false
 python-versions = ">=3.6,<4.0"
 
 [package.dependencies]
+mslex = ">=0.3.0,<0.4.0"
 psutil = ">=5.7.2,<6.0.0"
 toml = ">=0.10.0,<0.11.0"
 
@@ -819,6 +828,10 @@ mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
+mslex = [
+    {file = "mslex-0.3.0-py2.py3-none-any.whl", hash = "sha256:380cb14abf8fabf40e56df5c8b21a6d533dc5cbdcfe42406bbf08dda8f42e42a"},
+    {file = "mslex-0.3.0.tar.gz", hash = "sha256:4a1ac3f25025cad78ad2fe499dd16d42759f7a3801645399cce5c404415daa97"},
+]
 mypy = [
     {file = "mypy-0.790-cp35-cp35m-macosx_10_6_x86_64.whl", hash = "sha256:bd03b3cf666bff8d710d633d1c56ab7facbdc204d567715cb3b9f85c6e94f669"},
     {file = "mypy-0.790-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:2170492030f6faa537647d29945786d297e4862765f0b4ac5930ff62e300d802"},
@@ -995,8 +1008,8 @@ stringcase = [
     {file = "stringcase-1.2.0.tar.gz", hash = "sha256:48a06980661908efe8d9d34eab2b6c13aefa2163b3ced26972902e3bdfd87008"},
 ]
 taskipy = [
-    {file = "taskipy-1.5.0-py3-none-any.whl", hash = "sha256:61747793dbf059164f8b19143a83ae67758f994c2ed701d51311538a388ee7ec"},
-    {file = "taskipy-1.5.0.tar.gz", hash = "sha256:2a40f8494d4fbd986f98680e695aac8a741142ad6c018926d9de201822f97077"},
+    {file = "taskipy-1.5.1-py3-none-any.whl", hash = "sha256:2cf0080a8a5b6eb182c26ce323412c8bd63ea5b3477bfb4d0407bb77924abd04"},
+    {file = "taskipy-1.5.1.tar.gz", hash = "sha256:aa803322e6286e4ade8156366e0f846f79959447f4a9bcd7eac59c7705bd3f0d"},
 ]
 toml = [
     {file = "toml-0.10.1-py2.py3-none-any.whl", hash = "sha256:bda89d5935c2eac546d648028b9901107a595863cb36bae0c73ac804a9b4ce88"},
