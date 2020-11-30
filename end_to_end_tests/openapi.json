@@ -543,7 +543,8 @@
                   "a_property": {
                     "type": "string"
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           }
@@ -559,7 +560,8 @@
                     "a_property": {
                       "type": "string"
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -680,7 +682,8 @@
             "nullable": false
           }
         },
-        "description": "A Model for testing all the ways custom objects can be used "
+        "description": "A Model for testing all the ways custom objects can be used ",
+        "additionalProperties": false
       },
       "AnEnum": {
         "title": "AnEnum",
@@ -703,7 +706,8 @@
             "type": "string",
             "format": "binary"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DifferentEnum": {
         "title": "DifferentEnum",
@@ -721,7 +725,8 @@
               "$ref": "#/components/schemas/ValidationError"
             }
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ValidationError": {
         "title": "ValidationError",
@@ -743,7 +748,8 @@
             "title": "Error Type",
             "type": "string"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ModelWithUnionProperty": {
         "title": "ModelWithUnionProperty",
@@ -755,12 +761,12 @@
               {"$ref": "#/components/schemas/AnIntEnum"}
             ]
           }
-        }
+        },
+        "additionalProperties": false
       },
       "FreeFormModel": {
         "title": "FreeFormModel",
-        "type": "object",
-        "additionalProperties": true
+        "type": "object"
       },
       "ModelWithAdditionalPropertiesInlined": {
         "title": "ModelWithAdditionalPropertiesInlined",
@@ -774,7 +780,8 @@
           "type": "object",
           "properties": {
             "extra_props_prop": {"type": "string"}
-          }
+          },
+          "additionalProperties": {}
         }
       },
       "ModelWithAdditionalPropertiesRefed": {
