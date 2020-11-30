@@ -24,7 +24,7 @@ class ModelWithAdditionalPropertiesRefed:
         d = src_dict.copy()
         model_with_additional_properties_refed = ModelWithAdditionalPropertiesRefed()
 
-        model_with_additional_properties_refed._additional_properties.update(d)
+        model_with_additional_properties_refed._additional_properties = d
         return model_with_additional_properties_refed
 
     @property

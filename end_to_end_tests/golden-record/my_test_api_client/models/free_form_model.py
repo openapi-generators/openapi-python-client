@@ -22,7 +22,7 @@ class FreeFormModel:
         d = src_dict.copy()
         free_form_model = FreeFormModel()
 
-        free_form_model._additional_properties.update(d)
+        free_form_model._additional_properties = d
         return free_form_model
 
     @property

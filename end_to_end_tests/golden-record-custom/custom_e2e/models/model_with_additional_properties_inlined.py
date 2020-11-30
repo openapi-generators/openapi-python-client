@@ -37,7 +37,7 @@ class ModelWithAdditionalPropertiesInlined:
             a_number=a_number,
         )
 
-        model_with_additional_properties_inlined._additional_properties.update(d)
+        model_with_additional_properties_inlined._additional_properties = d
         return model_with_additional_properties_inlined
 
     @property

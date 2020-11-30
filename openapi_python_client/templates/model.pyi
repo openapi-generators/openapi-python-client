@@ -90,7 +90,7 @@ class {{ model.reference.class_name }}:
         )
 
         {% if model.additional_properties %}
-        {{model.reference.module_name}}._additional_properties.update(d)
+        {{model.reference.module_name}}._additional_properties = d
         {% endif %}
         return {{model.reference.module_name}}
 
