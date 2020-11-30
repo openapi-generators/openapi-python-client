@@ -13,7 +13,7 @@ class ModelWithAdditionalPropertiesInlined:
     """  """
 
     a_number: Union[Unset, float] = UNSET
-    _additional_properties: Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperties] = attr.ib(
+    additional_properties: Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperties] = attr.ib(
         init=False, factory=dict
     )
 
@@ -21,7 +21,7 @@ class ModelWithAdditionalPropertiesInlined:
         a_number = self.a_number
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self._additional_properties)
+        field_dict.update(self.additional_properties)
         field_dict.update({})
         if a_number is not UNSET:
             field_dict["a_number"] = a_number
@@ -37,25 +37,21 @@ class ModelWithAdditionalPropertiesInlined:
             a_number=a_number,
         )
 
-        model_with_additional_properties_inlined._additional_properties = d
+        model_with_additional_properties_inlined.additional_properties = d
         return model_with_additional_properties_inlined
 
     @property
-    def additional_properties(self) -> Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperties]:
-        return self._additional_properties
-
-    @property
     def additional_keys(self) -> List[str]:
-        return list(self._additional_properties.keys())
+        return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> ModelWithAdditionalPropertiesInlinedAdditionalProperties:
-        return self._additional_properties[key]
+        return self.additional_properties[key]
 
     def __setitem__(self, key: str, value: ModelWithAdditionalPropertiesInlinedAdditionalProperties) -> None:
-        self._additional_properties[key] = value
+        self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:
-        del self._additional_properties[key]
+        del self.additional_properties[key]
 
     def __contains__(self, key: str) -> bool:
-        return key in self._additional_properties
+        return key in self.additional_properties

@@ -32,7 +32,7 @@ class {{ model.reference.class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    _additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
     {% endif %}
 
 
@@ -48,7 +48,7 @@ class {{ model.reference.class_name }}:
 
         field_dict: Dict[str, Any] = {}
         {% if model.additional_properties %}
-        field_dict.update(self._additional_properties)
+        field_dict.update(self.additional_properties)
         {% endif %}
         field_dict.update({
             {% for property in model.required_properties + model.optional_properties %}
@@ -90,30 +90,25 @@ class {{ model.reference.class_name }}:
         )
 
         {% if model.additional_properties %}
-        {{model.reference.module_name}}._additional_properties = d
+        {{model.reference.module_name}}.additional_properties = d
         {% endif %}
         return {{model.reference.module_name}}
 
     {% if model.additional_properties %}
-
-    @property
-    def additional_properties(self) -> Dict[str, {{ additional_property_type }}]:
-        return self._additional_properties
-
     @property
     def additional_keys(self) -> List[str]:
-        return list(self._additional_properties.keys())
+        return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> {{ additional_property_type }}:
-        return self._additional_properties[key]
+        return self.additional_properties[key]
 
     def __setitem__(self, key: str, value: {{ additional_property_type }}) -> None:
-        self._additional_properties[key] = value
+        self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:
-        del self._additional_properties[key]
+        del self.additional_properties[key]
 
     def __contains__(self, key: str) -> bool:
-        return key in self._additional_properties
+        return key in self.additional_properties
     {% endif %}
 
