@@ -15,7 +15,7 @@ from ..types import UNSET, Unset
 
 
 {% if model.additional_properties %}
-{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(no_optional=True) %}
+{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
 {% endif %}
 
 @attr.s(auto_attribs=True)
@@ -48,7 +48,13 @@ class {{ model.reference.class_name }}:
 
         field_dict: Dict[str, Any] = {}
         {% if model.additional_properties %}
+        {% if model.additional_properties.template %}
+        {% from "property_templates/" + model.additional_properties.template import transform %}
+        for prop_name, prop in self.additional_properties.items():
+            {{ transform(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
+        {% else %}
         field_dict.update(self.additional_properties)
+        {% endif %}
         {% endif %}
         field_dict.update({
             {% for property in model.required_properties + model.optional_properties %}
@@ -89,9 +95,19 @@ class {{ model.reference.class_name }}:
 {% endfor %}
         )
 
-        {% if model.additional_properties %}
+{% if model.additional_properties %}
+    {% if model.additional_properties.template %}
+        {% from "property_templates/" + model.additional_properties.template import construct %}
+        additional_properties_dict = {}
+        for prop_name, prop_dict in d.items():
+            {{ construct(model.additional_properties, "prop_dict") | indent(12) }}
+            additional_properties_dict[prop_name] = {{ model.additional_properties.python_name }}
+
+        {{model.reference.module_name}}.additional_properties = additional_properties_dict
+    {% else %}
         {{model.reference.module_name}}.additional_properties = d
-        {% endif %}
+    {% endif %}
+{% endif %}
         return {{model.reference.module_name}}
 
     {% if model.additional_properties %}

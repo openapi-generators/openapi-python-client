@@ -266,7 +266,7 @@ def build_model_property(
         assert isinstance(data.additionalProperties, (oai.Schema, oai.Reference))
         additional_properties, schemas = property_from_data(
             name="AdditionalProperties",
-            required=False,
+            required=True,  # in the sense that if present in the dict will not be None
             data=data.additionalProperties,
             schemas=schemas,
             parent_name=class_name,
