@@ -1,4 +1,4 @@
-from typing import ClassVar, List, Optional, Set, Union
+from typing import ClassVar, List, Set, Union
 
 import attr
 
