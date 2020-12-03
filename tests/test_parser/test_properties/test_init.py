@@ -588,6 +588,7 @@ class TestPropertyFromData:
             optional_properties=[],
             description="",
             relative_imports=set(),
+            additional_properties=False,
         )
         schemas = Schemas(models={class_name: existing_model})
 
@@ -603,6 +604,7 @@ class TestPropertyFromData:
             optional_properties=[],
             description="",
             relative_imports=set(),
+            additional_properties=False,
         )
         assert schemas == new_schemas
 
@@ -1051,6 +1053,7 @@ def test_build_model_property():
         },
         description="A class called MyModel",
         nullable=False,
+        additional_properties=oai.Schema.construct(),
     )
     schemas = Schemas(models={"OtherModel": None})
 
@@ -1083,6 +1086,7 @@ def test_build_model_property():
             "from ..types import UNSET, Unset",
             "from typing import Union",
         },
+        additional_properties=True,
     )
 
 
