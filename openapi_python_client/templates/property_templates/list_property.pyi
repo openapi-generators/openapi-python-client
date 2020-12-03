@@ -3,10 +3,11 @@
 {% if inner_property.template %}
 {% set inner_source = inner_property.python_name + "_data" %}
 {{ property.python_name }} = {{ initial_value }}
+_{{ property.python_name }} = {{ source }}
 {% if property.required %}
-for {{ inner_source }} in ({{ source }}):
+for {{ inner_source }} in (_{{ property.python_name }}):
 {% else %}
-for {{ inner_source }} in ({{ source }} or []):
+for {{ inner_source }} in (_{{ property.python_name }} or []):
 {% endif %}
     {% from "property_templates/" + inner_property.template import construct %}
     {{ construct(inner_property, inner_source) | indent(4) }}

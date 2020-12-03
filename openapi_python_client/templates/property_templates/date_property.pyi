@@ -3,8 +3,9 @@
 {{ property.python_name }} = isoparse({{ source }}).date()
 {% else %}
 {{ property.python_name }} = {{ initial_value }}
-if {{ source }} is not None:
-    {{ property.python_name }} = isoparse(cast(str, {{ source }})).date()
+_{{ property.python_name }} = {{ source }}
+if _{{ property.python_name }} is not None:
+    {{ property.python_name }} = isoparse(cast(str, _{{ property.python_name }})).date()
 {% endif %}
 {% endmacro %}
 
