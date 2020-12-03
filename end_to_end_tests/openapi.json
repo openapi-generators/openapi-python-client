@@ -784,6 +784,22 @@
           "additionalProperties": {}
         }
       },
+      "ModelWithPrimitiveAdditionalProperties": {
+        "title": "ModelWithPrimitiveAdditionalProperties",
+        "type": "object",
+        "properties": {
+          "a_date_holder": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
       "ModelWithAdditionalPropertiesRefed": {
         "title": "ModelWithAdditionalPropertiesRefed",
         "type": "object",
