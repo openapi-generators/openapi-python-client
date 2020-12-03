@@ -255,6 +255,7 @@ def build_model_property(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
+    additional_properties: Union[bool, Property, PropertyError]
     if data.additionalProperties is None:
         additional_properties = True
     elif isinstance(data.additionalProperties, bool):

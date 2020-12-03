@@ -16,7 +16,7 @@ class ModelProperty(Property):
     optional_properties: List[Property]
     description: str
     relative_imports: Set[str]
-    additional_properties: Optional[Union[bool, Property]]
+    additional_properties: Union[bool, Property]
 
     template: ClassVar[str] = "model_property.pyi"
 
