@@ -21,7 +21,9 @@ class ModelWithAdditionalPropertiesInlined:
         a_number = self.a_number
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
+        for prop_name, prop in self.additional_properties.items():
+            field_dict[prop_name] = prop.to_dict()
+
         field_dict.update({})
         if a_number is not UNSET:
             field_dict["a_number"] = a_number
@@ -37,7 +39,13 @@ class ModelWithAdditionalPropertiesInlined:
             a_number=a_number,
         )
 
-        model_with_additional_properties_inlined.additional_properties = d
+        additional_properties_dict = {}
+        for prop_name, prop_dict in d.items():
+            additional_properties = ModelWithAdditionalPropertiesInlinedAdditionalProperties.from_dict(prop_dict)
+
+            additional_properties_dict[prop_name] = additional_properties
+
+        model_with_additional_properties_inlined.additional_properties = additional_properties_dict
         return model_with_additional_properties_inlined
 
     @property

@@ -1,48 +1,48 @@
+import datetime
 from typing import Any, Dict, List
 
 import attr
-
-from ..models.an_enum import AnEnum
+from dateutil.parser import isoparse
 
 
 @attr.s(auto_attribs=True)
-class ModelWithAdditionalPropertiesRefed:
+class ModelWithPrimitiveAdditionalPropertiesADateHolder:
     """  """
 
-    additional_properties: Dict[str, AnEnum] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, datetime.datetime] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = prop.value
+            field_dict[prop_name] = prop.isoformat()
 
         field_dict.update({})
 
         return field_dict
 
     @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithAdditionalPropertiesRefed":
+    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithPrimitiveAdditionalPropertiesADateHolder":
         d = src_dict.copy()
-        model_with_additional_properties_refed = ModelWithAdditionalPropertiesRefed()
+        model_with_primitive_additional_properties_a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder()
 
         additional_properties_dict = {}
         for prop_name, prop_dict in d.items():
-            additional_properties = AnEnum(prop_dict)
+            additional_properties = isoparse(prop_dict)
 
             additional_properties_dict[prop_name] = additional_properties
 
-        model_with_additional_properties_refed.additional_properties = additional_properties_dict
-        return model_with_additional_properties_refed
+        model_with_primitive_additional_properties_a_date_holder.additional_properties = additional_properties_dict
+        return model_with_primitive_additional_properties_a_date_holder
 
     @property
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> AnEnum:
+    def __getitem__(self, key: str) -> datetime.datetime:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: AnEnum) -> None:
+    def __setitem__(self, key: str, value: datetime.datetime) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

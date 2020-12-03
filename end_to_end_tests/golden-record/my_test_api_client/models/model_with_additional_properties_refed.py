@@ -14,7 +14,9 @@ class ModelWithAdditionalPropertiesRefed:
     def to_dict(self) -> Dict[str, Any]:
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
+        for prop_name, prop in self.additional_properties.items():
+            field_dict[prop_name] = prop.value
+
         field_dict.update({})
 
         return field_dict
@@ -24,7 +26,13 @@ class ModelWithAdditionalPropertiesRefed:
         d = src_dict.copy()
         model_with_additional_properties_refed = ModelWithAdditionalPropertiesRefed()
 
-        model_with_additional_properties_refed.additional_properties = d
+        additional_properties_dict = {}
+        for prop_name, prop_dict in d.items():
+            additional_properties = AnEnum(prop_dict)
+
+            additional_properties_dict[prop_name] = additional_properties
+
+        model_with_additional_properties_refed.additional_properties = additional_properties_dict
         return model_with_additional_properties_refed
 
     @property
