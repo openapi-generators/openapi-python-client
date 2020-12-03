@@ -32,7 +32,8 @@ class HTTPValidationError:
     def from_dict(src_dict: Dict[str, Any]) -> "HTTPValidationError":
         d = src_dict.copy()
         detail = []
-        for detail_item_data in d.pop("detail", UNSET) or []:
+        _detail = d.pop("detail", UNSET)
+        for detail_item_data in _detail or []:
             detail_item = ValidationError.from_dict(detail_item_data)
 
             detail.append(detail_item)

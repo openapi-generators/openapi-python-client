@@ -43,15 +43,17 @@ class ModelWithUnionProperty:
             a_property: Union[Unset, AnEnum, AnIntEnum]
             try:
                 a_property = UNSET
-                if data is not None:
-                    a_property = AnEnum(data)
+                _a_property = data
+                if _a_property is not None:
+                    a_property = AnEnum(_a_property)
 
                 return a_property
             except:  # noqa: E722
                 pass
             a_property = UNSET
-            if data is not None:
-                a_property = AnIntEnum(data)
+            _a_property = data
+            if _a_property is not None:
+                a_property = AnIntEnum(_a_property)
 
             return a_property
 

@@ -98,9 +98,11 @@ class AModel:
         required_not_nullable = d.pop("required_not_nullable")
 
         nested_list_of_enums = []
-        for nested_list_of_enums_item_data in d.pop("nested_list_of_enums", UNSET) or []:
+        _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
+        for nested_list_of_enums_item_data in _nested_list_of_enums or []:
             nested_list_of_enums_item = []
-            for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
+            _nested_list_of_enums_item = nested_list_of_enums_item_data
+            for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
                 nested_list_of_enums_item_item = DifferentEnum(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
