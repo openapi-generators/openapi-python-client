@@ -1125,6 +1125,30 @@ def test_build_model_property_bad_prop():
     assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
 
 
+def test_build_model_property_bad_additional_props():
+    from openapi_python_client.parser.properties import Schemas, build_model_property
+
+    additional_properties = oai.Schema(
+        type="object",
+        properties={
+            "bad": oai.Schema(type="not_real"),
+        },
+    )
+    data = oai.Schema(additionalProperties=additional_properties)
+    schemas = Schemas(models={"OtherModel": None})
+
+    err, new_schemas = build_model_property(
+        data=data,
+        name="prop",
+        schemas=schemas,
+        required=True,
+        parent_name=None,
+    )
+
+    # assert new_schemas == schemas
+    assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
+
+
 def test_build_enum_property_conflict(mocker):
     from openapi_python_client.parser.properties import Schemas, build_enum_property
 
