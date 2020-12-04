@@ -65,6 +65,12 @@ task regen\
 && task regen_custom\
 && task e2e\
 """
+gen-setuppy = """
+poetry build \
+&& tar --strip-components=1 -xvf "$(ls -1 dist/*tar.gz | tail -1)" '*/setup.py' \
+&& isort setup.py \
+&& black setup.py
+"""
 
 [tool.black]
 line-length = 120
