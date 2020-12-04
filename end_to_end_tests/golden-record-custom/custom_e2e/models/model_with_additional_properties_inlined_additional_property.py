@@ -6,7 +6,7 @@ from ..types import UNSET, Unset
 
 
 @attr.s(auto_attribs=True)
-class ModelWithAdditionalPropertiesInlinedAdditionalProperties:
+class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
     """  """
 
     extra_props_prop: Union[Unset, str] = UNSET
@@ -24,18 +24,18 @@ class ModelWithAdditionalPropertiesInlinedAdditionalProperties:
         return field_dict
 
     @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithAdditionalPropertiesInlinedAdditionalProperties":
+    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithAdditionalPropertiesInlinedAdditionalProperty":
         d = src_dict.copy()
         extra_props_prop = d.pop("extra_props_prop", UNSET)
 
-        model_with_additional_properties_inlined_additional_properties = (
-            ModelWithAdditionalPropertiesInlinedAdditionalProperties(
+        model_with_additional_properties_inlined_additional_property = (
+            ModelWithAdditionalPropertiesInlinedAdditionalProperty(
                 extra_props_prop=extra_props_prop,
             )
         )
 
-        model_with_additional_properties_inlined_additional_properties.additional_properties = d
-        return model_with_additional_properties_inlined_additional_properties
+        model_with_additional_properties_inlined_additional_property.additional_properties = d
+        return model_with_additional_properties_inlined_additional_property
 
     @property
     def additional_keys(self) -> List[str]:

@@ -26,13 +26,13 @@ class ModelWithAdditionalPropertiesRefed:
         d = src_dict.copy()
         model_with_additional_properties_refed = ModelWithAdditionalPropertiesRefed()
 
-        additional_properties_dict = {}
+        additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_properties = AnEnum(prop_dict)
+            additional_property = AnEnum(prop_dict)
 
-            additional_properties_dict[prop_name] = additional_properties
+            additional_properties[prop_name] = additional_property
 
-        model_with_additional_properties_refed.additional_properties = additional_properties_dict
+        model_with_additional_properties_refed.additional_properties = additional_properties
         return model_with_additional_properties_refed
 
     @property

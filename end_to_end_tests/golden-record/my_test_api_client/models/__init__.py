@@ -8,8 +8,8 @@ from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
 from .http_validation_error import HTTPValidationError
 from .model_with_additional_properties_inlined import ModelWithAdditionalPropertiesInlined
-from .model_with_additional_properties_inlined_additional_properties import (
-    ModelWithAdditionalPropertiesInlinedAdditionalProperties,
+from .model_with_additional_properties_inlined_additional_property import (
+    ModelWithAdditionalPropertiesInlinedAdditionalProperty,
 )
 from .model_with_additional_properties_refed import ModelWithAdditionalPropertiesRefed
 from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditionalProperties

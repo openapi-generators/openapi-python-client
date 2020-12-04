@@ -2,8 +2,8 @@ from typing import Any, Dict, List, Union
 
 import attr
 
-from ..models.model_with_additional_properties_inlined_additional_properties import (
-    ModelWithAdditionalPropertiesInlinedAdditionalProperties,
+from ..models.model_with_additional_properties_inlined_additional_property import (
+    ModelWithAdditionalPropertiesInlinedAdditionalProperty,
 )
 from ..types import UNSET, Unset
 
@@ -13,7 +13,7 @@ class ModelWithAdditionalPropertiesInlined:
     """  """
 
     a_number: Union[Unset, float] = UNSET
-    additional_properties: Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperties] = attr.ib(
+    additional_properties: Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperty] = attr.ib(
         init=False, factory=dict
     )
 
@@ -39,23 +39,23 @@ class ModelWithAdditionalPropertiesInlined:
             a_number=a_number,
         )
 
-        additional_properties_dict = {}
+        additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_properties = ModelWithAdditionalPropertiesInlinedAdditionalProperties.from_dict(prop_dict)
+            additional_property = ModelWithAdditionalPropertiesInlinedAdditionalProperty.from_dict(prop_dict)
 
-            additional_properties_dict[prop_name] = additional_properties
+            additional_properties[prop_name] = additional_property
 
-        model_with_additional_properties_inlined.additional_properties = additional_properties_dict
+        model_with_additional_properties_inlined.additional_properties = additional_properties
         return model_with_additional_properties_inlined
 
     @property
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> ModelWithAdditionalPropertiesInlinedAdditionalProperties:
+    def __getitem__(self, key: str) -> ModelWithAdditionalPropertiesInlinedAdditionalProperty:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: ModelWithAdditionalPropertiesInlinedAdditionalProperties) -> None:
+    def __setitem__(self, key: str, value: ModelWithAdditionalPropertiesInlinedAdditionalProperty) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

@@ -98,12 +98,12 @@ class {{ model.reference.class_name }}:
 {% if model.additional_properties %}
     {% if model.additional_properties.template %}
         {% from "property_templates/" + model.additional_properties.template import construct %}
-        additional_properties_dict = {}
+        additional_properties = {}
         for prop_name, prop_dict in d.items():
             {{ construct(model.additional_properties, "prop_dict") | indent(12) }}
-            additional_properties_dict[prop_name] = {{ model.additional_properties.python_name }}
+            additional_properties[prop_name] = {{ model.additional_properties.python_name }}
 
-        {{model.reference.module_name}}.additional_properties = additional_properties_dict
+        {{model.reference.module_name}}.additional_properties = additional_properties
     {% else %}
         {{model.reference.module_name}}.additional_properties = d
     {% endif %}
