@@ -49,7 +49,8 @@ def _get_kwargs(
 def _parse_response(*, response: httpx.Response) -> Optional[Union[List[AModel], HTTPValidationError]]:
     if response.status_code == 200:
         response_200 = []
-        for response_200_item_data in response.json():
+        _response_200 = response.json()
+        for response_200_item_data in _response_200:
             response_200_item = AModel.from_dict(response_200_item_data)
 
             response_200.append(response_200_item)

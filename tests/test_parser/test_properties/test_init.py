@@ -588,6 +588,7 @@ class TestPropertyFromData:
             optional_properties=[],
             description="",
             relative_imports=set(),
+            additional_properties=False,
         )
         schemas = Schemas(models={class_name: existing_model})
 
@@ -603,6 +604,7 @@ class TestPropertyFromData:
             optional_properties=[],
             description="",
             relative_imports=set(),
+            additional_properties=False,
         )
         assert schemas == new_schemas
 
@@ -1039,7 +1041,20 @@ def test_build_enums(mocker):
     build_model_property.assert_not_called()
 
 
-def test_build_model_property():
+@pytest.mark.parametrize(
+    "additional_properties_schema, expected_additional_properties",
+    [
+        (True, True),
+        (oai.Schema.construct(), True),
+        (None, True),
+        (False, False),
+        (
+            oai.Schema.construct(type="string"),
+            StringProperty(name="AdditionalProperty", required=True, nullable=False, default=None),
+        ),
+    ],
+)
+def test_build_model_property(additional_properties_schema, expected_additional_properties):
     from openapi_python_client.parser.properties import Schemas, build_model_property
 
     data = oai.Schema.construct(
@@ -1051,6 +1066,7 @@ def test_build_model_property():
         },
         description="A class called MyModel",
         nullable=False,
+        additionalProperties=additional_properties_schema,
     )
     schemas = Schemas(models={"OtherModel": None})
 
@@ -1083,6 +1099,7 @@ def test_build_model_property():
             "from ..types import UNSET, Unset",
             "from typing import Union",
         },
+        additional_properties=expected_additional_properties,
     )
 
 
@@ -1094,6 +1111,30 @@ def test_build_model_property_bad_prop():
             "bad": oai.Schema(type="not_real"),
         },
     )
+    schemas = Schemas(models={"OtherModel": None})
+
+    err, new_schemas = build_model_property(
+        data=data,
+        name="prop",
+        schemas=schemas,
+        required=True,
+        parent_name=None,
+    )
+
+    assert new_schemas == schemas
+    assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
+
+
+def test_build_model_property_bad_additional_props():
+    from openapi_python_client.parser.properties import Schemas, build_model_property
+
+    additional_properties = oai.Schema(
+        type="object",
+        properties={
+            "bad": oai.Schema(type="not_real"),
+        },
+    )
+    data = oai.Schema(additionalProperties=additional_properties)
     schemas = Schemas(models={"OtherModel": None})
 
     err, new_schemas = build_model_property(

@@ -21,20 +21,25 @@ class HTTPValidationError:
 
                 detail.append(detail_item)
 
-        field_dict = {}
+        field_dict: Dict[str, Any] = {}
+        field_dict.update({})
         if detail is not UNSET:
             field_dict["detail"] = detail
 
         return field_dict
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "HTTPValidationError":
+    def from_dict(src_dict: Dict[str, Any]) -> "HTTPValidationError":
+        d = src_dict.copy()
         detail = []
-        for detail_item_data in d.get("detail", UNSET) or []:
+        _detail = d.pop("detail", UNSET)
+        for detail_item_data in _detail or []:
             detail_item = ValidationError.from_dict(detail_item_data)
 
             detail.append(detail_item)
 
-        return HTTPValidationError(
+        http_validation_error = HTTPValidationError(
             detail=detail,
         )
+
+        return http_validation_error

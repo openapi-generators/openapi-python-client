@@ -2,9 +2,16 @@
 {% if property.required %}
 {{ property.python_name }} = {{ property.reference.class_name }}.from_dict({{ source }})
 {% else %}
+{% if initial_value != None %}
 {{ property.python_name }} = {{ initial_value }}
-if {{ source }} is not None:
-    {{ property.python_name }} = {{ property.reference.class_name }}.from_dict(cast(Dict[str, Any], {{ source }}))
+{% elif property.nullable %}
+{{ property.python_name }} = None
+{% else %}
+{{ property.python_name }} = UNSET
+{% endif %}
+_{{ property.python_name }} = {{source}}
+if _{{ property.python_name }} is not None and not isinstance({{ property.python_name }},  Unset):
+    {{ property.python_name }} = {{ property.reference.class_name }}.from_dict(cast(Dict[str, Any], _{{ property.python_name }}))
 {% endif %}
 {% endmacro %}
 
@@ -16,7 +23,7 @@ if {{ source }} is not None:
 {{ destination }} = {{ source }}.to_dict()
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: Union[{% if property.nullable %}None, {% endif %}Unset, Dict[str, Any]]{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
     {{ destination }} = {{ source }}.to_dict() if {{ source }} else None

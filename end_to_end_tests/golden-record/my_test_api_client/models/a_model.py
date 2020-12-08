@@ -52,13 +52,16 @@ class AModel:
         not_required_nullable = self.not_required_nullable
         not_required_not_nullable = self.not_required_not_nullable
 
-        field_dict = {
-            "an_enum_value": an_enum_value,
-            "aCamelDateTime": a_camel_date_time,
-            "a_date": a_date,
-            "required_not_nullable": required_not_nullable,
-            "required_nullable": required_nullable,
-        }
+        field_dict: Dict[str, Any] = {}
+        field_dict.update(
+            {
+                "an_enum_value": an_enum_value,
+                "aCamelDateTime": a_camel_date_time,
+                "a_date": a_date,
+                "required_not_nullable": required_not_nullable,
+                "required_nullable": required_nullable,
+            }
+        )
         if nested_list_of_enums is not UNSET:
             field_dict["nested_list_of_enums"] = nested_list_of_enums
         if attr_1_leading_digit is not UNSET:
@@ -71,8 +74,9 @@ class AModel:
         return field_dict
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "AModel":
-        an_enum_value = AnEnum(d["an_enum_value"])
+    def from_dict(src_dict: Dict[str, Any]) -> "AModel":
+        d = src_dict.copy()
+        an_enum_value = AnEnum(d.pop("an_enum_value"))
 
         def _parse_a_camel_date_time(data: Any) -> Union[datetime.datetime, datetime.date]:
             data = None if isinstance(data, Unset) else data
@@ -87,31 +91,33 @@ class AModel:
 
             return a_camel_date_time
 
-        a_camel_date_time = _parse_a_camel_date_time(d["aCamelDateTime"])
+        a_camel_date_time = _parse_a_camel_date_time(d.pop("aCamelDateTime"))
 
-        a_date = isoparse(d["a_date"]).date()
+        a_date = isoparse(d.pop("a_date")).date()
 
-        required_not_nullable = d["required_not_nullable"]
+        required_not_nullable = d.pop("required_not_nullable")
 
         nested_list_of_enums = []
-        for nested_list_of_enums_item_data in d.get("nested_list_of_enums", UNSET) or []:
+        _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
+        for nested_list_of_enums_item_data in _nested_list_of_enums or []:
             nested_list_of_enums_item = []
-            for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
+            _nested_list_of_enums_item = nested_list_of_enums_item_data
+            for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
                 nested_list_of_enums_item_item = DifferentEnum(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
             nested_list_of_enums.append(nested_list_of_enums_item)
 
-        attr_1_leading_digit = d.get("1_leading_digit", UNSET)
+        attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
-        required_nullable = d["required_nullable"]
+        required_nullable = d.pop("required_nullable")
 
-        not_required_nullable = d.get("not_required_nullable", UNSET)
+        not_required_nullable = d.pop("not_required_nullable", UNSET)
 
-        not_required_not_nullable = d.get("not_required_not_nullable", UNSET)
+        not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
-        return AModel(
+        a_model = AModel(
             an_enum_value=an_enum_value,
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,
@@ -122,3 +128,5 @@ class AModel:
             not_required_nullable=not_required_nullable,
             not_required_not_nullable=not_required_not_nullable,
         )
+
+        return a_model

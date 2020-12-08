@@ -255,6 +255,27 @@ def build_model_property(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
+    additional_properties: Union[bool, Property, PropertyError]
+    if data.additionalProperties is None:
+        additional_properties = True
+    elif isinstance(data.additionalProperties, bool):
+        additional_properties = data.additionalProperties
+    elif isinstance(data.additionalProperties, oai.Schema) and not any(data.additionalProperties.dict().values()):
+        # An empty schema
+        additional_properties = True
+    else:
+        assert isinstance(data.additionalProperties, (oai.Schema, oai.Reference))
+        additional_properties, schemas = property_from_data(
+            name="AdditionalProperty",
+            required=True,  # in the sense that if present in the dict will not be None
+            data=data.additionalProperties,
+            schemas=schemas,
+            parent_name=class_name,
+        )
+        if isinstance(additional_properties, PropertyError):
+            return additional_properties, schemas
+        relative_imports.update(additional_properties.get_imports(prefix=".."))
+
     prop = ModelProperty(
         reference=ref,
         required_properties=required_properties,
@@ -265,6 +286,7 @@ def build_model_property(
         nullable=data.nullable,
         required=required,
         name=name,
+        additional_properties=additional_properties,
     )
     schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
     return prop, schemas

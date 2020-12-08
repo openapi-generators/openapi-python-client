@@ -3,8 +3,9 @@
 {{ property.python_name }} = isoparse({{ source }})
 {% else %}
 {{ property.python_name }} = {{ initial_value }}
-if {{ source }} is not None:
-    {{ property.python_name }} = isoparse(cast(str, {{ source }}))
+_{{ property.python_name }} = {{ source }}
+if _{{ property.python_name }} is not None:
+    {{ property.python_name }} = isoparse(cast(str, _{{ property.python_name }}))
 {% endif %}
 {% endmacro %}
 

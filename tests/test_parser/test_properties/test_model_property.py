@@ -27,6 +27,7 @@ def test_get_type_string(no_optional, nullable, required, expected):
         optional_properties=[],
         required_properties=[],
         relative_imports=set(),
+        additional_properties=False,
     )
 
     assert prop.get_type_string(no_optional=no_optional) == expected
@@ -45,6 +46,7 @@ def test_get_imports():
         optional_properties=[],
         required_properties=[],
         relative_imports=set(),
+        additional_properties=False,
     )
 
     assert prop.get_imports(prefix="..") == {
