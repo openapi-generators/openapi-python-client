@@ -68,7 +68,7 @@ task regen\
 
 [tool.black]
 line-length = 120
-target_version = ['py36']
+target_version = ['py36', 'py37', 'py38']
 exclude = '''
 (
   /(
