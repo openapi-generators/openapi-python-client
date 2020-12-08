@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 - Enums will once again work with query parameters (#259). Thanks @packyg!
+- Generated Poetry metadata in pyproject.toml will properly indicate Python 3.6 compatibility (#258). Thanks @bowenwr!
 
 ## 0.7.0 - 2020-11-25
 
