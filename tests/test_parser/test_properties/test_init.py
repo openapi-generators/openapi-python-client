@@ -586,6 +586,7 @@ class TestPropertyFromData:
             nullable=False,
             default=None,
             reference=Reference(class_name=class_name, module_name="my_model"),
+            references=[],
             required_properties=[],
             optional_properties=[],
             description="",
@@ -602,6 +603,7 @@ class TestPropertyFromData:
             nullable=False,
             default=None,
             reference=Reference(class_name=class_name, module_name="my_model"),
+            references=[],
             required_properties=[],
             optional_properties=[],
             description="",
@@ -988,19 +990,25 @@ class TestStringBasedProperty:
 def test_build_schemas(mocker):
     build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
     in_data = {"1": mocker.MagicMock(enum=None), "2": mocker.MagicMock(enum=None), "3": mocker.MagicMock(enum=None)}
+
     model_1 = mocker.MagicMock()
     schemas_1 = mocker.MagicMock()
     model_2 = mocker.MagicMock()
     schemas_2 = mocker.MagicMock(errors=[])
-    error = PropertyError()
+    schemas_2.models = {"1": model_1, "2": model_2}
+    error_1 = PropertyError()
     schemas_3 = mocker.MagicMock()
+    schemas_4 = mocker.MagicMock(errors=[])
+    model_1.resolve_references.return_value = schemas_4
+    error_2 = PropertyError()
+    model_2.resolve_references.return_value = error_2
 
     # This loops through one for each, then again to retry the error
     build_model_property.side_effect = [
         (model_1, schemas_1),
         (model_2, schemas_2),
-        (error, schemas_3),
-        (error, schemas_3),
+        (error_1, schemas_3),
+        (error_1, schemas_3),
     ]
 
     from openapi_python_client.parser.properties import Schemas, build_schemas
@@ -1016,8 +1024,12 @@ def test_build_schemas(mocker):
         ]
     )
     # schemas_3 was the last to come back from build_model_property, but it should be ignored because it's an error
-    assert result == schemas_2
-    assert result.errors == [error]
+    model_1.resolve_references.assert_called_once_with(components=in_data, schemas=schemas_2)
+    # schemas_4 came from resolving model_1
+    model_2.resolve_references.assert_called_once_with(components=in_data, schemas=schemas_4)
+    # resolving model_2 resulted in err, so no schemas_5
+    assert result == schemas_4
+    assert result.errors == [error_1, error_2]
 
 
 def test_build_parse_error_on_reference():
@@ -1091,6 +1103,7 @@ def test_build_model_property(additional_properties_schema, expected_additional_
         nullable=False,
         default=None,
         reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
+        references=[],
         required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
         optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
         description=data.description,

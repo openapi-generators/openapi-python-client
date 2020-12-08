@@ -844,6 +844,32 @@
             }
           ]
         }
+      },
+      "ModelFromAllOf": {
+        "title": "ModelFromAllOf",
+        "type": "object",
+        "allOf": [
+          {"$ref": "#/components/schemas/AllOfSubModel"},
+          {"$ref": "#/components/schemas/AnotherAllOfSubModel"}
+        ]
+      },
+      "AllOfSubModel": {
+        "title": "AllOfSubModel",
+        "type": "object",
+        "properties": {
+          "a_sub_property": {
+            "type": "string"
+          }
+        }
+      },
+      "AnotherAllOfSubModel": {
+        "title": "AnotherAllOfSubModel",
+        "type": "object",
+        "properties": {
+          "another_sub_property": {
+            "type": "string"
+          }
+        }
       }
     }
   }
