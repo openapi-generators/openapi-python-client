@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.7.1 - Unreleased
+### Additions
+- Support for additionalProperties attribute in OpenAPI schemas and "free-form" objects by adding an `additional_properties` attribute to generated models. **COMPATIBILITY NOTE**: this will prevent any model property with a name that would be coerced to "additional_properties" in the generated client from generating properly (#218 & #252). Thanks @packyg!
+
+### Fixes
+- Enums will once again work with query parameters (#259). Thanks @packyg!
+
 ## 0.7.0 - 2020-11-25
 
 ### Breaking Changes
