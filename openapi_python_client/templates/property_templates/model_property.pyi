@@ -7,10 +7,10 @@
 {% elif property.nullable %}
 {{ property.python_name }} = None
 {% else %}
-{{ property.python_name }} = UNSET
+{{ property.python_name }}: {{ property.get_type_string() }} = UNSET
 {% endif %}
 _{{ property.python_name }} = {{source}}
-if _{{ property.python_name }} is not None and not isinstance({{ property.python_name }},  Unset):
+if _{{ property.python_name }} is not None and not isinstance(_{{ property.python_name }},  Unset):
     {{ property.python_name }} = {{ property.reference.class_name }}.from_dict(cast(Dict[str, Any], _{{ property.python_name }}))
 {% endif %}
 {% endmacro %}
