@@ -98,5 +98,8 @@ skip = [".venv", "tests/test_templates"]
 omit = ["openapi_python_client/templates/*"]
 
 [build-system]
-requires = ["poetry>=1.0"]
+requires = [
+    "setuptools>=30.3.0,<50",
+    "poetry>=1.0"
+]
 build-backend = "poetry.masonry.api"
