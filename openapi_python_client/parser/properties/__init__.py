@@ -135,7 +135,7 @@ class ListProperty(Property, Generic[InnerProp]):
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
-    def get_instance_type_string(self):
+    def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
         return "list"
 
