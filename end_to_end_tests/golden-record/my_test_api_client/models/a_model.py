@@ -17,6 +17,7 @@ class AModel:
     a_camel_date_time: Union[datetime.datetime, datetime.date]
     a_date: datetime.date
     required_not_nullable: str
+    a_nullable_date: Optional[datetime.date]
     required_nullable: Optional[str]
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
@@ -47,6 +48,8 @@ class AModel:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
+        a_nullable_date = self.a_nullable_date.isoformat() if self.a_nullable_date else None
+
         attr_1_leading_digit = self.attr_1_leading_digit
         required_nullable = self.required_nullable
         not_required_nullable = self.not_required_nullable
@@ -59,6 +62,7 @@ class AModel:
                 "aCamelDateTime": a_camel_date_time,
                 "a_date": a_date,
                 "required_not_nullable": required_not_nullable,
+                "a_nullable_date": a_nullable_date,
                 "required_nullable": required_nullable,
             }
         )
@@ -109,6 +113,9 @@ class AModel:
 
             nested_list_of_enums.append(nested_list_of_enums_item)
 
+        a_nullable_date = d.pop("a_nullable_date")
+        a_nullable_date = isoparse(a_nullable_date).date() if a_nullable_date else None
+
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
         required_nullable = d.pop("required_nullable")
@@ -123,6 +130,7 @@ class AModel:
             a_date=a_date,
             required_not_nullable=required_not_nullable,
             nested_list_of_enums=nested_list_of_enums,
+            a_nullable_date=a_nullable_date,
             attr_1_leading_digit=attr_1_leading_digit,
             required_nullable=required_nullable,
             not_required_nullable=not_required_nullable,

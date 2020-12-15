@@ -1,6 +1,11 @@
 {% macro construct(property, source, initial_value="None") %}
 {% if property.required %}
+{% if property.nullable %}
+{{ property.python_name }} = {{ source }}
+{{ property.python_name }} = isoparse({{ property.python_name }}) if {{ property.python_name }} else None
+{% else %}
 {{ property.python_name }} = isoparse({{ source }})
+{% endif %}
 {% else %}
 {{ property.python_name }} = {{ initial_value }}
 _{{ property.python_name }} = {{ source }}
