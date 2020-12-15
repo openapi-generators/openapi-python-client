@@ -48,6 +48,10 @@ class Property:
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
+    def get_instance_type_string(self):
+        """Get a string representation of runtime type that should be used for `isinstance` checks"""
+        return self.get_type_string(no_optional=True)
+
     # noinspection PyUnusedLocal
     def get_imports(self, *, prefix: str) -> Set[str]:
         """

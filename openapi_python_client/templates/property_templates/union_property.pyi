@@ -15,7 +15,7 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
     {{ construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
     return {{ property.python_name }}
     {% else %}
-    return {{ source }}
+    return cast({{ inner_property.get_type_string() }}, {{ source }})
     {% endif %}
     {% endfor %}
 
@@ -39,9 +39,9 @@ elif {{ source }} is None:
 {% endif %}
 {% for inner_property in property.inner_properties %}
     {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
-if isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True) }}):
+if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
     {% elif not loop.last %}
-elif isinstance({{ source }}, {{ inner_property.get_type_string(no_optional=True) }}):
+elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
     {% else %}
 else:
     {% endif %}
