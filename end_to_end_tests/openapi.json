@@ -806,6 +806,38 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/AnEnum"
         }
+      },
+      "ModelWithAnyJsonProperties": {
+        "title": "ModelWithAnyJsonProperties",
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
       }
     }
   }
