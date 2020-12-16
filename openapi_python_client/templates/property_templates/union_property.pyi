@@ -15,7 +15,7 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
     {{ construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
     return {{ property.python_name }}
     {% else %}
-    return cast({{ inner_property.get_type_string() }}, {{ source }})
+    return cast({{ inner_property.get_type_string() }}, data)
     {% endif %}
     {% endfor %}
 
