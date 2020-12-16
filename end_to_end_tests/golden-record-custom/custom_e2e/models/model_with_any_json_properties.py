@@ -64,10 +64,10 @@ class ModelWithAnyJsonProperties:
                     return additional_property
                 except:  # noqa: E722
                     pass
-                return cast(str, prop_dict)
-                return cast(float, prop_dict)
-                return cast(int, prop_dict)
-                return cast(bool, prop_dict)
+                return cast(str, data)
+                return cast(float, data)
+                return cast(int, data)
+                return cast(bool, data)
 
             additional_property = _parse_additional_property(prop_dict)
 
