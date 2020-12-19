@@ -1,3 +1,4 @@
+import builtins
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
@@ -186,6 +187,14 @@ class UnionProperty(Property):
             imports.update(inner_prop.get_imports(prefix=prefix))
         imports.add("from typing import Union")
         return imports
+
+    @builtins.property
+    def inner_properties_with_template(self) -> List[Property]:
+        return [prop for prop in self.inner_properties if prop.template]
+
+    @builtins.property
+    def inner_properties_without_template(self) -> List[Property]:
+        return [prop for prop in self.inner_properties if not prop.template]
 
 
 def _string_based_property(
