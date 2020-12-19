@@ -24,12 +24,6 @@ class ModelWithAnyJsonProperties:
             elif isinstance(prop, list):
                 field_dict[prop_name] = prop
 
-            elif isinstance(prop, str):
-                field_dict[prop_name] = prop
-            elif isinstance(prop, float):
-                field_dict[prop_name] = prop
-            elif isinstance(prop, int):
-                field_dict[prop_name] = prop
             else:
                 field_dict[prop_name] = prop
 
@@ -65,9 +59,6 @@ class ModelWithAnyJsonProperties:
                 except:  # noqa: E722
                     pass
                 return cast(str, data)
-                return cast(float, data)
-                return cast(int, data)
-                return cast(bool, data)
 
             additional_property = _parse_additional_property(prop_dict)
 
