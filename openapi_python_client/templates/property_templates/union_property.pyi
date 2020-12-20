@@ -2,8 +2,8 @@
 def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string() }}:
     data = None if isinstance(data, Unset) else data
     {{ property.python_name }}: {{ property.get_type_string() }}
-    {% for inner_property in property.inner_properties_with_template %}
-    {% if not loop.last or property.inner_properties_without_template %}
+    {% for inner_property in property.inner_properties_with_template() %}
+    {% if not loop.last or property.has_properties_without_templates %}
     try:
     {% from "property_templates/" + inner_property.template import construct %}
         {{ construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
@@ -16,9 +16,9 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
     return {{ property.python_name }}
     {% endif %}
     {% endfor %}
-    {% if property.inner_properties_without_template %}
+    {% if property.has_properties_without_templates %}
     {# Doesn't really matter what we cast it to as this type will be erased, so cast to one of the options #}
-    return cast({{ property.inner_properties_without_template[0].get_type_string() }}, data)
+    return cast({{ property.get_type_string() }}, data)
     {% endif %}
 
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
@@ -32,28 +32,28 @@ if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
 {% endif %}
 {% if property.nullable %}
-{% if property.required %}
+    {% if property.required %}
 if {{ source }} is None:
-{% else %}{# There's an if UNSET statement before this #}
+    {% else %}{# There's an if UNSET statement before this #}
 elif {{ source }} is None:
-{% endif %}
+    {% endif %}
     {{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = None
 {% endif %}
-{% for inner_property in property.inner_properties_with_template %}
+{% for inner_property in property.inner_properties_with_template() %}
     {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
 if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
-    {% elif not loop.last or property.inner_properties_without_template %}
+    {% elif not loop.last or property.has_properties_without_templates %}
 elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
     {% else %}
 else:
     {% endif %}
-{% from "property_templates/" + inner_property.template import transform %}
+    {% from "property_templates/" + inner_property.template import transform %}
     {{ transform(inner_property, source, destination, declare_type=False) | indent(4) }}
 {% endfor %}
-{% if property.inner_properties_without_template and (property.inner_properties_with_template or not property.required)%}
+{% if property.has_properties_without_templates and (property.inner_properties_with_template() | any or not property.required)%}
 else:
     {{ destination }} = {{ source }}
-{% elif property.inner_properties_without_template %}
+{% elif property.has_properties_without_templates %}
 {{ destination }} = {{ source }}
 {% endif %}
 

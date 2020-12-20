@@ -1,18 +1,17 @@
-import builtins
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union, Iterator
 
 import attr
 
-from ... import schema as oai
-from ... import utils
-from ..errors import PropertyError, ValidationError
-from ..reference import Reference
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty
 from .property import Property
 from .schemas import Schemas
+from ..errors import PropertyError, ValidationError
+from ..reference import Reference
+from ... import schema as oai
+from ... import utils
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -160,6 +159,13 @@ class UnionProperty(Property):
 
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.pyi"
+    has_properties_without_templates: bool = attr.ib(init=False)
+
+    def __attrs_post_init__(self) -> None:
+        super().__attrs_post_init__()
+        object.__setattr__(
+            self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
+        )
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -185,16 +191,11 @@ class UnionProperty(Property):
         imports = super().get_imports(prefix=prefix)
         for inner_prop in self.inner_properties:
             imports.update(inner_prop.get_imports(prefix=prefix))
-        imports.add("from typing import Union")
+        imports.add("from typing import cast, Union")
         return imports
 
-    @builtins.property
-    def inner_properties_with_template(self) -> List[Property]:
-        return [prop for prop in self.inner_properties if prop.template]
-
-    @builtins.property
-    def inner_properties_without_template(self) -> List[Property]:
-        return [prop for prop in self.inner_properties if not prop.template]
+    def inner_properties_with_template(self) -> Iterator[Property]:
+        return (prop for prop in self.inner_properties if prop.template)
 
 
 def _string_based_property(

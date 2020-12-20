@@ -25,8 +25,15 @@ else:
 __version__ = version(__package__)
 
 
+TEMPLATE_FILTERS = {
+    "snakecase": utils.snake_case,
+    "kebabcase": utils.kebab_case,
+    "pascalcase": utils.pascal_case,
+    "any": any,
+}
+
+
 class Project:
-    TEMPLATE_FILTERS = {"snakecase": utils.snake_case, "kebabcase": utils.kebab_case, "pascalcase": utils.pascal_case}
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
@@ -57,7 +64,7 @@ class Project:
         )
         self.version: str = self.package_version_override or openapi.version
 
-        self.env.filters.update(self.TEMPLATE_FILTERS)
+        self.env.filters.update(TEMPLATE_FILTERS)
 
     def build(self) -> Sequence[GeneratorError]:
         """ Create the project from templates """

@@ -58,7 +58,7 @@ class ModelWithAnyJsonProperties:
                     return additional_property
                 except:  # noqa: E722
                     pass
-                return cast(str, data)
+                return cast(Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool], data)
 
             additional_property = _parse_additional_property(prop_dict)
 
