@@ -4,6 +4,7 @@ from typing import Optional, Sequence
 
 import typer
 
+from openapi_python_client import MetaType
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
 app = typer.Typer()
@@ -104,12 +105,18 @@ custom_template_path_options = {
     "resolve_path": True,
 }
 
+_meta_option = typer.Option(
+    MetaType.POETRY,
+    help="The type of metadata you want to generate.",
+)
+
 
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    meta: MetaType = _meta_option,
 ) -> None:
     """ Generate a new OpenAPI Client library """
     from . import create_new_client
@@ -120,7 +127,7 @@ def generate(
     if url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    errors = create_new_client(url=url, path=path, custom_template_path=custom_template_path)
+    errors = create_new_client(url=url, path=path, meta=meta, custom_template_path=custom_template_path)
     handle_errors(errors)
 
 
@@ -129,6 +136,7 @@ def update(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    meta: MetaType = _meta_option,
 ) -> None:
     """ Update an existing OpenAPI Client library """
     from . import update_existing_client
@@ -140,5 +148,5 @@ def update(
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    errors = update_existing_client(url=url, path=path, custom_template_path=custom_template_path)
+    errors = update_existing_client(url=url, path=path, meta=meta, custom_template_path=custom_template_path)
     handle_errors(errors)
