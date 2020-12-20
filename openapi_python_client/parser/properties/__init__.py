@@ -1,17 +1,17 @@
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union, Iterator
+from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
+from ... import schema as oai
+from ... import utils
+from ..errors import PropertyError, ValidationError
+from ..reference import Reference
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty
 from .property import Property
 from .schemas import Schemas
-from ..errors import PropertyError, ValidationError
-from ..reference import Reference
-from ... import schema as oai
-from ... import utils
 
 
 @attr.s(auto_attribs=True, frozen=True)
