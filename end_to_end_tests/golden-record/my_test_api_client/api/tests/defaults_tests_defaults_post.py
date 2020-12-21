@@ -47,20 +47,19 @@ def _get_kwargs(
     json_union_prop: Union[Unset, float, str]
     if isinstance(union_prop, Unset):
         json_union_prop = UNSET
-    elif isinstance(union_prop, float):
-        json_union_prop = union_prop
     else:
         json_union_prop = union_prop
 
     json_union_prop_with_ref: Union[Unset, float, AnEnum]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
-    elif isinstance(union_prop_with_ref, float):
-        json_union_prop_with_ref = union_prop_with_ref
-    else:
+    elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
             json_union_prop_with_ref = union_prop_with_ref
+
+    else:
+        json_union_prop_with_ref = union_prop_with_ref
 
     json_enum_prop: Union[Unset, AnEnum] = UNSET
     if not isinstance(enum_prop, Unset):

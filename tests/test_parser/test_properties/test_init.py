@@ -292,7 +292,7 @@ class TestUnionProperty:
         assert p.get_type_string() == base_type_string_with_unset
         assert p.get_type_string(no_optional=True) == base_type_string
 
-    def test_get_type_imports(self, mocker):
+    def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
@@ -313,7 +313,7 @@ class TestUnionProperty:
         assert p.get_imports(prefix=prefix) == {
             inner_import_1,
             inner_import_2,
-            "from typing import Union",
+            "from typing import cast, Union",
         }
 
         p = UnionProperty(
@@ -327,6 +327,7 @@ class TestUnionProperty:
             inner_import_1,
             inner_import_2,
             "from typing import Union",
+            "from typing import cast, Union",
             "from ...types import UNSET, Unset",
         }
 
@@ -341,6 +342,7 @@ class TestUnionProperty:
             inner_import_1,
             inner_import_2,
             "from typing import Union",
+            "from typing import cast, Union",
             "from typing import Optional",
             "from ...types import UNSET, Unset",
         }

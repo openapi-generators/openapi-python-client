@@ -19,8 +19,7 @@ class Reference:
     def from_ref(ref: str) -> "Reference":
         """ Get a Reference from the openapi #/schemas/blahblah string """
         ref_value = ref.split("/")[-1]
-        # ugly hack to avoid stringcase ugly pascalcase output when ref_value isn't snake case
-        class_name = utils.pascal_case(ref_value.replace(" ", ""))
+        class_name = utils.pascal_case(ref_value)
 
         if class_name in class_overrides:
             return class_overrides[class_name]
