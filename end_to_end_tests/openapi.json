@@ -622,7 +622,7 @@
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "aCamelDateTime", "a_date", "required_nullable", "required_not_nullable"],
+        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable"],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -656,6 +656,12 @@
             "title": "A Date",
             "type": "string",
             "format": "date"
+          },
+          "a_nullable_date": {
+            "title": "A Nullable Date",
+            "type": "string",
+            "format": "date",
+            "nullable": true
           },
           "1_leading_digit": {
             "title": "Leading Digit",
