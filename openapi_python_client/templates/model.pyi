@@ -51,7 +51,7 @@ class {{ model.reference.class_name }}:
         {% if model.additional_properties.template %}
         {% from "property_templates/" + model.additional_properties.template import transform %}
         for prop_name, prop in self.additional_properties.items():
-            {{ transform(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
+            {{ transform(model.additional_properties, "prop", "field_dict[prop_name]") | indent(12) }}
         {% else %}
         field_dict.update(self.additional_properties)
         {% endif %}
