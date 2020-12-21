@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import attr
 from dateutil.parser import isoparse
@@ -34,7 +34,6 @@ class AModel:
             a_camel_date_time = self.a_camel_date_time.isoformat()
 
         a_date = self.a_date.isoformat()
-
         required_not_nullable = self.required_not_nullable
         nested_list_of_enums: Union[Unset, List[Any]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
@@ -49,7 +48,6 @@ class AModel:
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
         a_nullable_date = self.a_nullable_date.isoformat() if self.a_nullable_date else None
-
         attr_1_leading_digit = self.attr_1_leading_digit
         required_nullable = self.required_nullable
         not_required_nullable = self.not_required_nullable
@@ -113,8 +111,10 @@ class AModel:
 
             nested_list_of_enums.append(nested_list_of_enums_item)
 
-        a_nullable_date = d.pop("a_nullable_date")
-        a_nullable_date = isoparse(a_nullable_date).date() if a_nullable_date else None
+        a_nullable_date = None
+        _a_nullable_date = d.pop("a_nullable_date")
+        if _a_nullable_date is not None:
+            a_nullable_date = isoparse(cast(str, _a_nullable_date)).date()
 
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
