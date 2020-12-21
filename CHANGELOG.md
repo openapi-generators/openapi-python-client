@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.7.3 - Unreleased
+## 0.7.3 - 2020-12-21
 ### Fixes
 - Spacing and extra returns for Union types of `additionalProperties` (#266 & #268). Thanks @joshzana & @packyg!
 - Title of inline schemas will no longer be missing characters (#271 & #274). Thanks @kalzoo!
