@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.7.3 - Unreleased
 ### Fixes
 - Spacing and extra returns for Union types of `additionalProperties` (#266 & #268). Thanks @joshzana & @packyg!
+- Title of inline schemas will no longer be missing characters (#271 & #274). Thanks @kalzoo!
 
 ## 0.7.2 - 2020-12-08
 ### Fixes
