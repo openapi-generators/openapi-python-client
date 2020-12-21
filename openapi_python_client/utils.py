@@ -26,7 +26,7 @@ def snake_case(value: str) -> str:
 
 
 def pascal_case(value: str) -> str:
-    return fix_keywords(stringcase.pascalcase(sanitize(value)))
+    return fix_keywords(stringcase.pascalcase(sanitize(value.replace(" ", ""))))
 
 
 def kebab_case(value: str) -> str:
