@@ -1,3 +1,5 @@
+import pytest
+
 from openapi_python_client import utils
 
 
@@ -41,3 +43,16 @@ def test_to_valid_python_identifier():
     assert utils.to_valid_python_identifier("1") == "field_1"
     assert utils.to_valid_python_identifier("$") == "field_"
     assert utils.to_valid_python_identifier("for") == "for_"
+
+
+@pytest.mark.parametrize(
+    "before, after",
+    [
+        ("PascalCase", "PascalCase"),
+        ("snake_case", "SnakeCase"),
+        ("TLAClass", "TLAClass"),
+        ("Title Case", "TitleCase"),
+    ],
+)
+def test_pascalcase(before, after):
+    assert utils.pascal_case(before) == after

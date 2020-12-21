@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
@@ -135,6 +135,10 @@ class ListProperty(Property, Generic[InnerProp]):
             type_string = f"Union[Unset, {type_string}]"
         return type_string
 
+    def get_instance_type_string(self) -> str:
+        """Get a string representation of runtime type that should be used for `isinstance` checks"""
+        return "list"
+
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere
@@ -155,6 +159,13 @@ class UnionProperty(Property):
 
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.pyi"
+    has_properties_without_templates: bool = attr.ib(init=False)
+
+    def __attrs_post_init__(self) -> None:
+        super().__attrs_post_init__()
+        object.__setattr__(
+            self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
+        )
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -180,8 +191,11 @@ class UnionProperty(Property):
         imports = super().get_imports(prefix=prefix)
         for inner_prop in self.inner_properties:
             imports.update(inner_prop.get_imports(prefix=prefix))
-        imports.add("from typing import Union")
+        imports.add("from typing import cast, Union")
         return imports
+
+    def inner_properties_with_template(self) -> Iterator[Property]:
+        return (prop for prop in self.inner_properties if prop.template)
 
 
 def _string_based_property(
