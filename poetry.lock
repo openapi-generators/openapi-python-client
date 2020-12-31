@@ -236,7 +236,7 @@ python-versions = "*"
 
 [[package]]
 name = "isort"
-version = "5.6.4"
+version = "5.7.0"
 description = "A Python utility / library to sort Python imports."
 category = "main"
 optional = false
@@ -781,8 +781,8 @@ iniconfig = [
     {file = "iniconfig-1.0.1.tar.gz", hash = "sha256:e5f92f89355a67de0595932a6c6c02ab4afddc6fcdc0bfc5becd0d60884d3f69"},
 ]
 isort = [
-    {file = "isort-5.6.4-py3-none-any.whl", hash = "sha256:dcab1d98b469a12a1a624ead220584391648790275560e1a43e54c5dceae65e7"},
-    {file = "isort-5.6.4.tar.gz", hash = "sha256:dcaeec1b5f0eca77faea2a35ab790b4f3680ff75590bfcb7145986905aab2f58"},
+    {file = "isort-5.7.0-py3-none-any.whl", hash = "sha256:fff4f0c04e1825522ce6949973e83110a6e907750cd92d128b0d14aaaadbffdc"},
+    {file = "isort-5.7.0.tar.gz", hash = "sha256:c729845434366216d320e936b8ad6f9d681aab72dc7cbc2d51bedc3582f3ad1e"},
 ]
 jinja2 = [
     {file = "Jinja2-2.11.2-py2.py3-none-any.whl", hash = "sha256:f0a4641d3cf955324a89c04f3d94663aa4d638abe8f733ecd3582848e1c37035"},
