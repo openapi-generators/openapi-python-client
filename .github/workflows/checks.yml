@@ -27,3 +27,5 @@ jobs:
       uses: triaxtec/github-actions/python/run-checks@main
       with:
         module: openapi_python_client
+    - name: End to End Tests
+      run: poetry run pytest --cov=openapi_python_client end_to_end_tests
