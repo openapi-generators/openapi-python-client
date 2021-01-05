@@ -14,8 +14,6 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python }}
-    - name: Install dependencies
-      uses: triaxtec/github-actions/python/install-and-configure-poetry@main
     - name: Cache dependencies
       uses: actions/cache@v2
       with:
@@ -23,6 +21,8 @@ jobs:
         key: ${{ runner.os }}-${{ matrix.python }}-dependencies-${{ hashFiles('**/poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.python }}-dependencies-
+    - name: Install dependencies
+      uses: triaxtec/github-actions/python/install-and-configure-poetry@main
     - name: Run Checks
       uses: triaxtec/github-actions/python/run-checks@main
       with:
