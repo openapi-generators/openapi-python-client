@@ -47,6 +47,7 @@ safety = "*"
 pytest-cov = "*"
 python-multipart = "*"
 flake8 = "*"
+typer-cli = "^0.0.11"
 
 [tool.taskipy.tasks]
 check = """
@@ -65,6 +66,7 @@ task regen\
 && task regen_custom\
 && task e2e\
 """
+docs = "typer openapi_python_client/cli.py utils docs > usage.md"
 
 [tool.black]
 line-length = 120

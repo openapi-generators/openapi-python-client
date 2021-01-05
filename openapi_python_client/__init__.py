@@ -3,6 +3,7 @@
 import shutil
 import subprocess
 import sys
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Union
 
@@ -25,6 +26,12 @@ else:
 __version__ = version(__package__)
 
 
+class MetaType(str, Enum):
+    NONE = "none"
+    POETRY = "poetry"
+    SETUP = "setup"
+
+
 TEMPLATE_FILTERS = {
     "snakecase": utils.snake_case,
     "kebabcase": utils.kebab_case,
@@ -38,8 +45,9 @@ class Project:
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
 
-    def __init__(self, *, openapi: GeneratorData, custom_template_path: Optional[Path] = None) -> None:
+    def __init__(self, *, openapi: GeneratorData, meta: MetaType, custom_template_path: Optional[Path] = None) -> None:
         self.openapi: GeneratorData = openapi
+        self.meta: MetaType = meta
 
         package_loader = PackageLoader(__package__)
         loader: BaseLoader
@@ -55,7 +63,9 @@ class Project:
         self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
 
         self.project_name: str = self.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
-        self.project_dir: Path = Path.cwd() / self.project_name
+        self.project_dir: Path = Path.cwd()
+        if meta != MetaType.NONE:
+            self.project_dir /= self.project_name
 
         self.package_name: str = self.package_name_override or self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
@@ -69,11 +79,14 @@ class Project:
     def build(self) -> Sequence[GeneratorError]:
         """ Create the project from templates """
 
-        print(f"Generating {self.project_name}")
-        try:
-            self.project_dir.mkdir()
-        except FileExistsError:
-            return [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
+        if self.meta == MetaType.NONE:
+            print(f"Generating {self.package_name}")
+        else:
+            print(f"Generating {self.project_name}")
+            try:
+                self.project_dir.mkdir()
+            except FileExistsError:
+                return [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
         self._create_package()
         self._build_metadata()
         self._build_models()
@@ -86,7 +99,7 @@ class Project:
 
         if not self.package_dir.is_dir():
             raise FileNotFoundError()
-        print(f"Updating {self.project_name}")
+        print(f"Updating {self.package_name}")
         shutil.rmtree(self.package_dir)
         self._create_package()
         self._build_models()
@@ -126,25 +139,21 @@ class Project:
         package_init_template = self.env.get_template("package_init.pyi")
         package_init.write_text(package_init_template.render(description=self.package_description))
 
-        pytyped = self.package_dir / "py.typed"
-        pytyped.write_text("# Marker file for PEP 561")
+        if self.meta != MetaType.NONE:
+            pytyped = self.package_dir / "py.typed"
+            pytyped.write_text("# Marker file for PEP 561")
 
         types_template = self.env.get_template("types.py")
         types_path = self.package_dir / "types.py"
         types_path.write_text(types_template.render())
 
     def _build_metadata(self) -> None:
-        # Create a pyproject.toml file
-        pyproject_template = self.env.get_template("pyproject.toml")
-        pyproject_path = self.project_dir / "pyproject.toml"
-        pyproject_path.write_text(
-            pyproject_template.render(
-                project_name=self.project_name,
-                package_name=self.package_name,
-                version=self.version,
-                description=self.package_description,
-            )
-        )
+        if self.meta == MetaType.NONE:
+            return
+
+        self._build_pyproject_toml(use_poetry=self.meta == MetaType.POETRY)
+        if self.meta == MetaType.SETUP:
+            self._build_setup_py()
 
         # README.md
         readme = self.project_dir / "README.md"
@@ -159,6 +168,31 @@ class Project:
         git_ignore_path = self.project_dir / ".gitignore"
         git_ignore_template = self.env.get_template(".gitignore")
         git_ignore_path.write_text(git_ignore_template.render())
+
+    def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
+        template = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml"
+        pyproject_template = self.env.get_template(template)
+        pyproject_path = self.project_dir / "pyproject.toml"
+        pyproject_path.write_text(
+            pyproject_template.render(
+                project_name=self.project_name,
+                package_name=self.package_name,
+                version=self.version,
+                description=self.package_description,
+            )
+        )
+
+    def _build_setup_py(self) -> None:
+        template = self.env.get_template("setup.py")
+        path = self.project_dir / "setup.py"
+        path.write_text(
+            template.render(
+                project_name=self.project_name,
+                package_name=self.package_name,
+                version=self.version,
+                description=self.package_description,
+            )
+        )
 
     def _build_models(self) -> None:
         # Generate models
@@ -212,7 +246,7 @@ class Project:
 
 
 def _get_project_for_url_or_path(
-    url: Optional[str], path: Optional[Path], custom_template_path: Optional[Path] = None
+    url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
@@ -220,11 +254,11 @@ def _get_project_for_url_or_path(
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return Project(openapi=openapi, custom_template_path=custom_template_path)
+    return Project(openapi=openapi, custom_template_path=custom_template_path, meta=meta)
 
 
 def create_new_client(
-    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[Path] = None
+    *, url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -232,14 +266,14 @@ def create_new_client(
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path)
+    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path, meta=meta)
     if isinstance(project, GeneratorError):
         return [project]
     return project.build()
 
 
 def update_existing_client(
-    *, url: Optional[str], path: Optional[Path], custom_template_path: Optional[Path] = None
+    *, url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
 ) -> Sequence[GeneratorError]:
     """
     Update an existing client library
@@ -247,7 +281,7 @@ def update_existing_client(
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path)
+    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path, meta=meta)
     if isinstance(project, GeneratorError):
         return [project]
     return project.update()

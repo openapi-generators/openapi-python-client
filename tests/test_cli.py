@@ -27,7 +27,7 @@ def _create_new_client(mocker) -> MagicMock:
 
 def test_config_arg(mocker, _create_new_client):
     load_config = mocker.patch("openapi_python_client.config.Config.load_from_path")
-    from openapi_python_client.cli import app
+    from openapi_python_client.cli import MetaType, app
 
     config_path = "config/path"
     path = "cool/path"
@@ -36,7 +36,9 @@ def test_config_arg(mocker, _create_new_client):
 
     assert result.exit_code == 0
     load_config.assert_called_once_with(path=Path(config_path))
-    _create_new_client.assert_called_once_with(url=None, path=Path(path), custom_template_path=None)
+    _create_new_client.assert_called_once_with(
+        url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY
+    )
 
 
 def test_bad_config(mocker, _create_new_client):
@@ -75,21 +77,34 @@ class TestGenerate:
 
     def test_generate_url(self, _create_new_client):
         url = "cool.url"
-        from openapi_python_client.cli import app
+        from openapi_python_client.cli import MetaType, app
 
         result = runner.invoke(app, ["generate", f"--url={url}"])
 
         assert result.exit_code == 0
-        _create_new_client.assert_called_once_with(url=url, path=None, custom_template_path=None)
+        _create_new_client.assert_called_once_with(url=url, path=None, custom_template_path=None, meta=MetaType.POETRY)
 
     def test_generate_path(self, _create_new_client):
         path = "cool/path"
-        from openapi_python_client.cli import app
+        from openapi_python_client.cli import MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}"])
 
         assert result.exit_code == 0
-        _create_new_client.assert_called_once_with(url=None, path=Path(path), custom_template_path=None)
+        _create_new_client.assert_called_once_with(
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY
+        )
+
+    def test_generate_meta(self, _create_new_client):
+        path = "cool/path"
+        from openapi_python_client.cli import MetaType, app
+
+        result = runner.invoke(app, ["generate", f"--path={path}", "--meta=none"])
+
+        assert result.exit_code == 0
+        _create_new_client.assert_called_once_with(
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.NONE
+        )
 
     def test_generate_handle_errors(self, _create_new_client):
         _create_new_client.return_value = [GeneratorError(detail="this is a message")]
@@ -154,18 +169,22 @@ class TestUpdate:
 
     def test_update_url(self, _update_existing_client):
         url = "cool.url"
-        from openapi_python_client.cli import app
+        from openapi_python_client.cli import MetaType, app
 
         result = runner.invoke(app, ["update", f"--url={url}"])
 
         assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(url=url, path=None, custom_template_path=None)
+        _update_existing_client.assert_called_once_with(
+            url=url, path=None, custom_template_path=None, meta=MetaType.POETRY
+        )
 
     def test_update_path(self, _update_existing_client):
         path = "cool/path"
-        from openapi_python_client.cli import app
+        from openapi_python_client.cli import MetaType, app
 
         result = runner.invoke(app, ["update", f"--path={path}"])
 
         assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(url=None, path=Path(path), custom_template_path=None)
+        _update_existing_client.assert_called_once_with(
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY
+        )
