@@ -1,5 +1,5 @@
 {% macro construct(property, source, initial_value="None") %}
-{% if property.required %}
+{% if property.required and not property.nullable %}
 {{ property.python_name }} = isoparse({{ source }}).date()
 {% else %}
 {{ property.python_name }} = {{ initial_value }}
@@ -11,11 +11,7 @@ if _{{ property.python_name }} is not None:
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}
-{% if property.nullable %}
-{{ destination }} = {{ source }}.isoformat() if {{ source }} else None
-{% else %}
-{{ destination }} = {{ source }}.isoformat()
-{% endif %}
+{{ destination }} = {{ source }}.isoformat() {% if property.nullable %}if {{ source }} else None {%endif%}
 {% else %}
 {{ destination }}{% if declare_type %}: Union[Unset, str]{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):

@@ -15,10 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
 
 
-## 0.7.3 - Unreleased
+## 0.7.3 - 2020-12-21
 ### Fixes
 - Spacing and extra returns for Union types of `additionalProperties` (#266 & #268). Thanks @joshzana & @packyg!
 - Title of inline schemas will no longer be missing characters (#271 & #274). Thanks @kalzoo!
+- Handling of nulls (Nones) when parsing or constructing dates (#267). Thanks @fyhertz! 
 
 
 ## 0.7.2 - 2020-12-08
