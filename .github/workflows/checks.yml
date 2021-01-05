@@ -1,0 +1,17 @@
+name: Run Checks
+
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      uses: triaxtec/github-actions/python/install-and-configure-poetry@main
+    - name: Run Checks
+      uses: triaxtec/github-actions/python/run-checks@main
