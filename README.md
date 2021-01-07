@@ -1,4 +1,4 @@
-[![triaxtec](https://circleci.com/gh/triaxtec/openapi-python-client.svg?style=svg)](https://circleci.com/gh/triaxtec/openapi-python-client)
+![Run Checks](https://github.com/triaxtec/openapi-python-client/workflows/Run%20Checks/badge.svg)
 [![codecov](https://codecov.io/gh/triaxtec/openapi-python-client/branch/main/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 [![Generic badge](https://img.shields.io/badge/type_checked-mypy-informational.svg)](https://mypy.readthedocs.io/en/stable/introduction.html)
