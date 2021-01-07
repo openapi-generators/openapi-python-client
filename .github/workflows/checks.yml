@@ -17,7 +17,7 @@ jobs:
     - name: Cache dependencies
       uses: actions/cache@v2
       with:
-        path: ~/.venv
+        path: .venv
         key: ${{ runner.os }}-${{ matrix.python }}-dependencies-${{ hashFiles('**/poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.python }}-dependencies-
@@ -27,5 +27,13 @@ jobs:
       uses: triaxtec/github-actions/python/run-checks@main
       with:
         module: openapi_python_client
+
     - name: End to End Tests
       run: poetry run pytest --cov=openapi_python_client end_to_end_tests
+
+    - name: Generate E2E Coverage
+      run: poetry run coverage xml -o e2e-coverage.xml
+
+    - uses: codecov/codecov-action@v1
+      with:
+        files: ./coverage.xml,./e2e-coverage.xml
