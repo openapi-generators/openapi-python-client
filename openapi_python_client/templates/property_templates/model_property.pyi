@@ -15,7 +15,7 @@ if _{{ property.python_name }} is not None and not isinstance(_{{ property.pytho
 {% endif %}
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
@@ -24,7 +24,7 @@ if _{{ property.python_name }} is not None and not isinstance(_{{ property.pytho
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: Union[{% if property.nullable %}None, {% endif %}Unset, Dict[str, Any]]{% endif %} = UNSET
-if not isinstance({{ source }}, Unset):
+if not isinstance({{ source }}, Unset){%if query_parameter %} and {{ source }} is not None{% endif %}:
 {% if property.nullable %}
     {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
 {% else %}

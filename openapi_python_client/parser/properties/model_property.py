@@ -20,16 +20,8 @@ class ModelProperty(Property):
 
     template: ClassVar[str] = "model_property.pyi"
 
-    def get_type_string(self, no_optional: bool = False) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        type_string = self.reference.class_name
-        if no_optional:
-            return type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        if not self.required:
-            type_string = f"Union[{type_string}, Unset]"
-        return type_string
+    def get_base_type_string(self) -> str:
+        return self.reference.class_name
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """

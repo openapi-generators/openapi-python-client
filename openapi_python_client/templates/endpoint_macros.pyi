@@ -17,7 +17,7 @@ if {{ parameter.python_name }} is not UNSET:
         {% set destination = "json_" + property.python_name %}
         {% if property.template %}
             {% from "property_templates/" + property.template import transform %}
-{{ transform(property, property.python_name, destination) }}
+{{ transform(property, property.python_name, destination, query_parameter=True) }}
         {% endif %}
     {% endfor %}
 params: Dict[str, Any] = {
@@ -33,7 +33,7 @@ params: Dict[str, Any] = {
 }
     {% for property in endpoint.query_parameters %}
         {% if not property.required %}
-if {{ property.python_name }} is not UNSET:
+if {{ property.python_name }} is not UNSET and {{ property.python_name }} is not None:
             {% if property.template %}
     params["{{ property.name }}"] = {{ "json_" + property.python_name }}
             {% else %}
@@ -96,7 +96,7 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {% endif %}
 {# query parameters #}
 {% for parameter in endpoint.query_parameters %}
-{{ parameter.to_string() }},
+{{ parameter.to_string(query_parameter=True) }},
 {% endfor %}
 {% for parameter in endpoint.header_parameters %}
 {{ parameter.to_string() }},

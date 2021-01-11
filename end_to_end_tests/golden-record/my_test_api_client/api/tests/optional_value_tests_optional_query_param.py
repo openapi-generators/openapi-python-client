@@ -10,18 +10,18 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     client: Client,
-    query_param: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, None, List[str]] = None,
 ) -> Dict[str, Any]:
     url = "{}/tests/optional_query_param/".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
 
     json_query_param: Union[Unset, List[Any]] = UNSET
-    if not isinstance(query_param, Unset):
+    if not isinstance(query_param, Unset) and query_param is not None:
         json_query_param = query_param
 
     params: Dict[str, Any] = {}
-    if query_param is not UNSET:
+    if query_param is not UNSET and query_param is not None:
         params["query_param"] = json_query_param
 
     return {
@@ -57,7 +57,7 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPVal
 def sync_detailed(
     *,
     client: Client,
-    query_param: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, None, List[str]] = None,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -74,7 +74,7 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    query_param: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, None, List[str]] = None,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """ Test optional query parameters """
 
@@ -87,7 +87,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-    query_param: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, None, List[str]] = None,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -103,7 +103,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    query_param: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, None, List[str]] = None,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """ Test optional query parameters """
 

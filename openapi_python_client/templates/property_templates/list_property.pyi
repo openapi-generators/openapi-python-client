@@ -32,7 +32,7 @@ for {{ inner_source }} in {{ source }}:
 {% endmacro %}
 
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% set inner_property = property.inner_property %}
 {% if property.required %}
 {% if property.nullable %}
@@ -45,7 +45,7 @@ else:
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: Union[Unset, List[Any]]{% endif %} = UNSET
-if not isinstance({{ source }}, Unset):
+if not isinstance({{ source }}, Unset){%if query_parameter %} and {{ source }} is not None{% endif %}:
 {% if property.nullable %}
     if {{ source }} is None:
         {{ destination }} = None

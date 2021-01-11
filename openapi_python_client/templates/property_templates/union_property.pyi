@@ -24,11 +24,11 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if not property.required %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %}
 
-if isinstance({{ source }}, Unset):
+if isinstance({{ source }}, Unset){%if query_parameter %} or {{ source }} is None{% endif %}:
     {{ destination }} = UNSET
 {% endif %}
 {% if property.nullable %}
