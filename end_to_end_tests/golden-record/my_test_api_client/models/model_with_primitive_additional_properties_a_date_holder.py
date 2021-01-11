@@ -1,8 +1,10 @@
 import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 from dateutil.parser import isoparse
+
+T = TypeVar("T", bound="ModelWithPrimitiveAdditionalPropertiesADateHolder")
 
 
 @attr.s(auto_attribs=True)
@@ -21,10 +23,10 @@ class ModelWithPrimitiveAdditionalPropertiesADateHolder:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithPrimitiveAdditionalPropertiesADateHolder":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_with_primitive_additional_properties_a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder()
+        model_with_primitive_additional_properties_a_date_holder = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():

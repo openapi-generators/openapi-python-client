@@ -1,9 +1,11 @@
 from io import BytesIO
-from typing import Any, Dict
+from typing import Any, Dict, Type, TypeVar
 
 import attr
 
 from ..types import File
+
+T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 
 
 @attr.s(auto_attribs=True)
@@ -24,12 +26,12 @@ class BodyUploadFileTestsUploadPost:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "BodyUploadFileTestsUploadPost":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         some_file = File(payload=BytesIO(d.pop("some_file")))
 
-        body_upload_file_tests_upload_post = BodyUploadFileTestsUploadPost(
+        body_upload_file_tests_upload_post = cls(
             some_file=some_file,
         )
 

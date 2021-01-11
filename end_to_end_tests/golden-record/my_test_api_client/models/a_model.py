@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 import attr
 from dateutil.parser import isoparse
@@ -13,6 +13,8 @@ from ..models.different_enum import DifferentEnum
 from ..models.free_form_model import FreeFormModel
 from ..models.model_with_union_property import ModelWithUnionProperty
 from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="AModel")
 
 
 @attr.s(auto_attribs=True)
@@ -162,8 +164,8 @@ class AModel:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "AModel":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
@@ -234,110 +236,7 @@ class AModel:
 
         not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
-        nullable_model = None
-        _nullable_model = d.pop("nullable_model")
-        if _nullable_model is not None:
-            nullable_model = AModelNullableModel.from_dict(_nullable_model)
-
-        not_required_model: Union[Unset, AModelNotRequiredModel] = UNSET
-        _not_required_model = d.pop("not_required_model", UNSET)
-        if not isinstance(_not_required_model, Unset):
-            not_required_model = AModelNotRequiredModel.from_dict(_not_required_model)
-
-        not_required_nullable_model = None
-        _not_required_nullable_model = d.pop("not_required_nullable_model", UNSET)
-        if _not_required_nullable_model is not None and not isinstance(_not_required_nullable_model, Unset):
-            not_required_nullable_model = AModelNotRequiredNullableModel.from_dict(_not_required_nullable_model)
-
-        def _parse_nullable_one_of_models(
-            data: Union[None, Dict[str, Any]]
-        ) -> Union[None, FreeFormModel, ModelWithUnionProperty]:
-            nullable_one_of_models: Union[None, FreeFormModel, ModelWithUnionProperty]
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                nullable_one_of_models = FreeFormModel.from_dict(data)
-
-                return nullable_one_of_models
-            except:  # noqa: E722
-                pass
-            if not isinstance(data, dict):
-                raise TypeError()
-            nullable_one_of_models = ModelWithUnionProperty.from_dict(data)
-
-            return nullable_one_of_models
-
-        nullable_one_of_models = _parse_nullable_one_of_models(d.pop("nullable_one_of_models"))
-
-        def _parse_not_required_one_of_models(
-            data: Union[Unset, Dict[str, Any]]
-        ) -> Union[Unset, FreeFormModel, ModelWithUnionProperty]:
-            not_required_one_of_models: Union[Unset, FreeFormModel, ModelWithUnionProperty]
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                not_required_one_of_models = UNSET
-                _not_required_one_of_models = data
-                if not isinstance(_not_required_one_of_models, Unset):
-                    not_required_one_of_models = FreeFormModel.from_dict(_not_required_one_of_models)
-
-                return not_required_one_of_models
-            except:  # noqa: E722
-                pass
-            if not isinstance(data, dict):
-                raise TypeError()
-            not_required_one_of_models = UNSET
-            _not_required_one_of_models = data
-            if not isinstance(_not_required_one_of_models, Unset):
-                not_required_one_of_models = ModelWithUnionProperty.from_dict(_not_required_one_of_models)
-
-            return not_required_one_of_models
-
-        not_required_one_of_models = _parse_not_required_one_of_models(d.pop("not_required_one_of_models", UNSET))
-
-        def _parse_not_required_nullable_one_of_models(
-            data: Union[Unset, None, Dict[str, Any], str]
-        ) -> Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str]:
-            not_required_nullable_one_of_models: Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str]
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                not_required_nullable_one_of_models = UNSET
-                _not_required_nullable_one_of_models = data
-                if not isinstance(_not_required_nullable_one_of_models, Unset):
-                    not_required_nullable_one_of_models = FreeFormModel.from_dict(_not_required_nullable_one_of_models)
-
-                return not_required_nullable_one_of_models
-            except:  # noqa: E722
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                not_required_nullable_one_of_models = UNSET
-                _not_required_nullable_one_of_models = data
-                if not isinstance(_not_required_nullable_one_of_models, Unset):
-                    not_required_nullable_one_of_models = ModelWithUnionProperty.from_dict(
-                        _not_required_nullable_one_of_models
-                    )
-
-                return not_required_nullable_one_of_models
-            except:  # noqa: E722
-                pass
-            return cast(Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str], data)
-
-        not_required_nullable_one_of_models = _parse_not_required_nullable_one_of_models(
-            d.pop("not_required_nullable_one_of_models", UNSET)
-        )
-
-        a_model = AModel(
+        a_model = cls(
             an_enum_value=an_enum_value,
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,

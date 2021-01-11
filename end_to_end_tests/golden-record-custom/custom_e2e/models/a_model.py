@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 import attr
 from dateutil.parser import isoparse
@@ -13,6 +13,8 @@ from ..models.different_enum import DifferentEnum
 from ..models.free_form_model import FreeFormModel
 from ..models.model_with_union_property import ModelWithUnionProperty
 from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="AModel")
 
 
 @attr.s(auto_attribs=True)
@@ -162,8 +164,8 @@ class AModel:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "AModel":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
@@ -337,7 +339,7 @@ class AModel:
             d.pop("not_required_nullable_one_of_models", UNSET)
         )
 
-        a_model = AModel(
+        a_model = cls(
             an_enum_value=an_enum_value,
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,

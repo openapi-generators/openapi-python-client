@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Type, TypeVar
 
 {% if model.additional_properties %}
 from typing import List
@@ -17,6 +17,8 @@ from ..types import UNSET, Unset
 {% if model.additional_properties %}
 {% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
 {% endif %}
+
+T = TypeVar("T", bound="{{ model.reference.class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ model.reference.class_name }}:
@@ -72,8 +74,8 @@ class {{ model.reference.class_name }}:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "{{ model.reference.class_name }}":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -89,7 +91,7 @@ class {{ model.reference.class_name }}:
     {% endif %}
 
 {% endfor %}
-        {{model.reference.module_name}} = {{ model.reference.class_name }}(
+        {{model.reference.module_name}} = cls(
 {% for property in model.required_properties + model.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
 {% endfor %}
@@ -127,4 +129,3 @@ class {{ model.reference.class_name }}:
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
     {% endif %}
-

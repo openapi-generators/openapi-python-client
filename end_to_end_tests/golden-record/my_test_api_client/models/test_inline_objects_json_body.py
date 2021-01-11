@@ -1,8 +1,10 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="TestInlineObjectsJsonBody")
 
 
 @attr.s(auto_attribs=True)
@@ -21,12 +23,12 @@ class TestInlineObjectsJsonBody:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TestInlineObjectsJsonBody":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         a_property = d.pop("a_property", UNSET)
 
-        test_inline_objects_json_body = TestInlineObjectsJsonBody(
+        test_inline_objects_json_body = cls(
             a_property=a_property,
         )
 
