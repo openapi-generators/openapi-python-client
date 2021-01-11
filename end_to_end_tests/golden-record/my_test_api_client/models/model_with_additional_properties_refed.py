@@ -1,8 +1,10 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
 from ..models.an_enum import AnEnum
+
+T = TypeVar("T", bound="ModelWithAdditionalPropertiesRefed")
 
 
 @attr.s(auto_attribs=True)
@@ -21,10 +23,10 @@ class ModelWithAdditionalPropertiesRefed:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithAdditionalPropertiesRefed":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_with_additional_properties_refed = ModelWithAdditionalPropertiesRefed()
+        model_with_additional_properties_refed = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():

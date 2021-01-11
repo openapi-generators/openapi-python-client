@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
@@ -6,6 +6,8 @@ from ..models.model_with_primitive_additional_properties_a_date_holder import (
     ModelWithPrimitiveAdditionalPropertiesADateHolder,
 )
 from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
 
 
 @attr.s(auto_attribs=True)
@@ -28,8 +30,8 @@ class ModelWithPrimitiveAdditionalProperties:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithPrimitiveAdditionalProperties":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         a_date_holder: Union[ModelWithPrimitiveAdditionalPropertiesADateHolder, Unset] = UNSET
         _a_date_holder = d.pop("a_date_holder", UNSET)
@@ -38,7 +40,7 @@ class ModelWithPrimitiveAdditionalProperties:
                 cast(Dict[str, Any], _a_date_holder)
             )
 
-        model_with_primitive_additional_properties = ModelWithPrimitiveAdditionalProperties(
+        model_with_primitive_additional_properties = cls(
             a_date_holder=a_date_holder,
         )
 

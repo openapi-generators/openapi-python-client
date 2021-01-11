@@ -1,10 +1,12 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 
 from ..models.an_enum import AnEnum
 from ..models.an_int_enum import AnIntEnum
 from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="ModelWithUnionProperty")
 
 
 @attr.s(auto_attribs=True)
@@ -34,8 +36,8 @@ class ModelWithUnionProperty:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithUnionProperty":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
         def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
@@ -59,7 +61,7 @@ class ModelWithUnionProperty:
 
         a_property = _parse_a_property(d.pop("a_property", UNSET))
 
-        model_with_union_property = ModelWithUnionProperty(
+        model_with_union_property = cls(
             a_property=a_property,
         )
 

@@ -1,6 +1,8 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
+
+T = TypeVar("T", bound="FreeFormModel")
 
 
 @attr.s(auto_attribs=True)
@@ -17,10 +19,10 @@ class FreeFormModel:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "FreeFormModel":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        free_form_model = FreeFormModel()
+        free_form_model = cls()
 
         free_form_model.additional_properties = d
         return free_form_model
