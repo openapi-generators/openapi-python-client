@@ -1,8 +1,10 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
 
 
 @attr.s(auto_attribs=True)
@@ -23,15 +25,13 @@ class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithAdditionalPropertiesInlinedAdditionalProperty":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         extra_props_prop = d.pop("extra_props_prop", UNSET)
 
-        model_with_additional_properties_inlined_additional_property = (
-            ModelWithAdditionalPropertiesInlinedAdditionalProperty(
-                extra_props_prop=extra_props_prop,
-            )
+        model_with_additional_properties_inlined_additional_property = cls(
+            extra_props_prop=extra_props_prop,
         )
 
         model_with_additional_properties_inlined_additional_property.additional_properties = d

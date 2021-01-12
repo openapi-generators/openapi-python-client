@@ -1,6 +1,8 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
+
+T = TypeVar("T", bound="ModelWithAnyJsonPropertiesAdditionalProperty")
 
 
 @attr.s(auto_attribs=True)
@@ -17,10 +19,10 @@ class ModelWithAnyJsonPropertiesAdditionalProperty:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ModelWithAnyJsonPropertiesAdditionalProperty":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_with_any_json_properties_additional_property = ModelWithAnyJsonPropertiesAdditionalProperty()
+        model_with_any_json_properties_additional_property = cls()
 
         model_with_any_json_properties_additional_property.additional_properties = d
         return model_with_any_json_properties_additional_property
