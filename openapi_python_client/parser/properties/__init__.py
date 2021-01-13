@@ -171,14 +171,14 @@ class UnionProperty(Property):
         type_string = self.get_base_type_string()
         if no_optional:
             return type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
         if not self.required:
             if query_parameter:
                 # For query parameters, None has the same meaning as Unset
                 type_string = f"Union[Unset, None, {self._get_inner_prop_string()}]"
             else:
                 type_string = f"Union[Unset, {self._get_inner_prop_string()}]"
+        if self.nullable:
+            type_string = f"Optional[{type_string}]"
         return type_string
 
     def get_imports(self, *, prefix: str) -> Set[str]:
