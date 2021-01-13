@@ -169,7 +169,7 @@ class UnionProperty(Property):
     def get_type_string(self, no_optional: bool = False, query_parameter: bool = False) -> str:
         """
         Get a string representation of type that should be used when declaring this property.
-        
+
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """

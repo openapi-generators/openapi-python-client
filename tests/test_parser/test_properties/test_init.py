@@ -369,7 +369,9 @@ class TestUnionProperty:
             inner_properties=[inner_property_1, inner_property_2],
             nullable=True,
         )
-        assert p.get_type_string(query_parameter=True) == f"Union[Unset, None, inner_type_string_1, inner_type_string_2]"
+        assert (
+            p.get_type_string(query_parameter=True) == f"Union[Unset, None, inner_type_string_1, inner_type_string_2]"
+        )
         assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
 
         p = UnionProperty(
