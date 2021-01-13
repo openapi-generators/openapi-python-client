@@ -159,7 +159,7 @@ class UnionProperty(Property):
             self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
         )
 
-    def _get_inner_prop_string(self) -> List[str]:
+    def _get_inner_prop_string(self) -> str:
         inner_types = [p.get_type_string(no_optional=True) for p in self.inner_properties]
         return ", ".join(inner_types)
 
