@@ -23,7 +23,7 @@ class AModel:
     required_nullable: Optional[str]
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
-    not_required_nullable: Union[Unset, Optional[str]] = UNSET
+    not_required_nullable: Union[Unset, None, str] = UNSET
     not_required_not_nullable: Union[Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:

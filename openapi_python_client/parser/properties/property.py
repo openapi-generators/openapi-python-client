@@ -46,15 +46,20 @@ class Property:
         type_string = self.get_base_type_string()
         if no_optional:
             return type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        if not self.required:
-            if query_parameter:
-                # For query parameters, None has the same meaning as Unset
-                type_string = f"Union[Unset, None, {type_string}]"
+        if self.required:
+            if self.nullable:
+                return f"Optional[{type_string}]"
             else:
-                type_string = f"Union[Unset, {type_string}]"
-        return type_string
+                return type_string
+        else:
+            if self.nullable:
+                return f"Union[Unset, None, {type_string}]"
+            else:
+                if query_parameter:
+                    # For query parameters, None has the same meaning as Unset
+                    return f"Union[Unset, None, {type_string}]"
+                else:
+                    return f"Union[Unset, {type_string}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""

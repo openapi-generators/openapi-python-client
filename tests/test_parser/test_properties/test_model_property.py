@@ -6,7 +6,7 @@ import pytest
     [
         (False, False, False, "Union[Unset, MyClass]"),
         (False, False, True, "MyClass"),
-        (False, True, False, "Union[Unset, Optional[MyClass]]"),
+        (False, True, False, "Union[Unset, None, MyClass]"),
         (False, True, True, "Optional[MyClass]"),
         (True, False, False, "MyClass"),
         (True, False, True, "MyClass"),
