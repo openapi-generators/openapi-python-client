@@ -162,7 +162,7 @@ class UnionProperty(Property):
     def _get_inner_prop_string(self) -> List[str]:
         inner_types = [p.get_type_string(no_optional=True) for p in self.inner_properties]
         return ", ".join(inner_types)
-    
+
     def get_base_type_string(self) -> str:
         return f"Union[{self._get_inner_prop_string()}]"
 

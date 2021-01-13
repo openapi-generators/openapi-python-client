@@ -31,7 +31,7 @@ class Property:
 
     def __attrs_post_init__(self) -> None:
         object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(self.name)))
-    
+
     def get_base_type_string(self) -> str:
         return self._type_string
 
@@ -80,7 +80,7 @@ class Property:
     def to_string(self, query_parameter: bool = False) -> str:
         """
         How this should be declared in a dataclass
-        
+
         Args:
             query_parameter: True if the property's type is being used for a query parameter
         """
