@@ -38,6 +38,10 @@ def test__fix_keywords():
     assert utils.fix_keywords("None") == "None_"
 
 
+def test__fix_reserved_words():
+    assert utils.fix_reserved_words("self") == "self_"
+
+
 def test_to_valid_python_identifier():
     assert utils.to_valid_python_identifier("valid") == "valid"
     assert utils.to_valid_python_identifier("1") == "field_1"
