@@ -15,7 +15,7 @@ def fix_keywords(value: str) -> str:
     return value
 
 
-RESERVED_WORDS = ('self')
+RESERVED_WORDS = ("self",)
 
 
 def fix_reserved_words(value: str) -> str:
