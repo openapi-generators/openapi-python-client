@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.8.0 - Unreleased
 
 ### Additions
 
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `setup` will generate a pyproject.toml with no Poetry information, and instead create a `setup.py` with the
     project info.
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
+- Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
 
 ### Changes
 

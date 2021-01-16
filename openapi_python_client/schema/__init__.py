@@ -1,69 +1,50 @@
-"""
-OpenAPI v3.0.3 schema types, created according to the specification:
-https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
-
-The type orders are according to the contents of the specification:
-https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#table-of-contents
-"""
-
 __all__ = [
-    "Components",
-    "Contact",
-    "Discriminator",
-    "Encoding",
-    "Example",
-    "ExternalDocumentation",
-    "Header",
-    "Info",
-    "License",
-    "Link",
     "MediaType",
-    "OAuthFlow",
-    "OAuthFlows",
     "OpenAPI",
     "Operation",
     "Parameter",
     "PathItem",
-    "Paths",
     "Reference",
     "RequestBody",
     "Response",
     "Responses",
     "Schema",
-    "SecurityRequirement",
-    "SecurityScheme",
-    "Server",
-    "ServerVariable",
-    "Tag",
-    "XML",
 ]
 
-from .components import Components
-from .contact import Contact
-from .discriminator import Discriminator
-from .encoding import Encoding
-from .example import Example
-from .external_documentation import ExternalDocumentation
-from .header import Header
-from .info import Info
-from .license import License
-from .link import Link
-from .media_type import MediaType
-from .oauth_flow import OAuthFlow
-from .oauth_flows import OAuthFlows
-from .open_api import OpenAPI
-from .operation import Operation
-from .parameter import Parameter
-from .path_item import PathItem
-from .paths import Paths
-from .reference import Reference
-from .request_body import RequestBody
-from .response import Response
-from .responses import Responses
-from .schema import Schema
-from .security_requirement import SecurityRequirement
-from .security_scheme import SecurityScheme
-from .server import Server
-from .server_variable import ServerVariable
-from .tag import Tag
-from .xml import XML
+
+import re
+from typing import Callable, Iterator
+
+from .openapi_schema_pydantic import MediaType
+from .openapi_schema_pydantic import OpenAPI as _OpenAPI
+from .openapi_schema_pydantic import Operation, Parameter, PathItem, Reference, RequestBody, Response, Responses, Schema
+
+regex = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)")
+
+
+class SemVer:
+    def __init__(self, str_value: str) -> None:
+        self.str_value = str_value
+        if not isinstance(str_value, str):
+            raise TypeError("string required")
+        m = regex.fullmatch(str_value)
+        if not m:
+            raise ValueError("invalid semantic versioning format")
+        self.major = int(m.group(1))
+        self.minor = int(m.group(2))
+        self.patch = int(m.group(3))
+
+    @classmethod
+    def __get_validators__(cls) -> Iterator[Callable[[str], "SemVer"]]:
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v: str) -> "SemVer":
+        return cls(v)
+
+    def __str__(self) -> str:
+        return self.str_value
+
+
+class OpenAPI(_OpenAPI):
+    openapi: SemVer
