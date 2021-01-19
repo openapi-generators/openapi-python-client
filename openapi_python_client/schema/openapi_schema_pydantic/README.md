@@ -1,4 +1,4 @@
-# OpenAPI v3.0.3 schema classes
+Everything in this directory (including the rest of this file after this paragraph) is a vendored copy of [openapi-schem-pydantic](https://github.com/kuimono/openapi-schema-pydantic) and is licensed under the LICENSE file in this directory.
 
 ## Alias
 
