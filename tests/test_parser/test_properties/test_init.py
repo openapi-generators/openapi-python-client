@@ -88,7 +88,7 @@ class TestProperty:
         assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)}"
 
         p = Property(name=name, required=False, default=None, nullable=False)
-        assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)} = None"
+        assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)} = UNSET"
 
         p = Property(name=name, required=True, default=None, nullable=False)
         assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)}"
