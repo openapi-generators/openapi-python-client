@@ -260,12 +260,22 @@ class GeneratorData:
     enums: Dict[str, EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Dict[str, Any]]) -> Union["GeneratorData", GeneratorError]:
+    def from_dict(d: Dict[str, Any]) -> Union["GeneratorData", GeneratorError]:
         """ Create an OpenAPI from dict """
         try:
             openapi = oai.OpenAPI.parse_obj(d)
         except ValidationError as e:
-            return GeneratorError(header="Failed to parse OpenAPI document", detail=str(e))
+            detail = str(e)
+            if "swagger" in d:
+                detail = (
+                    "You may be trying to use a Swagger document; this is not supported by this project.\n\n" + detail
+                )
+            return GeneratorError(header="Failed to parse OpenAPI document", detail=detail)
+        if openapi.openapi.major != 3:
+            return GeneratorError(
+                header="openapi-python-client only supports OpenAPI 3.x",
+                detail=f"The version of the provided document was {openapi.openapi}",
+            )
         if openapi.components is None or openapi.components.schemas is None:
             schemas = Schemas()
         else:

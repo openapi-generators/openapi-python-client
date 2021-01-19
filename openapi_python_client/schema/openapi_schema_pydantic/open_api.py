@@ -14,14 +14,6 @@ from .tag import Tag
 class OpenAPI(BaseModel):
     """This is the root document object of the OpenAPI document."""
 
-    openapi: str = "3.0.3"
-    """
-    **REQUIRED**. This string MUST be the [semantic version number](https://semver.org/spec/v2.0.0.html)
-    of the [OpenAPI Specification version](#versions) that the OpenAPI document uses.
-    The `openapi` field SHOULD be used by tooling specifications and clients to interpret the OpenAPI document.
-    This is *not* related to the API [`info.version`](#infoVersion) string.
-    """
-
     info: Info
     """
     **REQUIRED**. Provides metadata about the API. The metadata MAY be used by tooling as required.

@@ -14,6 +14,7 @@ class TestGeneratorData:
         EndpointCollection.from_data.return_value = (endpoints_collections_by_tag, schemas)
         OpenAPI = mocker.patch(f"{MODULE_NAME}.oai.OpenAPI")
         openapi = OpenAPI.parse_obj.return_value
+        openapi.openapi = mocker.MagicMock(major=3)
 
         in_dict = mocker.MagicMock()
 
@@ -54,12 +55,59 @@ class TestGeneratorData:
         assert generator_data == GeneratorError(
             header="Failed to parse OpenAPI document",
             detail=(
-                "2 validation errors for OpenAPI\n"
+                "3 validation errors for OpenAPI\n"
                 "info\n"
                 "  field required (type=value_error.missing)\n"
                 "paths\n"
+                "  field required (type=value_error.missing)\n"
+                "openapi\n"
                 "  field required (type=value_error.missing)"
             ),
+        )
+        Schemas.build.assert_not_called()
+        Schemas.assert_not_called()
+
+    def test_swagger_document_invalid_schema(self, mocker):
+        Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
+
+        in_dict = {"swagger": "2.0"}
+
+        from openapi_python_client.parser.openapi import GeneratorData
+
+        generator_data = GeneratorData.from_dict(in_dict)
+
+        assert generator_data == GeneratorError(
+            header="Failed to parse OpenAPI document",
+            detail=(
+                "You may be trying to use a Swagger document; this is not supported by this project.\n\n"
+                "3 validation errors for OpenAPI\n"
+                "info\n"
+                "  field required (type=value_error.missing)\n"
+                "paths\n"
+                "  field required (type=value_error.missing)\n"
+                "openapi\n"
+                "  field required (type=value_error.missing)"
+            ),
+        )
+        Schemas.build.assert_not_called()
+        Schemas.assert_not_called()
+
+    def test_from_dict_invalid_version(self, mocker):
+        Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
+
+        OpenAPI = mocker.patch(f"{MODULE_NAME}.oai.OpenAPI")
+        openapi = OpenAPI.parse_obj.return_value
+        openapi.openapi = oai.SemVer("2.1.3")
+
+        in_dict = mocker.MagicMock()
+
+        from openapi_python_client.parser.openapi import GeneratorData
+
+        generator_data = GeneratorData.from_dict(in_dict)
+
+        assert generator_data == GeneratorError(
+            header="openapi-python-client only supports OpenAPI 3.x",
+            detail="The version of the provided document was 2.1.3",
         )
         Schemas.build.assert_not_called()
         Schemas.assert_not_called()
