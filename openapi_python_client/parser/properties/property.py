@@ -93,10 +93,7 @@ class Property:
         if self.default is not None:
             default = self.default
         elif not self.required:
-            if query_parameter:
-                default = "None"
-            else:
-                default = "UNSET"
+            default = "UNSET"
         else:
             default = None
 
