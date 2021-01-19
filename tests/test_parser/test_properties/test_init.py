@@ -510,7 +510,7 @@ class TestPropertyFromData:
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.enums == {
             "AnEnum": schemas.enums["AnEnum"],
-            "ParentAnEnum": prop,
+            "my_enum": prop,
         }
 
     def test_property_from_data_int_enum(self, mocker):
@@ -541,7 +541,7 @@ class TestPropertyFromData:
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.enums == {
             "AnEnum": schemas.enums["AnEnum"],
-            "ParentAnEnum": prop,
+            "my_enum": prop,
         }
 
     def test_property_from_data_ref_enum(self):
@@ -1083,7 +1083,7 @@ def test_build_model_property(additional_properties_schema, expected_additional_
     assert new_schemas != schemas
     assert new_schemas.models == {
         "OtherModel": None,
-        "ParentMyModel": model,
+        "prop": model,
     }
     assert model == ModelProperty(
         name="prop",

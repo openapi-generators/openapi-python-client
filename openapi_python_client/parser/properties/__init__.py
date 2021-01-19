@@ -302,7 +302,7 @@ def build_model_property(
         name=name,
         additional_properties=additional_properties,
     )
-    schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
+    schemas = attr.evolve(schemas, models={**schemas.models, prop.name: prop})
     return prop, schemas
 
 
@@ -374,7 +374,7 @@ def build_enum_property(
         values=values,
         value_type=value_type,
     )
-    schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
+    schemas = attr.evolve(schemas, enums={**schemas.enums, prop.name: prop})
     return prop, schemas
 
 
