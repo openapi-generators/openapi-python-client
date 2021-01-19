@@ -36,7 +36,7 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPVal
 def httpx_request(
     *,
     client: Client,
-    query_param: Union[Unset, None, List[str]] = None,
+    query_param: Union[Unset, None, List[str]] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_query_param: Union[Unset, List[Any]] = UNSET

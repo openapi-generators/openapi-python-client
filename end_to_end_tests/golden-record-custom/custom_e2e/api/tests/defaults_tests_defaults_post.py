@@ -46,10 +46,10 @@ def httpx_request(
     float_prop: Union[Unset, None, float] = 3.14,
     int_prop: Union[Unset, None, int] = 7,
     boolean_prop: Union[Unset, None, bool] = False,
-    list_prop: Union[Unset, None, List[AnEnum]] = None,
+    list_prop: Union[Unset, None, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
-    enum_prop: Union[Unset, None, AnEnum] = None,
+    enum_prop: Union[Unset, None, AnEnum] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_datetime_prop: Union[Unset, str] = UNSET

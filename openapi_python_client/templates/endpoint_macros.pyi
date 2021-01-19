@@ -22,7 +22,7 @@ if {{ parameter.python_name }} is not UNSET:
     {% endfor %}
 params: Dict[str, Any] = {
     {% for property in endpoint.query_parameters %}
-        {% if property.required %}
+        {% if property.required and not property.nullable %}
             {% if property.template %}
     "{{ property.name }}": {{ "json_" + property.python_name }},
             {% else %}
@@ -32,7 +32,7 @@ params: Dict[str, Any] = {
     {% endfor %}
 }
     {% for property in endpoint.query_parameters %}
-        {% if not property.required %}
+        {% if not property.required or property.nullable %}
 if {{ property.python_name }} is not UNSET and {{ property.python_name }} is not None:
             {% if property.template %}
     params["{{ property.name }}"] = {{ "json_" + property.python_name }}
