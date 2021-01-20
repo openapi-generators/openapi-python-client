@@ -252,7 +252,28 @@ class TestListProperty:
 
 
 class TestUnionProperty:
-    def test_get_type_string(self, mocker):
+    @pytest.mark.parametrize(
+        "query_parameter,nullable,required,no_optional,expected",
+        [
+            (False, False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
+            (False, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (False, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
+            (False, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
+            (True, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+        ],
+    )
+    def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
         from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
@@ -261,98 +282,13 @@ class TestUnionProperty:
         inner_property_2.get_type_string.return_value = "inner_type_string_2"
         p = UnionProperty(
             name="test",
-            required=True,
+            required=required,
             default=None,
             inner_properties=[inner_property_1, inner_property_2],
-            nullable=False,
+            nullable=nullable,
         )
 
-        base_type_string = f"Union[inner_type_string_1, inner_type_string_2]"
-
-        assert p.get_type_string() == base_type_string
-
-        p = UnionProperty(
-            name="test",
-            required=True,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=True,
-        )
-        assert p.get_type_string() == f"Union[None, inner_type_string_1, inner_type_string_2]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        base_type_string_with_unset = f"Union[Unset, inner_type_string_1, inner_type_string_2]"
-        p = UnionProperty(
-            name="test",
-            required=False,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=True,
-        )
-        assert p.get_type_string() == f"Union[Unset, None, inner_type_string_1, inner_type_string_2]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = UnionProperty(
-            name="test",
-            required=False,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=False,
-        )
-        assert p.get_type_string() == base_type_string_with_unset
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-    def test_get_type_string_query_parameter(self, mocker):
-        from openapi_python_client.parser.properties import UnionProperty
-
-        inner_property_1 = mocker.MagicMock()
-        inner_property_1.get_type_string.return_value = "inner_type_string_1"
-        inner_property_2 = mocker.MagicMock()
-        inner_property_2.get_type_string.return_value = "inner_type_string_2"
-        p = UnionProperty(
-            name="test",
-            required=True,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=False,
-        )
-
-        base_type_string = f"Union[inner_type_string_1, inner_type_string_2]"
-
-        assert p.get_type_string(query_parameter=True) == base_type_string
-
-        p = UnionProperty(
-            name="test",
-            required=True,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=True,
-        )
-        assert p.get_type_string(query_parameter=True) == f"Union[None, inner_type_string_1, inner_type_string_2]"
-        assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
-
-        base_type_string_with_unset = f"Union[Unset, None, inner_type_string_1, inner_type_string_2]"
-        p = UnionProperty(
-            name="test",
-            required=False,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=True,
-        )
-        assert (
-            p.get_type_string(query_parameter=True) == f"Union[Unset, None, inner_type_string_1, inner_type_string_2]"
-        )
-        assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
-
-        p = UnionProperty(
-            name="test",
-            required=False,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=False,
-        )
-        assert p.get_type_string(query_parameter=True) == base_type_string_with_unset
-        assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
+        assert p.get_type_string(query_parameter=query_parameter, no_optional=no_optional) == expected
 
     def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty
