@@ -16,85 +16,55 @@ MODULE_NAME = "openapi_python_client.parser.properties"
 
 
 class TestProperty:
-    def test_get_type_string(self, mocker):
+    @pytest.mark.parametrize(
+        "query_parameter,nullable,required,no_optional,expected",
+        [
+            (False, False, False, False, "Union[Unset, TestType]"),
+            (False, False, False, True, "TestType"),
+            (False, False, True, False, "TestType"),
+            (False, False, True, True, "TestType"),
+            (False, True, False, False, "Union[Unset, None, TestType]"),
+            (False, True, False, True, "TestType"),
+            (False, True, True, False, "Optional[TestType]"),
+            (False, True, True, True, "TestType"),
+            (True, False, False, False, "Union[Unset, None, TestType]"),
+            (True, False, False, True, "TestType"),
+            (True, False, True, False, "TestType"),
+            (True, False, True, True, "TestType"),
+            (True, True, False, False, "Union[Unset, None, TestType]"),
+            (True, True, False, True, "TestType"),
+            (True, True, True, False, "Optional[TestType]"),
+            (True, True, True, True, "TestType"),
+        ],
+    )
+    def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
         from openapi_python_client.parser.properties import Property
 
         mocker.patch.object(Property, "_type_string", "TestType")
-        p = Property(name="test", required=True, default=None, nullable=False)
+        p = Property(name="test", required=required, default=None, nullable=nullable)
+        assert p.get_type_string(no_optional=no_optional, query_parameter=query_parameter) == expected
 
-        base_type_string = f"TestType"
-
-        assert p.get_type_string() == base_type_string
-
-        p = Property(name="test", required=True, default=None, nullable=True)
-        assert p.get_type_string() == f"Optional[{base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = Property(name="test", required=False, default=None, nullable=True)
-        assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = Property(name="test", required=False, default=None, nullable=False)
-        assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-    def test_get_type_string_query_parameter(self, mocker):
+    @pytest.mark.parametrize(
+        "query_parameter,default,required,expected",
+        [
+            (False, None, False, "test: Union[Unset, TestType] = UNSET"),
+            (False, None, True, "test: TestType"),
+            (False, "Test", False, "test: Union[Unset, TestType] = Test"),
+            (False, "Test", True, "test: TestType = Test"),
+            (True, None, False, "test: Union[Unset, None, TestType] = UNSET"),
+            (True, None, True, "test: TestType"),
+            (True, "Test", False, "test: Union[Unset, None, TestType] = Test"),
+            (True, "Test", True, "test: TestType = Test"),
+        ],
+    )
+    def test_to_string(self, mocker, query_parameter, default, required, expected):
         from openapi_python_client.parser.properties import Property
 
+        name = "test"
         mocker.patch.object(Property, "_type_string", "TestType")
-        p = Property(name="test", required=True, default=None, nullable=False)
+        p = Property(name=name, required=required, default=default, nullable=False)
 
-        base_type_string = f"TestType"
-
-        assert p.get_type_string(query_parameter=True) == base_type_string
-
-        p = Property(name="test", required=True, default=None, nullable=True)
-        assert p.get_type_string(query_parameter=True) == f"Optional[{base_type_string}]"
-        assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
-
-        p = Property(name="test", required=False, default=None, nullable=True)
-        assert p.get_type_string(query_parameter=True) == f"Union[Unset, None, {base_type_string}]"
-        assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
-
-        p = Property(name="test", required=False, default=None, nullable=False)
-        assert p.get_type_string(query_parameter=True) == f"Union[Unset, None, {base_type_string}]"
-        assert p.get_type_string(no_optional=True, query_parameter=True) == base_type_string
-
-    def test_to_string(self, mocker):
-        from openapi_python_client.parser.properties import Property
-
-        name = "test"
-        get_type_string = mocker.patch.object(Property, "get_type_string")
-        p = Property(name=name, required=True, default=None, nullable=False)
-
-        assert p.to_string() == f"{name}: {get_type_string()}"
-
-        p = Property(name=name, required=False, default=None, nullable=False)
-        assert p.to_string() == f"{name}: {get_type_string()} = UNSET"
-
-        p = Property(name=name, required=True, default=None, nullable=False)
-        assert p.to_string() == f"{name}: {get_type_string()}"
-
-        p = Property(name=name, required=True, default="TEST", nullable=False)
-        assert p.to_string() == f"{name}: {get_type_string()} = TEST"
-
-    def test_to_string_query_parameter(self, mocker):
-        from openapi_python_client.parser.properties import Property
-
-        name = "test"
-        get_type_string = mocker.patch.object(Property, "get_type_string")
-        p = Property(name=name, required=True, default=None, nullable=False)
-
-        assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)}"
-
-        p = Property(name=name, required=False, default=None, nullable=False)
-        assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)} = UNSET"
-
-        p = Property(name=name, required=True, default=None, nullable=False)
-        assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)}"
-
-        p = Property(name=name, required=True, default="TEST", nullable=False)
-        assert p.to_string(query_parameter=True) == f"{name}: {get_type_string(query_parameter=True)} = TEST"
+        assert p.to_string(query_parameter=query_parameter) == expected
 
     def test_get_imports(self):
         from openapi_python_client.parser.properties import Property
