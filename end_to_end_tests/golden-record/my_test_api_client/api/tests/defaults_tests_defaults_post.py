@@ -14,7 +14,10 @@ def _get_kwargs(
     *,
     client: Client,
     string_prop: Union[Unset, None, str] = "the default string",
-    datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_not_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    required_not_nullable_datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
+    required_nullable_datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, None, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, None, float] = 3.14,
     int_prop: Union[Unset, None, int] = 7,
@@ -28,9 +31,24 @@ def _get_kwargs(
 
     headers: Dict[str, Any] = client.get_headers()
 
-    json_datetime_prop: Union[Unset, str] = UNSET
-    if not isinstance(datetime_prop, Unset) and datetime_prop is not None:
-        json_datetime_prop = datetime_prop.isoformat()
+    json_not_required_not_nullable_datetime_prop: Union[Unset, str] = UNSET
+    if (
+        not isinstance(not_required_not_nullable_datetime_prop, Unset)
+        and not_required_not_nullable_datetime_prop is not None
+    ):
+        json_not_required_not_nullable_datetime_prop = not_required_not_nullable_datetime_prop.isoformat()
+
+    json_not_required_nullable_datetime_prop: Union[Unset, str] = UNSET
+    if not isinstance(not_required_nullable_datetime_prop, Unset) and not_required_nullable_datetime_prop is not None:
+        json_not_required_nullable_datetime_prop = (
+            not_required_nullable_datetime_prop.isoformat() if not_required_nullable_datetime_prop else None
+        )
+
+    json_required_not_nullable_datetime_prop = required_not_nullable_datetime_prop.isoformat()
+
+    json_required_nullable_datetime_prop = (
+        required_nullable_datetime_prop.isoformat() if required_nullable_datetime_prop else None
+    )
 
     json_date_prop: Union[Unset, str] = UNSET
     if not isinstance(date_prop, Unset) and date_prop is not None:
@@ -65,11 +83,17 @@ def _get_kwargs(
     if not isinstance(enum_prop, Unset) and enum_prop is not None:
         json_enum_prop = enum_prop
 
-    params: Dict[str, Any] = {}
+    params: Dict[str, Any] = {
+        "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,
+    }
     if string_prop is not UNSET and string_prop is not None:
         params["string_prop"] = string_prop
-    if datetime_prop is not UNSET and datetime_prop is not None:
-        params["datetime_prop"] = json_datetime_prop
+    if not_required_not_nullable_datetime_prop is not UNSET and not_required_not_nullable_datetime_prop is not None:
+        params["not_required_not_nullable_datetime_prop"] = json_not_required_not_nullable_datetime_prop
+    if not_required_nullable_datetime_prop is not UNSET and not_required_nullable_datetime_prop is not None:
+        params["not_required_nullable_datetime_prop"] = json_not_required_nullable_datetime_prop
+    if required_nullable_datetime_prop is not UNSET and required_nullable_datetime_prop is not None:
+        params["required_nullable_datetime_prop"] = json_required_nullable_datetime_prop
     if date_prop is not UNSET and date_prop is not None:
         params["date_prop"] = json_date_prop
     if float_prop is not UNSET and float_prop is not None:
@@ -121,7 +145,10 @@ def sync_detailed(
     *,
     client: Client,
     string_prop: Union[Unset, None, str] = "the default string",
-    datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_not_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    required_not_nullable_datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
+    required_nullable_datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, None, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, None, float] = 3.14,
     int_prop: Union[Unset, None, int] = 7,
@@ -134,7 +161,10 @@ def sync_detailed(
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
-        datetime_prop=datetime_prop,
+        not_required_not_nullable_datetime_prop=not_required_not_nullable_datetime_prop,
+        not_required_nullable_datetime_prop=not_required_nullable_datetime_prop,
+        required_not_nullable_datetime_prop=required_not_nullable_datetime_prop,
+        required_nullable_datetime_prop=required_nullable_datetime_prop,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -156,7 +186,10 @@ def sync(
     *,
     client: Client,
     string_prop: Union[Unset, None, str] = "the default string",
-    datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_not_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    required_not_nullable_datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
+    required_nullable_datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, None, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, None, float] = 3.14,
     int_prop: Union[Unset, None, int] = 7,
@@ -171,7 +204,10 @@ def sync(
     return sync_detailed(
         client=client,
         string_prop=string_prop,
-        datetime_prop=datetime_prop,
+        not_required_not_nullable_datetime_prop=not_required_not_nullable_datetime_prop,
+        not_required_nullable_datetime_prop=not_required_nullable_datetime_prop,
+        required_not_nullable_datetime_prop=required_not_nullable_datetime_prop,
+        required_nullable_datetime_prop=required_nullable_datetime_prop,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -187,7 +223,10 @@ async def asyncio_detailed(
     *,
     client: Client,
     string_prop: Union[Unset, None, str] = "the default string",
-    datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_not_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    required_not_nullable_datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
+    required_nullable_datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, None, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, None, float] = 3.14,
     int_prop: Union[Unset, None, int] = 7,
@@ -200,7 +239,10 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
-        datetime_prop=datetime_prop,
+        not_required_not_nullable_datetime_prop=not_required_not_nullable_datetime_prop,
+        not_required_nullable_datetime_prop=not_required_nullable_datetime_prop,
+        required_not_nullable_datetime_prop=required_not_nullable_datetime_prop,
+        required_nullable_datetime_prop=required_nullable_datetime_prop,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -221,7 +263,10 @@ async def asyncio(
     *,
     client: Client,
     string_prop: Union[Unset, None, str] = "the default string",
-    datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_not_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    required_not_nullable_datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
+    required_nullable_datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, None, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, None, float] = 3.14,
     int_prop: Union[Unset, None, int] = 7,
@@ -237,7 +282,10 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             string_prop=string_prop,
-            datetime_prop=datetime_prop,
+            not_required_not_nullable_datetime_prop=not_required_not_nullable_datetime_prop,
+            not_required_nullable_datetime_prop=not_required_nullable_datetime_prop,
+            required_not_nullable_datetime_prop=required_not_nullable_datetime_prop,
+            required_nullable_datetime_prop=required_nullable_datetime_prop,
             date_prop=date_prop,
             float_prop=float_prop,
             int_prop=int_prop,

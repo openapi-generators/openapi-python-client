@@ -290,12 +290,49 @@
           {
             "required": false,
             "schema": {
-              "title": "Datetime Prop",
+              "title": "Not Required, Not Nullable Datetime Prop",
+              "nullable": false,
               "type": "string",
               "format": "date-time",
               "default": "1010-10-10T00:00:00"
             },
-            "name": "datetime_prop",
+            "name": "not_required_not_nullable_datetime_prop",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Not Required, Nullable Datetime Prop",
+              "nullable": true,
+              "type": "string",
+              "format": "date-time",
+              "default": "1010-10-10T00:00:00"
+            },
+            "name": "not_required_nullable_datetime_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Required, Not Nullable Datetime Prop",
+              "nullable": false,
+              "type": "string",
+              "format": "date-time",
+              "default": "1010-10-10T00:00:00"
+            },
+            "name": "required_not_nullable_datetime_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Required, Nullable Datetime Prop",
+              "nullable": true,
+              "type": "string",
+              "format": "date-time",
+              "default": "1010-10-10T00:00:00"
+            },
+            "name": "required_nullable_datetime_prop",
             "in": "query"
           },
           {
