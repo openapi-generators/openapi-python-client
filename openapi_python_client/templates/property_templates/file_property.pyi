@@ -12,9 +12,9 @@
 {{ destination }} = {{ source }}.to_tuple()
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = UNSET
-if not isinstance({{ source }}, Unset){%if query_parameter %} and {{ source }} is not None{% endif %}:
-{% if property.nullable %}
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter) }}{% endif %} = UNSET
+if not isinstance({{ source }}, Unset):
+{% if property.nullable or query_parameter %}
     {{ destination }} = {{ source }}.to_tuple() if {{ source }} else None
 {% else %}
     {{ destination }} = {{ source }}.to_tuple()

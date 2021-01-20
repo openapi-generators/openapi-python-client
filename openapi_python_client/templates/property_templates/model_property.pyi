@@ -23,9 +23,9 @@ if _{{ property.python_name }} is not None and not isinstance(_{{ property.pytho
 {{ destination }} = {{ source }}.to_dict()
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: Union[{% if property.nullable %}None, {% endif %}Unset, Dict[str, Any]]{% endif %} = UNSET
-if not isinstance({{ source }}, Unset){%if query_parameter %} and {{ source }} is not None{% endif %}:
-{% if property.nullable %}
+{{ destination }}{% if declare_type %}: Union[{% if property.nullable or query_parameter %}None, {% endif %}Unset, Dict[str, Any]]{% endif %} = UNSET
+if not isinstance({{ source }}, Unset):
+{% if property.nullable or query_parameter %}
     {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
 {% else %}
     {{ destination }} = {{ source }}.to_dict()

@@ -44,13 +44,13 @@ else:
 {{ _transform(property, source, destination) }}
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: Union[Unset, List[Any]]{% endif %} = UNSET
-if not isinstance({{ source }}, Unset){%if query_parameter %} and {{ source }} is not None{% endif %}:
-{% if property.nullable %}
+{{ destination }}{% if declare_type %}: Union[Unset, {% if property.nullable or query_parameter %}None, {% endif %}List[Any]]{% endif %} = UNSET
+if not isinstance({{ source }}, Unset):
+{% if property.nullable or query_parameter %}
     if {{ source }} is None:
         {{ destination }} = None
     else:
-        {{ _transform(property, source, destination) | indent(4)}}
+        {{ _transform(property, source, destination) | indent(8)}}
 {% else %}
     {{ _transform(property, source, destination) | indent(4)}}
 {% endif %}

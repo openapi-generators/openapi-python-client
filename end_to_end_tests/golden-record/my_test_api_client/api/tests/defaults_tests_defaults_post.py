@@ -31,15 +31,14 @@ def _get_kwargs(
 
     headers: Dict[str, Any] = client.get_headers()
 
-    json_not_required_not_nullable_datetime_prop: Union[Unset, str] = UNSET
-    if (
-        not isinstance(not_required_not_nullable_datetime_prop, Unset)
-        and not_required_not_nullable_datetime_prop is not None
-    ):
-        json_not_required_not_nullable_datetime_prop = not_required_not_nullable_datetime_prop.isoformat()
+    json_not_required_not_nullable_datetime_prop: Union[Unset, None, str] = UNSET
+    if not isinstance(not_required_not_nullable_datetime_prop, Unset):
+        json_not_required_not_nullable_datetime_prop = (
+            not_required_not_nullable_datetime_prop.isoformat() if not_required_not_nullable_datetime_prop else None
+        )
 
-    json_not_required_nullable_datetime_prop: Union[Unset, str] = UNSET
-    if not isinstance(not_required_nullable_datetime_prop, Unset) and not_required_nullable_datetime_prop is not None:
+    json_not_required_nullable_datetime_prop: Union[Unset, None, str] = UNSET
+    if not isinstance(not_required_nullable_datetime_prop, Unset):
         json_not_required_nullable_datetime_prop = (
             not_required_nullable_datetime_prop.isoformat() if not_required_nullable_datetime_prop else None
         )
@@ -50,27 +49,34 @@ def _get_kwargs(
         required_nullable_datetime_prop.isoformat() if required_nullable_datetime_prop else None
     )
 
-    json_date_prop: Union[Unset, str] = UNSET
-    if not isinstance(date_prop, Unset) and date_prop is not None:
-        json_date_prop = date_prop.isoformat()
+    json_date_prop: Union[Unset, None, str] = UNSET
+    if not isinstance(date_prop, Unset):
+        json_date_prop = date_prop.isoformat() if date_prop else None
 
-    json_list_prop: Union[Unset, List[Any]] = UNSET
-    if not isinstance(list_prop, Unset) and list_prop is not None:
-        json_list_prop = []
-        for list_prop_item_data in list_prop:
-            list_prop_item = list_prop_item_data.value
+    json_list_prop: Union[Unset, None, List[Any]] = UNSET
+    if not isinstance(list_prop, Unset):
+        if list_prop is None:
+            json_list_prop = None
+        else:
+            json_list_prop = []
+            for list_prop_item_data in list_prop:
+                list_prop_item = list_prop_item_data.value
 
-            json_list_prop.append(list_prop_item)
+                json_list_prop.append(list_prop_item)
 
-    json_union_prop: Union[Unset, float, str]
-    if isinstance(union_prop, Unset) or union_prop is None:
+    json_union_prop: Union[Unset, None, float, str]
+    if isinstance(union_prop, Unset):
         json_union_prop = UNSET
+    elif union_prop is None:
+        json_union_prop: Union[Unset, None, float, str] = None
     else:
         json_union_prop = union_prop
 
-    json_union_prop_with_ref: Union[Unset, float, AnEnum]
-    if isinstance(union_prop_with_ref, Unset) or union_prop_with_ref is None:
+    json_union_prop_with_ref: Union[Unset, None, float, AnEnum]
+    if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
+    elif union_prop_with_ref is None:
+        json_union_prop_with_ref: Union[Unset, None, float, AnEnum] = None
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
@@ -79,9 +85,9 @@ def _get_kwargs(
     else:
         json_union_prop_with_ref = union_prop_with_ref
 
-    json_enum_prop: Union[Unset, AnEnum] = UNSET
-    if not isinstance(enum_prop, Unset) and enum_prop is not None:
-        json_enum_prop = enum_prop
+    json_enum_prop: Union[Unset, None, AnEnum] = UNSET
+    if not isinstance(enum_prop, Unset):
+        json_enum_prop = enum_prop if enum_prop else None
 
     params: Dict[str, Any] = {
         "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,
@@ -92,7 +98,7 @@ def _get_kwargs(
         params["not_required_not_nullable_datetime_prop"] = json_not_required_not_nullable_datetime_prop
     if not_required_nullable_datetime_prop is not UNSET and not_required_nullable_datetime_prop is not None:
         params["not_required_nullable_datetime_prop"] = json_not_required_nullable_datetime_prop
-    if required_nullable_datetime_prop is not UNSET and required_nullable_datetime_prop is not None:
+    if required_nullable_datetime_prop is not None:
         params["required_nullable_datetime_prop"] = json_required_nullable_datetime_prop
     if date_prop is not UNSET and date_prop is not None:
         params["date_prop"] = json_date_prop

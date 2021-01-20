@@ -53,6 +53,8 @@ def httpx_request(
 
         json_an_enum_value.append(an_enum_value_item)
 
+    if some_date is None:
+        json_some_date: Union[datetime.date, datetime.datetime] = None
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
     else:
