@@ -68,7 +68,7 @@ def _get_kwargs(
     if isinstance(union_prop, Unset):
         json_union_prop = UNSET
     elif union_prop is None:
-        json_union_prop: Union[Unset, None, float, str] = None
+        json_union_prop = None
     else:
         json_union_prop = union_prop
 
@@ -76,7 +76,7 @@ def _get_kwargs(
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
     elif union_prop_with_ref is None:
-        json_union_prop_with_ref: Union[Unset, None, float, AnEnum] = None
+        json_union_prop_with_ref = None
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
