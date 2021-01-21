@@ -24,6 +24,7 @@ class Property:
     required: bool
     nullable: bool
     _type_string: ClassVar[str] = ""
+    _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()
     python_name: str = attr.ib(init=False)
 
@@ -35,15 +36,20 @@ class Property:
     def get_base_type_string(self) -> str:
         return self._type_string
 
-    def get_type_string(self, no_optional: bool = False, query_parameter: bool = False) -> str:
+    def get_type_string(self, no_optional: bool = False, query_parameter: bool = False, json: bool = False) -> str:
         """
         Get a string representation of type that should be used when declaring this property
 
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
             query_parameter: True if the property's type is being used for a query parameter
+            json: True if the type refers to the property after JSON serialization
         """
-        type_string = self.get_base_type_string()
+        if json:
+            type_string = self._json_type_string
+        else:
+            type_string = self.get_base_type_string()
+
         if no_optional:
             return type_string
         if self.required:

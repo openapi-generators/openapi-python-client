@@ -22,7 +22,7 @@ if _{{ property.python_name }} is not None:
 {{ destination }} = {{ source }}.isoformat()
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: Union[Unset, {% if property.nullable or query_parameter %}None, {% endif %}str]{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable or query_parameter %}
     {{ destination }} = {{ source }}.isoformat() if {{ source }} else None

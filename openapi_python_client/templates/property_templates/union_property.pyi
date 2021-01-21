@@ -26,7 +26,7 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
 
 {% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if not property.required or property.nullable %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter) }}{% endif %}
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %}
 
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET

@@ -17,12 +17,12 @@ if _{{ property.python_name }} is not None:
 {{ destination }} = {{ source }}.value
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter) }}{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable or query_parameter %}
-    {{ destination }} = {{ source }} if {{ source }} else None
+    {{ destination }} = {{ source }}.value if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}
+    {{ destination }} = {{ source }}.value
 {% endif %}
 {% endif %}
 {% endmacro %}

@@ -18,6 +18,7 @@ class EnumProperty(Property):
     values: Dict[str, ValueType]
     reference: Reference
     value_type: Type[ValueType]
+    _json_type_string: ClassVar[str] = "int"
     default: Optional[Any] = attr.ib()
 
     template: ClassVar[str] = "enum_property.pyi"

@@ -96,7 +96,7 @@ def httpx_request(
     else:
         json_union_prop = union_prop
 
-    json_union_prop_with_ref: Union[Unset, None, float, AnEnum]
+    json_union_prop_with_ref: Union[Unset, None, float, int]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
     elif union_prop_with_ref is None:
@@ -104,14 +104,14 @@ def httpx_request(
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
-            json_union_prop_with_ref = union_prop_with_ref
+            json_union_prop_with_ref = union_prop_with_ref.value
 
     else:
         json_union_prop_with_ref = union_prop_with_ref
 
-    json_enum_prop: Union[Unset, None, AnEnum] = UNSET
+    json_enum_prop: Union[Unset, None, int] = UNSET
     if not isinstance(enum_prop, Unset):
-        json_enum_prop = enum_prop if enum_prop else None
+        json_enum_prop = enum_prop.value if enum_prop else None
 
     params: Dict[str, Any] = {
         "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,

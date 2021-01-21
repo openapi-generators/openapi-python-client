@@ -17,6 +17,7 @@ class ModelProperty(Property):
     description: str
     relative_imports: Set[str]
     additional_properties: Union[bool, Property]
+    _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.pyi"
 
