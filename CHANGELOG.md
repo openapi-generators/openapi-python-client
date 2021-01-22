@@ -5,21 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.8.0 - Unreleased
+
+### Additions
+
+- New `--meta` command line option for specifying what type of metadata should be generated:
+  - `poetry` is the default value, same behavior you're used to in previous versions
+  - `setup` will generate a pyproject.toml with no Poetry information, and instead create a `setup.py` with the
+    project info.
+  - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
+- Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
+- Fixes `Enum` deserialization when the value is `UNSET`.
+
+### Changes
+
+- Lowered the minimum version of `python-dateutil` to 2.8.0 for improved compatibility (#298 & #299). Thanks @bowenwr!
+- The `from_dict` method on generated models is now a `@classmethod` instead of `@staticmethod` (#215 & #292). Thanks @forest-benchling!
+
 ## 0.7.3 - 2020-12-21
+
 ### Fixes
+
 - Spacing and extra returns for Union types of `additionalProperties` (#266 & #268). Thanks @joshzana & @packyg!
 - Title of inline schemas will no longer be missing characters (#271 & #274). Thanks @kalzoo!
-- Handling of nulls (Nones) when parsing or constructing dates (#267). Thanks @fyhertz! 
+- Handling of nulls (Nones) when parsing or constructing dates (#267). Thanks @fyhertz!
 
 ## 0.7.2 - 2020-12-08
+
 ### Fixes
+
 - A bug in handling optional properties that are themselves models (introduced in 0.7.1) (#262). Thanks @packyg!
 
 ## 0.7.1 - 2020-12-08
+
 ### Additions
+
 - Support for additionalProperties attribute in OpenAPI schemas and "free-form" objects by adding an `additional_properties` attribute to generated models. **COMPATIBILITY NOTE**: this will prevent any model property with a name that would be coerced to "additional_properties" in the generated client from generating properly (#218 & #252). Thanks @packyg!
 
 ### Fixes
+
 - Enums will once again work with query parameters (#259). Thanks @packyg!
 - Generated Poetry metadata in pyproject.toml will properly indicate Python 3.6 compatibility (#258). Thanks @bowenwr!
 
@@ -27,18 +51,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`. 
+- Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`.
 - Values that are `UNSET` will not be sent along in API calls
-- Schemas defined with `type=object` will now be converted into classes, just like if they were created as ref components. 
-    The previous behavior was a combination of skipping and using generic Dicts for these schemas.
-- Response schema handling was unified with input schema handling, meaning that responses will behave differently than before. 
-    Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
-    - As a result of this, endpoints that used to return `bytes` when content-type was application/octet-stream will now return a `File` object if the type of the data is "binary", just like if you were submitting that type instead of receiving it.
+- Schemas defined with `type=object` will now be converted into classes, just like if they were created as ref components.
+  The previous behavior was a combination of skipping and using generic Dicts for these schemas.
+- Response schema handling was unified with input schema handling, meaning that responses will behave differently than before.
+  Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
+  - As a result of this, endpoints that used to return `bytes` when content-type was application/octet-stream will now return a `File` object if the type of the data is "binary", just like if you were submitting that type instead of receiving it.
 - Instead of skipping input properties with no type, enum, anyOf, or oneOf declared, the property will be declared as `None`.
-- Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property 
-    declared in an endpoint will be named like {endpoint_name}_{previous_class_name}. Classes will no longer be
-    deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming 
-    scheme, there will be an error instead.
+- Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property
+  declared in an endpoint will be named like {endpoint*name}*{previous_class_name}. Classes will no longer be
+  deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming
+  scheme, there will be an error instead.
 
 ### Additions
 

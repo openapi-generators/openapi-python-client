@@ -47,7 +47,7 @@ class ModelWithUnionProperty:
                     raise TypeError()
                 a_property = UNSET
                 _a_property = data
-                if _a_property is not None:
+                if _a_property is not None and _a_property is not UNSET:
                     a_property = AnEnum(_a_property)
 
                 return a_property
@@ -57,7 +57,7 @@ class ModelWithUnionProperty:
                 raise TypeError()
             a_property = UNSET
             _a_property = data
-            if _a_property is not None:
+            if _a_property is not None and _a_property is not UNSET:
                 a_property = AnIntEnum(_a_property)
 
             return a_property
