@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     project info.
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
+- Fixes `Enum` deserialization when the value is `UNSET`.
+- Add handling of application/vnd.api+json media type.
 
 ### Changes
 
