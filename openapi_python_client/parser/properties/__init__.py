@@ -174,8 +174,8 @@ class UnionProperty(Property):
         unique_inner_types = list(dict.fromkeys(inner_types))
         return ", ".join(unique_inner_types)
 
-    def get_base_type_string(self) -> str:
-        return f"Union[{self._get_inner_prop_string()}]"
+    def get_base_type_string(self, json: bool = False) -> str:
+        return f"Union[{self._get_inner_prop_string(json=json)}]"
 
     def get_type_string(self, no_optional: bool = False, query_parameter: bool = False, json: bool = False) -> str:
         """
@@ -184,7 +184,7 @@ class UnionProperty(Property):
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_string = f"Union[{self._get_inner_prop_string(json=json)}]"
+        type_string = self.get_base_type_string(json=json)
         if no_optional:
             return type_string
         if self.required:
