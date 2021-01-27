@@ -12,7 +12,7 @@ from ..types import UNSET, Unset
 class ModelWithPrimitiveAdditionalProperties:
     """  """
 
-    a_date_holder: Union[ModelWithPrimitiveAdditionalPropertiesADateHolder, Unset] = UNSET
+    a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
     additional_properties: Dict[str, str] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -31,9 +31,9 @@ class ModelWithPrimitiveAdditionalProperties:
     @staticmethod
     def from_dict(src_dict: Dict[str, Any]) -> "ModelWithPrimitiveAdditionalProperties":
         d = src_dict.copy()
-        a_date_holder: Union[ModelWithPrimitiveAdditionalPropertiesADateHolder, Unset] = UNSET
+        a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
         _a_date_holder = d.pop("a_date_holder", UNSET)
-        if not isinstance(_a_date_holder, Unset):
+        if _a_date_holder is not None and not isinstance(_a_date_holder, Unset):
             a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(
                 cast(Dict[str, Any], _a_date_holder)
             )
