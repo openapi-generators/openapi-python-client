@@ -153,11 +153,14 @@ class AModel:
 
         not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
-        nullable_model = AModelNullableModel.from_dict(d.pop("nullable_model"))
+        nullable_model = None
+        _nullable_model = d.pop("nullable_model")
+        if _nullable_model is not None:
+            nullable_model = AModelNullableModel.from_dict(cast(Dict[str, Any], _nullable_model))
 
         not_required_model: Union[Unset, AModelNotRequiredModel] = UNSET
         _not_required_model = d.pop("not_required_model", UNSET)
-        if _not_required_model is not None and not isinstance(_not_required_model, Unset):
+        if not isinstance(_not_required_model, Unset):
             not_required_model = AModelNotRequiredModel.from_dict(cast(Dict[str, Any], _not_required_model))
 
         not_required_nullable_model = None

@@ -24,7 +24,7 @@ def _get_kwargs(
             json_query_param = query_param
 
     params: Dict[str, Any] = {}
-    if query_param is not UNSET and query_param is not None:
+    if not isinstance(json_query_param, Unset) and json_query_param is not None:
         params["query_param"] = json_query_param
 
     return {

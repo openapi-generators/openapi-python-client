@@ -98,32 +98,38 @@ def _get_kwargs(
     params: Dict[str, Any] = {
         "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,
     }
-    if string_prop is not UNSET and string_prop is not None:
+    if not isinstance(string_prop, Unset) and string_prop is not None:
         params["string_prop"] = string_prop
-    if not_required_not_nullable_datetime_prop is not UNSET and not_required_not_nullable_datetime_prop is not None:
+    if (
+        not isinstance(json_not_required_not_nullable_datetime_prop, Unset)
+        and json_not_required_not_nullable_datetime_prop is not None
+    ):
         params["not_required_not_nullable_datetime_prop"] = json_not_required_not_nullable_datetime_prop
-    if not_required_nullable_datetime_prop is not UNSET and not_required_nullable_datetime_prop is not None:
+    if (
+        not isinstance(json_not_required_nullable_datetime_prop, Unset)
+        and json_not_required_nullable_datetime_prop is not None
+    ):
         params["not_required_nullable_datetime_prop"] = json_not_required_nullable_datetime_prop
-    if required_nullable_datetime_prop is not None:
+    if json_required_nullable_datetime_prop is not None:
         params["required_nullable_datetime_prop"] = json_required_nullable_datetime_prop
-    if date_prop is not UNSET and date_prop is not None:
+    if not isinstance(json_date_prop, Unset) and json_date_prop is not None:
         params["date_prop"] = json_date_prop
-    if float_prop is not UNSET and float_prop is not None:
+    if not isinstance(float_prop, Unset) and float_prop is not None:
         params["float_prop"] = float_prop
-    if int_prop is not UNSET and int_prop is not None:
+    if not isinstance(int_prop, Unset) and int_prop is not None:
         params["int_prop"] = int_prop
-    if boolean_prop is not UNSET and boolean_prop is not None:
+    if not isinstance(boolean_prop, Unset) and boolean_prop is not None:
         params["boolean_prop"] = boolean_prop
-    if list_prop is not UNSET and list_prop is not None:
+    if not isinstance(json_list_prop, Unset) and json_list_prop is not None:
         params["list_prop"] = json_list_prop
-    if union_prop is not UNSET and union_prop is not None:
+    if not isinstance(json_union_prop, Unset) and json_union_prop is not None:
         params["union_prop"] = json_union_prop
-    if union_prop_with_ref is not UNSET and union_prop_with_ref is not None:
+    if not isinstance(json_union_prop_with_ref, Unset) and json_union_prop_with_ref is not None:
         params["union_prop_with_ref"] = json_union_prop_with_ref
-    if enum_prop is not UNSET and enum_prop is not None:
+    if not isinstance(json_enum_prop, Unset) and json_enum_prop is not None:
         params["enum_prop"] = json_enum_prop
-    if model_prop is not UNSET and model_prop is not None:
-        params["model_prop"] = json_model_prop
+    if not isinstance(json_model_prop, Unset) and json_model_prop is not None:
+        params.update(json_model_prop)
 
     return {
         "url": url,
