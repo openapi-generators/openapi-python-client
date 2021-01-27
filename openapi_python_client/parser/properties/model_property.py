@@ -20,7 +20,6 @@ class ModelProperty(Property):
 
     reference: Reference
     references: List[oai.Reference]
-
     required_properties: List[Property]
     optional_properties: List[Property]
     description: str

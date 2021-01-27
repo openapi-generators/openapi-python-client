@@ -482,7 +482,6 @@ def _property_from_data(
         )
     if data.anyOf or data.oneOf:
         return build_union_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
-    
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data), schemas
     elif data.type == "number":
@@ -587,5 +586,6 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
         else:
             schemas = schemas_or_err
 
+    schemas.errors.extend(errors)
     schemas.errors.extend(resolve_errors)
     return schemas
