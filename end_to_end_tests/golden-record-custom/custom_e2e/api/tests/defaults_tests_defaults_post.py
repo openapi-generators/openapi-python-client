@@ -13,6 +13,7 @@ from dateutil.parser import isoparse
 
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
+from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Unset
 
 
@@ -53,6 +54,7 @@ def httpx_request(
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, None, AnEnum] = UNSET,
+    model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_not_required_not_nullable_datetime_prop: Union[Unset, None, str] = UNSET
@@ -113,6 +115,10 @@ def httpx_request(
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop.value if enum_prop else None
 
+    json_model_prop: Union[Unset, None, Dict[str, Any]] = UNSET
+    if not isinstance(model_prop, Unset):
+        json_model_prop = model_prop.to_dict() if model_prop else None
+
     params: Dict[str, Any] = {
         "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,
     }
@@ -140,6 +146,8 @@ def httpx_request(
         params["union_prop_with_ref"] = json_union_prop_with_ref
     if enum_prop is not UNSET and enum_prop is not None:
         params["enum_prop"] = json_enum_prop
+    if model_prop is not UNSET and model_prop is not None:
+        params["model_prop"] = json_model_prop
 
     response = client.request(
         "post",

@@ -7,6 +7,7 @@ from dateutil.parser import isoparse
 from ...client import Client
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
+from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
 
 
@@ -26,6 +27,7 @@ def _get_kwargs(
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, None, AnEnum] = UNSET,
+    model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -89,6 +91,10 @@ def _get_kwargs(
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop.value if enum_prop else None
 
+    json_model_prop: Union[Unset, None, Dict[str, Any]] = UNSET
+    if not isinstance(model_prop, Unset):
+        json_model_prop = model_prop.to_dict() if model_prop else None
+
     params: Dict[str, Any] = {
         "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,
     }
@@ -116,6 +122,8 @@ def _get_kwargs(
         params["union_prop_with_ref"] = json_union_prop_with_ref
     if enum_prop is not UNSET and enum_prop is not None:
         params["enum_prop"] = json_enum_prop
+    if model_prop is not UNSET and model_prop is not None:
+        params["model_prop"] = json_model_prop
 
     return {
         "url": url,
@@ -163,6 +171,7 @@ def sync_detailed(
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, None, AnEnum] = UNSET,
+    model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -179,6 +188,7 @@ def sync_detailed(
         union_prop=union_prop,
         union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
+        model_prop=model_prop,
     )
 
     response = httpx.post(
@@ -204,6 +214,7 @@ def sync(
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, None, AnEnum] = UNSET,
+    model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -222,6 +233,7 @@ def sync(
         union_prop=union_prop,
         union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
+        model_prop=model_prop,
     ).parsed
 
 
@@ -241,6 +253,7 @@ async def asyncio_detailed(
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, None, AnEnum] = UNSET,
+    model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -257,6 +270,7 @@ async def asyncio_detailed(
         union_prop=union_prop,
         union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
+        model_prop=model_prop,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -281,6 +295,7 @@ async def asyncio(
     union_prop: Union[Unset, None, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, None, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, None, AnEnum] = UNSET,
+    model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -300,5 +315,6 @@ async def asyncio(
             union_prop=union_prop,
             union_prop_with_ref=union_prop_with_ref,
             enum_prop=enum_prop,
+            model_prop=model_prop,
         )
     ).parsed

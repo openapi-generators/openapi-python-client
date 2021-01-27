@@ -47,7 +47,6 @@ safety = "*"
 pytest-cov = "*"
 python-multipart = "*"
 flake8 = "*"
-typer-cli = "^0.0.11"
 
 [tool.taskipy.tasks]
 check = """
@@ -67,7 +66,12 @@ task regen\
 && task regen_custom\
 && task e2e\
 """
-docs = "typer openapi_python_client/cli.py utils docs > usage.md"
+gen-setuppy = """
+poetry build \
+&& tar --strip-components=1 -xvf "$(ls -1 dist/*tar.gz | tail -1)" '*/setup.py' \
+&& isort setup.py \
+&& black setup.py
+"""
 
 [tool.black]
 line-length = 120
@@ -95,5 +99,8 @@ skip = [".venv", "tests/test_templates"]
 omit = ["openapi_python_client/templates/*"]
 
 [build-system]
-requires = ["poetry>=1.0"]
+requires = [
+    "setuptools>=30.3.0,<50",
+    "poetry>=1.0"
+]
 build-backend = "poetry.masonry.api"
