@@ -396,6 +396,14 @@
             },
             "name": "enum_prop",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            "name": "model_prop",
+            "in": "query"
           }
         ],
         "responses": {
