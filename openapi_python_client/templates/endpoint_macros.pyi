@@ -17,12 +17,12 @@ if {{ parameter.python_name }} is not UNSET:
         {% set destination = "json_" + property.python_name %}
         {% if property.template %}
             {% from "property_templates/" + property.template import transform %}
-{{ transform(property, property.python_name, destination) }}
+{{ transform(property, property.python_name, destination, query_parameter=True) }}
         {% endif %}
     {% endfor %}
 params: Dict[str, Any] = {
     {% for property in endpoint.query_parameters %}
-        {% if property.required %}
+        {% if property.required and not property.nullable %}
             {% if property.template %}
     "{{ property.name }}": {{ "json_" + property.python_name }},
             {% else %}
@@ -32,13 +32,12 @@ params: Dict[str, Any] = {
     {% endfor %}
 }
     {% for property in endpoint.query_parameters %}
-        {% if not property.required %}
-            {% set property_name = "json_" + property.python_name if property.template else property.python_name %}
-if {% if not property.required %}not isinstance({{ property_name }}, Unset) and {% endif %}{{ property_name }} is not None:
-            {% if property.json_is_dict %}
-    params.update({{ property_name }})
+        {% if not property.required or property.nullable %}
+if {% if not property.required %}{{ property.python_name }} is not UNSET and {% endif %}{{ property.python_name }} is not None:
+            {% if property.template %}
+    params["{{ property.name }}"] = {{ "json_" + property.python_name }}
             {% else %}
-    params["{{ property.name }}"] = {{ property_name }}
+    params["{{ property.name }}"] = {{ property.python_name }}
             {% endif %}
         {% endif %}
     {% endfor %}
@@ -97,7 +96,7 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {% endif %}
 {# query parameters #}
 {% for parameter in endpoint.query_parameters %}
-{{ parameter.to_string() }},
+{{ parameter.to_string(query_parameter=True) }},
 {% endfor %}
 {% for parameter in endpoint.header_parameters %}
 {{ parameter.to_string() }},

@@ -6,7 +6,7 @@ from dateutil.parser import isoparse
 some_source = date(2020, 10, 12)
 
 
-some_destination: Union[Unset, str] = UNSET
+some_destination: Union[Unset, None, str] = UNSET
 if not isinstance(some_source, Unset):
 
     some_destination = some_source.isoformat() if some_source else None

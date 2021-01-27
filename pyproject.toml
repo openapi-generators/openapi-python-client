@@ -47,6 +47,7 @@ safety = "*"
 pytest-cov = "*"
 python-multipart = "*"
 flake8 = "*"
+typer-cli = "^0.0.11"
 
 [tool.taskipy.tasks]
 check = """
@@ -55,8 +56,9 @@ isort .\
  && flake8 openapi_python_client\
  && safety check --bare\
  && mypy openapi_python_client\
- && pytest --cov openapi_python_client tests --cov-report=term-missing\
+ && task unit\
 """
+unit = "pytest --cov openapi_python_client tests --cov-report=term-missing"
 regen = "python -m end_to_end_tests.regen_golden_record"
 regen_custom = "python -m end_to_end_tests.regen_golden_record custom"
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
@@ -65,12 +67,7 @@ task regen\
 && task regen_custom\
 && task e2e\
 """
-gen-setuppy = """
-poetry build \
-&& tar --strip-components=1 -xvf "$(ls -1 dist/*tar.gz | tail -1)" '*/setup.py' \
-&& isort setup.py \
-&& black setup.py
-"""
+docs = "typer openapi_python_client/cli.py utils docs > usage.md"
 
 [tool.black]
 line-length = 120
@@ -98,8 +95,5 @@ skip = [".venv", "tests/test_templates"]
 omit = ["openapi_python_client/templates/*"]
 
 [build-system]
-requires = [
-    "setuptools>=30.3.0,<50",
-    "poetry>=1.0"
-]
+requires = ["poetry>=1.0"]
 build-backend = "poetry.masonry.api"
