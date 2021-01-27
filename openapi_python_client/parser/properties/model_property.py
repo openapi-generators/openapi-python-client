@@ -27,6 +27,7 @@ class ModelProperty(Property):
     additional_properties: Union[bool, Property]
 
     template: ClassVar[str] = "model_property.pyi"
+    json_is_dict: ClassVar[bool] = True
 
     def resolve_references(
         self, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas

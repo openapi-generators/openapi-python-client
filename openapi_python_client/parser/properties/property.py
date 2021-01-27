@@ -28,6 +28,7 @@ class Property:
     python_name: str = attr.ib(init=False)
 
     template: ClassVar[Optional[str]] = None
+    json_is_dict: ClassVar[bool] = False
 
     def __attrs_post_init__(self) -> None:
         object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(self.name)))

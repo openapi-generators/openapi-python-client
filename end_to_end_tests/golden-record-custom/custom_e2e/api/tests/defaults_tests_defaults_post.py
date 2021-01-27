@@ -13,6 +13,7 @@ from dateutil.parser import isoparse
 
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
+from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Unset
 
 
@@ -50,6 +51,7 @@ def httpx_request(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_datetime_prop: Union[Unset, str] = UNSET
@@ -89,27 +91,33 @@ def httpx_request(
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop
 
+    json_model_prop: Union[Unset, Dict[str, Any]] = UNSET
+    if not isinstance(model_prop, Unset):
+        json_model_prop = model_prop.to_dict()
+
     params: Dict[str, Any] = {}
-    if string_prop is not UNSET:
+    if not isinstance(string_prop, Unset) and string_prop is not None:
         params["string_prop"] = string_prop
-    if datetime_prop is not UNSET:
+    if not isinstance(json_datetime_prop, Unset) and json_datetime_prop is not None:
         params["datetime_prop"] = json_datetime_prop
-    if date_prop is not UNSET:
+    if not isinstance(json_date_prop, Unset) and json_date_prop is not None:
         params["date_prop"] = json_date_prop
-    if float_prop is not UNSET:
+    if not isinstance(float_prop, Unset) and float_prop is not None:
         params["float_prop"] = float_prop
-    if int_prop is not UNSET:
+    if not isinstance(int_prop, Unset) and int_prop is not None:
         params["int_prop"] = int_prop
-    if boolean_prop is not UNSET:
+    if not isinstance(boolean_prop, Unset) and boolean_prop is not None:
         params["boolean_prop"] = boolean_prop
-    if list_prop is not UNSET:
+    if not isinstance(json_list_prop, Unset) and json_list_prop is not None:
         params["list_prop"] = json_list_prop
-    if union_prop is not UNSET:
+    if not isinstance(json_union_prop, Unset) and json_union_prop is not None:
         params["union_prop"] = json_union_prop
-    if union_prop_with_ref is not UNSET:
+    if not isinstance(json_union_prop_with_ref, Unset) and json_union_prop_with_ref is not None:
         params["union_prop_with_ref"] = json_union_prop_with_ref
-    if enum_prop is not UNSET:
+    if not isinstance(json_enum_prop, Unset) and json_enum_prop is not None:
         params["enum_prop"] = json_enum_prop
+    if not isinstance(json_model_prop, Unset) and json_model_prop is not None:
+        params.update(json_model_prop)
 
     response = client.request(
         "post",
