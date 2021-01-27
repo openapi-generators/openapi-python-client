@@ -667,7 +667,18 @@
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable", "model", "nullable_model"],
+        "required": [
+          "an_enum_value",
+          "aCamelDateTime",
+          "a_date",
+          "a_nullable_date",
+          "required_nullable",
+          "required_not_nullable",
+          "model",
+          "nullable_model",
+          "one_of_models",
+          "nullable_one_of_models"
+        ],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -764,6 +775,50 @@
             "allOf": [
               {
                 "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "nullable_one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "not_required_one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "not_required_nullable_one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": true
