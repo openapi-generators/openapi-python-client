@@ -176,7 +176,7 @@ def test_resolve_references_nested_allof(mocker):
                     ),
                 ]
             ),
-        }
+        },
     )
 
     components = {**schemas, "Model": model_schema}

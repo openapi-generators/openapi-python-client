@@ -1,5 +1,5 @@
 {% macro construct(property, source, initial_value=None) %}
-{% if property.required %}
+{% if property.required and not property.nullable %}
 {{ property.python_name }} = {{ property.reference.class_name }}.from_dict({{ source }})
 {% else %}
 {% if initial_value != None %}
@@ -10,7 +10,7 @@
 {{ property.python_name }}: {{ property.get_type_string() }} = UNSET
 {% endif %}
 _{{ property.python_name }} = {{source}}
-if _{{ property.python_name }} is not None and not isinstance(_{{ property.python_name }},  Unset):
+if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{% if property.nullable and not property.required %} and {% endif %}{% if not property.required %}not isinstance(_{{ property.python_name }},  Unset){% endif %}:
     {{ property.python_name }} = {{ property.reference.class_name }}.from_dict(cast(Dict[str, Any], _{{ property.python_name }}))
 {% endif %}
 {% endmacro %}
