@@ -16,45 +16,55 @@ MODULE_NAME = "openapi_python_client.parser.properties"
 
 
 class TestProperty:
-    def test_get_type_string(self, mocker):
+    @pytest.mark.parametrize(
+        "query_parameter,nullable,required,no_optional,expected",
+        [
+            (False, False, False, False, "Union[Unset, TestType]"),
+            (False, False, False, True, "TestType"),
+            (False, False, True, False, "TestType"),
+            (False, False, True, True, "TestType"),
+            (False, True, False, False, "Union[Unset, None, TestType]"),
+            (False, True, False, True, "TestType"),
+            (False, True, True, False, "Optional[TestType]"),
+            (False, True, True, True, "TestType"),
+            (True, False, False, False, "Union[Unset, None, TestType]"),
+            (True, False, False, True, "TestType"),
+            (True, False, True, False, "TestType"),
+            (True, False, True, True, "TestType"),
+            (True, True, False, False, "Union[Unset, None, TestType]"),
+            (True, True, False, True, "TestType"),
+            (True, True, True, False, "Optional[TestType]"),
+            (True, True, True, True, "TestType"),
+        ],
+    )
+    def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
         from openapi_python_client.parser.properties import Property
 
         mocker.patch.object(Property, "_type_string", "TestType")
-        p = Property(name="test", required=True, default=None, nullable=False)
+        p = Property(name="test", required=required, default=None, nullable=nullable)
+        assert p.get_type_string(no_optional=no_optional, query_parameter=query_parameter) == expected
 
-        base_type_string = f"TestType"
-
-        assert p.get_type_string() == base_type_string
-
-        p = Property(name="test", required=True, default=None, nullable=True)
-        assert p.get_type_string() == f"Optional[{base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = Property(name="test", required=False, default=None, nullable=True)
-        assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = Property(name="test", required=False, default=None, nullable=False)
-        assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-    def test_to_string(self, mocker):
+    @pytest.mark.parametrize(
+        "query_parameter,default,required,expected",
+        [
+            (False, None, False, "test: Union[Unset, TestType] = UNSET"),
+            (False, None, True, "test: TestType"),
+            (False, "Test", False, "test: Union[Unset, TestType] = Test"),
+            (False, "Test", True, "test: TestType = Test"),
+            (True, None, False, "test: Union[Unset, None, TestType] = UNSET"),
+            (True, None, True, "test: TestType"),
+            (True, "Test", False, "test: Union[Unset, None, TestType] = Test"),
+            (True, "Test", True, "test: TestType = Test"),
+        ],
+    )
+    def test_to_string(self, mocker, query_parameter, default, required, expected):
         from openapi_python_client.parser.properties import Property
 
         name = "test"
-        get_type_string = mocker.patch.object(Property, "get_type_string")
-        p = Property(name=name, required=True, default=None, nullable=False)
+        mocker.patch.object(Property, "_type_string", "TestType")
+        p = Property(name=name, required=required, default=default, nullable=False)
 
-        assert p.to_string() == f"{name}: {get_type_string()}"
-
-        p = Property(name=name, required=False, default=None, nullable=False)
-        assert p.to_string() == f"{name}: {get_type_string()} = UNSET"
-
-        p = Property(name=name, required=True, default=None, nullable=False)
-        assert p.to_string() == f"{name}: {get_type_string()}"
-
-        p = Property(name=name, required=True, default="TEST", nullable=False)
-        assert p.to_string() == f"{name}: {get_type_string()} = TEST"
+        assert p.to_string(query_parameter=query_parameter) == expected
 
     def test_get_imports(self):
         from openapi_python_client.parser.properties import Property
@@ -87,7 +97,7 @@ class TestStringProperty:
         assert p.get_type_string() == f"Optional[{base_type_string}]"
 
         p = StringProperty(name="test", required=False, default=None, nullable=True)
-        assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
 
         p = StringProperty(name="test", required=False, default=None, nullable=False)
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
@@ -202,7 +212,7 @@ class TestListProperty:
         assert p.get_type_string(no_optional=True) == base_type_string
 
         p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=True)
-        assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
 
         p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=False)
@@ -242,7 +252,28 @@ class TestListProperty:
 
 
 class TestUnionProperty:
-    def test_get_type_string(self, mocker):
+    @pytest.mark.parametrize(
+        "query_parameter,nullable,required,no_optional,expected",
+        [
+            (False, False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
+            (False, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (False, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
+            (False, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
+            (True, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+        ],
+    )
+    def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
         from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
@@ -251,46 +282,13 @@ class TestUnionProperty:
         inner_property_2.get_type_string.return_value = "inner_type_string_2"
         p = UnionProperty(
             name="test",
-            required=True,
+            required=required,
             default=None,
             inner_properties=[inner_property_1, inner_property_2],
-            nullable=False,
+            nullable=nullable,
         )
 
-        base_type_string = f"Union[inner_type_string_1, inner_type_string_2]"
-
-        assert p.get_type_string() == base_type_string
-
-        p = UnionProperty(
-            name="test",
-            required=True,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=True,
-        )
-        assert p.get_type_string() == f"Optional[{base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        base_type_string_with_unset = f"Union[Unset, inner_type_string_1, inner_type_string_2]"
-        p = UnionProperty(
-            name="test",
-            required=False,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=True,
-        )
-        assert p.get_type_string() == f"Optional[{base_type_string_with_unset}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = UnionProperty(
-            name="test",
-            required=False,
-            default=None,
-            inner_properties=[inner_property_1, inner_property_2],
-            nullable=False,
-        )
-        assert p.get_type_string() == base_type_string_with_unset
-        assert p.get_type_string(no_optional=True) == base_type_string
+        assert p.get_type_string(query_parameter=query_parameter, no_optional=no_optional) == expected
 
     def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty
@@ -389,7 +387,7 @@ class TestEnumProperty:
             reference=fake_reference,
             value_type=str,
         )
-        assert p.get_type_string() == f"Union[Unset, Optional[{base_type_string}]]"
+        assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
 
         p = properties.EnumProperty(
@@ -990,7 +988,6 @@ class TestStringBasedProperty:
 def test_build_schemas(mocker):
     build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
     in_data = {"1": mocker.MagicMock(enum=None), "2": mocker.MagicMock(enum=None), "3": mocker.MagicMock(enum=None)}
-
     model_1 = mocker.MagicMock()
     schemas_1 = mocker.MagicMock()
     model_2 = mocker.MagicMock()

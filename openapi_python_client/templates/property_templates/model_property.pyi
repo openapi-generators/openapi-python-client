@@ -15,7 +15,7 @@ if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{
 {% endif %}
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
@@ -23,9 +23,9 @@ if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{
 {{ destination }} = {{ source }}.to_dict()
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: Union[{% if property.nullable %}None, {% endif %}Unset, Dict[str, Any]]{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
+{% if property.nullable or query_parameter %}
     {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
 {% else %}
     {{ destination }} = {{ source }}.to_dict()

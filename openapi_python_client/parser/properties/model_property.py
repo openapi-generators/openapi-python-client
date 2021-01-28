@@ -25,6 +25,7 @@ class ModelProperty(Property):
     description: str
     relative_imports: Set[str]
     additional_properties: Union[bool, Property]
+    _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.pyi"
     json_is_dict: ClassVar[bool] = True
@@ -72,16 +73,8 @@ class ModelProperty(Property):
 
         return schemas
 
-    def get_type_string(self, no_optional: bool = False) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        type_string = self.reference.class_name
-        if no_optional:
-            return type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        if not self.required:
-            type_string = f"Union[{type_string}, Unset]"
-        return type_string
+    def get_base_type_string(self) -> str:
+        return self.reference.class_name
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """

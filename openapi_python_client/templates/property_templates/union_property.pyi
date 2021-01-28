@@ -24,20 +24,20 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
-{% if not property.required %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %}
+{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
+{% if not property.required or property.nullable %}
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %}
 
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
 {% endif %}
-{% if property.nullable %}
+{% if property.nullable or (query_parameter and not property.required) %}
     {% if property.required %}
 if {{ source }} is None:
     {% else %}{# There's an if UNSET statement before this #}
 elif {{ source }} is None:
     {% endif %}
-    {{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = None
+    {{ destination }} = None
 {% endif %}
 {% for inner_property in property.inner_properties_with_template() %}
     {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}

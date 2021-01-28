@@ -9,7 +9,7 @@ if _{{ property.python_name }} is not None:
 {% endif %}
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.value if {{ source }} else None
@@ -17,12 +17,12 @@ if _{{ property.python_name }} is not None:
 {{ destination }} = {{ source }}.value
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
-    {{ destination }} = {{ source }} if {{ source }} else None
+{% if property.nullable or query_parameter %}
+    {{ destination }} = {{ source }}.value if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}
+    {{ destination }} = {{ source }}.value
 {% endif %}
 {% endif %}
 {% endmacro %}
