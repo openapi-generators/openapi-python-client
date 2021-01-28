@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, Union
 
 import attr
 
@@ -34,9 +34,7 @@ class ModelWithPrimitiveAdditionalProperties:
         a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
         _a_date_holder = d.pop("a_date_holder", UNSET)
         if not isinstance(_a_date_holder, Unset):
-            a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(
-                cast(Dict[str, Any], _a_date_holder)
-            )
+            a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(_a_date_holder)
 
         model_with_primitive_additional_properties = ModelWithPrimitiveAdditionalProperties(
             a_date_holder=a_date_holder,

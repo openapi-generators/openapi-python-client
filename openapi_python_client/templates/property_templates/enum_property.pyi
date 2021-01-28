@@ -9,6 +9,8 @@ if _{{ property.python_name }} is not None:
 {% endif %}
 {% endmacro %}
 
+{% macro check_type_for_construct(source) %}(isinstance({{ source }}, int) or isinstance({{ source }}, str)){% endmacro %}
+
 {% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}

@@ -1,17 +1,28 @@
 {% macro construct(property, source, initial_value=None) %}
-def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string() }}:
-    data = None if isinstance(data, Unset) else data
+def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=True) }}) -> {{ property.get_type_string() }}:
     {{ property.python_name }}: {{ property.get_type_string() }}
+    {% if "None" in property.get_type_strings_in_union(json=True) %}
+    if data is None:
+        return data
+    {% endif %}
+    {% if "Unset" in property.get_type_strings_in_union(json=True) %}
+    if isinstance(data, Unset):
+        return data
+    {% endif %}
     {% for inner_property in property.inner_properties_with_template() %}
     {% if not loop.last or property.has_properties_without_templates %}
     try:
-    {% from "property_templates/" + inner_property.template import construct %}
+    {% from "property_templates/" + inner_property.template import construct, check_type_for_construct %}
+        if not {{ check_type_for_construct("data") }}:
+            raise TypeError()
         {{ construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
         return {{ property.python_name }}
     except: # noqa: E722
         pass
     {% else  %}{# Don't do try/except for the last one #}
-    {% from "property_templates/" + inner_property.template import construct %}
+    {% from "property_templates/" + inner_property.template import construct, check_type_for_construct %}
+    if not {{ check_type_for_construct("data") }}:
+        raise TypeError()
     {{ construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
     return {{ property.python_name }}
     {% endif %}
@@ -23,6 +34,9 @@ def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string(
 
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
+
+{# For now we assume there will be no unions of unions #}
+{% macro check_type_for_construct(source) %}True{% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if not property.required or property.nullable %}

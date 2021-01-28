@@ -17,6 +17,8 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 {% endif %}
 {% endmacro %}
 
+{% macro check_type_for_construct(source) %}isinstance({{ source }}, list){% endmacro %}
+
 {% macro _transform(property, source, destination) %}
 {% set inner_property = property.inner_property %}
 {% if inner_property.template %}

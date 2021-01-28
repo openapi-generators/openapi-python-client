@@ -11,9 +11,11 @@
 {% endif %}
 _{{ property.python_name }} = {{source}}
 if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{% if property.nullable and not property.required %} and {% endif %}{% if not property.required %}not isinstance(_{{ property.python_name }},  Unset){% endif %}:
-    {{ property.python_name }} = {{ property.reference.class_name }}.from_dict(cast(Dict[str, Any], _{{ property.python_name }}))
+    {{ property.python_name }} = {{ property.reference.class_name }}.from_dict(_{{ property.python_name }})
 {% endif %}
 {% endmacro %}
+
+{% macro check_type_for_construct(source) %}isinstance({{ source }}, dict){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if property.required %}

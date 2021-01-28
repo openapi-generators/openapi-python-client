@@ -169,13 +169,34 @@ class UnionProperty(Property):
             self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
         )
 
-    def _get_inner_prop_string(self, json: bool = False) -> str:
+    def _get_inner_type_strings(self, json: bool = False) -> List[str]:
         inner_types = [p.get_type_string(no_optional=True, json=json) for p in self.inner_properties]
         unique_inner_types = list(dict.fromkeys(inner_types))
-        return ", ".join(unique_inner_types)
+        return unique_inner_types
 
     def get_base_type_string(self, json: bool = False) -> str:
-        return f"Union[{self._get_inner_prop_string(json=json)}]"
+        return f"Union[{', '.join(self._get_inner_type_strings(json=json))}]"
+
+    def get_type_strings_in_union(
+        self, no_optional: bool = False, query_parameter: bool = False, json: bool = False
+    ) -> List[str]:
+        type_strings = self._get_inner_type_strings(json=json)
+        if no_optional:
+            return type_strings
+        if self.required:
+            if self.nullable:
+                return ["None"] + type_strings
+            else:
+                return type_strings
+        else:
+            if self.nullable:
+                return ["Unset", "None"] + type_strings
+            else:
+                if query_parameter:
+                    # For query parameters, None has the same meaning as Unset
+                    return ["Unset", "None"] + type_strings
+                else:
+                    return ["Unset"] + type_strings
 
     def get_type_string(self, no_optional: bool = False, query_parameter: bool = False, json: bool = False) -> str:
         """
@@ -184,23 +205,10 @@ class UnionProperty(Property):
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_string = self.get_base_type_string(json=json)
-        if no_optional:
-            return type_string
-        if self.required:
-            if self.nullable:
-                return f"Union[None, {self._get_inner_prop_string(json=json)}]"
-            else:
-                return type_string
-        else:
-            if self.nullable:
-                return f"Union[Unset, None, {self._get_inner_prop_string(json=json)}]"
-            else:
-                if query_parameter:
-                    # For query parameters, None has the same meaning as Unset
-                    return f"Union[Unset, None, {self._get_inner_prop_string(json=json)}]"
-                else:
-                    return f"Union[Unset, {self._get_inner_prop_string(json=json)}]"
+        type_strings_in_union = self.get_type_strings_in_union(
+            no_optional=no_optional, query_parameter=query_parameter, json=json
+        )
+        return f"Union[{', '.join(type_strings_in_union)}]"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """

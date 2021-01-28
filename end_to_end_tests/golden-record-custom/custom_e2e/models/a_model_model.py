@@ -40,10 +40,13 @@ class AModelModel:
     def from_dict(src_dict: Dict[str, Any]) -> "AModelModel":
         d = src_dict.copy()
 
-        def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
-            data = None if isinstance(data, Unset) else data
+        def _parse_a_property(data: Union[Unset, int]) -> Union[Unset, AnEnum, AnIntEnum]:
             a_property: Union[Unset, AnEnum, AnIntEnum]
+            if isinstance(data, Unset):
+                return data
             try:
+                if not (isinstance(data, int) or isinstance(data, str)):
+                    raise TypeError()
                 a_property = UNSET
                 _a_property = data
                 if _a_property is not None:
@@ -52,6 +55,8 @@ class AModelModel:
                 return a_property
             except:  # noqa: E722
                 pass
+            if not (isinstance(data, int) or isinstance(data, str)):
+                raise TypeError()
             a_property = UNSET
             _a_property = data
             if _a_property is not None:
