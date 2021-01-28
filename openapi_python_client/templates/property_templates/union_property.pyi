@@ -1,7 +1,14 @@
 {% macro construct(property, source, initial_value=None) %}
-def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string() }}:
-    data = None if isinstance(data, Unset) else data
+def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=True) }}) -> {{ property.get_type_string() }}:
     {{ property.python_name }}: {{ property.get_type_string() }}
+    {% if "None" in property.get_type_string(json=True) %}
+    if data is None:
+        return data
+    {% endif %}
+    {% if "Unset" in property.get_type_string(json=True) %}
+    if isinstance(data, Unset):
+        return data
+    {% endif %}
     {% for inner_property in property.inner_properties_with_template() %}
     {% if not loop.last or property.has_properties_without_templates %}
     try:

@@ -38,13 +38,14 @@ class ModelWithUnionProperty:
     def from_dict(src_dict: Dict[str, Any]) -> "ModelWithUnionProperty":
         d = src_dict.copy()
 
-        def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
-            data = None if isinstance(data, Unset) else data
+        def _parse_a_property(data: Union[Unset, int]) -> Union[Unset, AnEnum, AnIntEnum]:
             a_property: Union[Unset, AnEnum, AnIntEnum]
+            if isinstance(data, Unset):
+                return data
             try:
                 a_property = UNSET
                 _a_property = data
-                if _a_property is not None:
+                if _a_property is not None and not isinstance(_a_property, Unset):
                     a_property = AnEnum(_a_property)
 
                 return a_property
@@ -52,7 +53,7 @@ class ModelWithUnionProperty:
                 pass
             a_property = UNSET
             _a_property = data
-            if _a_property is not None:
+            if _a_property is not None and not isinstance(_a_property, Unset):
                 a_property = AnIntEnum(_a_property)
 
             return a_property

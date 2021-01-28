@@ -4,7 +4,7 @@
 {% else %}
 {{ property.python_name }} = {{ initial_value }}
 _{{ property.python_name }} = {{ source }}
-if _{{ property.python_name }} is not None:
+if _{{ property.python_name }} is not None and not isinstance(_{{ property.python_name }}, Unset):
     {{ property.python_name }} = {{ property.reference.class_name }}(_{{ property.python_name }})
 {% endif %}
 {% endmacro %}
