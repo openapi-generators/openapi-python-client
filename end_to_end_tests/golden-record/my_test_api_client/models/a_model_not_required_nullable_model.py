@@ -45,7 +45,7 @@ class AModelNotRequiredNullableModel:
             if isinstance(data, Unset):
                 return data
             try:
-                if not isinstance(data, int):
+                if not (isinstance(data, int) or isinstance(data, str)):
                     raise TypeError()
                 a_property = UNSET
                 _a_property = data
@@ -55,7 +55,7 @@ class AModelNotRequiredNullableModel:
                 return a_property
             except:  # noqa: E722
                 pass
-            if not isinstance(data, int):
+            if not (isinstance(data, int) or isinstance(data, str)):
                 raise TypeError()
             a_property = UNSET
             _a_property = data
