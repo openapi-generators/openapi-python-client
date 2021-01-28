@@ -819,6 +819,9 @@
               },
               {
                 "ref": "#components/schemas/ModelWithUnionProperty"
+              },
+              {
+                "type": "string"
               }
             ],
             "nullable": true

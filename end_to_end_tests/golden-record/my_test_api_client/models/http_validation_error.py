@@ -34,8 +34,6 @@ class HTTPValidationError:
         detail = []
         _detail = d.pop("detail", UNSET)
         for detail_item_data in _detail or []:
-            if not isinstance(detail_item_data, dict):
-                raise ValueError("Cannot construct model from value " + str(detail_item_data))
             detail_item = ValidationError.from_dict(detail_item_data)
 
             detail.append(detail_item)

@@ -33,8 +33,6 @@ class ModelWithPrimitiveAdditionalProperties:
         d = src_dict.copy()
         a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
         if d.pop("a_date_holder", UNSET) is not None and not isinstance(d.pop("a_date_holder", UNSET), Unset):
-            if not isinstance(d.pop("a_date_holder", UNSET), dict):
-                raise ValueError("Cannot construct model from value " + str(d.pop("a_date_holder", UNSET)))
             a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(d.pop("a_date_holder", UNSET))
 
         model_with_primitive_additional_properties = ModelWithPrimitiveAdditionalProperties(

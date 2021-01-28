@@ -1,7 +1,5 @@
 {% macro construct(property, source, initial_value=None) %}
 {% if property.required and not property.nullable %}
-if not isinstance({{ source }}, dict):
-    raise ValueError("Cannot construct model from value " + str({{ source }}))
 {{ property.python_name }} = {{ property.reference.class_name }}.from_dict({{ source }})
 {% else %}
 {% if initial_value != None %}
@@ -12,11 +10,11 @@ if not isinstance({{ source }}, dict):
 {{ property.python_name }}: {{ property.get_type_string() }} = UNSET
 {% endif %}
 if {{ source }} is not None and not isinstance({{ source }},  Unset):
-    if not isinstance({{ source }}, dict):
-        raise ValueError("Cannot construct model from value " + str({{ source }}))
     {{ property.python_name }} = {{ property.reference.class_name }}.from_dict({{ source }})
 {% endif %}
 {% endmacro %}
+
+{% macro check_type_for_construct(source) %}isinstance({{ source }}, dict){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
 {% if property.required %}

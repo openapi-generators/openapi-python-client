@@ -46,13 +46,15 @@ class ModelWithAnyJsonProperties:
                 ]
                 try:
                     if not isinstance(data, dict):
-                        raise ValueError("Cannot construct model from value " + str(data))
+                        raise TypeError()
                     additional_property = ModelWithAnyJsonPropertiesAdditionalProperty.from_dict(data)
 
                     return additional_property
                 except:  # noqa: E722
                     pass
                 try:
+                    if not isinstance(data, list):
+                        raise TypeError()
                     additional_property = cast(List[str], data)
 
                     return additional_property

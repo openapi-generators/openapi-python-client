@@ -19,16 +19,12 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[List[AModel],
         response_200 = []
         _response_200 = response.json()
         for response_200_item_data in _response_200:
-            if not isinstance(response_200_item_data, dict):
-                raise ValueError("Cannot construct model from value " + str(response_200_item_data))
             response_200_item = AModel.from_dict(response_200_item_data)
 
             response_200.append(response_200_item)
 
         return response_200
     if response.status_code == 422:
-        if not isinstance(response.json(), dict):
-            raise ValueError("Cannot construct model from value " + str(response.json()))
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422

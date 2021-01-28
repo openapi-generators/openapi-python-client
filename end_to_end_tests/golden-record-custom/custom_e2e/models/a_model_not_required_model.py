@@ -45,6 +45,8 @@ class AModelNotRequiredModel:
             if isinstance(data, Unset):
                 return data
             try:
+                if not isinstance(data, int):
+                    raise TypeError()
                 a_property = UNSET
                 _a_property = data
                 if _a_property is not None and not isinstance(_a_property, Unset):
@@ -53,6 +55,8 @@ class AModelNotRequiredModel:
                 return a_property
             except:  # noqa: E722
                 pass
+            if not isinstance(data, int):
+                raise TypeError()
             a_property = UNSET
             _a_property = data
             if _a_property is not None and not isinstance(_a_property, Unset):
