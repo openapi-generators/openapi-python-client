@@ -1,11 +1,11 @@
 {% macro construct(property, source, initial_value=None) %}
 def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=True) }}) -> {{ property.get_type_string() }}:
     {{ property.python_name }}: {{ property.get_type_string() }}
-    {% if "None" in property.get_type_string(json=True) %}
+    {% if "None" in property.get_type_strings_in_union(json=True) %}
     if data is None:
         return data
     {% endif %}
-    {% if "Unset" in property.get_type_string(json=True) %}
+    {% if "Unset" in property.get_type_strings_in_union(json=True) %}
     if isinstance(data, Unset):
         return data
     {% endif %}
