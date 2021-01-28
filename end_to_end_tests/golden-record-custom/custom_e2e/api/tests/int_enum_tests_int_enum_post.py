@@ -18,6 +18,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPVal
 
         return response_200
     if response.status_code == 422:
+        if not isinstance(response.json(), dict):
+            raise ValueError("Cannot construct model from value " + str(response.json()))
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422

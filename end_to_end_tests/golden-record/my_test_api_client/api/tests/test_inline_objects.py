@@ -30,6 +30,8 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[TestInlineObjectsResponse_200]:
     if response.status_code == 200:
+        if not isinstance(response.json(), dict):
+            raise ValueError("Cannot construct model from value " + str(response.json()))
         response_200 = TestInlineObjectsResponse_200.from_dict(response.json())
 
         return response_200

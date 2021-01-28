@@ -182,16 +182,22 @@ class AModel:
 
         required_not_nullable = d.pop("required_not_nullable")
 
+        if not isinstance(d.pop("model"), dict):
+            raise ValueError("Cannot construct model from value " + str(d.pop("model")))
         model = AModelModel.from_dict(d.pop("model"))
 
         def _parse_one_of_models(data: Union[Dict[str, Any]]) -> Union[FreeFormModel, ModelWithUnionProperty]:
             one_of_models: Union[FreeFormModel, ModelWithUnionProperty]
             try:
+                if not isinstance(data, dict):
+                    raise ValueError("Cannot construct model from value " + str(data))
                 one_of_models = FreeFormModel.from_dict(data)
 
                 return one_of_models
             except:  # noqa: E722
                 pass
+            if not isinstance(data, dict):
+                raise ValueError("Cannot construct model from value " + str(data))
             one_of_models = ModelWithUnionProperty.from_dict(data)
 
             return one_of_models
@@ -224,19 +230,28 @@ class AModel:
         not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
         nullable_model = None
-        _nullable_model = d.pop("nullable_model")
-        if _nullable_model is not None and not isinstance(_nullable_model, Unset):
-            nullable_model = AModelNullableModel.from_dict(_nullable_model)
+        if d.pop("nullable_model") is not None and not isinstance(d.pop("nullable_model"), Unset):
+            if not isinstance(d.pop("nullable_model"), dict):
+                raise ValueError("Cannot construct model from value " + str(d.pop("nullable_model")))
+            nullable_model = AModelNullableModel.from_dict(d.pop("nullable_model"))
 
         not_required_model: Union[Unset, AModelNotRequiredModel] = UNSET
-        _not_required_model = d.pop("not_required_model", UNSET)
-        if _not_required_model is not None and not isinstance(_not_required_model, Unset):
-            not_required_model = AModelNotRequiredModel.from_dict(_not_required_model)
+        if d.pop("not_required_model", UNSET) is not None and not isinstance(d.pop("not_required_model", UNSET), Unset):
+            if not isinstance(d.pop("not_required_model", UNSET), dict):
+                raise ValueError("Cannot construct model from value " + str(d.pop("not_required_model", UNSET)))
+            not_required_model = AModelNotRequiredModel.from_dict(d.pop("not_required_model", UNSET))
 
         not_required_nullable_model = None
-        _not_required_nullable_model = d.pop("not_required_nullable_model", UNSET)
-        if _not_required_nullable_model is not None and not isinstance(_not_required_nullable_model, Unset):
-            not_required_nullable_model = AModelNotRequiredNullableModel.from_dict(_not_required_nullable_model)
+        if d.pop("not_required_nullable_model", UNSET) is not None and not isinstance(
+            d.pop("not_required_nullable_model", UNSET), Unset
+        ):
+            if not isinstance(d.pop("not_required_nullable_model", UNSET), dict):
+                raise ValueError(
+                    "Cannot construct model from value " + str(d.pop("not_required_nullable_model", UNSET))
+                )
+            not_required_nullable_model = AModelNotRequiredNullableModel.from_dict(
+                d.pop("not_required_nullable_model", UNSET)
+            )
 
         def _parse_nullable_one_of_models(
             data: Union[None, Dict[str, Any]]
@@ -245,11 +260,15 @@ class AModel:
             if data is None:
                 return data
             try:
+                if not isinstance(data, dict):
+                    raise ValueError("Cannot construct model from value " + str(data))
                 nullable_one_of_models = FreeFormModel.from_dict(data)
 
                 return nullable_one_of_models
             except:  # noqa: E722
                 pass
+            if not isinstance(data, dict):
+                raise ValueError("Cannot construct model from value " + str(data))
             nullable_one_of_models = ModelWithUnionProperty.from_dict(data)
 
             return nullable_one_of_models
@@ -264,17 +283,19 @@ class AModel:
                 return data
             try:
                 not_required_one_of_models = UNSET
-                _not_required_one_of_models = data
-                if _not_required_one_of_models is not None and not isinstance(_not_required_one_of_models, Unset):
-                    not_required_one_of_models = FreeFormModel.from_dict(_not_required_one_of_models)
+                if data is not None and not isinstance(data, Unset):
+                    if not isinstance(data, dict):
+                        raise ValueError("Cannot construct model from value " + str(data))
+                    not_required_one_of_models = FreeFormModel.from_dict(data)
 
                 return not_required_one_of_models
             except:  # noqa: E722
                 pass
             not_required_one_of_models = UNSET
-            _not_required_one_of_models = data
-            if _not_required_one_of_models is not None and not isinstance(_not_required_one_of_models, Unset):
-                not_required_one_of_models = ModelWithUnionProperty.from_dict(_not_required_one_of_models)
+            if data is not None and not isinstance(data, Unset):
+                if not isinstance(data, dict):
+                    raise ValueError("Cannot construct model from value " + str(data))
+                not_required_one_of_models = ModelWithUnionProperty.from_dict(data)
 
             return not_required_one_of_models
 
@@ -290,23 +311,19 @@ class AModel:
                 return data
             try:
                 not_required_nullable_one_of_models = UNSET
-                _not_required_nullable_one_of_models = data
-                if _not_required_nullable_one_of_models is not None and not isinstance(
-                    _not_required_nullable_one_of_models, Unset
-                ):
-                    not_required_nullable_one_of_models = FreeFormModel.from_dict(_not_required_nullable_one_of_models)
+                if data is not None and not isinstance(data, Unset):
+                    if not isinstance(data, dict):
+                        raise ValueError("Cannot construct model from value " + str(data))
+                    not_required_nullable_one_of_models = FreeFormModel.from_dict(data)
 
                 return not_required_nullable_one_of_models
             except:  # noqa: E722
                 pass
             not_required_nullable_one_of_models = UNSET
-            _not_required_nullable_one_of_models = data
-            if _not_required_nullable_one_of_models is not None and not isinstance(
-                _not_required_nullable_one_of_models, Unset
-            ):
-                not_required_nullable_one_of_models = ModelWithUnionProperty.from_dict(
-                    _not_required_nullable_one_of_models
-                )
+            if data is not None and not isinstance(data, Unset):
+                if not isinstance(data, dict):
+                    raise ValueError("Cannot construct model from value " + str(data))
+                not_required_nullable_one_of_models = ModelWithUnionProperty.from_dict(data)
 
             return not_required_nullable_one_of_models
 

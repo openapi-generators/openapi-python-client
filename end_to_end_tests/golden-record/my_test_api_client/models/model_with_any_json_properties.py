@@ -45,6 +45,8 @@ class ModelWithAnyJsonProperties:
                     ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool
                 ]
                 try:
+                    if not isinstance(data, dict):
+                        raise ValueError("Cannot construct model from value " + str(data))
                     additional_property = ModelWithAnyJsonPropertiesAdditionalProperty.from_dict(data)
 
                     return additional_property

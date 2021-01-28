@@ -41,6 +41,8 @@ class ModelWithAdditionalPropertiesInlined:
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
+            if not isinstance(prop_dict, dict):
+                raise ValueError("Cannot construct model from value " + str(prop_dict))
             additional_property = ModelWithAdditionalPropertiesInlinedAdditionalProperty.from_dict(prop_dict)
 
             additional_properties[prop_name] = additional_property
