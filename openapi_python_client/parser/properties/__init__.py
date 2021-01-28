@@ -177,7 +177,9 @@ class UnionProperty(Property):
     def get_base_type_string(self, json: bool = False) -> str:
         return f"Union[{', '.join(self._get_inner_type_strings(json=json))}]"
 
-    def get_type_strings_in_union(self, no_optional: bool = False, query_parameter: bool = False, json: bool = False) -> List[str]:
+    def get_type_strings_in_union(
+        self, no_optional: bool = False, query_parameter: bool = False, json: bool = False
+    ) -> List[str]:
         type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
@@ -203,9 +205,10 @@ class UnionProperty(Property):
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        return (
-            f"Union[{', '.join(self.get_type_strings_in_union(no_optional=no_optional, query_parameter=query_parameter, json=json))}]"
+        type_strings_in_union = self.get_type_strings_in_union(
+            no_optional=no_optional, query_parameter=query_parameter, json=json
         )
+        return f"Union[{', '.join(type_strings_in_union)}]"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """

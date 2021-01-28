@@ -49,7 +49,7 @@ class AModelNotRequiredNullableModel:
                     raise TypeError()
                 a_property = UNSET
                 _a_property = data
-                if _a_property is not None and not isinstance(_a_property, Unset):
+                if _a_property is not None:
                     a_property = AnEnum(_a_property)
 
                 return a_property
@@ -59,7 +59,7 @@ class AModelNotRequiredNullableModel:
                 raise TypeError()
             a_property = UNSET
             _a_property = data
-            if _a_property is not None and not isinstance(_a_property, Unset):
+            if _a_property is not None:
                 a_property = AnIntEnum(_a_property)
 
             return a_property
