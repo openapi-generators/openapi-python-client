@@ -10,7 +10,7 @@ from ...types import Response
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.pyi" import header_params, query_params, json_body, return_type, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, query_params, json_body, return_type, arguments, client, kwargs, parse_response %}
 
 {% set return_string = return_type(endpoint) %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}

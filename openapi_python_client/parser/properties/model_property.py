@@ -18,7 +18,7 @@ class ModelProperty(Property):
     relative_imports: Set[str]
     additional_properties: Union[bool, Property]
 
-    template: ClassVar[str] = "model_property.pyi"
+    template: ClassVar[str] = "model_property.py.jinja"
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """

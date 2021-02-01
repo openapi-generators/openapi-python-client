@@ -19,7 +19,7 @@ class NoneProperty(Property):
     """ A property that is always None (used for empty schemas) """
 
     _type_string: ClassVar[str] = "None"
-    template: ClassVar[Optional[str]] = "none_property.pyi"
+    template: ClassVar[Optional[str]] = "none_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -38,7 +38,7 @@ class DateTimeProperty(Property):
     """
 
     _type_string: ClassVar[str] = "datetime.datetime"
-    template: ClassVar[str] = "datetime_property.pyi"
+    template: ClassVar[str] = "datetime_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -58,7 +58,7 @@ class DateProperty(Property):
     """ A property of type datetime.date """
 
     _type_string: ClassVar[str] = "datetime.date"
-    template: ClassVar[str] = "date_property.pyi"
+    template: ClassVar[str] = "date_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -78,7 +78,7 @@ class FileProperty(Property):
     """ A property used for uploading files """
 
     _type_string: ClassVar[str] = "File"
-    template: ClassVar[str] = "file_property.pyi"
+    template: ClassVar[str] = "file_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -122,7 +122,7 @@ class ListProperty(Property, Generic[InnerProp]):
     """ A property representing a list (array) of other properties """
 
     inner_property: InnerProp
-    template: ClassVar[str] = "list_property.pyi"
+    template: ClassVar[str] = "list_property.py.jinja"
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """
@@ -158,7 +158,7 @@ class UnionProperty(Property):
     """ A property representing a Union (anyOf) of other properties """
 
     inner_properties: List[Property]
-    template: ClassVar[str] = "union_property.pyi"
+    template: ClassVar[str] = "union_property.py.jinja"
     has_properties_without_templates: bool = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
