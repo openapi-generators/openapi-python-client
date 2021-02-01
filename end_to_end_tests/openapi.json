@@ -622,7 +622,7 @@
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable"],
+        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable", "model", "nullable_model"],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -686,6 +686,42 @@
             "title": "NOT Required AND NOT Nullable",
             "type": "string",
             "nullable": false
+          },
+          "model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "nullable_model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "not_required_model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "not_required_nullable_model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
           }
         },
         "description": "A Model for testing all the ways custom objects can be used ",
