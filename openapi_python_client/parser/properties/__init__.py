@@ -250,7 +250,6 @@ def build_model_property(
     required_properties: List[Property] = []
     optional_properties: List[Property] = []
     relative_imports: Set[str] = set()
-    references: List[oai.Reference] = []
 
     class_name = data.title or name
     if parent_name:
@@ -258,13 +257,18 @@ def build_model_property(
     ref = Reference.from_ref(class_name)
 
     all_props = data.properties or {}
-    if not isinstance(data, oai.Reference) and data.allOf:
-        for sub_prop in data.allOf:
-            if isinstance(sub_prop, oai.Reference):
-                references += [sub_prop]
-            else:
-                all_props.update(sub_prop.properties or {})
-                required_set.update(sub_prop.required or [])
+    for sub_prop in data.allOf or []:
+        if isinstance(sub_prop, oai.Reference):
+            source_name = Reference.from_ref(sub_prop.ref).class_name
+            sub_model = schemas.models.get(source_name)
+            if sub_model is None:
+                return PropertyError(f"Reference {sub_prop.ref} not found"), schemas
+            required_properties.extend(sub_model.required_properties)
+            optional_properties.extend(sub_model.optional_properties)
+            relative_imports.update(sub_model.relative_imports)
+        else:
+            all_props.update(sub_prop.properties or {})
+            required_set.update(sub_prop.required or [])
 
     for key, value in all_props.items():
         prop_required = key in required_set
@@ -302,7 +306,6 @@ def build_model_property(
 
     prop = ModelProperty(
         reference=ref,
-        references=references,
         required_properties=required_properties,
         optional_properties=optional_properties,
         relative_imports=relative_imports,
@@ -555,15 +558,5 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
                 processing = True  # We made some progress this round, do another after it's done
         to_process = next_round
 
-    resolve_errors: List[PropertyError] = []
-    models = list(schemas.models.values())
-    for model in models:
-        schemas_or_err = model.resolve_references(components=components, schemas=schemas)
-        if isinstance(schemas_or_err, PropertyError):
-            resolve_errors.append(schemas_or_err)
-        else:
-            schemas = schemas_or_err
-
     schemas.errors.extend(errors)
-    schemas.errors.extend(resolve_errors)
     return schemas
