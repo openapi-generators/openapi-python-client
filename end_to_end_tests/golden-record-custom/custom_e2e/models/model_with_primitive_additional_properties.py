@@ -35,7 +35,7 @@ class ModelWithPrimitiveAdditionalProperties:
         d = src_dict.copy()
         a_date_holder: Union[ModelWithPrimitiveAdditionalPropertiesADateHolder, Unset] = UNSET
         _a_date_holder = d.pop("a_date_holder", UNSET)
-        if _a_date_holder is not None and not isinstance(_a_date_holder, Unset):
+        if not isinstance(_a_date_holder, Unset):
             a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(
                 cast(Dict[str, Any], _a_date_holder)
             )

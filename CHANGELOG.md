@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `from_dict` method on generated models is now a `@classmethod` instead of `@staticmethod` (#215 & #292). Thanks @forest-benchling!
 - Renamed all templates to end in `.jinja`, and all python-templates to end in `.py.jinja` to fix confusion with the latest version of mypy. Note **this will break existing custom templates until you update your template file names**.
 
+### Fixes
+
+- The generated `from_dict` and `to_dict` methods of models will now properly handle `nullable` and `not required` properties that are themselves generated models (#315). Thanks @forest-benchling!
+
 ## 0.7.3 - 2020-12-21
 
 ### Fixes
