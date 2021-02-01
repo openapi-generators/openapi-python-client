@@ -31,8 +31,8 @@ class AModel:
     attr_1_leading_digit: Union[Unset, str] = UNSET
     not_required_nullable: Union[Unset, None, str] = UNSET
     not_required_not_nullable: Union[Unset, str] = UNSET
-    not_required_model: Union[AModelNotRequiredModel, Unset] = UNSET
-    not_required_nullable_model: Union[Optional[AModelNotRequiredNullableModel], Unset] = UNSET
+    not_required_model: Union[Unset, AModelNotRequiredModel] = UNSET
+    not_required_nullable_model: Union[Unset, None, AModelNotRequiredNullableModel] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         an_enum_value = self.an_enum_value.value
@@ -70,7 +70,7 @@ class AModel:
         if not isinstance(self.not_required_model, Unset):
             not_required_model = self.not_required_model.to_dict()
 
-        not_required_nullable_model: Union[None, Unset, Dict[str, Any]] = UNSET
+        not_required_nullable_model: Union[Unset, None, Dict[str, Any]] = UNSET
         if not isinstance(self.not_required_nullable_model, Unset):
             not_required_nullable_model = (
                 self.not_required_nullable_model.to_dict() if self.not_required_nullable_model else None
@@ -160,7 +160,7 @@ class AModel:
         if _nullable_model is not None:
             nullable_model = AModelNullableModel.from_dict(cast(Dict[str, Any], _nullable_model))
 
-        not_required_model: Union[AModelNotRequiredModel, Unset] = UNSET
+        not_required_model: Union[Unset, AModelNotRequiredModel] = UNSET
         _not_required_model = d.pop("not_required_model", UNSET)
         if not isinstance(_not_required_model, Unset):
             not_required_model = AModelNotRequiredModel.from_dict(cast(Dict[str, Any], _not_required_model))
