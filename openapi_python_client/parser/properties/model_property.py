@@ -19,7 +19,7 @@ class ModelProperty(Property):
     additional_properties: Union[bool, Property]
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
-    template: ClassVar[str] = "model_property.pyi"
+    template: ClassVar[str] = "model_property.py.jinja"
 
     def get_base_type_string(self) -> str:
         return self.reference.class_name

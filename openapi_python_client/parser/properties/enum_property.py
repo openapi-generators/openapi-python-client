@@ -21,7 +21,7 @@ class EnumProperty(Property):
     _json_type_string: ClassVar[str] = "int"
     default: Optional[Any] = attr.ib()
 
-    template: ClassVar[str] = "enum_property.pyi"
+    template: ClassVar[str] = "enum_property.py.jinja"
 
     def get_base_type_string(self) -> str:
         return self.reference.class_name

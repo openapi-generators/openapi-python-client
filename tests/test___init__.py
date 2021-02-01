@@ -379,14 +379,14 @@ class TestProject:
         git_ignore_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
         templates = {
-            "README.md": readme_template,
-            ".gitignore": git_ignore_template,
+            "README.md.jinja": readme_template,
+            ".gitignore.jinja": git_ignore_template,
         }
         project.env.get_template.side_effect = lambda x: templates[x]
 
         project._build_metadata()
 
-        project.env.get_template.assert_has_calls([mocker.call("README.md"), mocker.call(".gitignore")])
+        project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
         readme_template.render.assert_called_once_with(
             description=project.package_description,
             project_name=project.project_name,
@@ -416,14 +416,14 @@ class TestProject:
         git_ignore_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
         templates = {
-            "README.md": readme_template,
-            ".gitignore": git_ignore_template,
+            "README.md.jinja": readme_template,
+            ".gitignore.jinja": git_ignore_template,
         }
         project.env.get_template.side_effect = lambda x: templates[x]
 
         project._build_metadata()
 
-        project.env.get_template.assert_has_calls([mocker.call("README.md"), mocker.call(".gitignore")])
+        project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
         readme_template.render.assert_called_once_with(
             description=project.package_description,
             project_name=project.project_name,
@@ -459,7 +459,7 @@ class TestProject:
 
         pyproject_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
-        template_path = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml"
+        template_path = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
         templates = {
             template_path: pyproject_template,
         }
@@ -491,13 +491,13 @@ class TestProject:
         setup_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
         templates = {
-            "setup.py": setup_template,
+            "setup.py.jinja": setup_template,
         }
         project.env.get_template.side_effect = lambda x: templates[x]
 
         project._build_setup_py()
 
-        project.env.get_template.assert_called_once_with("setup.py")
+        project.env.get_template.assert_called_once_with("setup.py.jinja")
 
         setup_template.render.assert_called_once_with(
             project_name=project.project_name,
