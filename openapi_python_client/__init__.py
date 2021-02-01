@@ -136,14 +136,14 @@ class Project:
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
-        package_init_template = self.env.get_template("package_init.pyi")
+        package_init_template = self.env.get_template("package_init.py.jinja")
         package_init.write_text(package_init_template.render(description=self.package_description))
 
         if self.meta != MetaType.NONE:
             pytyped = self.package_dir / "py.typed"
             pytyped.write_text("# Marker file for PEP 561")
 
-        types_template = self.env.get_template("types.py")
+        types_template = self.env.get_template("types.py.jinja")
         types_path = self.package_dir / "types.py"
         types_path.write_text(types_template.render())
 
@@ -157,7 +157,7 @@ class Project:
 
         # README.md
         readme = self.project_dir / "README.md"
-        readme_template = self.env.get_template("README.md")
+        readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
             readme_template.render(
                 project_name=self.project_name, description=self.package_description, package_name=self.package_name
@@ -166,11 +166,11 @@ class Project:
 
         # .gitignore
         git_ignore_path = self.project_dir / ".gitignore"
-        git_ignore_template = self.env.get_template(".gitignore")
+        git_ignore_template = self.env.get_template(".gitignore.jinja")
         git_ignore_path.write_text(git_ignore_template.render())
 
     def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
-        template = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml"
+        template = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
@@ -183,7 +183,7 @@ class Project:
         )
 
     def _build_setup_py(self) -> None:
-        template = self.env.get_template("setup.py")
+        template = self.env.get_template("setup.py.jinja")
         path = self.project_dir / "setup.py"
         path.write_text(
             template.render(
@@ -201,15 +201,15 @@ class Project:
         models_init = models_dir / "__init__.py"
         imports = []
 
-        model_template = self.env.get_template("model.pyi")
+        model_template = self.env.get_template("model.py.jinja")
         for model in self.openapi.models.values():
             module_path = models_dir / f"{model.reference.module_name}.py"
             module_path.write_text(model_template.render(model=model))
             imports.append(import_string_from_reference(model.reference))
 
         # Generate enums
-        str_enum_template = self.env.get_template("str_enum.pyi")
-        int_enum_template = self.env.get_template("int_enum.pyi")
+        str_enum_template = self.env.get_template("str_enum.py.jinja")
+        int_enum_template = self.env.get_template("int_enum.py.jinja")
         for enum in self.openapi.enums.values():
             module_path = models_dir / f"{enum.reference.module_name}.py"
             if enum.value_type is int:
@@ -218,13 +218,13 @@ class Project:
                 module_path.write_text(str_enum_template.render(enum=enum))
             imports.append(import_string_from_reference(enum.reference))
 
-        models_init_template = self.env.get_template("models_init.pyi")
+        models_init_template = self.env.get_template("models_init.py.jinja")
         models_init.write_text(models_init_template.render(imports=imports))
 
     def _build_api(self) -> None:
         # Generate Client
         client_path = self.package_dir / "client.py"
-        client_template = self.env.get_template("client.pyi")
+        client_template = self.env.get_template("client.py.jinja")
         client_path.write_text(client_template.render())
 
         # Generate endpoints
@@ -233,7 +233,7 @@ class Project:
         api_init = api_dir / "__init__.py"
         api_init.write_text('""" Contains methods for accessing the API """')
 
-        endpoint_template = self.env.get_template("endpoint_module.pyi")
+        endpoint_template = self.env.get_template("endpoint_module.py.jinja")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
             tag = utils.snake_case(tag)
             tag_dir = api_dir / tag
