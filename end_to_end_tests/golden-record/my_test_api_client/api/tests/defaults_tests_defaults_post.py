@@ -30,6 +30,7 @@ def _get_kwargs(
     url = "{}/tests/defaults".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     json_datetime_prop: Union[Unset, str] = UNSET
     if not isinstance(datetime_prop, Unset):
@@ -94,7 +95,7 @@ def _get_kwargs(
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
     }
