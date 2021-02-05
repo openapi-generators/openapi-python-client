@@ -17,6 +17,7 @@ from openapi_python_client import utils
 from .parser import GeneratorData, import_string_from_reference
 from .parser.errors import GeneratorError
 from .utils import snake_case
+from .resolver.schema_resolver import SchemaResolver
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
     from importlib_metadata import version
@@ -318,20 +319,19 @@ def update_existing_client(
 
 
 def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
-    yaml_bytes: bytes
     if url is not None and path is not None:
         return GeneratorError(header="Provide URL or Path, not both.")
-    if url is not None:
-        try:
-            response = httpx.get(url)
-            yaml_bytes = response.content
-        except (httpx.HTTPError, httpcore.NetworkError):
-            return GeneratorError(header="Could not get OpenAPI document from provided URL")
-    elif path is not None:
-        yaml_bytes = path.read_bytes()
-    else:
+
+    if url is None and path is None:
         return GeneratorError(header="No URL or Path provided")
+
+    source: Union[str, Path] = url if url is not None else path
     try:
-        return yaml.safe_load(yaml_bytes)
-    except yaml.YAMLError:
+        resolver = SchemaResolver(source)
+        result = resolver.resolve()
+        if len(result.errors) > 0:
+            return GeneratorError(header=errors.join('; '))
+    except Exception as e:
         return GeneratorError(header="Invalid YAML from provided source")
+
+    return result.schema
