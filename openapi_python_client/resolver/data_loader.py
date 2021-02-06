@@ -1,13 +1,14 @@
 import yaml
+
 from .resolver_types import SchemaData
 
-class DataLoader:
 
+class DataLoader:
     @classmethod
     def load(cls, path: str, data: bytes) -> SchemaData:
-        data_type = path.split('.')[-1]
+        data_type = path.split(".")[-1].casefold()
 
-        if data_type == 'json':
+        if data_type == "json":
             return cls.load_json(data)
         else:
             return cls.load_yaml(data)
@@ -19,4 +20,3 @@ class DataLoader:
     @classmethod
     def load_yaml(cls, data: bytes) -> SchemaData:
         return yaml.safe_load(data)
-

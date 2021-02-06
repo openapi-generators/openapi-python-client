@@ -5,19 +5,16 @@ import subprocess
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Union
+from typing import Any, Dict, Optional, Sequence, Union, cast
 
-import httpcore
-import httpx
-import yaml
 from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 from openapi_python_client import utils
 
 from .parser import GeneratorData, import_string_from_reference
 from .parser.errors import GeneratorError
-from .utils import snake_case
 from .resolver.schema_resolver import SchemaResolver
+from .utils import snake_case
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
     from importlib_metadata import version
@@ -325,13 +322,13 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
     if url is None and path is None:
         return GeneratorError(header="No URL or Path provided")
 
-    source: Union[str, Path] = url if url is not None else path
+    source = cast(Union[str, Path], (url if url is not None else path))
     try:
         resolver = SchemaResolver(source)
         result = resolver.resolve()
         if len(result.errors) > 0:
-            return GeneratorError(header=errors.join('; '))
-    except Exception as e:
+            return GeneratorError(header="; ".join(result.errors))
+    except Exception:
         return GeneratorError(header="Invalid YAML from provided source")
 
     return result.schema
