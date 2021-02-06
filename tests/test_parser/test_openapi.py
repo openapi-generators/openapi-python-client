@@ -294,6 +294,35 @@ class TestEndpoint:
         assert endpoint.form_body_reference == form_body_reference
         assert endpoint.multipart_body_reference == multipart_body_reference
 
+    def test__add_responses_status_code_error(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        schemas = Schemas()
+        response_1_data = mocker.MagicMock()
+        response_2_data = mocker.MagicMock()
+        data = {
+            "not_a_number": response_1_data,
+        }
+        endpoint = Endpoint(
+            path="path",
+            method="method",
+            description=None,
+            name="name",
+            requires_security=False,
+            tag="tag",
+            relative_imports={"import_3"},
+        )
+        parse_error = ParseError(data=mocker.MagicMock())
+        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
+
+        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas)
+
+        assert response.errors == [
+            ParseError(
+                detail=f"Invalid response status code not_a_number (not a number), response will be ommitted from generated client"
+            )
+        ]
+
     def test__add_responses_error(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
