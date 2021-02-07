@@ -1020,13 +1020,43 @@ def test_build_schemas(mocker):
     assert result.errors == [error]
 
 
-def test_build_parse_error_on_reference():
+def test_build_parse_error_on_unknown_local_reference():
     from openapi_python_client.parser.openapi import build_schemas
 
-    ref_schema = oai.Reference.construct()
+    ref_schema = oai.Reference.construct(ref="#/foobar")
     in_data = {"1": ref_schema}
     result = build_schemas(components=in_data)
-    assert result.errors[0] == PropertyError(data=ref_schema, detail="Reference schemas are not supported.")
+    assert result.errors[0] == PropertyError(data=ref_schema, detail="Failed to resolve local reference schemas.")
+
+
+def test_build_parse_success_on_known_local_reference(mocker):
+    from openapi_python_client.parser.openapi import build_schemas
+
+    build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
+    schemas = mocker.MagicMock()
+    build_enum_property = mocker.patch(f"{MODULE_NAME}.build_enum_property", return_value=(mocker.MagicMock(), schemas))
+    in_data = {"1": oai.Reference.construct(ref="#/foobar"), "foobar": mocker.MagicMock(enum=["val1", "val2", "val3"])}
+
+    result = build_schemas(components=in_data)
+
+    assert len(result.errors) == 0
+    assert result.enums["1"] == result.enums["foobar"]
+
+
+def test_build_parse_error_on_remote_reference():
+    from openapi_python_client.parser.openapi import build_schemas
+
+    ref_schemas = [
+        oai.Reference.construct(ref="http://foobar/../foobar.yaml#/foobar"),
+        oai.Reference.construct(ref="https://foobar/foobar.yaml#/foobar"),
+        oai.Reference.construct(ref="../foobar.yaml#/foobar"),
+        oai.Reference.construct(ref="foobar.yaml#/foobar"),
+        oai.Reference.construct(ref="//foobar#/foobar"),
+    ]
+    for ref_schema in ref_schemas:
+        in_data = {"1": ref_schema}
+        result = build_schemas(components=in_data)
+        assert result.errors[0] == PropertyError(data=ref_schema, detail="Remote reference schemas are not supported.")
 
 
 def test_build_enums(mocker):
@@ -1216,3 +1246,171 @@ def test_build_enum_property_bad_default():
 
     assert schemas == schemas
     assert err == PropertyError(detail="B is an invalid default for enum Existing", data=data)
+
+
+def test__is_local_reference():
+    from openapi_python_client.parser.properties import _is_local_reference
+
+    data_set = [
+        ("//foobar#foobar", False),
+        ("foobar#/foobar", False),
+        ("foobar.json", False),
+        ("foobar.yaml", False),
+        ("../foo/bar.json#/foobar", False),
+        ("#/foobar", True),
+        ("#/foo/bar", True),
+    ]
+
+    for data, expected_result in data_set:
+        ref = oai.Reference.construct(ref=data)
+        assert _is_local_reference(ref) == expected_result
+
+
+def test__reference_name():
+    from openapi_python_client.parser.properties import _reference_name
+
+    data_set = [
+        ("#/foobar", "foobar"),
+        ("#/foo/bar", "bar"),
+    ]
+
+    for data, expected_result in data_set:
+        ref = oai.Reference.construct(ref=data)
+        assert _reference_name(ref) == expected_result
+
+
+def test__reference_model_name():
+    from openapi_python_client.parser.properties import _reference_model_name
+
+    data_set = [
+        ("#/foobar", "Foobar"),
+        ("#/foo/bar", "Bar"),
+    ]
+
+    for data, expected_result in data_set:
+        ref = oai.Reference.construct(ref=data)
+        assert _reference_model_name(ref) == expected_result
+
+
+def test__resolve_model_or_enum_reference(mocker):
+    from openapi_python_client.parser.properties import _resolve_model_or_enum_reference
+    from openapi_python_client.parser.properties.schemas import Schemas
+
+    references_by_name = {
+        "FooBarReferenceLoop": oai.Reference.construct(ref="#/foobar"),
+        "FooBarDeeperReferenceLoop": oai.Reference.construct(ref="#/FooBarReferenceLoop"),
+        "BarFooReferenceLoop": oai.Reference.construct(ref="#/barfoo"),
+        "BarFooDeeperReferenceLoop": oai.Reference.construct(ref="#/BarFooReferenceLoop"),
+        "InfiniteReferenceLoop": oai.Reference.construct(ref="#/InfiniteReferenceLoop"),
+        "UnknownReference": oai.Reference.construct(ref="#/unknown"),
+    }
+    schemas = Schemas(enums={"Foobar": 1}, models={"Barfoo": 2})
+
+    res_1 = _resolve_model_or_enum_reference(
+        "FooBarReferenceLoop", references_by_name["FooBarReferenceLoop"], schemas, references_by_name
+    )
+    res_2 = _resolve_model_or_enum_reference(
+        "FooBarDeeperReferenceLoop", references_by_name["FooBarDeeperReferenceLoop"], schemas, references_by_name
+    )
+    res_3 = _resolve_model_or_enum_reference(
+        "BarFooReferenceLoop", references_by_name["BarFooReferenceLoop"], schemas, references_by_name
+    )
+    res_4 = _resolve_model_or_enum_reference(
+        "BarFooDeeperReferenceLoop", references_by_name["BarFooDeeperReferenceLoop"], schemas, references_by_name
+    )
+    res_5 = _resolve_model_or_enum_reference(
+        "InfiniteReferenceLoop", references_by_name["InfiniteReferenceLoop"], schemas, references_by_name
+    )
+    res_6 = _resolve_model_or_enum_reference(
+        "UnknownReference", references_by_name["UnknownReference"], schemas, references_by_name
+    )
+
+    assert res_1 == schemas.enums["Foobar"]
+    assert res_2 == schemas.enums["Foobar"]
+    assert res_3 == schemas.models["Barfoo"]
+    assert res_4 == schemas.models["Barfoo"]
+    assert res_5 == None
+    assert res_6 == None
+
+
+def test__resolve_local_reference_schema(mocker):
+    from openapi_python_client.parser.properties import _resolve_local_reference_schema
+    from openapi_python_client.parser.properties.enum_property import EnumProperty
+    from openapi_python_client.parser.properties.model_property import ModelProperty
+    from openapi_python_client.parser.properties.schemas import Schemas
+
+    references_by_name = {
+        "FooBarReferenceLoop": oai.Reference.construct(ref="#/foobar"),
+        "FooBarDeeperReferenceLoop": oai.Reference.construct(ref="#/FooBarReferenceLoop"),
+        "fooBarLowerCaseReferenceLoop": oai.Reference.construct(ref="#/foobar"),
+        "fooBarLowerCaseDeeperReferenceLoop": oai.Reference.construct(ref="#/fooBarLowerCaseReferenceLoop"),
+        "BarFooReferenceLoop": oai.Reference.construct(ref="#/barfoo"),
+        "BarFooDeeperReferenceLoop": oai.Reference.construct(ref="#/BarFooReferenceLoop"),
+        "InfiniteReferenceLoop": oai.Reference.construct(ref="#/InfiniteReferenceLoop"),
+        "UnknownReference": oai.Reference.construct(ref="#/unknown"),
+    }
+    schemas = Schemas(
+        enums={
+            "Foobar": EnumProperty(
+                name="Foobar",
+                required=False,
+                nullable=True,
+                default="foobar",
+                values=["foobar"],
+                value_type="str",
+                reference="",
+            )
+        },
+        models={
+            "Barfoo": ModelProperty(
+                name="Barfoo",
+                required=False,
+                nullable=True,
+                default="barfoo",
+                reference="",
+                required_properties=[],
+                optional_properties=[],
+                description="",
+                relative_imports=[],
+                additional_properties=[],
+            )
+        },
+    )
+
+    res_1 = _resolve_local_reference_schema(
+        "FooBarReferenceLoop", references_by_name["FooBarReferenceLoop"], schemas, references_by_name
+    )
+    res_2 = _resolve_local_reference_schema(
+        "FooBarDeeperReferenceLoop", references_by_name["FooBarDeeperReferenceLoop"], schemas, references_by_name
+    )
+    res_3 = _resolve_local_reference_schema(
+        "BarFooReferenceLoop", references_by_name["BarFooReferenceLoop"], schemas, references_by_name
+    )
+    res_4 = _resolve_local_reference_schema(
+        "BarFooDeeperReferenceLoop", references_by_name["BarFooDeeperReferenceLoop"], schemas, references_by_name
+    )
+    res_5 = _resolve_local_reference_schema(
+        "fooBarLowerCaseReferenceLoop", references_by_name["fooBarLowerCaseReferenceLoop"], schemas, references_by_name
+    )
+    res_6 = _resolve_local_reference_schema(
+        "fooBarLowerCaseDeeperReferenceLoop",
+        references_by_name["fooBarLowerCaseDeeperReferenceLoop"],
+        schemas,
+        references_by_name,
+    )
+    res_7 = _resolve_local_reference_schema(
+        "InfiniteReferenceLoop", references_by_name["InfiniteReferenceLoop"], schemas, references_by_name
+    )
+    res_8 = _resolve_local_reference_schema(
+        "UnknownReference", references_by_name["UnknownReference"], schemas, references_by_name
+    )
+
+    assert res_1 == res_2 == res_3 == res_4 == res_5 == res_6 == schemas
+    assert schemas.enums["FooBarReferenceLoop"] == schemas.enums["Foobar"]
+    assert schemas.enums["FooBarDeeperReferenceLoop"] == schemas.enums["Foobar"]
+    assert schemas.models["BarFooReferenceLoop"] == schemas.models["Barfoo"]
+    assert schemas.models["BarFooDeeperReferenceLoop"] == schemas.models["Barfoo"]
+    assert schemas.enums["FooBarLowerCaseReferenceLoop"] == schemas.enums["Foobar"]
+    assert schemas.enums["FooBarLowerCaseDeeperReferenceLoop"] == schemas.enums["Foobar"]
+    assert isinstance(res_7, PropertyError)
+    assert isinstance(res_8, PropertyError)

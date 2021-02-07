@@ -525,12 +525,83 @@ def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> U
         return schemas
 
 
+def resolve_reference_and_update_schemas(
+    name: str, data: oai.Reference, schemas: Schemas, references_by_name: Dict[str, oai.Reference]
+) -> Union[Schemas, PropertyError]:
+    if _is_local_reference(data):
+        return _resolve_local_reference_schema(name, data, schemas, references_by_name)
+    else:
+        return _resolve_remote_reference_schema(name, data, schemas, references_by_name)
+
+
+def _resolve_local_reference_schema(
+    name: str, data: oai.Reference, schemas: Schemas, references_by_name: Dict[str, oai.Reference]
+) -> Union[Schemas, PropertyError]:
+    resolved_model_or_enum = _resolve_model_or_enum_reference(name, data, schemas, references_by_name)
+
+    if resolved_model_or_enum:
+        model_name = utils.pascal_case(name)
+
+        if isinstance(resolved_model_or_enum, EnumProperty):
+            schemas.enums[model_name] = resolved_model_or_enum
+
+        elif isinstance(resolved_model_or_enum, ModelProperty):
+            schemas.models[model_name] = resolved_model_or_enum
+
+        return schemas
+    else:
+        return PropertyError(data=data, detail="Failed to resolve local reference schemas.")
+
+
+def _resolve_model_or_enum_reference(
+    name: str, data: oai.Reference, schemas: Schemas, references_by_name: Dict[str, oai.Reference]
+) -> Union[EnumProperty, ModelProperty, None]:
+    target_model = _reference_model_name(data)
+    target_name = _reference_name(data)
+
+    if target_model == name or target_name == name:
+        return None  # Avoid infinite loop
+
+    if target_name in references_by_name:
+        return _resolve_model_or_enum_reference(
+            target_name, references_by_name[target_name], schemas, references_by_name
+        )
+
+    if target_model in schemas.enums:
+        return schemas.enums[target_model]
+    elif target_model in schemas.models:
+        return schemas.models[target_model]
+
+    return None
+
+
+def _resolve_remote_reference_schema(
+    name: str, data: oai.Reference, schemas: Schemas, references_by_name: Dict[str, oai.Reference]
+) -> Union[Schemas, PropertyError]:
+    return PropertyError(data=data, detail="Remote reference schemas are not supported.")
+
+
+def _is_local_reference(reference: oai.Reference) -> bool:
+    return reference.ref.startswith("#", 0)
+
+
+def _reference_model_name(reference: oai.Reference) -> str:
+    return utils.pascal_case(_reference_name(reference))
+
+
+def _reference_name(reference: oai.Reference) -> str:
+    parts = reference.ref.split("/")
+    return parts[-1]
+
+
 def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) -> Schemas:
     """ Get a list of Schemas from an OpenAPI dict """
     schemas = Schemas()
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     processing = True
     errors: List[PropertyError] = []
+    references_by_name: Dict[str, oai.Reference] = dict()
+    references_to_process: List[Tuple[str, oai.Reference]] = list()
 
     # References could have forward References so keep going as long as we are making progress
     while processing:
@@ -540,16 +611,26 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
             if isinstance(data, oai.Reference):
-                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
+                references_by_name[name] = data
+                references_to_process.append((name, data))
                 continue
+
             schemas_or_err = update_schemas_with_data(name, data, schemas)
+
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)
             else:
                 schemas = schemas_or_err
-                processing = True  # We made some progress this round, do another after it's done
-        to_process = next_round
-    schemas.errors.extend(errors)
+                processing = True  # We made some progress this round, do another after it's donea
 
+        to_process = next_round
+
+        for name, reference in references_to_process:
+            schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
+
+            if isinstance(schemas_or_err, PropertyError):
+                errors.append(schemas_or_err)
+
+    schemas.errors.extend(errors)
     return schemas
