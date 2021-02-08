@@ -169,14 +169,29 @@ class Endpoint:
     def _add_responses(*, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
+
+            status_code: int
+            try:
+                status_code = int(code)
+            except ValueError:
+                endpoint.errors.append(
+                    ParseError(
+                        detail=(
+                            f"Invalid response status code {code} (not a number), "
+                            f"response will be ommitted from generated client"
+                        )
+                    )
+                )
+                continue
+
             response, schemas = response_from_data(
-                status_code=int(code), data=response_data, schemas=schemas, parent_name=endpoint.name
+                status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name
             )
             if isinstance(response, ParseError):
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Cannot parse response for status code {code}, "
+                            f"Cannot parse response for status code {status_code}, "
                             f"response will be ommitted from generated client"
                         ),
                         data=response.data,
