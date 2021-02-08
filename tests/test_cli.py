@@ -31,13 +31,16 @@ def test_config_arg(mocker, _create_new_client):
 
     config_path = "config/path"
     path = "cool/path"
+    encoding = "utf-8"
 
-    result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={path}"], catch_exceptions=False)
+    result = runner.invoke(
+        app, [f"--config={config_path}", "generate", f"--path={path}", f"--encoding={encoding}"], catch_exceptions=False
+    )
 
     assert result.exit_code == 0
     load_config.assert_called_once_with(path=Path(config_path))
     _create_new_client.assert_called_once_with(
-        url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY
+        url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, encoding="utf-8"
     )
 
 
@@ -82,7 +85,9 @@ class TestGenerate:
         result = runner.invoke(app, ["generate", f"--url={url}"])
 
         assert result.exit_code == 0
-        _create_new_client.assert_called_once_with(url=url, path=None, custom_template_path=None, meta=MetaType.POETRY)
+        _create_new_client.assert_called_once_with(
+            url=url, path=None, custom_template_path=None, meta=MetaType.POETRY, encoding=None
+        )
 
     def test_generate_path(self, _create_new_client):
         path = "cool/path"
@@ -92,7 +97,7 @@ class TestGenerate:
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, encoding=None
         )
 
     def test_generate_meta(self, _create_new_client):
@@ -103,7 +108,19 @@ class TestGenerate:
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.NONE
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.NONE, encoding=None
+        )
+
+    def test_generate_encoding(self, _create_new_client):
+        path = "cool/path"
+        encoding = "utf-8"
+        from openapi_python_client.cli import MetaType, app
+
+        result = runner.invoke(app, ["generate", f"--path={path}", f"--encoding={encoding}"])
+
+        assert result.exit_code == 0
+        _create_new_client.assert_called_once_with(
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, encoding="utf-8"
         )
 
     def test_generate_handle_errors(self, _create_new_client):

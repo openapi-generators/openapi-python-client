@@ -116,6 +116,7 @@ def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    encoding: Optional[str] = typer.Option(None, help="Set file encoding for client files"),  # type: ignore
     meta: MetaType = _meta_option,
 ) -> None:
     """ Generate a new OpenAPI Client library """
@@ -127,7 +128,9 @@ def generate(
     if url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    errors = create_new_client(url=url, path=path, meta=meta, custom_template_path=custom_template_path)
+    errors = create_new_client(
+        url=url, path=path, meta=meta, custom_template_path=custom_template_path, encoding=encoding
+    )
     handle_errors(errors)
 
 
