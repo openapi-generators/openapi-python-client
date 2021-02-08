@@ -65,27 +65,19 @@ def _get_kwargs(
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop
 
-    params: Dict[str, Any] = {}
-    if string_prop is not UNSET:
-        params["string_prop"] = string_prop
-    if datetime_prop is not UNSET:
-        params["datetime_prop"] = json_datetime_prop
-    if date_prop is not UNSET:
-        params["date_prop"] = json_date_prop
-    if float_prop is not UNSET:
-        params["float_prop"] = float_prop
-    if int_prop is not UNSET:
-        params["int_prop"] = int_prop
-    if boolean_prop is not UNSET:
-        params["boolean_prop"] = boolean_prop
-    if list_prop is not UNSET:
-        params["list_prop"] = json_list_prop
-    if union_prop is not UNSET:
-        params["union_prop"] = json_union_prop
-    if union_prop_with_ref is not UNSET:
-        params["union_prop_with_ref"] = json_union_prop_with_ref
-    if enum_prop is not UNSET:
-        params["enum_prop"] = json_enum_prop
+    params: Dict[str, Any] = {
+        "string_prop": string_prop,
+        "datetime_prop": json_datetime_prop,
+        "date_prop": json_date_prop,
+        "float_prop": float_prop,
+        "int_prop": int_prop,
+        "boolean_prop": boolean_prop,
+        "list_prop": json_list_prop,
+        "union_prop": json_union_prop,
+        "union_prop_with_ref": json_union_prop_with_ref,
+        "enum_prop": json_enum_prop,
+    }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,

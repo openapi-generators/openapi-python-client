@@ -62,6 +62,7 @@ def httpx_request(
         "an_enum_value": json_an_enum_value,
         "some_date": json_some_date,
     }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     response = client.request(
         "get",
