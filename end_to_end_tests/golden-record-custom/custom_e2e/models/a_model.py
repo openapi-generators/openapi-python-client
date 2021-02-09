@@ -77,8 +77,6 @@ class AModel:
         not_required_nullable = self.not_required_nullable
         not_required_not_nullable = self.not_required_not_nullable
         nullable_one_of_models: Union[None, Dict[str, Any]]
-        if isinstance(self.nullable_one_of_models, Unset):
-            nullable_one_of_models = UNSET
         if self.nullable_one_of_models is None:
             nullable_one_of_models = None
         elif isinstance(self.nullable_one_of_models, FreeFormModel):

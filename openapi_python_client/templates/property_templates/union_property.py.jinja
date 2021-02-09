@@ -42,8 +42,10 @@ def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=Tru
 {% if not property.required or property.nullable %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %}
 
+{% if not property.required %}
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
+{% endif %}
 {% endif %}
 {% if property.nullable %}
     {% if property.required %}
