@@ -43,9 +43,10 @@ def httpx_request(
     if not isinstance(query_param, Unset):
         json_query_param = query_param
 
-    params: Dict[str, Any] = {}
-    if not isinstance(json_query_param, Unset) and json_query_param is not None:
-        params["query_param"] = json_query_param
+    params: Dict[str, Any] = {
+        "query_param": json_query_param,
+    }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     response = client.request(
         "get",

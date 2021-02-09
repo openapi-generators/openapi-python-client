@@ -18,7 +18,7 @@ class ModelProperty(Property):
     relative_imports: Set[str]
     additional_properties: Union[bool, Property]
 
-    template: ClassVar[str] = "model_property.pyi"
+    template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
 
     def get_type_string(self, no_optional: bool = False) -> str:

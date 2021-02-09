@@ -71,29 +71,21 @@ def _get_kwargs(
     if not isinstance(model_prop, Unset):
         json_model_prop = model_prop.to_dict()
 
-    params: Dict[str, Any] = {}
-    if not isinstance(string_prop, Unset) and string_prop is not None:
-        params["string_prop"] = string_prop
-    if not isinstance(json_datetime_prop, Unset) and json_datetime_prop is not None:
-        params["datetime_prop"] = json_datetime_prop
-    if not isinstance(json_date_prop, Unset) and json_date_prop is not None:
-        params["date_prop"] = json_date_prop
-    if not isinstance(float_prop, Unset) and float_prop is not None:
-        params["float_prop"] = float_prop
-    if not isinstance(int_prop, Unset) and int_prop is not None:
-        params["int_prop"] = int_prop
-    if not isinstance(boolean_prop, Unset) and boolean_prop is not None:
-        params["boolean_prop"] = boolean_prop
-    if not isinstance(json_list_prop, Unset) and json_list_prop is not None:
-        params["list_prop"] = json_list_prop
-    if not isinstance(json_union_prop, Unset) and json_union_prop is not None:
-        params["union_prop"] = json_union_prop
-    if not isinstance(json_union_prop_with_ref, Unset) and json_union_prop_with_ref is not None:
-        params["union_prop_with_ref"] = json_union_prop_with_ref
-    if not isinstance(json_enum_prop, Unset) and json_enum_prop is not None:
-        params["enum_prop"] = json_enum_prop
-    if not isinstance(json_model_prop, Unset) and json_model_prop is not None:
+    params: Dict[str, Any] = {
+        "string_prop": string_prop,
+        "datetime_prop": json_datetime_prop,
+        "date_prop": json_date_prop,
+        "float_prop": float_prop,
+        "int_prop": int_prop,
+        "boolean_prop": boolean_prop,
+        "list_prop": json_list_prop,
+        "union_prop": json_union_prop,
+        "union_prop_with_ref": json_union_prop_with_ref,
+        "enum_prop": json_enum_prop,
+    }
+    if not isinstance(json_model_prop, Unset):
         params.update(json_model_prop)
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,

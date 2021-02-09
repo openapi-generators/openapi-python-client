@@ -6,7 +6,7 @@ from jinja2 import Template
 
 @pytest.fixture(scope="session")
 def template(env) -> Template:
-    return env.get_template("endpoint_module.pyi")
+    return env.get_template("endpoint_module.py.jinja")
 
 
 def test_async_module(template, mocker):

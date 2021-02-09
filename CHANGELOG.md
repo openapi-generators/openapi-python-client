@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.8.0 - Unreleased
 
+### Breaking Changes
+
+- Generated clients will no longer pass through `None` to query parameters. Previously, any query params set to `None` would surface as empty strings (per the default behavior of `httpx`). This is contrary to the defaults indicated by the OpenAPI 3.0.3 spec. Ommitting these parameters makes us more compliant. If you require a style of `null` to be passed to your query parameters, please request support for the OpenAPI "style" attribute. Thank you to @forest-benchling and @bowenwr for a ton of input on this.
+
 ### Additions
 
 - New `--meta` command line option for specifying what type of metadata should be generated:
@@ -22,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Lowered the minimum version of `python-dateutil` to 2.8.0 for improved compatibility (#298 & #299). Thanks @bowenwr!
 - The `from_dict` method on generated models is now a `@classmethod` instead of `@staticmethod` (#215 & #292). Thanks @forest-benchling!
+- Renamed all templates to end in `.jinja`, and all python-templates to end in `.py.jinja` to fix confusion with the latest version of mypy. Note **this will break existing custom templates until you update your template file names**.
+
+### Fixes
+
+- Parser will softly ignore value error during schema responses' status code convertion from string to integer (not a number). Errors will be reported to the end user and parsing will continue to proceed (#327).
+- The generated `from_dict` and `to_dict` methods of models will now properly handle `nullable` and `not required` properties that are themselves generated models (#315). Thanks @forest-benchling!
 
 ## 0.7.3 - 2020-12-21
 
