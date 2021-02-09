@@ -9,6 +9,8 @@ if _{{ property.python_name }} is not None and _{{ property.python_name }} is no
 {% endif %}
 {% endmacro %}
 
+{% macro check_type_for_construct(source) %}(isinstance({{ source }}, int) or isinstance({{ source }}, str)){% endmacro %}
+
 {% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}
 {% if property.nullable %}
@@ -17,12 +19,12 @@ if _{{ property.python_name }} is not None and _{{ property.python_name }} is no
 {{ destination }} = {{ source }}.value
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-    {{ destination }} = {{ source }} if {{ source }} else None
+    {{ destination }} = {{ source }}.value if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}
+    {{ destination }} = {{ source }}.value
 {% endif %}
 {% endif %}
 {% endmacro %}
