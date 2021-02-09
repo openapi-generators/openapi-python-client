@@ -1,15 +1,15 @@
 {% macro construct(property, source, initial_value="None") %}
-{% if property.required %}
+{% if property.required and not property.nullable %}
 {{ property.python_name }} = {{ property.reference.class_name }}({{ source }})
 {% else %}
 {{ property.python_name }} = {{ initial_value }}
 _{{ property.python_name }} = {{ source }}
-if _{{ property.python_name }} is not None and _{{ property.python_name }} is not UNSET:
+if _{{ property.python_name }} is not None and _{{ property.python_name }} is not UNSET:  # type: ignore
     {{ property.python_name }} = {{ property.reference.class_name }}(_{{ property.python_name }})
 {% endif %}
 {% endmacro %}
 
-{% macro check_type_for_construct(source) %}(isinstance({{ source }}, int) or isinstance({{ source }}, str)){% endmacro %}
+{% macro check_type_for_construct(property, source) %}{% if property.value_type == str %}isinstance({{ source }}, str){% else %}isinstance({{ source }}, int){% endif %}{% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}

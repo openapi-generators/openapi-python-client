@@ -31,7 +31,7 @@ for {{ inner_source }} in {{ source }}:
 {% endif %}
 {% endmacro %}
 
-{% macro check_type_for_construct(source) %}isinstance({{ source }}, list){% endmacro %}
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% set inner_property = property.inner_property %}

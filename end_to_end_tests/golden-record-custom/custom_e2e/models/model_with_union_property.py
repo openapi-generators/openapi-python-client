@@ -45,21 +45,21 @@ class ModelWithUnionProperty:
             if isinstance(data, Unset):
                 return data
             try:
-                if not (isinstance(data, int) or isinstance(data, str)):
+                if not isinstance(data, int):
                     raise TypeError()
                 a_property = UNSET
                 _a_property = data
-                if _a_property is not None and _a_property is not UNSET:
+                if _a_property is not None and _a_property is not UNSET:  # type: ignore
                     a_property = AnEnum(_a_property)
 
                 return a_property
             except:  # noqa: E722
                 pass
-            if not (isinstance(data, int) or isinstance(data, str)):
+            if not isinstance(data, int):
                 raise TypeError()
             a_property = UNSET
             _a_property = data
-            if _a_property is not None and _a_property is not UNSET:
+            if _a_property is not None and _a_property is not UNSET:  # type: ignore
                 a_property = AnIntEnum(_a_property)
 
             return a_property

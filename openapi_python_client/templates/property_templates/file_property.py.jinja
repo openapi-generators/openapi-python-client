@@ -4,7 +4,7 @@
 )
 {% endmacro %}
 
-{% macro check_type_for_construct(source) %}isinstance({{ source }}, bytes){% endmacro %}
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, bytes){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}
