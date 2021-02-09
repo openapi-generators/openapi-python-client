@@ -4,7 +4,7 @@ import httpx
 from attr import asdict
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response
+from ...types import Response, UNSET
 
 import this
 from __future__ import braces

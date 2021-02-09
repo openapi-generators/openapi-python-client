@@ -44,6 +44,7 @@ def httpx_request(
     params: Dict[str, Any] = {
         "int_enum": json_int_enum,
     }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     response = client.request(
         "post",

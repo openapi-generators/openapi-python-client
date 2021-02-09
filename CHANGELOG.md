@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.8.0 - Unreleased
 
+### Breaking Changes
+
+- Generated clients will no longer pass through `None` to query parameters. Previously, any query params set to `None` would surface as empty strings (per the default behavior of `httpx`). This is contrary to the defaults indicated by the OpenAPI 3.0.3 spec. Ommitting these parameters makes us more compliant. If you require a style of `null` to be passed to your query parameters, please request support for the OpenAPI "style" attribute. Thank you to @forest-benchling and @bowenwr for a ton of input on this.
+
 ### Additions
 
 - New `--meta` command line option for specifying what type of metadata should be generated:
