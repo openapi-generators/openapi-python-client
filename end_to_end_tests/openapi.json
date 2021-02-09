@@ -404,6 +404,14 @@
             },
             "name": "model_prop",
             "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            "name": "required_model_prop",
+            "in": "query"
           }
         ],
         "responses": {
