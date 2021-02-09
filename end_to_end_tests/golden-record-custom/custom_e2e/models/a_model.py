@@ -167,7 +167,7 @@ class AModel:
         d = src_dict.copy()
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
-        def _parse_a_camel_date_time(data: Union[str]) -> Union[datetime.datetime, datetime.date]:
+        def _parse_a_camel_date_time(data: str) -> Union[datetime.datetime, datetime.date]:
             a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
                 if not isinstance(data, str):
@@ -189,7 +189,7 @@ class AModel:
 
         required_not_nullable = d.pop("required_not_nullable")
 
-        def _parse_one_of_models(data: Union[Dict[str, Any]]) -> Union[FreeFormModel, ModelWithUnionProperty]:
+        def _parse_one_of_models(data: Dict[str, Any]) -> Union[FreeFormModel, ModelWithUnionProperty]:
             one_of_models: Union[FreeFormModel, ModelWithUnionProperty]
             try:
                 if not isinstance(data, dict):

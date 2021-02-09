@@ -174,11 +174,17 @@ class UnionProperty(Property):
         unique_inner_types = list(dict.fromkeys(inner_types))
         return unique_inner_types
 
+    def _get_type_string_from_inner_type_strings(self, inner_types: List[str]) -> str:
+        if len(inner_types) == 1:
+            return inner_types[0]
+        else:
+            return f"Union[{', '.join(inner_types)}]"
+
     def get_base_type_string(self) -> str:
-        return f"Union[{', '.join(self._get_inner_type_strings(json=False))}]"
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
     def get_base_json_type_string(self) -> str:
-        return f"Union[{', '.join(self._get_inner_type_strings(json=True))}]"
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
     def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> List[str]:
         type_strings = self._get_inner_type_strings(json=json)
@@ -199,7 +205,7 @@ class UnionProperty(Property):
         nested union types.
         """
         type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
-        return f"Union[{', '.join(type_strings_in_union)}]"
+        return self._get_type_string_from_inner_type_strings(type_strings_in_union)
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
