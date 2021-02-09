@@ -41,7 +41,6 @@ class ModelWithUnionProperty:
         d = src_dict.copy()
 
         def _parse_a_property(data: Union[Unset, str, int]) -> Union[Unset, AnEnum, AnIntEnum]:
-            data = None if isinstance(data, Unset) else data
             a_property: Union[Unset, AnEnum, AnIntEnum]
             if isinstance(data, Unset):
                 return data

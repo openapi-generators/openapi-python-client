@@ -17,53 +17,41 @@ MODULE_NAME = "openapi_python_client.parser.properties"
 
 class TestProperty:
     @pytest.mark.parametrize(
-        "query_parameter,nullable,required,no_optional,expected",
+        "nullable,required,no_optional,expected",
         [
-            (False, False, False, False, "Union[Unset, TestType]"),
-            (False, False, False, True, "TestType"),
-            (False, False, True, False, "TestType"),
-            (False, False, True, True, "TestType"),
-            (False, True, False, False, "Union[Unset, None, TestType]"),
-            (False, True, False, True, "TestType"),
-            (False, True, True, False, "Optional[TestType]"),
-            (False, True, True, True, "TestType"),
-            (True, False, False, False, "Union[Unset, None, TestType]"),
-            (True, False, False, True, "TestType"),
-            (True, False, True, False, "TestType"),
-            (True, False, True, True, "TestType"),
-            (True, True, False, False, "Union[Unset, None, TestType]"),
-            (True, True, False, True, "TestType"),
-            (True, True, True, False, "Optional[TestType]"),
-            (True, True, True, True, "TestType"),
+            (False, False, False, "Union[Unset, TestType]"),
+            (False, False, True, "TestType"),
+            (False, True, False, "TestType"),
+            (False, True, True, "TestType"),
+            (True, False, False, "Union[Unset, None, TestType]"),
+            (True, False, True, "TestType"),
+            (True, True, False, "Optional[TestType]"),
+            (True, True, True, "TestType"),
         ],
     )
-    def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
+    def test_get_type_string(self, mocker, nullable, required, no_optional, expected):
         from openapi_python_client.parser.properties import Property
 
         mocker.patch.object(Property, "_type_string", "TestType")
         p = Property(name="test", required=required, default=None, nullable=nullable)
-        assert p.get_type_string(no_optional=no_optional, query_parameter=query_parameter) == expected
+        assert p.get_type_string(no_optional=no_optional) == expected
 
     @pytest.mark.parametrize(
-        "query_parameter,default,required,expected",
+        "default,required,expected",
         [
-            (False, None, False, "test: Union[Unset, TestType] = UNSET"),
-            (False, None, True, "test: TestType"),
-            (False, "Test", False, "test: Union[Unset, TestType] = Test"),
-            (False, "Test", True, "test: TestType = Test"),
-            (True, None, False, "test: Union[Unset, None, TestType] = UNSET"),
-            (True, None, True, "test: TestType"),
-            (True, "Test", False, "test: Union[Unset, None, TestType] = Test"),
-            (True, "Test", True, "test: TestType = Test"),
+            (None, False, "test: Union[Unset, TestType] = UNSET"),
+            (None, True, "test: TestType"),
+            ("Test", False, "test: Union[Unset, TestType] = Test"),
+            ("Test", True, "test: TestType = Test"),
         ],
     )
-    def test_to_string(self, mocker, query_parameter, default, required, expected):
+    def test_to_string(self, mocker, default, required, expected):
         from openapi_python_client.parser.properties import Property
 
         name = "test"
         mocker.patch.object(Property, "_type_string", "TestType")
         p = Property(name=name, required=required, default=default, nullable=False)
-        assert p.to_string(query_parameter=query_parameter) == expected
+        assert p.to_string() == expected
 
     def test_get_imports(self):
         from openapi_python_client.parser.properties import Property
@@ -252,27 +240,19 @@ class TestListProperty:
 
 class TestUnionProperty:
     @pytest.mark.parametrize(
-        "query_parameter,nullable,required,no_optional,expected",
+        "nullable,required,no_optional,expected",
         [
-            (False, False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
-            (False, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (False, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
-            (False, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (True, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (True, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
-            (True, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
+            (False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
+            (True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
         ],
     )
-    def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
+    def test_get_type_string(self, mocker, nullable, required, no_optional, expected):
         from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
@@ -286,7 +266,7 @@ class TestUnionProperty:
             inner_properties=[inner_property_1, inner_property_2],
             nullable=nullable,
         )
-        assert p.get_type_string(query_parameter=query_parameter, no_optional=no_optional) == expected
+        assert p.get_type_string(no_optional=no_optional) == expected
 
     def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty

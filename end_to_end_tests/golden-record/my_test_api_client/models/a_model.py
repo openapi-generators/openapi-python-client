@@ -170,7 +170,6 @@ class AModel:
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
         def _parse_a_camel_date_time(data: Union[str]) -> Union[datetime.datetime, datetime.date]:
-            data = None if isinstance(data, Unset) else data
             a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
                 if not isinstance(data, str):
@@ -193,7 +192,6 @@ class AModel:
         required_not_nullable = d.pop("required_not_nullable")
 
         def _parse_one_of_models(data: Union[Dict[str, Any]]) -> Union[FreeFormModel, ModelWithUnionProperty]:
-            data = None if isinstance(data, Unset) else data
             one_of_models: Union[FreeFormModel, ModelWithUnionProperty]
             try:
                 if not isinstance(data, dict):
@@ -241,7 +239,6 @@ class AModel:
         def _parse_nullable_one_of_models(
             data: Union[None, Dict[str, Any]]
         ) -> Union[None, FreeFormModel, ModelWithUnionProperty]:
-            data = None if isinstance(data, Unset) else data
             nullable_one_of_models: Union[None, FreeFormModel, ModelWithUnionProperty]
             if data is None:
                 return data
@@ -264,7 +261,6 @@ class AModel:
         def _parse_not_required_one_of_models(
             data: Union[Unset, Dict[str, Any]]
         ) -> Union[Unset, FreeFormModel, ModelWithUnionProperty]:
-            data = None if isinstance(data, Unset) else data
             not_required_one_of_models: Union[Unset, FreeFormModel, ModelWithUnionProperty]
             if isinstance(data, Unset):
                 return data
@@ -293,7 +289,6 @@ class AModel:
         def _parse_not_required_nullable_one_of_models(
             data: Union[Unset, None, Dict[str, Any], str]
         ) -> Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str]:
-            data = None if isinstance(data, Unset) else data
             not_required_nullable_one_of_models: Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str]
             if data is None:
                 return data

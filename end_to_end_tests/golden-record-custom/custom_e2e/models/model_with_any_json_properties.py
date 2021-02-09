@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union, cast
 import attr
 
 from ..models.model_with_any_json_properties_additional_property import ModelWithAnyJsonPropertiesAdditionalProperty
-from ..types import Unset
 
 T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 
@@ -44,7 +43,6 @@ class ModelWithAnyJsonProperties:
             def _parse_additional_property(
                 data: Union[Dict[str, Any], List[Any], str, float, int, bool]
             ) -> Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]:
-                data = None if isinstance(data, Unset) else data
                 additional_property: Union[
                     ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool
                 ]
