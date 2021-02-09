@@ -9,14 +9,14 @@ from ...types import Response
 def _get_kwargs(
     *,
     client: Client,
-    token: str,
+    my_token: str,
 ) -> Dict[str, Any]:
     url = "{}/auth/token_with_cookie".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    cookies["token"] = token
+    cookies["MyToken"] = my_token
 
     return {
         "url": url,
@@ -50,11 +50,11 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, None]]:
 def sync_detailed(
     *,
     client: Client,
-    token: str,
+    my_token: str,
 ) -> Response[Union[None, None]]:
     kwargs = _get_kwargs(
         client=client,
-        token=token,
+        my_token=my_token,
     )
 
     response = httpx.get(
@@ -67,24 +67,24 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    token: str,
+    my_token: str,
 ) -> Optional[Union[None, None]]:
     """ Test optional cookie parameters """
 
     return sync_detailed(
         client=client,
-        token=token,
+        my_token=my_token,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Client,
-    token: str,
+    my_token: str,
 ) -> Response[Union[None, None]]:
     kwargs = _get_kwargs(
         client=client,
-        token=token,
+        my_token=my_token,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -96,13 +96,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    token: str,
+    my_token: str,
 ) -> Optional[Union[None, None]]:
     """ Test optional cookie parameters """
 
     return (
         await asyncio_detailed(
             client=client,
-            token=token,
+            my_token=my_token,
         )
     ).parsed

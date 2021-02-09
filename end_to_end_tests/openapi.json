@@ -648,7 +648,7 @@
               "title": "Token",
               "type": "string"
             },
-            "name": "token",
+            "name": "MyToken",
             "in": "cookie"
           }
         ],

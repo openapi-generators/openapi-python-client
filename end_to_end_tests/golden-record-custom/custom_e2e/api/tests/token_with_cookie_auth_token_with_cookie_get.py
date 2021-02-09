@@ -31,7 +31,7 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, None]]:
 def httpx_request(
     *,
     client: Client,
-    token: str,
+    my_token: str,
 ) -> Response[Union[None, None]]:
 
     response = client.request(

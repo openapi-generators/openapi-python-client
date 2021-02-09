@@ -15,7 +15,7 @@ if {{ parameter.python_name }} is not UNSET:
 {% if endpoint.cookie_parameters %}
     {% for parameter in endpoint.cookie_parameters %}
         {% if parameter.required %}
-cookies["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
+cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% else %}
 if {{ parameter.python_name }} is not UNSET:
     cookies["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
