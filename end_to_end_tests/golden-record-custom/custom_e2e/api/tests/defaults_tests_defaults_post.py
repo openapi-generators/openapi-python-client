@@ -13,6 +13,7 @@ from dateutil.parser import isoparse
 
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
+from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Unset
 
 
@@ -50,6 +51,7 @@ def httpx_request(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_datetime_prop: Union[Unset, str] = UNSET
@@ -74,20 +76,24 @@ def httpx_request(
     else:
         json_union_prop = union_prop
 
-    json_union_prop_with_ref: Union[Unset, float, AnEnum]
+    json_union_prop_with_ref: Union[Unset, float, str]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
-            json_union_prop_with_ref = union_prop_with_ref
+            json_union_prop_with_ref = union_prop_with_ref.value
 
     else:
         json_union_prop_with_ref = union_prop_with_ref
 
-    json_enum_prop: Union[Unset, AnEnum] = UNSET
+    json_enum_prop: Union[Unset, str] = UNSET
     if not isinstance(enum_prop, Unset):
-        json_enum_prop = enum_prop
+        json_enum_prop = enum_prop.value
+
+    json_model_prop: Union[Unset, Dict[str, Any]] = UNSET
+    if not isinstance(model_prop, Unset):
+        json_model_prop = model_prop.to_dict()
 
     params: Dict[str, Any] = {
         "string_prop": string_prop,
@@ -100,6 +106,7 @@ def httpx_request(
         "union_prop": json_union_prop,
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
+        "model_prop": json_model_prop,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 

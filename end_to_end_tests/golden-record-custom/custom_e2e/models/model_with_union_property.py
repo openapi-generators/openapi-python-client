@@ -16,18 +16,18 @@ class ModelWithUnionProperty:
     a_property: Union[Unset, AnEnum, AnIntEnum] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        a_property: Union[Unset, AnEnum, AnIntEnum]
+        a_property: Union[Unset, str, int]
         if isinstance(self.a_property, Unset):
             a_property = UNSET
         elif isinstance(self.a_property, AnEnum):
             a_property = UNSET
             if not isinstance(self.a_property, Unset):
-                a_property = self.a_property
+                a_property = self.a_property.value
 
         else:
             a_property = UNSET
             if not isinstance(self.a_property, Unset):
-                a_property = self.a_property
+                a_property = self.a_property.value
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -40,10 +40,14 @@ class ModelWithUnionProperty:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
-        def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
+        def _parse_a_property(data: Union[Unset, str, int]) -> Union[Unset, AnEnum, AnIntEnum]:
             data = None if isinstance(data, Unset) else data
             a_property: Union[Unset, AnEnum, AnIntEnum]
+            if isinstance(data, Unset):
+                return data
             try:
+                if not (isinstance(data, int) or isinstance(data, str)):
+                    raise TypeError()
                 a_property = UNSET
                 _a_property = data
                 if _a_property is not None and _a_property is not UNSET:
@@ -52,6 +56,8 @@ class ModelWithUnionProperty:
                 return a_property
             except:  # noqa: E722
                 pass
+            if not (isinstance(data, int) or isinstance(data, str)):
+                raise TypeError()
             a_property = UNSET
             _a_property = data
             if _a_property is not None and _a_property is not UNSET:

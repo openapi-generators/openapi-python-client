@@ -42,19 +42,23 @@ class ModelWithAnyJsonProperties:
         for prop_name, prop_dict in d.items():
 
             def _parse_additional_property(
-                data: Any,
+                data: Union[Dict[str, Any], List[Any], str, float, int, bool]
             ) -> Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]:
                 data = None if isinstance(data, Unset) else data
                 additional_property: Union[
                     ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool
                 ]
                 try:
+                    if not isinstance(data, dict):
+                        raise TypeError()
                     additional_property = ModelWithAnyJsonPropertiesAdditionalProperty.from_dict(data)
 
                     return additional_property
                 except:  # noqa: E722
                     pass
                 try:
+                    if not isinstance(data, list):
+                        raise TypeError()
                     additional_property = cast(List[str], data)
 
                     return additional_property

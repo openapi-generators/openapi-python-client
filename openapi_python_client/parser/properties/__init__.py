@@ -40,7 +40,7 @@ class DateTimeProperty(Property):
     """
 
     _type_string: ClassVar[str] = "datetime.datetime"
-     _json_type_string: ClassVar[str] = "str"
+    _json_type_string: ClassVar[str] = "str"
     template: ClassVar[str] = "datetime_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -176,13 +176,11 @@ class UnionProperty(Property):
 
     def get_base_type_string(self) -> str:
         return f"Union[{', '.join(self._get_inner_type_strings(json=False))}]"
-    
+
     def get_base_json_type_string(self) -> str:
         return f"Union[{', '.join(self._get_inner_type_strings(json=True))}]"
 
-    def get_type_strings_in_union(
-        self, no_optional: bool = False, json: bool = False
-    ) -> List[str]:
+    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> List[str]:
         type_strings = self._get_inner_type_strings(json=json)
 
         if no_optional or (self.required and not self.nullable):
@@ -200,9 +198,7 @@ class UnionProperty(Property):
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_strings_in_union = self.get_type_strings_in_union(
-            no_optional=no_optional, json=json
-        )
+        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
         return f"Union[{', '.join(type_strings_in_union)}]"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
