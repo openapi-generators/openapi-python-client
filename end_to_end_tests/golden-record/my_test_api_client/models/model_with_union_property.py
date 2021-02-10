@@ -42,20 +42,23 @@ class ModelWithUnionProperty:
 
         def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
             data = None if isinstance(data, Unset) else data
-            a_property: Union[Unset, AnEnum, AnIntEnum]
             try:
+                a_property_item0: Union[Unset, AnEnum]
+                a_property_item0 = UNSET
                 _a_property_item0 = data
                 if _a_property_item0 is not None and _a_property_item0 is not UNSET:
-                    AnEnum(_a_property_item0)
+                    a_property_item0 = AnEnum(_a_property_item0)
 
-                return a_property
+                return a_property_item0
             except:  # noqa: E722
                 pass
+            a_property_item1: Union[Unset, AnIntEnum]
+            a_property_item1 = UNSET
             _a_property_item1 = data
             if _a_property_item1 is not None and _a_property_item1 is not UNSET:
-                AnIntEnum(_a_property_item1)
+                a_property_item1 = AnIntEnum(_a_property_item1)
 
-            return a_property
+            return a_property_item1
 
         a_property = _parse_a_property(d.pop("a_property", UNSET))
 

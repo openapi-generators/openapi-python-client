@@ -44,20 +44,23 @@ class ModelWithUnionPropertyInlined:
             data: Any,
         ) -> Union[Unset, ModelWithUnionPropertyInlinedFruitItem0, ModelWithUnionPropertyInlinedFruitItem1]:
             data = None if isinstance(data, Unset) else data
-            fruit: Union[Unset, ModelWithUnionPropertyInlinedFruitItem0, ModelWithUnionPropertyInlinedFruitItem1]
             try:
+                fruit_item0: Union[ModelWithUnionPropertyInlinedFruitItem0, Unset]
+                fruit_item0 = UNSET
                 _fruit_item0 = data
                 if not isinstance(_fruit_item0, Unset):
-                    ModelWithUnionPropertyInlinedFruitItem0.from_dict(cast(Dict[str, Any], _fruit_item0))
+                    fruit_item0 = ModelWithUnionPropertyInlinedFruitItem0.from_dict(cast(Dict[str, Any], _fruit_item0))
 
-                return fruit
+                return fruit_item0
             except:  # noqa: E722
                 pass
+            fruit_item1: Union[ModelWithUnionPropertyInlinedFruitItem1, Unset]
+            fruit_item1 = UNSET
             _fruit_item1 = data
             if not isinstance(_fruit_item1, Unset):
-                ModelWithUnionPropertyInlinedFruitItem1.from_dict(cast(Dict[str, Any], _fruit_item1))
+                fruit_item1 = ModelWithUnionPropertyInlinedFruitItem1.from_dict(cast(Dict[str, Any], _fruit_item1))
 
-            return fruit
+            return fruit_item1
 
         fruit = _parse_fruit(d.pop("fruit", UNSET))
 

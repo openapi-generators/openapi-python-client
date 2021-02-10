@@ -111,16 +111,17 @@ class AModel:
 
         def _parse_a_camel_date_time(data: Any) -> Union[datetime.datetime, datetime.date]:
             data = None if isinstance(data, Unset) else data
-            a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
-                isoparse(data)
+                a_camel_date_time_item0: datetime.datetime
+                a_camel_date_time_item0 = isoparse(data)
 
-                return a_camel_date_time
+                return a_camel_date_time_item0
             except:  # noqa: E722
                 pass
-            isoparse(data).date()
+            a_camel_date_time_item1: datetime.date
+            a_camel_date_time_item1 = isoparse(data).date()
 
-            return a_camel_date_time
+            return a_camel_date_time_item1
 
         a_camel_date_time = _parse_a_camel_date_time(d.pop("aCamelDateTime"))
 

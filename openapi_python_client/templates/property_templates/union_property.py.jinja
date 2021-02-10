@@ -1,19 +1,20 @@
 {% macro construct(property, source, initial_value=None) %}
 def _parse_{{ property.python_name }}(data: Any) -> {{ property.get_type_string() }}:
     data = None if isinstance(data, Unset) else data
-    {{ property.python_name }}: {{ property.get_type_string() }}
     {% for inner_property in property.inner_properties_with_template() %}
     {% if not loop.last or property.has_properties_without_templates %}
     try:
+        {{ inner_property.python_name }}: {{ inner_property.get_type_string() }}
     {% from "property_templates/" + inner_property.template import construct %}
         {{ construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
-        return {{ property.python_name }}
+        return {{ inner_property.python_name }}
     except: # noqa: E722
         pass
     {% else  %}{# Don't do try/except for the last one #}
+    {{ inner_property.python_name }}: {{ inner_property.get_type_string() }}
     {% from "property_templates/" + inner_property.template import construct %}
     {{ construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
-    return {{ property.python_name }}
+    return {{ inner_property.python_name }}
     {% endif %}
     {% endfor %}
     {% if property.has_properties_without_templates %}

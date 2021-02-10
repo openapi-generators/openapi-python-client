@@ -47,19 +47,18 @@ class ModelWithAnyJsonProperties:
                 data: Any,
             ) -> Union[ModelWithAnyJsonPropertiesAdditionalPropertyItem0, List[str], str, float, int, bool]:
                 data = None if isinstance(data, Unset) else data
-                additional_property: Union[
-                    ModelWithAnyJsonPropertiesAdditionalPropertyItem0, List[str], str, float, int, bool
-                ]
                 try:
-                    ModelWithAnyJsonPropertiesAdditionalPropertyItem0.from_dict(data)
+                    additional_property_item0: ModelWithAnyJsonPropertiesAdditionalPropertyItem0
+                    additional_property_item0 = ModelWithAnyJsonPropertiesAdditionalPropertyItem0.from_dict(data)
 
-                    return additional_property
+                    return additional_property_item0
                 except:  # noqa: E722
                     pass
                 try:
-                    cast(List[str], data)
+                    additional_property_item1: List[str]
+                    additional_property_item1 = cast(List[str], data)
 
-                    return additional_property
+                    return additional_property_item1
                 except:  # noqa: E722
                     pass
                 return cast(
