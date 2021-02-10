@@ -1147,6 +1147,7 @@ def test_build_model_property_bad_prop(mocker):
         required=True,
         parent_name=None,
     )
+
     assert new_schemas == schemas
     assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
 
