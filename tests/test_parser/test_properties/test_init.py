@@ -1130,7 +1130,7 @@ def test_build_model_property_conflict():
     assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
 
 
-def test_build_model_property_bad_prop(mocker):
+def test_build_model_property_bad_prop():
     from openapi_python_client.parser.properties import Schemas, build_model_property
 
     data = oai.Schema(
