@@ -234,6 +234,10 @@ def _string_based_property(
         )
 
 
+class NameClashException(Exception):
+    pass
+
+
 def build_model_property(
     *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str]
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
@@ -302,6 +306,9 @@ def build_model_property(
         name=name,
         additional_properties=additional_properties,
     )
+    if prop.reference.class_name in schemas.models:
+        raise NameClashException(f'Attempted to generate duplicate models with name "{prop.reference.class_name}"')
+
     schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
     return prop, schemas
 
@@ -374,6 +381,9 @@ def build_enum_property(
         values=values,
         value_type=value_type,
     )
+    if prop.reference.class_name in schemas.enums:
+        raise NameClashException(f'Attempted to generate duplicate enums with name "{prop.reference.class_name}"')
+
     schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
     return prop, schemas
 
