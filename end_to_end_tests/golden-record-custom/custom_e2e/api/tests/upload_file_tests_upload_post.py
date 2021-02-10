@@ -24,6 +24,8 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
+
+
         return response_422
     return None
 
