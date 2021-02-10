@@ -303,12 +303,12 @@ def build_model_property(
         additional_properties=additional_properties,
     )
     if prop.reference.class_name in schemas.models:
-        prop = PropertyError(
-            data=data,
-            detail=f'Attempted to generate duplicate models with name "{prop.reference.class_name}"')
-    else:
-        schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
+        error = PropertyError(
+            data=data, detail=f'Attempted to generate duplicate models with name "{prop.reference.class_name}"'
+        )
+        return error, schemas
 
+    schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
     return prop, schemas
 
 
@@ -381,12 +381,12 @@ def build_enum_property(
         value_type=value_type,
     )
     if prop.reference.class_name in schemas.enums:
-        prop = PropertyError(
-            data=data,
-            detail=f'Attempted to generate duplicate enums with name "{prop.reference.class_name}"')
-    else:
-        schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
+        error = PropertyError(
+            data=data, detail=f'Attempted to generate duplicate enums with name "{prop.reference.class_name}"'
+        )
+        return error, schemas
 
+    schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
     return prop, schemas
 
 
