@@ -110,7 +110,7 @@ def httpx_request(
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
     }
-    if not isinstance(json_model_prop, Unset) and json_model_prop is not None:
+    if not isinstance(json_model_prop, Unset):
         params.update(json_model_prop)
     params.update(json_required_model_prop)
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
