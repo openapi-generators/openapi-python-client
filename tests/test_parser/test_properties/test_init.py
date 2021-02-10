@@ -1105,7 +1105,32 @@ def test_build_model_property(additional_properties_schema, expected_additional_
     )
 
 
-def test_build_model_property_bad_prop():
+def test_build_model_property_conflict():
+    from openapi_python_client.parser.properties import Schemas, build_model_property
+
+    data = oai.Schema.construct(
+        required=["req"],
+        properties={
+            "req": oai.Schema.construct(type="string"),
+            "opt": oai.Schema(type="string", format="date-time"),
+        },
+        nullable=False,
+    )
+    schemas = Schemas(models={"OtherModel": None})
+
+    err, new_schemas = build_model_property(
+        data=data,
+        name="OtherModel",
+        schemas=schemas,
+        required=True,
+        parent_name=None,
+    )
+
+    assert new_schemas == schemas
+    assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
+
+
+def test_build_model_property_bad_prop(mocker):
     from openapi_python_client.parser.properties import Schemas, build_model_property
 
     data = oai.Schema(
@@ -1122,7 +1147,6 @@ def test_build_model_property_bad_prop():
         required=True,
         parent_name=None,
     )
-
     assert new_schemas == schemas
     assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
 

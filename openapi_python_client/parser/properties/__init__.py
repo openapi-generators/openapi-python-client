@@ -380,11 +380,6 @@ def build_enum_property(
         values=values,
         value_type=value_type,
     )
-    if prop.reference.class_name in schemas.enums:
-        error = PropertyError(
-            data=data, detail=f'Attempted to generate duplicate enums with name "{prop.reference.class_name}"'
-        )
-        return error, schemas
 
     schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
     return prop, schemas
