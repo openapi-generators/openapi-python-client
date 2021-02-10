@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
 - Fixes `Enum` deserialization when the value is `UNSET`.
 - Add handling of application/vnd.api+json media type.
+- Support passing models into query parameters (#316). Thanks @forest-benchling!
 
 ### Changes
 
