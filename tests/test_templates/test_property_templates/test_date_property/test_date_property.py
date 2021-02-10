@@ -71,6 +71,5 @@ def test_optional_nullable():
 
     template = env.get_template("date_property_template.py")
     content = template.render(property=prop)
-    print(content)
     expected = here / "optional_nullable.py"
     assert content == expected.read_text()
