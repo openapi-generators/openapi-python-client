@@ -1,7 +1,7 @@
 import logging
 import urllib
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Union, cast
 
 import httpx
 
@@ -21,12 +21,20 @@ class SchemaResolver:
         self._root_url: Union[str, None] = None
         self._root_url_scheme: Union[str, None] = None
 
-        if isinstance(url_or_path, Path):
+        if self._isapath(url_or_path):
+            url_or_path = cast(Path, url_or_path)
             self._root_path = url_or_path.absolute()
             self._root_path_dir = self._root_path.parent
         else:
+            url_or_path = cast(str, url_or_path)
             self._root_url = url_or_path
-            self._root_url_scheme = urllib.parse.urlparse(url_or_path).scheme
+            try:
+                self._root_url_scheme = urllib.parse.urlparse(url_or_path).scheme
+            except Exception:
+                raise urllib.error.URLError(f"Coult not parse URL > {url_or_path}")
+
+    def _isapath(self, url_or_path: Union[str, Path]) -> bool:
+        return isinstance(url_or_path, Path)
 
     def resolve(self, recursive: bool = True) -> ResolvedSchema:
         assert self._root_path or self._root_url
@@ -81,14 +89,14 @@ class SchemaResolver:
             raise RuntimeError("Bad object initilalization")
 
     def _fetch_remote_file_path(self, path: Path) -> SchemaData:
-        logging.info("Fetching remote ref file path > {0}".format(path))
+        logging.info(f"Fetching remote ref file path > {path}")
         return DataLoader.load(str(path), path.read_bytes())
 
     def _fetch_url_reference(self, url: str) -> SchemaData:
         if url.startswith("//", 0):
             url = "{0}:{1}".format(self._root_url_scheme, url)
 
-        logging.info("Fetching remote ref url > {0}".format(url))
+        logging.info(f"Fetching remote ref url > {url}")
         return DataLoader.load(url, httpx.get(url).content)
 
     def _lookup_schema_references(self, attr: Any) -> Generator[Reference, None, None]:

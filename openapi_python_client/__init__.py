@@ -3,10 +3,13 @@
 import shutil
 import subprocess
 import sys
+import urllib
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Union, cast
 
+import httpcore
+import httpx
 from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 from openapi_python_client import utils
@@ -328,6 +331,8 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
         result = resolver.resolve()
         if len(result.errors) > 0:
             return GeneratorError(header="; ".join(result.errors))
+    except (httpx.HTTPError, httpcore.NetworkError, urllib.error.URLError):
+        return GeneratorError(header="Could not get OpenAPI document from provided URL")
     except Exception:
         return GeneratorError(header="Invalid YAML from provided source")
 

@@ -1,4 +1,5 @@
 import pathlib
+from urllib.parse import ParseResult
 
 import httpcore
 import jinja2
@@ -169,7 +170,7 @@ class TestGetJson:
         loads.assert_not_called()
 
     def test__get_document_bad_url(self, mocker):
-        get = mocker.patch("httpx.get", side_effect=httpcore.NetworkError)
+        get = mocker.patch("httpx.get")
         Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
@@ -179,7 +180,7 @@ class TestGetJson:
         result = _get_document(url=url, path=None)
 
         assert result == GeneratorError(header="Could not get OpenAPI document from provided URL")
-        get.assert_called_once_with(url)
+        get.assert_not_called()
         Path.assert_not_called()
         loads.assert_not_called()
 
@@ -190,7 +191,7 @@ class TestGetJson:
 
         from openapi_python_client import _get_document
 
-        url = mocker.MagicMock()
+        url = "http://localhost/"
         _get_document(url=url, path=None)
 
         get.assert_called_once_with(url)
@@ -200,6 +201,7 @@ class TestGetJson:
     def test__get_document_path_no_url(self, mocker):
         get = mocker.patch("httpx.get")
         loads = mocker.patch("yaml.safe_load")
+        mocker.patch("openapi_python_client.resolver.schema_resolver.SchemaResolver._isapath", return_value=True)
 
         from openapi_python_client import _get_document
 
@@ -207,12 +209,13 @@ class TestGetJson:
         _get_document(url=None, path=path)
 
         get.assert_not_called()
-        path.read_bytes.assert_called_once()
-        loads.assert_called_once_with(path.read_bytes())
+        path.absolute().read_bytes.assert_called_once()
+        loads.assert_called_once_with(path.absolute().read_bytes())
 
     def test__get_document_bad_yaml(self, mocker):
         get = mocker.patch("httpx.get")
         loads = mocker.patch("yaml.safe_load", side_effect=yaml.YAMLError)
+        mocker.patch("openapi_python_client.resolver.schema_resolver.SchemaResolver._isapath", return_value=True)
 
         from openapi_python_client import _get_document
 
@@ -220,8 +223,8 @@ class TestGetJson:
         result = _get_document(url=None, path=path)
 
         get.assert_not_called()
-        path.read_bytes.assert_called_once()
-        loads.assert_called_once_with(path.read_bytes())
+        path.absolute().read_bytes.assert_called_once()
+        loads.assert_called_once_with(path.absolute().read_bytes())
         assert result == GeneratorError(header="Invalid YAML from provided source")
 
 
