@@ -806,6 +806,29 @@
         },
         "additionalProperties": false
       },
+      "ModelWithUnionPropertyInlined": {
+        "title": "ModelWithUnionPropertyInlined",
+        "type": "object",
+        "properties": {
+          "fruit": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "apples": {"type": "string"}
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "bananas": {"type": "string"}
+                }
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
       "FreeFormModel": {
         "title": "FreeFormModel",
         "type": "object"

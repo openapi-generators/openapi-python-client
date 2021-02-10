@@ -113,12 +113,12 @@ class AModel:
             data = None if isinstance(data, Unset) else data
             a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
-                a_camel_date_time = isoparse(data)
+                isoparse(data)
 
                 return a_camel_date_time
             except:  # noqa: E722
                 pass
-            a_camel_date_time = isoparse(data).date()
+            isoparse(data).date()
 
             return a_camel_date_time
 

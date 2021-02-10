@@ -44,18 +44,16 @@ class ModelWithUnionProperty:
             data = None if isinstance(data, Unset) else data
             a_property: Union[Unset, AnEnum, AnIntEnum]
             try:
-                a_property = UNSET
-                _a_property = data
-                if _a_property is not None and _a_property is not UNSET:
-                    a_property = AnEnum(_a_property)
+                _a_property_item0 = data
+                if _a_property_item0 is not None and _a_property_item0 is not UNSET:
+                    AnEnum(_a_property_item0)
 
                 return a_property
             except:  # noqa: E722
                 pass
-            a_property = UNSET
-            _a_property = data
-            if _a_property is not None and _a_property is not UNSET:
-                a_property = AnIntEnum(_a_property)
+            _a_property_item1 = data
+            if _a_property_item1 is not None and _a_property_item1 is not UNSET:
+                AnIntEnum(_a_property_item1)
 
             return a_property
 
