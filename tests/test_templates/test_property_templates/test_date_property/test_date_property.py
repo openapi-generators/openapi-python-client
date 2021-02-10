@@ -16,7 +16,9 @@ def test_required_not_nullable():
     templates_dir = here.parent.parent.parent.parent / "openapi_python_client" / "templates"
 
     env = jinja2.Environment(
-        loader=jinja2.ChoiceLoader([jinja2.FileSystemLoader(here), jinja2.FileSystemLoader(templates_dir)])
+        loader=jinja2.ChoiceLoader([jinja2.FileSystemLoader(here), jinja2.FileSystemLoader(templates_dir)]),
+        trim_blocks=True,
+        lstrip_blocks=True
     )
 
     template = env.get_template("date_property_template.py")
@@ -38,7 +40,9 @@ def test_required_nullable():
     templates_dir = here.parent.parent.parent.parent / "openapi_python_client" / "templates"
 
     env = jinja2.Environment(
-        loader=jinja2.ChoiceLoader([jinja2.FileSystemLoader(here), jinja2.FileSystemLoader(templates_dir)])
+        loader=jinja2.ChoiceLoader([jinja2.FileSystemLoader(here), jinja2.FileSystemLoader(templates_dir)]),
+        trim_blocks=True,
+        lstrip_blocks=True
     )
 
     template = env.get_template("date_property_template.py")
@@ -60,7 +64,9 @@ def test_optional_nullable():
     templates_dir = here.parent.parent.parent.parent / "openapi_python_client" / "templates"
 
     env = jinja2.Environment(
-        loader=jinja2.ChoiceLoader([jinja2.FileSystemLoader(here), jinja2.FileSystemLoader(templates_dir)])
+        loader=jinja2.ChoiceLoader([jinja2.FileSystemLoader(here), jinja2.FileSystemLoader(templates_dir)]),
+        trim_blocks=True,
+        lstrip_blocks=True
     )
 
     template = env.get_template("date_property_template.py")

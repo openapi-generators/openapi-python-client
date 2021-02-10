@@ -329,6 +329,12 @@ def build_model_property(
         name=name,
         additional_properties=additional_properties,
     )
+    if prop.reference.class_name in schemas.models:
+        error = PropertyError(
+            data=data, detail=f'Attempted to generate duplicate models with name "{prop.reference.class_name}"'
+        )
+        return error, schemas
+
     schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
     return prop, schemas
 
