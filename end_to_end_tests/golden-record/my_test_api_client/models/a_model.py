@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
 import attr
 from dateutil.parser import isoparse
@@ -28,6 +28,7 @@ class AModel:
     required_nullable: Optional[str]
     nullable_model: Optional[AModelNullableModel]
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
+    a_not_required_date: Union[Unset, datetime.date] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
     not_required_nullable: Union[Unset, Optional[str]] = UNSET
     not_required_not_nullable: Union[Unset, str] = UNSET
@@ -60,6 +61,10 @@ class AModel:
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
         a_nullable_date = self.a_nullable_date.isoformat() if self.a_nullable_date else None
+        a_not_required_date: Union[Unset, str] = UNSET
+        if not isinstance(self.a_not_required_date, Unset):
+            a_not_required_date = self.a_not_required_date.isoformat()
+
         attr_1_leading_digit = self.attr_1_leading_digit
         required_nullable = self.required_nullable
         not_required_nullable = self.not_required_nullable
@@ -91,6 +96,8 @@ class AModel:
         )
         if nested_list_of_enums is not UNSET:
             field_dict["nested_list_of_enums"] = nested_list_of_enums
+        if a_not_required_date is not UNSET:
+            field_dict["a_not_required_date"] = a_not_required_date
         if attr_1_leading_digit is not UNSET:
             field_dict["1_leading_digit"] = attr_1_leading_digit
         if not_required_nullable is not UNSET:
@@ -145,7 +152,12 @@ class AModel:
         a_nullable_date = None
         _a_nullable_date = d.pop("a_nullable_date")
         if _a_nullable_date is not None:
-            a_nullable_date = isoparse(cast(str, _a_nullable_date)).date()
+            a_nullable_date = isoparse(_a_nullable_date).date()
+
+        a_not_required_date: Union[Unset, datetime.date] = UNSET
+        _a_not_required_date = d.pop("a_not_required_date", UNSET)
+        if not isinstance(_a_not_required_date, Unset):
+            a_not_required_date = isoparse(_a_not_required_date).date()
 
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
@@ -158,19 +170,17 @@ class AModel:
         nullable_model = None
         _nullable_model = d.pop("nullable_model")
         if _nullable_model is not None:
-            nullable_model = AModelNullableModel.from_dict(cast(Dict[str, Any], _nullable_model))
+            nullable_model = AModelNullableModel.from_dict(_nullable_model)
 
         not_required_model: Union[AModelNotRequiredModel, Unset] = UNSET
         _not_required_model = d.pop("not_required_model", UNSET)
         if not isinstance(_not_required_model, Unset):
-            not_required_model = AModelNotRequiredModel.from_dict(cast(Dict[str, Any], _not_required_model))
+            not_required_model = AModelNotRequiredModel.from_dict(_not_required_model)
 
         not_required_nullable_model = None
         _not_required_nullable_model = d.pop("not_required_nullable_model", UNSET)
         if _not_required_nullable_model is not None and not isinstance(_not_required_nullable_model, Unset):
-            not_required_nullable_model = AModelNotRequiredNullableModel.from_dict(
-                cast(Dict[str, Any], _not_required_nullable_model)
-            )
+            not_required_nullable_model = AModelNotRequiredNullableModel.from_dict(_not_required_nullable_model)
 
         a_model = cls(
             an_enum_value=an_enum_value,
@@ -180,6 +190,7 @@ class AModel:
             model=model,
             nested_list_of_enums=nested_list_of_enums,
             a_nullable_date=a_nullable_date,
+            a_not_required_date=a_not_required_date,
             attr_1_leading_digit=attr_1_leading_digit,
             required_nullable=required_nullable,
             not_required_nullable=not_required_nullable,
