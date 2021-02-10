@@ -174,7 +174,7 @@ class AModel:
         d = src_dict.copy()
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
-        def _parse_a_camel_date_time(data: str) -> Union[datetime.datetime, datetime.date]:
+        def _parse_a_camel_date_time(data: object) -> Union[datetime.datetime, datetime.date]:
             a_camel_date_time: Union[datetime.datetime, datetime.date]
             try:
                 if not isinstance(data, str):
@@ -196,7 +196,7 @@ class AModel:
 
         required_not_nullable = d.pop("required_not_nullable")
 
-        def _parse_one_of_models(data: Dict[str, Any]) -> Union[FreeFormModel, ModelWithUnionProperty]:
+        def _parse_one_of_models(data: object) -> Union[FreeFormModel, ModelWithUnionProperty]:
             one_of_models: Union[FreeFormModel, ModelWithUnionProperty]
             try:
                 if not isinstance(data, dict):
@@ -246,9 +246,7 @@ class AModel:
 
         not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
-        def _parse_nullable_one_of_models(
-            data: Union[None, Dict[str, Any]]
-        ) -> Union[None, FreeFormModel, ModelWithUnionProperty]:
+        def _parse_nullable_one_of_models(data: object) -> Union[None, FreeFormModel, ModelWithUnionProperty]:
             nullable_one_of_models: Union[None, FreeFormModel, ModelWithUnionProperty]
             if data is None:
                 return data
@@ -268,9 +266,7 @@ class AModel:
 
         nullable_one_of_models = _parse_nullable_one_of_models(d.pop("nullable_one_of_models"))
 
-        def _parse_not_required_one_of_models(
-            data: Union[Unset, Dict[str, Any]]
-        ) -> Union[Unset, FreeFormModel, ModelWithUnionProperty]:
+        def _parse_not_required_one_of_models(data: object) -> Union[Unset, FreeFormModel, ModelWithUnionProperty]:
             not_required_one_of_models: Union[Unset, FreeFormModel, ModelWithUnionProperty]
             if isinstance(data, Unset):
                 return data
@@ -297,7 +293,7 @@ class AModel:
         not_required_one_of_models = _parse_not_required_one_of_models(d.pop("not_required_one_of_models", UNSET))
 
         def _parse_not_required_nullable_one_of_models(
-            data: Union[Unset, None, Dict[str, Any], str]
+            data: object,
         ) -> Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str]:
             not_required_nullable_one_of_models: Union[Unset, None, FreeFormModel, ModelWithUnionProperty, str]
             if data is None:

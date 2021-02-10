@@ -40,7 +40,7 @@ class ModelWithUnionProperty:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
-        def _parse_a_property(data: Union[Unset, str, int]) -> Union[Unset, AnEnum, AnIntEnum]:
+        def _parse_a_property(data: object) -> Union[Unset, AnEnum, AnIntEnum]:
             a_property: Union[Unset, AnEnum, AnIntEnum]
             if isinstance(data, Unset):
                 return data

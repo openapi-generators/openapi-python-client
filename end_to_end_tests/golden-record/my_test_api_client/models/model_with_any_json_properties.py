@@ -41,7 +41,7 @@ class ModelWithAnyJsonProperties:
         for prop_name, prop_dict in d.items():
 
             def _parse_additional_property(
-                data: Union[Dict[str, Any], List[Any], str, float, int, bool]
+                data: object,
             ) -> Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]:
                 additional_property: Union[
                     ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool
