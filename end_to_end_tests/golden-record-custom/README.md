@@ -34,7 +34,7 @@ Or do the same thing with an async version:
 
 ```python
 from custom_e2e.models import MyDataModel
-from custom_e2e.async_api.my_tag import get_my_data_model
+from custom_e2e.api.my_tag import get_my_data_model
 from custom_e2e.types import Response
 
 my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
