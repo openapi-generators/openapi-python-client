@@ -7,6 +7,7 @@ from dateutil.parser import isoparse
 from ...client import Client
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
+from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
 
 
@@ -23,6 +24,8 @@ def _get_kwargs(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
+    required_model_prop: ModelWithUnionProperty,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -65,6 +68,12 @@ def _get_kwargs(
     if not isinstance(enum_prop, Unset):
         json_enum_prop = enum_prop
 
+    json_model_prop: Union[Unset, Dict[str, Any]] = UNSET
+    if not isinstance(model_prop, Unset):
+        json_model_prop = model_prop.to_dict()
+
+    json_required_model_prop = required_model_prop.to_dict()
+
     params: Dict[str, Any] = {
         "string_prop": string_prop,
         "datetime_prop": json_datetime_prop,
@@ -77,6 +86,9 @@ def _get_kwargs(
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
     }
+    if not isinstance(json_model_prop, Unset):
+        params.update(json_model_prop)
+    params.update(json_required_model_prop)
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
@@ -122,6 +134,8 @@ def sync_detailed(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
+    required_model_prop: ModelWithUnionProperty,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -135,6 +149,8 @@ def sync_detailed(
         union_prop=union_prop,
         union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
+        model_prop=model_prop,
+        required_model_prop=required_model_prop,
     )
 
     response = httpx.post(
@@ -157,6 +173,8 @@ def sync(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
+    required_model_prop: ModelWithUnionProperty,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -172,6 +190,8 @@ def sync(
         union_prop=union_prop,
         union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
+        model_prop=model_prop,
+        required_model_prop=required_model_prop,
     ).parsed
 
 
@@ -188,6 +208,8 @@ async def asyncio_detailed(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
+    required_model_prop: ModelWithUnionProperty,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -201,6 +223,8 @@ async def asyncio_detailed(
         union_prop=union_prop,
         union_prop_with_ref=union_prop_with_ref,
         enum_prop=enum_prop,
+        model_prop=model_prop,
+        required_model_prop=required_model_prop,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -222,6 +246,8 @@ async def asyncio(
     union_prop: Union[Unset, float, str] = "not a float",
     union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
+    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
+    required_model_prop: ModelWithUnionProperty,
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -238,5 +264,7 @@ async def asyncio(
             union_prop=union_prop,
             union_prop_with_ref=union_prop_with_ref,
             enum_prop=enum_prop,
+            model_prop=model_prop,
+            required_model_prop=required_model_prop,
         )
     ).parsed
