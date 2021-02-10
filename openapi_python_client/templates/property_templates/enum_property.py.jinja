@@ -8,7 +8,7 @@
 {{ construct_template(construct_function, property, source, initial_value=initial_value) }}
 {% endmacro %}
 
-{% macro check_type_for_construct(property, source) %}{% if property.value_type == str %}isinstance({{ source }}, str){% else %}isinstance({{ source }}, int){% endif %}{% endmacro %}
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}

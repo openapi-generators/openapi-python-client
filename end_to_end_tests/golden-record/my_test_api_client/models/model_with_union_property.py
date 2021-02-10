@@ -45,7 +45,7 @@ class ModelWithUnionProperty:
             if isinstance(data, Unset):
                 return data
             try:
-                if not isinstance(data, int):
+                if not isinstance(data, str):
                     raise TypeError()
                 a_property = UNSET
                 _a_property = data
