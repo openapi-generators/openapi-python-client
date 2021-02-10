@@ -17,24 +17,33 @@ MODULE_NAME = "openapi_python_client.parser.properties"
 
 class TestProperty:
     @pytest.mark.parametrize(
-        "nullable,required,no_optional,expected",
+        "nullable,required,no_optional,json,expected",
         [
-            (False, False, False, "Union[Unset, TestType]"),
-            (False, False, True, "TestType"),
-            (False, True, False, "TestType"),
-            (False, True, True, "TestType"),
-            (True, False, False, "Union[Unset, None, TestType]"),
-            (True, False, True, "TestType"),
-            (True, True, False, "Optional[TestType]"),
-            (True, True, True, "TestType"),
+            (False, False, False, False, "Union[Unset, TestType]"),
+            (False, False, True, False, "TestType"),
+            (False, True, False, False, "TestType"),
+            (False, True, True, False, "TestType"),
+            (True, False, False, False, "Union[Unset, None, TestType]"),
+            (True, False, True, False, "TestType"),
+            (True, True, False, False, "Optional[TestType]"),
+            (True, True, True, False, "TestType"),
+            (False, False, False, True, "Union[Unset, str]"),
+            (False, False, True, True, "str"),
+            (False, True, False, True, "str"),
+            (False, True, True, True, "str"),
+            (True, False, False, True, "Union[Unset, None, str]"),
+            (True, False, True, True, "str"),
+            (True, True, False, True, "Optional[str]"),
+            (True, True, True, True, "str"),
         ],
     )
-    def test_get_type_string(self, mocker, nullable, required, no_optional, expected):
+    def test_get_type_string(self, mocker, nullable, required, no_optional, json, expected):
         from openapi_python_client.parser.properties import Property
 
         mocker.patch.object(Property, "_type_string", "TestType")
+        mocker.patch.object(Property, "_json_type_string", "str")
         p = Property(name="test", required=required, default=None, nullable=nullable)
-        assert p.get_type_string(no_optional=no_optional) == expected
+        assert p.get_type_string(no_optional=no_optional, json=json) == expected
 
     @pytest.mark.parametrize(
         "default,required,expected",
@@ -240,25 +249,37 @@ class TestListProperty:
 
 class TestUnionProperty:
     @pytest.mark.parametrize(
-        "nullable,required,no_optional,expected",
+        "nullable,required,no_optional,json,expected",
         [
-            (False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
-            (False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
-            (True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
+            (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, False, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, True, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (True, True, False, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
+            (True, True, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, False, True, "Union[Unset, inner_json_type_string_1, inner_json_type_string_2]"),
+            (False, False, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
+            (False, True, False, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
+            (False, True, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
+            (True, False, False, True, "Union[Unset, None, inner_json_type_string_1, inner_json_type_string_2]"),
+            (True, False, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
+            (True, True, False, True, "Union[None, inner_json_type_string_1, inner_json_type_string_2]"),
+            (True, True, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
         ],
     )
-    def test_get_type_string(self, mocker, nullable, required, no_optional, expected):
+    def test_get_type_string(self, mocker, nullable, required, no_optional, json, expected):
         from openapi_python_client.parser.properties import UnionProperty
 
         inner_property_1 = mocker.MagicMock()
-        inner_property_1.get_type_string.return_value = "inner_type_string_1"
+        inner_property_1.get_type_string.side_effect = (
+            lambda no_optional=False, json=False: "inner_json_type_string_1" if json else "inner_type_string_1"
+        )
         inner_property_2 = mocker.MagicMock()
-        inner_property_2.get_type_string.return_value = "inner_type_string_2"
+        inner_property_2.get_type_string.side_effect = (
+            lambda no_optional=False, json=False: "inner_json_type_string_2" if json else "inner_type_string_2"
+        )
         p = UnionProperty(
             name="test",
             required=required,
@@ -266,7 +287,7 @@ class TestUnionProperty:
             inner_properties=[inner_property_1, inner_property_2],
             nullable=nullable,
         )
-        assert p.get_type_string(no_optional=no_optional) == expected
+        assert p.get_type_string(no_optional=no_optional, json=json) == expected
 
     def test_get_imports(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty
