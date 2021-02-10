@@ -38,7 +38,7 @@ params: Dict[str, Any] = {
 params.update({{ property_name }})
             {% else %}
 if {% if not property.required %}not isinstance({{ property_name }}, Unset){% endif %}{% if not property.required and property.nullable %} and {% endif %}{% if property.nullable %}{{ property_name }} is not None{% endif %}:
-    params.update({{ "json_" + property.python_name }})
+    params.update({{ property_name }})
             {% endif %}
         {% endif %}
     {% endfor %}
