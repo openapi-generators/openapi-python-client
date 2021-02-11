@@ -449,6 +449,32 @@
             },
             "name": "required_model_prop",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ModelWithUnionProperty"
+                }
+              ],
+              "nullable": true
+            },
+            "name": "nullable_model_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ModelWithUnionProperty"
+                }
+              ],
+              "nullable": true
+            },
+            "name": "nullable_required_model_prop",
+            "in": "query"
           }
         ],
         "responses": {

@@ -29,6 +29,8 @@ def _get_kwargs(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
+    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -89,6 +91,22 @@ def _get_kwargs(
 
     json_required_model_prop = required_model_prop.to_dict()
 
+    json_nullable_model_prop: Union[Dict[str, Any], None, Unset]
+    if isinstance(nullable_model_prop, Unset):
+        json_nullable_model_prop = UNSET
+    elif nullable_model_prop is None:
+        json_nullable_model_prop = None
+    else:
+        json_nullable_model_prop = UNSET
+        if not isinstance(nullable_model_prop, Unset):
+            json_nullable_model_prop = nullable_model_prop.to_dict()
+
+    json_nullable_required_model_prop: Union[Dict[str, Any], None]
+    if nullable_required_model_prop is None:
+        json_nullable_required_model_prop = None
+    else:
+        json_nullable_required_model_prop = nullable_required_model_prop.to_dict()
+
     params: Dict[str, Any] = {
         "string_prop": string_prop,
         "not_required_not_nullable_datetime_prop": json_not_required_not_nullable_datetime_prop,
@@ -103,6 +121,8 @@ def _get_kwargs(
         "union_prop": json_union_prop,
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
+        "nullable_model_prop": json_nullable_model_prop,
+        "nullable_required_model_prop": json_nullable_required_model_prop,
     }
     if not isinstance(json_model_prop, Unset):
         params.update(json_model_prop)
@@ -157,6 +177,8 @@ def sync_detailed(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
+    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -175,6 +197,8 @@ def sync_detailed(
         enum_prop=enum_prop,
         model_prop=model_prop,
         required_model_prop=required_model_prop,
+        nullable_model_prop=nullable_model_prop,
+        nullable_required_model_prop=nullable_required_model_prop,
     )
 
     response = httpx.post(
@@ -202,6 +226,8 @@ def sync(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
+    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -222,6 +248,8 @@ def sync(
         enum_prop=enum_prop,
         model_prop=model_prop,
         required_model_prop=required_model_prop,
+        nullable_model_prop=nullable_model_prop,
+        nullable_required_model_prop=nullable_required_model_prop,
     ).parsed
 
 
@@ -243,6 +271,8 @@ async def asyncio_detailed(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
+    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -261,6 +291,8 @@ async def asyncio_detailed(
         enum_prop=enum_prop,
         model_prop=model_prop,
         required_model_prop=required_model_prop,
+        nullable_model_prop=nullable_model_prop,
+        nullable_required_model_prop=nullable_required_model_prop,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -287,6 +319,8 @@ async def asyncio(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
+    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -308,5 +342,7 @@ async def asyncio(
             enum_prop=enum_prop,
             model_prop=model_prop,
             required_model_prop=required_model_prop,
+            nullable_model_prop=nullable_model_prop,
+            nullable_required_model_prop=nullable_required_model_prop,
         )
     ).parsed
