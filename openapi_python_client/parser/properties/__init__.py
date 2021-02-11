@@ -413,9 +413,9 @@ def build_union_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
-    for sub_prop_data in chain(data.anyOf, data.oneOf):
+    for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=name, required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
+            name=f"{name}_item{i}", required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
         )
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
