@@ -22,13 +22,26 @@ if {{ parameter.python_name }} is not UNSET:
     {% endfor %}
 params: Dict[str, Any] = {
     {% for property in endpoint.query_parameters %}
-        {% if property.template %}
+        {% if not property.json_is_dict %}
+            {% if property.template %}
     "{{ property.name }}": {{ "json_" + property.python_name }},
-        {% else %}
+            {% else %}
     "{{ property.name }}": {{ property.python_name }},
+            {% endif %}
         {% endif %}
     {% endfor %}
 }
+    {% for property in endpoint.query_parameters %}
+        {% if property.json_is_dict %}
+            {% set property_name = "json_" + property.python_name %}
+            {% if property.required and not property.nullable %}
+params.update({{ property_name }})
+            {% else %}
+if {% if not property.required %}not isinstance({{ property_name }}, Unset){% endif %}{% if not property.required and property.nullable %} and {% endif %}{% if property.nullable %}{{ property_name }} is not None{% endif %}:
+    params.update({{ property_name }})
+            {% endif %}
+        {% endif %}
+    {% endfor %}
 params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}

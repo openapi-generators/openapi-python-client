@@ -55,6 +55,7 @@ def httpx_request(
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
+    required_model_prop: ModelWithUnionProperty,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_not_required_not_nullable_datetime_prop: Union[Unset, str] = UNSET
@@ -110,6 +111,8 @@ def httpx_request(
     if not isinstance(model_prop, Unset):
         json_model_prop = model_prop.to_dict()
 
+    json_required_model_prop = required_model_prop.to_dict()
+
     params: Dict[str, Any] = {
         "string_prop": string_prop,
         "not_required_not_nullable_datetime_prop": json_not_required_not_nullable_datetime_prop,
@@ -124,8 +127,10 @@ def httpx_request(
         "union_prop": json_union_prop,
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
-        "model_prop": json_model_prop,
     }
+    if not isinstance(json_model_prop, Unset):
+        params.update(json_model_prop)
+    params.update(json_required_model_prop)
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     response = client.request(
