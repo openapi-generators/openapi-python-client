@@ -30,7 +30,9 @@ class SchemaResolver:
             self._root_url = url_or_path
             try:
                 self._root_url_scheme = urllib.parse.urlparse(url_or_path).scheme
-            except Exception:
+                if self._root_url_scheme not in ["http", "https"]:
+                    raise ValueError(f"Unsupported URL scheme '{self._root_url_scheme}', expecting http or https")
+            except (TypeError, AttributeError):
                 raise urllib.error.URLError(f"Coult not parse URL > {url_or_path}")
 
     def _isapath(self, url_or_path: Union[str, Path]) -> bool:
@@ -56,7 +58,7 @@ class SchemaResolver:
     ) -> None:
 
         for ref in self._lookup_schema_references(root):
-            if ref.is_local_ref():
+            if ref.is_local():
                 continue
 
             try:
@@ -64,7 +66,7 @@ class SchemaResolver:
                 if path in external_schemas:
                     continue
 
-                if ref.is_url_reference():
+                if ref.is_url():
                     external_schemas[path] = self._fetch_url_reference(path)
                 else:
                     external_schemas[path] = self._fetch_remote_reference(path)

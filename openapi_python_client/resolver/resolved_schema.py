@@ -34,10 +34,10 @@ class ResolvedSchema:
         for owner, ref_key, ref_val in self._lookup_schema_references_in(self._root, "paths"):
             ref = Reference(ref_val)
 
-            if ref.is_local_ref():
+            if ref.is_local():
                 continue
 
-            remote_path = ref.remote_relative_path
+            remote_path = ref.pointer.value
             path = ref.path
 
             if remote_path not in self._refs:
@@ -62,12 +62,12 @@ class ResolvedSchema:
         for parent, ref_key, ref_val in self._lookup_schema_references(target):
             ref = Reference(ref_val)
 
-            if ref.is_local_ref():
+            if ref.is_local():
                 # print('Found local reference >> {0}'.format(ref.value))
                 if depth > 0:
                     self._transform_to_local_components(owner, ref)
             else:
-                remote_path = ref.remote_relative_path
+                remote_path = ref.pointer.value
                 if remote_path not in self._refs:
                     self._errors.append("Failed to resolve remote reference > {0}".format(remote_path))
                 else:
@@ -80,20 +80,23 @@ class ResolvedSchema:
 
         # print('Processing remote component > {0}'.format(ref.value))
         remote_component = self._lookup_dict(owner, ref.path)
-        root_components_dir = self._lookup_dict(self._resolved_remotes_components, ref.path_parent)
-        component_name = ref.path.split("/")[-1]
+        pointer_parent = ref.pointer.parent
+
+        if pointer_parent is not None:
+            root_components_dir = self._lookup_dict(self._resolved_remotes_components, pointer_parent.value)
+            component_name = ref.path.split("/")[-1]
 
         if component_name == "SorTransparentContainer" or component_name == "sorTransparentContainer":
             print(ref.value)
 
         if remote_component is None:
             print("Weirdy relookup of >> {0}".format(ref.value))
-            assert ref.is_local_ref() and self._lookup_dict(self._resolved_remotes_components, ref.path)
+            assert ref.is_local() and self._lookup_dict(self._resolved_remotes_components, ref.path)
             return
 
         if "$ref" in remote_component:
             subref = Reference(remote_component["$ref"])
-            if not subref.is_local_ref():
+            if not subref.is_local():
                 print("Lookup remote ref >>> {0}".format(subref.value))
                 return self._process_remote_components(remote_component)
 
@@ -118,7 +121,10 @@ class ResolvedSchema:
 
     def _ensure_components_dir_exists(self, ref: Reference) -> None:
         cursor = self._resolved_remotes_components
-        for key in ref.path_parent.split("/"):
+        pointer_dir = ref.pointer.parent
+        assert pointer_dir is not None
+
+        for key in pointer_dir.value.split("/"):  # noqa
             if key == "":
                 continue
 
