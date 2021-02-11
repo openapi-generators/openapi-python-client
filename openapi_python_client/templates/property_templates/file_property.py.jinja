@@ -1,7 +1,13 @@
-{% macro construct(property, source, initial_value=None) %}
-{{ property.python_name }} = File(
+{% macro construct_function(property, source) %}
+File(
      payload = BytesIO({{ source }})
 )
+{% endmacro %}
+
+{% from "property_templates/property_macros.py.jinja" import construct_template %}
+
+{% macro construct(property, source, initial_value=None) %}
+{{ construct_template(construct_function, property, source, initial_value=initial_value) }}
 {% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}

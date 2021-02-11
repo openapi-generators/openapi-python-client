@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 
@@ -49,7 +49,7 @@ class ModelWithUnionPropertyInlined:
                 fruit_item0 = UNSET
                 _fruit_item0 = data
                 if not isinstance(_fruit_item0, Unset):
-                    fruit_item0 = ModelWithUnionPropertyInlinedFruitItem0.from_dict(cast(Dict[str, Any], _fruit_item0))
+                    fruit_item0 = ModelWithUnionPropertyInlinedFruitItem0.from_dict(_fruit_item0)
 
                 return fruit_item0
             except:  # noqa: E722
@@ -58,7 +58,7 @@ class ModelWithUnionPropertyInlined:
             fruit_item1 = UNSET
             _fruit_item1 = data
             if not isinstance(_fruit_item1, Unset):
-                fruit_item1 = ModelWithUnionPropertyInlinedFruitItem1.from_dict(cast(Dict[str, Any], _fruit_item1))
+                fruit_item1 = ModelWithUnionPropertyInlinedFruitItem1.from_dict(_fruit_item1)
 
             return fruit_item1
 

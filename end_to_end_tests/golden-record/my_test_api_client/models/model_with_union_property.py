@@ -46,7 +46,7 @@ class ModelWithUnionProperty:
                 a_property_item0: Union[Unset, AnEnum]
                 a_property_item0 = UNSET
                 _a_property_item0 = data
-                if _a_property_item0 is not None and _a_property_item0 is not UNSET:
+                if not isinstance(_a_property_item0, Unset):
                     a_property_item0 = AnEnum(_a_property_item0)
 
                 return a_property_item0
@@ -55,7 +55,7 @@ class ModelWithUnionProperty:
             a_property_item1: Union[Unset, AnIntEnum]
             a_property_item1 = UNSET
             _a_property_item1 = data
-            if _a_property_item1 is not None and _a_property_item1 is not UNSET:
+            if not isinstance(_a_property_item1, Unset):
                 a_property_item1 = AnIntEnum(_a_property_item1)
 
             return a_property_item1
