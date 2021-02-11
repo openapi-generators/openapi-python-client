@@ -52,7 +52,7 @@ def httpx_request(
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
 ) -> Response[Union[None, HTTPValidationError]]:
@@ -77,7 +77,7 @@ def httpx_request(
     if not isinstance(date_prop, Unset):
         json_date_prop = date_prop.isoformat()
 
-    json_list_prop: Union[Unset, List[Any]] = UNSET
+    json_list_prop: Union[Unset, List[str]] = UNSET
     if not isinstance(list_prop, Unset):
         json_list_prop = []
         for list_prop_item_data in list_prop:

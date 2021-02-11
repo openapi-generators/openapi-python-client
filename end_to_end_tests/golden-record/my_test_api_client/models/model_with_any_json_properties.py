@@ -12,7 +12,7 @@ class ModelWithAnyJsonProperties:
     """  """
 
     additional_properties: Dict[
-        str, Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]
+        str, Union[List[str], ModelWithAnyJsonPropertiesAdditionalProperty, bool, float, int, str]
     ] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -42,9 +42,9 @@ class ModelWithAnyJsonProperties:
 
             def _parse_additional_property(
                 data: object,
-            ) -> Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]:
+            ) -> Union[List[str], ModelWithAnyJsonPropertiesAdditionalProperty, bool, float, int, str]:
                 additional_property: Union[
-                    ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool
+                    List[str], ModelWithAnyJsonPropertiesAdditionalProperty, bool, float, int, str
                 ]
                 try:
                     if not isinstance(data, dict):
@@ -62,7 +62,7 @@ class ModelWithAnyJsonProperties:
                     return additional_property
                 except:  # noqa: E722
                     pass
-                return cast(Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool], data)
+                return cast(Union[List[str], ModelWithAnyJsonPropertiesAdditionalProperty, bool, float, int, str], data)
 
             additional_property = _parse_additional_property(prop_dict)
 
@@ -77,11 +77,11 @@ class ModelWithAnyJsonProperties:
 
     def __getitem__(
         self, key: str
-    ) -> Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]:
+    ) -> Union[List[str], ModelWithAnyJsonPropertiesAdditionalProperty, bool, float, int, str]:
         return self.additional_properties[key]
 
     def __setitem__(
-        self, key: str, value: Union[ModelWithAnyJsonPropertiesAdditionalProperty, List[str], str, float, int, bool]
+        self, key: str, value: Union[List[str], ModelWithAnyJsonPropertiesAdditionalProperty, bool, float, int, str]
     ) -> None:
         self.additional_properties[key] = value
 

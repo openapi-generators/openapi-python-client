@@ -13,10 +13,10 @@ T = TypeVar("T", bound="ModelWithUnionProperty")
 class ModelWithUnionProperty:
     """  """
 
-    a_property: Union[Unset, AnEnum, AnIntEnum] = UNSET
+    a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        a_property: Union[Unset, str, int]
+        a_property: Union[Unset, int, str]
         if isinstance(self.a_property, Unset):
             a_property = UNSET
         elif isinstance(self.a_property, AnEnum):
@@ -40,8 +40,8 @@ class ModelWithUnionProperty:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
-        def _parse_a_property(data: object) -> Union[Unset, AnEnum, AnIntEnum]:
-            a_property: Union[Unset, AnEnum, AnIntEnum]
+        def _parse_a_property(data: object) -> Union[AnEnum, AnIntEnum, Unset]:
+            a_property: Union[AnEnum, AnIntEnum, Unset]
             if isinstance(data, Unset):
                 return data
             try:

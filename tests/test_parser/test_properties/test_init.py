@@ -88,6 +88,7 @@ class TestStringProperty:
         base_type_string = f"str"
 
         assert p.get_type_string() == base_type_string
+        assert p.get_type_string(json=True) == base_type_string
 
         p = StringProperty(name="test", required=True, default=None, nullable=True)
         assert p.get_type_string() == f"Optional[{base_type_string}]"
@@ -196,12 +197,15 @@ class TestListProperty:
 
         inner_property = mocker.MagicMock()
         inner_type_string = mocker.MagicMock()
-        inner_property.get_type_string.return_value = inner_type_string
+        inner_property.get_type_string.side_effect = (
+            lambda no_optional=False, json=False: "int" if json else inner_type_string
+        )
         p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
 
         base_type_string = f"List[{inner_type_string}]"
 
         assert p.get_type_string() == base_type_string
+        assert p.get_type_string(json=True) == "List[int]"
 
         p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=True)
         assert p.get_type_string() == f"Optional[{base_type_string}]"
@@ -255,7 +259,7 @@ class TestUnionProperty:
             (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
             (False, True, False, False, "Union[inner_type_string_1, inner_type_string_2]"),
             (False, True, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
+            (True, False, False, False, "Union[None, Unset, inner_type_string_1, inner_type_string_2]"),
             (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
             (True, True, False, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
             (True, True, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
@@ -263,7 +267,7 @@ class TestUnionProperty:
             (False, False, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
             (False, True, False, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
             (False, True, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
-            (True, False, False, True, "Union[Unset, None, inner_json_type_string_1, inner_json_type_string_2]"),
+            (True, False, False, True, "Union[None, Unset, inner_json_type_string_1, inner_json_type_string_2]"),
             (True, False, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
             (True, True, False, True, "Union[None, inner_json_type_string_1, inner_json_type_string_2]"),
             (True, True, True, True, "Union[inner_json_type_string_1, inner_json_type_string_2]"),
@@ -364,6 +368,7 @@ class TestEnumProperty:
         base_type_string = f"MyTestEnum"
 
         assert p.get_type_string() == base_type_string
+        assert p.get_type_string(json=True) == "str"
 
         p = properties.EnumProperty(
             name="test",

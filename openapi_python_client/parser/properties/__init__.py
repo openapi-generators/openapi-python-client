@@ -131,11 +131,13 @@ class ListProperty(Property, Generic[InnerProp]):
     """ A property representing a list (array) of other properties """
 
     inner_property: InnerProp
-    _json_type_string: ClassVar[str] = "List[Any]"
     template: ClassVar[str] = "list_property.py.jinja"
 
     def get_base_type_string(self) -> str:
         return f"List[{self.inner_property.get_type_string()}]"
+
+    def get_base_json_type_string(self) -> str:
+        return f"List[{self.inner_property.get_type_string(json=True)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -169,16 +171,14 @@ class UnionProperty(Property):
             self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
         )
 
-    def _get_inner_type_strings(self, json: bool = False) -> List[str]:
-        inner_types = [p.get_type_string(no_optional=True, json=json) for p in self.inner_properties]
-        unique_inner_types = list(dict.fromkeys(inner_types))
-        return unique_inner_types
+    def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
+        return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
 
-    def _get_type_string_from_inner_type_strings(self, inner_types: List[str]) -> str:
+    def _get_type_string_from_inner_type_strings(self, inner_types: Set[str]) -> str:
         if len(inner_types) == 1:
-            return inner_types[0]
+            return inner_types.pop()
         else:
-            return f"Union[{', '.join(inner_types)}]"
+            return f"Union[{', '.join(sorted(inner_types))}]"
 
     def get_base_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
@@ -186,17 +186,15 @@ class UnionProperty(Property):
     def get_base_json_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
-    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> List[str]:
+    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
         type_strings = self._get_inner_type_strings(json=json)
-
-        if no_optional or (self.required and not self.nullable):
+        if no_optional:
             return type_strings
-        elif self.required and self.nullable:
-            return ["None"] + type_strings
-        elif not self.required and self.nullable:
-            return ["Unset", "None"] + type_strings
-        else:
-            return ["Unset"] + type_strings
+        if self.nullable:
+            type_strings.add("None")
+        if not self.required:
+            type_strings.add("Unset")
+        return type_strings
 
     def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
         """
