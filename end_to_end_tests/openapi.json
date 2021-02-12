@@ -396,6 +396,22 @@
             },
             "name": "enum_prop",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            "name": "model_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            "name": "required_model_prop",
+            "in": "query"
           }
         ],
         "responses": {
@@ -662,6 +678,11 @@
             "type": "string",
             "format": "date",
             "nullable": true
+          },
+          "a_not_required_date": {
+            "title": "A Nullable Date",
+            "type": "string",
+            "format": "date",
           },
           "1_leading_digit": {
             "title": "Leading Digit",

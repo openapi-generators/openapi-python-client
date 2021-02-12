@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.8.0 - Unreleased
 
+### Breaking Changes
+
+- Generated clients will no longer pass through `None` to query parameters. Previously, any query params set to `None` would surface as empty strings (per the default behavior of `httpx`). This is contrary to the defaults indicated by the OpenAPI 3.0.3 spec. Ommitting these parameters makes us more compliant. If you require a style of `null` to be passed to your query parameters, please request support for the OpenAPI "style" attribute. Thank you to @forest-benchling and @bowenwr for a ton of input on this.
+
 ### Additions
 
 - New `--meta` command line option for specifying what type of metadata should be generated:
@@ -17,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
 - Fixes `Enum` deserialization when the value is `UNSET`.
 - Add handling of application/vnd.api+json media type.
+- Support passing models into query parameters (#316). Thanks @forest-benchling!
 
 ### Changes
 
@@ -29,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Endpoint tags are now sanitized during parsing to fix an issue where `My Tag` and `MyTag` are seen as two different tags but are then later unified, causing errors when creating directories. Thanks @p1-ra! (#328)
 - Parser will softly ignore value error during schema responses' status code convertion from string to integer (not a number). Errors will be reported to the end user and parsing will continue to proceed (#327).
 - The generated `from_dict` and `to_dict` methods of models will now properly handle `nullable` and `not required` properties that are themselves generated models (#315). Thanks @forest-benchling!
+- Fix deserialization of `None` and `Unset` properties for all types by unifying the checks (#334). Thanks @forest-benchling!
+- If duplicate model names are detected during generation, you'll now get an error message instead of broken code (#336). Thanks @forest-benchling!
 
 ## 0.7.3 - 2020-12-21
 

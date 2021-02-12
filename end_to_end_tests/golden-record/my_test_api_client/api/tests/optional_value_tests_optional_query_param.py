@@ -20,9 +20,10 @@ def _get_kwargs(
     if not isinstance(query_param, Unset):
         json_query_param = query_param
 
-    params: Dict[str, Any] = {}
-    if query_param is not UNSET:
-        params["query_param"] = json_query_param
+    params: Dict[str, Any] = {
+        "query_param": json_query_param,
+    }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,
