@@ -18,7 +18,7 @@ if {{ parameter.python_name }} is not UNSET:
 cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% else %}
 if {{ parameter.python_name }} is not UNSET:
-    cookies["{{ parameter.python_name | kebabcase}}"] = {{ parameter.python_name }}
+    cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% endif %}
     {% endfor %}
 {% endif %}
