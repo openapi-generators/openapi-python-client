@@ -115,15 +115,25 @@ class TestGenerate:
 
     def test_generate_encoding(self, _create_new_client):
         path = "cool/path"
-        encoding = "utf-8"
+        file_encoding = "utf-8"
         from openapi_python_client.cli import MetaType, app
 
-        result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={encoding}"])
+        result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={file_encoding}"])
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
             url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
         )
+
+    def test_generate_encoding_errors(self, _create_new_client):
+        path = "cool/path"
+        file_encoding = "error-file-encoding"
+        from openapi_python_client.cli import MetaType, app
+
+        result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={file_encoding}"])
+
+        assert result.exit_code == 1
+        assert result.output == "Unknown encoding : {}\n".format(file_encoding)
 
     def test_generate_handle_errors(self, _create_new_client):
         _create_new_client.return_value = [GeneratorError(detail="this is a message")]
@@ -207,3 +217,25 @@ class TestUpdate:
         _update_existing_client.assert_called_once_with(
             url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
         )
+
+    def test_update_encoding(self, _update_existing_client):
+        path = "cool/path"
+        file_encoding = "utf-8"
+        from openapi_python_client.cli import MetaType, app
+
+        result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
+
+        assert result.exit_code == 0
+        _update_existing_client.assert_called_once_with(
+            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+        )
+
+    def test_update_encoding_errors(self, _update_existing_client):
+        path = "cool/path"
+        file_encoding = "error-file-encoding"
+        from openapi_python_client.cli import MetaType, app
+
+        result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
+
+        assert result.exit_code == 1
+        assert result.output == "Unknown encoding : {}\n".format(file_encoding)
