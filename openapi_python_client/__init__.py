@@ -44,7 +44,7 @@ class Project:
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
-    encoding: Optional[str] = None
+    file_encoding: str
 
     def __init__(
         self,
@@ -52,11 +52,11 @@ class Project:
         openapi: GeneratorData,
         meta: MetaType,
         custom_template_path: Optional[Path] = None,
-        encoding: Optional[str] = None,
+        file_encoding: str = "utf-8",
     ) -> None:
         self.openapi: GeneratorData = openapi
         self.meta: MetaType = meta
-        self.encoding = encoding
+        self.encoding = file_encoding
 
         package_loader = PackageLoader(__package__)
         loader: BaseLoader
@@ -263,7 +263,7 @@ def _get_project_for_url_or_path(
     path: Optional[Path],
     meta: MetaType,
     custom_template_path: Optional[Path] = None,
-    encoding: Optional[str] = None,
+    file_encoding: str = "utf-8",
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
@@ -271,7 +271,7 @@ def _get_project_for_url_or_path(
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return Project(openapi=openapi, custom_template_path=custom_template_path, meta=meta, encoding=encoding)
+    return Project(openapi=openapi, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding)
 
 
 def create_new_client(
@@ -280,7 +280,7 @@ def create_new_client(
     path: Optional[Path],
     meta: MetaType,
     custom_template_path: Optional[Path] = None,
-    encoding: Optional[str] = None,
+    file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -289,7 +289,7 @@ def create_new_client(
          A list containing any errors encountered when generating.
     """
     project = _get_project_for_url_or_path(
-        url=url, path=path, custom_template_path=custom_template_path, meta=meta, encoding=encoding
+        url=url, path=path, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding
     )
     if isinstance(project, GeneratorError):
         return [project]
@@ -297,7 +297,12 @@ def create_new_client(
 
 
 def update_existing_client(
-    *, url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
+    *,
+    url: Optional[str],
+    path: Optional[Path],
+    meta: MetaType,
+    custom_template_path: Optional[Path] = None,
+    file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
     """
     Update an existing client library
@@ -305,7 +310,9 @@ def update_existing_client(
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path, meta=meta)
+    project = _get_project_for_url_or_path(
+        url=url, path=path, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding
+    )
     if isinstance(project, GeneratorError):
         return [project]
     return project.update()
