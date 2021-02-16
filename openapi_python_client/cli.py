@@ -1,3 +1,4 @@
+import codecs
 import pathlib
 from pprint import pformat
 from typing import Optional, Sequence
@@ -116,6 +117,7 @@ def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     meta: MetaType = _meta_option,
 ) -> None:
     """ Generate a new OpenAPI Client library """
@@ -127,7 +129,16 @@ def generate(
     if url and path:
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    errors = create_new_client(url=url, path=path, meta=meta, custom_template_path=custom_template_path)
+
+    try:
+        codecs.getencoder(file_encoding)
+    except LookupError:
+        typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    errors = create_new_client(
+        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+    )
     handle_errors(errors)
 
 
@@ -137,6 +148,7 @@ def update(
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
+    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
 ) -> None:
     """ Update an existing OpenAPI Client library """
     from . import update_existing_client
@@ -148,5 +160,13 @@ def update(
         typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    errors = update_existing_client(url=url, path=path, meta=meta, custom_template_path=custom_template_path)
+    try:
+        codecs.getencoder(file_encoding)
+    except LookupError:
+        typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    errors = update_existing_client(
+        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+    )
     handle_errors(errors)
