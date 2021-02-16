@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixes `Enum` deserialization when the value is `UNSET`.
 - Add handling of application/vnd.api+json media type.
 - Support passing models into query parameters (#316). Thanks @forest-benchling!
-- New `--file-encoding`command line option, set encoding used when writing generated, default: utf-8 (#330).
+- New `--file-encoding` command line option (#330). Sets the encoding used when writing generated files (defaults to utf-8). Thanks @dongfangtianyu!
 
 ### Changes
 
