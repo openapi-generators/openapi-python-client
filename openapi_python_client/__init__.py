@@ -235,7 +235,6 @@ class Project:
 
         endpoint_template = self.env.get_template("endpoint_module.py.jinja")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
-            tag = utils.snake_case(tag)
             tag_dir = api_dir / tag
             tag_dir.mkdir()
             (tag_dir / "__init__.py").touch()
