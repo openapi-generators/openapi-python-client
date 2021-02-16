@@ -632,6 +632,40 @@
           }
         }
       }
+    },
+    "/auth/token_with_cookie": {
+      "get": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "TOKEN_WITH_COOKIE",
+        "description": "Test optional cookie parameters",
+        "operationId": "token_with_cookie_auth_token_with_cookie_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            },
+            "name": "MyToken",
+            "in": "cookie"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
     }
   },
   "components": {

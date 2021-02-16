@@ -473,7 +473,9 @@ class TestEndpoint:
         )
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
-        param = oai.Parameter.construct(name="test", required=True, param_schema=mocker.MagicMock(), param_in="cookie")
+        param = oai.Parameter.construct(
+            name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
+        )
         schemas = Schemas()
 
         result = Endpoint._add_parameters(

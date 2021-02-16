@@ -19,6 +19,7 @@ class ParameterLocation(str, Enum):
     QUERY = "query"
     PATH = "path"
     HEADER = "header"
+    COOKIE = "cookie"
 
 
 def import_string_from_reference(reference: Reference, prefix: str = "") -> str:
@@ -93,6 +94,7 @@ class Endpoint:
     query_parameters: List[Property] = field(default_factory=list)
     path_parameters: List[Property] = field(default_factory=list)
     header_parameters: List[Property] = field(default_factory=list)
+    cookie_parameters: List[Property] = field(default_factory=list)
     responses: List[Response] = field(default_factory=list)
     form_body_reference: Optional[Reference] = None
     json_body: Optional[Property] = None
@@ -229,6 +231,8 @@ class Endpoint:
                 endpoint.path_parameters.append(prop)
             elif param.param_in == ParameterLocation.HEADER:
                 endpoint.header_parameters.append(prop)
+            elif param.param_in == ParameterLocation.COOKIE:
+                endpoint.cookie_parameters.append(prop)
             else:
                 return ParseError(data=param, detail="Parameter must be declared in path or query"), schemas
         return endpoint, schemas
