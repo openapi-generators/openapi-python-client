@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Endpoint tags are now sanitized during parsing to fix an issue where `My Tag` and `MyTag` are seen as two different tags but are then later unified, causing errors when creating directories. Thanks @p1-ra! (#328)
 - Parser will softly ignore value error during schema responses' status code convertion from string to integer (not a number). Errors will be reported to the end user and parsing will continue to proceed (#327).
 - The generated `from_dict` and `to_dict` methods of models will now properly handle `nullable` and `not required` properties that are themselves generated models (#315). Thanks @forest-benchling!
+- Fixed a typo in the async example in generated README.md files (#337). Thanks @synchronizing!
 - Fix deserialization of `None` and `Unset` properties for all types by unifying the checks (#334). Thanks @forest-benchling!
 - If duplicate model names are detected during generation, you'll now get an error message instead of broken code (#336). Thanks @forest-benchling!
 
