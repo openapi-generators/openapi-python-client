@@ -20,11 +20,12 @@ def _get_kwargs(
     url = "{}/post/".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "data": asdict(form_data),
         "files": multipart_data.to_dict(),

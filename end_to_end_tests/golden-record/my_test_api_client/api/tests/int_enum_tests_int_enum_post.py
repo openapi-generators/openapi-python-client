@@ -16,6 +16,7 @@ def _get_kwargs(
     url = "{}/tests/int_enum".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     json_int_enum = int_enum.value
 
@@ -27,7 +28,7 @@ def _get_kwargs(
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
     }
