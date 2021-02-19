@@ -1,5 +1,6 @@
+import copy
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union, cast
 
 import attr
 
@@ -12,6 +13,83 @@ from .enum_property import EnumProperty
 from .model_property import ModelProperty
 from .property import Property
 from .schemas import Schemas
+
+
+class LazyReferencePropertyProxy:
+
+    __GLOBAL_SCHEMAS_REF: Schemas = Schemas()
+    __PROXIES: List[Tuple["LazyReferencePropertyProxy", oai.Reference]] = []
+
+    @classmethod
+    def update_schemas(cls, schemas: Schemas) -> None:
+        cls.__GLOBAL_SCHEMAS_REF = schemas
+
+    @classmethod
+    def create(cls, name: str, required: bool, data: oai.Reference, parent_name: str) -> "LazyReferencePropertyProxy":
+        proxy = LazyReferencePropertyProxy(name, required, data, parent_name)
+        cls.__PROXIES.append((proxy, data))
+        return proxy
+
+    @classmethod
+    def created_proxies(cls) -> List[Tuple["LazyReferencePropertyProxy", oai.Reference]]:
+        return cls.__PROXIES
+
+    @classmethod
+    def flush_internal_references(cls) -> None:
+        cls.__PROXIES = []
+        cls.__GLOBAL_SCHEMAS_REF = Schemas()
+
+    def __init__(self, name: str, required: bool, data: oai.Reference, parent_name: str):
+        self._name = name
+        self._required = required
+        self._data = data
+        self._parent_name = parent_name
+        self._reference: Reference = Reference.from_ref(data.ref)
+        self._reference_to_itself: bool = self._reference.class_name == parent_name
+        self._resolved: Union[Property, None] = None
+
+    def get_instance_type_string(self) -> str:
+        return self.get_type_string(no_optional=True)
+
+    def get_type_string(self, no_optional: bool = False) -> str:
+        resolved = self.resolve()
+        if resolved:
+            return resolved.get_type_string(no_optional)
+        return "LazyReferencePropertyProxy"
+
+    def get_imports(self, *, prefix: str) -> Set[str]:
+        resolved = self.resolve()
+        if resolved:
+            return resolved.get_imports(prefix=prefix)
+        return set()
+
+    def __copy__(self) -> Property:
+        resolved = cast(Property, self.resolve(False))
+        return copy.copy(resolved)
+
+    def __deepcopy__(self, memo: Any) -> Property:
+        resolved = cast(Property, self.resolve(False))
+        return copy.deepcopy(resolved, memo)
+
+    def __getattr__(self, name: str) -> Any:
+        resolved = self.resolve(False)
+        return resolved.__getattribute__(name)
+
+    def resolve(self, allow_lazyness: bool = True) -> Union[Property, None]:
+        if not self._resolved:
+            schemas = LazyReferencePropertyProxy.__GLOBAL_SCHEMAS_REF
+            class_name = self._reference.class_name
+            if schemas:
+                existing = schemas.enums.get(class_name) or schemas.models.get(class_name)
+                if existing:
+                    self._resolved = attr.evolve(existing, required=self._required, name=self._name)
+
+        if self._resolved:
+            return self._resolved
+        elif allow_lazyness:
+            return None
+        else:
+            raise RuntimeError(f"Reference {self._data} shall have been resolved.")
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -441,6 +519,9 @@ def _property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
+        if not _is_local_reference(data):
+            return PropertyError(data=data, detail="Remote reference schemas are not supported."), schemas
+
         reference = Reference.from_ref(data.ref)
         existing = schemas.enums.get(reference.class_name) or schemas.models.get(reference.class_name)
         if existing:
@@ -448,7 +529,9 @@ def _property_from_data(
                 attr.evolve(existing, required=required, name=name),
                 schemas,
             )
-        return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+        else:
+            return cast(Property, LazyReferencePropertyProxy.create(name, required, data, parent_name)), schemas
+
     if data.enum:
         return build_enum_property(
             data=data, name=name, required=required, schemas=schemas, enum=data.enum, parent_name=parent_name
@@ -519,6 +602,7 @@ def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> U
         )
     else:
         prop, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True, parent_name=None)
+
     if isinstance(prop, PropertyError):
         return prop
     else:
@@ -602,6 +686,7 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
     errors: List[PropertyError] = []
     references_by_name: Dict[str, oai.Reference] = dict()
     references_to_process: List[Tuple[str, oai.Reference]] = list()
+    LazyReferencePropertyProxy.flush_internal_references()  # Cleanup side effects
 
     # References could have forward References so keep going as long as we are making progress
     while processing:
@@ -626,11 +711,17 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
 
         to_process = next_round
 
-        for name, reference in references_to_process:
-            schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
+    for name, reference in references_to_process:
+        schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
 
-            if isinstance(schemas_or_err, PropertyError):
-                errors.append(schemas_or_err)
+        if isinstance(schemas_or_err, PropertyError):
+            errors.append(schemas_or_err)
 
     schemas.errors.extend(errors)
+    LazyReferencePropertyProxy.update_schemas(schemas)
+    for reference_proxy, data in LazyReferencePropertyProxy.created_proxies():
+        if not reference_proxy.resolve():
+            schemas.errors.append(
+                PropertyError(data=data, detail="Could not find reference in parsed models or enums.")
+            )
     return schemas
