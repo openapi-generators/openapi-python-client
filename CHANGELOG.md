@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.8.0 - Unreleased
+## 0.8.0 - 2021-02-19
 
 ### Breaking Changes
 
@@ -19,8 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     project info.
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
-- Fixes `Enum` deserialization when the value is `UNSET`.
-- Add handling of application/vnd.api+json media type.
+- The media type application/vnd.api+json will now be handled just like application/json (#307). Thanks @jrversteegh!
 - Support passing models into query parameters (#316). Thanks @forest-benchling!
 - Add support for cookie parameters (#326).
 - New `--file-encoding` command line option (#330). Sets the encoding used when writing generated files (defaults to utf-8). Thanks @dongfangtianyu!
@@ -39,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a typo in the async example in generated README.md files (#337). Thanks @synchronizing!
 - Fix deserialization of `None` and `Unset` properties for all types by unifying the checks (#334). Thanks @forest-benchling!
 - If duplicate model names are detected during generation, you'll now get an error message instead of broken code (#336). Thanks @forest-benchling!
+- Fixes `Enum` deserialization when the value is `UNSET` (#306). Thanks @bowenwr!
 
 ## 0.7.3 - 2020-12-21
 
