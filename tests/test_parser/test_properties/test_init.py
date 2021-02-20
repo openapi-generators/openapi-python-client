@@ -611,7 +611,12 @@ class TestPropertyFromData:
         assert schemas == new_schemas
 
     def test_property_from_data_ref_not_found(self, mocker):
-        from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
+        from openapi_python_client.parser.properties import (
+            LazyReferencePropertyProxy,
+            PropertyError,
+            Schemas,
+            property_from_data,
+        )
 
         name = mocker.MagicMock()
         required = mocker.MagicMock()
@@ -624,8 +629,13 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent"
         )
 
-        from_ref.assert_called_once_with(data.ref)
-        assert prop == PropertyError(data=data, detail="Could not find reference in parsed models or enums")
+        from_ref.assert_called_with(data.ref)
+        assert isinstance(prop, LazyReferencePropertyProxy)
+        assert prop.resolve() == None
+        with pytest.raises(RuntimeError):
+            prop.resolve(False)
+        with pytest.raises(RuntimeError):
+            prop.template
         assert schemas == new_schemas
 
     def test_property_from_data_string(self, mocker):
@@ -1414,3 +1424,287 @@ def test__resolve_local_reference_schema(mocker):
     assert schemas.enums["FooBarLowerCaseDeeperReferenceLoop"] == schemas.enums["Foobar"]
     assert isinstance(res_7, PropertyError)
     assert isinstance(res_8, PropertyError)
+
+
+def _base_api_data():
+    return """
+---
+openapi: 3.0.2
+info:
+  title: test
+  description: test
+  version: 1.0.0
+paths:
+  /tests/:
+    get:
+      operationId: getTests
+      description: test
+      responses: 
+        '200':
+          description: test
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fooBarModel'
+"""
+
+
+def test_lazy_proxy_reference_unresolved():
+    import copy
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import LazyReferencePropertyProxy, Schemas
+
+    LazyReferencePropertyProxy.update_schemas(Schemas())
+    lazy_reference_proxy = LazyReferencePropertyProxy.create(
+        "childProperty", False, oai.Reference(ref="#/foobar"), "AModel"
+    )
+
+    assert lazy_reference_proxy.get_instance_type_string() == "LazyReferencePropertyProxy"
+    assert lazy_reference_proxy.get_type_string(no_optional=False) == "LazyReferencePropertyProxy"
+    assert lazy_reference_proxy.get_type_string(no_optional=True) == "LazyReferencePropertyProxy"
+    assert lazy_reference_proxy.get_imports(prefix="..") == set()
+    assert lazy_reference_proxy.resolve() == None
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.resolve(False)
+    with pytest.raises(RuntimeError):
+        copy.copy(lazy_reference_proxy)
+    with pytest.raises(RuntimeError):
+        copy.deepcopy(lazy_reference_proxy)
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.name
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.required
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.nullable
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.default
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.python_name
+    with pytest.raises(RuntimeError):
+        lazy_reference_proxy.template
+
+
+def test_lazy_proxy_reference_resolved():
+    import copy
+
+    import yaml
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import LazyReferencePropertyProxy, Schemas, build_schemas
+
+    data = yaml.safe_load(
+        f"""
+{_base_api_data()}
+components:
+  schemas:
+    fooBar:
+      type: object
+      properties:
+        childSettings:
+          type: number
+"""
+    )
+    openapi = oai.OpenAPI.parse_obj(data)
+    schemas = build_schemas(components=openapi.components.schemas)
+    foobar = schemas.models.get("FooBar")
+
+    LazyReferencePropertyProxy.update_schemas(schemas)
+    lazy_reference_proxy = LazyReferencePropertyProxy.create(
+        "childProperty", True, oai.Reference(ref="#/components/schemas/fooBar"), "AModel"
+    )
+
+    assert foobar
+    assert lazy_reference_proxy.get_instance_type_string() == foobar.get_instance_type_string()
+    assert lazy_reference_proxy.get_type_string(no_optional=False) == foobar.get_type_string(no_optional=False)
+    assert lazy_reference_proxy.get_type_string(no_optional=True) == foobar.get_type_string(no_optional=True)
+    assert lazy_reference_proxy.get_imports(prefix="..") == foobar.get_imports(prefix="..")
+    assert lazy_reference_proxy.name == "childProperty" and foobar.name == "fooBar"
+    assert lazy_reference_proxy.nullable == foobar.nullable
+    assert lazy_reference_proxy.default == foobar.default
+    assert lazy_reference_proxy.python_name == "child_property" and foobar.python_name == "foo_bar"
+    assert lazy_reference_proxy.template == foobar.template
+    try:
+        copy.copy(lazy_reference_proxy)
+        copy.deepcopy(lazy_reference_proxy)
+    except Exception as e:
+        pytest.fail(e)
+
+
+def test_build_schemas_resolve_inner_property_remote_reference():
+    import yaml
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+
+    data = yaml.safe_load(
+        f"""
+{_base_api_data()}
+components:
+  schemas:
+    fooBar:
+      type: object
+      properties:
+        childSettings:
+          type: array
+          items:
+            $ref: 'AnOtherDocument#/components/schemas/bar'
+"""
+    )
+    openapi = oai.OpenAPI.parse_obj(data)
+
+    schemas = build_schemas(components=openapi.components.schemas)
+
+    assert len(schemas.errors) == 1
+    assert schemas.errors[0] == PropertyError(
+        data=oai.Reference(ref="AnOtherDocument#/components/schemas/bar"),
+        detail="invalid data in items of array childSettings",
+    )
+
+
+def test_build_schemas_lazy_resolve_known_inner_property_local_reference():
+    import yaml
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+
+    data = yaml.safe_load(
+        f"""
+{_base_api_data()}
+components:
+  schemas:
+    fooBar:
+      type: object
+      properties:
+        childSettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/bar'
+    bar:
+      type: object
+      properties:
+        a_prop:
+          type: number
+"""
+    )
+    openapi = oai.OpenAPI.parse_obj(data)
+
+    schemas = build_schemas(components=openapi.components.schemas)
+
+    foo_bar = schemas.models.get("FooBar")
+    bar = schemas.models.get("Bar")
+    assert len(schemas.errors) == 0
+    assert foo_bar and bar
+    child_settings = foo_bar.optional_properties[0]
+    assert child_settings.inner_property.reference == bar.reference
+
+
+def test_build_schemas_lazy_resolve_known_inner_property_local_reference_with_loop():
+    import yaml
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+
+    data = yaml.safe_load(
+        f"""
+{_base_api_data()}
+components:
+  schemas:
+    fooBar:
+      type: object
+      properties:
+        childSettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/barDeeperLoop'
+
+    barDeeperLoop:
+      $ref: '#/components/schemas/barLoop'
+    barLoop:
+      $ref: '#/components/schemas/bar'
+    bar:
+      type: object
+      properties:
+        a_prop:
+          type: number
+
+"""
+    )
+    openapi = oai.OpenAPI.parse_obj(data)
+
+    schemas = build_schemas(components=openapi.components.schemas)
+
+    foo_bar = schemas.models.get("FooBar")
+    bar_deeper_loop = schemas.models.get("BarDeeperLoop")
+    bar_loop = schemas.models.get("BarLoop")
+    bar = schemas.models.get("Bar")
+    assert len(schemas.errors) == 0
+    assert foo_bar and bar_deeper_loop and bar_loop and bar
+    assert bar == bar_deeper_loop == bar_loop
+
+    child_settings = foo_bar.optional_properties[0]
+    assert child_settings.inner_property.reference == bar.reference
+    assert child_settings.inner_property.reference == bar_loop.reference
+    assert child_settings.inner_property.reference == bar_deeper_loop.reference
+
+
+def test_build_schemas_lazy_resolve_inner_property_self_local_reference():
+    import yaml
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+
+    data = yaml.safe_load(
+        f"""
+{_base_api_data()}
+components:
+  schemas:
+    fooBar:
+      type: object
+      properties:
+        childSettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/fooBar'
+"""
+    )
+    openapi = oai.OpenAPI.parse_obj(data)
+
+    schemas = build_schemas(components=openapi.components.schemas)
+
+    foo_bar = schemas.models.get("FooBar")
+    assert len(schemas.errors) == 0
+    assert foo_bar
+    child_settings = foo_bar.optional_properties[0]
+    assert child_settings.inner_property.reference == foo_bar.reference
+
+
+def test_build_schemas_lazy_resolve_unknown_inner_property_local_reference():
+    import yaml
+
+    import openapi_python_client.schema as oai
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+
+    data = yaml.safe_load(
+        f"""
+{_base_api_data()}
+components:
+  schemas:
+    fooBar:
+      type: object
+      properties:
+        childSettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/noexist'
+"""
+    )
+    openapi = oai.OpenAPI.parse_obj(data)
+
+    schemas = build_schemas(components=openapi.components.schemas)
+
+    assert len(schemas.errors) == 1
+    assert schemas.errors[0] == PropertyError(
+        detail="Could not find reference in parsed models or enums.",
+        data=oai.Reference(ref="#/components/schemas/noexist"),
+    )
