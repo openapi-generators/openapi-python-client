@@ -670,7 +670,7 @@ def _is_local_reference(reference: oai.Reference) -> bool:
 
 
 def _reference_model_name(reference: oai.Reference) -> str:
-    return utils.pascal_case(_reference_name(reference))
+    return Reference.from_ref(reference.ref).class_name
 
 
 def _reference_name(reference: oai.Reference) -> str:
