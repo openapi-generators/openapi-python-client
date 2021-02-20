@@ -548,7 +548,7 @@ class TestPropertyFromData:
         from openapi_python_client.parser.properties import EnumProperty, Reference, Schemas, property_from_data
 
         name = "some_enum"
-        data = oai.Reference.construct(ref="MyEnum")
+        data = oai.Reference.construct(ref="#MyEnum")
         existing_enum = EnumProperty(
             name="an_enum",
             required=True,
@@ -579,7 +579,7 @@ class TestPropertyFromData:
         name = "new_name"
         required = False
         class_name = "MyModel"
-        data = oai.Reference.construct(ref=class_name)
+        data = oai.Reference.construct(ref=f"#{class_name}")
         existing_model = ModelProperty(
             name="old_name",
             required=True,
