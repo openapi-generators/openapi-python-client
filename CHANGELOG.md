@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Additions
 
-- Add support for properties local reference ($ref) resolution
+- Add support of properties indirect reference ($ref) resolution; Add support of inner properties direct and indirect reference resolution to its owner model/enum (#329). Thanks @p1-ra!
 - New `--meta` command line option for specifying what type of metadata should be generated:
   - `poetry` is the default value, same behavior you're used to in previous versions
   - `setup` will generate a pyproject.toml with no Poetry information, and instead create a `setup.py` with the
