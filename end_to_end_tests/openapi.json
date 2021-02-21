@@ -675,6 +675,15 @@
         "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable", "model", "nullable_model"],
         "type": "object",
         "properties": {
+          "an_enum_indirect_ref": {
+            "$ref": "#/components/schemas/AnEnumDeeperIndirectReference"
+          },
+          "direct_ref_to_itself": {
+            "$ref": "#/components/schemas/AModel"
+          },
+          "indirect_ref_to_itself": {
+            "$ref": "#/components/schemas/AModelDeeperIndirectReference"
+          },
           "an_enum_value": {
             "$ref": "#/components/schemas/AnEnum"
           },
@@ -716,7 +725,7 @@
           "a_not_required_date": {
             "title": "A Nullable Date",
             "type": "string",
-            "format": "date",
+            "format": "date"
           },
           "1_leading_digit": {
             "title": "Leading Digit",
@@ -782,10 +791,22 @@
         "description": "A Model for testing all the ways custom objects can be used ",
         "additionalProperties": false
       },
+      "AModelIndirectReference": {
+        "$ref": "#/components/schemas/AModel"
+      },
+      "AModelDeeperIndirectReference": {
+        "$ref": "#/components/schemas/AModelIndirectReference"
+      },
+      "AnEnumIndirectReference": {
+       "$ref": "#/components/schemas/AnEnum" 
+      },
       "AnEnum": {
         "title": "AnEnum",
         "enum": ["FIRST_VALUE", "SECOND_VALUE"],
         "description": "For testing Enums in all the ways they can be used "
+      },
+      "AnEnumDeeperIndirectReference": {
+        "$ref": "#/components/schemas/AnEnumIndirectReference" 
       },
       "AnIntEnum": {
         "title": "AnIntEnum",

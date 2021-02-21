@@ -27,6 +27,9 @@ class AModel:
     a_nullable_date: Optional[datetime.date]
     required_nullable: Optional[str]
     nullable_model: Optional[AModelNullableModel]
+    an_enum_indirect_ref: Union[Unset, AnEnum] = UNSET
+    direct_ref_to_itself: Union["AModel", Unset] = UNSET
+    indirect_ref_to_itself: Union["AModel", Unset] = UNSET
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
@@ -47,6 +50,18 @@ class AModel:
         a_date = self.a_date.isoformat()
         required_not_nullable = self.required_not_nullable
         model = self.model.to_dict()
+
+        an_enum_indirect_ref: Union[Unset, AnEnum] = UNSET
+        if not isinstance(self.an_enum_indirect_ref, Unset):
+            an_enum_indirect_ref = self.an_enum_indirect_ref
+
+        direct_ref_to_itself: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.direct_ref_to_itself, Unset):
+            direct_ref_to_itself = self.direct_ref_to_itself.to_dict()
+
+        indirect_ref_to_itself: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.indirect_ref_to_itself, Unset):
+            indirect_ref_to_itself = self.indirect_ref_to_itself.to_dict()
 
         nested_list_of_enums: Union[Unset, List[Any]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
@@ -94,6 +109,12 @@ class AModel:
                 "nullable_model": nullable_model,
             }
         )
+        if an_enum_indirect_ref is not UNSET:
+            field_dict["an_enum_indirect_ref"] = an_enum_indirect_ref
+        if direct_ref_to_itself is not UNSET:
+            field_dict["direct_ref_to_itself"] = direct_ref_to_itself
+        if indirect_ref_to_itself is not UNSET:
+            field_dict["indirect_ref_to_itself"] = indirect_ref_to_itself
         if nested_list_of_enums is not UNSET:
             field_dict["nested_list_of_enums"] = nested_list_of_enums
         if a_not_required_date is not UNSET:
@@ -136,6 +157,21 @@ class AModel:
         required_not_nullable = d.pop("required_not_nullable")
 
         model = AModelModel.from_dict(d.pop("model"))
+
+        an_enum_indirect_ref: Union[Unset, AnEnum] = UNSET
+        _an_enum_indirect_ref = d.pop("an_enum_indirect_ref", UNSET)
+        if not isinstance(_an_enum_indirect_ref, Unset):
+            an_enum_indirect_ref = AnEnum(_an_enum_indirect_ref)
+
+        direct_ref_to_itself: Union[AModel, Unset] = UNSET
+        _direct_ref_to_itself = d.pop("direct_ref_to_itself", UNSET)
+        if not isinstance(_direct_ref_to_itself, Unset):
+            direct_ref_to_itself = AModel.from_dict(_direct_ref_to_itself)
+
+        indirect_ref_to_itself: Union[AModel, Unset] = UNSET
+        _indirect_ref_to_itself = d.pop("indirect_ref_to_itself", UNSET)
+        if not isinstance(_indirect_ref_to_itself, Unset):
+            indirect_ref_to_itself = AModel.from_dict(_indirect_ref_to_itself)
 
         nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
@@ -188,6 +224,9 @@ class AModel:
             a_date=a_date,
             required_not_nullable=required_not_nullable,
             model=model,
+            an_enum_indirect_ref=an_enum_indirect_ref,
+            direct_ref_to_itself=direct_ref_to_itself,
+            indirect_ref_to_itself=indirect_ref_to_itself,
             nested_list_of_enums=nested_list_of_enums,
             a_nullable_date=a_nullable_date,
             a_not_required_date=a_not_required_date,
