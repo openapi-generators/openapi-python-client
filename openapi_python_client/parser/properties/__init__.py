@@ -63,6 +63,11 @@ class LazyReferencePropertyProxy:
             return resolved.get_imports(prefix=prefix)
         return set()
 
+    def to_string(self) -> str:
+        resolved = cast(Property, self.resolve(False))
+        p_repr = resolved.to_string()
+        return p_repr.replace(f"{self._parent_name}", f"'{self._parent_name}'")
+
     def __copy__(self) -> Property:
         resolved = cast(Property, self.resolve(False))
         return copy.copy(resolved)
