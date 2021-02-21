@@ -1492,7 +1492,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fooBarModel'
+                $ref: '#/components/schemas/fooBar'
 """
 
 
@@ -1607,93 +1607,7 @@ components:
     )
 
 
-def test_build_schemas_lazy_resolve_known_inner_property_local_reference():
-    import yaml
-
-    import openapi_python_client.schema as oai
-    from openapi_python_client.parser.properties import Schemas, build_schemas
-
-    data = yaml.safe_load(
-        f"""
-{_base_api_data()}
-components:
-  schemas:
-    fooBar:
-      type: object
-      properties:
-        childSettings:
-          type: array
-          items:
-            $ref: '#/components/schemas/bar'
-    bar:
-      type: object
-      properties:
-        a_prop:
-          type: number
-"""
-    )
-    openapi = oai.OpenAPI.parse_obj(data)
-
-    schemas = build_schemas(components=openapi.components.schemas)
-
-    foo_bar = schemas.models.get("FooBar")
-    bar = schemas.models.get("Bar")
-    assert len(schemas.errors) == 0
-    assert foo_bar and bar
-    child_settings = foo_bar.optional_properties[0]
-    assert child_settings.inner_property.reference == bar.reference
-
-
-def test_build_schemas_lazy_resolve_known_inner_property_local_reference_with_loop():
-    import yaml
-
-    import openapi_python_client.schema as oai
-    from openapi_python_client.parser.properties import Schemas, build_schemas
-
-    data = yaml.safe_load(
-        f"""
-{_base_api_data()}
-components:
-  schemas:
-    fooBar:
-      type: object
-      properties:
-        childSettings:
-          type: array
-          items:
-            $ref: '#/components/schemas/barDeeperLoop'
-
-    barDeeperLoop:
-      $ref: '#/components/schemas/barLoop'
-    barLoop:
-      $ref: '#/components/schemas/bar'
-    bar:
-      type: object
-      properties:
-        a_prop:
-          type: number
-
-"""
-    )
-    openapi = oai.OpenAPI.parse_obj(data)
-
-    schemas = build_schemas(components=openapi.components.schemas)
-
-    foo_bar = schemas.models.get("FooBar")
-    bar_deeper_loop = schemas.models.get("BarDeeperLoop")
-    bar_loop = schemas.models.get("BarLoop")
-    bar = schemas.models.get("Bar")
-    assert len(schemas.errors) == 0
-    assert foo_bar and bar_deeper_loop and bar_loop and bar
-    assert bar == bar_deeper_loop == bar_loop
-
-    child_settings = foo_bar.optional_properties[0]
-    assert child_settings.inner_property.reference == bar.reference
-    assert child_settings.inner_property.reference == bar_loop.reference
-    assert child_settings.inner_property.reference == bar_deeper_loop.reference
-
-
-def test_build_schemas_lazy_resolve_inner_property_self_local_reference():
+def test_build_schemas_lazy_resolve_inner_property_self_direct_reference():
     import yaml
 
     import openapi_python_client.schema as oai
@@ -1724,7 +1638,7 @@ components:
     assert child_settings.inner_property.reference == foo_bar.reference
 
 
-def test_build_schemas_lazy_resolve_unknown_inner_property_local_reference():
+def test_build_schemas_lazy_resolve_known_inner_property_self_indirect_reference():
     import yaml
 
     import openapi_python_client.schema as oai
@@ -1740,16 +1654,25 @@ components:
       properties:
         childSettings:
           type: array
+          description: test
           items:
-            $ref: '#/components/schemas/noexist'
+            $ref: '#/components/schemas/FoobarSelfIndirectReference'
+    FoobarSelfIndirectReference:
+      $ref: '#/components/schemas/foobarSelfDeeperIndirectReference'
+    foobarSelfDeeperIndirectReference:
+      $ref: '#/components/schemas/fooBar'
 """
     )
     openapi = oai.OpenAPI.parse_obj(data)
 
     schemas = build_schemas(components=openapi.components.schemas)
 
-    assert len(schemas.errors) == 1
-    assert schemas.errors[0] == PropertyError(
-        detail="invalid data in items of array childSettings",
-        data=oai.Reference(ref="#/components/schemas/noexist"),
-    )
+    assert len(schemas.errors) == 0
+    foobar = schemas.models.get("FooBar")
+    foobar_indirect_ref = schemas.models.get("FoobarSelfIndirectReference")
+    foobar_deep_indirect_ref = schemas.models.get("FoobarSelfDeeperIndirectReference")
+    assert foobar is not None and foobar_indirect_ref is not None and foobar_deep_indirect_ref is not None
+    assert foobar == foobar_indirect_ref == foobar_deep_indirect_ref
+
+    child_settings = foobar.optional_properties[0]
+    assert child_settings.inner_property.reference == foobar.reference

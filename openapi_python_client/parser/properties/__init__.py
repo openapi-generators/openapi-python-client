@@ -571,11 +571,17 @@ def _property_from_data(
         else:
 
             def lookup_is_reference_to_itself(
-                ref_name: str, owner_class_name: str, lazy_references: Dict[str, oai.Reference]
+                ref_name: str,
+                owner_class_name: str,
+                lazy_references: Dict[str, oai.Reference],
             ) -> bool:
                 if ref_name in lazy_references:
                     next_ref_name = _reference_pointer_name(lazy_references[ref_name])
-                    return lookup_is_reference_to_itself(next_ref_name, owner_class_name, lazy_references)
+                    return lookup_is_reference_to_itself(
+                        next_ref_name,
+                        owner_class_name,
+                        lazy_references,
+                    )
 
                 return ref_name.casefold() == owner_class_name.casefold()
 
@@ -783,14 +789,14 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     processing = True
     errors: List[PropertyError] = []
-    LazyReferencePropertyProxy.flush_internal_references()  # Cleanup side effects
     lazy_self_references: Dict[str, oai.Reference] = dict()
     visited: List[str] = []
+    references_by_name: Dict[str, oai.Reference] = dict()
+    references_to_process: List[Tuple[str, oai.Reference]] = list()
+    LazyReferencePropertyProxy.flush_internal_references()  # Cleanup side effects
 
     # References could have forward References so keep going as long as we are making progress
     while processing:
-        references_by_name: Dict[str, oai.Reference] = dict()
-        references_to_process: List[Tuple[str, oai.Reference]] = list()
         processing = False
         errors = []
         next_round = []
@@ -822,24 +828,29 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
             schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
 
             if isinstance(schemas_or_err, PropertyError):
-                if _reference_pointer_name(reference) in visited:
+                if _reference_pointer_name(reference) in visited and name not in lazy_self_references:
                     # It's a reference to an already visited Enum|Model; not yet resolved
                     # It's an indirect reference toward this Enum|Model;
                     # It will be lazy proxified and resolved later on
                     lazy_self_references[name] = reference
+                    processing = True
                 else:
                     errors.append(schemas_or_err)
+
+    schemas.errors.extend(errors)
 
     for name in lazy_self_references.keys():
         schemas_or_err = resolve_reference_and_update_schemas(
             name, lazy_self_references[name], schemas, references_by_name
         )
+        if isinstance(schemas_or_err, PropertyError):
+            schemas.errors.extend(errors)
 
-    schemas.errors.extend(errors)
     LazyReferencePropertyProxy.update_schemas(schemas)
     for reference_proxy, data in LazyReferencePropertyProxy.created_proxies():
         if not reference_proxy.resolve():
             schemas.errors.append(
                 PropertyError(data=data, detail="Could not find reference in parsed models or enums.")
             )
+
     return schemas
