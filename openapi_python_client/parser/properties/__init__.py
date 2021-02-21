@@ -79,10 +79,9 @@ class LazyReferencePropertyProxy:
         if not self._resolved:
             schemas = LazyReferencePropertyProxy.__GLOBAL_SCHEMAS_REF
             class_name = self._reference.class_name
-            if schemas:
-                existing = schemas.enums.get(class_name) or schemas.models.get(class_name)
-                if existing:
-                    self._resolved = attr.evolve(existing, required=self._required, name=self._name)
+            existing = schemas.enums.get(class_name) or schemas.models.get(class_name)
+            if existing:
+                self._resolved = attr.evolve(existing, required=self._required, name=self._name)
 
         if self._resolved:
             return self._resolved
@@ -530,7 +529,10 @@ def _property_from_data(
                 schemas,
             )
         else:
-            return cast(Property, LazyReferencePropertyProxy.create(name, required, data, parent_name)), schemas
+            if Reference.from_ref(f"#{parent_name}").class_name == reference.class_name:
+                return cast(Property, LazyReferencePropertyProxy.create(name, required, data, parent_name)), schemas
+            else:
+                return PropertyError(data=data, detail="Could not find reference in parsed models or enums."), schemas
 
     if data.enum:
         return build_enum_property(
@@ -707,15 +709,15 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
                 errors.append(schemas_or_err)
             else:
                 schemas = schemas_or_err
-                processing = True  # We made some progress this round, do another after it's donea
+                processing = True  # We made some progress this round, do another after it's done
 
         to_process = next_round
 
-    for name, reference in references_to_process:
-        schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
+        for name, reference in references_to_process:
+            schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
 
-        if isinstance(schemas_or_err, PropertyError):
-            errors.append(schemas_or_err)
+            if isinstance(schemas_or_err, PropertyError):
+                errors.append(schemas_or_err)
 
     schemas.errors.extend(errors)
     LazyReferencePropertyProxy.update_schemas(schemas)
