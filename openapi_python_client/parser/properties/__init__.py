@@ -78,7 +78,7 @@ class LazyReferencePropertyProxy:
 
     def __getattr__(self, name: str) -> Any:
         if name == "nullable":
-            return not self._required
+            return False
         elif name == "required":
             return self._required
         else:

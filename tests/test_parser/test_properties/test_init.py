@@ -1513,7 +1513,7 @@ def test_lazy_proxy_reference_unresolved():
     assert lazy_reference_proxy.get_imports(prefix="..") == set()
     assert lazy_reference_proxy.resolve() == None
     assert lazy_reference_proxy.required == False
-    assert lazy_reference_proxy.nullable == True
+    assert lazy_reference_proxy.nullable == False
     with pytest.raises(RuntimeError):
         lazy_reference_proxy.resolve(False)
     with pytest.raises(RuntimeError):
