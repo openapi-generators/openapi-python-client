@@ -1705,6 +1705,6 @@ components:
 
     assert len(schemas.errors) == 1
     assert schemas.errors[0] == PropertyError(
-        detail="Could not find reference in parsed models or enums.",
+        detail="invalid data in items of array childSettings",
         data=oai.Reference(ref="#/components/schemas/noexist"),
     )
