@@ -72,8 +72,13 @@ class LazyReferencePropertyProxy:
         return copy.deepcopy(resolved, memo)
 
     def __getattr__(self, name: str) -> Any:
-        resolved = self.resolve(False)
-        return resolved.__getattribute__(name)
+        if name == "nullable":
+            return not self._required
+        elif name == "required":
+            return self._required
+        else:
+            resolved = self.resolve(False)
+            return resolved.__getattribute__(name)
 
     def resolve(self, allow_lazyness: bool = True) -> Union[Property, None]:
         if not self._resolved:
@@ -312,7 +317,13 @@ def _string_based_property(
 
 
 def build_model_property(
-    *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str]
+    *,
+    data: oai.Schema,
+    name: str,
+    schemas: Schemas,
+    required: bool,
+    parent_name: Optional[str],
+    lazy_references: Dict[str, oai.Reference],
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
     """
     A single ModelProperty from its OAI data
@@ -336,7 +347,12 @@ def build_model_property(
     for key, value in (data.properties or {}).items():
         prop_required = key in required_set
         prop, schemas = property_from_data(
-            name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name
+            name=key,
+            required=prop_required,
+            data=value,
+            schemas=schemas,
+            parent_name=class_name,
+            lazy_references=lazy_references,
         )
         if isinstance(prop, PropertyError):
             return prop, schemas
@@ -362,6 +378,7 @@ def build_model_property(
             data=data.additionalProperties,
             schemas=schemas,
             parent_name=class_name,
+            lazy_references=lazy_references,
         )
         if isinstance(additional_properties, PropertyError):
             return additional_properties, schemas
@@ -462,12 +479,23 @@ def build_enum_property(
 
 
 def build_union_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
+    *,
+    data: oai.Schema,
+    name: str,
+    required: bool,
+    schemas: Schemas,
+    parent_name: str,
+    lazy_references: Dict[str, oai.Reference],
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
     for sub_prop_data in chain(data.anyOf, data.oneOf):
         sub_prop, schemas = property_from_data(
-            name=name, required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
+            name=name,
+            required=required,
+            data=sub_prop_data,
+            schemas=schemas,
+            parent_name=parent_name,
+            lazy_references=lazy_references,
         )
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
@@ -487,12 +515,23 @@ def build_union_property(
 
 
 def build_list_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
+    *,
+    data: oai.Schema,
+    name: str,
+    required: bool,
+    schemas: Schemas,
+    parent_name: str,
+    lazy_references: Dict[str, oai.Reference],
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
-        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name
+        name=f"{name}_item",
+        required=True,
+        data=data.items,
+        schemas=schemas,
+        parent_name=parent_name,
+        lazy_references=lazy_references,
     )
     if isinstance(inner_prop, PropertyError):
         return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}"), schemas
@@ -514,6 +553,7 @@ def _property_from_data(
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
     parent_name: str,
+    lazy_references: Dict[str, oai.Reference],
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
@@ -529,17 +569,40 @@ def _property_from_data(
                 schemas,
             )
         else:
-            if Reference.from_ref(f"#{parent_name}").class_name == reference.class_name:
+
+            def lookup_is_reference_to_itself(
+                ref_name: str, owner_class_name: str, lazy_references: Dict[str, oai.Reference]
+            ) -> bool:
+                if ref_name in lazy_references:
+                    next_ref_name = _reference_name(lazy_references[ref_name])
+                    return lookup_is_reference_to_itself(next_ref_name, owner_class_name, lazy_references)
+
+                return ref_name.casefold() == owner_class_name.casefold()
+
+            reference_name = _reference_name(data)
+            if lookup_is_reference_to_itself(reference_name, parent_name, lazy_references):
                 return cast(Property, LazyReferencePropertyProxy.create(name, required, data, parent_name)), schemas
             else:
                 return PropertyError(data=data, detail="Could not find reference in parsed models or enums."), schemas
 
     if data.enum:
         return build_enum_property(
-            data=data, name=name, required=required, schemas=schemas, enum=data.enum, parent_name=parent_name
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            enum=data.enum,
+            parent_name=parent_name,
         )
     if data.anyOf or data.oneOf:
-        return build_union_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
+        return build_union_property(
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name=parent_name,
+            lazy_references=lazy_references,
+        )
     if not data.type:
         return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
 
@@ -576,9 +639,23 @@ def _property_from_data(
             schemas,
         )
     elif data.type == "array":
-        return build_list_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
+        return build_list_property(
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name=parent_name,
+            lazy_references=lazy_references,
+        )
     elif data.type == "object":
-        return build_model_property(data=data, name=name, schemas=schemas, required=required, parent_name=parent_name)
+        return build_model_property(
+            data=data,
+            name=name,
+            schemas=schemas,
+            required=required,
+            parent_name=parent_name,
+            lazy_references=lazy_references,
+        )
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
 
 
@@ -589,21 +666,41 @@ def property_from_data(
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
     parent_name: str,
+    lazy_references: Optional[Dict[str, oai.Reference]] = None,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
+    if lazy_references is None:
+        lazy_references = dict()
+
     try:
-        return _property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name=parent_name)
+        return _property_from_data(
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name=parent_name,
+            lazy_references=lazy_references,
+        )
     except ValidationError:
         return PropertyError(detail="Failed to validate default value", data=data), schemas
 
 
-def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> Union[Schemas, PropertyError]:
+def update_schemas_with_data(
+    name: str, data: oai.Schema, schemas: Schemas, lazy_references: Dict[str, oai.Reference]
+) -> Union[Schemas, PropertyError]:
     prop: Union[PropertyError, ModelProperty, EnumProperty]
     if data.enum is not None:
         prop, schemas = build_enum_property(
-            data=data, name=name, required=True, schemas=schemas, enum=data.enum, parent_name=None
+            data=data,
+            name=name,
+            required=True,
+            schemas=schemas,
+            enum=data.enum,
+            parent_name=None,
         )
     else:
-        prop, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True, parent_name=None)
+        prop, schemas = build_model_property(
+            data=data, name=name, schemas=schemas, required=True, parent_name=None, lazy_references=lazy_references
+        )
 
     if isinstance(prop, PropertyError):
         return prop
@@ -686,23 +783,31 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     processing = True
     errors: List[PropertyError] = []
-    references_by_name: Dict[str, oai.Reference] = dict()
-    references_to_process: List[Tuple[str, oai.Reference]] = list()
     LazyReferencePropertyProxy.flush_internal_references()  # Cleanup side effects
+    lazy_self_references: Dict[str, oai.Reference] = dict()
+    visited: List[str] = []
 
     # References could have forward References so keep going as long as we are making progress
     while processing:
+        references_by_name: Dict[str, oai.Reference] = dict()
+        references_to_process: List[Tuple[str, oai.Reference]] = list()
         processing = False
         errors = []
         next_round = []
+
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
+            visited.append(name)
+
             if isinstance(data, oai.Reference):
-                references_by_name[name] = data
-                references_to_process.append((name, data))
+                class_name = _reference_model_name(data)
+
+                if not schemas.models.get(class_name) and not schemas.enums.get(class_name):
+                    references_by_name[name] = data
+                    references_to_process.append((name, data))
                 continue
 
-            schemas_or_err = update_schemas_with_data(name, data, schemas)
+            schemas_or_err = update_schemas_with_data(name, data, schemas, lazy_self_references)
 
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
@@ -717,7 +822,18 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
             schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
 
             if isinstance(schemas_or_err, PropertyError):
-                errors.append(schemas_or_err)
+                if _reference_name(reference) in visited:
+                    # It's a reference to an already visited Enum|Model; not yet resolved
+                    # It's an indirect reference toward this Enum|Model;
+                    # It will be lazy proxified and resolved later on
+                    lazy_self_references[name] = reference
+                else:
+                    errors.append(schemas_or_err)
+
+    for name in lazy_self_references.keys():
+        schemas_or_err = resolve_reference_and_update_schemas(
+            name, lazy_self_references[name], schemas, references_by_name
+        )
 
     schemas.errors.extend(errors)
     LazyReferencePropertyProxy.update_schemas(schemas)
