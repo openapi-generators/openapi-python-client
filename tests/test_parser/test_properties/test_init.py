@@ -626,16 +626,16 @@ class TestPropertyFromData:
         schemas = Schemas()
 
         prop, new_schemas = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
-        from_ref.assert_called_with(data.ref)
-        assert isinstance(prop, LazyReferencePropertyProxy)
-        assert prop.resolve() == None
-        with pytest.raises(RuntimeError):
-            prop.resolve(False)
-        with pytest.raises(RuntimeError):
-            prop.template
+        from_ref.assert_called_once_with(data.ref)
+        assert prop == PropertyError(data=data, detail="Could not find reference in parsed models or enums.")
         assert schemas == new_schemas
 
     def test_property_from_data_string(self, mocker):
@@ -708,7 +708,12 @@ class TestPropertyFromData:
 
         assert response == build_list_property.return_value
         build_list_property.assert_called_once_with(
-            data=data, name=name, required=required, schemas=schemas, parent_name="parent"
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
     def test_property_from_data_object(self, mocker):
@@ -727,7 +732,12 @@ class TestPropertyFromData:
 
         assert response == build_model_property.return_value
         build_model_property.assert_called_once_with(
-            data=data, name=name, required=required, schemas=schemas, parent_name="parent"
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
     def test_property_from_data_union(self, mocker):
@@ -749,7 +759,12 @@ class TestPropertyFromData:
 
         assert response == build_union_property.return_value
         build_union_property.assert_called_once_with(
-            data=data, name=name, required=required, schemas=schemas, parent_name="parent"
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
     def test_property_from_data_unsupported_type(self, mocker):
@@ -804,7 +819,12 @@ class TestBuildListProperty:
         schemas = properties.Schemas()
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
         assert p == PropertyError(data=data, detail="type array must have items defined")
@@ -827,14 +847,24 @@ class TestBuildListProperty:
         )
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
         assert p == PropertyError(data="blah", detail=f"invalid data in items of array {name}")
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
-            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent"
+            name=f"{name}_item",
+            required=True,
+            data=data.items,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
     def test_build_list_property(self, mocker):
@@ -855,7 +885,12 @@ class TestBuildListProperty:
         mocker.patch("openapi_python_client.utils.to_valid_python_identifier", return_value=name)
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
         assert isinstance(p, properties.ListProperty)
@@ -863,7 +898,12 @@ class TestBuildListProperty:
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
-            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent"
+            name=f"{name}_item",
+            required=True,
+            data=data.items,
+            schemas=schemas,
+            parent_name="parent",
+            lazy_references=dict(),
         )
 
 
@@ -1019,10 +1059,18 @@ def test_build_schemas(mocker):
 
     build_model_property.assert_has_calls(
         [
-            mocker.call(data=in_data["1"], name="1", schemas=Schemas(), required=True, parent_name=None),
-            mocker.call(data=in_data["2"], name="2", schemas=schemas_1, required=True, parent_name=None),
-            mocker.call(data=in_data["3"], name="3", schemas=schemas_2, required=True, parent_name=None),
-            mocker.call(data=in_data["3"], name="3", schemas=schemas_2, required=True, parent_name=None),
+            mocker.call(
+                data=in_data["1"], name="1", schemas=Schemas(), required=True, parent_name=None, lazy_references=dict()
+            ),
+            mocker.call(
+                data=in_data["2"], name="2", schemas=schemas_1, required=True, parent_name=None, lazy_references=dict()
+            ),
+            mocker.call(
+                data=in_data["3"], name="3", schemas=schemas_2, required=True, parent_name=None, lazy_references=dict()
+            ),
+            mocker.call(
+                data=in_data["3"], name="3", schemas=schemas_2, required=True, parent_name=None, lazy_references=dict()
+            ),
         ]
     )
     # schemas_3 was the last to come back from build_model_property, but it should be ignored because it's an error
@@ -1118,6 +1166,7 @@ def test_build_model_property(additional_properties_schema, expected_additional_
         schemas=schemas,
         required=True,
         parent_name="parent",
+        lazy_references=dict(),
     )
 
     assert new_schemas != schemas
@@ -1164,6 +1213,7 @@ def test_build_model_property_conflict():
         schemas=schemas,
         required=True,
         parent_name=None,
+        lazy_references=dict(),
     )
 
     assert new_schemas == schemas
@@ -1181,11 +1231,7 @@ def test_build_model_property_bad_prop():
     schemas = Schemas(models={"OtherModel": None})
 
     err, new_schemas = build_model_property(
-        data=data,
-        name="prop",
-        schemas=schemas,
-        required=True,
-        parent_name=None,
+        data=data, name="prop", schemas=schemas, required=True, parent_name=None, lazy_references=dict()
     )
 
     assert new_schemas == schemas
@@ -1210,6 +1256,7 @@ def test_build_model_property_bad_additional_props():
         schemas=schemas,
         required=True,
         parent_name=None,
+        lazy_references=dict(),
     )
 
     assert new_schemas == schemas
@@ -1276,8 +1323,8 @@ def test__is_local_reference():
         assert _is_local_reference(ref) == expected_result
 
 
-def test__reference_name():
-    from openapi_python_client.parser.properties import _reference_name
+def test__reference_pointer_name():
+    from openapi_python_client.parser.properties import _reference_pointer_name
 
     data_set = [
         ("#/foobar", "foobar"),
@@ -1286,7 +1333,7 @@ def test__reference_name():
 
     for data, expected_result in data_set:
         ref = oai.Reference.construct(ref=data)
-        assert _reference_name(ref) == expected_result
+        assert _reference_pointer_name(ref) == expected_result
 
 
 def test__reference_model_name():
@@ -1465,6 +1512,8 @@ def test_lazy_proxy_reference_unresolved():
     assert lazy_reference_proxy.get_type_string(no_optional=True) == "LazyReferencePropertyProxy"
     assert lazy_reference_proxy.get_imports(prefix="..") == set()
     assert lazy_reference_proxy.resolve() == None
+    assert lazy_reference_proxy.required == False
+    assert lazy_reference_proxy.nullable == True
     with pytest.raises(RuntimeError):
         lazy_reference_proxy.resolve(False)
     with pytest.raises(RuntimeError):
@@ -1473,10 +1522,6 @@ def test_lazy_proxy_reference_unresolved():
         copy.deepcopy(lazy_reference_proxy)
     with pytest.raises(RuntimeError):
         lazy_reference_proxy.name
-    with pytest.raises(RuntimeError):
-        lazy_reference_proxy.required
-    with pytest.raises(RuntimeError):
-        lazy_reference_proxy.nullable
     with pytest.raises(RuntimeError):
         lazy_reference_proxy.default
     with pytest.raises(RuntimeError):
