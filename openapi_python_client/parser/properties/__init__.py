@@ -574,12 +574,12 @@ def _property_from_data(
                 ref_name: str, owner_class_name: str, lazy_references: Dict[str, oai.Reference]
             ) -> bool:
                 if ref_name in lazy_references:
-                    next_ref_name = _reference_name(lazy_references[ref_name])
+                    next_ref_name = _reference_pointer_name(lazy_references[ref_name])
                     return lookup_is_reference_to_itself(next_ref_name, owner_class_name, lazy_references)
 
                 return ref_name.casefold() == owner_class_name.casefold()
 
-            reference_name = _reference_name(data)
+            reference_name = _reference_pointer_name(data)
             if lookup_is_reference_to_itself(reference_name, parent_name, lazy_references):
                 return cast(Property, LazyReferencePropertyProxy.create(name, required, data, parent_name)), schemas
             else:
@@ -740,7 +740,7 @@ def _resolve_model_or_enum_reference(
     name: str, data: oai.Reference, schemas: Schemas, references_by_name: Dict[str, oai.Reference]
 ) -> Union[EnumProperty, ModelProperty, None]:
     target_model = _reference_model_name(data)
-    target_name = _reference_name(data)
+    target_name = _reference_pointer_name(data)
 
     if target_model == name or target_name == name:
         return None  # Avoid infinite loop
@@ -772,7 +772,7 @@ def _reference_model_name(reference: oai.Reference) -> str:
     return Reference.from_ref(reference.ref).class_name
 
 
-def _reference_name(reference: oai.Reference) -> str:
+def _reference_pointer_name(reference: oai.Reference) -> str:
     parts = reference.ref.split("/")
     return parts[-1]
 
@@ -822,7 +822,7 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
             schemas_or_err = resolve_reference_and_update_schemas(name, reference, schemas, references_by_name)
 
             if isinstance(schemas_or_err, PropertyError):
-                if _reference_name(reference) in visited:
+                if _reference_pointer_name(reference) in visited:
                     # It's a reference to an already visited Enum|Model; not yet resolved
                     # It's an indirect reference toward this Enum|Model;
                     # It will be lazy proxified and resolved later on
