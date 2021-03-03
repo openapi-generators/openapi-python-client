@@ -415,7 +415,7 @@ def build_union_property(
     sub_properties: List[Property] = []
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=f"{name}_item{i}", required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
+            name=f"{name}_type{i}", required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
         )
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas

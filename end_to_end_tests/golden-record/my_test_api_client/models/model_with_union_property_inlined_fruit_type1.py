@@ -4,38 +4,38 @@ import attr
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ModelWithUnionPropertyInlinedFruitItem0")
+T = TypeVar("T", bound="ModelWithUnionPropertyInlinedFruitType1")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithUnionPropertyInlinedFruitItem0:
+class ModelWithUnionPropertyInlinedFruitType1:
     """  """
 
-    apples: Union[Unset, str] = UNSET
+    bananas: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        apples = self.apples
+        bananas = self.bananas
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if apples is not UNSET:
-            field_dict["apples"] = apples
+        if bananas is not UNSET:
+            field_dict["bananas"] = bananas
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        apples = d.pop("apples", UNSET)
+        bananas = d.pop("bananas", UNSET)
 
-        model_with_union_property_inlined_fruit_item0 = cls(
-            apples=apples,
+        model_with_union_property_inlined_fruit_type1 = cls(
+            bananas=bananas,
         )
 
-        model_with_union_property_inlined_fruit_item0.additional_properties = d
-        return model_with_union_property_inlined_fruit_item0
+        model_with_union_property_inlined_fruit_type1.additional_properties = d
+        return model_with_union_property_inlined_fruit_type1
 
     @property
     def additional_keys(self) -> List[str]:
