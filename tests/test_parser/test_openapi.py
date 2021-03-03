@@ -473,7 +473,9 @@ class TestEndpoint:
         )
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
-        param = oai.Parameter.construct(name="test", required=True, param_schema=mocker.MagicMock(), param_in="cookie")
+        param = oai.Parameter.construct(
+            name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
+        )
         schemas = Schemas()
 
         result = Endpoint._add_parameters(
@@ -829,3 +831,51 @@ class TestEndpointCollection:
         assert result["default"].parse_errors[1].data == "3"
         assert result["tag_2"].parse_errors[0].data == "2"
         assert result_schemas == schemas_3
+
+    def test_from_data_tags_snake_case_sanitizer(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
+
+        path_1_put = oai.Operation.construct()
+        path_1_post = oai.Operation.construct(tags=["AMF Subscription Info (Document)", "tag_3"])
+        path_2_get = oai.Operation.construct()
+        data = {
+            "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
+            "path_2": oai.PathItem.construct(get=path_2_get),
+        }
+        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"})
+        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="AMFSubscriptionInfo (Document)", relative_imports={"2"})
+        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"})
+        schemas_1 = mocker.MagicMock()
+        schemas_2 = mocker.MagicMock()
+        schemas_3 = mocker.MagicMock()
+        endpoint_from_data = mocker.patch.object(
+            Endpoint,
+            "from_data",
+            side_effect=[(endpoint_1, schemas_1), (endpoint_2, schemas_2), (endpoint_3, schemas_3)],
+        )
+        schemas = mocker.MagicMock()
+
+        result = EndpointCollection.from_data(data=data, schemas=schemas)
+
+        endpoint_from_data.assert_has_calls(
+            [
+                mocker.call(data=path_1_put, path="path_1", method="put", tag="default", schemas=schemas),
+                mocker.call(
+                    data=path_1_post,
+                    path="path_1",
+                    method="post",
+                    tag="amf_subscription_info_document",
+                    schemas=schemas_1,
+                ),
+                mocker.call(data=path_2_get, path="path_2", method="get", tag="default", schemas=schemas_2),
+            ],
+        )
+        assert result == (
+            {
+                "default": EndpointCollection("default", endpoints=[endpoint_1, endpoint_3]),
+                "amf_subscription_info_document": EndpointCollection(
+                    "amf_subscription_info_document", endpoints=[endpoint_2]
+                ),
+            },
+            schemas_3,
+        )

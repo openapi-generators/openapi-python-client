@@ -23,7 +23,9 @@ def test__get_project_for_url_or_path(mocker):
 
     _get_document.assert_called_once_with(url=url, path=path)
     from_dict.assert_called_once_with(data_dict)
-    _Project.assert_called_once_with(openapi=openapi, custom_template_path=None, meta=MetaType.POETRY)
+    _Project.assert_called_once_with(
+        openapi=openapi, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+    )
     assert project == _Project.return_value
 
 
@@ -76,7 +78,7 @@ def test_create_new_client(mocker):
     result = create_new_client(url=url, path=path, meta=MetaType.POETRY)
 
     _get_project_for_url_or_path.assert_called_once_with(
-        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY
+        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
     )
     project.build.assert_called_once()
     assert result == project.build.return_value
@@ -95,7 +97,7 @@ def test_create_new_client_project_error(mocker):
     result = create_new_client(url=url, path=path, meta=MetaType.POETRY)
 
     _get_project_for_url_or_path.assert_called_once_with(
-        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY
+        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
     )
     assert result == [error]
 
@@ -113,7 +115,7 @@ def test_update_existing_client(mocker):
     result = update_existing_client(url=url, path=path, meta=MetaType.POETRY)
 
     _get_project_for_url_or_path.assert_called_once_with(
-        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY
+        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
     )
     project.update.assert_called_once()
     assert result == project.update.return_value
@@ -132,7 +134,7 @@ def test_update_existing_client_project_error(mocker):
     result = update_existing_client(url=url, path=path, meta=MetaType.POETRY)
 
     _get_project_for_url_or_path.assert_called_once_with(
-        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY
+        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
     )
     assert result == [error]
 
@@ -392,9 +394,9 @@ class TestProject:
             project_name=project.project_name,
             package_name=project.package_name,
         )
-        readme_path.write_text.assert_called_once_with(readme_template.render())
+        readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
-        git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render())
+        git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
         project._build_pyproject_toml.assert_called_once_with(use_poetry=True)
 
     def test__build_metadata_setup(self, mocker):
@@ -429,9 +431,9 @@ class TestProject:
             project_name=project.project_name,
             package_name=project.package_name,
         )
-        readme_path.write_text.assert_called_once_with(readme_template.render())
+        readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
-        git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render())
+        git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
         project._build_pyproject_toml.assert_called_once_with(use_poetry=False)
         project._build_setup_py.assert_called_once()
 
@@ -475,7 +477,7 @@ class TestProject:
             version=project.version,
             description=project.package_description,
         )
-        pyproject_path.write_text.assert_called_once_with(pyproject_template.render())
+        pyproject_path.write_text.assert_called_once_with(pyproject_template.render(), encoding="utf-8")
 
     def test__build_setup_py(self, mocker):
         from openapi_python_client import MetaType, Project
@@ -505,7 +507,7 @@ class TestProject:
             version=project.version,
             description=project.package_description,
         )
-        setup_path.write_text.assert_called_once_with(setup_template.render())
+        setup_path.write_text.assert_called_once_with(setup_template.render(), encoding="utf-8")
 
 
 def test__reformat(mocker):
