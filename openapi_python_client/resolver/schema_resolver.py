@@ -53,7 +53,7 @@ class SchemaResolver:
             root_schema = self._fetch_url_reference(self._root_url)
 
         self._resolve_schema_references(self._parent_path, root_schema, external_schemas, errors, recursive)
-        return ResolvedSchema(root_schema, external_schemas, errors)
+        return ResolvedSchema(root_schema, external_schemas, errors, self._parent_path)
 
     def _resolve_schema_references(
         self,

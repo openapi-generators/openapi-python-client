@@ -1,4 +1,6 @@
 import urllib.parse
+from pathlib import Path
+from typing import Union
 
 from .pointer import Pointer
 
@@ -6,13 +8,28 @@ from .pointer import Pointer
 class Reference:
     """ https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03 """
 
-    def __init__(self, reference: str):
+    def __init__(self, reference: str, parent: str = None):
         self._ref = reference
         self._parsed_ref = urllib.parse.urlparse(reference)
+        self._parent = parent
 
     @property
     def path(self) -> str:
         return urllib.parse.urldefrag(self._parsed_ref.geturl()).url
+
+    @property
+    def abs_path(self) -> str:
+        if self._parent:
+            parent_dir = Path(self._parent)
+            abs_path = parent_dir.joinpath(self.path)
+            abs_path = abs_path.resolve()
+            return str(abs_path)
+        else:
+            return self.path
+
+    @property
+    def parent(self) -> Union[str, None]:
+        return self._parent
 
     @property
     def pointer(self) -> Pointer:
