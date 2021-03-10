@@ -1,7 +1,7 @@
 import codecs
 import pathlib
 from pprint import pformat
-from typing import Optional, Sequence
+from typing import Optional, Dict, List, Sequence
 
 import typer
 
@@ -112,6 +112,12 @@ _meta_option = typer.Option(
 )
 
 
+def _parse_extra_template_kwargs(extra_template_kwargs: List[str]) -> Dict[str, str]:
+    out = {k: v for k, v in map(lambda s: s.split("="), extra_template_kwargs)}
+    return out
+
+
+
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
@@ -119,6 +125,7 @@ def generate(
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     meta: MetaType = _meta_option,
+    extra_template_kwargs: Optional[List[str]] = typer.Option(None),
 ) -> None:
     """ Generate a new OpenAPI Client library """
     from . import create_new_client
@@ -136,8 +143,11 @@ def generate(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
+    if extra_template_kwargs is not None:
+        extra_tpl_kwargs = _parse_extra_template_kwargs(extra_template_kwargs)
+
     errors = create_new_client(
-        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding, extra_template_kwargs=extra_tpl_kwargs,
     )
     handle_errors(errors)
 
@@ -166,7 +176,10 @@ def update(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
+    if extra_template_kwargs is not None:
+        extra_tpl_kwargs = _parse_extra_template_kwargs(extra_template_kwargs)
+
     errors = update_existing_client(
-        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding, extra_template_kwargs=extra_tpl_kwargs,
     )
     handle_errors(errors)
