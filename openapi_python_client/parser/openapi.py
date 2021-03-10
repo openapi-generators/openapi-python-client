@@ -220,6 +220,7 @@ class Endpoint:
                 data=param.param_schema,
                 schemas=schemas,
                 parent_name=endpoint.name,
+                description=param.description,
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas

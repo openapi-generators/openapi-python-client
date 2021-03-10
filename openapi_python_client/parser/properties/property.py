@@ -25,6 +25,7 @@ class Property:
     nullable: bool
     _type_string: ClassVar[str] = ""
     default: Optional[str] = attr.ib()
+    description: Optional[str]
     python_name: str = attr.ib(init=False)
 
     template: ClassVar[Optional[str]] = None
