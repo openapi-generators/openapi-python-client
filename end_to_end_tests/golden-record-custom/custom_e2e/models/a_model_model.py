@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
@@ -6,14 +6,15 @@ from ..models.an_enum import AnEnum
 from ..models.an_int_enum import AnIntEnum
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ModelWithUnionProperty")
+T = TypeVar("T", bound="AModelModel")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithUnionProperty:
+class AModelModel:
     """  """
 
     a_property: Union[Unset, AnEnum, AnIntEnum] = UNSET
+    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_property: Union[Unset, AnEnum, AnIntEnum]
@@ -30,6 +31,7 @@ class ModelWithUnionProperty:
                 a_property = self.a_property
 
         field_dict: Dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
         field_dict.update({})
         if a_property is not UNSET:
             field_dict["a_property"] = a_property
@@ -61,8 +63,25 @@ class ModelWithUnionProperty:
 
         a_property = _parse_a_property(d.pop("a_property", UNSET))
 
-        model_with_union_property = cls(
+        a_model_model = cls(
             a_property=a_property,
         )
 
-        return model_with_union_property
+        a_model_model.additional_properties = d
+        return a_model_model
+
+    @property
+    def additional_keys(self) -> List[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

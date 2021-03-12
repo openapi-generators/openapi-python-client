@@ -1,0 +1,20 @@
+[[workflows]]
+name = "Start Task"
+    [[workflows.steps]]
+    type = "SelectGitHubIssue"
+
+    [[workflows.steps]]
+    type = "SwitchBranches"
+
+[[workflows]]
+name = "Prepare Release"
+    [[workflows.steps]]
+    type = "UpdateProjectFromCommits"
+
+    [[workflows.steps]]
+    type = "Command"
+    command = "prettier --write CHANGELOG.md"
+
+[github]
+owner = "triaxtec"
+repo = "openapi-python-client"

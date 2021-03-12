@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.8.0 - Unreleased
+## 0.8.0 - 2021-02-19
+
+### Breaking Changes
+
+- Generated clients will no longer pass through `None` to query parameters. Previously, any query params set to `None` would surface as empty strings (per the default behavior of `httpx`). This is contrary to the defaults indicated by the OpenAPI 3.0.3 spec. Ommitting these parameters makes us more compliant. If you require a style of `null` to be passed to your query parameters, please request support for the OpenAPI "style" attribute. Thank you to @forest-benchling and @bowenwr for a ton of input on this.
 
 ### Additions
 
@@ -15,13 +19,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     project info.
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
-- Fixes `Enum` deserialization when the value is `UNSET`.
-- Basic support for `allOf` in models (#98)
+- The media type application/vnd.api+json will now be handled just like application/json (#307). Thanks @jrversteegh!
+- Support passing models into query parameters (#316). Thanks @forest-benchling!
+- Add support for cookie parameters (#326).
+- New `--file-encoding` command line option (#330). Sets the encoding used when writing generated files (defaults to utf-8). Thanks @dongfangtianyu!
 
 ### Changes
 
 - Lowered the minimum version of `python-dateutil` to 2.8.0 for improved compatibility (#298 & #299). Thanks @bowenwr!
 - The `from_dict` method on generated models is now a `@classmethod` instead of `@staticmethod` (#215 & #292). Thanks @forest-benchling!
+- Renamed all templates to end in `.jinja`, and all python-templates to end in `.py.jinja` to fix confusion with the latest version of mypy. Note **this will break existing custom templates until you update your template file names**.
+
+### Fixes
+
+- Endpoint tags are now sanitized during parsing to fix an issue where `My Tag` and `MyTag` are seen as two different tags but are then later unified, causing errors when creating directories. Thanks @p1-ra! (#328)
+- Parser will softly ignore value error during schema responses' status code convertion from string to integer (not a number). Errors will be reported to the end user and parsing will continue to proceed (#327).
+- The generated `from_dict` and `to_dict` methods of models will now properly handle `nullable` and `not required` properties that are themselves generated models (#315). Thanks @forest-benchling!
+- Fixed a typo in the async example in generated README.md files (#337). Thanks @synchronizing!
+- Fix deserialization of `None` and `Unset` properties for all types by unifying the checks (#334). Thanks @forest-benchling!
+- If duplicate model names are detected during generation, you'll now get an error message instead of broken code (#336). Thanks @forest-benchling!
+- Fixes `Enum` deserialization when the value is `UNSET` (#306). Thanks @bowenwr!
 
 ## 0.7.3 - 2020-12-21
 

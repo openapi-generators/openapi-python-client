@@ -20,7 +20,7 @@ class EnumProperty(Property):
     value_type: Type[ValueType]
     default: Optional[Any] = attr.ib()
 
-    template: ClassVar[str] = "enum_property.pyi"
+    template: ClassVar[str] = "enum_property.py.jinja"
 
     def get_type_string(self, no_optional: bool = False) -> str:
         """ Get a string representation of type that should be used when declaring this property """

@@ -4,13 +4,13 @@ import httpx
 from attr import asdict
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response
+from ...types import Response, UNSET
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.pyi" import header_params, query_params, json_body, return_type, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, return_type, arguments, client, kwargs, parse_response %}
 
 {% set return_string = return_type(endpoint) %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
@@ -26,8 +26,11 @@ def _get_kwargs(
     )
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     {{ header_params(endpoint) | indent(4) }}
+
+    {{ cookie_params(endpoint) | indent(4) }}
 
     {{ query_params(endpoint) | indent(4) }}
 
@@ -36,7 +39,7 @@ def _get_kwargs(
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         {% if endpoint.form_body_reference %}
         "data": asdict(form_data),

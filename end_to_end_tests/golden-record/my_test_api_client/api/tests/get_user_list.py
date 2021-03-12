@@ -7,7 +7,7 @@ from ...client import Client
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
-from ...types import Response
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
@@ -19,6 +19,7 @@ def _get_kwargs(
     url = "{}/tests/".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
@@ -35,11 +36,12 @@ def _get_kwargs(
         "an_enum_value": json_an_enum_value,
         "some_date": json_some_date,
     }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
     }

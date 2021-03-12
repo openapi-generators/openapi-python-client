@@ -396,6 +396,22 @@
             },
             "name": "enum_prop",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            "name": "model_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            "name": "required_model_prop",
+            "in": "query"
           }
         ],
         "responses": {
@@ -616,13 +632,47 @@
           }
         }
       }
+    },
+    "/auth/token_with_cookie": {
+      "get": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "TOKEN_WITH_COOKIE",
+        "description": "Test optional cookie parameters",
+        "operationId": "token_with_cookie_auth_token_with_cookie_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            },
+            "name": "MyToken",
+            "in": "cookie"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable"],
+        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable", "model", "nullable_model"],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -663,6 +713,11 @@
             "format": "date",
             "nullable": true
           },
+          "a_not_required_date": {
+            "title": "A Nullable Date",
+            "type": "string",
+            "format": "date",
+          },
           "1_leading_digit": {
             "title": "Leading Digit",
             "type": "string"
@@ -686,6 +741,42 @@
             "title": "NOT Required AND NOT Nullable",
             "type": "string",
             "nullable": false
+          },
+          "model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "nullable_model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "not_required_model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "not_required_nullable_model": {
+            "type": "object",
+            "allOf": [
+              {
+                "ref": "#/components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
           }
         },
         "description": "A Model for testing all the ways custom objects can be used ",

@@ -11,6 +11,20 @@ if {{ parameter.python_name }} is not UNSET:
 {% endif %}
 {% endmacro %}
 
+{% macro cookie_params(endpoint) %}
+{% if endpoint.cookie_parameters %}
+    {% for parameter in endpoint.cookie_parameters %}
+        {% if parameter.required %}
+cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
+        {% else %}
+if {{ parameter.python_name }} is not UNSET:
+    cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% endmacro %}
+
+
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
     {% for property in endpoint.query_parameters %}
@@ -22,7 +36,7 @@ if {{ parameter.python_name }} is not UNSET:
     {% endfor %}
 params: Dict[str, Any] = {
     {% for property in endpoint.query_parameters %}
-        {% if property.required %}
+        {% if not property.json_is_dict %}
             {% if property.template %}
     "{{ property.name }}": {{ "json_" + property.python_name }},
             {% else %}
@@ -32,15 +46,17 @@ params: Dict[str, Any] = {
     {% endfor %}
 }
     {% for property in endpoint.query_parameters %}
-        {% if not property.required %}
-if {{ property.python_name }} is not UNSET:
-            {% if property.template %}
-    params["{{ property.name }}"] = {{ "json_" + property.python_name }}
+        {% if property.json_is_dict %}
+            {% set property_name = "json_" + property.python_name %}
+            {% if property.required and not property.nullable %}
+params.update({{ property_name }})
             {% else %}
-    params["{{ property.name }}"] = {{ property.python_name }}
+if {% if not property.required %}not isinstance({{ property_name }}, Unset){% endif %}{% if not property.required and property.nullable %} and {% endif %}{% if property.nullable %}{{ property_name }} is not None{% endif %}:
+    params.update({{ property_name }})
             {% endif %}
         {% endif %}
     {% endfor %}
+params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
@@ -101,6 +117,10 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {% for parameter in endpoint.header_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
+{# cookie parameters #}
+{% for parameter in endpoint.cookie_parameters %}
+{{ parameter.to_string() }},
+{% endfor %}
 {% endmacro %}
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
@@ -122,6 +142,9 @@ json_body=json_body,
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% for parameter in endpoint.header_parameters %}
+{{ parameter.python_name }}={{ parameter.python_name }},
+{% endfor %}
+{% for parameter in endpoint.cookie_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% endmacro %}

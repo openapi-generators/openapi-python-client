@@ -1,0 +1,16 @@
+{% macro construct_template(construct_function, property, source, initial_value=None) %}
+{% if property.required and not property.nullable %}
+{{ property.python_name }} = {{ construct_function(property, source) }}
+{% else %}
+{% if initial_value != None %}
+{{ property.python_name }} = {{ initial_value }}
+{% elif property.nullable %}
+{{ property.python_name }} = None
+{% else %}
+{{ property.python_name }}: {{ property.get_type_string() }} = UNSET
+{% endif %}
+_{{ property.python_name }} = {{ source }}
+if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{% if property.nullable and not property.required %} and {% endif %}{% if not property.required %}not isinstance(_{{ property.python_name }},  Unset){% endif %}:
+    {{ property.python_name }} = {{ construct_function(property, "_" + property.python_name) }}
+{% endif %}
+{% endmacro %}

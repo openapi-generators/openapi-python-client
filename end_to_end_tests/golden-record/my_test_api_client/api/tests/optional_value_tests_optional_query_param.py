@@ -15,19 +15,21 @@ def _get_kwargs(
     url = "{}/tests/optional_query_param/".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     json_query_param: Union[Unset, List[Any]] = UNSET
     if not isinstance(query_param, Unset):
         json_query_param = query_param
 
-    params: Dict[str, Any] = {}
-    if query_param is not UNSET:
-        params["query_param"] = json_query_param
+    params: Dict[str, Any] = {
+        "query_param": json_query_param,
+    }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
     }

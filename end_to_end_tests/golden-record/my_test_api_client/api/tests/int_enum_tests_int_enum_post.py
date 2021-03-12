@@ -5,7 +5,7 @@ import httpx
 from ...client import Client
 from ...models.an_int_enum import AnIntEnum
 from ...models.http_validation_error import HTTPValidationError
-from ...types import Response
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
@@ -16,17 +16,19 @@ def _get_kwargs(
     url = "{}/tests/int_enum".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
     json_int_enum = int_enum.value
 
     params: Dict[str, Any] = {
         "int_enum": json_int_enum,
     }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
     }

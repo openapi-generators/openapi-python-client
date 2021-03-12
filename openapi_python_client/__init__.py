@@ -45,9 +45,17 @@ class Project:
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
 
-    def __init__(self, *, openapi: GeneratorData, meta: MetaType, custom_template_path: Optional[Path] = None) -> None:
+    def __init__(
+        self,
+        *,
+        openapi: GeneratorData,
+        meta: MetaType,
+        custom_template_path: Optional[Path] = None,
+        file_encoding: str = "utf-8",
+    ) -> None:
         self.openapi: GeneratorData = openapi
         self.meta: MetaType = meta
+        self.file_encoding = file_encoding
 
         package_loader = PackageLoader(__package__)
         loader: BaseLoader
@@ -136,16 +144,18 @@ class Project:
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
-        package_init_template = self.env.get_template("package_init.pyi")
-        package_init.write_text(package_init_template.render(description=self.package_description))
+        package_init_template = self.env.get_template("package_init.py.jinja")
+        package_init.write_text(
+            package_init_template.render(description=self.package_description), encoding=self.file_encoding
+        )
 
         if self.meta != MetaType.NONE:
             pytyped = self.package_dir / "py.typed"
-            pytyped.write_text("# Marker file for PEP 561")
+            pytyped.write_text("# Marker file for PEP 561", encoding=self.file_encoding)
 
-        types_template = self.env.get_template("types.py")
+        types_template = self.env.get_template("types.py.jinja")
         types_path = self.package_dir / "types.py"
-        types_path.write_text(types_template.render())
+        types_path.write_text(types_template.render(), encoding=self.file_encoding)
 
     def _build_metadata(self) -> None:
         if self.meta == MetaType.NONE:
@@ -157,20 +167,21 @@ class Project:
 
         # README.md
         readme = self.project_dir / "README.md"
-        readme_template = self.env.get_template("README.md")
+        readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
             readme_template.render(
                 project_name=self.project_name, description=self.package_description, package_name=self.package_name
-            )
+            ),
+            encoding=self.file_encoding,
         )
 
         # .gitignore
         git_ignore_path = self.project_dir / ".gitignore"
-        git_ignore_template = self.env.get_template(".gitignore")
-        git_ignore_path.write_text(git_ignore_template.render())
+        git_ignore_template = self.env.get_template(".gitignore.jinja")
+        git_ignore_path.write_text(git_ignore_template.render(), encoding=self.file_encoding)
 
     def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
-        template = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml"
+        template = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
@@ -179,11 +190,12 @@ class Project:
                 package_name=self.package_name,
                 version=self.version,
                 description=self.package_description,
-            )
+            ),
+            encoding=self.file_encoding,
         )
 
     def _build_setup_py(self) -> None:
-        template = self.env.get_template("setup.py")
+        template = self.env.get_template("setup.py.jinja")
         path = self.project_dir / "setup.py"
         path.write_text(
             template.render(
@@ -191,7 +203,8 @@ class Project:
                 package_name=self.package_name,
                 version=self.version,
                 description=self.package_description,
-            )
+            ),
+            encoding=self.file_encoding,
         )
 
     def _build_models(self) -> None:
@@ -201,52 +214,55 @@ class Project:
         models_init = models_dir / "__init__.py"
         imports = []
 
-        model_template = self.env.get_template("model.pyi")
+        model_template = self.env.get_template("model.py.jinja")
         for model in self.openapi.models.values():
             module_path = models_dir / f"{model.reference.module_name}.py"
-            module_path.write_text(model_template.render(model=model))
+            module_path.write_text(model_template.render(model=model), encoding=self.file_encoding)
             imports.append(import_string_from_reference(model.reference))
 
         # Generate enums
-        str_enum_template = self.env.get_template("str_enum.pyi")
-        int_enum_template = self.env.get_template("int_enum.pyi")
+        str_enum_template = self.env.get_template("str_enum.py.jinja")
+        int_enum_template = self.env.get_template("int_enum.py.jinja")
         for enum in self.openapi.enums.values():
             module_path = models_dir / f"{enum.reference.module_name}.py"
             if enum.value_type is int:
-                module_path.write_text(int_enum_template.render(enum=enum))
+                module_path.write_text(int_enum_template.render(enum=enum), encoding=self.file_encoding)
             else:
-                module_path.write_text(str_enum_template.render(enum=enum))
+                module_path.write_text(str_enum_template.render(enum=enum), encoding=self.file_encoding)
             imports.append(import_string_from_reference(enum.reference))
 
-        models_init_template = self.env.get_template("models_init.pyi")
-        models_init.write_text(models_init_template.render(imports=imports))
+        models_init_template = self.env.get_template("models_init.py.jinja")
+        models_init.write_text(models_init_template.render(imports=imports), encoding=self.file_encoding)
 
     def _build_api(self) -> None:
         # Generate Client
         client_path = self.package_dir / "client.py"
-        client_template = self.env.get_template("client.pyi")
-        client_path.write_text(client_template.render())
+        client_template = self.env.get_template("client.py.jinja")
+        client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate endpoints
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
         api_init = api_dir / "__init__.py"
-        api_init.write_text('""" Contains methods for accessing the API """')
+        api_init.write_text('""" Contains methods for accessing the API """', encoding=self.file_encoding)
 
-        endpoint_template = self.env.get_template("endpoint_module.pyi")
+        endpoint_template = self.env.get_template("endpoint_module.py.jinja")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
-            tag = utils.snake_case(tag)
             tag_dir = api_dir / tag
             tag_dir.mkdir()
             (tag_dir / "__init__.py").touch()
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{snake_case(endpoint.name)}.py"
-                module_path.write_text(endpoint_template.render(endpoint=endpoint))
+                module_path.write_text(endpoint_template.render(endpoint=endpoint), encoding=self.file_encoding)
 
 
 def _get_project_for_url_or_path(
-    url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
+    url: Optional[str],
+    path: Optional[Path],
+    meta: MetaType,
+    custom_template_path: Optional[Path] = None,
+    file_encoding: str = "utf-8",
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
@@ -254,11 +270,16 @@ def _get_project_for_url_or_path(
     openapi = GeneratorData.from_dict(data_dict)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return Project(openapi=openapi, custom_template_path=custom_template_path, meta=meta)
+    return Project(openapi=openapi, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding)
 
 
 def create_new_client(
-    *, url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
+    *,
+    url: Optional[str],
+    path: Optional[Path],
+    meta: MetaType,
+    custom_template_path: Optional[Path] = None,
+    file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -266,14 +287,21 @@ def create_new_client(
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path, meta=meta)
+    project = _get_project_for_url_or_path(
+        url=url, path=path, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding
+    )
     if isinstance(project, GeneratorError):
         return [project]
     return project.build()
 
 
 def update_existing_client(
-    *, url: Optional[str], path: Optional[Path], meta: MetaType, custom_template_path: Optional[Path] = None
+    *,
+    url: Optional[str],
+    path: Optional[Path],
+    meta: MetaType,
+    custom_template_path: Optional[Path] = None,
+    file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
     """
     Update an existing client library
@@ -281,7 +309,9 @@ def update_existing_client(
     Returns:
          A list containing any errors encountered when generating.
     """
-    project = _get_project_for_url_or_path(url=url, path=path, custom_template_path=custom_template_path, meta=meta)
+    project = _get_project_for_url_or_path(
+        url=url, path=path, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding
+    )
     if isinstance(project, GeneratorError):
         return [project]
     return project.update()

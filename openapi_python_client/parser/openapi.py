@@ -19,6 +19,7 @@ class ParameterLocation(str, Enum):
     QUERY = "query"
     PATH = "path"
     HEADER = "header"
+    COOKIE = "cookie"
 
 
 def import_string_from_reference(reference: Reference, prefix: str = "") -> str:
@@ -48,7 +49,7 @@ class EndpointCollection:
                 operation: Optional[oai.Operation] = getattr(path_data, method)
                 if operation is None:
                     continue
-                tag = (operation.tags or ["default"])[0]
+                tag = utils.snake_case((operation.tags or ["default"])[0])
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas
@@ -93,6 +94,7 @@ class Endpoint:
     query_parameters: List[Property] = field(default_factory=list)
     path_parameters: List[Property] = field(default_factory=list)
     header_parameters: List[Property] = field(default_factory=list)
+    cookie_parameters: List[Property] = field(default_factory=list)
     responses: List[Response] = field(default_factory=list)
     form_body_reference: Optional[Reference] = None
     json_body: Optional[Property] = None
@@ -169,14 +171,29 @@ class Endpoint:
     def _add_responses(*, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
+
+            status_code: int
+            try:
+                status_code = int(code)
+            except ValueError:
+                endpoint.errors.append(
+                    ParseError(
+                        detail=(
+                            f"Invalid response status code {code} (not a number), "
+                            f"response will be ommitted from generated client"
+                        )
+                    )
+                )
+                continue
+
             response, schemas = response_from_data(
-                status_code=int(code), data=response_data, schemas=schemas, parent_name=endpoint.name
+                status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name
             )
             if isinstance(response, ParseError):
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Cannot parse response for status code {code}, "
+                            f"Cannot parse response for status code {status_code}, "
                             f"response will be ommitted from generated client"
                         ),
                         data=response.data,
@@ -214,6 +231,8 @@ class Endpoint:
                 endpoint.path_parameters.append(prop)
             elif param.param_in == ParameterLocation.HEADER:
                 endpoint.header_parameters.append(prop)
+            elif param.param_in == ParameterLocation.COOKIE:
+                endpoint.cookie_parameters.append(prop)
             else:
                 return ParseError(data=param, detail="Parameter must be declared in path or query"), schemas
         return endpoint, schemas

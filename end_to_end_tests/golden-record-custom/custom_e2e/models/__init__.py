@@ -1,6 +1,10 @@
 """ Contains all the data models used in inputs/outputs """
 
 from .a_model import AModel
+from .a_model_model import AModelModel
+from .a_model_not_required_model import AModelNotRequiredModel
+from .a_model_not_required_nullable_model import AModelNotRequiredNullableModel
+from .a_model_nullable_model import AModelNullableModel
 from .all_of_sub_model import AllOfSubModel
 from .an_enum import AnEnum
 from .an_int_enum import AnIntEnum

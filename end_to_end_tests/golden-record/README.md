@@ -34,7 +34,7 @@ Or do the same thing with an async version:
 
 ```python
 from my_test_api_client.models import MyDataModel
-from my_test_api_client.async_api.my_tag import get_my_data_model
+from my_test_api_client.api.my_tag import get_my_data_model
 from my_test_api_client.types import Response
 
 my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
