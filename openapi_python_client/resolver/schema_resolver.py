@@ -5,6 +5,7 @@ from typing import Any, Dict, Generator, List, Union, cast
 
 import httpx
 
+from .collision_resolver import CollisionResolver
 from .data_loader import DataLoader
 from .reference import Reference
 from .resolved_schema import ResolvedSchema
@@ -53,6 +54,7 @@ class SchemaResolver:
             root_schema = self._fetch_url_reference(self._root_url)
 
         self._resolve_schema_references(self._parent_path, root_schema, external_schemas, errors, recursive)
+        CollisionResolver(root_schema, external_schemas, errors, self._parent_path).resolve()
         return ResolvedSchema(root_schema, external_schemas, errors, self._parent_path)
 
     def _resolve_schema_references(

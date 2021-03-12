@@ -1,4 +1,3 @@
-import hashlib
 from typing import Any, Dict, Generator, List, Tuple, Union, cast
 
 from .reference import Reference
@@ -96,7 +95,7 @@ class ResolvedSchema:
             component_name = ref.pointer.value.split("/")[-1]
 
         if remote_component is None:
-            print("Weirdy relookup of >> {0}".format(ref.value))
+            print("Weird relookup of >> {0}".format(ref.value))
             assert ref.is_local() and self._lookup_dict(self._resolved_remotes_components, ref.path)
             return
 
@@ -108,19 +107,14 @@ class ResolvedSchema:
 
         if root_components_dir is not None:
             if component_name in root_components_dir:
-                local_component_hash = self._reference_schema_hash(root_components_dir[component_name])
-                remote_component_hash = self._reference_schema_hash(remote_component)
-
-                if local_component_hash == remote_component_hash:
+                if remote_component == root_components_dir[component_name]:
                     return
                 else:
+                    print("FOUND COLLISION IN RESOLVED SCHEMA, SHOULD NOT HAPPEN")
+                    # print(component_name)
+                    # print(remote_component)
+                    # print(root_components_dir[component_name])
                     pass
-                # print('=' * 120)
-                # print('TODO: Find compoment collision to handle on >>> {0}'.format(ref.path))
-                # print('Local componente {0} >> {1}'.format(local_component_hash, root_components_dir[component_name]))
-                # print('')
-                # print('Remote componente {0} >> {1}'.format(remote_component_hash, remote_component))
-                # print('=' * 120)
             else:
                 root_components_dir[component_name] = remote_component
                 self._process_remote_components(owner, remote_component, 2, ref.parent)
@@ -186,23 +180,3 @@ class ResolvedSchema:
         elif isinstance(attr, list):
             for val in attr:
                 yield from self._lookup_schema_references(val)
-
-    def _reference_schema_hash(self, schema: Dict[str, Any]) -> str:
-        md5 = hashlib.md5()
-        hash_elms = []
-        for key in schema.keys():
-            if key == "description":
-                continue
-
-            if key == "type":
-                hash_elms.append(schema[key])
-
-            if key == "allOf":
-                for item in schema[key]:
-                    hash_elms.append(str(item))
-
-            hash_elms.append(key)
-
-        hash_elms.sort()
-        md5.update(";".join(hash_elms).encode("utf-8"))
-        return md5.hexdigest()
