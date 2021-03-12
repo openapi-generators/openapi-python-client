@@ -716,7 +716,7 @@
           "a_not_required_date": {
             "title": "A Nullable Date",
             "type": "string",
-            "format": "date",
+            "format": "date"
           },
           "1_leading_digit": {
             "title": "Leading Digit",
