@@ -1,4 +1,5 @@
-from typing import ClassVar, List, NamedTuple, Optional, Set, Tuple, Union
+from itertools import chain
+from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
 import attr
 
@@ -54,6 +55,18 @@ class ModelProperty(Property):
         return imports
 
 
+def _merge_properties(first: Property, second: Property) -> Union[Property, PropertyError]:
+    if first.__class__ != second.__class__:
+        return PropertyError(header="Cannot merge properties", detail="Properties are two different types")
+    nullable = first.nullable and second.nullable
+    required = first.required or second.required
+    first = attr.evolve(first, nullable=nullable, required=required)
+    second = attr.evolve(second, nullable=nullable, required=required)
+    if first != second:
+        return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
+    return first
+
+
 class _PropertyData(NamedTuple):
     optional_props: List[Property]
     required_props: List[Property]
@@ -64,10 +77,18 @@ class _PropertyData(NamedTuple):
 def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) -> Union[_PropertyData, PropertyError]:
     from . import property_from_data
 
-    required_properties: List[Property] = []
-    optional_properties: List[Property] = []
+    properties: Dict[str, Property] = {}
     relative_imports: Set[str] = set()
     required_set = set(data.required or [])
+
+    def _check_existing(prop: Property) -> Union[Property, PropertyError]:
+        existing = properties.get(prop.name)
+        prop_or_error = (existing and _merge_properties(existing, prop)) or prop
+        if isinstance(prop_or_error, PropertyError):
+            prop_or_error.header = f"Found conflicting properties named {prop.name} when creating {class_name}"
+            return prop_or_error
+        properties[prop_or_error.name] = prop_or_error
+        return prop_or_error
 
     all_props = data.properties or {}
     for sub_prop in data.allOf or []:
@@ -76,21 +97,30 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
             sub_model = schemas.models.get(source_name)
             if sub_model is None:
                 return PropertyError(f"Reference {sub_prop.ref} not found")
-            required_properties.extend(sub_model.required_properties)
-            optional_properties.extend(sub_model.optional_properties)
-            relative_imports.update(sub_model.relative_imports)
+            for prop in chain(sub_model.required_properties, sub_model.optional_properties):
+                prop_or_error = _check_existing(prop)
+                if isinstance(prop_or_error, PropertyError):
+                    return prop_or_error
         else:
             all_props.update(sub_prop.properties or {})
             required_set.update(sub_prop.required or [])
 
     for key, value in all_props.items():
         prop_required = key in required_set
-        prop, schemas = property_from_data(
+        prop_or_error, schemas = property_from_data(
             name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name
         )
-        if isinstance(prop, PropertyError):
-            return prop
-        if prop_required and not prop.nullable:
+        if isinstance(prop_or_error, Property):
+            prop_or_error = _check_existing(prop_or_error)
+        if isinstance(prop_or_error, PropertyError):
+            return prop_or_error
+
+        properties[prop_or_error.name] = prop_or_error
+
+    required_properties = []
+    optional_properties = []
+    for prop in properties.values():
+        if prop.required and not prop.nullable:
             required_properties.append(prop)
         else:
             optional_properties.append(prop)

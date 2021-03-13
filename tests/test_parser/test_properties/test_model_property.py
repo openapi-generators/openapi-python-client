@@ -1,3 +1,5 @@
+from typing import Callable
+
 import pytest
 
 import openapi_python_client.schema as oai
@@ -202,3 +204,110 @@ class TestBuildModelProperty:
 
         assert new_schemas == schemas
         assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
+
+
+@pytest.fixture
+def model_property() -> Callable[..., ModelProperty]:
+    from openapi_python_client.parser.reference import Reference
+
+    def _factory(**kwargs):
+        kwargs = {
+            "name": "",
+            "description": "",
+            "required": True,
+            "nullable": True,
+            "default": None,
+            "reference": Reference(class_name="", module_name=""),
+            "required_properties": [],
+            "optional_properties": [],
+            "relative_imports": set(),
+            "additional_properties": False,
+            **kwargs,
+        }
+        return ModelProperty(**kwargs)
+
+    return _factory
+
+
+def string_property(**kwargs) -> StringProperty:
+    kwargs = {
+        "name": "",
+        "required": True,
+        "nullable": True,
+        "default": None,
+        **kwargs,
+    }
+    return StringProperty(**kwargs)
+
+
+class TestProcessProperties:
+    def test_conflicting_properties(self, model_property):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        schemas = Schemas(
+            models={
+                "First": model_property(
+                    optional_properties=[StringProperty(name="prop", required=True, nullable=True, default=None)]
+                ),
+                "Second": model_property(
+                    optional_properties=[DateTimeProperty(name="prop", required=True, nullable=True, default=None)]
+                ),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="")
+
+        assert isinstance(result, PropertyError)
+
+    def test_duplicate_properties(self, model_property):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        prop = string_property()
+        schemas = Schemas(
+            models={
+                "First": model_property(optional_properties=[prop]),
+                "Second": model_property(optional_properties=[prop]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="")
+
+        assert result.optional_props == [prop], "There should only be one copy of duplicate properties"
+
+    @pytest.mark.parametrize("first_nullable", [True, False])
+    @pytest.mark.parametrize("second_nullable", [True, False])
+    @pytest.mark.parametrize("first_required", [True, False])
+    @pytest.mark.parametrize("second_required", [True, False])
+    def test_mixed_requirements(self, model_property, first_nullable, second_nullable, first_required, second_required):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        schemas = Schemas(
+            models={
+                "First": model_property(
+                    optional_properties=[string_property(required=first_required, nullable=first_nullable)]
+                ),
+                "Second": model_property(
+                    optional_properties=[string_property(required=second_required, nullable=second_nullable)]
+                ),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="")
+
+        nullable = first_nullable and second_nullable
+        required = first_required or second_required
+        expected_prop = string_property(
+            nullable=nullable,
+            required=required,
+        )
+
+        if nullable or not required:
+            assert result.optional_props == [expected_prop]
+        else:
+            assert result.required_props == [expected_prop]
