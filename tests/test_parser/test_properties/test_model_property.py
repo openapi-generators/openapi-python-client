@@ -64,134 +64,141 @@ def test_get_imports():
     }
 
 
-@pytest.mark.parametrize(
-    "additional_properties_schema, expected_additional_properties",
-    [
-        (True, True),
-        (oai.Schema.construct(), True),
-        (None, True),
-        (False, False),
-        (
-            oai.Schema.construct(type="string"),
-            StringProperty(name="AdditionalProperty", required=True, nullable=False, default=None),
-        ),
-    ],
-)
-def test_build_model_property(additional_properties_schema, expected_additional_properties):
-    from openapi_python_client.parser.properties import Schemas, build_model_property
-
-    data = oai.Schema.construct(
-        required=["req"],
-        title="MyModel",
-        properties={
-            "req": oai.Schema.construct(type="string"),
-            "opt": oai.Schema(type="string", format="date-time"),
-        },
-        description="A class called MyModel",
-        nullable=False,
-        additionalProperties=additional_properties_schema,
+class TestBuildModelProperty:
+    @pytest.mark.parametrize(
+        "additional_properties_schema, expected_additional_properties",
+        [
+            (True, True),
+            (oai.Schema.construct(), True),
+            (None, True),
+            (False, False),
+            (
+                oai.Schema.construct(type="string"),
+                StringProperty(name="AdditionalProperty", required=True, nullable=False, default=None),
+            ),
+        ],
     )
-    schemas = Schemas(models={"OtherModel": None})
+    def test_additional_schemas(self, additional_properties_schema, expected_additional_properties):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
 
-    model, new_schemas = build_model_property(
-        data=data,
-        name="prop",
-        schemas=schemas,
-        required=True,
-        parent_name="parent",
-    )
+        data = oai.Schema.construct(
+            additionalProperties=additional_properties_schema,
+        )
 
-    assert new_schemas != schemas
-    assert new_schemas.models == {
-        "OtherModel": None,
-        "ParentMyModel": model,
-    }
-    assert model == ModelProperty(
-        name="prop",
-        required=True,
-        nullable=False,
-        default=None,
-        reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
-        required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
-        optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
-        description=data.description,
-        relative_imports={
-            "from dateutil.parser import isoparse",
-            "from typing import cast",
-            "import datetime",
-            "from ..types import UNSET, Unset",
-            "from typing import Union",
-        },
-        additional_properties=expected_additional_properties,
-    )
+        model, _ = build_model_property(
+            data=data,
+            name="prop",
+            schemas=Schemas(),
+            required=True,
+            parent_name="parent",
+        )
 
+        assert model.additional_properties == expected_additional_properties
 
-def test_build_model_property_conflict():
-    from openapi_python_client.parser.properties import Schemas, build_model_property
+    def test_happy_path(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
 
-    data = oai.Schema.construct(
-        required=["req"],
-        properties={
-            "req": oai.Schema.construct(type="string"),
-            "opt": oai.Schema(type="string", format="date-time"),
-        },
-        nullable=False,
-    )
-    schemas = Schemas(models={"OtherModel": None})
+        data = oai.Schema.construct(
+            required=["req"],
+            title="MyModel",
+            properties={
+                "req": oai.Schema.construct(type="string"),
+                "opt": oai.Schema(type="string", format="date-time"),
+            },
+            description="A class called MyModel",
+            nullable=False,
+        )
+        schemas = Schemas(models={"OtherModel": None})
 
-    err, new_schemas = build_model_property(
-        data=data,
-        name="OtherModel",
-        schemas=schemas,
-        required=True,
-        parent_name=None,
-    )
+        model, new_schemas = build_model_property(
+            data=data,
+            name="prop",
+            schemas=schemas,
+            required=True,
+            parent_name="parent",
+        )
 
-    assert new_schemas == schemas
-    assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
+        assert new_schemas != schemas
+        assert new_schemas.models == {
+            "OtherModel": None,
+            "ParentMyModel": model,
+        }
+        assert model == ModelProperty(
+            name="prop",
+            required=True,
+            nullable=False,
+            default=None,
+            reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
+            required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
+            optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
+            description=data.description,
+            relative_imports={
+                "from dateutil.parser import isoparse",
+                "from typing import cast",
+                "import datetime",
+                "from ..types import UNSET, Unset",
+                "from typing import Union",
+            },
+            additional_properties=True,
+        )
 
+    def test_model_name_conflict(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
 
-def test_build_model_property_bad_prop():
-    from openapi_python_client.parser.properties import Schemas, build_model_property
+        data = oai.Schema.construct()
+        schemas = Schemas(models={"OtherModel": None})
 
-    data = oai.Schema(
-        properties={
-            "bad": oai.Schema(type="not_real"),
-        },
-    )
-    schemas = Schemas(models={"OtherModel": None})
+        err, new_schemas = build_model_property(
+            data=data,
+            name="OtherModel",
+            schemas=schemas,
+            required=True,
+            parent_name=None,
+        )
 
-    err, new_schemas = build_model_property(
-        data=data,
-        name="prop",
-        schemas=schemas,
-        required=True,
-        parent_name=None,
-    )
+        assert new_schemas == schemas
+        assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
 
-    assert new_schemas == schemas
-    assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
+    def test_bad_props_return_error(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
 
+        data = oai.Schema(
+            properties={
+                "bad": oai.Schema(type="not_real"),
+            },
+        )
+        schemas = Schemas()
 
-def test_build_model_property_bad_additional_props():
-    from openapi_python_client.parser.properties import Schemas, build_model_property
+        err, new_schemas = build_model_property(
+            data=data,
+            name="prop",
+            schemas=schemas,
+            required=True,
+            parent_name=None,
+        )
 
-    additional_properties = oai.Schema(
-        type="object",
-        properties={
-            "bad": oai.Schema(type="not_real"),
-        },
-    )
-    data = oai.Schema(additionalProperties=additional_properties)
-    schemas = Schemas(models={"OtherModel": None})
+        assert new_schemas == schemas
+        assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
 
-    err, new_schemas = build_model_property(
-        data=data,
-        name="prop",
-        schemas=schemas,
-        required=True,
-        parent_name=None,
-    )
+    def test_bad_additional_props_return_error(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
 
-    assert new_schemas == schemas
-    assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
+        additional_properties = oai.Schema(
+            type="object",
+            properties={
+                "bad": oai.Schema(type="not_real"),
+            },
+        )
+        data = oai.Schema(additionalProperties=additional_properties)
+        schemas = Schemas()
+
+        err, new_schemas = build_model_property(
+            data=data,
+            name="prop",
+            schemas=schemas,
+            required=True,
+            parent_name=None,
+        )
+
+        assert new_schemas == schemas
+        assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))

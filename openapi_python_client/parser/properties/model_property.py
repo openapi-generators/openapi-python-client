@@ -104,6 +104,31 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
     )
 
 
+def _get_additional_properties(
+    *, schema_additional: Union[None, bool, oai.Reference, oai.Schema], schemas: Schemas, class_name: str
+) -> Tuple[Union[bool, Property, PropertyError], Schemas]:
+    from . import property_from_data
+
+    if schema_additional is None:
+        return True, schemas
+
+    if isinstance(schema_additional, bool):
+        return schema_additional, schemas
+
+    if isinstance(schema_additional, oai.Schema) and not any(schema_additional.dict().values()):
+        # An empty schema
+        return True, schemas
+
+    additional_properties, schemas = property_from_data(
+        name="AdditionalProperty",
+        required=True,  # in the sense that if present in the dict will not be None
+        data=schema_additional,
+        schemas=schemas,
+        parent_name=class_name,
+    )
+    return additional_properties, schemas
+
+
 def build_model_property(
     *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str]
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
@@ -118,8 +143,6 @@ def build_model_property(
         required: Whether or not this property is required by the parent (affects typing)
         parent_name: The name of the property that this property is inside of (affects class naming)
     """
-    from . import property_from_data
-
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
@@ -130,26 +153,13 @@ def build_model_property(
         return property_data, schemas
     schemas = property_data.schemas
 
-    additional_properties: Union[bool, Property, PropertyError]
-    if data.additionalProperties is None:
-        additional_properties = True
-    elif isinstance(data.additionalProperties, bool):
-        additional_properties = data.additionalProperties
-    elif isinstance(data.additionalProperties, oai.Schema) and not any(data.additionalProperties.dict().values()):
-        # An empty schema
-        additional_properties = True
-    else:
-        assert isinstance(data.additionalProperties, (oai.Schema, oai.Reference))
-        additional_properties, schemas = property_from_data(
-            name="AdditionalProperty",
-            required=True,  # in the sense that if present in the dict will not be None
-            data=data.additionalProperties,
-            schemas=schemas,
-            parent_name=class_name,
-        )
-        if isinstance(additional_properties, PropertyError):
-            return additional_properties, schemas
+    additional_properties, schemas = _get_additional_properties(
+        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_name
+    )
+    if isinstance(additional_properties, Property):
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
+    elif isinstance(additional_properties, PropertyError):
+        return additional_properties, schemas
 
     prop = ModelProperty(
         reference=ref,
