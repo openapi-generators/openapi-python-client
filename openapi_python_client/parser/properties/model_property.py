@@ -82,15 +82,17 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
     required_set = set(data.required or [])
 
     def _check_existing(prop: Property) -> Union[Property, PropertyError]:
+        nonlocal properties
+
         existing = properties.get(prop.name)
-        prop_or_error = (existing and _merge_properties(existing, prop)) or prop
+        prop_or_error = _merge_properties(existing, prop) if existing else prop
         if isinstance(prop_or_error, PropertyError):
             prop_or_error.header = f"Found conflicting properties named {prop.name} when creating {class_name}"
             return prop_or_error
         properties[prop_or_error.name] = prop_or_error
         return prop_or_error
 
-    all_props = data.properties or {}
+    unprocessed_props = data.properties or {}
     for sub_prop in data.allOf or []:
         if isinstance(sub_prop, oai.Reference):
             source_name = Reference.from_ref(sub_prop.ref).class_name
@@ -102,10 +104,10 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
                 if isinstance(prop_or_error, PropertyError):
                     return prop_or_error
         else:
-            all_props.update(sub_prop.properties or {})
+            unprocessed_props.update(sub_prop.properties or {})
             required_set.update(sub_prop.required or [])
 
-    for key, value in all_props.items():
+    for key, value in unprocessed_props.items():
         prop_required = key in required_set
         prop_or_error, schemas = property_from_data(
             name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name
