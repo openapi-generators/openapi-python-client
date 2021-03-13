@@ -241,7 +241,7 @@ def string_property(**kwargs) -> StringProperty:
 
 
 class TestProcessProperties:
-    def test_conflicting_properties(self, model_property):
+    def test_conflicting_properties_different_types(self, model_property):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -254,6 +254,22 @@ class TestProcessProperties:
                 "Second": model_property(
                     optional_properties=[DateTimeProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="")
+
+        assert isinstance(result, PropertyError)
+
+    def test_conflicting_properties_same_types(self, model_property):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        schemas = Schemas(
+            models={
+                "First": model_property(optional_properties=[string_property(default="abc")]),
+                "Second": model_property(optional_properties=[string_property()]),
             }
         )
 
@@ -311,3 +327,25 @@ class TestProcessProperties:
             assert result.optional_props == [expected_prop]
         else:
             assert result.required_props == [expected_prop]
+
+    def test_direct_properties_non_ref(self):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[
+                oai.Schema.construct(
+                    required=["first"],
+                    properties={
+                        "first": oai.Schema.construct(type="string"),
+                        "second": oai.Schema.construct(type="string"),
+                    },
+                )
+            ]
+        )
+        schemas = Schemas()
+
+        result = _process_properties(data=data, schemas=schemas, class_name="")
+
+        assert result.optional_props == [string_property(name="second", required=False, nullable=False)]
+        assert result.required_props == [string_property(name="first", required=True, nullable=False)]

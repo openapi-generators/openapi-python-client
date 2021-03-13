@@ -6,7 +6,7 @@ import attr
 
 from ..errors import ParseError
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .enum_property import EnumProperty
     from .model_property import ModelProperty
 else:
