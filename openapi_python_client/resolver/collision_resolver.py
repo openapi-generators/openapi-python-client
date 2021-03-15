@@ -12,6 +12,7 @@ class CollisionResolver:
         self._errors: List[str] = errors
         self._parent = parent
         self._refs_index: Dict[str, str] = dict()
+        self._schema_index: Dict[str, Reference] = dict()
         self._keys_to_replace: Dict[str, Tuple[int, SchemaData, str]] = dict()
 
     def _browse_schema(self, attr: Any, root_attr: Any) -> None:
@@ -36,6 +37,17 @@ class CollisionResolver:
                                 self._increment_ref(ref, self._refs[ref.abs_path], hashed_schema, attr, key)
                     else:
                         self._refs_index[value] = hashed_schema
+
+                    if hashed_schema in self._schema_index.keys():
+                        existing_ref = self._schema_index[hashed_schema]
+                        if (
+                            existing_ref.pointer.value != ref.pointer.value
+                            and ref.pointer.tokens()[-1] == existing_ref.pointer.tokens()[-1]
+                        ):
+                            print("Found same schema for different pointer")
+                    else:
+                        self._schema_index[hashed_schema] = ref
+
                 else:
                     self._browse_schema(val, root_attr)
 
