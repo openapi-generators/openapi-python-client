@@ -31,6 +31,7 @@ for {{ inner_source }} in {{ source }}:
 {% endif %}
 {% endmacro %}
 
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% set inner_property = property.inner_property %}
@@ -44,13 +45,13 @@ else:
 {{ _transform(property, source, destination) }}
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: Union[Unset, List[Any]]{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
     if {{ source }} is None:
         {{ destination }} = None
     else:
-        {{ _transform(property, source, destination) | indent(4)}}
+        {{ _transform(property, source, destination) | indent(8)}}
 {% else %}
     {{ _transform(property, source, destination) | indent(4)}}
 {% endif %}
