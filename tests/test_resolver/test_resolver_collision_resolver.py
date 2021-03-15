@@ -19,6 +19,7 @@ def test__collision_resolver():
         "localref": {"$ref": "#/local_ref"},
         "local_ref": {"description": "a local ref"},
         "last": {"$ref": "first_instance.yaml#/fourth_instance"},
+        "baz": {"$ref": "fifth_instance.yaml#/foo"},
     }
 
     external_schemas = {
@@ -30,11 +31,13 @@ def test__collision_resolver():
         "/home/user/second_instance.yaml": {"foo": {"description": "foo_second_description"}},
         "/home/user/third_instance.yaml": {"foo": {"description": "foo_third_description"}},
         "/home/user/fourth_instance.yaml": {"foo": {"description": "foo_fourth_description"}},
+        "/home/user/fifth_instance.yaml": {"foo": {"description": "foo_second_description"}},
     }
 
     desired_result = {
         "foobar": {"$ref": "#/foo"},
         "barfoo": {"$ref": "#/foo_2"},
+        "baz": {"$ref": "#/foo_2"},
         "barbarfoo": {"$ref": "#/foo_3"},
         "foobarfoo": {"$ref": "#/foo_2"},
         "barfoobar": {"$ref": "#/bar/foo"},

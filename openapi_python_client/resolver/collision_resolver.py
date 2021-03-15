@@ -12,8 +12,7 @@ class CollisionResolver:
         self._errors: List[str] = errors
         self._parent = parent
         self._refs_index: Dict[str, str] = dict()
-        self._keys_to_replace: Dict[Reference, Tuple[int, SchemaData]] = dict()
-        self._debug = set()
+        self._keys_to_replace: Dict[str, Tuple[int, SchemaData, str]] = dict()
 
     def _browse_schema(self, attr: Any, root_attr: Any) -> None:
         if isinstance(attr, dict):
@@ -26,14 +25,10 @@ class CollisionResolver:
                     assert value
 
                     schema = self._get_from_ref(ref, root_attr)
-                    # if value == '/components/schemas/EeSubscription':
-                    #     print(schema)
-                    #     print()
                     hashed_schema = self._reference_schema_hash(schema)
 
                     if value in self._refs_index.keys():
                         if self._refs_index[value] != hashed_schema:
-                            self._debug.add(ref.pointer.value)
                             if ref.is_local():
                                 self._increment_ref(ref, root_attr, hashed_schema, attr, key)
                             else:
@@ -49,11 +44,10 @@ class CollisionResolver:
                 self._browse_schema(val, root_attr)
 
     def _get_from_ref(self, ref: Reference, attr: SchemaData) -> SchemaData:
-        if ref.is_local():
-            cursor = attr
-        else:
+        if ref.is_remote():
             assert ref.abs_path in self._refs.keys()
-            cursor = self._refs[ref.abs_path]
+            attr = self._refs[ref.abs_path]
+        cursor = attr
         query = ref.pointer.unescapated_value
         query_parts = []
 
@@ -69,15 +63,13 @@ class CollisionResolver:
             if isinstance(cursor, dict) and key in cursor:
                 cursor = cursor[key]
             else:
-                print('ERROR')
+                print("ERROR")
 
-        # if list(cursor) == ['$ref']:
-        #     ref = Reference(cursor['$ref'],self._parent)
-        #     if ref.is_remote():
-        #         print('remote_ref')
-        #         print(ref.value)
-        #         attr = self._refs[ref.abs_path]
-        #     return self._get_from_ref(ref,attr)
+        if list(cursor) == ["$ref"]:
+            ref2 = Reference(cursor["$ref"], self._parent)
+            if ref2.is_remote():
+                attr = self._refs[ref2.abs_path]
+            return self._get_from_ref(ref2, attr)
 
         return cursor
 
@@ -90,15 +82,18 @@ class CollisionResolver:
 
         while incremented_value in self._refs_index.keys():
             if self._refs_index[incremented_value] == hashed_schema:
-                attr[key] = ref.value + "_" + str(i)
-                return
+                if ref.value not in self._keys_to_replace.keys():
+                    break  # have to increment target key aswell
+                else:
+                    attr[key] = ref.value + "_" + str(i)
+                    return
             else:
                 i = i + 1
                 incremented_value = value + "_" + str(i)
 
         attr[key] = ref.value + "_" + str(i)
         self._refs_index[incremented_value] = hashed_schema
-        self._keys_to_replace[ref] = (i, schema)
+        self._keys_to_replace[ref.value] = (i, schema, ref.pointer.value)
 
     def _modify_root_ref_name(self, ref_pointer: str, i: int, attr: SchemaData) -> None:
         cursor = attr
@@ -127,15 +122,11 @@ class CollisionResolver:
                 return
 
     def resolve(self) -> None:
-        debug = set()
         self._browse_schema(self._root, self._root)
         for file, schema in self._refs.items():
             self._browse_schema(schema, schema)
         for a, b in self._keys_to_replace.items():
-            debug.add(a.pointer.value)
-            self._modify_root_ref_name(a.pointer.value, b[0], b[1])
-
-        print(self._debug)
+            self._modify_root_ref_name(b[2], b[0], b[1])
 
     def _reference_schema_hash(self, schema: Dict[str, Any]) -> str:
         md5 = hashlib.md5()
