@@ -111,8 +111,8 @@ class CollisionResolver:
             if key == "":
                 continue
 
-            if key == last_key:
-                assert key in cursor
+            if key == last_key and key + "_" + str(i) not in cursor:
+                assert key in cursor, "Didnt find %s in %s" % (ref_pointer, attr)
                 cursor[key + "_" + str(i)] = cursor.pop(key)
                 return
 
