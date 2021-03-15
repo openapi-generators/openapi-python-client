@@ -17,7 +17,7 @@ def _get_kwargs(
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    json_query_param: Union[Unset, List[Any]] = UNSET
+    json_query_param: Union[Unset, List[str]] = UNSET
     if not isinstance(query_param, Unset):
         json_query_param = query_param
 

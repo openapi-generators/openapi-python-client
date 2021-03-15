@@ -7,7 +7,7 @@ from ...types import Response
 Client = httpx.Client
 
 import datetime
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import isoparse
 
@@ -42,28 +42,45 @@ def httpx_request(
     *,
     client: Client,
     string_prop: Union[Unset, str] = "the default string",
-    datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_not_nullable_datetime_prop: Union[Unset, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    not_required_nullable_datetime_prop: Union[Unset, None, datetime.datetime] = isoparse("1010-10-10T00:00:00"),
+    required_not_nullable_datetime_prop: datetime.datetime = isoparse("1010-10-10T00:00:00"),
+    required_nullable_datetime_prop: Optional[datetime.datetime] = isoparse("1010-10-10T00:00:00"),
     date_prop: Union[Unset, datetime.date] = isoparse("1010-10-10").date(),
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = False,
     list_prop: Union[Unset, List[AnEnum]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[Unset, float, AnEnum] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: Union[Unset, AnEnum] = UNSET,
-    model_prop: Union[ModelWithUnionProperty, Unset] = UNSET,
+    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
+    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
 ) -> Response[Union[None, HTTPValidationError]]:
 
-    json_datetime_prop: Union[Unset, str] = UNSET
-    if not isinstance(datetime_prop, Unset):
-        json_datetime_prop = datetime_prop.isoformat()
+    json_not_required_not_nullable_datetime_prop: Union[Unset, str] = UNSET
+    if not isinstance(not_required_not_nullable_datetime_prop, Unset):
+        json_not_required_not_nullable_datetime_prop = not_required_not_nullable_datetime_prop.isoformat()
+
+    json_not_required_nullable_datetime_prop: Union[Unset, None, str] = UNSET
+    if not isinstance(not_required_nullable_datetime_prop, Unset):
+        json_not_required_nullable_datetime_prop = (
+            not_required_nullable_datetime_prop.isoformat() if not_required_nullable_datetime_prop else None
+        )
+
+    json_required_not_nullable_datetime_prop = required_not_nullable_datetime_prop.isoformat()
+
+    json_required_nullable_datetime_prop = (
+        required_nullable_datetime_prop.isoformat() if required_nullable_datetime_prop else None
+    )
 
     json_date_prop: Union[Unset, str] = UNSET
     if not isinstance(date_prop, Unset):
         json_date_prop = date_prop.isoformat()
 
-    json_list_prop: Union[Unset, List[Any]] = UNSET
+    json_list_prop: Union[Unset, List[str]] = UNSET
     if not isinstance(list_prop, Unset):
         json_list_prop = []
         for list_prop_item_data in list_prop:
@@ -77,20 +94,20 @@ def httpx_request(
     else:
         json_union_prop = union_prop
 
-    json_union_prop_with_ref: Union[Unset, float, AnEnum]
+    json_union_prop_with_ref: Union[Unset, float, str]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
-            json_union_prop_with_ref = union_prop_with_ref
+            json_union_prop_with_ref = union_prop_with_ref.value
 
     else:
         json_union_prop_with_ref = union_prop_with_ref
 
-    json_enum_prop: Union[Unset, AnEnum] = UNSET
+    json_enum_prop: Union[Unset, str] = UNSET
     if not isinstance(enum_prop, Unset):
-        json_enum_prop = enum_prop
+        json_enum_prop = enum_prop.value
 
     json_model_prop: Union[Unset, Dict[str, Any]] = UNSET
     if not isinstance(model_prop, Unset):
@@ -98,9 +115,28 @@ def httpx_request(
 
     json_required_model_prop = required_model_prop.to_dict()
 
+    json_nullable_model_prop: Union[Dict[str, Any], None, Unset]
+    if isinstance(nullable_model_prop, Unset):
+        json_nullable_model_prop = UNSET
+    elif nullable_model_prop is None:
+        json_nullable_model_prop = None
+    else:
+        json_nullable_model_prop = UNSET
+        if not isinstance(nullable_model_prop, Unset):
+            json_nullable_model_prop = nullable_model_prop.to_dict()
+
+    json_nullable_required_model_prop: Union[Dict[str, Any], None]
+    if nullable_required_model_prop is None:
+        json_nullable_required_model_prop = None
+    else:
+        json_nullable_required_model_prop = nullable_required_model_prop.to_dict()
+
     params: Dict[str, Any] = {
         "string_prop": string_prop,
-        "datetime_prop": json_datetime_prop,
+        "not_required_not_nullable_datetime_prop": json_not_required_not_nullable_datetime_prop,
+        "not_required_nullable_datetime_prop": json_not_required_nullable_datetime_prop,
+        "required_not_nullable_datetime_prop": json_required_not_nullable_datetime_prop,
+        "required_nullable_datetime_prop": json_required_nullable_datetime_prop,
         "date_prop": json_date_prop,
         "float_prop": float_prop,
         "int_prop": int_prop,
@@ -109,6 +145,8 @@ def httpx_request(
         "union_prop": json_union_prop,
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
+        "nullable_model_prop": json_nullable_model_prop,
+        "nullable_required_model_prop": json_nullable_required_model_prop,
     }
     if not isinstance(json_model_prop, Unset):
         params.update(json_model_prop)

@@ -8,6 +8,8 @@
 {{ construct_template(construct_function, property, source, initial_value=initial_value) }}
 {% endmacro %}
 
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
+
 {% macro transform(property, source, destination, declare_type=True) %}
 {% if property.required %}
 {% if property.nullable %}
@@ -16,12 +18,12 @@
 {{ destination }} = {{ source }}.value
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string() }}{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-    {{ destination }} = {{ source }} if {{ source }} else None
+    {{ destination }} = {{ source }}.value if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}
+    {{ destination }} = {{ source }}.value
 {% endif %}
 {% endif %}
 {% endmacro %}

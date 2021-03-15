@@ -2,19 +2,20 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "no_optional,nullable,required,expected",
+    "no_optional,nullable,required,json,expected",
     [
-        (False, False, False, "Union[MyClass, Unset]"),
-        (False, False, True, "MyClass"),
-        (False, True, False, "Union[Optional[MyClass], Unset]"),
-        (False, True, True, "Optional[MyClass]"),
-        (True, False, False, "MyClass"),
-        (True, False, True, "MyClass"),
-        (True, True, False, "MyClass"),
-        (True, True, True, "MyClass"),
+        (False, False, False, False, "Union[Unset, MyClass]"),
+        (False, False, True, False, "MyClass"),
+        (False, True, False, False, "Union[Unset, None, MyClass]"),
+        (False, True, True, False, "Optional[MyClass]"),
+        (True, False, False, False, "MyClass"),
+        (True, False, True, False, "MyClass"),
+        (True, True, False, False, "MyClass"),
+        (True, True, True, False, "MyClass"),
+        (False, False, True, True, "Dict[str, Any]"),
     ],
 )
-def test_get_type_string(no_optional, nullable, required, expected):
+def test_get_type_string(no_optional, nullable, required, json, expected):
     from openapi_python_client.parser.properties import ModelProperty, Reference
 
     prop = ModelProperty(
@@ -30,7 +31,7 @@ def test_get_type_string(no_optional, nullable, required, expected):
         additional_properties=False,
     )
 
-    assert prop.get_type_string(no_optional=no_optional) == expected
+    assert prop.get_type_string(no_optional=no_optional, json=json) == expected
 
 
 def test_get_imports():

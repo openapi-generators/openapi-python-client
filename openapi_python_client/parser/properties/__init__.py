@@ -19,6 +19,7 @@ class NoneProperty(Property):
     """ A property that is always None (used for empty schemas) """
 
     _type_string: ClassVar[str] = "None"
+    _json_type_string: ClassVar[str] = "None"
     template: ClassVar[Optional[str]] = "none_property.py.jinja"
 
 
@@ -29,6 +30,7 @@ class StringProperty(Property):
     max_length: Optional[int] = None
     pattern: Optional[str] = None
     _type_string: ClassVar[str] = "str"
+    _json_type_string: ClassVar[str] = "str"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -38,6 +40,7 @@ class DateTimeProperty(Property):
     """
 
     _type_string: ClassVar[str] = "datetime.datetime"
+    _json_type_string: ClassVar[str] = "str"
     template: ClassVar[str] = "datetime_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -58,6 +61,7 @@ class DateProperty(Property):
     """ A property of type datetime.date """
 
     _type_string: ClassVar[str] = "datetime.date"
+    _json_type_string: ClassVar[str] = "str"
     template: ClassVar[str] = "date_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -78,6 +82,8 @@ class FileProperty(Property):
     """ A property used for uploading files """
 
     _type_string: ClassVar[str] = "File"
+    # Return type of File.to_tuple()
+    _json_type_string: ClassVar[str] = "Tuple[Optional[str], Union[BinaryIO, TextIO], Optional[str]]"
     template: ClassVar[str] = "file_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -98,6 +104,7 @@ class FloatProperty(Property):
     """ A property of type float """
 
     _type_string: ClassVar[str] = "float"
+    _json_type_string: ClassVar[str] = "float"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -105,6 +112,7 @@ class IntProperty(Property):
     """ A property of type int """
 
     _type_string: ClassVar[str] = "int"
+    _json_type_string: ClassVar[str] = "int"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -112,6 +120,7 @@ class BooleanProperty(Property):
     """ Property for bool """
 
     _type_string: ClassVar[str] = "bool"
+    _json_type_string: ClassVar[str] = "bool"
 
 
 InnerProp = TypeVar("InnerProp", bound=Property)
@@ -124,16 +133,11 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.py.jinja"
 
-    def get_type_string(self, no_optional: bool = False) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        type_string = f"List[{self.inner_property.get_type_string()}]"
-        if no_optional:
-            return type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        if not self.required:
-            type_string = f"Union[Unset, {type_string}]"
-        return type_string
+    def get_base_type_string(self) -> str:
+        return f"List[{self.inner_property.get_type_string()}]"
+
+    def get_base_json_type_string(self) -> str:
+        return f"List[{self.inner_property.get_type_string(json=True)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -167,18 +171,39 @@ class UnionProperty(Property):
             self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
         )
 
-    def get_type_string(self, no_optional: bool = False) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
-        inner_types = [p.get_type_string(no_optional=True) for p in self.inner_properties]
-        inner_prop_string = ", ".join(inner_types)
-        type_string = f"Union[{inner_prop_string}]"
+    def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
+        return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
+
+    def _get_type_string_from_inner_type_strings(self, inner_types: Set[str]) -> str:
+        if len(inner_types) == 1:
+            return inner_types.pop()
+        else:
+            return f"Union[{', '.join(sorted(inner_types))}]"
+
+    def get_base_type_string(self) -> str:
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
+
+    def get_base_json_type_string(self) -> str:
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
+
+    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
+        type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
-            return type_string
-        if not self.required:
-            type_string = f"Union[Unset, {inner_prop_string}]"
+            return type_strings
         if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        return type_string
+            type_strings.add("None")
+        if not self.required:
+            type_strings.add("Unset")
+        return type_strings
+
+    def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
+        """
+        Get a string representation of type that should be used when declaring this property.
+        This implementation differs slightly from `Property.get_type_string` in order to collapse
+        nested union types.
+        """
+        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
+        return self._get_type_string_from_inner_type_strings(type_strings_in_union)
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -388,9 +413,9 @@ def build_union_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
-    for sub_prop_data in chain(data.anyOf, data.oneOf):
+    for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=name, required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
+            name=f"{name}_type{i}", required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
         )
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas

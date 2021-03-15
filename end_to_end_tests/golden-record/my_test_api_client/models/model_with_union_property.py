@@ -13,21 +13,21 @@ T = TypeVar("T", bound="ModelWithUnionProperty")
 class ModelWithUnionProperty:
     """  """
 
-    a_property: Union[Unset, AnEnum, AnIntEnum] = UNSET
+    a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        a_property: Union[Unset, AnEnum, AnIntEnum]
+        a_property: Union[Unset, int, str]
         if isinstance(self.a_property, Unset):
             a_property = UNSET
         elif isinstance(self.a_property, AnEnum):
             a_property = UNSET
             if not isinstance(self.a_property, Unset):
-                a_property = self.a_property
+                a_property = self.a_property.value
 
         else:
             a_property = UNSET
             if not isinstance(self.a_property, Unset):
-                a_property = self.a_property
+                a_property = self.a_property.value
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -40,24 +40,30 @@ class ModelWithUnionProperty:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
-        def _parse_a_property(data: Any) -> Union[Unset, AnEnum, AnIntEnum]:
-            data = None if isinstance(data, Unset) else data
-            a_property: Union[Unset, AnEnum, AnIntEnum]
+        def _parse_a_property(data: object) -> Union[AnEnum, AnIntEnum, Unset]:
+            if isinstance(data, Unset):
+                return data
             try:
-                a_property = UNSET
-                _a_property = data
-                if not isinstance(_a_property, Unset):
-                    a_property = AnEnum(_a_property)
+                a_property_type0: Union[Unset, AnEnum]
+                if not isinstance(data, str):
+                    raise TypeError()
+                a_property_type0 = UNSET
+                _a_property_type0 = data
+                if not isinstance(_a_property_type0, Unset):
+                    a_property_type0 = AnEnum(_a_property_type0)
 
-                return a_property
+                return a_property_type0
             except:  # noqa: E722
                 pass
-            a_property = UNSET
-            _a_property = data
-            if not isinstance(_a_property, Unset):
-                a_property = AnIntEnum(_a_property)
+            if not isinstance(data, int):
+                raise TypeError()
+            a_property_type1: Union[Unset, AnIntEnum]
+            a_property_type1 = UNSET
+            _a_property_type1 = data
+            if not isinstance(_a_property_type1, Unset):
+                a_property_type1 = AnIntEnum(_a_property_type1)
 
-            return a_property
+            return a_property_type1
 
         a_property = _parse_a_property(d.pop("a_property", UNSET))
 
