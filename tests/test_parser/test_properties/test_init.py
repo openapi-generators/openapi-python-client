@@ -313,6 +313,22 @@ class TestUnionProperty:
         )
         assert p.get_base_type_string() == "Union[inner_type_string_1, inner_type_string_2]"
 
+    def test_get_base_type_string_one_element(self, mocker):
+        from openapi_python_client.parser.properties import UnionProperty
+
+        inner_property_1 = mocker.MagicMock()
+        inner_property_1.get_type_string.side_effect = (
+            lambda no_optional=False, json=False: "inner_json_type_string_1" if json else "inner_type_string_1"
+        )
+        p = UnionProperty(
+            name="test",
+            required=False,
+            default=None,
+            inner_properties=[inner_property_1],
+            nullable=True,
+        )
+        assert p.get_base_type_string() == "inner_type_string_1"
+
     def test_get_base_json_type_string(self, mocker):
         from openapi_python_client.parser.properties import UnionProperty
 
