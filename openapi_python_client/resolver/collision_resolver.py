@@ -13,7 +13,7 @@ class CollisionResolver:
         self._parent = parent
         self._refs_index: Dict[str, str] = dict()
         self._schema_index: Dict[str, Reference] = dict()
-        self._keys_to_replace: Dict[str, Tuple[int, SchemaData, str]] = dict()
+        self._keys_to_replace: Dict[str, Tuple[int, SchemaData, List[str]]] = dict()
 
     def _browse_schema(self, attr: Any, root_attr: Any) -> None:
         if isinstance(attr, dict):
@@ -60,13 +60,7 @@ class CollisionResolver:
             assert ref.abs_path in self._refs.keys()
             attr = self._refs[ref.abs_path]
         cursor = attr
-        query = ref.pointer.unescapated_value
-        query_parts = []
-
-        if query.startswith("/paths"):
-            query_parts = ["paths", query.replace("/paths//", "/").replace("/paths", "")]
-        else:
-            query_parts = query.split("/")
+        query_parts = ref.pointer.tokens()
 
         for key in query_parts:
             if key == "":
@@ -105,18 +99,10 @@ class CollisionResolver:
 
         attr[key] = ref.value + "_" + str(i)
         self._refs_index[incremented_value] = hashed_schema
-        self._keys_to_replace[ref.value] = (i, schema, ref.pointer.value)
+        self._keys_to_replace[ref.value] = (i, schema, ref.pointer.tokens())
 
-    def _modify_root_ref_name(self, ref_pointer: str, i: int, attr: SchemaData) -> None:
+    def _modify_root_ref_name(self, query_parts: List[str], i: int, attr: SchemaData) -> None:
         cursor = attr
-        query = ref_pointer
-        query_parts = []
-
-        if query.startswith("/paths"):
-            query_parts = ["paths", query.replace("/paths//", "/").replace("/paths", "")]
-        else:
-            query_parts = query.split("/")
-
         last_key = query_parts[-1]
 
         for key in query_parts:
@@ -124,7 +110,7 @@ class CollisionResolver:
                 continue
 
             if key == last_key and key + "_" + str(i) not in cursor:
-                assert key in cursor, "Didnt find %s in %s" % (ref_pointer, attr)
+                assert key in cursor, "Didnt find %s in %s" % (key, attr)
                 cursor[key + "_" + str(i)] = cursor.pop(key)
                 return
 

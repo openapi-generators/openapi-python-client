@@ -47,12 +47,13 @@ class ResolvedSchema:
 
             remote_path = ref.abs_path
             path = ref.pointer.unescapated_value
+            tokens = ref.pointer.tokens()
 
             if remote_path not in self._refs:
                 self._errors.append("Failed to resolve remote reference > {0}".format(remote_path))
             else:
                 remote_schema = self._refs[remote_path]
-                remote_value = self._lookup_dict(remote_schema, path)
+                remote_value = self._lookup_dict(remote_schema, tokens)
                 if not remote_value:
                     self._errors.append("Failed to read remote value {}, in remote ref {}".format(path, remote_path))
                 else:
@@ -87,16 +88,16 @@ class ResolvedSchema:
         self._ensure_components_dir_exists(ref)
 
         # print('Processing remote component > {0}'.format(ref.value))
-        remote_component = self._lookup_dict(owner, ref.pointer.value)
+        remote_component = self._lookup_dict(owner, ref.pointer.tokens())
         pointer_parent = ref.pointer.parent
 
         if pointer_parent is not None:
-            root_components_dir = self._lookup_dict(self._resolved_remotes_components, pointer_parent.value)
+            root_components_dir = self._lookup_dict(self._resolved_remotes_components, pointer_parent.tokens())
             component_name = ref.pointer.value.split("/")[-1]
 
         if remote_component is None:
             print("Weird relookup of >> {0}".format(ref.value))
-            assert ref.is_local() and self._lookup_dict(self._resolved_remotes_components, ref.path)
+            assert ref.is_local() and self._lookup_dict(self._resolved_remotes_components, ref.pointer.tokens())
             return
 
         if "$ref" in remote_component:
@@ -109,10 +110,14 @@ class ResolvedSchema:
             if component_name in root_components_dir:
                 if remote_component == root_components_dir[component_name]:
                     return
+                elif list(remote_component) == ["$ref"]:
+                    pass
                 else:
                     print("FOUND COLLISION IN RESOLVED SCHEMA, SHOULD NOT HAPPEN")
                     # print(component_name)
+                    # print()
                     # print(remote_component)
+                    # print()
                     # print(root_components_dir[component_name])
                     pass
             else:
@@ -136,14 +141,8 @@ class ResolvedSchema:
     def _transform_to_local_ref(self, owner: Dict[str, Any], ref: Reference) -> None:
         owner["$ref"] = "#{0}".format(ref.pointer.value)
 
-    def _lookup_dict(self, attr: SchemaData, query: str) -> Union[SchemaData, None]:
+    def _lookup_dict(self, attr: SchemaData, query_parts: List[str]) -> Union[SchemaData, None]:
         cursor = attr
-        query_parts = []
-
-        if query.startswith("/paths"):
-            query_parts = ["paths", query.replace("/paths//", "/").replace("/paths", "")]
-        else:
-            query_parts = query.split("/")
 
         for key in query_parts:
             if key == "":
