@@ -290,12 +290,49 @@
           {
             "required": false,
             "schema": {
-              "title": "Datetime Prop",
+              "title": "Not Required, Not Nullable Datetime Prop",
+              "nullable": false,
               "type": "string",
               "format": "date-time",
               "default": "1010-10-10T00:00:00"
             },
-            "name": "datetime_prop",
+            "name": "not_required_not_nullable_datetime_prop",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Not Required, Nullable Datetime Prop",
+              "nullable": true,
+              "type": "string",
+              "format": "date-time",
+              "default": "1010-10-10T00:00:00"
+            },
+            "name": "not_required_nullable_datetime_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Required, Not Nullable Datetime Prop",
+              "nullable": false,
+              "type": "string",
+              "format": "date-time",
+              "default": "1010-10-10T00:00:00"
+            },
+            "name": "required_not_nullable_datetime_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Required, Nullable Datetime Prop",
+              "nullable": true,
+              "type": "string",
+              "format": "date-time",
+              "default": "1010-10-10T00:00:00"
+            },
+            "name": "required_nullable_datetime_prop",
             "in": "query"
           },
           {
@@ -411,6 +448,32 @@
               "$ref": "#/components/schemas/ModelWithUnionProperty"
             },
             "name": "required_model_prop",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ModelWithUnionProperty"
+                }
+              ],
+              "nullable": true
+            },
+            "name": "nullable_model_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ModelWithUnionProperty"
+                }
+              ],
+              "nullable": true
+            },
+            "name": "nullable_required_model_prop",
             "in": "query"
           }
         ],
@@ -672,7 +735,18 @@
     "schemas": {
       "AModel": {
         "title": "AModel",
-        "required": ["an_enum_value", "aCamelDateTime", "a_date", "a_nullable_date", "required_nullable", "required_not_nullable", "model", "nullable_model"],
+        "required": [
+          "an_enum_value",
+          "aCamelDateTime",
+          "a_date",
+          "a_nullable_date",
+          "required_nullable",
+          "required_not_nullable",
+          "model",
+          "nullable_model",
+          "one_of_models",
+          "nullable_one_of_models"
+        ],
         "type": "object",
         "properties": {
           "an_enum_value": {
@@ -741,6 +815,53 @@
             "title": "NOT Required AND NOT Nullable",
             "type": "string",
             "nullable": false
+          },
+          "one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "nullable_one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "not_required_one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              }
+            ],
+            "nullable": false
+          },
+          "not_required_nullable_one_of_models": {
+            "oneOf": [
+              {
+                "ref": "#components/schemas/FreeFormModel"
+              },
+              {
+                "ref": "#components/schemas/ModelWithUnionProperty"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
           },
           "model": {
             "type": "object",
@@ -856,6 +977,29 @@
             "oneOf": [
               {"$ref": "#/components/schemas/AnEnum"},
               {"$ref": "#/components/schemas/AnIntEnum"}
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModelWithUnionPropertyInlined": {
+        "title": "ModelWithUnionPropertyInlined",
+        "type": "object",
+        "properties": {
+          "fruit": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "apples": {"type": "string"}
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "bananas": {"type": "string"}
+                }
+              }
             ]
           }
         },

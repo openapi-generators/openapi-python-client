@@ -24,6 +24,7 @@ class Property:
     required: bool
     nullable: bool
     _type_string: ClassVar[str] = ""
+    _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()
     python_name: str = attr.ib(init=False)
 
@@ -33,21 +34,33 @@ class Property:
     def __attrs_post_init__(self) -> None:
         object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(self.name)))
 
-    def get_type_string(self, no_optional: bool = False) -> str:
+    def get_base_type_string(self) -> str:
+        return self._type_string
+
+    def get_base_json_type_string(self) -> str:
+        return self._json_type_string
+
+    def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
         """
         Get a string representation of type that should be used when declaring this property
 
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
+            json: True if the type refers to the property after JSON serialization
         """
-        type_string = self._type_string
-        if no_optional:
-            return self._type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        if not self.required:
-            type_string = f"Union[Unset, {type_string}]"
-        return type_string
+        if json:
+            type_string = self.get_base_json_type_string()
+        else:
+            type_string = self.get_base_type_string()
+
+        if no_optional or (self.required and not self.nullable):
+            return type_string
+        elif self.required and self.nullable:
+            return f"Optional[{type_string}]"
+        elif not self.required and self.nullable:
+            return f"Union[Unset, None, {type_string}]"
+        else:
+            return f"Union[Unset, {type_string}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""

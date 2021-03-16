@@ -22,17 +22,11 @@ class EnumProperty(Property):
 
     template: ClassVar[str] = "enum_property.py.jinja"
 
-    def get_type_string(self, no_optional: bool = False) -> str:
-        """ Get a string representation of type that should be used when declaring this property """
+    def get_base_type_string(self, json: bool = False) -> str:
+        return self.reference.class_name
 
-        type_string = self.reference.class_name
-        if no_optional:
-            return type_string
-        if self.nullable:
-            type_string = f"Optional[{type_string}]"
-        if not self.required:
-            type_string = f"Union[Unset, {type_string}]"
-        return type_string
+    def get_base_json_type_string(self, json: bool = False) -> str:
+        return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
