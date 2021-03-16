@@ -26,6 +26,8 @@ class ResolvedSchema:
 
     def _dict_deep_update(self, d: Dict[str, Any], u: Dict[str, Any]) -> Dict[str, Any]:
         for k, v in u.items():
+            if isinstance(d, Dict) and list(d) == ["$ref"]:
+                d.pop("$ref")
             if isinstance(v, Dict):
                 d[k] = self._dict_deep_update(d.get(k, {}), v)
             else:
@@ -107,20 +109,7 @@ class ResolvedSchema:
                 self._process_remote_components(remote_component, parent_path=ref.parent)
 
         if root_components_dir is not None:
-            if component_name in root_components_dir:
-                if remote_component == root_components_dir[component_name]:
-                    return
-                elif list(remote_component) == ["$ref"]:
-                    pass
-                else:
-                    print("FOUND COLLISION IN RESOLVED SCHEMA, SHOULD NOT HAPPEN")
-                    # print(component_name)
-                    # print()
-                    # print(remote_component)
-                    # print()
-                    # print(root_components_dir[component_name])
-                    pass
-            else:
+            if component_name not in root_components_dir:
                 root_components_dir[component_name] = remote_component
                 self._process_remote_components(owner, remote_component, 2, ref.parent)
 
