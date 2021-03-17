@@ -793,6 +793,49 @@ class TestPropertyFromData:
             data=data, name=name, required=required, schemas=schemas, parent_name="parent"
         )
 
+    def test_property_from_data_union_of_one_element(self, mocker):
+        from openapi_python_client.parser.properties import ModelProperty, Reference, Schemas, property_from_data
+
+        name = "new_name"
+        required = False
+        class_name = "MyModel"
+        existing_model = ModelProperty(
+            name="old_name",
+            required=True,
+            nullable=False,
+            default=None,
+            reference=Reference(class_name=class_name, module_name="my_model"),
+            required_properties=[],
+            optional_properties=[],
+            description="",
+            relative_imports=set(),
+            additional_properties=False,
+        )
+        schemas = Schemas(models={class_name: existing_model})
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref=class_name)],
+            nullable=True,
+        )
+        build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+
+        prop, schemas = property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name="parent")
+
+        assert prop == ModelProperty(
+            name=name,
+            required=required,
+            nullable=True,
+            default=None,
+            reference=Reference(class_name=class_name, module_name="my_model"),
+            required_properties=[],
+            optional_properties=[],
+            description="",
+            relative_imports=set(),
+            additional_properties=False,
+        )
+        build_union_property.assert_not_called()
+
     def test_property_from_data_unsupported_type(self, mocker):
         name = mocker.MagicMock()
         required = mocker.MagicMock()
