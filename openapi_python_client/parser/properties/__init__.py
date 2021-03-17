@@ -410,7 +410,7 @@ def _property_from_data(
     for attribute in ["allOf", "anyOf", "oneOf"]:
         sub_data = getattr(data, attribute)
         if sub_data and len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
-            return _property_from_ref(name=name, required=required, nullable=False, data=sub_data[0], schemas=schemas)
+            return _property_from_ref(name=name, required=required, nullable=data.nullable, data=sub_data[0], schemas=schemas)
 
     if data.enum:
         return build_enum_property(

@@ -29,8 +29,8 @@ def _get_kwargs(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    nullable_required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
+    nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -92,11 +92,11 @@ def _get_kwargs(
 
     json_required_model_prop = required_model_prop.to_dict()
 
-    json_nullable_model_prop: Union[Unset, Dict[str, Any]] = UNSET
+    json_nullable_model_prop: Union[Unset, None, Dict[str, Any]] = UNSET
     if not isinstance(nullable_model_prop, Unset):
-        json_nullable_model_prop = nullable_model_prop.to_dict()
+        json_nullable_model_prop = nullable_model_prop.to_dict() if nullable_model_prop else None
 
-    json_nullable_required_model_prop = nullable_required_model_prop.to_dict()
+    json_nullable_required_model_prop = nullable_required_model_prop.to_dict() if nullable_required_model_prop else None
 
     params: Dict[str, Any] = {
         "string_prop": string_prop,
@@ -116,9 +116,10 @@ def _get_kwargs(
     if not isinstance(json_model_prop, Unset):
         params.update(json_model_prop)
     params.update(json_required_model_prop)
-    if not isinstance(json_nullable_model_prop, Unset):
+    if not isinstance(json_nullable_model_prop, Unset) and json_nullable_model_prop is not None:
         params.update(json_nullable_model_prop)
-    params.update(json_nullable_required_model_prop)
+    if json_nullable_required_model_prop is not None:
+        params.update(json_nullable_required_model_prop)
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
@@ -169,8 +170,8 @@ def sync_detailed(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    nullable_required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
+    nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -218,8 +219,8 @@ def sync(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    nullable_required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
+    nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
@@ -263,8 +264,8 @@ async def asyncio_detailed(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    nullable_required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
+    nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
@@ -311,8 +312,8 @@ async def asyncio(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    nullable_required_model_prop: ModelWithUnionProperty,
+    nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
+    nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Optional[Union[None, HTTPValidationError]]:
     """  """
 
