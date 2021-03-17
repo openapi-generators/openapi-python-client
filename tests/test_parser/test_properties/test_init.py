@@ -819,7 +819,9 @@ class TestPropertyFromData:
         build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
-        prop, schemas = property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name="parent")
+        prop, schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+        )
 
         assert prop == ModelProperty(
             name=name,
