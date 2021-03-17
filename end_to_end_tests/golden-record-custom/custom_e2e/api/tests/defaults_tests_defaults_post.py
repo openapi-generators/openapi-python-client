@@ -56,8 +56,8 @@ def httpx_request(
     enum_prop: Union[Unset, AnEnum] = UNSET,
     model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
     required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
-    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
+    nullable_model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
+    nullable_required_model_prop: ModelWithUnionProperty,
 ) -> Response[Union[None, HTTPValidationError]]:
 
     json_not_required_not_nullable_datetime_prop: Union[Unset, str] = UNSET
@@ -115,21 +115,11 @@ def httpx_request(
 
     json_required_model_prop = required_model_prop.to_dict()
 
-    json_nullable_model_prop: Union[Dict[str, Any], None, Unset]
-    if isinstance(nullable_model_prop, Unset):
-        json_nullable_model_prop = UNSET
-    elif nullable_model_prop is None:
-        json_nullable_model_prop = None
-    else:
-        json_nullable_model_prop = UNSET
-        if not isinstance(nullable_model_prop, Unset):
-            json_nullable_model_prop = nullable_model_prop.to_dict()
+    json_nullable_model_prop: Union[Unset, Dict[str, Any]] = UNSET
+    if not isinstance(nullable_model_prop, Unset):
+        json_nullable_model_prop = nullable_model_prop.to_dict()
 
-    json_nullable_required_model_prop: Union[Dict[str, Any], None]
-    if nullable_required_model_prop is None:
-        json_nullable_required_model_prop = None
-    else:
-        json_nullable_required_model_prop = nullable_required_model_prop.to_dict()
+    json_nullable_required_model_prop = nullable_required_model_prop.to_dict()
 
     params: Dict[str, Any] = {
         "string_prop": string_prop,
@@ -145,12 +135,13 @@ def httpx_request(
         "union_prop": json_union_prop,
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
-        "nullable_model_prop": json_nullable_model_prop,
-        "nullable_required_model_prop": json_nullable_required_model_prop,
     }
     if not isinstance(json_model_prop, Unset):
         params.update(json_model_prop)
     params.update(json_required_model_prop)
+    if not isinstance(json_nullable_model_prop, Unset):
+        params.update(json_nullable_model_prop)
+    params.update(json_nullable_required_model_prop)
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     response = client.request(
