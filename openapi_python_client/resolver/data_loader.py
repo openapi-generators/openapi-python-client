@@ -1,4 +1,5 @@
 import yaml
+import json
 
 from .resolver_types import SchemaData
 
@@ -15,7 +16,7 @@ class DataLoader:
 
     @classmethod
     def load_json(cls, data: bytes) -> SchemaData:
-        raise NotImplementedError()
+        return json.loads(data)
 
     @classmethod
     def load_yaml(cls, data: bytes) -> SchemaData:
