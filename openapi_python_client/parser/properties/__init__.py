@@ -811,11 +811,8 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
             visited.append(name)
 
             if isinstance(data, oai.Reference):
-                class_name = _reference_model_name(data)
-
-                if not schemas.models.get(class_name) and not schemas.enums.get(class_name):
-                    references_by_name[name] = data
-                    references_to_process.append((name, data))
+                references_by_name[name] = data
+                references_to_process.append((name, data))
                 continue
 
             schemas_or_err = update_schemas_with_data(name, data, schemas, lazy_self_references)
