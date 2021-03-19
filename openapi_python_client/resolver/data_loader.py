@@ -1,5 +1,6 @@
-import yaml
 import json
+
+import yaml
 
 from .resolver_types import SchemaData
 

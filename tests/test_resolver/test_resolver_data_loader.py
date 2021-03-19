@@ -45,6 +45,8 @@ def test_load_yaml(mocker):
 def test_load_json(mocker):
     from openapi_python_client.resolver.data_loader import DataLoader
 
+    json_loads = mocker.patch("json.loads")
+
     content = mocker.MagicMock()
-    with pytest.raises(NotImplementedError):
-        DataLoader.load_json(content)
+    DataLoader.load_json(content)
+    json_loads.assert_called_once_with(content)
