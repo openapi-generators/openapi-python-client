@@ -20,13 +20,23 @@ def _get_kwargs(
 
     json_json_body = json_body.to_dict()
 
-    return {
+    data: Dict[str, Any] = {}
+    files: Dict[str, Any] = {}
+
+    kwargs = {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "json": json_json_body,
     }
+
+    if data:
+        kwargs["data"] = data
+    if files:
+        kwargs["files"] = files
+
+    return kwargs
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:

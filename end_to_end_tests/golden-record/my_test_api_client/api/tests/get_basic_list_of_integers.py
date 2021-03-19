@@ -15,12 +15,22 @@ def _get_kwargs(
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    return {
+    data: Dict[str, Any] = {}
+    files: Dict[str, Any] = {}
+
+    kwargs = {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
     }
+
+    if data:
+        kwargs["data"] = data
+    if files:
+        kwargs["files"] = files
+
+    return kwargs
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[List[int]]:

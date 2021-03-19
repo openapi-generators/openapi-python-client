@@ -22,13 +22,30 @@ def _get_kwargs(
     if keep_alive is not UNSET:
         headers["keep-alive"] = keep_alive
 
-    return {
+    data: Dict[str, Any] = {}
+    files: Dict[str, Any] = {}
+
+    non_files: Dict[str, Any] = {}
+    for key, value in multipart_data.to_dict().items():
+        if type(value) is tuple:
+            files[key] = value
+        else:
+            non_files[key] = value
+    data.update(non_files)
+
+    kwargs = {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        "files": multipart_data.to_dict(),
     }
+
+    if data:
+        kwargs["data"] = data
+    if files:
+        kwargs["files"] = files
+
+    return kwargs
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:

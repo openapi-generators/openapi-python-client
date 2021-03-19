@@ -22,15 +22,33 @@ def _get_kwargs(
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    return {
+    data: Dict[str, Any] = {}
+    files: Dict[str, Any] = {}
+
+    data.update(asdict(form_data))
+
+    non_files: Dict[str, Any] = {}
+    for key, value in multipart_data.to_dict().items():
+        if type(value) is tuple:
+            files[key] = value
+        else:
+            non_files[key] = value
+    data.update(non_files)
+
+    kwargs = {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        "data": asdict(form_data),
-        "files": multipart_data.to_dict(),
         "json": json_json_body,
     }
+
+    if data:
+        kwargs["data"] = data
+    if files:
+        kwargs["files"] = files
+
+    return kwargs
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[str, int]]:

@@ -38,13 +38,23 @@ def _get_kwargs(
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    data: Dict[str, Any] = {}
+    files: Dict[str, Any] = {}
+
+    kwargs = {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
     }
+
+    if data:
+        kwargs["data"] = data
+    if files:
+        kwargs["files"] = files
+
+    return kwargs
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[List[AModel], HTTPValidationError]]:

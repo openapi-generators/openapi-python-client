@@ -36,17 +36,28 @@ def _get_kwargs(
 
     {{ json_body(endpoint) | indent(4) }}
 
-    return {
+    data: Dict[str, Any] = {}
+    files: Dict[str, Any] = {}
+
+    {% if endpoint.form_body_reference %}
+    data.update(asdict(form_data))
+    {% endif %}
+
+    {% if endpoint.multipart_body_reference %}
+    non_files: Dict[str, Any] = {}
+    for key, value in multipart_data.to_dict().items():
+        if type(value) is tuple:
+            files[key] = value
+        else:
+            non_files[key] = value
+    data.update(non_files)
+    {% endif %}
+
+    kwargs = {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        {% if endpoint.form_body_reference %}
-        "data": asdict(form_data),
-        {% endif %}
-        {% if endpoint.multipart_body_reference %}
-        "files": multipart_data.to_dict(),
-        {% endif %}
         {% if endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
         {% endif %}
@@ -54,6 +65,13 @@ def _get_kwargs(
         "params": params,
         {% endif %}
     }
+
+    if data:
+        kwargs["data"] = data
+    if files:
+        kwargs["files"] = files
+
+    return kwargs
 
 
 {% if parsed_responses %}
