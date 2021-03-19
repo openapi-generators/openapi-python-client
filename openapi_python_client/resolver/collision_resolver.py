@@ -44,7 +44,7 @@ class CollisionResolver:
                             existing_ref.pointer.value != ref.pointer.value
                             and ref.pointer.tokens()[-1] == existing_ref.pointer.tokens()[-1]
                         ):
-                            print("Found same schema for different pointer")
+                            self._errors.append(f"Found a duplicate schema in {existing_ref.value} and {ref.value}")
                     else:
                         self._schema_index[hashed_schema] = ref
 
@@ -69,7 +69,7 @@ class CollisionResolver:
             if isinstance(cursor, dict) and key in cursor:
                 cursor = cursor[key]
             else:
-                print("ERROR")
+                self._errors.append(f"Did not find data corresponding to the reference {ref.value}")
 
         if list(cursor) == ["$ref"]:
             ref2 = Reference(cursor["$ref"], self._parent)

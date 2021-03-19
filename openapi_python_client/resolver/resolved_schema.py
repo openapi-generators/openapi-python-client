@@ -41,6 +41,7 @@ class ResolvedSchema:
 
     def _process_remote_paths(self) -> None:
         refs_to_replace = []
+        refs_to_remove = []
         for owner, ref_key, ref_val in self._lookup_schema_references_in(self._root, "paths"):
             ref = Reference(ref_val, self._parent)
 
@@ -58,12 +59,16 @@ class ResolvedSchema:
                 remote_value = self._lookup_dict(remote_schema, tokens)
                 if not remote_value:
                     self._errors.append("Failed to read remote value {}, in remote ref {}".format(path, remote_path))
+                    refs_to_remove.append((owner, ref_key))
                 else:
                     refs_to_replace.append((owner, remote_schema, remote_value))
 
         for owner, remote_schema, remote_value in refs_to_replace:
             self._process_remote_components(remote_schema, remote_value, 1, self._parent)
             self._replace_reference_with(owner, remote_value)
+
+        for owner, ref_key in refs_to_remove:
+            owner.pop(ref_key)
 
     def _process_remote_components(
         self, owner: SchemaData, subpart: Union[SchemaData, None] = None, depth: int = 0, parent_path: str = None
