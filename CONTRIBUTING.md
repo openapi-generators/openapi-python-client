@@ -27,7 +27,8 @@
    compare them with the golden records. The tests will fail if **anything is different**. The end to end
    tests are not included in `task check` as they take longer to run and don't provide very useful feedback in the
    event of failure. If an e2e test does fail, the easiest way to check what's wrong is to run `task regen` and/or
-   `task regen_custom` and check the diffs.
+   `task regen_custom` and check the diffs. You can also use `task re` which will run `regen`, `regen_custom` and `e2e`
+   in that order.
 5. Include a summary of your changes in `CHANGELOG.md`. If there isn't an "Unreleased" version in the CHANGELOG yet,
    go ahead and add one.
 
