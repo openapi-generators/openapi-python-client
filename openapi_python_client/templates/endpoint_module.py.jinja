@@ -4,7 +4,7 @@ import httpx
 from attr import asdict
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
+from ...types import Response, UNSET{% if endpoint.multipart_body_reference %}, File {% endif %}
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -36,6 +36,16 @@ def _get_kwargs(
 
     {{ json_body(endpoint) | indent(4) }}
 
+    {% if endpoint.multipart_body_reference %}
+    files = {}
+    data = {}
+    for key, value in multipart_data.to_dict().items():
+         if isinstance(value, File):
+             files[key] = value
+         else:
+             data[key] = value
+    {% endif %}
+
     return {
         "url": url,
         "headers": headers,
@@ -43,11 +53,10 @@ def _get_kwargs(
         "timeout": client.get_timeout(),
         {% if endpoint.form_body_reference %}
         "data": asdict(form_data),
-        {% endif %}
-        {% if endpoint.multipart_body_reference %}
-        "files": multipart_data.to_dict(),
-        {% endif %}
-        {% if endpoint.json_body %}
+        {% elif endpoint.multipart_body_reference %}
+        "files": files,
+        "data": data,
+        {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
         {% endif %}
         {% if endpoint.query_parameters %}

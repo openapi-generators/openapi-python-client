@@ -5,7 +5,7 @@ import httpx
 from ...client import Client
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, File, Response, Unset
 
 
 def _get_kwargs(
@@ -22,12 +22,21 @@ def _get_kwargs(
     if keep_alive is not UNSET:
         headers["keep-alive"] = keep_alive
 
+    files = {}
+    data = {}
+    for key, value in multipart_data.to_dict().items():
+        if isinstance(value, File):
+            files[key] = value
+        else:
+            data[key] = value
+
     return {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        "files": multipart_data.to_dict(),
+        "files": files,
+        "data": data,
     }
 
 
