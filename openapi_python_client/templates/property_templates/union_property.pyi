@@ -1,6 +1,6 @@
 {% macro construct(property, source, initial_value=None) %}
-def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=True) }}) -> {{ property.get_type_string() }}:
-    {{ property.python_name }}: {{ property.get_type_string() }}
+def _parse_{{ property.python_name }}(data):
+    {{ property.python_name }} = None
     {% if "None" in property.get_type_strings_in_union(json=True) %}
     if data is None:
         return data
@@ -38,9 +38,9 @@ def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=Tru
 {# For now we assume there will be no unions of unions #}
 {% macro check_type_for_construct(source) %}True{% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
+{% macro transform(property, source, destination, declare_type=False, query_parameter=False) %}
 {% if not property.required or property.nullable %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %}
+{{ destination }} = None
 
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET

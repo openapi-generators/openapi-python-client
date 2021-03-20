@@ -7,7 +7,7 @@
 {% elif property.nullable %}
 {{ property.python_name }} = None
 {% else %}
-{{ property.python_name }}: {{ property.get_type_string() }} = UNSET
+{{ property.python_name }} = UNSET
 {% endif %}
 _{{ property.python_name }} = {{source}}
 if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{% if property.nullable and not property.required %} and {% endif %}{% if not property.required %}not isinstance(_{{ property.python_name }},  Unset){% endif %}:
@@ -17,7 +17,7 @@ if {% if property.nullable %}_{{ property.python_name }} is not None{% endif %}{
 
 {% macro check_type_for_construct(source) %}isinstance({{ source }}, dict){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
+{% macro transform(property, source, destination, declare_type=False, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.to_dict() if {{ source }} else None

@@ -16,7 +16,7 @@ if _{{ property.python_name }} is not None:
 
 {% macro check_type_for_construct(source) %}isinstance({{ source }}, str){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
+{% macro transform(property, source, destination, declare_type=False, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.isoformat() if {{ source }} else None

@@ -1,10 +1,3 @@
-from typing import Any, Dict
-
-{% if model.additional_properties %}
-from typing import List
-
-{% endif %}
-
 import attr
 
 from ..types import UNSET, Unset
@@ -12,11 +5,6 @@ from ..types import UNSET, Unset
 {% for relative in model.relative_imports %}
 {{ relative }}
 {% endfor %}
-
-
-{% if model.additional_properties %}
-{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
-{% endif %}
 
 @attr.s(auto_attribs=True)
 class {{ model.reference.class_name }}:
@@ -32,11 +20,11 @@ class {{ model.reference.class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
+    additional_properties = attr.ib(init=False, factory=dict)
     {% endif %}
 
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self):
         {% for property in model.required_properties + model.optional_properties %}
         {% if property.template %}
         {% from "property_templates/" + property.template import transform %}
@@ -46,7 +34,7 @@ class {{ model.reference.class_name }}:
         {% endif %}
         {% endfor %}
 
-        field_dict: Dict[str, Any] = {}
+        field_dict = {}
         {% if model.additional_properties %}
         {% if model.additional_properties.template %}
         {% from "property_templates/" + model.additional_properties.template import transform %}
@@ -73,7 +61,7 @@ class {{ model.reference.class_name }}:
         return field_dict
 
     @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "{{ model.reference.class_name }}":
+    def from_dict(src_dict):
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -112,19 +100,19 @@ class {{ model.reference.class_name }}:
 
     {% if model.additional_properties %}
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self):
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> {{ additional_property_type }}:
+    def __getitem__(self, key):
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: {{ additional_property_type }}) -> None:
+    def __setitem__(self, key, value):
         self.additional_properties[key] = value
 
-    def __delitem__(self, key: str) -> None:
+    def __delitem__(self, key):
         del self.additional_properties[key]
 
-    def __contains__(self, key: str) -> bool:
+    def __contains__(self, key):
         return key in self.additional_properties
     {% endif %}
 

@@ -6,7 +6,7 @@
 
 {% macro check_type_for_construct(source) %}isinstance({{ source }}, bytes){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
+{% macro transform(property, source, destination, declare_type=False, query_parameter=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.to_tuple() if {{ source }} else None

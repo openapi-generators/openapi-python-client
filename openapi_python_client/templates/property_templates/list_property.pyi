@@ -34,7 +34,7 @@ for {{ inner_source }} in {{ source }}:
 {% endmacro %}
 
 
-{% macro transform(property, source, destination, declare_type=True, query_parameter=False) %}
+{% macro transform(property, source, destination, declare_type=False, query_parameter=False) %}
 {% set inner_property = property.inner_property %}
 {% if property.required %}
 {% if property.nullable %}

@@ -103,8 +103,4 @@ class Property:
             default = "UNSET"
         else:
             default = None
-
-        if default is not None:
-            return f"{self.python_name}: {self.get_type_string(query_parameter=query_parameter)} = {default}"
-        else:
-            return f"{self.python_name}: {self.get_type_string(query_parameter=query_parameter)}"
+        return f"{self.python_name} = {default}"

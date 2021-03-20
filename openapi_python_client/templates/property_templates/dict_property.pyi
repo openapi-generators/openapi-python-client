@@ -11,7 +11,7 @@ if  _{{ property.python_name }} is not None:
 
 {% macro check_type_for_construct(source) %}isinstance({{ source }}, dict){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=False) %}
 {% if property.nullable %}
 {{ destination }} = {{ source }} if {{ source }} else None
 {% else %}
