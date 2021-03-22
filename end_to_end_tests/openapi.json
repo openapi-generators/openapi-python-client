@@ -923,6 +923,11 @@
             "title": "Some File",
             "type": "string",
             "format": "binary"
+          },
+          "some_string": {
+            "title": "Some String",
+            "type": "string",
+            "default": "some_default_string"
           }
         },
         "additionalProperties": false
