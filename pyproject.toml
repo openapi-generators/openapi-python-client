@@ -59,11 +59,9 @@ isort .\
  && pytest --cov openapi_python_client tests --cov-report=term-missing\
 """
 regen = "python -m end_to_end_tests.regen_golden_record"
-regen_custom = "python -m end_to_end_tests.regen_golden_record custom"
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = """
 task regen\
-&& task regen_custom\
 && task e2e\
 """
 docs = "typer openapi_python_client/cli.py utils docs > usage.md"
