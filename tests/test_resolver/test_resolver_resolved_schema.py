@@ -28,6 +28,27 @@ def test__resolved_schema_with_resolved_external_references():
     assert "foobar_description" in resolved_schema["foo"]["description"]
 
 
+def test__resolved_schema_with_depth_refs():
+
+    from openapi_python_client.resolver.resolved_schema import ResolvedSchema
+
+    root_schema = {"foo": {"$ref": "foo.yaml#/foo"}, "bar": {"$ref": "bar.yaml#/bar"}}
+
+    external_schemas = {
+        "/home/user/foo.yaml": {"foo": {"$ref": "bar.yaml#/bar"}},
+        "/home/user/bar.yaml": {"bar": {"description": "bar"}},
+    }
+
+    errors = []
+
+    expected_result = {"foo": {"$ref": "#/bar"}, "bar": {"description": "bar"}}
+
+    resolved_schema = ResolvedSchema(root_schema, external_schemas, errors, "/home/user").schema
+
+    assert len(errors) == 0
+    assert resolved_schema == expected_result
+
+
 def test__resolved_schema_with_duplicate_ref():
 
     from openapi_python_client.resolver.resolved_schema import ResolvedSchema

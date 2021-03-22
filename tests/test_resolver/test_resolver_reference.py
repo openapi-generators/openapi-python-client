@@ -186,6 +186,17 @@ def test_path():
         assert ref.path == path
 
 
+def test_abs_path():
+
+    from openapi_python_client.resolver.reference import Reference
+
+    ref = Reference("foo.yaml#/foo")
+    ref_with_parent = Reference("foo.yaml#/foo", "/home/user")
+
+    assert ref.abs_path == "foo.yaml"
+    assert ref_with_parent.abs_path == "/home/user/foo.yaml"
+
+
 def test_is_full_document():
     from openapi_python_client.resolver.reference import Reference
 
