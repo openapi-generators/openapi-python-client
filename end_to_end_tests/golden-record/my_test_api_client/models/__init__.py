@@ -5,12 +5,15 @@ from .a_model_model import AModelModel
 from .a_model_not_required_model import AModelNotRequiredModel
 from .a_model_not_required_nullable_model import AModelNotRequiredNullableModel
 from .a_model_nullable_model import AModelNullableModel
+from .all_of_sub_model import AllOfSubModel
 from .an_enum import AnEnum
 from .an_int_enum import AnIntEnum
+from .another_all_of_sub_model import AnotherAllOfSubModel
 from .body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
 from .http_validation_error import HTTPValidationError
+from .model_from_all_of import ModelFromAllOf
 from .model_with_additional_properties_inlined import ModelWithAdditionalPropertiesInlined
 from .model_with_additional_properties_inlined_additional_property import (
     ModelWithAdditionalPropertiesInlinedAdditionalProperty,

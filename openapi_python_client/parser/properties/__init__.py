@@ -9,7 +9,7 @@ from ..errors import PropertyError, ValidationError
 from ..reference import Reference
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
-from .model_property import ModelProperty
+from .model_property import ModelProperty, build_model_property
 from .property import Property
 from .schemas import Schemas
 
@@ -259,84 +259,6 @@ def _string_based_property(
         )
 
 
-def build_model_property(
-    *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str]
-) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
-    """
-    A single ModelProperty from its OAI data
-
-    Args:
-        data: Data of a single Schema
-        name: Name by which the schema is referenced, such as a model name.
-            Used to infer the type name if a `title` property is not available.
-        schemas: Existing Schemas which have already been processed (to check name conflicts)
-    """
-    required_set = set(data.required or [])
-    required_properties: List[Property] = []
-    optional_properties: List[Property] = []
-    relative_imports: Set[str] = set()
-
-    class_name = data.title or name
-    if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    ref = Reference.from_ref(class_name)
-
-    for key, value in (data.properties or {}).items():
-        prop_required = key in required_set
-        prop, schemas = property_from_data(
-            name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name
-        )
-        if isinstance(prop, PropertyError):
-            return prop, schemas
-        if prop_required and not prop.nullable:
-            required_properties.append(prop)
-        else:
-            optional_properties.append(prop)
-        relative_imports.update(prop.get_imports(prefix=".."))
-
-    additional_properties: Union[bool, Property, PropertyError]
-    if data.additionalProperties is None:
-        additional_properties = True
-    elif isinstance(data.additionalProperties, bool):
-        additional_properties = data.additionalProperties
-    elif isinstance(data.additionalProperties, oai.Schema) and not any(data.additionalProperties.dict().values()):
-        # An empty schema
-        additional_properties = True
-    else:
-        assert isinstance(data.additionalProperties, (oai.Schema, oai.Reference))
-        additional_properties, schemas = property_from_data(
-            name="AdditionalProperty",
-            required=True,  # in the sense that if present in the dict will not be None
-            data=data.additionalProperties,
-            schemas=schemas,
-            parent_name=class_name,
-        )
-        if isinstance(additional_properties, PropertyError):
-            return additional_properties, schemas
-        relative_imports.update(additional_properties.get_imports(prefix=".."))
-
-    prop = ModelProperty(
-        reference=ref,
-        required_properties=required_properties,
-        optional_properties=optional_properties,
-        relative_imports=relative_imports,
-        description=data.description or "",
-        default=None,
-        nullable=data.nullable,
-        required=required,
-        name=name,
-        additional_properties=additional_properties,
-    )
-    if prop.reference.class_name in schemas.models:
-        error = PropertyError(
-            data=data, detail=f'Attempted to generate duplicate models with name "{prop.reference.class_name}"'
-        )
-        return error, schemas
-
-    schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
-    return prop, schemas
-
-
 def build_enum_property(
     *,
     data: oai.Schema,
@@ -480,9 +402,6 @@ def _property_from_data(
         )
     if data.anyOf or data.oneOf:
         return build_union_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
-    if not data.type:
-        return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
-
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data), schemas
     elif data.type == "number":
@@ -517,8 +436,10 @@ def _property_from_data(
         )
     elif data.type == "array":
         return build_list_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
-    elif data.type == "object":
+    elif data.type == "object" or data.allOf:
         return build_model_property(data=data, name=name, schemas=schemas, required=required, parent_name=parent_name)
+    elif not data.type:
+        return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
 
 
@@ -575,6 +496,6 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
                 schemas = schemas_or_err
                 processing = True  # We made some progress this round, do another after it's done
         to_process = next_round
-    schemas.errors.extend(errors)
 
+    schemas.errors.extend(errors)
     return schemas

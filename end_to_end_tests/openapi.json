@@ -790,7 +790,7 @@
           "a_not_required_date": {
             "title": "A Nullable Date",
             "type": "string",
-            "format": "date",
+            "format": "date"
           },
           "1_leading_digit": {
             "title": "Leading Digit",
@@ -1083,6 +1083,32 @@
               "type": "boolean"
             }
           ]
+        }
+      },
+      "ModelFromAllOf": {
+        "title": "ModelFromAllOf",
+        "type": "object",
+        "allOf": [
+          {"$ref": "#/components/schemas/AllOfSubModel"},
+          {"$ref": "#/components/schemas/AnotherAllOfSubModel"}
+        ]
+      },
+      "AllOfSubModel": {
+        "title": "AllOfSubModel",
+        "type": "object",
+        "properties": {
+          "a_sub_property": {
+            "type": "string"
+          }
+        }
+      },
+      "AnotherAllOfSubModel": {
+        "title": "AnotherAllOfSubModel",
+        "type": "object",
+        "properties": {
+          "another_sub_property": {
+            "type": "string"
+          }
         }
       }
     }

@@ -1,12 +1,17 @@
 __all__ = ["Schemas"]
 
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
 import attr
 
 from ..errors import ParseError
-from .enum_property import EnumProperty
-from .model_property import ModelProperty
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .enum_property import EnumProperty
+    from .model_property import ModelProperty
+else:
+    EnumProperty = "EnumProperty"
+    ModelProperty = "ModelProperty"
 
 
 @attr.s(auto_attribs=True, frozen=True)
