@@ -52,7 +52,7 @@ class EnumProperty(Property):
                 else:
                     output[f"VALUE_{value}"] = value
                 continue
-            if value[0].isalpha():
+            if value and value[0].isalpha():
                 key = value.upper()
             else:
                 key = f"VALUE_{i}"

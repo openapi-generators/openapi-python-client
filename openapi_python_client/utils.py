@@ -1,3 +1,4 @@
+import builtins
 import re
 from keyword import iskeyword
 
@@ -15,7 +16,7 @@ def fix_keywords(value: str) -> str:
     return value
 
 
-RESERVED_WORDS = ("self",)
+RESERVED_WORDS = set(dir(builtins)).union({"self"})
 
 
 def fix_reserved_words(value: str) -> str:
