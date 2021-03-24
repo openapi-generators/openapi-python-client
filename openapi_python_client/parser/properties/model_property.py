@@ -3,19 +3,21 @@ from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
 import attr
 
+from ... import Config
 from ... import schema as oai
 from ... import utils
-from ..errors import PropertyError
-from ..reference import Reference
+from ...utils import to_valid_python_identifier
+from ..errors import ParseError, PropertyError
+from . import parse_reference_path
 from .property import Property
-from .schemas import Schemas
+from .schemas import Class, Schemas
 
 
 @attr.s(auto_attribs=True, frozen=True)
 class ModelProperty(Property):
     """ A property which refers to another Schema """
 
-    reference: Reference
+    class_info: Class
     required_properties: List[Property]
     optional_properties: List[Property]
     description: str
@@ -27,7 +29,7 @@ class ModelProperty(Property):
     json_is_dict: ClassVar[bool] = True
 
     def get_base_type_string(self, json: bool = False) -> str:
-        return self.reference.class_name
+        return self.class_info.name
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -40,7 +42,7 @@ class ModelProperty(Property):
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                f"from {prefix}models.{self.reference.module_name} import {self.reference.class_name}",
+                f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}",
                 "from typing import Dict",
                 "from typing import cast",
             }
@@ -88,10 +90,14 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
     unprocessed_props = data.properties or {}
     for sub_prop in data.allOf or []:
         if isinstance(sub_prop, oai.Reference):
-            source_name = Reference.from_ref(sub_prop.ref).class_name
-            sub_model = schemas.models.get(source_name)
+            ref_path = parse_reference_path(sub_prop.ref)
+            if isinstance(ref_path, ParseError):
+                return PropertyError(detail=ref_path.detail, data=sub_prop)
+            sub_model = schemas.classes_by_reference.get(ref_path)
             if sub_model is None:
                 return PropertyError(f"Reference {sub_prop.ref} not found")
+            if not isinstance(sub_model, ModelProperty):
+                return PropertyError("Cannot take allOf a non-object")
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
                 prop_or_error = _check_existing(prop)
                 if isinstance(prop_or_error, PropertyError):
@@ -155,7 +161,7 @@ def _get_additional_properties(
 
 
 def build_model_property(
-    *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str]
+    *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str], config: Config
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
     """
     A single ModelProperty from its OAI data
@@ -167,11 +173,12 @@ def build_model_property(
         schemas: Existing Schemas which have already been processed (to check name conflicts)
         required: Whether or not this property is required by the parent (affects typing)
         parent_name: The name of the property that this property is inside of (affects class naming)
+        config: Config data for this run of the generator, used to modifying names
     """
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    ref = Reference.from_ref(class_name)
+    class_info = Class.from_string(string=class_name, schemas=schemas)
 
     property_data = _process_properties(data=data, schemas=schemas, class_name=class_name)
     if isinstance(property_data, PropertyError):
@@ -187,7 +194,7 @@ def build_model_property(
         return additional_properties, schemas
 
     prop = ModelProperty(
-        reference=ref,
+        class_info=class_info,
         required_properties=property_data.required_props,
         optional_properties=property_data.optional_props,
         relative_imports=property_data.relative_imports,
@@ -197,12 +204,11 @@ def build_model_property(
         required=required,
         name=name,
         additional_properties=additional_properties,
+        python_name=to_valid_python_identifier(value=name, field_prefix=config.field_prefix),
     )
-    if prop.reference.class_name in schemas.models:
-        error = PropertyError(
-            data=data, detail=f'Attempted to generate duplicate models with name "{prop.reference.class_name}"'
-        )
+    if class_info.name in schemas.classes_by_name:
+        error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')
         return error, schemas
 
-    schemas = attr.evolve(schemas, models={**schemas.models, prop.reference.class_name: prop})
+    schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas

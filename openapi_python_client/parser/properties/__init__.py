@@ -1,3 +1,13 @@
+__all__ = [
+    "Class",
+    "EnumProperty",
+    "ModelProperty",
+    "Property",
+    "Schemas",
+    "build_schemas",
+    "property_from_data",
+]
+
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
@@ -5,13 +15,12 @@ import attr
 
 from ... import schema as oai
 from ... import utils
-from ..errors import PropertyError, ValidationError
-from ..reference import Reference
+from ..errors import ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty, build_model_property
 from .property import Property
-from .schemas import Schemas
+from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_data
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -286,15 +295,15 @@ def build_enum_property(
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    reference = Reference.from_ref(class_name)
+    class_info = Class.from_string(string=class_name, schemas=schemas)
     values = EnumProperty.values_from_list(enum)
 
-    if reference.class_name in schemas.enums:
-        existing = schemas.enums[reference.class_name]
-        if values != existing.values:
+    if class_info.name in schemas.classes_by_name:
+        existing = schemas.classes_by_name[class_info.name]
+        if not isinstance(existing, EnumProperty) or values != existing.values:
             return (
                 PropertyError(
-                    detail=f"Found conflicting enums named {reference.class_name} with incompatible values.", data=data
+                    detail=f"Found conflicting enums named {class_info.name} with incompatible values.", data=data
                 ),
                 schemas,
             )
@@ -309,12 +318,10 @@ def build_enum_property(
     if data.default is not None:
         inverse_values = {v: k for k, v in values.items()}
         try:
-            default = f"{reference.class_name}.{inverse_values[data.default]}"
+            default = f"{class_info.name}.{inverse_values[data.default]}"
         except KeyError:
             return (
-                PropertyError(
-                    detail=f"{data.default} is an invalid default for enum {reference.class_name}", data=data
-                ),
+                PropertyError(detail=f"{data.default} is an invalid default for enum {class_info.name}", data=data),
                 schemas,
             )
 
@@ -323,11 +330,11 @@ def build_enum_property(
         required=required,
         default=default,
         nullable=data.nullable,
-        reference=reference,
+        class_info=class_info,
         values=values,
         value_type=value_type,
     )
-    schemas = attr.evolve(schemas, enums={**schemas.enums, prop.reference.class_name: prop})
+    schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas
 
 
@@ -388,8 +395,10 @@ def _property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        reference = Reference.from_ref(data.ref)
-        existing = schemas.enums.get(reference.class_name) or schemas.models.get(reference.class_name)
+        ref_path = parse_reference_path(data.ref)
+        if isinstance(ref_path, ParseError):
+            return PropertyError(data=data, detail=ref_path.detail), schemas
+        existing = schemas.classes_by_reference.get(ref_path)
         if existing:
             return (
                 attr.evolve(existing, required=required, name=name),
@@ -457,23 +466,8 @@ def property_from_data(
         return PropertyError(detail="Failed to validate default value", data=data), schemas
 
 
-def update_schemas_with_data(name: str, data: oai.Schema, schemas: Schemas) -> Union[Schemas, PropertyError]:
-    prop: Union[PropertyError, ModelProperty, EnumProperty]
-    if data.enum is not None:
-        prop, schemas = build_enum_property(
-            data=data, name=name, required=True, schemas=schemas, enum=data.enum, parent_name=None
-        )
-    else:
-        prop, schemas = build_model_property(data=data, name=name, schemas=schemas, required=True, parent_name=None)
-    if isinstance(prop, PropertyError):
-        return prop
-    else:
-        return schemas
-
-
-def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) -> Schemas:
+def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas) -> Schemas:
     """ Get a list of Schemas from an OpenAPI dict """
-    schemas = Schemas()
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     processing = True
     errors: List[PropertyError] = []
@@ -488,13 +482,18 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
             if isinstance(data, oai.Reference):
                 schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
                 continue
-            schemas_or_err = update_schemas_with_data(name, data, schemas)
+            ref_path = parse_reference_path(f"#/components/schemas/{name}")
+            if isinstance(ref_path, ParseError):
+                next_round.append((name, data))
+                errors.append(PropertyError(detail=ref_path.detail, data=data))
+                continue
+            schemas_or_err = update_schemas_with_data(ref_path, data, schemas)
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)
-            else:
-                schemas = schemas_or_err
-                processing = True  # We made some progress this round, do another after it's done
+                continue
+            schemas = schemas_or_err
+            processing = True  # We made some progress this round, do another after it's done
         to_process = next_round
 
     schemas.errors.extend(errors)

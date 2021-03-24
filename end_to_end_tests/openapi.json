@@ -819,10 +819,10 @@
           "one_of_models": {
             "oneOf": [
               {
-                "ref": "#components/schemas/FreeFormModel"
+                "ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#components/schemas/ModelWithUnionProperty"
+                "ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": false
@@ -830,10 +830,10 @@
           "nullable_one_of_models": {
             "oneOf": [
               {
-                "ref": "#components/schemas/FreeFormModel"
+                "ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#components/schemas/ModelWithUnionProperty"
+                "ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": true
@@ -841,10 +841,10 @@
           "not_required_one_of_models": {
             "oneOf": [
               {
-                "ref": "#components/schemas/FreeFormModel"
+                "ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#components/schemas/ModelWithUnionProperty"
+                "ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": false
@@ -852,10 +852,10 @@
           "not_required_nullable_one_of_models": {
             "oneOf": [
               {
-                "ref": "#components/schemas/FreeFormModel"
+                "ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#components/schemas/ModelWithUnionProperty"
+                "ref": "#/components/schemas/ModelWithUnionProperty"
               },
               {
                 "type": "string"
@@ -1109,6 +1109,16 @@
           "another_sub_property": {
             "type": "string"
           }
+        }
+      },
+      "model_reference_doesnt_match": {
+        "title": "ModelName",
+        "type": "object"
+      },
+      "ModelWithPropertyRef": {
+        "type": "object",
+        "properties": {
+          "inner": {"$ref":  "#/components/schemas/model_reference_doesnt_match"}
         }
       }
     }

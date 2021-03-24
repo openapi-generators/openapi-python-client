@@ -8,6 +8,8 @@ import typer
 from openapi_python_client import MetaType
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
+from .config import Config
+
 app = typer.Typer()
 
 
@@ -19,14 +21,13 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def _process_config(path: Optional[pathlib.Path]) -> None:
-    from .config import Config
+def _process_config(path: Optional[pathlib.Path]) -> Optional[Config]:
 
     if not path:
-        return
+        return None
 
     try:
-        Config.load_from_path(path=path)
+        return Config.load_from_path(path=path)
     except:  # noqa
         raise typer.BadParameter("Unable to parse config")
 
@@ -35,9 +36,6 @@ def _process_config(path: Optional[pathlib.Path]) -> None:
 @app.callback(name="openapi-python-client")
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
-    config: Optional[pathlib.Path] = typer.Option(
-        None, callback=_process_config, help="Path to the config file to use"
-    ),
 ) -> None:
     """ Generate a Python client from an OpenAPI JSON document """
     pass
@@ -117,8 +115,9 @@ def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
-    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     meta: MetaType = _meta_option,
+    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
+    config: Optional[pathlib.Path] = typer.Option(None, help="Path to the config file to use"),
 ) -> None:
     """ Generate a new OpenAPI Client library """
     from . import create_new_client
@@ -149,6 +148,7 @@ def update(
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
+    config: Optional[pathlib.Path] = typer.Option(None, help="Path to the config file to use"),
 ) -> None:
     """ Update an existing OpenAPI Client library """
     from . import update_existing_client

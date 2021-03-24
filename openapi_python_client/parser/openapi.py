@@ -1,15 +1,15 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 from pydantic import ValidationError
 
+from .. import Config
 from .. import schema as oai
 from .. import utils
 from .errors import GeneratorError, ParseError, PropertyError
-from .properties import EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
-from .reference import Reference
+from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
 
 
@@ -22,9 +22,9 @@ class ParameterLocation(str, Enum):
     COOKIE = "cookie"
 
 
-def import_string_from_reference(reference: Reference, prefix: str = "") -> str:
+def import_string_from_class(class_: Class, prefix: str = "") -> str:
     """ Create a string which is used to import a reference """
-    return f"from {prefix}.{reference.module_name} import {reference.class_name}"
+    return f"from {prefix}.{class_.module_name} import {class_.name}"
 
 
 @dataclass
@@ -96,27 +96,27 @@ class Endpoint:
     header_parameters: List[Property] = field(default_factory=list)
     cookie_parameters: List[Property] = field(default_factory=list)
     responses: List[Response] = field(default_factory=list)
-    form_body_reference: Optional[Reference] = None
+    form_body_class: Optional[Class] = None
     json_body: Optional[Property] = None
-    multipart_body_reference: Optional[Reference] = None
+    multipart_body_class: Optional[Class] = None
     errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
-    def parse_request_form_body(body: oai.RequestBody) -> Optional[Reference]:
+    def parse_request_form_body(*, body: oai.RequestBody, schemas: Schemas) -> Optional[Class]:
         """ Return form_body_reference """
         body_content = body.content
         form_body = body_content.get("application/x-www-form-urlencoded")
         if form_body is not None and isinstance(form_body.media_type_schema, oai.Reference):
-            return Reference.from_ref(form_body.media_type_schema.ref)
+            return Class.from_string(string=form_body.media_type_schema.ref, schemas=schemas)
         return None
 
     @staticmethod
-    def parse_multipart_body(body: oai.RequestBody) -> Optional[Reference]:
+    def parse_multipart_body(*, body: oai.RequestBody, schemas: Schemas) -> Optional[Class]:
         """ Return form_body_reference """
         body_content = body.content
         json_body = body_content.get("multipart/form-data")
         if json_body is not None and isinstance(json_body.media_type_schema, oai.Reference):
-            return Reference.from_ref(json_body.media_type_schema.ref)
+            return Class.from_string(string=json_body.media_type_schema.ref, schemas=schemas)
         return None
 
     @staticmethod
@@ -145,23 +145,19 @@ class Endpoint:
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
             return endpoint, schemas
 
-        endpoint.form_body_reference = Endpoint.parse_request_form_body(data.requestBody)
+        endpoint.form_body_class = Endpoint.parse_request_form_body(body=data.requestBody, schemas=schemas)
         json_body, schemas = Endpoint.parse_request_json_body(
             body=data.requestBody, schemas=schemas, parent_name=endpoint.name
         )
         if isinstance(json_body, ParseError):
             return ParseError(detail=f"cannot parse body of endpoint {endpoint.name}", data=json_body.data), schemas
 
-        endpoint.multipart_body_reference = Endpoint.parse_multipart_body(data.requestBody)
+        endpoint.multipart_body_class = Endpoint.parse_multipart_body(body=data.requestBody, schemas=schemas)
 
-        if endpoint.form_body_reference:
-            endpoint.relative_imports.add(
-                import_string_from_reference(endpoint.form_body_reference, prefix="...models")
-            )
-        if endpoint.multipart_body_reference:
-            endpoint.relative_imports.add(
-                import_string_from_reference(endpoint.multipart_body_reference, prefix="...models")
-            )
+        if endpoint.form_body_class:
+            endpoint.relative_imports.add(import_string_from_class(endpoint.form_body_class, prefix="...models"))
+        if endpoint.multipart_body_class:
+            endpoint.relative_imports.add(import_string_from_class(endpoint.multipart_body_class, prefix="...models"))
         if json_body is not None:
             endpoint.json_body = json_body
             endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..."))
@@ -273,13 +269,13 @@ class GeneratorData:
     title: str
     description: Optional[str]
     version: str
-    models: Dict[str, ModelProperty]
+    models: Iterator[ModelProperty]
     errors: List[ParseError]
     endpoint_collections_by_tag: Dict[str, EndpointCollection]
-    enums: Dict[str, EnumProperty]
+    enums: Iterator[EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> Union["GeneratorData", GeneratorError]:
+    def from_dict(d: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
         """ Create an OpenAPI from dict """
         try:
             openapi = oai.OpenAPI.parse_obj(d)
@@ -295,19 +291,20 @@ class GeneratorData:
                 header="openapi-python-client only supports OpenAPI 3.x",
                 detail=f"The version of the provided document was {openapi.openapi}",
             )
-        if openapi.components is None or openapi.components.schemas is None:
-            schemas = Schemas()
-        else:
-            schemas = build_schemas(components=openapi.components.schemas)
+        schemas = Schemas(class_overrides=config.class_overrides)
+        if openapi.components and openapi.components.schemas:
+            schemas = build_schemas(components=openapi.components.schemas, schemas=schemas)
         endpoint_collections_by_tag, schemas = EndpointCollection.from_data(data=openapi.paths, schemas=schemas)
-        enums = schemas.enums
+
+        enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
+        models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
 
         return GeneratorData(
             title=openapi.info.title,
             description=openapi.info.description,
             version=openapi.info.version,
             endpoint_collections_by_tag=endpoint_collections_by_tag,
-            models=schemas.models,
+            models=models,
             errors=schemas.errors,
             enums=enums,
         )

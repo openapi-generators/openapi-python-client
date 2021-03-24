@@ -5,8 +5,8 @@ from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union
 import attr
 
 from ... import utils
-from ..reference import Reference
 from .property import Property
+from .schemas import Class
 
 ValueType = Union[str, int]
 
@@ -16,14 +16,14 @@ class EnumProperty(Property):
     """ A property that should use an enum """
 
     values: Dict[str, ValueType]
-    reference: Reference
+    class_info: Class
     value_type: Type[ValueType]
     default: Optional[Any] = attr.ib()
 
     template: ClassVar[str] = "enum_property.py.jinja"
 
     def get_base_type_string(self, json: bool = False) -> str:
-        return self.reference.class_name
+        return self.class_info.name
 
     def get_base_json_type_string(self, json: bool = False) -> str:
         return self.value_type.__name__
@@ -37,7 +37,7 @@ class EnumProperty(Property):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.add(f"from {prefix}models.{self.reference.module_name} import {self.reference.class_name}")
+        imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}")
         return imports
 
     @staticmethod

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field
 
 
 class Reference(BaseModel):
@@ -12,7 +12,7 @@ class Reference(BaseModel):
     and not by the JSON Schema specification.
     """
 
-    ref: str = Field(alias="$ref")
+    ref: AnyUrl = Field(alias="$ref")
     """**REQUIRED**. The reference string."""
 
     class Config:
