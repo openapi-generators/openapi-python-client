@@ -874,7 +874,6 @@
             "nullable": true
           },
           "model": {
-            "type": "object",
             "allOf": [
               {
                 "ref": "#/components/schemas/ModelWithUnionProperty"
@@ -883,7 +882,6 @@
             "nullable": false
           },
           "nullable_model": {
-            "type": "object",
             "allOf": [
               {
                 "ref": "#/components/schemas/ModelWithUnionProperty"
@@ -892,7 +890,6 @@
             "nullable": true
           },
           "not_required_model": {
-            "type": "object",
             "allOf": [
               {
                 "ref": "#/components/schemas/ModelWithUnionProperty"
@@ -901,7 +898,6 @@
             "nullable": false
           },
           "not_required_nullable_model": {
-            "type": "object",
             "allOf": [
               {
                 "ref": "#/components/schemas/ModelWithUnionProperty"
