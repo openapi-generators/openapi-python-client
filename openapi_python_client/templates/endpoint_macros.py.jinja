@@ -71,6 +71,12 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
+{% macro reponses_type_csv(responses) %}
+{% for response in responses %}
+{{ response.prop.get_type_string() }}{{"," if not loop.last }}
+{% endfor %}
+{% endmacro %}
+
 {% macro return_type(endpoint) %}
 {% if endpoint.responses | length == 0 %}
 None
@@ -78,8 +84,9 @@ None
 {{ endpoint.responses[0].prop.get_type_string() }}
 {%- else %}
 Union[
-    {% for response in endpoint.responses %}
-    {{ response.prop.get_type_string() }}{{ "," if not loop.last }}
+    {% set response_types = reponses_type_csv(endpoint.responses) | trim  %}
+    {% for type_string in (response_types.split(',') | unique | list) %}
+    {{ type_string }}{{ "," if not loop.last }}
     {% endfor %}
 ]
 {%- endif %}
