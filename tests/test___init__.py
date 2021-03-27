@@ -113,13 +113,14 @@ def test_update_existing_client(mocker):
     )
     url = mocker.MagicMock()
     path = mocker.MagicMock()
+    config = mocker.MagicMock()
 
     from openapi_python_client import MetaType, update_existing_client
 
-    result = update_existing_client(url=url, path=path, meta=MetaType.POETRY, config=Config())
+    result = update_existing_client(url=url, path=path, meta=MetaType.POETRY, config=config)
 
     _get_project_for_url_or_path.assert_called_once_with(
-        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8", config=config
     )
     project.update.assert_called_once()
     assert result == project.update.return_value
@@ -132,13 +133,14 @@ def test_update_existing_client_project_error(mocker):
     )
     url = mocker.MagicMock()
     path = mocker.MagicMock()
+    config = mocker.MagicMock()
 
     from openapi_python_client import MetaType, update_existing_client
 
-    result = update_existing_client(url=url, path=path, meta=MetaType.POETRY, config=Config())
+    result = update_existing_client(url=url, path=path, meta=MetaType.POETRY, config=config)
 
     _get_project_for_url_or_path.assert_called_once_with(
-        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+        url=url, path=path, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8", config=config
     )
     assert result == [error]
 
@@ -229,12 +231,14 @@ class TestGetJson:
         assert result == GeneratorError(header="Invalid YAML from provided source")
 
 
-def make_project():
+def make_project(**kwargs):
     from unittest.mock import MagicMock
 
     from openapi_python_client import MetaType, Project
 
-    return Project(openapi=MagicMock(title="My Test API"), meta=MetaType.POETRY, config=Config())
+    kwargs = {"openapi": MagicMock(title="My Test API"), "meta": MetaType.POETRY, "config": Config(), **kwargs}
+
+    return Project(**kwargs)
 
 
 class TestProject:
@@ -261,31 +265,35 @@ class TestProject:
         project = Project(openapi=openapi, meta=MetaType.NONE, config=Config())
 
         assert project.openapi == openapi
-        assert project.project_name == "my-test-api-client"
-        assert project.package_name == "my_test_api_client"
         assert project.package_description == "A client library for accessing My Test API"
         assert project.meta == MetaType.NONE
         assert project.project_dir == pathlib.Path.cwd()
         assert project.package_dir == pathlib.Path.cwd() / project.package_name
 
-    def test_project_and_package_name_overrides(self, mocker):
+    @pytest.mark.parametrize(
+        "project_override, package_override, expected_project_name, expected_package_name",
+        (
+            (None, None, "my-test-api-client", "my_test_api_client"),
+            ("custom-project", None, "custom-project", "custom_project"),
+            ("custom-project", "custom_package", "custom-project", "custom_package"),
+            (None, "custom_package", "my-test-api-client", "custom_package"),
+        ),
+    )
+    def test_project_and_package_names(
+        self, mocker, project_override, package_override, expected_project_name, expected_package_name
+    ):
         openapi = mocker.MagicMock(title="My Test API")
 
         from openapi_python_client import MetaType, Project
 
         project = Project(
-            openapi=openapi, meta=MetaType.POETRY, config=Config(project_name_override="my-special-project-name")
+            openapi=openapi,
+            meta=MetaType.POETRY,
+            config=Config(project_name_override=project_override, package_name_override=package_override),
         )
 
-        assert project.project_name == "my-special-project-name"
-        assert project.package_name == "my_special_project_name"
-
-        project = Project(
-            openapi=openapi, meta=MetaType.POETRY, config=Config(package_name_override="my_special_package_name")
-        )
-
-        assert project.project_name == "my-special-project-name"
-        assert project.package_name == "my_special_package_name"
+        assert project.project_name == expected_project_name
+        assert project.package_name == expected_package_name
 
     def test_build(self, mocker):
         project = make_project()
@@ -310,7 +318,9 @@ class TestProject:
         assert result == project._get_errors.return_value
 
     def test_build_no_meta(self, mocker):
-        project = make_project()
+        from openapi_python_client import MetaType
+
+        project = make_project(meta=MetaType.NONE)
         project.project_dir = mocker.MagicMock()
         project.package_dir = mocker.MagicMock()
         project._build_metadata = mocker.MagicMock()
@@ -404,7 +414,9 @@ class TestProject:
         project._build_pyproject_toml.assert_called_once_with(use_poetry=True)
 
     def test__build_metadata_setup(self, mocker):
-        project = make_project()
+        from openapi_python_client import MetaType
+
+        project = make_project(meta=MetaType.SETUP)
         project._build_pyproject_toml = mocker.MagicMock()
         project._build_setup_py = mocker.MagicMock()
         project.project_dir = mocker.MagicMock()
@@ -440,7 +452,9 @@ class TestProject:
         project._build_setup_py.assert_called_once()
 
     def test__build_metadata_none(self, mocker):
-        project = make_project()
+        from openapi_python_client import MetaType
+
+        project = make_project(meta=MetaType.NONE)
         project._build_pyproject_toml = mocker.MagicMock()
 
         project._build_metadata()

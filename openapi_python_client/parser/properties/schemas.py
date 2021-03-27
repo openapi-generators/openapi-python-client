@@ -41,11 +41,15 @@ class Class(BaseModel):
         """ Get a Class from an arbitrary string """
         class_name = string.split("/")[-1]  # Get rid of ref path stuff
         class_name = utils.pascal_case(class_name)
-        module_name = utils.snake_case(class_name)
         override = config.class_overrides.get(class_name)
-        if override is not None:
-            class_name = override.class_name or class_name
-            module_name = override.module_name or module_name
+
+        if override is not None and override.class_name is not None:
+            class_name = override.class_name
+
+        if override is not None and override.module_name is not None:
+            module_name = override.module_name
+        else:
+            module_name = utils.snake_case(class_name)
 
         return Class(name=cast(_ClassName, class_name), module_name=module_name)
 

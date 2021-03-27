@@ -212,29 +212,6 @@ class TestBuildModelProperty:
         assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
 
 
-@pytest.fixture
-def model_property() -> Callable[..., ModelProperty]:
-    from openapi_python_client.parser.properties import Class
-
-    def _factory(**kwargs):
-        kwargs = {
-            "name": "",
-            "description": "",
-            "required": True,
-            "nullable": True,
-            "default": None,
-            "reference": Class(name="", module_name=""),
-            "required_properties": [],
-            "optional_properties": [],
-            "relative_imports": set(),
-            "additional_properties": False,
-            **kwargs,
-        }
-        return ModelProperty(**kwargs)
-
-    return _factory
-
-
 def string_property(**kwargs) -> StringProperty:
     kwargs = {
         "name": "",
@@ -247,17 +224,17 @@ def string_property(**kwargs) -> StringProperty:
 
 
 class TestProcessProperties:
-    def test_conflicting_properties_different_types(self, model_property):
+    def test_conflicting_properties_different_types(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
         schemas = Schemas(
             models={
-                "First": model_property(
+                "First": model_property_factory(
                     optional_properties=[StringProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
-                "Second": model_property(
+                "Second": model_property_factory(
                     optional_properties=[DateTimeProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
             }
@@ -267,15 +244,15 @@ class TestProcessProperties:
 
         assert isinstance(result, PropertyError)
 
-    def test_conflicting_properties_same_types(self, model_property):
+    def test_conflicting_properties_same_types(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
         schemas = Schemas(
             models={
-                "First": model_property(optional_properties=[string_property(default="abc")]),
-                "Second": model_property(optional_properties=[string_property()]),
+                "First": model_property_factory(optional_properties=[string_property(default="abc")]),
+                "Second": model_property_factory(optional_properties=[string_property()]),
             }
         )
 
@@ -283,7 +260,7 @@ class TestProcessProperties:
 
         assert isinstance(result, PropertyError)
 
-    def test_duplicate_properties(self, model_property):
+    def test_duplicate_properties(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -291,8 +268,8 @@ class TestProcessProperties:
         prop = string_property()
         schemas = Schemas(
             models={
-                "First": model_property(optional_properties=[prop]),
-                "Second": model_property(optional_properties=[prop]),
+                "First": model_property_factory(optional_properties=[prop]),
+                "Second": model_property_factory(optional_properties=[prop]),
             }
         )
 
@@ -304,17 +281,19 @@ class TestProcessProperties:
     @pytest.mark.parametrize("second_nullable", [True, False])
     @pytest.mark.parametrize("first_required", [True, False])
     @pytest.mark.parametrize("second_required", [True, False])
-    def test_mixed_requirements(self, model_property, first_nullable, second_nullable, first_required, second_required):
+    def test_mixed_requirements(
+        self, model_property_factory, first_nullable, second_nullable, first_required, second_required
+    ):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
         schemas = Schemas(
             models={
-                "First": model_property(
+                "First": model_property_factory(
                     optional_properties=[string_property(required=first_required, nullable=first_nullable)]
                 ),
-                "Second": model_property(
+                "Second": model_property_factory(
                     optional_properties=[string_property(required=second_required, nullable=second_nullable)]
                 ),
             }
