@@ -2,11 +2,11 @@ from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-T = TypeVar("T", bound="ModelWithAdditionalPropertiesRefed")
+T = TypeVar("T", bound="AModelNotRequiredNullableModel")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithAdditionalPropertiesRefed:
+class AModelNotRequiredNullableModel:
     """  """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -22,10 +22,10 @@ class ModelWithAdditionalPropertiesRefed:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_with_additional_properties_refed = cls()
+        a_model_not_required_nullable_model = cls()
 
-        model_with_additional_properties_refed.additional_properties = d
-        return model_with_additional_properties_refed
+        a_model_not_required_nullable_model.additional_properties = d
+        return a_model_not_required_nullable_model
 
     @property
     def additional_keys(self) -> List[str]:

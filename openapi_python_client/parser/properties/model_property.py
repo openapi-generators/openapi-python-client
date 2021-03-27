@@ -7,9 +7,8 @@ from ... import Config
 from ... import schema as oai
 from ... import utils
 from ..errors import ParseError, PropertyError
-from . import parse_reference_path
 from .property import Property
-from .schemas import Class, Schemas
+from .schemas import Class, Schemas, parse_reference_path
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -68,7 +67,9 @@ class _PropertyData(NamedTuple):
     schemas: Schemas
 
 
-def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) -> Union[_PropertyData, PropertyError]:
+def _process_properties(
+    *, data: oai.Schema, schemas: Schemas, class_name: str, config: Config
+) -> Union[_PropertyData, PropertyError]:
     from . import property_from_data
 
     properties: Dict[str, Property] = {}
@@ -108,7 +109,7 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
     for key, value in unprocessed_props.items():
         prop_required = key in required_set
         prop_or_error, schemas = property_from_data(
-            name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name
+            name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name, config=config
         )
         if isinstance(prop_or_error, Property):
             prop_or_error = _check_existing(prop_or_error)
@@ -135,7 +136,11 @@ def _process_properties(*, data: oai.Schema, schemas: Schemas, class_name: str) 
 
 
 def _get_additional_properties(
-    *, schema_additional: Union[None, bool, oai.Reference, oai.Schema], schemas: Schemas, class_name: str
+    *,
+    schema_additional: Union[None, bool, oai.Reference, oai.Schema],
+    schemas: Schemas,
+    class_name: str,
+    config: Config,
 ) -> Tuple[Union[bool, Property, PropertyError], Schemas]:
     from . import property_from_data
 
@@ -155,6 +160,7 @@ def _get_additional_properties(
         data=schema_additional,
         schemas=schemas,
         parent_name=class_name,
+        config=config,
     )
     return additional_properties, schemas
 
@@ -179,13 +185,13 @@ def build_model_property(
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     class_info = Class.from_string(string=class_name, config=config)
 
-    property_data = _process_properties(data=data, schemas=schemas, class_name=class_name)
+    property_data = _process_properties(data=data, schemas=schemas, class_name=class_name, config=config)
     if isinstance(property_data, PropertyError):
         return property_data, schemas
     schemas = property_data.schemas
 
     additional_properties, schemas = _get_additional_properties(
-        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_name
+        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_name, config=config
     )
     if isinstance(additional_properties, Property):
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))

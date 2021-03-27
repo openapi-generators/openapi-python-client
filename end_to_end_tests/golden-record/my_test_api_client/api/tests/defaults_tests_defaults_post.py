@@ -5,9 +5,6 @@ import httpx
 from dateutil.parser import isoparse
 
 from ...client import Client
-from ...models.an_enum import AnEnum
-from ...models.http_validation_error import HTTPValidationError
-from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
 
 
@@ -23,14 +20,14 @@ def _get_kwargs(
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = False,
-    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    list_prop: Union[Unset, List[None]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
-    enum_prop: Union[Unset, AnEnum] = UNSET,
-    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
-    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
+    union_prop_with_ref: Union[None, Unset, float] = 0.6,
+    enum_prop: Union[Unset, None] = UNSET,
+    model_prop: Union[Unset, None] = UNSET,
+    required_model_prop: None,
+    nullable_model_prop: Union[None, Unset] = UNSET,
+    nullable_required_model_prop: None,
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -57,11 +54,11 @@ def _get_kwargs(
     if not isinstance(date_prop, Unset):
         json_date_prop = date_prop.isoformat()
 
-    json_list_prop: Union[Unset, List[str]] = UNSET
+    json_list_prop: Union[Unset, List[None]] = UNSET
     if not isinstance(list_prop, Unset):
         json_list_prop = []
         for list_prop_item_data in list_prop:
-            list_prop_item = list_prop_item_data.value
+            list_prop_item = None
 
             json_list_prop.append(list_prop_item)
 
@@ -71,42 +68,34 @@ def _get_kwargs(
     else:
         json_union_prop = union_prop
 
-    json_union_prop_with_ref: Union[Unset, float, str]
+    json_union_prop_with_ref: Union[None, Unset, float]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
-    elif isinstance(union_prop_with_ref, AnEnum):
-        json_union_prop_with_ref = UNSET
-        if not isinstance(union_prop_with_ref, Unset):
-            json_union_prop_with_ref = union_prop_with_ref.value
+    elif isinstance(union_prop_with_ref, None):
+        json_union_prop_with_ref = None
 
     else:
         json_union_prop_with_ref = union_prop_with_ref
 
-    json_enum_prop: Union[Unset, str] = UNSET
-    if not isinstance(enum_prop, Unset):
-        json_enum_prop = enum_prop.value
+    json_enum_prop = None
 
-    json_model_prop: Union[Unset, Dict[str, Any]] = UNSET
-    if not isinstance(model_prop, Unset):
-        json_model_prop = model_prop.to_dict()
+    json_model_prop = None
 
-    json_required_model_prop = required_model_prop.to_dict()
+    json_required_model_prop = None
 
-    json_nullable_model_prop: Union[Dict[str, Any], None, Unset]
+    json_nullable_model_prop: Union[None, Unset]
     if isinstance(nullable_model_prop, Unset):
         json_nullable_model_prop = UNSET
     elif nullable_model_prop is None:
         json_nullable_model_prop = None
     else:
-        json_nullable_model_prop = UNSET
-        if not isinstance(nullable_model_prop, Unset):
-            json_nullable_model_prop = nullable_model_prop.to_dict()
+        json_nullable_model_prop = None
 
-    json_nullable_required_model_prop: Union[Dict[str, Any], None]
+    json_nullable_required_model_prop: None
     if nullable_required_model_prop is None:
         json_nullable_required_model_prop = None
     else:
-        json_nullable_required_model_prop = nullable_required_model_prop.to_dict()
+        json_nullable_required_model_prop = None
 
     params: Dict[str, Any] = {
         "string_prop": string_prop,
@@ -122,12 +111,11 @@ def _get_kwargs(
         "union_prop": json_union_prop,
         "union_prop_with_ref": json_union_prop_with_ref,
         "enum_prop": json_enum_prop,
+        "model_prop": json_model_prop,
+        "required_model_prop": json_required_model_prop,
         "nullable_model_prop": json_nullable_model_prop,
         "nullable_required_model_prop": json_nullable_required_model_prop,
     }
-    if not isinstance(json_model_prop, Unset):
-        params.update(json_model_prop)
-    params.update(json_required_model_prop)
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
@@ -139,19 +127,19 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[None, None]]:
     if response.status_code == 200:
         response_200 = None
 
         return response_200
     if response.status_code == 422:
-        response_422 = HTTPValidationError.from_dict(response.json())
+        response_422 = None
 
         return response_422
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[None, None]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -172,15 +160,15 @@ def sync_detailed(
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = False,
-    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    list_prop: Union[Unset, List[None]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
-    enum_prop: Union[Unset, AnEnum] = UNSET,
-    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
-    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
-) -> Response[Union[None, HTTPValidationError]]:
+    union_prop_with_ref: Union[None, Unset, float] = 0.6,
+    enum_prop: Union[Unset, None] = UNSET,
+    model_prop: Union[Unset, None] = UNSET,
+    required_model_prop: None,
+    nullable_model_prop: Union[None, Unset] = UNSET,
+    nullable_required_model_prop: None,
+) -> Response[Union[None, None]]:
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
@@ -221,15 +209,15 @@ def sync(
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = False,
-    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    list_prop: Union[Unset, List[None]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
-    enum_prop: Union[Unset, AnEnum] = UNSET,
-    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
-    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
-) -> Optional[Union[None, HTTPValidationError]]:
+    union_prop_with_ref: Union[None, Unset, float] = 0.6,
+    enum_prop: Union[Unset, None] = UNSET,
+    model_prop: Union[Unset, None] = UNSET,
+    required_model_prop: None,
+    nullable_model_prop: Union[None, Unset] = UNSET,
+    nullable_required_model_prop: None,
+) -> Optional[Union[None, None]]:
     """  """
 
     return sync_detailed(
@@ -266,15 +254,15 @@ async def asyncio_detailed(
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = False,
-    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    list_prop: Union[Unset, List[None]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
-    enum_prop: Union[Unset, AnEnum] = UNSET,
-    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
-    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
-) -> Response[Union[None, HTTPValidationError]]:
+    union_prop_with_ref: Union[None, Unset, float] = 0.6,
+    enum_prop: Union[Unset, None] = UNSET,
+    model_prop: Union[Unset, None] = UNSET,
+    required_model_prop: None,
+    nullable_model_prop: Union[None, Unset] = UNSET,
+    nullable_required_model_prop: None,
+) -> Response[Union[None, None]]:
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
@@ -314,15 +302,15 @@ async def asyncio(
     float_prop: Union[Unset, float] = 3.14,
     int_prop: Union[Unset, int] = 7,
     boolean_prop: Union[Unset, bool] = False,
-    list_prop: Union[Unset, List[AnEnum]] = UNSET,
+    list_prop: Union[Unset, List[None]] = UNSET,
     union_prop: Union[Unset, float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
-    enum_prop: Union[Unset, AnEnum] = UNSET,
-    model_prop: Union[Unset, ModelWithUnionProperty] = UNSET,
-    required_model_prop: ModelWithUnionProperty,
-    nullable_model_prop: Union[ModelWithUnionProperty, None, Unset] = UNSET,
-    nullable_required_model_prop: Union[ModelWithUnionProperty, None],
-) -> Optional[Union[None, HTTPValidationError]]:
+    union_prop_with_ref: Union[None, Unset, float] = 0.6,
+    enum_prop: Union[Unset, None] = UNSET,
+    model_prop: Union[Unset, None] = UNSET,
+    required_model_prop: None,
+    nullable_model_prop: Union[None, Unset] = UNSET,
+    nullable_required_model_prop: None,
+) -> Optional[Union[None, None]]:
     """  """
 
     return (

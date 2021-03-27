@@ -5,7 +5,12 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import DateTimeProperty, ModelProperty, StringProperty
-from openapi_python_client.parser.reference import Reference
+
+
+def get_class():
+    from openapi_python_client.parser.properties import Class
+
+    return Class(name="MyClass", module_name="my_module")
 
 
 @pytest.mark.parametrize(
@@ -23,14 +28,14 @@ from openapi_python_client.parser.reference import Reference
     ],
 )
 def test_get_type_string(no_optional, nullable, required, json, expected):
-    from openapi_python_client.parser.properties import ModelProperty, Reference
+    from openapi_python_client.parser.properties import ModelProperty
 
     prop = ModelProperty(
         name="prop",
         required=required,
         nullable=nullable,
         default=None,
-        reference=Reference(class_name="MyClass", module_name="my_module"),
+        class_info=get_class(),
         description="",
         optional_properties=[],
         required_properties=[],
@@ -42,14 +47,14 @@ def test_get_type_string(no_optional, nullable, required, json, expected):
 
 
 def test_get_imports():
-    from openapi_python_client.parser.properties import ModelProperty, Reference
+    from openapi_python_client.parser.properties import ModelProperty
 
     prop = ModelProperty(
         name="prop",
         required=False,
         nullable=True,
         default=None,
-        reference=Reference(class_name="MyClass", module_name="my_module"),
+        class_info=get_class(),
         description="",
         optional_properties=[],
         required_properties=[],
@@ -99,7 +104,7 @@ class TestBuildModelProperty:
         assert model.additional_properties == expected_additional_properties
 
     def test_happy_path(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import Class, Schemas, build_model_property
 
         data = oai.Schema.construct(
             required=["req"],
@@ -131,7 +136,7 @@ class TestBuildModelProperty:
             required=True,
             nullable=False,
             default=None,
-            reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
+            class_info=Class(name="ParentMyModel", module_name="parent_my_model"),
             required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
             optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
             description=data.description,
@@ -209,7 +214,7 @@ class TestBuildModelProperty:
 
 @pytest.fixture
 def model_property() -> Callable[..., ModelProperty]:
-    from openapi_python_client.parser.reference import Reference
+    from openapi_python_client.parser.properties import Class
 
     def _factory(**kwargs):
         kwargs = {
@@ -218,7 +223,7 @@ def model_property() -> Callable[..., ModelProperty]:
             "required": True,
             "nullable": True,
             "default": None,
-            "reference": Reference(class_name="", module_name=""),
+            "reference": Class(name="", module_name=""),
             "required_properties": [],
             "optional_properties": [],
             "relative_imports": set(),

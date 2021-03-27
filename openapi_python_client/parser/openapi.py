@@ -5,9 +5,9 @@ from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 from pydantic import ValidationError
 
-from .. import Config
 from .. import schema as oai
 from .. import utils
+from ..config import Config
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
@@ -121,7 +121,7 @@ class Endpoint:
 
     @staticmethod
     def parse_request_json_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
         """ Return json_body """
         body_content = body.content
@@ -133,12 +133,17 @@ class Endpoint:
                 data=json_body.media_type_schema,
                 schemas=schemas,
                 parent_name=parent_name,
+                config=config,
             )
         return None, schemas
 
     @staticmethod
     def _add_body(
-        *, endpoint: "Endpoint", data: oai.Operation, schemas: Schemas, config: Config
+        *,
+        endpoint: "Endpoint",
+        data: oai.Operation,
+        schemas: Schemas,
+        config: Config,
     ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
         """ Adds form or JSON body to Endpoint if included in data """
         endpoint = deepcopy(endpoint)
@@ -147,7 +152,7 @@ class Endpoint:
 
         endpoint.form_body_class = Endpoint.parse_request_form_body(body=data.requestBody, config=config)
         json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name
+            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(json_body, ParseError):
             return ParseError(detail=f"cannot parse body of endpoint {endpoint.name}", data=json_body.data), schemas
@@ -204,7 +209,7 @@ class Endpoint:
 
     @staticmethod
     def _add_parameters(
-        *, endpoint: "Endpoint", data: oai.Operation, schemas: Schemas
+        *, endpoint: "Endpoint", data: oai.Operation, schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
         if data.parameters is None:
@@ -218,6 +223,7 @@ class Endpoint:
                 data=param.param_schema,
                 schemas=schemas,
                 parent_name=endpoint.name,
+                config=config,
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
@@ -255,7 +261,7 @@ class Endpoint:
             tag=tag,
         )
 
-        result, schemas = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas)
+        result, schemas = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         if isinstance(result, ParseError):
             return result, schemas
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
@@ -295,7 +301,7 @@ class GeneratorData:
             )
         schemas = Schemas()
         if openapi.components and openapi.components.schemas:
-            schemas = build_schemas(components=openapi.components.schemas, schemas=schemas)
+            schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         endpoint_collections_by_tag, schemas = EndpointCollection.from_data(
             data=openapi.paths, schemas=schemas, config=config
         )

@@ -74,6 +74,7 @@ def response_from_data(
         data=schema_data,
         schemas=schemas,
         parent_name=parent_name,
+        config=config,
     )
 
     if isinstance(prop, PropertyError):

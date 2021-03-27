@@ -18,7 +18,7 @@ if __name__ == "__main__":
     shutil.rmtree(gr_path, ignore_errors=True)
     shutil.rmtree(output_path, ignore_errors=True)
 
-    result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={openapi_path}"])
+    result = runner.invoke(app, ["generate", f"--config={config_path}", f"--path={openapi_path}"])
 
     if result.stdout:
         print(result.stdout)

@@ -1,4 +1,4 @@
-__all__ = ["Class", "Schemas", "parse_reference_path"]
+__all__ = ["Class", "Schemas", "parse_reference_path", "update_schemas_with_data"]
 
 from typing import TYPE_CHECKING, Dict, List, NewType, Union, cast
 from urllib.parse import urlparse
@@ -25,8 +25,8 @@ _ClassName = NewType("_ClassName", str)
 
 def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]:
     parsed = urlparse(ref_path_raw)
-    if parsed.scheme is not None or parsed.path is not None:
-        return ParseError(detail="Remote references are not supported yet.")
+    if parsed.scheme or parsed.path:
+        return ParseError(detail=f"Remote references such as {ref_path_raw} are not supported yet.")
     return cast(_ReferencePath, parsed.fragment)
 
 
@@ -41,11 +41,13 @@ class Class(BaseModel):
         """ Get a Class from an arbitrary string """
         class_name = string.split("/")[-1]  # Get rid of ref path stuff
         class_name = utils.pascal_case(class_name)
+        module_name = utils.snake_case(class_name)
+        override = config.class_overrides.get(class_name)
+        if override is not None:
+            class_name = override.class_name or class_name
+            module_name = override.module_name or module_name
 
-        if class_name in config.class_overrides:
-            return config.class_overrides[class_name]
-
-        return Class(name=cast(_ClassName, class_name), module_name=utils.snake_case(class_name))
+        return Class(name=cast(_ClassName, class_name), module_name=module_name)
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -58,14 +60,14 @@ class Schemas:
 
 
 def update_schemas_with_data(
-    ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
+    *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Union[Schemas, PropertyError]:
     from . import build_enum_property, build_model_property
 
     prop: Union[PropertyError, ModelProperty, EnumProperty]
     if data.enum is not None:
         prop, schemas = build_enum_property(
-            data=data, name=ref_path, required=True, schemas=schemas, enum=data.enum, parent_name=None
+            data=data, name=ref_path, required=True, schemas=schemas, enum=data.enum, parent_name=None, config=config
         )
     else:
         prop, schemas = build_model_property(

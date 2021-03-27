@@ -47,7 +47,7 @@ class Project:
         *,
         openapi: GeneratorData,
         meta: MetaType,
-        config: Optional[Config],
+        config: Config,
         custom_template_path: Optional[Path] = None,
         file_encoding: str = "utf-8",
     ) -> None:
@@ -259,14 +259,14 @@ def _get_project_for_url_or_path(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,
-    config: Optional[Config],
+    config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
         return data_dict
-    openapi = GeneratorData.from_dict(data_dict)
+    openapi = GeneratorData.from_dict(data_dict, config=config)
     if isinstance(openapi, GeneratorError):
         return openapi
     return Project(
@@ -283,7 +283,7 @@ def create_new_client(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,
-    config: Optional[Config],
+    config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
@@ -311,7 +311,7 @@ def update_existing_client(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,
-    config: Optional[Config],
+    config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:

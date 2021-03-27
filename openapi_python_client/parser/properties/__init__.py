@@ -14,6 +14,7 @@ from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optio
 
 import attr
 
+from ... import Config
 from ... import schema as oai
 from ... import utils
 from ..errors import ParseError, PropertyError, ValidationError
@@ -277,6 +278,7 @@ def build_enum_property(
     schemas: Schemas,
     enum: List[Union[str, int]],
     parent_name: Optional[str],
+    config: Config,
 ) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
     """
     Create an EnumProperty from schema data.
@@ -288,6 +290,7 @@ def build_enum_property(
         schemas: The Schemas which have been defined so far (used to prevent naming collisions)
         enum: The enum from the provided data. Required separately here to prevent extra type checking.
         parent_name: The context in which this EnumProperty is defined, used to create more specific class names.
+        config: The global config for this run of the generator
 
     Returns:
         A tuple containing either the created property or a PropertyError describing what went wrong AND update schemas.
@@ -296,7 +299,7 @@ def build_enum_property(
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    class_info = Class.from_string(string=class_name, schemas=schemas)
+    class_info = Class.from_string(string=class_name, config=config)
     values = EnumProperty.values_from_list(enum)
 
     if class_info.name in schemas.classes_by_name:
@@ -340,12 +343,17 @@ def build_enum_property(
 
 
 def build_union_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
+    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=f"{name}_type{i}", required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
+            name=f"{name}_type{i}",
+            required=required,
+            data=sub_prop_data,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
         )
         if isinstance(sub_prop, PropertyError):
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
@@ -365,12 +373,12 @@ def build_union_property(
 
 
 def build_list_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
+    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
-        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name
+        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name, config=config
     )
     if isinstance(inner_prop, PropertyError):
         return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}"), schemas
@@ -392,6 +400,7 @@ def _property_from_data(
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
     parent_name: str,
+    config: Config,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
@@ -408,10 +417,18 @@ def _property_from_data(
         return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
     if data.enum:
         return build_enum_property(
-            data=data, name=name, required=required, schemas=schemas, enum=data.enum, parent_name=parent_name
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            enum=data.enum,
+            parent_name=parent_name,
+            config=config,
         )
     if data.anyOf or data.oneOf:
-        return build_union_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
+        return build_union_property(
+            data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
+        )
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data), schemas
     elif data.type == "number":
@@ -445,9 +462,13 @@ def _property_from_data(
             schemas,
         )
     elif data.type == "array":
-        return build_list_property(data=data, name=name, required=required, schemas=schemas, parent_name=parent_name)
+        return build_list_property(
+            data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
+        )
     elif data.type == "object" or data.allOf:
-        return build_model_property(data=data, name=name, schemas=schemas, required=required, parent_name=parent_name)
+        return build_model_property(
+            data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
+        )
     elif not data.type:
         return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
@@ -460,14 +481,19 @@ def property_from_data(
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
     parent_name: str,
+    config: Config,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     try:
-        return _property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name=parent_name)
+        return _property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name=parent_name, config=config
+        )
     except ValidationError:
         return PropertyError(detail="Failed to validate default value", data=data), schemas
 
 
-def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas) -> Schemas:
+def build_schemas(
+    *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
+) -> Schemas:
     """ Get a list of Schemas from an OpenAPI dict """
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     processing = True
@@ -488,7 +514,7 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]], sc
                 next_round.append((name, data))
                 errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
-            schemas_or_err = update_schemas_with_data(ref_path, data, schemas)
+            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)

@@ -4,11 +4,14 @@ from typing import Dict, Optional
 import yaml
 from pydantic import BaseModel
 
-from openapi_python_client.parser.properties import Class
+
+class ClassOverride(BaseModel):
+    class_name: Optional[str] = None
+    module_name: Optional[str] = None
 
 
 class Config(BaseModel):
-    class_overrides: Dict[str, Class] = {}
+    class_overrides: Dict[str, ClassOverride] = {}
     project_name_override: Optional[str]
     package_name_override: Optional[str]
     package_version_override: Optional[str]

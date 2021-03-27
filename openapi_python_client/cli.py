@@ -109,6 +109,8 @@ _meta_option = typer.Option(
     help="The type of metadata you want to generate.",
 )
 
+CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to use")
+
 
 @app.command()
 def generate(
@@ -117,7 +119,7 @@ def generate(
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config: Optional[pathlib.Path] = typer.Option(None, help="Path to the config file to use"),
+    config_path: Optional[pathlib.Path] = CONFIG_OPTION,
 ) -> None:
     """ Generate a new OpenAPI Client library """
     from . import create_new_client
@@ -135,8 +137,14 @@ def generate(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
+    config = Config.load_from_path(config_path) if config_path is not None else Config()
     errors = create_new_client(
-        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+        url=url,
+        path=path,
+        meta=meta,
+        custom_template_path=custom_template_path,
+        file_encoding=file_encoding,
+        config=config,
     )
     handle_errors(errors)
 
@@ -148,7 +156,7 @@ def update(
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config: Optional[pathlib.Path] = typer.Option(None, help="Path to the config file to use"),
+    config_path: Optional[pathlib.Path] = CONFIG_OPTION,
 ) -> None:
     """ Update an existing OpenAPI Client library """
     from . import update_existing_client
@@ -166,7 +174,13 @@ def update(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
+    config = Config.load_from_path(config_path) if config_path is not None else Config()
     errors = update_existing_client(
-        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+        url=url,
+        path=path,
+        meta=meta,
+        custom_template_path=custom_template_path,
+        file_encoding=file_encoding,
+        config=config,
     )
     handle_errors(errors)

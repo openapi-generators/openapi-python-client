@@ -2,8 +2,6 @@ from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 
-from ..models.an_enum import AnEnum
-from ..models.an_int_enum import AnIntEnum
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithUnionProperty")
@@ -13,21 +11,17 @@ T = TypeVar("T", bound="ModelWithUnionProperty")
 class ModelWithUnionProperty:
     """  """
 
-    a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
+    a_property: Union[None, Unset] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        a_property: Union[Unset, int, str]
+        a_property: Union[None, Unset]
         if isinstance(self.a_property, Unset):
             a_property = UNSET
-        elif isinstance(self.a_property, AnEnum):
-            a_property = UNSET
-            if not isinstance(self.a_property, Unset):
-                a_property = self.a_property.value
+        elif isinstance(self.a_property, None):
+            a_property = None
 
         else:
-            a_property = UNSET
-            if not isinstance(self.a_property, Unset):
-                a_property = self.a_property.value
+            a_property = None
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -40,28 +34,24 @@ class ModelWithUnionProperty:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
-        def _parse_a_property(data: object) -> Union[AnEnum, AnIntEnum, Unset]:
+        def _parse_a_property(data: object) -> Union[None, Unset]:
+            if data is None:
+                return data
             if isinstance(data, Unset):
                 return data
             try:
-                a_property_type0: Union[Unset, AnEnum]
-                if not isinstance(data, str):
+                a_property_type0: Union[Unset, None]
+                if not data is None:
                     raise TypeError()
                 a_property_type0 = UNSET
-                _a_property_type0 = data
-                if not isinstance(_a_property_type0, Unset):
-                    a_property_type0 = AnEnum(_a_property_type0)
 
                 return a_property_type0
             except:  # noqa: E722
                 pass
-            if not isinstance(data, int):
+            if not data is None:
                 raise TypeError()
-            a_property_type1: Union[Unset, AnIntEnum]
+            a_property_type1: Union[Unset, None]
             a_property_type1 = UNSET
-            _a_property_type1 = data
-            if not isinstance(_a_property_type1, Unset):
-                a_property_type1 = AnIntEnum(_a_property_type1)
 
             return a_property_type1
 
