@@ -17,5 +17,9 @@ class Config(BaseModel):
     @staticmethod
     def load_from_path(path: Path) -> "Config":
         """ Creates a Config from provided JSON or YAML file and sets a bunch of globals from it """
+        from . import utils
+
         config_data = yaml.safe_load(path.read_text())
-        return Config(**config_data)
+        config = Config(**config_data)
+        utils.FIELD_PREFIX = config.field_prefix
+        return config

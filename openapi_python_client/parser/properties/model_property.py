@@ -6,7 +6,6 @@ import attr
 from ... import Config
 from ... import schema as oai
 from ... import utils
-from ...utils import to_valid_python_identifier
 from ..errors import ParseError, PropertyError
 from . import parse_reference_path
 from .property import Property
@@ -178,7 +177,7 @@ def build_model_property(
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    class_info = Class.from_string(string=class_name, schemas=schemas)
+    class_info = Class.from_string(string=class_name, config=config)
 
     property_data = _process_properties(data=data, schemas=schemas, class_name=class_name)
     if isinstance(property_data, PropertyError):
@@ -204,7 +203,6 @@ def build_model_property(
         required=required,
         name=name,
         additional_properties=additional_properties,
-        python_name=to_valid_python_identifier(value=name, field_prefix=config.field_prefix),
     )
     if class_info.name in schemas.classes_by_name:
         error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')

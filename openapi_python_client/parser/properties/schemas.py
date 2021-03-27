@@ -58,7 +58,7 @@ class Schemas:
 
 
 def update_schemas_with_data(
-    ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas
+    ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Union[Schemas, PropertyError]:
     from . import build_enum_property, build_model_property
 
@@ -68,7 +68,9 @@ def update_schemas_with_data(
             data=data, name=ref_path, required=True, schemas=schemas, enum=data.enum, parent_name=None
         )
     else:
-        prop, schemas = build_model_property(data=data, name=ref_path, schemas=schemas, required=True, parent_name=None)
+        prop, schemas = build_model_property(
+            data=data, name=ref_path, schemas=schemas, required=True, parent_name=None, config=config
+        )
     if isinstance(prop, PropertyError):
         return prop
     schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})

@@ -1,7 +1,6 @@
 import builtins
 import re
 from keyword import iskeyword
-from typing import NewType, cast
 
 import stringcase
 
@@ -48,10 +47,11 @@ def remove_string_escapes(value: str) -> str:
     return value.replace('"', r"\"")
 
 
-PythonIdentifier = NewType("PythonIdentifier", str)
+# This can be changed by config.Config.load_config
+FIELD_PREFIX = "field_"
 
 
-def to_valid_python_identifier(*, value: str, field_prefix: str) -> PythonIdentifier:
+def to_valid_python_identifier(value: str) -> str:
     """
     Given a string, attempt to coerce it into a valid Python identifier by stripping out invalid characters and, if
     necessary, prepending a prefix.
@@ -62,6 +62,6 @@ def to_valid_python_identifier(*, value: str, field_prefix: str) -> PythonIdenti
     new_value = fix_reserved_words(fix_keywords(sanitize(value)))
 
     if new_value.isidentifier():
-        return cast(PythonIdentifier, new_value)
+        return new_value
 
-    return cast(PythonIdentifier, f"{field_prefix}{new_value}")
+    return f"{FIELD_PREFIX}{new_value}"
