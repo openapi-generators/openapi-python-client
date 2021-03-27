@@ -21,10 +21,10 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def _process_config(path: Optional[pathlib.Path]) -> Optional[Config]:
+def _process_config(path: Optional[pathlib.Path]) -> Config:
 
     if not path:
-        return None
+        return Config()
 
     try:
         return Config.load_from_path(path=path)
@@ -137,7 +137,7 @@ def generate(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    config = Config.load_from_path(config_path) if config_path is not None else Config()
+    config = _process_config(config_path)
     errors = create_new_client(
         url=url,
         path=path,
@@ -174,7 +174,7 @@ def update(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    config = Config.load_from_path(config_path) if config_path is not None else Config()
+    config = _process_config(config_path)
     errors = update_existing_client(
         url=url,
         path=path,

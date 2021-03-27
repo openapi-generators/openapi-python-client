@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import GeneratorError, ParseError
 
 runner = CliRunner()
@@ -40,9 +41,14 @@ def test_config_arg(mocker, _create_new_client):
     )
 
     assert result.exit_code == 0
-    load_config.assert_called_once_with(Path(config_path))
+    load_config.assert_called_once_with(path=Path(config_path))
     _create_new_client.assert_called_once_with(
-        url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+        url=None,
+        path=Path(path),
+        custom_template_path=None,
+        meta=MetaType.POETRY,
+        file_encoding="utf-8",
+        config=load_config.return_value,
     )
 
 
@@ -59,7 +65,7 @@ def test_bad_config(mocker, _create_new_client):
 
     assert result.exit_code == 2
     assert "Unable to parse config" in result.stdout
-    load_config.assert_called_once_with(Path(config_path))
+    load_config.assert_called_once_with(path=Path(config_path))
     _create_new_client.assert_not_called()
 
 

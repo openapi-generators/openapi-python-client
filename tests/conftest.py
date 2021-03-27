@@ -46,7 +46,7 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
         kwargs = {
             "name": "test",
             "required": True,
-            "nullable": True,
+            "nullable": False,
             "default": None,
             "class_info": Class(name="", module_name=""),
             "values": {},

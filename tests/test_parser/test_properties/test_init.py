@@ -1,6 +1,7 @@
 import pytest
 
 import openapi_python_client.schema as oai
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError, ValidationError
 from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty
 
@@ -398,110 +399,35 @@ class TestUnionProperty:
 
 
 class TestEnumProperty:
-    def test_get_type_string(self, mocker):
-        fake_reference = mocker.MagicMock(class_name="MyTestEnum")
+    @pytest.mark.parametrize(
+        "required, nullable, expected",
+        (
+            (False, False, "Union[Unset, {}]"),
+            (True, False, "{}"),
+            (False, True, "Union[Unset, None, {}]"),
+            (True, True, "Optional[{}]"),
+        ),
+    )
+    def test_get_type_string(self, mocker, enum_property_factory, required, nullable, expected):
+        fake_class = mocker.MagicMock()
+        fake_class.name = "MyTestEnum"
 
-        from openapi_python_client.parser import properties
+        p = enum_property_factory(class_info=fake_class, required=required, nullable=nullable)
 
-        p = properties.EnumProperty(
-            name="test",
-            required=True,
-            default=None,
-            values={},
-            nullable=False,
-            reference=fake_reference,
-            value_type=str,
-        )
+        assert p.get_type_string() == expected.format(fake_class.name)
+        assert p.get_type_string(no_optional=True) == fake_class.name
+        assert p.get_type_string(json=True) == expected.format("str")
 
-        base_type_string = f"MyTestEnum"
-
-        assert p.get_type_string() == base_type_string
-        assert p.get_type_string(json=True) == "str"
-
-        p = properties.EnumProperty(
-            name="test",
-            required=True,
-            default=None,
-            values={},
-            nullable=True,
-            reference=fake_reference,
-            value_type=str,
-        )
-        assert p.get_type_string() == f"Optional[{base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = properties.EnumProperty(
-            name="test",
-            required=False,
-            default=None,
-            values={},
-            nullable=True,
-            reference=fake_reference,
-            value_type=str,
-        )
-        assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-        p = properties.EnumProperty(
-            name="test",
-            required=False,
-            default=None,
-            values={},
-            nullable=False,
-            reference=fake_reference,
-            value_type=str,
-        )
-        assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
-        assert p.get_type_string(no_optional=True) == base_type_string
-
-    def test_get_imports(self, mocker):
-        fake_reference = mocker.MagicMock(class_name="MyTestEnum", module_name="my_test_enum")
+    def test_get_imports(self, mocker, enum_property_factory):
+        fake_class = mocker.MagicMock(module_name="my_test_enum")
+        fake_class.name = "MyTestEnum"
         prefix = "..."
 
-        from openapi_python_client.parser import properties
-
-        enum_property = properties.EnumProperty(
-            name="test",
-            required=True,
-            default=None,
-            values={},
-            nullable=False,
-            reference=fake_reference,
-            value_type=str,
-        )
+        enum_property = enum_property_factory(class_info=fake_class, required=False)
 
         assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-        }
-
-        enum_property = properties.EnumProperty(
-            name="test",
-            required=False,
-            default=None,
-            values={},
-            nullable=False,
-            reference=fake_reference,
-            value_type=str,
-        )
-        assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Union",
-            "from ...types import UNSET, Unset",
-        }
-
-        enum_property = properties.EnumProperty(
-            name="test",
-            required=False,
-            default=None,
-            values={},
-            nullable=True,
-            reference=fake_reference,
-            value_type=str,
-        )
-        assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
-            "from typing import Union",
-            "from typing import Optional",
+            f"from {prefix}models.{fake_class.module_name} import {fake_class.name}",
+            "from typing import Union",  # Makes sure unset is handled via base class
             "from ...types import UNSET, Unset",
         }
 
@@ -534,7 +460,7 @@ class TestEnumProperty:
 
 class TestPropertyFromData:
     def test_property_from_data_str_enum(self, mocker):
-        from openapi_python_client.parser.properties import EnumProperty, Reference
+        from openapi_python_client.parser.properties import EnumProperty, Class
         from openapi_python_client.schema import Schema
 
         data = Schema(title="AnEnum", enum=["A", "B", "C"], nullable=False, default="B")
@@ -543,10 +469,10 @@ class TestPropertyFromData:
 
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        schemas = Schemas(enums={"AnEnum": mocker.MagicMock()})
+        schemas = Schemas(classes_by_name={"AnEnum": mocker.MagicMock()})
 
         prop, new_schemas = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
         assert prop == EnumProperty(
@@ -554,18 +480,18 @@ class TestPropertyFromData:
             required=True,
             nullable=False,
             values={"A": "A", "B": "B", "C": "C"},
-            reference=Reference(class_name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
-        assert new_schemas.enums == {
-            "AnEnum": schemas.enums["AnEnum"],
+        assert new_schemas.classes_by_name == {
+            "AnEnum": schemas.classes_by_name["AnEnum"],
             "ParentAnEnum": prop,
         }
 
     def test_property_from_data_int_enum(self, mocker):
-        from openapi_python_client.parser.properties import EnumProperty, Reference
+        from openapi_python_client.parser.properties import EnumProperty, Class
         from openapi_python_client.schema import Schema
 
         data = Schema.construct(title="anEnum", enum=[1, 2, 3], nullable=False, default=3)
@@ -574,10 +500,10 @@ class TestPropertyFromData:
 
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        schemas = Schemas(enums={"AnEnum": mocker.MagicMock()})
+        schemas = Schemas(classes_by_name={"AnEnum": mocker.MagicMock()})
 
         prop, new_schemas = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent"
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
         assert prop == EnumProperty(
@@ -585,21 +511,21 @@ class TestPropertyFromData:
             required=True,
             nullable=False,
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
-            reference=Reference(class_name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
             default="ParentAnEnum.VALUE_3",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
-        assert new_schemas.enums == {
-            "AnEnum": schemas.enums["AnEnum"],
+        assert new_schemas.classes_by_name == {
+            "AnEnum": schemas.classes_by_name["AnEnum"],
             "ParentAnEnum": prop,
         }
 
     def test_property_from_data_ref_enum(self):
-        from openapi_python_client.parser.properties import EnumProperty, Reference, Schemas, property_from_data
+        from openapi_python_client.parser.properties import EnumProperty, Class, Schemas, property_from_data
 
         name = "some_enum"
-        data = oai.Reference.construct(ref="MyEnum")
+        data = oai.Reference.construct(ref="#/components/schemas/MyEnum")
         existing_enum = EnumProperty(
             name="an_enum",
             required=True,
@@ -607,11 +533,13 @@ class TestPropertyFromData:
             default=None,
             values={"A": "a"},
             value_type=str,
-            reference=Reference(class_name="MyEnum", module_name="my_enum"),
+            class_info=Class(name="MyEnum", module_name="my_enum"),
         )
-        schemas = Schemas(enums={"MyEnum": existing_enum})
+        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
 
-        prop, new_schemas = property_from_data(name=name, required=False, data=data, schemas=schemas, parent_name="")
+        prop, new_schemas = property_from_data(
+            name=name, required=False, data=data, schemas=schemas, parent_name="", config=Config()
+        )
 
         assert prop == EnumProperty(
             name="some_enum",
@@ -620,39 +548,41 @@ class TestPropertyFromData:
             default=None,
             values={"A": "a"},
             value_type=str,
-            reference=Reference(class_name="MyEnum", module_name="my_enum"),
+            class_info=Class(name="MyEnum", module_name="my_enum"),
         )
         assert schemas == new_schemas
 
     def test_property_from_data_ref_model(self):
-        from openapi_python_client.parser.properties import ModelProperty, Reference, Schemas, property_from_data
+        from openapi_python_client.parser.properties import ModelProperty, Class, Schemas, property_from_data
 
         name = "new_name"
         required = False
         class_name = "MyModel"
-        data = oai.Reference.construct(ref=class_name)
+        data = oai.Reference.construct(ref=f"#/components/schemas/{class_name}")
         existing_model = ModelProperty(
             name="old_name",
             required=True,
             nullable=False,
             default=None,
-            reference=Reference(class_name=class_name, module_name="my_model"),
+            class_info=Class(name=class_name, module_name="my_model"),
             required_properties=[],
             optional_properties=[],
             description="",
             relative_imports=set(),
             additional_properties=False,
         )
-        schemas = Schemas(models={class_name: existing_model})
+        schemas = Schemas(classes_by_reference={f"/components/schemas/{class_name}": existing_model})
 
-        prop, new_schemas = property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name="")
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="", config=Config()
+        )
 
         assert prop == ModelProperty(
             name=name,
             required=required,
             nullable=False,
             default=None,
-            reference=Reference(class_name=class_name, module_name="my_model"),
+            class_info=Class(name=class_name, module_name="my_model"),
             required_properties=[],
             optional_properties=[],
             description="",

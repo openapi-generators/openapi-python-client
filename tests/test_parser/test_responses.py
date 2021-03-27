@@ -58,13 +58,15 @@ def test_response_from_data_property_error(mocker):
     data = oai.Response.construct(
         description="", content={"application/json": oai.MediaType.construct(media_type_schema="something")}
     )
+    config = MagicMock()
+
     response, schemas = responses.response_from_data(
-        status_code=400, data=data, schemas=Schemas(), parent_name="parent"
+        status_code=400, data=data, schemas=Schemas(), parent_name="parent", config=config
     )
 
     assert response == PropertyError()
     property_from_data.assert_called_once_with(
-        name="response_400", required=True, data="something", schemas=Schemas(), parent_name="parent"
+        name="response_400", required=True, data="something", schemas=Schemas(), parent_name="parent", config=config
     )
 
 
@@ -76,8 +78,10 @@ def test_response_from_data_property(mocker):
     data = oai.Response.construct(
         description="", content={"application/json": oai.MediaType.construct(media_type_schema="something")}
     )
+    config = MagicMock()
+
     response, schemas = responses.response_from_data(
-        status_code=400, data=data, schemas=Schemas(), parent_name="parent"
+        status_code=400, data=data, schemas=Schemas(), parent_name="parent", config=config
     )
 
     assert response == responses.Response(
@@ -86,5 +90,5 @@ def test_response_from_data_property(mocker):
         source="response.json()",
     )
     property_from_data.assert_called_once_with(
-        name="response_400", required=True, data="something", schemas=Schemas(), parent_name="parent"
+        name="response_400", required=True, data="something", schemas=Schemas(), parent_name="parent", config=config
     )
