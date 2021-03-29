@@ -1071,15 +1071,6 @@ def test_build_schemas(mocker):
     assert result.errors == [error]
 
 
-def test_build_parse_error_on_reference():
-    from openapi_python_client.parser.openapi import build_schemas
-
-    ref_schema = oai.Reference.construct()
-    in_data = {"1": ref_schema}
-    result = build_schemas(components=in_data)
-    assert result.errors[0] == PropertyError(data=ref_schema, detail="Reference schemas are not supported.")
-
-
 def test_build_enums(mocker):
     from openapi_python_client.parser.openapi import build_schemas
 

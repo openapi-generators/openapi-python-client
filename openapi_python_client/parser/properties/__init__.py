@@ -486,8 +486,6 @@ def build_schemas(*, components: Dict[str, Union[oai.Reference, oai.Schema]]) ->
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
             if isinstance(data, oai.Reference):
-                references_by_name[name] = data
-                references_to_process.append((name, data))
                 continue
             schemas_or_err = update_schemas_with_data(name, data, schemas)
             if isinstance(schemas_or_err, PropertyError):
