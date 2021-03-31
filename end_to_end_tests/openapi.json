@@ -747,6 +747,7 @@
         "title": "AModel",
         "required": [
           "an_enum_value",
+          "an_allof_enum_with_overridden_default",
           "aCamelDateTime",
           "a_date",
           "a_nullable_date",
@@ -761,6 +762,21 @@
         "properties": {
           "an_enum_value": {
             "$ref": "#/components/schemas/AnEnum"
+          },
+          "an_allof_enum_with_overridden_default": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AnAllOfEnum"
+              }
+            ],
+            "default": "overridden_default"
+          },
+          "an_optional_allof_enum": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AnAllOfEnum"
+              }
+            ]
           },
           "nested_list_of_enums": {
             "title": "Nested List Of Enums",
@@ -913,6 +929,11 @@
         "title": "AnEnum",
         "enum": ["FIRST_VALUE", "SECOND_VALUE"],
         "description": "For testing Enums in all the ways they can be used "
+      },
+      "AnAllOfEnum": {
+        "title": "AnAllOfEnum",
+        "enum": ["foo", "bar", "a_default", "overridden_default"],
+        "default": "a_default"
       },
       "AnIntEnum": {
         "title": "AnIntEnum",

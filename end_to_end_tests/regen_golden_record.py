@@ -1,6 +1,5 @@
 """ Regenerate golden-record """
 import shutil
-import sys
 from pathlib import Path
 
 from typer.testing import CliRunner
