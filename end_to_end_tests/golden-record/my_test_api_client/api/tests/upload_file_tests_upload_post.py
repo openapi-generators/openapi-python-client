@@ -5,7 +5,7 @@ import httpx
 from ...client import Client
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, File, Response, Unset
+from ...types import UNSET, Response, Unset, is_file
 
 
 def _get_kwargs(
@@ -25,7 +25,7 @@ def _get_kwargs(
     files = {}
     data = {}
     for key, value in multipart_data.to_dict().items():
-        if isinstance(value, File):
+        if is_file(value):
             files[key] = value
         else:
             data[key] = value

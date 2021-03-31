@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, File {% endif %}
+from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, is_file {% endif %}
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -39,7 +39,7 @@ def _get_kwargs(
     files = {}
     data = {}
     for key, value in multipart_data.to_dict().items():
-         if isinstance(value, File):
+         if is_file(value):
              files[key] = value
          else:
              data[key] = value

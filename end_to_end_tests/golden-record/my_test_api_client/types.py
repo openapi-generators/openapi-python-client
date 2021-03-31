@@ -1,5 +1,6 @@
 """ Contains some shared types for properties """
-from typing import BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
+from io import IOBase
+from typing import Any, BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
 
 import attr
 
@@ -12,6 +13,10 @@ class Unset:
 UNSET: Unset = Unset()
 
 FileJsonType = Tuple[Optional[str], Union[BinaryIO, TextIO], Optional[str]]
+
+
+def is_file(value: Any) -> bool:
+    return isinstance(value, tuple) and len(value) == 3 and isinstance(value[1], IOBase)
 
 
 @attr.s(auto_attribs=True)
@@ -40,4 +45,4 @@ class Response(Generic[T]):
     parsed: Optional[T]
 
 
-__all__ = ["File", "Response"]
+__all__ = ["File", "Response", "is_file"]
