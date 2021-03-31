@@ -3,7 +3,7 @@ from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 
-from ..types import UNSET, File, Unset
+from ..types import UNSET, File, FileJsonType, Unset
 
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 
@@ -13,10 +13,15 @@ class BodyUploadFileTestsUploadPost:
     """ """
 
     some_file: File
+    some_optional_file: Union[Unset, File] = UNSET
     some_string: Union[Unset, str] = "some_default_string"
 
     def to_dict(self) -> Dict[str, Any]:
         some_file = self.some_file.to_tuple()
+
+        some_optional_file: Union[Unset, FileJsonType] = UNSET
+        if not isinstance(self.some_optional_file, Unset):
+            some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = self.some_string
 
@@ -26,6 +31,8 @@ class BodyUploadFileTestsUploadPost:
                 "some_file": some_file,
             }
         )
+        if some_optional_file is not UNSET:
+            field_dict["some_optional_file"] = some_optional_file
         if some_string is not UNSET:
             field_dict["some_string"] = some_string
 
@@ -36,10 +43,16 @@ class BodyUploadFileTestsUploadPost:
         d = src_dict.copy()
         some_file = File(payload=BytesIO(d.pop("some_file")))
 
+        some_optional_file: Union[Unset, File] = UNSET
+        _some_optional_file = d.pop("some_optional_file", UNSET)
+        if not isinstance(_some_optional_file, Unset):
+            some_optional_file = File(payload=BytesIO(_some_optional_file))
+
         some_string = d.pop("some_string", UNSET)
 
         body_upload_file_tests_upload_post = cls(
             some_file=some_file,
+            some_optional_file=some_optional_file,
             some_string=some_string,
         )
 

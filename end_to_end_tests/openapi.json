@@ -1063,6 +1063,11 @@
             "type": "string",
             "format": "binary"
           },
+          "some_optional_file": {
+            "title": "Some Optional File",
+            "type": "string",
+            "format": "binary"
+          },
           "some_string": {
             "title": "Some String",
             "type": "string",
