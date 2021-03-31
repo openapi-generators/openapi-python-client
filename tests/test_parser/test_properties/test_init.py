@@ -555,6 +555,60 @@ class TestPropertyFromData:
         )
         assert schemas == new_schemas
 
+    def test_property_from_data_ref_enum_with_overridden_default(self):
+        from openapi_python_client.parser.properties import Class, EnumProperty, Schemas, property_from_data
+
+        name = "some_enum"
+        data = oai.Schema.construct(default="b", allOf=[oai.Reference.construct(ref="#/components/schemas/MyEnum")])
+        existing_enum = EnumProperty(
+            name="an_enum",
+            required=True,
+            nullable=False,
+            default="MyEnum.A",
+            values={"A": "a", "B": "b"},
+            value_type=str,
+            class_info=Class(name="MyEnum", module_name="my_enum"),
+        )
+        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
+
+        prop, new_schemas = property_from_data(
+            name=name, required=False, data=data, schemas=schemas, parent_name="", config=Config()
+        )
+
+        assert prop == EnumProperty(
+            name="some_enum",
+            required=False,
+            nullable=False,
+            default="MyEnum.B",
+            values={"A": "a", "B": "b"},
+            value_type=str,
+            class_info=Class(name="MyEnum", module_name="my_enum"),
+        )
+        assert schemas == new_schemas
+
+    def test_property_from_data_ref_enum_with_invalid_default(self):
+        from openapi_python_client.parser.properties import Class, EnumProperty, Schemas, property_from_data
+
+        name = "some_enum"
+        data = oai.Schema.construct(default="x", allOf=[oai.Reference.construct(ref="#/components/schemas/MyEnum")])
+        existing_enum = EnumProperty(
+            name="an_enum",
+            required=True,
+            nullable=False,
+            default="MyEnum.A",
+            values={"A": "a", "B": "b"},
+            value_type=str,
+            class_info=Class(name="MyEnum", module_name="my_enum"),
+        )
+        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
+
+        prop, new_schemas = property_from_data(
+            name=name, required=False, data=data, schemas=schemas, parent_name="", config=Config()
+        )
+
+        assert schemas == new_schemas
+        assert prop == PropertyError(data=data, detail="x is an invalid default for enum MyEnum")
+
     def test_property_from_data_ref_model(self):
         from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
 
