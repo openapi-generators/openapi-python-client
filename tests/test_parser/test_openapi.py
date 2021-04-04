@@ -255,7 +255,7 @@ class TestEndpoint:
         )
 
     def test_add_body_happy(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Class
+        from openapi_python_client.parser.openapi import Class, Endpoint
         from openapi_python_client.parser.properties import Property
 
         request_body = mocker.MagicMock()

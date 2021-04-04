@@ -483,6 +483,29 @@ def property_from_data(
     parent_name: str,
     config: Config,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
+    """
+    Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a
+    generated API operation.
+
+    Args:
+        name: The name of the property, defined in OpenAPI as the key pointing at the schema. This is the parameter used
+            to send this data to an API or that the API will respond with. This will be used to generate a `python_name`
+            which is the name of the variable/attribute in generated Python.
+        required: Whether or not this property is required in whatever source is creating it. OpenAPI defines this by
+            including the property's name in the `required` list. If the property is required, `Unset` will not be
+            included in the generated code's available types.
+        data: The OpenAPI schema or reference that defines the details of this property (e.g. type, sub-properties).
+        schemas: A structure containing all of the parsed schemas so far that will become generated classes. This is
+            used to resolve references and to ensure that conflicting class names are not generated.
+        parent_name: The name of the thing above this property, prepended to generated class names to reduce the chance
+            of duplication.
+        config: Contains the parsed config that the user provided to tweak generation settings. Needed to apply class
+            name overrides for generated classes.
+
+    Returns:
+        A tuple containing either the parsed Property or a PropertyError (if something went wrong) and the updated
+        Schemas (including any new classes that should be generated).
+    """
     try:
         return _property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name=parent_name, config=config
@@ -496,12 +519,12 @@ def build_schemas(
 ) -> Schemas:
     """ Get a list of Schemas from an OpenAPI dict """
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
-    processing = True
+    still_making_progress = True
     errors: List[PropertyError] = []
 
     # References could have forward References so keep going as long as we are making progress
-    while processing:
-        processing = False
+    while still_making_progress:
+        still_making_progress = False
         errors = []
         next_round = []
         # Only accumulate errors from the last round, since we might fix some along the way
@@ -511,8 +534,7 @@ def build_schemas(
                 continue
             ref_path = parse_reference_path(f"#/components/schemas/{name}")
             if isinstance(ref_path, ParseError):
-                next_round.append((name, data))
-                errors.append(PropertyError(detail=ref_path.detail, data=data))
+                schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
             schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
             if isinstance(schemas_or_err, PropertyError):
@@ -520,7 +542,7 @@ def build_schemas(
                 errors.append(schemas_or_err)
                 continue
             schemas = schemas_or_err
-            processing = True  # We made some progress this round, do another after it's done
+            still_making_progress = True
         to_process = next_round
 
     schemas.errors.extend(errors)

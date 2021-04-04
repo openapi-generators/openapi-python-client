@@ -2,8 +2,8 @@ import pytest
 
 
 def test_class_from_string_default_config():
-    from openapi_python_client.parser.properties import Class
     from openapi_python_client import Config
+    from openapi_python_client.parser.properties import Class
 
     class_ = Class.from_string(string="#/components/schemas/PingResponse", config=Config())
 
@@ -21,8 +21,8 @@ def test_class_from_string_default_config():
     ),
 )
 def test_class_from_string(class_override, module_override, expected_class, expected_module):
+    from openapi_python_client.config import ClassOverride, Config
     from openapi_python_client.parser.properties import Class
-    from openapi_python_client.config import Config, ClassOverride
 
     ref = "#/components/schemas/_MyResponse"
     config = Config(

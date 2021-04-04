@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Dict, List, NewType, Union, cast
 from urllib.parse import urlparse
 
 import attr
-from pydantic import BaseModel
 
 from ... import Config
 from ... import schema as oai
@@ -30,7 +29,8 @@ def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]
     return cast(_ReferencePath, parsed.fragment)
 
 
-class Class(BaseModel):
+@attr.s(auto_attribs=True, frozen=True)
+class Class:
     """ Info about a generated class which will be in models """
 
     name: _ClassName

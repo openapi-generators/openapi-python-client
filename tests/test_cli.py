@@ -88,7 +88,7 @@ class TestGenerate:
 
     def test_generate_url(self, _create_new_client):
         url = "cool.url"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--url={url}"])
 
@@ -99,7 +99,7 @@ class TestGenerate:
 
     def test_generate_path(self, _create_new_client):
         path = "cool/path"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}"])
 
@@ -115,7 +115,7 @@ class TestGenerate:
 
     def test_generate_meta(self, _create_new_client):
         path = "cool/path"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}", "--meta=none"])
 
@@ -132,7 +132,7 @@ class TestGenerate:
     def test_generate_encoding(self, _create_new_client):
         path = "cool/path"
         file_encoding = "utf-8"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={file_encoding}"])
 
@@ -219,7 +219,7 @@ class TestUpdate:
 
     def test_update_url(self, _update_existing_client):
         url = "cool.url"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["update", f"--url={url}"])
 
@@ -230,7 +230,7 @@ class TestUpdate:
 
     def test_update_path(self, _update_existing_client):
         path = "cool/path"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["update", f"--path={path}"])
 
@@ -247,7 +247,7 @@ class TestUpdate:
     def test_update_encoding(self, _update_existing_client):
         path = "cool/path"
         file_encoding = "utf-8"
-        from openapi_python_client.cli import MetaType, app, Config
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
 

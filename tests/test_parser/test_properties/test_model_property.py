@@ -1,8 +1,10 @@
 from typing import Callable
+from unittest.mock import MagicMock
 
 import pytest
 
 import openapi_python_client.schema as oai
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import DateTimeProperty, ModelProperty, StringProperty
 
@@ -94,11 +96,7 @@ class TestBuildModelProperty:
         )
 
         model, _ = build_model_property(
-            data=data,
-            name="prop",
-            schemas=Schemas(),
-            required=True,
-            parent_name="parent",
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=MagicMock()
         )
 
         assert model.additional_properties == expected_additional_properties
@@ -116,20 +114,19 @@ class TestBuildModelProperty:
             description="A class called MyModel",
             nullable=False,
         )
-        schemas = Schemas(models={"OtherModel": None})
+        schemas = Schemas(classes_by_reference={"OtherModel": None}, classes_by_name={"OtherModel": None})
 
         model, new_schemas = build_model_property(
-            data=data,
-            name="prop",
-            schemas=schemas,
-            required=True,
-            parent_name="parent",
+            data=data, name="prop", schemas=schemas, required=True, parent_name="parent", config=Config()
         )
 
         assert new_schemas != schemas
-        assert new_schemas.models == {
+        assert new_schemas.classes_by_name == {
             "OtherModel": None,
             "ParentMyModel": model,
+        }
+        assert new_schemas.classes_by_reference == {
+            "OtherModel": None,
         }
         assert model == ModelProperty(
             name="prop",
@@ -154,14 +151,10 @@ class TestBuildModelProperty:
         from openapi_python_client.parser.properties import Schemas, build_model_property
 
         data = oai.Schema.construct()
-        schemas = Schemas(models={"OtherModel": None})
+        schemas = Schemas(classes_by_name={"OtherModel": None})
 
         err, new_schemas = build_model_property(
-            data=data,
-            name="OtherModel",
-            schemas=schemas,
-            required=True,
-            parent_name=None,
+            data=data, name="OtherModel", schemas=schemas, required=True, parent_name=None, config=Config()
         )
 
         assert new_schemas == schemas
@@ -178,11 +171,7 @@ class TestBuildModelProperty:
         schemas = Schemas()
 
         err, new_schemas = build_model_property(
-            data=data,
-            name="prop",
-            schemas=schemas,
-            required=True,
-            parent_name=None,
+            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=MagicMock()
         )
 
         assert new_schemas == schemas
@@ -201,11 +190,7 @@ class TestBuildModelProperty:
         schemas = Schemas()
 
         err, new_schemas = build_model_property(
-            data=data,
-            name="prop",
-            schemas=schemas,
-            required=True,
-            parent_name=None,
+            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=MagicMock()
         )
 
         assert new_schemas == schemas
@@ -228,19 +213,21 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         schemas = Schemas(
-            models={
-                "First": model_property_factory(
+            classes_by_reference={
+                "/First": model_property_factory(
                     optional_properties=[StringProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
-                "Second": model_property_factory(
+                "/Second": model_property_factory(
                     optional_properties=[DateTimeProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
         assert isinstance(result, PropertyError)
 
@@ -248,15 +235,17 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         schemas = Schemas(
-            models={
-                "First": model_property_factory(optional_properties=[string_property(default="abc")]),
-                "Second": model_property_factory(optional_properties=[string_property()]),
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[string_property(default="abc")]),
+                "/Second": model_property_factory(optional_properties=[string_property()]),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
         assert isinstance(result, PropertyError)
 
@@ -264,16 +253,18 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         prop = string_property()
         schemas = Schemas(
-            models={
-                "First": model_property_factory(optional_properties=[prop]),
-                "Second": model_property_factory(optional_properties=[prop]),
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[prop]),
+                "/Second": model_property_factory(optional_properties=[prop]),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
         assert result.optional_props == [prop], "There should only be one copy of duplicate properties"
 
@@ -287,19 +278,21 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         schemas = Schemas(
-            models={
-                "First": model_property_factory(
+            classes_by_reference={
+                "/First": model_property_factory(
                     optional_properties=[string_property(required=first_required, nullable=first_nullable)]
                 ),
-                "Second": model_property_factory(
+                "/Second": model_property_factory(
                     optional_properties=[string_property(required=second_required, nullable=second_nullable)]
                 ),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=MagicMock())
 
         nullable = first_nullable and second_nullable
         required = first_required or second_required
@@ -330,7 +323,7 @@ class TestProcessProperties:
         )
         schemas = Schemas()
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=MagicMock())
 
         assert result.optional_props == [string_property(name="second", required=False, nullable=False)]
         assert result.required_props == [string_property(name="first", required=True, nullable=False)]
