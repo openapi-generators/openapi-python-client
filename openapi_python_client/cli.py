@@ -6,9 +6,8 @@ from typing import Optional, Sequence
 import typer
 
 from openapi_python_client import MetaType
+from openapi_python_client.config import Config
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
-
-from .config import Config
 
 app = typer.Typer()
 
