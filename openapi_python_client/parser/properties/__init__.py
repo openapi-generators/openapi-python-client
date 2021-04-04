@@ -394,6 +394,25 @@ def build_list_property(
     )
 
 
+def _property_from_ref(
+    name: str,
+    required: bool,
+    nullable: bool,
+    data: oai.Reference,
+    schemas: Schemas,
+) -> Tuple[Union[Property, PropertyError], Schemas]:
+    ref_path = parse_reference_path(data.ref)
+    if isinstance(ref_path, ParseError):
+        return PropertyError(data=data, detail=ref_path.detail), schemas
+    existing = schemas.classes_by_reference.get(ref_path)
+    if existing:
+        return (
+            attr.evolve(existing, required=required, name=name),
+            schemas,
+        )
+    return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+
+
 def _property_from_data(
     name: str,
     required: bool,
@@ -405,16 +424,15 @@ def _property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        ref_path = parse_reference_path(data.ref)
-        if isinstance(ref_path, ParseError):
-            return PropertyError(data=data, detail=ref_path.detail), schemas
-        existing = schemas.classes_by_reference.get(ref_path)
-        if existing:
-            return (
-                attr.evolve(existing, required=required, name=name),
-                schemas,
-            )
-        return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+        return _property_from_ref(name=name, required=required, nullable=False, data=data, schemas=schemas)
+
+    # A union of a single reference should just be passed through to that reference (don't create copy class)
+    sub_data = (data.allOf or []) + data.anyOf + data.oneOf
+    if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
+        return _property_from_ref(
+            name=name, required=required, nullable=data.nullable, data=sub_data[0], schemas=schemas
+        )
+
     if data.enum:
         return build_enum_property(
             data=data,

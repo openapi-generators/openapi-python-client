@@ -574,7 +574,7 @@ python-versions = "*"
 
 [[package]]
 name = "taskipy"
-version = "1.6.0"
+version = "1.7.0"
 description = "tasks runner for python projects"
 category = "dev"
 optional = false
@@ -1040,8 +1040,8 @@ stringcase = [
     {file = "stringcase-1.2.0.tar.gz", hash = "sha256:48a06980661908efe8d9d34eab2b6c13aefa2163b3ced26972902e3bdfd87008"},
 ]
 taskipy = [
-    {file = "taskipy-1.6.0-py3-none-any.whl", hash = "sha256:33ee1d52b378cb4af3678fc459b75c3028f594c5e8e42ac0696cbe3e95d47394"},
-    {file = "taskipy-1.6.0.tar.gz", hash = "sha256:ec4d1f2208ae24218950e3a2812e4e8b4397b1f65a6ad7e2b1240b702042fa3e"},
+    {file = "taskipy-1.7.0-py3-none-any.whl", hash = "sha256:9e284c10898e9dee01a3e72220b94b192b1daa0f560271503a6df1da53d03844"},
+    {file = "taskipy-1.7.0.tar.gz", hash = "sha256:960e480b1004971e76454ecd1a0484e640744a30073a1069894a311467f85ed8"},
 ]
 toml = [
     {file = "toml-0.10.1-py2.py3-none-any.whl", hash = "sha256:bda89d5935c2eac546d648028b9901107a595863cb36bae0c73ac804a9b4ce88"},

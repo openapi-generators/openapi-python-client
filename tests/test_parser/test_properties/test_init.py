@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, call
 
+import attr
 import pytest
 
 import openapi_python_client.schema as oai
@@ -756,6 +757,28 @@ class TestPropertyFromData:
         build_union_property.assert_called_once_with(
             data=data, name=name, required=required, schemas=schemas, parent_name="parent", config=config
         )
+
+    def test_property_from_data_union_of_one_element(self, mocker, model_property_factory):
+        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+
+        name = "new_name"
+        required = False
+        class_name = "MyModel"
+        existing_model = model_property_factory()
+        schemas = Schemas(classes_by_reference={f"/{class_name}": existing_model})
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref=f"#/{class_name}")],
+            nullable=True,
+        )
+        build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
+
+        prop, schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
+        )
+
+        assert prop == attr.evolve(existing_model, name=name, required=required)
+        build_union_property.assert_not_called()
 
     def test_property_from_data_unsupported_type(self, mocker):
         name = mocker.MagicMock()
