@@ -231,6 +231,32 @@ class TestProcessProperties:
 
         assert isinstance(result, PropertyError)
 
+    def test_invalid_reference(self, model_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="ThisIsNotGood")])
+        schemas = Schemas()
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+
+        assert isinstance(result, PropertyError)
+
+    def test_non_model_reference(self, enum_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="#/First")])
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": enum_property_factory(),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+
+        assert isinstance(result, PropertyError)
+
     def test_conflicting_properties_same_types(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties

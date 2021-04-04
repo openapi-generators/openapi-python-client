@@ -611,6 +611,25 @@ class TestPropertyFromData:
         assert prop == PropertyError(data=data, detail="Could not find reference in parsed models or enums")
         assert schemas == new_schemas
 
+    def test_property_from_data_invalid_ref(self, mocker):
+        from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
+
+        name = mocker.MagicMock()
+        required = mocker.MagicMock()
+        data = oai.Reference.construct(ref=mocker.MagicMock())
+        parse_reference_path = mocker.patch(
+            f"{MODULE_NAME}.parse_reference_path", return_value=PropertyError(detail="bad stuff")
+        )
+        schemas = Schemas()
+
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=mocker.MagicMock()
+        )
+
+        parse_reference_path.assert_called_once_with(data.ref)
+        assert prop == PropertyError(data=data, detail="bad stuff")
+        assert schemas == new_schemas
+
     def test_property_from_data_string(self, mocker):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
