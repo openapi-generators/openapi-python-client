@@ -23,10 +23,10 @@ class AModel:
     required_not_nullable: str
     one_of_models: Union[FreeFormModel, ModelWithUnionProperty]
     model: ModelWithUnionProperty
-    nullable_model: ModelWithUnionProperty
     a_nullable_date: Optional[datetime.date]
     required_nullable: Optional[str]
     nullable_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, None]
+    nullable_model: Optional[ModelWithUnionProperty]
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
@@ -35,7 +35,7 @@ class AModel:
     not_required_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, Unset] = UNSET
     not_required_nullable_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, None, Unset, str] = UNSET
     not_required_model: Union[Unset, ModelWithUnionProperty] = UNSET
-    not_required_nullable_model: Union[Unset, ModelWithUnionProperty] = UNSET
+    not_required_nullable_model: Union[Unset, None, ModelWithUnionProperty] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         an_enum_value = self.an_enum_value.value
@@ -55,8 +55,6 @@ class AModel:
             one_of_models = self.one_of_models.to_dict()
 
         model = self.model.to_dict()
-
-        nullable_model = self.nullable_model.to_dict()
 
         nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
@@ -119,13 +117,17 @@ class AModel:
         else:
             not_required_nullable_one_of_models = self.not_required_nullable_one_of_models
 
+        nullable_model = self.nullable_model.to_dict() if self.nullable_model else None
+
         not_required_model: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.not_required_model, Unset):
             not_required_model = self.not_required_model.to_dict()
 
-        not_required_nullable_model: Union[Unset, Dict[str, Any]] = UNSET
+        not_required_nullable_model: Union[Unset, None, Dict[str, Any]] = UNSET
         if not isinstance(self.not_required_nullable_model, Unset):
-            not_required_nullable_model = self.not_required_nullable_model.to_dict()
+            not_required_nullable_model = (
+                self.not_required_nullable_model.to_dict() if self.not_required_nullable_model else None
+            )
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -136,10 +138,10 @@ class AModel:
                 "required_not_nullable": required_not_nullable,
                 "one_of_models": one_of_models,
                 "model": model,
-                "nullable_model": nullable_model,
                 "a_nullable_date": a_nullable_date,
                 "required_nullable": required_nullable,
                 "nullable_one_of_models": nullable_one_of_models,
+                "nullable_model": nullable_model,
             }
         )
         if nested_list_of_enums is not UNSET:
@@ -211,8 +213,6 @@ class AModel:
         one_of_models = _parse_one_of_models(d.pop("one_of_models"))
 
         model = ModelWithUnionProperty.from_dict(d.pop("model"))
-
-        nullable_model = ModelWithUnionProperty.from_dict(d.pop("nullable_model"))
 
         nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
@@ -333,14 +333,19 @@ class AModel:
             d.pop("not_required_nullable_one_of_models", UNSET)
         )
 
+        nullable_model = None
+        _nullable_model = d.pop("nullable_model")
+        if _nullable_model is not None:
+            nullable_model = ModelWithUnionProperty.from_dict(_nullable_model)
+
         not_required_model: Union[Unset, ModelWithUnionProperty] = UNSET
         _not_required_model = d.pop("not_required_model", UNSET)
         if not isinstance(_not_required_model, Unset):
             not_required_model = ModelWithUnionProperty.from_dict(_not_required_model)
 
-        not_required_nullable_model: Union[Unset, ModelWithUnionProperty] = UNSET
+        not_required_nullable_model = None
         _not_required_nullable_model = d.pop("not_required_nullable_model", UNSET)
-        if not isinstance(_not_required_nullable_model, Unset):
+        if _not_required_nullable_model is not None and not isinstance(_not_required_nullable_model, Unset):
             not_required_nullable_model = ModelWithUnionProperty.from_dict(_not_required_nullable_model)
 
         a_model = cls(
@@ -350,7 +355,6 @@ class AModel:
             required_not_nullable=required_not_nullable,
             one_of_models=one_of_models,
             model=model,
-            nullable_model=nullable_model,
             nested_list_of_enums=nested_list_of_enums,
             a_nullable_date=a_nullable_date,
             a_not_required_date=a_not_required_date,
@@ -361,6 +365,7 @@ class AModel:
             nullable_one_of_models=nullable_one_of_models,
             not_required_one_of_models=not_required_one_of_models,
             not_required_nullable_one_of_models=not_required_nullable_one_of_models,
+            nullable_model=nullable_model,
             not_required_model=not_required_model,
             not_required_nullable_model=not_required_nullable_model,
         )

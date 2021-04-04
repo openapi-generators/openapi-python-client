@@ -407,7 +407,7 @@ def _property_from_ref(
     existing = schemas.classes_by_reference.get(ref_path)
     if existing:
         return (
-            attr.evolve(existing, required=required, name=name),
+            attr.evolve(existing, required=required, name=name, nullable=nullable),
             schemas,
         )
     return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
