@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.validation_error import ValidationError
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="HTTPValidationError")
@@ -11,14 +12,14 @@ T = TypeVar("T", bound="HTTPValidationError")
 class HTTPValidationError:
     """  """
 
-    detail: Union[Unset, List[None]] = UNSET
+    detail: Union[Unset, List[ValidationError]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        detail: Union[Unset, List[None]] = UNSET
+        detail: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.detail, Unset):
             detail = []
             for detail_item_data in self.detail:
-                detail_item = None
+                detail_item = detail_item_data.to_dict()
 
                 detail.append(detail_item)
 
@@ -35,7 +36,7 @@ class HTTPValidationError:
         detail = []
         _detail = d.pop("detail", UNSET)
         for detail_item_data in _detail or []:
-            detail_item = None
+            detail_item = ValidationError.from_dict(detail_item_data)
 
             detail.append(detail_item)
 

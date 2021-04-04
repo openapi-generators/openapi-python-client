@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.model_name import ModelName
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithPropertyRef")
@@ -11,11 +12,13 @@ T = TypeVar("T", bound="ModelWithPropertyRef")
 class ModelWithPropertyRef:
     """  """
 
-    inner: Union[Unset, None] = UNSET
+    inner: Union[Unset, ModelName] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        inner = None
+        inner: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.inner, Unset):
+            inner = self.inner.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -28,7 +31,10 @@ class ModelWithPropertyRef:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        inner = None
+        inner: Union[Unset, ModelName] = UNSET
+        _inner = d.pop("inner", UNSET)
+        if not isinstance(_inner, Unset):
+            inner = ModelName.from_dict(_inner)
 
         model_with_property_ref = cls(
             inner=inner,

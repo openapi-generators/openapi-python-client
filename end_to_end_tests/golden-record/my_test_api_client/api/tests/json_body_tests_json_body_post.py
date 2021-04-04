@@ -3,20 +3,22 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ...client import Client
+from ...models.a_model import AModel
+from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
 def _get_kwargs(
     *,
     client: Client,
-    json_body: None,
+    json_body: AModel,
 ) -> Dict[str, Any]:
     url = "{}/tests/json_body".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    json_json_body = None
+    json_json_body = json_body.to_dict()
 
     return {
         "url": url,
@@ -27,19 +29,19 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[None, None]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
     if response.status_code == 200:
         response_200 = None
 
         return response_200
     if response.status_code == 422:
-        response_422 = None
+        response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[None, None]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -51,8 +53,8 @@ def _build_response(*, response: httpx.Response) -> Response[Union[None, None]]:
 def sync_detailed(
     *,
     client: Client,
-    json_body: None,
-) -> Response[Union[None, None]]:
+    json_body: AModel,
+) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -68,8 +70,8 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    json_body: None,
-) -> Optional[Union[None, None]]:
+    json_body: AModel,
+) -> Optional[Union[None, HTTPValidationError]]:
     """ Try sending a JSON body  """
 
     return sync_detailed(
@@ -81,8 +83,8 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-    json_body: None,
-) -> Response[Union[None, None]]:
+    json_body: AModel,
+) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -97,8 +99,8 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    json_body: None,
-) -> Optional[Union[None, None]]:
+    json_body: AModel,
+) -> Optional[Union[None, HTTPValidationError]]:
     """ Try sending a JSON body  """
 
     return (

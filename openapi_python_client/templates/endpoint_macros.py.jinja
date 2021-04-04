@@ -104,7 +104,7 @@ form_data: {{ endpoint.form_body_class.name }},
 {% endif %}
 {# Multipart data if any #}
 {% if endpoint.multipart_body_class %}
-multipart_data: {{ endpoint.multipart_body_class.class_name }},
+multipart_data: {{ endpoint.multipart_body_class.name }},
 {% endif %}
 {# JSON body if any #}
 {% if endpoint.json_body %}
