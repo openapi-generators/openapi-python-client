@@ -31,7 +31,7 @@ def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]
 
 @attr.s(auto_attribs=True, frozen=True)
 class Class:
-    """ Info about a generated class which will be in models """
+    """ Represents Python class which will be generated from an OpenAPI schema """
 
     name: _ClassName
     module_name: str
