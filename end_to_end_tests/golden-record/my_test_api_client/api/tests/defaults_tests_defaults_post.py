@@ -131,7 +131,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, None]]:
     if response.status_code == 200:
         response_200 = None
 
@@ -143,7 +143,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPVal
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, None]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -172,7 +172,7 @@ def sync_detailed(
     required_model_prop: ModelWithUnionProperty,
     nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
     nullable_required_model_prop: Optional[ModelWithUnionProperty],
-) -> Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, None]]:
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
@@ -221,7 +221,7 @@ def sync(
     required_model_prop: ModelWithUnionProperty,
     nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
     nullable_required_model_prop: Optional[ModelWithUnionProperty],
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, None]]:
     """  """
 
     return sync_detailed(
@@ -266,7 +266,7 @@ async def asyncio_detailed(
     required_model_prop: ModelWithUnionProperty,
     nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
     nullable_required_model_prop: Optional[ModelWithUnionProperty],
-) -> Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, None]]:
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
@@ -314,7 +314,7 @@ async def asyncio(
     required_model_prop: ModelWithUnionProperty,
     nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
     nullable_required_model_prop: Optional[ModelWithUnionProperty],
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, None]]:
     """  """
 
     return (

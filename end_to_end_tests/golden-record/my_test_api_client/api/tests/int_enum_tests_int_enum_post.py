@@ -34,7 +34,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, None]]:
     if response.status_code == 200:
         response_200 = None
 
@@ -46,7 +46,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPVal
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, None]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -59,7 +59,7 @@ def sync_detailed(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, None]]:
     kwargs = _get_kwargs(
         client=client,
         int_enum=int_enum,
@@ -76,7 +76,7 @@ def sync(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, None]]:
     """  """
 
     return sync_detailed(
@@ -89,7 +89,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, None]]:
     kwargs = _get_kwargs(
         client=client,
         int_enum=int_enum,
@@ -105,7 +105,7 @@ async def asyncio(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, None]]:
     """  """
 
     return (
