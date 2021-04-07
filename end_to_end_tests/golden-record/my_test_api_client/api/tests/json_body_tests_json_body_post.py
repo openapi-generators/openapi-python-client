@@ -29,7 +29,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPValidationError]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, None]]:
     if response.status_code == 200:
         response_200 = None
 
@@ -41,7 +41,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[None, HTTPVal
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[None, HTTPValidationError]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, None]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -54,7 +54,7 @@ def sync_detailed(
     *,
     client: Client,
     json_body: AModel,
-) -> Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, None]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -71,7 +71,7 @@ def sync(
     *,
     client: Client,
     json_body: AModel,
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, None]]:
     """ Try sending a JSON body  """
 
     return sync_detailed(
@@ -84,7 +84,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     json_body: AModel,
-) -> Response[Union[None, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, None]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -100,7 +100,7 @@ async def asyncio(
     *,
     client: Client,
     json_body: AModel,
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, None]]:
     """ Try sending a JSON body  """
 
     return (

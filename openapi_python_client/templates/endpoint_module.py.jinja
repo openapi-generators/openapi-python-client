@@ -10,9 +10,9 @@ from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, File
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, return_type, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, arguments, client, kwargs, parse_response %}
 
-{% set return_string = return_type(endpoint) %}
+{% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
 
 def _get_kwargs(
