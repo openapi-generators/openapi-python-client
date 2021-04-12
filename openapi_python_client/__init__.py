@@ -14,7 +14,8 @@ from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, Pack
 
 from openapi_python_client import utils
 
-from .parser import GeneratorData, import_string_from_reference
+from .config import Config
+from .parser import GeneratorData, import_string_from_class
 from .parser.errors import GeneratorError
 from .utils import snake_case
 
@@ -41,15 +42,12 @@ TEMPLATE_FILTERS = {
 
 
 class Project:
-    project_name_override: Optional[str] = None
-    package_name_override: Optional[str] = None
-    package_version_override: Optional[str] = None
-
     def __init__(
         self,
         *,
         openapi: GeneratorData,
         meta: MetaType,
+        config: Config,
         custom_template_path: Optional[Path] = None,
         file_encoding: str = "utf-8",
     ) -> None:
@@ -70,17 +68,17 @@ class Project:
             loader = package_loader
         self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
 
-        self.project_name: str = self.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
+        self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
         self.project_dir: Path = Path.cwd()
         if meta != MetaType.NONE:
             self.project_dir /= self.project_name
 
-        self.package_name: str = self.package_name_override or self.project_name.replace("-", "_")
+        self.package_name: str = config.package_name_override or self.project_name.replace("-", "_")
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description: str = utils.remove_string_escapes(
             f"A client library for accessing {self.openapi.title}"
         )
-        self.version: str = self.package_version_override or openapi.version
+        self.version: str = config.package_version_override or openapi.version
 
         self.env.filters.update(TEMPLATE_FILTERS)
 
@@ -215,21 +213,21 @@ class Project:
         imports = []
 
         model_template = self.env.get_template("model.py.jinja")
-        for model in self.openapi.models.values():
-            module_path = models_dir / f"{model.reference.module_name}.py"
+        for model in self.openapi.models:
+            module_path = models_dir / f"{model.class_info.module_name}.py"
             module_path.write_text(model_template.render(model=model), encoding=self.file_encoding)
-            imports.append(import_string_from_reference(model.reference))
+            imports.append(import_string_from_class(model.class_info))
 
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
         int_enum_template = self.env.get_template("int_enum.py.jinja")
-        for enum in self.openapi.enums.values():
-            module_path = models_dir / f"{enum.reference.module_name}.py"
+        for enum in self.openapi.enums:
+            module_path = models_dir / f"{enum.class_info.module_name}.py"
             if enum.value_type is int:
                 module_path.write_text(int_enum_template.render(enum=enum), encoding=self.file_encoding)
             else:
                 module_path.write_text(str_enum_template.render(enum=enum), encoding=self.file_encoding)
-            imports.append(import_string_from_reference(enum.reference))
+            imports.append(import_string_from_class(enum.class_info))
 
         models_init_template = self.env.get_template("models_init.py.jinja")
         models_init.write_text(models_init_template.render(imports=imports), encoding=self.file_encoding)
@@ -261,16 +259,23 @@ def _get_project_for_url_or_path(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,
+    config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path)
     if isinstance(data_dict, GeneratorError):
         return data_dict
-    openapi = GeneratorData.from_dict(data_dict)
+    openapi = GeneratorData.from_dict(data_dict, config=config)
     if isinstance(openapi, GeneratorError):
         return openapi
-    return Project(openapi=openapi, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding)
+    return Project(
+        openapi=openapi,
+        custom_template_path=custom_template_path,
+        meta=meta,
+        file_encoding=file_encoding,
+        config=config,
+    )
 
 
 def create_new_client(
@@ -278,6 +283,7 @@ def create_new_client(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,
+    config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
@@ -288,7 +294,12 @@ def create_new_client(
          A list containing any errors encountered when generating.
     """
     project = _get_project_for_url_or_path(
-        url=url, path=path, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding
+        url=url,
+        path=path,
+        custom_template_path=custom_template_path,
+        meta=meta,
+        file_encoding=file_encoding,
+        config=config,
     )
     if isinstance(project, GeneratorError):
         return [project]
@@ -300,6 +311,7 @@ def update_existing_client(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,
+    config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Sequence[GeneratorError]:
@@ -310,7 +322,12 @@ def update_existing_client(
          A list containing any errors encountered when generating.
     """
     project = _get_project_for_url_or_path(
-        url=url, path=path, custom_template_path=custom_template_path, meta=meta, file_encoding=file_encoding
+        url=url,
+        path=path,
+        custom_template_path=custom_template_path,
+        meta=meta,
+        file_encoding=file_encoding,
+        config=config,
     )
     if isinstance(project, GeneratorError):
         return [project]

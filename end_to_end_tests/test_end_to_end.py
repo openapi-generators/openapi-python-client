@@ -53,7 +53,7 @@ def run_e2e_test(extra_args=None, expected_differences=None):
     output_path = Path.cwd() / "my-test-api-client"
     shutil.rmtree(output_path, ignore_errors=True)
 
-    args = [f"--config={config_path}", "generate", f"--path={openapi_path}"]
+    args = ["generate", f"--config={config_path}", f"--path={openapi_path}"]
     if extra_args:
         args.extend(extra_args)
     result = runner.invoke(app, args)

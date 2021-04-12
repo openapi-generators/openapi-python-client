@@ -18,10 +18,13 @@ from ..types import UNSET, Unset
 {% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
 {% endif %}
 
-T = TypeVar("T", bound="{{ model.reference.class_name }}")
+{% set class_name = model.class_info.name %}
+{% set module_name = model.class_info.module_name %}
+
+T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
-class {{ model.reference.class_name }}:
+class {{ class_name }}:
     """ {{ model.description }} """
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
@@ -91,7 +94,7 @@ class {{ model.reference.class_name }}:
     {% endif %}
 
 {% endfor %}
-        {{model.reference.module_name}} = cls(
+        {{ module_name }} = cls(
 {% for property in model.required_properties + model.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
 {% endfor %}
@@ -105,12 +108,12 @@ class {{ model.reference.class_name }}:
             {{ construct(model.additional_properties, "prop_dict") | indent(12) }}
             additional_properties[prop_name] = {{ model.additional_properties.python_name }}
 
-        {{model.reference.module_name}}.additional_properties = additional_properties
+        {{ module_name }}.additional_properties = additional_properties
     {% else %}
-        {{model.reference.module_name}}.additional_properties = d
+        {{ module_name }}.additional_properties = d
     {% endif %}
 {% endif %}
-        return {{model.reference.module_name}}
+        return {{ module_name }}
 
     {% if model.additional_properties %}
     @property

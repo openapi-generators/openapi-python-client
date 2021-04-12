@@ -1,11 +1,18 @@
 from typing import Callable
+from unittest.mock import MagicMock
 
 import pytest
 
 import openapi_python_client.schema as oai
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import DateTimeProperty, ModelProperty, StringProperty
-from openapi_python_client.parser.reference import Reference
+
+
+def get_class():
+    from openapi_python_client.parser.properties import Class
+
+    return Class(name="MyClass", module_name="my_module")
 
 
 @pytest.mark.parametrize(
@@ -23,14 +30,14 @@ from openapi_python_client.parser.reference import Reference
     ],
 )
 def test_get_type_string(no_optional, nullable, required, json, expected):
-    from openapi_python_client.parser.properties import ModelProperty, Reference
+    from openapi_python_client.parser.properties import ModelProperty
 
     prop = ModelProperty(
         name="prop",
         required=required,
         nullable=nullable,
         default=None,
-        reference=Reference(class_name="MyClass", module_name="my_module"),
+        class_info=get_class(),
         description="",
         optional_properties=[],
         required_properties=[],
@@ -42,14 +49,14 @@ def test_get_type_string(no_optional, nullable, required, json, expected):
 
 
 def test_get_imports():
-    from openapi_python_client.parser.properties import ModelProperty, Reference
+    from openapi_python_client.parser.properties import ModelProperty
 
     prop = ModelProperty(
         name="prop",
         required=False,
         nullable=True,
         default=None,
-        reference=Reference(class_name="MyClass", module_name="my_module"),
+        class_info=get_class(),
         description="",
         optional_properties=[],
         required_properties=[],
@@ -89,17 +96,13 @@ class TestBuildModelProperty:
         )
 
         model, _ = build_model_property(
-            data=data,
-            name="prop",
-            schemas=Schemas(),
-            required=True,
-            parent_name="parent",
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=MagicMock()
         )
 
         assert model.additional_properties == expected_additional_properties
 
     def test_happy_path(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import Class, Schemas, build_model_property
 
         data = oai.Schema.construct(
             required=["req"],
@@ -111,27 +114,26 @@ class TestBuildModelProperty:
             description="A class called MyModel",
             nullable=False,
         )
-        schemas = Schemas(models={"OtherModel": None})
+        schemas = Schemas(classes_by_reference={"OtherModel": None}, classes_by_name={"OtherModel": None})
 
         model, new_schemas = build_model_property(
-            data=data,
-            name="prop",
-            schemas=schemas,
-            required=True,
-            parent_name="parent",
+            data=data, name="prop", schemas=schemas, required=True, parent_name="parent", config=Config()
         )
 
         assert new_schemas != schemas
-        assert new_schemas.models == {
+        assert new_schemas.classes_by_name == {
             "OtherModel": None,
             "ParentMyModel": model,
+        }
+        assert new_schemas.classes_by_reference == {
+            "OtherModel": None,
         }
         assert model == ModelProperty(
             name="prop",
             required=True,
             nullable=False,
             default=None,
-            reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
+            class_info=Class(name="ParentMyModel", module_name="parent_my_model"),
             required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
             optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
             description=data.description,
@@ -149,14 +151,10 @@ class TestBuildModelProperty:
         from openapi_python_client.parser.properties import Schemas, build_model_property
 
         data = oai.Schema.construct()
-        schemas = Schemas(models={"OtherModel": None})
+        schemas = Schemas(classes_by_name={"OtherModel": None})
 
         err, new_schemas = build_model_property(
-            data=data,
-            name="OtherModel",
-            schemas=schemas,
-            required=True,
-            parent_name=None,
+            data=data, name="OtherModel", schemas=schemas, required=True, parent_name=None, config=Config()
         )
 
         assert new_schemas == schemas
@@ -173,11 +171,7 @@ class TestBuildModelProperty:
         schemas = Schemas()
 
         err, new_schemas = build_model_property(
-            data=data,
-            name="prop",
-            schemas=schemas,
-            required=True,
-            parent_name=None,
+            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=MagicMock()
         )
 
         assert new_schemas == schemas
@@ -196,38 +190,11 @@ class TestBuildModelProperty:
         schemas = Schemas()
 
         err, new_schemas = build_model_property(
-            data=data,
-            name="prop",
-            schemas=schemas,
-            required=True,
-            parent_name=None,
+            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=MagicMock()
         )
 
         assert new_schemas == schemas
         assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
-
-
-@pytest.fixture
-def model_property() -> Callable[..., ModelProperty]:
-    from openapi_python_client.parser.reference import Reference
-
-    def _factory(**kwargs):
-        kwargs = {
-            "name": "",
-            "description": "",
-            "required": True,
-            "nullable": True,
-            "default": None,
-            "reference": Reference(class_name="", module_name=""),
-            "required_properties": [],
-            "optional_properties": [],
-            "relative_imports": set(),
-            "additional_properties": False,
-            **kwargs,
-        }
-        return ModelProperty(**kwargs)
-
-    return _factory
 
 
 def string_property(**kwargs) -> StringProperty:
@@ -242,56 +209,88 @@ def string_property(**kwargs) -> StringProperty:
 
 
 class TestProcessProperties:
-    def test_conflicting_properties_different_types(self, model_property):
+    def test_conflicting_properties_different_types(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         schemas = Schemas(
-            models={
-                "First": model_property(
+            classes_by_reference={
+                "/First": model_property_factory(
                     optional_properties=[StringProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
-                "Second": model_property(
+                "/Second": model_property_factory(
                     optional_properties=[DateTimeProperty(name="prop", required=True, nullable=True, default=None)]
                 ),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
         assert isinstance(result, PropertyError)
 
-    def test_conflicting_properties_same_types(self, model_property):
+    def test_invalid_reference(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="ThisIsNotGood")])
+        schemas = Schemas()
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+
+        assert isinstance(result, PropertyError)
+
+    def test_non_model_reference(self, enum_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="#/First")])
         schemas = Schemas(
-            models={
-                "First": model_property(optional_properties=[string_property(default="abc")]),
-                "Second": model_property(optional_properties=[string_property()]),
+            classes_by_reference={
+                "/First": enum_property_factory(),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
         assert isinstance(result, PropertyError)
 
-    def test_duplicate_properties(self, model_property):
+    def test_conflicting_properties_same_types(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[string_property(default="abc")]),
+                "/Second": model_property_factory(optional_properties=[string_property()]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+
+        assert isinstance(result, PropertyError)
+
+    def test_duplicate_properties(self, model_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         prop = string_property()
         schemas = Schemas(
-            models={
-                "First": model_property(optional_properties=[prop]),
-                "Second": model_property(optional_properties=[prop]),
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[prop]),
+                "/Second": model_property_factory(optional_properties=[prop]),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
         assert result.optional_props == [prop], "There should only be one copy of duplicate properties"
 
@@ -299,23 +298,27 @@ class TestProcessProperties:
     @pytest.mark.parametrize("second_nullable", [True, False])
     @pytest.mark.parametrize("first_required", [True, False])
     @pytest.mark.parametrize("second_required", [True, False])
-    def test_mixed_requirements(self, model_property, first_nullable, second_nullable, first_required, second_required):
+    def test_mixed_requirements(
+        self, model_property_factory, first_nullable, second_nullable, first_required, second_required
+    ):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="First"), oai.Reference.construct(ref="Second")])
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
         schemas = Schemas(
-            models={
-                "First": model_property(
+            classes_by_reference={
+                "/First": model_property_factory(
                     optional_properties=[string_property(required=first_required, nullable=first_nullable)]
                 ),
-                "Second": model_property(
+                "/Second": model_property_factory(
                     optional_properties=[string_property(required=second_required, nullable=second_nullable)]
                 ),
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=MagicMock())
 
         nullable = first_nullable and second_nullable
         required = first_required or second_required
@@ -346,7 +349,7 @@ class TestProcessProperties:
         )
         schemas = Schemas()
 
-        result = _process_properties(data=data, schemas=schemas, class_name="")
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=MagicMock())
 
         assert result.optional_props == [string_property(name="second", required=False, nullable=False)]
         assert result.required_props == [string_property(name="first", required=True, nullable=False)]
