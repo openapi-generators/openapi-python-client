@@ -1098,6 +1098,15 @@
       "ModelFromAllOf": {
         "title": "ModelFromAllOf",
         "type": "object",
+        "additionalProperties": false,
+        "allOf": [
+          {"$ref": "#/components/schemas/AllOfSubModel"},
+          {"$ref": "#/components/schemas/AnotherAllOfSubModel"}
+        ]
+      },
+      "ModelFromOneOf": {
+        "title": "ModelFromOneOf",
+        "type": "object",
         "allOf": [
           {"$ref": "#/components/schemas/AllOfSubModel"},
           {"$ref": "#/components/schemas/AnotherAllOfSubModel"}

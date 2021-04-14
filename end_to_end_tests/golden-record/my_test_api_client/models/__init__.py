@@ -10,6 +10,7 @@ from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
 from .http_validation_error import HTTPValidationError
 from .model_from_all_of import ModelFromAllOf
+from .model_from_one_of import ModelFromOneOf
 from .model_with_additional_properties_inlined import ModelWithAdditionalPropertiesInlined
 from .model_with_additional_properties_inlined_additional_property import (
     ModelWithAdditionalPropertiesInlinedAdditionalProperty,
