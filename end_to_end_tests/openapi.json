@@ -1107,7 +1107,7 @@
       "ModelFromOneOf": {
         "title": "ModelFromOneOf",
         "type": "object",
-        "allOf": [
+        "oneOf": [
           {"$ref": "#/components/schemas/AllOfSubModel"},
           {"$ref": "#/components/schemas/AnotherAllOfSubModel"}
         ]
