@@ -1,6 +1,9 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
+{% if endpoint.multipart_body_class %}
+import json
+{% endif %}
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, is_file {% endif %}
@@ -41,8 +44,10 @@ def _get_kwargs(
     for key, value in multipart_data.to_dict().items():
          if is_file(value):
              files[key] = value
-         else:
+         elif isinstance(value, str):
              data[key] = value
+         else:
+             data[key] = json.dumps(value)
     {% endif %}
 
     return {

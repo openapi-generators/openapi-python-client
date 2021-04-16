@@ -1072,6 +1072,30 @@
             "title": "Some String",
             "type": "string",
             "default": "some_default_string"
+          },
+          "some_number": {
+            "title": "Some Number",
+            "type": "number"
+          },
+          "some_array": {
+            "title": "Some Array",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "some_object": {
+            "title": "Some Object",
+            "type": "object",
+            "required": ["num", "text"],
+            "properties": {
+              "num": {
+                "type": "number"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
           }
         },
         "additionalProperties": false

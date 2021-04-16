@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Optional, Union
 
 import httpx
@@ -27,8 +28,10 @@ def _get_kwargs(
     for key, value in multipart_data.to_dict().items():
         if is_file(value):
             files[key] = value
-        else:
+        elif isinstance(value, str):
             data[key] = value
+        else:
+            data[key] = json.dumps(value)
 
     return {
         "url": url,
