@@ -48,6 +48,10 @@ This will generate a new client library named based on the title in your OpenAPI
 of your API is "My API", the expected output will be "my-api-client". If a folder already exists by that name, you'll
 get an error.
 
+If you have an `openapi.json` file available on disk, in any CLI invocation you can build off that instead by replacing `--url` with a `--path`:
+
+`openapi-python-client generate --path location/on/disk/openapi.json`
+
 ### Update an existing client
 
 `openapi-python-client update --url https://my.api.com/openapi.json`
