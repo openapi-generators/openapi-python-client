@@ -318,28 +318,34 @@ def build_enum_property(
     else:
         return PropertyError(data=data, detail="No values provided for Enum"), schemas
 
-    default = None
-    if data.default is not None:
-        inverse_values = {v: k for k, v in values.items()}
-        try:
-            default = f"{class_info.name}.{inverse_values[data.default]}"
-        except KeyError:
-            return (
-                PropertyError(detail=f"{data.default} is an invalid default for enum {class_info.name}", data=data),
-                schemas,
-            )
-
     prop = EnumProperty(
         name=name,
         required=required,
-        default=default,
         nullable=data.nullable,
         class_info=class_info,
         values=values,
         value_type=value_type,
+        default=None,
     )
+
+    default = get_enum_default(prop, data)
+    if isinstance(default, PropertyError):
+        return default, schemas
+    prop = attr.evolve(prop, default=default)
+
     schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas
+
+
+def get_enum_default(prop: EnumProperty, data: oai.Schema) -> Union[Optional[Any], PropertyError]:
+    if data.default is None:
+        return None
+
+    inverse_values = {v: k for k, v in prop.values.items()}
+    try:
+        return f"{prop.class_info.name}.{inverse_values[data.default]}"
+    except KeyError:
+        return PropertyError(detail=f"{data.default} is an invalid default for enum {prop.class_info.name}", data=data)
 
 
 def build_union_property(
@@ -397,7 +403,7 @@ def build_list_property(
 def _property_from_ref(
     name: str,
     required: bool,
-    nullable: bool,
+    parent: Union[oai.Schema, None],
     data: oai.Reference,
     schemas: Schemas,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
@@ -405,12 +411,19 @@ def _property_from_ref(
     if isinstance(ref_path, ParseError):
         return PropertyError(data=data, detail=ref_path.detail), schemas
     existing = schemas.classes_by_reference.get(ref_path)
-    if existing:
-        return (
-            attr.evolve(existing, required=required, name=name, nullable=nullable),
-            schemas,
-        )
-    return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+    if not existing:
+        return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+
+    prop = attr.evolve(existing, required=required, name=name)
+    if parent:
+        prop = attr.evolve(prop, nullable=parent.nullable)
+        if isinstance(prop, EnumProperty):
+            default = get_enum_default(prop, parent)
+            if isinstance(default, PropertyError):
+                return default, schemas
+            prop = attr.evolve(prop, default=default)
+
+    return prop, schemas
 
 
 def _property_from_data(
@@ -424,14 +437,12 @@ def _property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        return _property_from_ref(name=name, required=required, nullable=False, data=data, schemas=schemas)
+        return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
 
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     sub_data = (data.allOf or []) + data.anyOf + data.oneOf
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
-        return _property_from_ref(
-            name=name, required=required, nullable=data.nullable, data=sub_data[0], schemas=schemas
-        )
+        return _property_from_ref(name=name, required=required, parent=data, data=sub_data[0], schemas=schemas)
 
     if data.enum:
         return build_enum_property(
@@ -443,11 +454,11 @@ def _property_from_data(
             parent_name=parent_name,
             config=config,
         )
-    if data.anyOf or data.oneOf:
+    elif data.anyOf or data.oneOf:
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    if data.type == "string":
+    elif data.type == "string":
         return _string_based_property(name=name, required=required, data=data), schemas
     elif data.type == "number":
         return (

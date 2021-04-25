@@ -2,6 +2,7 @@
 
 from .a_model import AModel
 from .all_of_sub_model import AllOfSubModel
+from .an_all_of_enum import AnAllOfEnum
 from .an_enum import AnEnum
 from .an_int_enum import AnIntEnum
 from .another_all_of_sub_model import AnotherAllOfSubModel
