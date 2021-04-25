@@ -30,12 +30,12 @@ class ModelWithUnionPropertyInlinedFruitType1:
         d = src_dict.copy()
         bananas = d.pop("bananas", UNSET)
 
-        model_with_union_property_inlined_fruit_type1 = cls(
+        model_with_union_property_inlined_fruit_type_1 = cls(
             bananas=bananas,
         )
 
-        model_with_union_property_inlined_fruit_type1.additional_properties = d
-        return model_with_union_property_inlined_fruit_type1
+        model_with_union_property_inlined_fruit_type_1.additional_properties = d
+        return model_with_union_property_inlined_fruit_type_1
 
     @property
     def additional_keys(self) -> List[str]:

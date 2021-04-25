@@ -28,8 +28,8 @@ class TestInlineObjectsResponse200:
         d = src_dict.copy()
         a_property = d.pop("a_property", UNSET)
 
-        test_inline_objects_response200 = cls(
+        test_inline_objects_response_200 = cls(
             a_property=a_property,
         )
 
-        return test_inline_objects_response200
+        return test_inline_objects_response_200

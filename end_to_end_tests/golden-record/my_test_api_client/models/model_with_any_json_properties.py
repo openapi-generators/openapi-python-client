@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
-from ..models.model_with_any_json_properties_additional_property_type0 import (
+from ..models.model_with_any_json_properties_additional_property_type_0 import (
     ModelWithAnyJsonPropertiesAdditionalPropertyType0,
 )
 
@@ -46,21 +46,21 @@ class ModelWithAnyJsonProperties:
                 data: object,
             ) -> Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str]:
                 try:
-                    additional_property_type0: ModelWithAnyJsonPropertiesAdditionalPropertyType0
+                    additional_property_type_0: ModelWithAnyJsonPropertiesAdditionalPropertyType0
                     if not isinstance(data, dict):
                         raise TypeError()
-                    additional_property_type0 = ModelWithAnyJsonPropertiesAdditionalPropertyType0.from_dict(data)
+                    additional_property_type_0 = ModelWithAnyJsonPropertiesAdditionalPropertyType0.from_dict(data)
 
-                    return additional_property_type0
+                    return additional_property_type_0
                 except:  # noqa: E722
                     pass
                 try:
-                    additional_property_type1: List[str]
+                    additional_property_type_1: List[str]
                     if not isinstance(data, list):
                         raise TypeError()
-                    additional_property_type1 = cast(List[str], data)
+                    additional_property_type_1 = cast(List[str], data)
 
-                    return additional_property_type1
+                    return additional_property_type_1
                 except:  # noqa: E722
                     pass
                 return cast(

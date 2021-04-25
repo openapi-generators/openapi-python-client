@@ -15,6 +15,11 @@ def test_snake_case_from_pascal_with_acronyms():
     assert utils.snake_case("S3Config") == "s3_config"
 
 
+def test_snake_case_from_pascal_with_numbers():
+    assert utils.snake_case("Response200") == "response_200"
+    assert utils.snake_case("Response200WithContent") == "response_200_with_content"
+
+
 def test_snake_case_from_pascal():
     assert utils.snake_case("HttpResponsePascalCase") == "http_response_pascal_case"
 
