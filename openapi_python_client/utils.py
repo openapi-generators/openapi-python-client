@@ -40,8 +40,8 @@ def snake_case(value: str) -> str:
 
 def pascal_case(value: str) -> str:
     words = split_words(sanitize(value))
-    words = [word.capitalize() if not word.isupper() else word for word in words]
-    value = "".join(words)
+    capitalized_words = (word.capitalize() if not word.isupper() else word for word in words)
+    value = "".join(capitalized_words)
     return fix_keywords(value)
 
 

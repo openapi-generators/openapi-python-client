@@ -62,6 +62,7 @@ def test_to_valid_python_identifier():
         ("TLAClass", "TLAClass"),
         ("Title Case", "TitleCase"),
         ("s3_config", "S3Config"),
+        ("__LeadingUnderscore", "LeadingUnderscore"),
     ],
 )
 def test_pascalcase(before, after):
