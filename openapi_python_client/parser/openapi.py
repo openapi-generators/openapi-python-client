@@ -54,6 +54,10 @@ class EndpointCollection:
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
                 )
+                if not isinstance(endpoint, ParseError):
+                    endpoint, schemas = Endpoint._add_parameters(
+                        endpoint=endpoint, data=path_data, schemas=schemas, config=config
+                    )
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
@@ -209,7 +213,7 @@ class Endpoint:
 
     @staticmethod
     def _add_parameters(
-        *, endpoint: "Endpoint", data: oai.Operation, schemas: Schemas, config: Config
+        *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
         if data.parameters is None:
