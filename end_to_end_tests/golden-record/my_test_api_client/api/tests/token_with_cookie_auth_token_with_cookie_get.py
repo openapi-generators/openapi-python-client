@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 import httpx
 
@@ -26,24 +26,12 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[None, None]]:
-    if response.status_code == 200:
-        response_200 = None
-
-        return response_200
-    if response.status_code == 401:
-        response_401 = None
-
-        return response_401
-    return None
-
-
-def _build_response(*, response: httpx.Response) -> Response[Union[None, None]]:
+def _build_response(*, response: httpx.Response) -> Response[None]:
     return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(response=response),
+        parsed=None,
     )
 
 
@@ -51,7 +39,7 @@ def sync_detailed(
     *,
     client: Client,
     my_token: str,
-) -> Response[Union[None, None]]:
+) -> Response[None]:
     kwargs = _get_kwargs(
         client=client,
         my_token=my_token,
@@ -64,24 +52,11 @@ def sync_detailed(
     return _build_response(response=response)
 
 
-def sync(
-    *,
-    client: Client,
-    my_token: str,
-) -> Optional[Union[None, None]]:
-    """ Test optional cookie parameters """
-
-    return sync_detailed(
-        client=client,
-        my_token=my_token,
-    ).parsed
-
-
 async def asyncio_detailed(
     *,
     client: Client,
     my_token: str,
-) -> Response[Union[None, None]]:
+) -> Response[None]:
     kwargs = _get_kwargs(
         client=client,
         my_token=my_token,
@@ -91,18 +66,3 @@ async def asyncio_detailed(
         response = await _client.get(**kwargs)
 
     return _build_response(response=response)
-
-
-async def asyncio(
-    *,
-    client: Client,
-    my_token: str,
-) -> Optional[Union[None, None]]:
-    """ Test optional cookie parameters """
-
-    return (
-        await asyncio_detailed(
-            client=client,
-            my_token=my_token,
-        )
-    ).parsed

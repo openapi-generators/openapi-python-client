@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
 import attr
 from dateutil.parser import isoparse
 
+from ..models.an_all_of_enum import AnAllOfEnum
 from ..models.an_enum import AnEnum
 from ..models.different_enum import DifferentEnum
 from ..models.free_form_model import FreeFormModel
@@ -27,6 +28,8 @@ class AModel:
     required_nullable: Optional[str]
     nullable_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, None]
     nullable_model: Optional[ModelWithUnionProperty]
+    an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
+    an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
@@ -39,6 +42,8 @@ class AModel:
 
     def to_dict(self) -> Dict[str, Any]:
         an_enum_value = self.an_enum_value.value
+
+        an_allof_enum_with_overridden_default = self.an_allof_enum_with_overridden_default.value
 
         if isinstance(self.a_camel_date_time, datetime.datetime):
             a_camel_date_time = self.a_camel_date_time.isoformat()
@@ -55,6 +60,10 @@ class AModel:
             one_of_models = self.one_of_models.to_dict()
 
         model = self.model.to_dict()
+
+        an_optional_allof_enum: Union[Unset, str] = UNSET
+        if not isinstance(self.an_optional_allof_enum, Unset):
+            an_optional_allof_enum = self.an_optional_allof_enum.value
 
         nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
@@ -133,6 +142,7 @@ class AModel:
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,
+                "an_allof_enum_with_overridden_default": an_allof_enum_with_overridden_default,
                 "aCamelDateTime": a_camel_date_time,
                 "a_date": a_date,
                 "required_not_nullable": required_not_nullable,
@@ -144,6 +154,8 @@ class AModel:
                 "nullable_model": nullable_model,
             }
         )
+        if an_optional_allof_enum is not UNSET:
+            field_dict["an_optional_allof_enum"] = an_optional_allof_enum
         if nested_list_of_enums is not UNSET:
             field_dict["nested_list_of_enums"] = nested_list_of_enums
         if a_not_required_date is not UNSET:
@@ -169,6 +181,8 @@ class AModel:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         an_enum_value = AnEnum(d.pop("an_enum_value"))
+
+        an_allof_enum_with_overridden_default = AnAllOfEnum(d.pop("an_allof_enum_with_overridden_default"))
 
         def _parse_a_camel_date_time(data: object) -> Union[datetime.date, datetime.datetime]:
             try:
@@ -213,6 +227,11 @@ class AModel:
         one_of_models = _parse_one_of_models(d.pop("one_of_models"))
 
         model = ModelWithUnionProperty.from_dict(d.pop("model"))
+
+        an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
+        _an_optional_allof_enum = d.pop("an_optional_allof_enum", UNSET)
+        if not isinstance(_an_optional_allof_enum, Unset):
+            an_optional_allof_enum = AnAllOfEnum(_an_optional_allof_enum)
 
         nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
@@ -350,11 +369,13 @@ class AModel:
 
         a_model = cls(
             an_enum_value=an_enum_value,
+            an_allof_enum_with_overridden_default=an_allof_enum_with_overridden_default,
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,
             required_not_nullable=required_not_nullable,
             one_of_models=one_of_models,
             model=model,
+            an_optional_allof_enum=an_optional_allof_enum,
             nested_list_of_enums=nested_list_of_enums,
             a_nullable_date=a_nullable_date,
             a_not_required_date=a_not_required_date,

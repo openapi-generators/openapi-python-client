@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import GeneratorError, ParseError
 
 runner = CliRunner()
@@ -35,14 +36,19 @@ def test_config_arg(mocker, _create_new_client):
 
     result = runner.invoke(
         app,
-        [f"--config={config_path}", "generate", f"--path={path}", f"--file-encoding={file_encoding}"],
+        ["generate", f"--config={config_path}", f"--path={path}", f"--file-encoding={file_encoding}"],
         catch_exceptions=False,
     )
 
     assert result.exit_code == 0
     load_config.assert_called_once_with(path=Path(config_path))
     _create_new_client.assert_called_once_with(
-        url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+        url=None,
+        path=Path(path),
+        custom_template_path=None,
+        meta=MetaType.POETRY,
+        file_encoding="utf-8",
+        config=load_config.return_value,
     )
 
 
@@ -55,7 +61,7 @@ def test_bad_config(mocker, _create_new_client):
     config_path = "config/path"
     path = "cool/path"
 
-    result = runner.invoke(app, [f"--config={config_path}", "generate", f"--path={path}"])
+    result = runner.invoke(app, ["generate", f"--config={config_path}", f"--path={path}"])
 
     assert result.exit_code == 2
     assert "Unable to parse config" in result.stdout
@@ -82,47 +88,62 @@ class TestGenerate:
 
     def test_generate_url(self, _create_new_client):
         url = "cool.url"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--url={url}"])
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
-            url=url, path=None, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+            url=url, path=None, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8", config=Config()
         )
 
     def test_generate_path(self, _create_new_client):
         path = "cool/path"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}"])
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+            url=None,
+            path=Path(path),
+            custom_template_path=None,
+            meta=MetaType.POETRY,
+            file_encoding="utf-8",
+            config=Config(),
         )
 
     def test_generate_meta(self, _create_new_client):
         path = "cool/path"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}", "--meta=none"])
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.NONE, file_encoding="utf-8"
+            url=None,
+            path=Path(path),
+            custom_template_path=None,
+            meta=MetaType.NONE,
+            file_encoding="utf-8",
+            config=Config(),
         )
 
     def test_generate_encoding(self, _create_new_client):
         path = "cool/path"
         file_encoding = "utf-8"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={file_encoding}"])
 
         assert result.exit_code == 0
         _create_new_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+            url=None,
+            path=Path(path),
+            custom_template_path=None,
+            meta=MetaType.POETRY,
+            file_encoding="utf-8",
+            config=Config(),
         )
 
     def test_generate_encoding_errors(self, _create_new_client):
@@ -198,36 +219,46 @@ class TestUpdate:
 
     def test_update_url(self, _update_existing_client):
         url = "cool.url"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["update", f"--url={url}"])
 
         assert result.exit_code == 0
         _update_existing_client.assert_called_once_with(
-            url=url, path=None, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+            url=url, path=None, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8", config=Config()
         )
 
     def test_update_path(self, _update_existing_client):
         path = "cool/path"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["update", f"--path={path}"])
 
         assert result.exit_code == 0
         _update_existing_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+            url=None,
+            path=Path(path),
+            custom_template_path=None,
+            meta=MetaType.POETRY,
+            file_encoding="utf-8",
+            config=Config(),
         )
 
     def test_update_encoding(self, _update_existing_client):
         path = "cool/path"
         file_encoding = "utf-8"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import Config, MetaType, app
 
         result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
 
         assert result.exit_code == 0
         _update_existing_client.assert_called_once_with(
-            url=None, path=Path(path), custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8"
+            url=None,
+            path=Path(path),
+            custom_template_path=None,
+            meta=MetaType.POETRY,
+            file_encoding="utf-8",
+            config=Config(),
         )
 
     def test_update_encoding_errors(self, _update_existing_client):

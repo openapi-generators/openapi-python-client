@@ -71,20 +71,6 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro return_type(endpoint) %}
-{% if endpoint.responses | length == 0 %}
-None
-{%- elif endpoint.responses | length == 1 %}
-{{ endpoint.responses[0].prop.get_type_string() }}
-{%- else %}
-Union[
-    {% for response in endpoint.responses %}
-    {{ response.prop.get_type_string() }}{{ "," if not loop.last }}
-    {% endfor %}
-]
-{%- endif %}
-{% endmacro %}
-
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
 *,
@@ -99,12 +85,12 @@ client: Client,
 {{ parameter.to_string() }},
 {% endfor %}
 {# Form data if any #}
-{% if endpoint.form_body_reference %}
-form_data: {{ endpoint.form_body_reference.class_name }},
+{% if endpoint.form_body_class %}
+form_data: {{ endpoint.form_body_class.name }},
 {% endif %}
 {# Multipart data if any #}
-{% if endpoint.multipart_body_reference %}
-multipart_data: {{ endpoint.multipart_body_reference.class_name }},
+{% if endpoint.multipart_body_class %}
+multipart_data: {{ endpoint.multipart_body_class.name }},
 {% endif %}
 {# JSON body if any #}
 {% if endpoint.json_body %}
@@ -129,10 +115,10 @@ client=client,
 {% for parameter in endpoint.path_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
-{% if endpoint.form_body_reference %}
+{% if endpoint.form_body_class %}
 form_data=form_data,
 {% endif %}
-{% if endpoint.multipart_body_reference %}
+{% if endpoint.multipart_body_class %}
 multipart_data=multipart_data,
 {% endif %}
 {% if endpoint.json_body %}
