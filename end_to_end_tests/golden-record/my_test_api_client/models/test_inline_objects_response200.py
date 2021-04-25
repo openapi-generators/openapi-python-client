@@ -4,11 +4,11 @@ import attr
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="TestInlineObjectsResponse_200")
+T = TypeVar("T", bound="TestInlineObjectsResponse200")
 
 
 @attr.s(auto_attribs=True)
-class TestInlineObjectsResponse_200:
+class TestInlineObjectsResponse200:
     """  """
 
     a_property: Union[Unset, str] = UNSET
@@ -28,8 +28,8 @@ class TestInlineObjectsResponse_200:
         d = src_dict.copy()
         a_property = d.pop("a_property", UNSET)
 
-        test_inline_objects_response_200 = cls(
+        test_inline_objects_response200 = cls(
             a_property=a_property,
         )
 
-        return test_inline_objects_response_200
+        return test_inline_objects_response200
