@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-__all__ = ["GeneratorError", "ParseError", "PropertyError", "ValidationError"]
+__all__ = ["ErrorLevel", "GeneratorError", "ParseError", "PropertyError", "ValidationError"]
 
 from pydantic import BaseModel
 

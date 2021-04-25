@@ -4,6 +4,7 @@ from typing import Tuple, Union
 
 import attr
 
+from .. import Config
 from .. import schema as oai
 from .errors import ParseError, PropertyError
 from .properties import NoneProperty, Property, Schemas, property_from_data
@@ -27,22 +28,28 @@ _SOURCE_BY_CONTENT_TYPE = {
 
 
 def empty_response(status_code: int, response_name: str) -> Response:
+    """ Return an empty response, for when no response type is defined """
     return Response(
         status_code=status_code,
-        prop=NoneProperty(name=response_name, default=None, nullable=False, required=True),
+        prop=NoneProperty(
+            name=response_name,
+            default=None,
+            nullable=False,
+            required=True,
+        ),
         source="None",
     )
 
 
 def response_from_data(
-    *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas, parent_name: str
+    *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[Response, ParseError], Schemas]:
     """ Generate a Response from the OpenAPI dictionary representation of it """
 
     response_name = f"response_{status_code}"
     if isinstance(data, oai.Reference) or data.content is None:
         return (
-            empty_response(status_code, response_name),
+            empty_response(status_code=status_code, response_name=response_name),
             schemas,
         )
 
@@ -67,6 +74,7 @@ def response_from_data(
         data=schema_data,
         schemas=schemas,
         parent_name=parent_name,
+        config=config,
     )
 
     if isinstance(prop, PropertyError):

@@ -6,6 +6,7 @@ from typing import Optional, Sequence
 import typer
 
 from openapi_python_client import MetaType
+from openapi_python_client.config import Config
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
 app = typer.Typer()
@@ -19,14 +20,13 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def _process_config(path: Optional[pathlib.Path]) -> None:
-    from .config import Config
+def _process_config(path: Optional[pathlib.Path]) -> Config:
 
     if not path:
-        return
+        return Config()
 
     try:
-        Config.load_from_path(path=path)
+        return Config.load_from_path(path=path)
     except:  # noqa
         raise typer.BadParameter("Unable to parse config")
 
@@ -35,9 +35,6 @@ def _process_config(path: Optional[pathlib.Path]) -> None:
 @app.callback(name="openapi-python-client")
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
-    config: Optional[pathlib.Path] = typer.Option(
-        None, callback=_process_config, help="Path to the config file to use"
-    ),
 ) -> None:
     """ Generate a Python client from an OpenAPI JSON document """
     pass
@@ -111,14 +108,17 @@ _meta_option = typer.Option(
     help="The type of metadata you want to generate.",
 )
 
+CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to use")
+
 
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
-    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     meta: MetaType = _meta_option,
+    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
+    config_path: Optional[pathlib.Path] = CONFIG_OPTION,
 ) -> None:
     """ Generate a new OpenAPI Client library """
     from . import create_new_client
@@ -136,8 +136,14 @@ def generate(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
+    config = _process_config(config_path)
     errors = create_new_client(
-        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+        url=url,
+        path=path,
+        meta=meta,
+        custom_template_path=custom_template_path,
+        file_encoding=file_encoding,
+        config=config,
     )
     handle_errors(errors)
 
@@ -149,6 +155,7 @@ def update(
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
+    config_path: Optional[pathlib.Path] = CONFIG_OPTION,
 ) -> None:
     """ Update an existing OpenAPI Client library """
     from . import update_existing_client
@@ -166,7 +173,13 @@ def update(
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
+    config = _process_config(config_path)
     errors = update_existing_client(
-        url=url, path=path, meta=meta, custom_template_path=custom_template_path, file_encoding=file_encoding
+        url=url,
+        path=path,
+        meta=meta,
+        custom_template_path=custom_template_path,
+        file_encoding=file_encoding,
+        config=config,
     )
     handle_errors(errors)
