@@ -13,7 +13,7 @@ from .schemas import Class, Schemas, parse_reference_path
 
 @attr.s(auto_attribs=True, frozen=True)
 class ModelProperty(Property):
-    """ A property which refers to another Schema """
+    """A property which refers to another Schema"""
 
     class_info: Class
     required_properties: List[Property]

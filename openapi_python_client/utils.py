@@ -6,7 +6,7 @@ import stringcase
 
 
 def sanitize(value: str) -> str:
-    """ Removes every character that isn't 0-9, A-Z, a-z, ' ', -, or _ """
+    """Removes every character that isn't 0-9, A-Z, a-z, ' ', -, or _"""
     return re.sub(r"[^\w _\-]+", "", value)
 
 

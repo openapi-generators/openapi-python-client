@@ -31,14 +31,14 @@ def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]
 
 @attr.s(auto_attribs=True, frozen=True)
 class Class:
-    """ Represents Python class which will be generated from an OpenAPI schema """
+    """Represents Python class which will be generated from an OpenAPI schema"""
 
     name: _ClassName
     module_name: str
 
     @staticmethod
     def from_string(*, string: str, config: Config) -> "Class":
-        """ Get a Class from an arbitrary string """
+        """Get a Class from an arbitrary string"""
         class_name = string.split("/")[-1]  # Get rid of ref path stuff
         class_name = utils.pascal_case(class_name)
         override = config.class_overrides.get(class_name)
@@ -56,7 +56,7 @@ class Class:
 
 @attr.s(auto_attribs=True, frozen=True)
 class Schemas:
-    """ Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums) """
+    """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
     classes_by_reference: Dict[_ReferencePath, Union[EnumProperty, ModelProperty]] = attr.ib(factory=dict)
     classes_by_name: Dict[_ClassName, Union[EnumProperty, ModelProperty]] = attr.ib(factory=dict)

@@ -36,7 +36,7 @@ def _process_config(path: Optional[pathlib.Path]) -> Config:
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
 ) -> None:
-    """ Generate a Python client from an OpenAPI JSON document """
+    """Generate a Python client from an OpenAPI JSON document"""
     pass
 
 
@@ -55,7 +55,7 @@ def _print_parser_error(e: GeneratorError, color: str) -> None:
 
 
 def handle_errors(errors: Sequence[GeneratorError]) -> None:
-    """ Turn custom errors into formatted error messages """
+    """Turn custom errors into formatted error messages"""
     if len(errors) == 0:
         return
     error_level = ErrorLevel.WARNING
@@ -120,7 +120,7 @@ def generate(
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
 ) -> None:
-    """ Generate a new OpenAPI Client library """
+    """Generate a new OpenAPI Client library"""
     from . import create_new_client
 
     if not url and not path:
@@ -157,7 +157,7 @@ def update(
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
 ) -> None:
-    """ Update an existing OpenAPI Client library """
+    """Update an existing OpenAPI Client library"""
     from . import update_existing_client
 
     if not url and not path:

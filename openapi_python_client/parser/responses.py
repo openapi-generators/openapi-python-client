@@ -12,7 +12,7 @@ from .properties import NoneProperty, Property, Schemas, property_from_data
 
 @attr.s(auto_attribs=True, frozen=True)
 class Response:
-    """ Describes a single response for an endpoint """
+    """Describes a single response for an endpoint"""
 
     status_code: int
     prop: Property
@@ -28,7 +28,7 @@ _SOURCE_BY_CONTENT_TYPE = {
 
 
 def empty_response(status_code: int, response_name: str) -> Response:
-    """ Return an empty response, for when no response type is defined """
+    """Return an empty response, for when no response type is defined"""
     return Response(
         status_code=status_code,
         prop=NoneProperty(
@@ -44,7 +44,7 @@ def empty_response(status_code: int, response_name: str) -> Response:
 def response_from_data(
     *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[Response, ParseError], Schemas]:
-    """ Generate a Response from the OpenAPI dictionary representation of it """
+    """Generate a Response from the OpenAPI dictionary representation of it"""
 
     response_name = f"response_{status_code}"
     if isinstance(data, oai.Reference) or data.content is None:

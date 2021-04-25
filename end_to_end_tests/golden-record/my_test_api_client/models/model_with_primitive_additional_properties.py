@@ -12,7 +12,7 @@ T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
 
 @attr.s(auto_attribs=True)
 class ModelWithPrimitiveAdditionalProperties:
-    """  """
+    """ """
 
     a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
     additional_properties: Dict[str, str] = attr.ib(init=False, factory=dict)

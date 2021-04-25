@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
 
 @attr.s(auto_attribs=True)
 class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
-    """  """
+    """ """
 
     extra_props_prop: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
