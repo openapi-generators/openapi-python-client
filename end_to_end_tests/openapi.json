@@ -739,6 +739,27 @@
           }
         }
       }
+    },
+    "/common_parameters": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "common",
+          "in": "query"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {"description": "Success"}
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {"description": "Success"}
+        }
+      }
     }
   },
   "components": {
