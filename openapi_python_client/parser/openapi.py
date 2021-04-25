@@ -55,7 +55,9 @@ class EndpointCollection:
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
                 )
                 if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint._add_parameters(endpoint=endpoint, data=path_data, schemas=schemas)
+                    endpoint, schemas = Endpoint._add_parameters(
+                        endpoint=endpoint, data=path_data, schemas=schemas, config=config
+                    )
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
