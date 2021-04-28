@@ -22,10 +22,10 @@ class ModelWithAnyJsonPropertiesAdditionalPropertyType0:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_with_any_json_properties_additional_property_type0 = cls()
+        model_with_any_json_properties_additional_property_type_0 = cls()
 
-        model_with_any_json_properties_additional_property_type0.additional_properties = d
-        return model_with_any_json_properties_additional_property_type0
+        model_with_any_json_properties_additional_property_type_0.additional_properties = d
+        return model_with_any_json_properties_additional_property_type_0
 
     @property
     def additional_keys(self) -> List[str]:

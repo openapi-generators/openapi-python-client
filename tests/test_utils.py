@@ -12,6 +12,12 @@ def test_snake_case_from_pascal_with_acronyms():
     assert utils.snake_case("HTTPResponse") == "http_response"
     assert utils.snake_case("APIClientHTTPResponse") == "api_client_http_response"
     assert utils.snake_case("OAuthClientHTTPResponse") == "o_auth_client_http_response"
+    assert utils.snake_case("S3Config") == "s3_config"
+
+
+def test_snake_case_from_pascal_with_numbers():
+    assert utils.snake_case("Response200") == "response_200"
+    assert utils.snake_case("Response200WithContent") == "response_200_with_content"
 
 
 def test_snake_case_from_pascal():
@@ -20,6 +26,7 @@ def test_snake_case_from_pascal():
 
 def test_snake_case_from_camel():
     assert utils.snake_case("httpResponseLowerCamel") == "http_response_lower_camel"
+    assert utils.snake_case("connectionID") == "connection_id"
 
 
 def test_kebab_case():
@@ -59,6 +66,8 @@ def test_to_valid_python_identifier():
         ("snake_case", "SnakeCase"),
         ("TLAClass", "TLAClass"),
         ("Title Case", "TitleCase"),
+        ("s3_config", "S3Config"),
+        ("__LeadingUnderscore", "LeadingUnderscore"),
     ],
 )
 def test_pascalcase(before, after):

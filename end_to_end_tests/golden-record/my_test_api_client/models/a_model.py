@@ -186,20 +186,20 @@ class AModel:
 
         def _parse_a_camel_date_time(data: object) -> Union[datetime.date, datetime.datetime]:
             try:
-                a_camel_date_time_type0: datetime.datetime
+                a_camel_date_time_type_0: datetime.datetime
                 if not isinstance(data, str):
                     raise TypeError()
-                a_camel_date_time_type0 = isoparse(data)
+                a_camel_date_time_type_0 = isoparse(data)
 
-                return a_camel_date_time_type0
+                return a_camel_date_time_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, str):
                 raise TypeError()
-            a_camel_date_time_type1: datetime.date
-            a_camel_date_time_type1 = isoparse(data).date()
+            a_camel_date_time_type_1: datetime.date
+            a_camel_date_time_type_1 = isoparse(data).date()
 
-            return a_camel_date_time_type1
+            return a_camel_date_time_type_1
 
         a_camel_date_time = _parse_a_camel_date_time(d.pop("aCamelDateTime"))
 
@@ -209,20 +209,20 @@ class AModel:
 
         def _parse_one_of_models(data: object) -> Union[FreeFormModel, ModelWithUnionProperty]:
             try:
-                one_of_models_type0: FreeFormModel
+                one_of_models_type_0: FreeFormModel
                 if not isinstance(data, dict):
                     raise TypeError()
-                one_of_models_type0 = FreeFormModel.from_dict(data)
+                one_of_models_type_0 = FreeFormModel.from_dict(data)
 
-                return one_of_models_type0
+                return one_of_models_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            one_of_models_type1: ModelWithUnionProperty
-            one_of_models_type1 = ModelWithUnionProperty.from_dict(data)
+            one_of_models_type_1: ModelWithUnionProperty
+            one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
-            return one_of_models_type1
+            return one_of_models_type_1
 
         one_of_models = _parse_one_of_models(d.pop("one_of_models"))
 
@@ -267,20 +267,20 @@ class AModel:
             if data is None:
                 return data
             try:
-                nullable_one_of_models_type0: FreeFormModel
+                nullable_one_of_models_type_0: FreeFormModel
                 if not isinstance(data, dict):
                     raise TypeError()
-                nullable_one_of_models_type0 = FreeFormModel.from_dict(data)
+                nullable_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
-                return nullable_one_of_models_type0
+                return nullable_one_of_models_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            nullable_one_of_models_type1: ModelWithUnionProperty
-            nullable_one_of_models_type1 = ModelWithUnionProperty.from_dict(data)
+            nullable_one_of_models_type_1: ModelWithUnionProperty
+            nullable_one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
-            return nullable_one_of_models_type1
+            return nullable_one_of_models_type_1
 
         nullable_one_of_models = _parse_nullable_one_of_models(d.pop("nullable_one_of_models"))
 
@@ -288,26 +288,26 @@ class AModel:
             if isinstance(data, Unset):
                 return data
             try:
-                not_required_one_of_models_type0: Union[Unset, FreeFormModel]
+                not_required_one_of_models_type_0: Union[Unset, FreeFormModel]
                 if not isinstance(data, dict):
                     raise TypeError()
-                not_required_one_of_models_type0 = UNSET
-                _not_required_one_of_models_type0 = data
-                if not isinstance(_not_required_one_of_models_type0, Unset):
-                    not_required_one_of_models_type0 = FreeFormModel.from_dict(_not_required_one_of_models_type0)
+                not_required_one_of_models_type_0 = UNSET
+                _not_required_one_of_models_type_0 = data
+                if not isinstance(_not_required_one_of_models_type_0, Unset):
+                    not_required_one_of_models_type_0 = FreeFormModel.from_dict(_not_required_one_of_models_type_0)
 
-                return not_required_one_of_models_type0
+                return not_required_one_of_models_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            not_required_one_of_models_type1: Union[Unset, ModelWithUnionProperty]
-            not_required_one_of_models_type1 = UNSET
-            _not_required_one_of_models_type1 = data
-            if not isinstance(_not_required_one_of_models_type1, Unset):
-                not_required_one_of_models_type1 = ModelWithUnionProperty.from_dict(_not_required_one_of_models_type1)
+            not_required_one_of_models_type_1: Union[Unset, ModelWithUnionProperty]
+            not_required_one_of_models_type_1 = UNSET
+            _not_required_one_of_models_type_1 = data
+            if not isinstance(_not_required_one_of_models_type_1, Unset):
+                not_required_one_of_models_type_1 = ModelWithUnionProperty.from_dict(_not_required_one_of_models_type_1)
 
-            return not_required_one_of_models_type1
+            return not_required_one_of_models_type_1
 
         not_required_one_of_models = _parse_not_required_one_of_models(d.pop("not_required_one_of_models", UNSET))
 
@@ -319,31 +319,31 @@ class AModel:
             if isinstance(data, Unset):
                 return data
             try:
-                not_required_nullable_one_of_models_type0: Union[Unset, FreeFormModel]
+                not_required_nullable_one_of_models_type_0: Union[Unset, FreeFormModel]
                 if not isinstance(data, dict):
                     raise TypeError()
-                not_required_nullable_one_of_models_type0 = UNSET
-                _not_required_nullable_one_of_models_type0 = data
-                if not isinstance(_not_required_nullable_one_of_models_type0, Unset):
-                    not_required_nullable_one_of_models_type0 = FreeFormModel.from_dict(
-                        _not_required_nullable_one_of_models_type0
+                not_required_nullable_one_of_models_type_0 = UNSET
+                _not_required_nullable_one_of_models_type_0 = data
+                if not isinstance(_not_required_nullable_one_of_models_type_0, Unset):
+                    not_required_nullable_one_of_models_type_0 = FreeFormModel.from_dict(
+                        _not_required_nullable_one_of_models_type_0
                     )
 
-                return not_required_nullable_one_of_models_type0
+                return not_required_nullable_one_of_models_type_0
             except:  # noqa: E722
                 pass
             try:
-                not_required_nullable_one_of_models_type1: Union[Unset, ModelWithUnionProperty]
+                not_required_nullable_one_of_models_type_1: Union[Unset, ModelWithUnionProperty]
                 if not isinstance(data, dict):
                     raise TypeError()
-                not_required_nullable_one_of_models_type1 = UNSET
-                _not_required_nullable_one_of_models_type1 = data
-                if not isinstance(_not_required_nullable_one_of_models_type1, Unset):
-                    not_required_nullable_one_of_models_type1 = ModelWithUnionProperty.from_dict(
-                        _not_required_nullable_one_of_models_type1
+                not_required_nullable_one_of_models_type_1 = UNSET
+                _not_required_nullable_one_of_models_type_1 = data
+                if not isinstance(_not_required_nullable_one_of_models_type_1, Unset):
+                    not_required_nullable_one_of_models_type_1 = ModelWithUnionProperty.from_dict(
+                        _not_required_nullable_one_of_models_type_1
                     )
 
-                return not_required_nullable_one_of_models_type1
+                return not_required_nullable_one_of_models_type_1
             except:  # noqa: E722
                 pass
             return cast(Union[FreeFormModel, ModelWithUnionProperty, None, Unset, str], data)

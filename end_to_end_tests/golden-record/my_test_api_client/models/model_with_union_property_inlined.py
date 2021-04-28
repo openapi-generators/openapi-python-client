@@ -2,8 +2,8 @@ from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_with_union_property_inlined_fruit_type0 import ModelWithUnionPropertyInlinedFruitType0
-from ..models.model_with_union_property_inlined_fruit_type1 import ModelWithUnionPropertyInlinedFruitType1
+from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
@@ -46,26 +46,26 @@ class ModelWithUnionPropertyInlined:
             if isinstance(data, Unset):
                 return data
             try:
-                fruit_type0: Union[Unset, ModelWithUnionPropertyInlinedFruitType0]
+                fruit_type_0: Union[Unset, ModelWithUnionPropertyInlinedFruitType0]
                 if not isinstance(data, dict):
                     raise TypeError()
-                fruit_type0 = UNSET
-                _fruit_type0 = data
-                if not isinstance(_fruit_type0, Unset):
-                    fruit_type0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(_fruit_type0)
+                fruit_type_0 = UNSET
+                _fruit_type_0 = data
+                if not isinstance(_fruit_type_0, Unset):
+                    fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(_fruit_type_0)
 
-                return fruit_type0
+                return fruit_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            fruit_type1: Union[Unset, ModelWithUnionPropertyInlinedFruitType1]
-            fruit_type1 = UNSET
-            _fruit_type1 = data
-            if not isinstance(_fruit_type1, Unset):
-                fruit_type1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(_fruit_type1)
+            fruit_type_1: Union[Unset, ModelWithUnionPropertyInlinedFruitType1]
+            fruit_type_1 = UNSET
+            _fruit_type_1 = data
+            if not isinstance(_fruit_type_1, Unset):
+                fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(_fruit_type_1)
 
-            return fruit_type1
+            return fruit_type_1
 
         fruit = _parse_fruit(d.pop("fruit", UNSET))
 

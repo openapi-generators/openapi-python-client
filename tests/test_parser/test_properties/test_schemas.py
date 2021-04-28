@@ -14,19 +14,19 @@ def test_class_from_string_default_config():
 @pytest.mark.parametrize(
     "class_override, module_override, expected_class, expected_module",
     (
-        (None, None, "_MyResponse", "_my_response"),
+        (None, None, "MyResponse", "my_response"),
         ("MyClass", None, "MyClass", "my_class"),
         ("MyClass", "some_module", "MyClass", "some_module"),
-        (None, "some_module", "_MyResponse", "some_module"),
+        (None, "some_module", "MyResponse", "some_module"),
     ),
 )
 def test_class_from_string(class_override, module_override, expected_class, expected_module):
     from openapi_python_client.config import ClassOverride, Config
     from openapi_python_client.parser.properties import Class
 
-    ref = "#/components/schemas/_MyResponse"
+    ref = "#/components/schemas/MyResponse"
     config = Config(
-        class_overrides={"_MyResponse": ClassOverride(class_name=class_override, module_name=module_override)}
+        class_overrides={"MyResponse": ClassOverride(class_name=class_override, module_name=module_override)}
     )
 
     result = Class.from_string(string=ref, config=config)
