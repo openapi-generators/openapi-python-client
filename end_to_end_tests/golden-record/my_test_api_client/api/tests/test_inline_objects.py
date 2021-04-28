@@ -4,7 +4,7 @@ import httpx
 
 from ...client import Client
 from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
-from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse_200
+from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
 
 
@@ -29,15 +29,15 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[TestInlineObjectsResponse_200]:
+def _parse_response(*, response: httpx.Response) -> Optional[TestInlineObjectsResponse200]:
     if response.status_code == 200:
-        response_200 = TestInlineObjectsResponse_200.from_dict(response.json())
+        response_200 = TestInlineObjectsResponse200.from_dict(response.json())
 
         return response_200
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[TestInlineObjectsResponse_200]:
+def _build_response(*, response: httpx.Response) -> Response[TestInlineObjectsResponse200]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -50,7 +50,7 @@ def sync_detailed(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Response[TestInlineObjectsResponse_200]:
+) -> Response[TestInlineObjectsResponse200]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -67,7 +67,7 @@ def sync(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Optional[TestInlineObjectsResponse_200]:
+) -> Optional[TestInlineObjectsResponse200]:
     """  """
 
     return sync_detailed(
@@ -80,7 +80,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Response[TestInlineObjectsResponse_200]:
+) -> Response[TestInlineObjectsResponse200]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -96,7 +96,7 @@ async def asyncio(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Optional[TestInlineObjectsResponse_200]:
+) -> Optional[TestInlineObjectsResponse200]:
     """  """
 
     return (

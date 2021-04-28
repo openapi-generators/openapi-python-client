@@ -4,11 +4,11 @@ import attr
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="TestInlineObjectsResponse_200")
+T = TypeVar("T", bound="TestInlineObjectsResponse200")
 
 
 @attr.s(auto_attribs=True)
-class TestInlineObjectsResponse_200:
+class TestInlineObjectsResponse200:
     """  """
 
     a_property: Union[Unset, str] = UNSET

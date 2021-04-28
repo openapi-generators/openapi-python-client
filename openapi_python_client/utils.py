@@ -1,13 +1,20 @@
 import builtins
 import re
 from keyword import iskeyword
+from typing import List
 
-import stringcase
+delimiters = " _-"
 
 
 def sanitize(value: str) -> str:
-    """ Removes every character that isn't 0-9, A-Z, a-z, ' ', -, or _ """
-    return re.sub(r"[^\w _\-]+", "", value)
+    """ Removes every character that isn't 0-9, A-Z, a-z, or a known delimiter """
+    return re.sub(rf"[^\w{delimiters}]+", "", value)
+
+
+def split_words(value: str) -> List[str]:
+    """ Split a string on non-capital letters and known delimiters """
+    value = " ".join(re.split("([A-Z]?[a-z]+)", value))
+    return re.findall(rf"[^{delimiters}]+", value)
 
 
 def fix_keywords(value: str) -> str:
@@ -25,22 +32,23 @@ def fix_reserved_words(value: str) -> str:
     return value
 
 
-def group_title(value: str) -> str:
-    value = re.sub(r"([A-Z]{2,})([A-Z][a-z]|[ \-_]|$)", lambda m: m.group(1).title() + m.group(2), value.strip())
-    value = re.sub(r"(^|[ _-])([A-Z])", lambda m: m.group(1) + m.group(2).lower(), value)
-    return value
-
-
 def snake_case(value: str) -> str:
-    return fix_keywords(stringcase.snakecase(group_title(sanitize(value))))
+    words = split_words(sanitize(value))
+    value = "_".join(words).lower()
+    return fix_keywords(value)
 
 
 def pascal_case(value: str) -> str:
-    return fix_keywords(stringcase.pascalcase(sanitize(value.replace(" ", ""))))
+    words = split_words(sanitize(value))
+    capitalized_words = (word.capitalize() if not word.isupper() else word for word in words)
+    value = "".join(capitalized_words)
+    return fix_keywords(value)
 
 
 def kebab_case(value: str) -> str:
-    return fix_keywords(stringcase.spinalcase(group_title(sanitize(value))))
+    words = split_words(sanitize(value))
+    value = "-".join(words).lower()
+    return fix_keywords(value)
 
 
 def remove_string_escapes(value: str) -> str:
