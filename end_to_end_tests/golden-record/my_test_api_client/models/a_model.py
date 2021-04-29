@@ -16,7 +16,7 @@ T = TypeVar("T", bound="AModel")
 
 @attr.s(auto_attribs=True)
 class AModel:
-    """ A Model for testing all the ways custom objects can be used  """
+    """A Model for testing all the ways custom objects can be used"""
 
     an_enum_value: AnEnum
     a_camel_date_time: Union[datetime.date, datetime.datetime]

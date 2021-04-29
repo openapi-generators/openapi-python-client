@@ -13,7 +13,7 @@ ValueType = Union[str, int]
 
 @attr.s(auto_attribs=True, frozen=True)
 class EnumProperty(Property):
-    """ A property that should use an enum """
+    """A property that should use an enum"""
 
     values: Dict[str, ValueType]
     class_info: Class
@@ -42,7 +42,7 @@ class EnumProperty(Property):
 
     @staticmethod
     def values_from_list(values: List[ValueType]) -> Dict[str, ValueType]:
-        """ Convert a list of values into dict of {name: value} """
+        """Convert a list of values into dict of {name: value}"""
         output: Dict[str, ValueType] = {}
 
         for i, value in enumerate(values):

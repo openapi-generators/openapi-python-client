@@ -7,7 +7,7 @@ T = TypeVar("T", bound="FreeFormModel")
 
 @attr.s(auto_attribs=True)
 class FreeFormModel:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

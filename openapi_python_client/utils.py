@@ -7,12 +7,12 @@ delimiters = " _-"
 
 
 def sanitize(value: str) -> str:
-    """ Removes every character that isn't 0-9, A-Z, a-z, or a known delimiter """
+    """Removes every character that isn't 0-9, A-Z, a-z, or a known delimiter"""
     return re.sub(rf"[^\w{delimiters}]+", "", value)
 
 
 def split_words(value: str) -> List[str]:
-    """ Split a string on non-capital letters and known delimiters """
+    """Split a string on non-capital letters and known delimiters"""
     value = " ".join(re.split("([A-Z]?[a-z]+)", value))
     return re.findall(rf"[^{delimiters}]+", value)
 

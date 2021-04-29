@@ -78,7 +78,7 @@ def sync(
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
 ) -> Optional[Union[HTTPValidationError, None]]:
-    """ Test optional query parameters """
+    """Test optional query parameters"""
 
     return sync_detailed(
         client=client,
@@ -107,7 +107,7 @@ async def asyncio(
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
 ) -> Optional[Union[HTTPValidationError, None]]:
-    """ Test optional query parameters """
+    """Test optional query parameters"""
 
     return (
         await asyncio_detailed(

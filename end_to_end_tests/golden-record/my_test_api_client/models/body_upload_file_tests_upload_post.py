@@ -10,7 +10,7 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPost:
-    """  """
+    """ """
 
     some_file: File
     some_string: Union[Unset, str] = "some_default_string"

@@ -86,7 +86,7 @@ def sync(
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[HTTPValidationError, None]]:
-    """ Upload a file  """
+    """Upload a file"""
 
     return sync_detailed(
         client=client,
@@ -119,7 +119,7 @@ async def asyncio(
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[HTTPValidationError, None]]:
-    """ Upload a file  """
+    """Upload a file"""
 
     return (
         await asyncio_detailed(

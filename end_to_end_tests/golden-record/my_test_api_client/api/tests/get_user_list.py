@@ -102,7 +102,7 @@ def sync(
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
-    """ Get a list of things  """
+    """Get a list of things"""
 
     return sync_detailed(
         client=client,
@@ -135,7 +135,7 @@ async def asyncio(
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
-    """ Get a list of things  """
+    """Get a list of things"""
 
     return (
         await asyncio_detailed(

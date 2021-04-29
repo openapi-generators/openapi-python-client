@@ -83,7 +83,7 @@ class Project:
         self.env.filters.update(TEMPLATE_FILTERS)
 
     def build(self) -> Sequence[GeneratorError]:
-        """ Create the project from templates """
+        """Create the project from templates"""
 
         if self.meta == MetaType.NONE:
             print(f"Generating {self.package_name}")
@@ -101,7 +101,7 @@ class Project:
         return self._get_errors()
 
     def update(self) -> Sequence[GeneratorError]:
-        """ Update an existing project """
+        """Update an existing project"""
 
         if not self.package_dir.is_dir():
             raise FileNotFoundError()

@@ -14,7 +14,7 @@ from .responses import Response, response_from_data
 
 
 class ParameterLocation(str, Enum):
-    """ The places Parameters can be put when calling an Endpoint """
+    """The places Parameters can be put when calling an Endpoint"""
 
     QUERY = "query"
     PATH = "path"
@@ -23,13 +23,13 @@ class ParameterLocation(str, Enum):
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
-    """ Create a string which is used to import a reference """
+    """Create a string which is used to import a reference"""
     return f"from {prefix}.{class_.module_name} import {class_.name}"
 
 
 @dataclass
 class EndpointCollection:
-    """ A bunch of endpoints grouped under a tag that will become a module """
+    """A bunch of endpoints grouped under a tag that will become a module"""
 
     tag: str
     endpoints: List["Endpoint"] = field(default_factory=list)
@@ -39,7 +39,7 @@ class EndpointCollection:
     def from_data(
         *, data: Dict[str, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Dict[str, "EndpointCollection"], Schemas]:
-        """ Parse the openapi paths data to get EndpointCollections by tag """
+        """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[str, EndpointCollection] = {}
 
         methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
@@ -73,7 +73,7 @@ class EndpointCollection:
 
 
 def generate_operation_id(*, path: str, method: str) -> str:
-    """ Generate an operationId from a path """
+    """Generate an operationId from a path"""
     clean_path = path.replace("{", "").replace("}", "").replace("/", "_")
     if clean_path.startswith("_"):
         clean_path = clean_path[1:]
@@ -107,7 +107,7 @@ class Endpoint:
 
     @staticmethod
     def parse_request_form_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
-        """ Return form_body_reference """
+        """Return form_body_reference"""
         body_content = body.content
         form_body = body_content.get("application/x-www-form-urlencoded")
         if form_body is not None and isinstance(form_body.media_type_schema, oai.Reference):
@@ -116,7 +116,7 @@ class Endpoint:
 
     @staticmethod
     def parse_multipart_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
-        """ Return form_body_reference """
+        """Return form_body_reference"""
         body_content = body.content
         json_body = body_content.get("multipart/form-data")
         if json_body is not None and isinstance(json_body.media_type_schema, oai.Reference):
@@ -127,7 +127,7 @@ class Endpoint:
     def parse_request_json_body(
         *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """ Return json_body """
+        """Return json_body"""
         body_content = body.content
         json_body = body_content.get("application/json")
         if json_body is not None and json_body.media_type_schema is not None:
@@ -149,7 +149,7 @@ class Endpoint:
         schemas: Schemas,
         config: Config,
     ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
-        """ Adds form or JSON body to Endpoint if included in data """
+        """Adds form or JSON body to Endpoint if included in data"""
         endpoint = deepcopy(endpoint)
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
             return endpoint, schemas
@@ -249,7 +249,7 @@ class Endpoint:
     def from_data(
         *, data: oai.Operation, path: str, method: str, tag: str, schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
-        """ Construct an endpoint from the OpenAPI data """
+        """Construct an endpoint from the OpenAPI data"""
 
         if data.operationId is None:
             name = generate_operation_id(path=path, method=method)
@@ -274,7 +274,7 @@ class Endpoint:
         return result, schemas
 
     def response_type(self) -> str:
-        """ Get the Python type of any response from this endpoint """
+        """Get the Python type of any response from this endpoint"""
         types = sorted({response.prop.get_type_string() for response in self.responses})
         if len(types) == 0:
             return "None"
@@ -285,7 +285,7 @@ class Endpoint:
 
 @dataclass
 class GeneratorData:
-    """ All the data needed to generate a client """
+    """All the data needed to generate a client"""
 
     title: str
     description: Optional[str]
@@ -297,7 +297,7 @@ class GeneratorData:
 
     @staticmethod
     def from_dict(d: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
-        """ Create an OpenAPI from dict """
+        """Create an OpenAPI from dict"""
         try:
             openapi = oai.OpenAPI.parse_obj(d)
         except ValidationError as e:

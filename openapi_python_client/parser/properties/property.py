@@ -84,7 +84,7 @@ class Property:
         return imports
 
     def to_string(self) -> str:
-        """ How this should be declared in a dataclass """
+        """How this should be declared in a dataclass"""
         default: Optional[str]
         if self.default is not None:
             default = self.default
