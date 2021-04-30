@@ -94,6 +94,7 @@ class Endpoint:
     name: str
     requires_security: bool
     tag: str
+    summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: List[Property] = field(default_factory=list)
     path_parameters: List[Property] = field(default_factory=list)
@@ -259,6 +260,7 @@ class Endpoint:
         endpoint = Endpoint(
             path=path,
             method=method,
+            summary=utils.remove_string_escapes(data.summary) if data.summary else "",
             description=utils.remove_string_escapes(data.description) if data.description else "",
             name=name,
             requires_security=bool(data.security),
