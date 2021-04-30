@@ -239,15 +239,30 @@ class Project:
         client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate endpoints
+        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag.items()
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
-        api_init = api_dir / "__init__.py"
-        api_init.write_text('""" Contains methods for accessing the API """', encoding=self.file_encoding)
+        api_init_path = api_dir / "__init__.py"
+        api_init_template = self.env.get_template("api_init.py.jinja")
+        api_init_path.write_text(
+            api_init_template.render(
+                package_name=self.package_name,
+                endpoint_collections_by_tag=endpoint_collections_by_tag,
+            ),
+            encoding=self.file_encoding,
+        )
 
         endpoint_template = self.env.get_template("endpoint_module.py.jinja")
-        for tag, collection in self.openapi.endpoint_collections_by_tag.items():
+        for tag, collection in endpoint_collections_by_tag:
             tag_dir = api_dir / tag
             tag_dir.mkdir()
+
+            endpoint_init_path = tag_dir / "__init__.py"
+            endpoint_init_template = self.env.get_template("endpoint_init.py.jinja")
+            endpoint_init_path.write_text(
+                endpoint_init_template.render(package_name=self.package_name, tag=tag, endpoints=collection.endpoints),
+                encoding=self.file_encoding,
+            )
             (tag_dir / "__init__.py").touch()
 
             for endpoint in collection.endpoints:
