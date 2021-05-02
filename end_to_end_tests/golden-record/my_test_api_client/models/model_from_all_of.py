@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ModelFromAllOf")
 
 @attr.s(auto_attribs=True)
 class ModelFromAllOf:
-    """  """
+    """ """
 
     a_sub_property: Union[Unset, str] = UNSET
     another_sub_property: Union[Unset, str] = UNSET

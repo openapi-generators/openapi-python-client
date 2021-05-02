@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesRefed")
 
 @attr.s(auto_attribs=True)
 class ModelWithAdditionalPropertiesRefed:
-    """  """
+    """ """
 
     additional_properties: Dict[str, AnEnum] = attr.ib(init=False, factory=dict)
 

@@ -27,7 +27,7 @@ from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_d
 
 @attr.s(auto_attribs=True, frozen=True)
 class NoneProperty(Property):
-    """ A property that is always None (used for empty schemas) """
+    """A property that is always None (used for empty schemas)"""
 
     _type_string: ClassVar[str] = "None"
     _json_type_string: ClassVar[str] = "None"
@@ -36,7 +36,7 @@ class NoneProperty(Property):
 
 @attr.s(auto_attribs=True, frozen=True)
 class StringProperty(Property):
-    """ A property of type str """
+    """A property of type str"""
 
     max_length: Optional[int] = None
     pattern: Optional[str] = None
@@ -69,7 +69,7 @@ class DateTimeProperty(Property):
 
 @attr.s(auto_attribs=True, frozen=True)
 class DateProperty(Property):
-    """ A property of type datetime.date """
+    """A property of type datetime.date"""
 
     _type_string: ClassVar[str] = "datetime.date"
     _json_type_string: ClassVar[str] = "str"
@@ -90,7 +90,7 @@ class DateProperty(Property):
 
 @attr.s(auto_attribs=True, frozen=True)
 class FileProperty(Property):
-    """ A property used for uploading files """
+    """A property used for uploading files"""
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
@@ -112,7 +112,7 @@ class FileProperty(Property):
 
 @attr.s(auto_attribs=True, frozen=True)
 class FloatProperty(Property):
-    """ A property of type float """
+    """A property of type float"""
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
@@ -120,7 +120,7 @@ class FloatProperty(Property):
 
 @attr.s(auto_attribs=True, frozen=True)
 class IntProperty(Property):
-    """ A property of type int """
+    """A property of type int"""
 
     _type_string: ClassVar[str] = "int"
     _json_type_string: ClassVar[str] = "int"
@@ -128,7 +128,7 @@ class IntProperty(Property):
 
 @attr.s(auto_attribs=True, frozen=True)
 class BooleanProperty(Property):
-    """ Property for bool """
+    """Property for bool"""
 
     _type_string: ClassVar[str] = "bool"
     _json_type_string: ClassVar[str] = "bool"
@@ -139,7 +139,7 @@ InnerProp = TypeVar("InnerProp", bound=Property)
 
 @attr.s(auto_attribs=True, frozen=True)
 class ListProperty(Property, Generic[InnerProp]):
-    """ A property representing a list (array) of other properties """
+    """A property representing a list (array) of other properties"""
 
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.py.jinja"
@@ -170,7 +170,7 @@ class ListProperty(Property, Generic[InnerProp]):
 
 @attr.s(auto_attribs=True, frozen=True)
 class UnionProperty(Property):
-    """ A property representing a Union (anyOf) of other properties """
+    """A property representing a Union (anyOf) of other properties"""
 
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.py.jinja"
@@ -237,7 +237,7 @@ class UnionProperty(Property):
 def _string_based_property(
     name: str, required: bool, data: oai.Schema
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
-    """ Construct a Property from the type "string" """
+    """Construct a Property from the type "string" """
     string_format = data.schema_format
     if string_format == "date-time":
         return DateTimeProperty(
@@ -434,7 +434,7 @@ def _property_from_data(
     parent_name: str,
     config: Config,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
-    """ Generate a Property from the OpenAPI dictionary representation of it """
+    """Generate a Property from the OpenAPI dictionary representation of it"""
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
@@ -546,7 +546,7 @@ def property_from_data(
 def build_schemas(
     *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
 ) -> Schemas:
-    """ Get a list of Schemas from an OpenAPI dict """
+    """Get a list of Schemas from an OpenAPI dict"""
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
     errors: List[PropertyError] = []

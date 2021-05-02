@@ -77,7 +77,7 @@ def sync(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Optional[Union[HTTPValidationError, None]]:
-    """  """
+    """ """
 
     return sync_detailed(
         client=client,
@@ -106,7 +106,7 @@ async def asyncio(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Optional[Union[HTTPValidationError, None]]:
-    """  """
+    """ """
 
     return (
         await asyncio_detailed(
