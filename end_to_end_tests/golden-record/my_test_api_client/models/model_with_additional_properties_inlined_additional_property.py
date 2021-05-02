@@ -4,11 +4,11 @@ import attr
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty")
+T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
 
 
 @attr.s(auto_attribs=True)
-class ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty:
+class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
     """ """
 
     extra_props_prop: Union[Unset, str] = UNSET
@@ -30,12 +30,12 @@ class ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty:
         d = src_dict.copy()
         extra_props_prop = d.pop("extra_props_prop", UNSET)
 
-        componentsschemas_model_with_additional_properties_inlined_additional_property = cls(
+        model_with_additional_properties_inlined_additional_property = cls(
             extra_props_prop=extra_props_prop,
         )
 
-        componentsschemas_model_with_additional_properties_inlined_additional_property.additional_properties = d
-        return componentsschemas_model_with_additional_properties_inlined_additional_property
+        model_with_additional_properties_inlined_additional_property.additional_properties = d
+        return model_with_additional_properties_inlined_additional_property
 
     @property
     def additional_keys(self) -> List[str]:
