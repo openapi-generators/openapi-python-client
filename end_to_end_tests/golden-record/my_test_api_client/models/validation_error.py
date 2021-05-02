@@ -11,20 +11,20 @@ class ValidationError:
 
     loc: List[str]
     msg: str
-    type_: str
+    type: str
 
     def to_dict(self) -> Dict[str, Any]:
         loc = self.loc
 
         msg = self.msg
-        type_ = self.type_
+        type = self.type
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
                 "loc": loc,
                 "msg": msg,
-                "type": type_,
+                "type": type,
             }
         )
 
@@ -37,12 +37,12 @@ class ValidationError:
 
         msg = d.pop("msg")
 
-        type_ = d.pop("type")
+        type = d.pop("type")
 
         validation_error = cls(
             loc=loc,
             msg=msg,
-            type_=type_,
+            type=type,
         )
 
         return validation_error

@@ -23,7 +23,7 @@ def fix_keywords(value: str) -> str:
     return value
 
 
-RESERVED_WORDS = set(dir(builtins)).union({"self"})
+RESERVED_WORDS = (set(dir(builtins)) | {"self"}) - {"type", "id"}
 
 
 def fix_reserved_words(value: str) -> str:
