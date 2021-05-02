@@ -670,7 +670,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "92f259b95e7c0d6e3611a02da68fcbe548f7d1ac11ab099a49c6274bfb40c7cf"
+content-hash = "afcb8ca9faf8cb0a4923dee5cbc303fbe35f326083f900d951ba21e9fcd344c0"
 
 [metadata.files]
 appdirs = [
