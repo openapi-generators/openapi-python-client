@@ -543,6 +543,47 @@ class TestEndpoint:
         assert endpoint.header_parameters == [header_prop]
         assert schemas == schemas_3
 
+    def test__add_parameters_duplicate_properties(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        endpoint = self.make_endpoint()
+        parsed_schemas = mocker.MagicMock()
+        mocker.patch(
+            f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(python_name="test"), parsed_schemas)
+        )
+        param = oai.Parameter.construct(name="test", required=True, param_schema=mocker.MagicMock(), param_in="path")
+        data = oai.Operation.construct(parameters=[param, param, param])
+        schemas = Schemas()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        assert result == (ParseError(data=data, detail="Encountered duplicate properties named test"), parsed_schemas)
+
+    def test__add_parameters_duplicate_properties_different_location(self):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        endpoint = self.make_endpoint()
+        path_param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="path"
+        )
+        query_param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="query"
+        )
+        schemas = Schemas()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(
+            endpoint=endpoint,
+            data=oai.Operation.construct(parameters=[path_param, query_param]),
+            schemas=schemas,
+            config=config,
+        )[0]
+        assert isinstance(result, Endpoint)
+        assert result.path_parameters[0].python_name == "test"
+        assert result.path_parameters[0].name == "test"
+        assert result.query_parameters[0].python_name == "test_query"
+        assert result.query_parameters[0].name == "test"
+
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 

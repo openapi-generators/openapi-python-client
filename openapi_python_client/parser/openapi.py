@@ -217,6 +217,7 @@ class Endpoint:
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
+        used_python_names = set()
         if data.parameters is None:
             return endpoint, schemas
         for param in data.parameters:
@@ -232,6 +233,16 @@ class Endpoint:
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
+
+            if prop.python_name in used_python_names:
+                prop.set_python_name(f"{prop.python_name}_{param.param_in}")
+
+            if prop.python_name in used_python_names:
+                return (
+                    ParseError(detail=f"Encountered duplicate properties named {prop.python_name}", data=data),
+                    schemas,
+                )
+            used_python_names.add(prop.python_name)
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
             if param.param_in == ParameterLocation.QUERY:
