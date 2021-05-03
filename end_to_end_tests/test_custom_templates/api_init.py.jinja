@@ -1,0 +1,19 @@
+""" Contains methods for accessing the API """
+
+{% macro snake_to_pascal_case(name) %}
+{%- for part in name.split('_') -%}
+{{ part | capitalize }}
+{%- endfor -%}
+{% endmacro %}
+
+from typing import Type
+{% for tag, collection in endpoint_collections_by_tag %}
+from {{ package_name }}.api.{{ tag }} import {{ snake_to_pascal_case(tag) }}Endpoints
+{% endfor %}
+
+class {{ snake_to_pascal_case(package_name) }}Api:
+{% for tag, collection in endpoint_collections_by_tag %}
+    @classmethod
+    def {{ tag }}(cls) -> Type[{{ snake_to_pascal_case(tag) }}Endpoints]:
+        return {{ snake_to_pascal_case(tag) }}Endpoints
+{% endfor %}
