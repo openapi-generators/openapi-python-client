@@ -1,6 +1,5 @@
 """ Contains methods for accessing the API Endpoints """
 
-
 import types
 
 from my_test_api_client.api.tests import (
