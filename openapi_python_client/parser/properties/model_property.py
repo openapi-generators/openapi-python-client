@@ -180,18 +180,18 @@ def build_model_property(
         parent_name: The name of the property that this property is inside of (affects class naming)
         config: Config data for this run of the generator, used to modifying names
     """
-    class_name = data.title or name
+    class_string = data.title or name
     if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    class_info = Class.from_string(string=class_name, config=config)
+        class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_string)}"
+    class_info = Class.from_string(string=class_string, config=config)
 
-    property_data = _process_properties(data=data, schemas=schemas, class_name=class_name, config=config)
+    property_data = _process_properties(data=data, schemas=schemas, class_name=class_info.name, config=config)
     if isinstance(property_data, PropertyError):
         return property_data, schemas
     schemas = property_data.schemas
 
     additional_properties, schemas = _get_additional_properties(
-        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_name, config=config
+        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_info.name, config=config
     )
     if isinstance(additional_properties, Property):
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
