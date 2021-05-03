@@ -547,17 +547,18 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
-        parsed_schemas = mocker.MagicMock()
-        mocker.patch(
-            f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(python_name="test"), parsed_schemas)
+        param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="path"
         )
-        param = oai.Parameter.construct(name="test", required=True, param_schema=mocker.MagicMock(), param_in="path")
-        data = oai.Operation.construct(parameters=[param, param, param])
+        data = oai.Operation.construct(parameters=[param, param])
         schemas = Schemas()
         config = MagicMock()
 
         result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
-        assert result == (ParseError(data=data, detail="Encountered duplicate properties named test"), parsed_schemas)
+        assert result == (
+            ParseError(data=data, detail="Could not reconcile duplicate parameters named test_path"),
+            schemas,
+        )
 
     def test__add_parameters_duplicate_properties_different_location(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
@@ -579,7 +580,7 @@ class TestEndpoint:
             config=config,
         )[0]
         assert isinstance(result, Endpoint)
-        assert result.path_parameters[0].python_name == "test"
+        assert result.path_parameters[0].python_name == "test_path"
         assert result.path_parameters[0].name == "test"
         assert result.query_parameters[0].python_name == "test_query"
         assert result.query_parameters[0].name == "test"

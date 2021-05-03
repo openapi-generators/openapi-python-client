@@ -10,7 +10,7 @@ def _get_kwargs(
     *,
     client: Client,
     param_path: Union[Unset, str] = UNSET,
-    param: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/same-name-multiple-locations/{param}".format(client.base_url, param=param_path)
 
@@ -18,7 +18,7 @@ def _get_kwargs(
     cookies: Dict[str, Any] = client.get_cookies()
 
     params: Dict[str, Any] = {
-        "param": param,
+        "param": param_query,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -44,12 +44,12 @@ def sync_detailed(
     *,
     client: Client,
     param_path: Union[Unset, str] = UNSET,
-    param: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
 ) -> Response[None]:
     kwargs = _get_kwargs(
         client=client,
         param_path=param_path,
-        param=param,
+        param_query=param_query,
     )
 
     response = httpx.get(
@@ -63,12 +63,12 @@ async def asyncio_detailed(
     *,
     client: Client,
     param_path: Union[Unset, str] = UNSET,
-    param: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
 ) -> Response[None]:
     kwargs = _get_kwargs(
         client=client,
         param_path=param_path,
-        param=param,
+        param_query=param_query,
     )
 
     async with httpx.AsyncClient() as _client:
