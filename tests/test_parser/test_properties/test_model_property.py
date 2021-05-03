@@ -178,7 +178,7 @@ class TestBuildModelProperty:
         assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
 
     def test_bad_additional_props_return_error(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import Config, Schemas, build_model_property
 
         additional_properties = oai.Schema(
             type="object",
@@ -190,7 +190,7 @@ class TestBuildModelProperty:
         schemas = Schemas()
 
         err, new_schemas = build_model_property(
-            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=MagicMock()
+            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=Config()
         )
 
         assert new_schemas == schemas
