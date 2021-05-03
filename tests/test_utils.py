@@ -46,7 +46,15 @@ def test__fix_keywords():
 
 
 @pytest.mark.parametrize(
-    "reserved_word, expected", [("self", "self_"), ("int", "int_"), ("dict", "dict_"), ("not_reserved", "not_reserved")]
+    "reserved_word, expected",
+    [
+        ("self", "self_"),
+        ("int", "int_"),
+        ("dict", "dict_"),
+        ("not_reserved", "not_reserved"),
+        ("type", "type"),
+        ("id", "id"),
+    ],
 )
 def test__fix_reserved_words(reserved_word: str, expected: str):
     assert utils.fix_reserved_words(reserved_word) == expected
