@@ -1090,7 +1090,6 @@
         "type": "object"
       },
       "ModelWithAdditionalPropertiesInlined": {
-        "title": "ModelWithAdditionalPropertiesInlined",
         "type": "object",
         "properties": {
           "a_number": {
