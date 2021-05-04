@@ -2,8 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 0.9.0
+
+### Breaking Changes
+
+- Some generated names will be different, solving some inconsistencies. (closes #369) (#375) Thanks @ramnes!
+- Change reference resolution to use reference path instead of class name (fixes #342) (#366)
+- If a schema references exactly one other schema in `allOf`, `oneOf`, or `anyOf` that referenced generated model will be used directly instead of generating a copy with another name. (#361)
+- Attributes shadowing any builtin except `id` and `type` will now be renamed in generated clients (#360, #378, #407). Thanks @dblanchette and @forest-benchling!
+
+### Features
+
+- Allow httpx 0.18.x in generated clients (#400)
+- Add summary attribute to Endpoint for use in custom templates (#404)
+- Support common parameters for paths (#376). Thanks @ramnes!
+- Add allOf support for model definitions (#98) (#321)
+
+### Fixes
+
+- Attempt to deduplicate endpoint parameters based on name and location (fixes #305) (#406)
+- Names of classes without titles will no longer include ref path (fixes #397) (#405). Thanks @ramnes!
+- Problems with enum defaults in allOf (#363). Thanks @csymeonides-mf
+- Prevent duplicate return types in generated api functions (#365)
+- Support empty strings in enums (closes #357) (#358). Thanks @ramnes!
+- Allow passing data with files in multipart. (Fixes #351) (#355)
+- Deserialization of unions (#332). Thanks @forest-benchling!
 
 ## 0.8.0 - 2021-02-19
 
@@ -14,10 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Additions
 
 - New `--meta` command line option for specifying what type of metadata should be generated:
+
   - `poetry` is the default value, same behavior you're used to in previous versions
-  - `setup` will generate a pyproject.toml with no Poetry information, and instead create a `setup.py` with the
-    project info.
+  - `setup` will generate a pyproject.toml with no Poetry information, and instead create a `setup.py` with the project info.
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
+
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
 - The media type application/vnd.api+json will now be handled just like application/json (#307). Thanks @jrversteegh!
 - Support passing models into query parameters (#316). Thanks @forest-benchling!
@@ -71,16 +97,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`.
 - Values that are `UNSET` will not be sent along in API calls
-- Schemas defined with `type=object` will now be converted into classes, just like if they were created as ref components.
-  The previous behavior was a combination of skipping and using generic Dicts for these schemas.
-- Response schema handling was unified with input schema handling, meaning that responses will behave differently than before.
-  Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
+- Schemas defined with `type=object` will now be converted into classes, just like if they were created as ref components. The previous behavior was a combination of skipping and using generic Dicts for these schemas.
+- Response schema handling was unified with input schema handling, meaning that responses will behave differently than before. Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
+
   - As a result of this, endpoints that used to return `bytes` when content-type was application/octet-stream will now return a `File` object if the type of the data is "binary", just like if you were submitting that type instead of receiving it.
+
 - Instead of skipping input properties with no type, enum, anyOf, or oneOf declared, the property will be declared as `None`.
-- Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property
-  declared in an endpoint will be named like {endpoint*name}*{previous_class_name}. Classes will no longer be
-  deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming
-  scheme, there will be an error instead.
+- Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property declared in an endpoint will be named like {endpoint*name}*{previous*class*name}. Classes will no longer be deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming scheme, there will be an error instead.
 
 ### Additions
 
@@ -126,30 +149,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- Reorganized api calls in generated clients. `async_api` will no longer be generated. Each path operation will now
-  have it's own module under its tag. For example, if there was a generated function `api.my_tag.my_function()` it is
-  replaced with `api.my_tag.my_function.sync()`. The async version can be called with `asyncio()` instead of `sync()`.
-  (#167)
-- Removed support for mutable default values (e.g. dicts, lists). They may be added back in a future version given enough
-  demand, but the existing implementation was not up to this project's standards. (#170)
-- Removed generated `errors` module (and the `ApiResponseError` therein). Instead of raising an exception on failure,
-  the `sync()` and `asyncio()` functions for a path operation will return `None`. This means all return types are now
-  `Optional`, so mypy will require you to handle potential errors (or explicitly ignore them).
+- Reorganized api calls in generated clients. `async_api` will no longer be generated. Each path operation will now have it's own module under its tag. For example, if there was a generated function `api.my_tag.my_function()` it is replaced with `api.my_tag.my_function.sync()`. The async version can be called with `asyncio()` instead of `sync()`. (#167)
+- Removed support for mutable default values (e.g. dicts, lists). They may be added back in a future version given enough demand, but the existing implementation was not up to this project's standards. (#170)
+- Removed generated `errors` module (and the `ApiResponseError` therein). Instead of raising an exception on failure, the `sync()` and `asyncio()` functions for a path operation will return `None`. This means all return types are now `Optional`, so mypy will require you to handle potential errors (or explicitly ignore them).
 - Moved `models.types` generated module up a level, so just `types`.
 - All generated classes that were `dataclass` now use the `attrs` package instead
 
 ### Additions
 
-- Every generated API module will have a `sync_detailed()` and `asyncio_detailed()` function which work like their
-  non-detailed counterparts, but return a `types.Response[T]` instead of an `Optional[T]` (where T is the parsed body type).
-  `types.Response` contains `status_code`, `content` (bytes of returned content), `headers`, and `parsed` (the
-  parsed return type you would get from the non-detailed function). (#115)
-- It's now possible to include custom headers and cookies in requests, as well as set a custom timeout. This can be done
-  either by directly setting those parameters on a `Client` (e.g. `my_client.headers = {"Header": "Value"}`) or using
-  a fluid api (e.g. `my_endpoint.sync(my_client.with_cookies({"MyCookie": "cookie"}).with_timeout(10.0))`).
-- Unsupported content types or no responses at all will no longer result in an endpoint being completely skipped. Instead,
-  only the `detailed` versions of the endpoint will be generated, where the resulting `Response.parsed` is always `None`.
-  (#141)
+- Every generated API module will have a `sync_detailed()` and `asyncio_detailed()` function which work like their non-detailed counterparts, but return a `types.Response[T]` instead of an `Optional[T]` (where T is the parsed body type). `types.Response` contains `status_code`, `content` (bytes of returned content), `headers`, and `parsed` (the parsed return type you would get from the non-detailed function). (#115)
+- It's now possible to include custom headers and cookies in requests, as well as set a custom timeout. This can be done either by directly setting those parameters on a `Client` (e.g. `my_client.headers = {"Header": "Value"}`) or using a fluid api (e.g. `my_endpoint.sync(my_client.with_cookies({"MyCookie": "cookie"}).with_timeout(10.0))`).
+- Unsupported content types or no responses at all will no longer result in an endpoint being completely skipped. Instead, only the `detailed` versions of the endpoint will be generated, where the resulting `Response.parsed` is always `None`. (#141)
 - Support for Python 3.6 (#137 & #154)
 - Support for enums with integer values
 
@@ -212,21 +222,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- When encountering a problem, the generator will now differentiate between warnings (things it was able to skip past)
-  and errors (things which halt generation altogether).
+- When encountering a problem, the generator will now differentiate between warnings (things it was able to skip past) and errors (things which halt generation altogether).
 
 ### Additions
 
-- The generator can now handle many more errors gracefully, skipping the things it can't generate and continuing
-  with the pieces it can.
+- The generator can now handle many more errors gracefully, skipping the things it can't generate and continuing with the pieces it can.
 - Support for Enums declared in "components/schemas" and references to them (#102).
 - Generated clients can now be installed via pip (#120).
 - Support for YAML OpenAPI documents (#111)
 
 ### Internal Changes
 
-- Switched OpenAPI document parsing to use Pydantic based on a vendored version of
-  [openapi-schema-pydantic](https://github.com/kuimono/openapi-schema-pydantic/) (#103).
+- Switched OpenAPI document parsing to use Pydantic based on a vendored version of [openapi-schema-pydantic](https://github.com/kuimono/openapi-schema-pydantic/) (#103).
 - Tests can now be run on Windows.
 
 ## 0.4.2 - 2020-06-13
@@ -246,13 +253,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- Classes generated to be included within lists will now be named like <ListName>Item. For example, if a property
-  named "statuses" is an array of enum values, previously the `Enum` class declared would be called "Statuses". Now it
-  will be called "StatusesItem". If a "title" attribute was used in the OpenAPI document, that should still be respected
-  and used instead of the generated name. You can restore previous names by adding "StatusesItem" to the `class_overrides`
-  section of a config file.
-- Clients now require httpx ^0.13.0 (up from ^0.12.1). See [httpx release notes](https://github.com/encode/httpx/releases/tag/0.13.0)
-  for details.
+- Classes generated to be included within lists will now be named like <ListName>Item. For example, if a property named "statuses" is an array of enum values, previously the `Enum` class declared would be called "Statuses". Now it will be called "StatusesItem". If a "title" attribute was used in the OpenAPI document, that should still be respected and used instead of the generated name. You can restore previous names by adding "StatusesItem" to the `class_overrides` section of a config file.
+- Clients now require httpx ^0.13.0 (up from ^0.12.1). See [httpx release notes](https://github.com/encode/httpx/releases/tag/0.13.0) for details.
 
 ### Additions
 
@@ -261,24 +263,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for any supported property within a list (array), including other lists.
 - Support for Union types ("anyOf" in OpenAPI document)
 - Support for more basic response types (integer, number, boolean)
-- Support for duplicate enums. Instead of erroring, enums with the same name (title) but differing values
-  will have a number appended to the end. So if you have two conflicting enums named `MyEnum`, one of them
-  will now be named `MyEnum1`. Note that the order in which these are processed and therefore named is entirely
-  dependent on the order they are read from the OpenAPI document, so changes to the document could result
-  in swapping the names of conflicting Enums.
+- Support for duplicate enums. Instead of erroring, enums with the same name (title) but differing values will have a number appended to the end. So if you have two conflicting enums named `MyEnum`, one of them will now be named `MyEnum1`. Note that the order in which these are processed and therefore named is entirely dependent on the order they are read from the OpenAPI document, so changes to the document could result in swapping the names of conflicting Enums.
 
 ### Changes
 
 - The way most imports are handled was changed which _should_ lead to fewer unused imports in generated files.
 - Better error messages
+
   - Most error messages will contain some useful information about why it failed instead of a stack trace
   - Client will still be generated if there are recoverable errors, excluding endpoints that had those errors
+
 - Output from isort and black when generating will now be suppressed
 
 ### Fixes
 
-- Defaults within models dataclasses for `Dict` or `List` properties will now be properly declared as a
-  `field` with the `default_factory` parameter to prevent errors related to mutable defaults.
+- Defaults within models dataclasses for `Dict` or `List` properties will now be properly declared as a `field` with the `default_factory` parameter to prevent errors related to mutable defaults.
 
 ## 0.3.0 - 2020-04-25
 
