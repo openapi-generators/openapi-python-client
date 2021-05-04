@@ -3,6 +3,7 @@ __all__ = [
     "OpenAPI",
     "Operation",
     "Parameter",
+    "ParameterLocation",
     "PathItem",
     "Reference",
     "RequestBody",
@@ -18,6 +19,7 @@ from typing import Callable, Iterator
 from .openapi_schema_pydantic import MediaType
 from .openapi_schema_pydantic import OpenAPI as _OpenAPI
 from .openapi_schema_pydantic import Operation, Parameter, PathItem, Reference, RequestBody, Response, Responses, Schema
+from .parameter_location import ParameterLocation
 
 regex = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)")
 

@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from ..parameter_location import ParameterLocation
 from .example import Example
 from .media_type import MediaType
 from .reference import Reference
@@ -30,7 +31,7 @@ class Parameter(BaseModel):
     - For all other cases, the `name` corresponds to the parameter name used by the [`in`](#parameterIn) property.
     """
 
-    param_in: str = Field(alias="in")
+    param_in: ParameterLocation = Field(alias="in")
     """
     **REQUIRED**. The location of the parameter. Possible values are `"query"`, `"header"`, `"path"` or `"cookie"`.
     """

@@ -32,7 +32,10 @@ class Property:
     json_is_dict: ClassVar[bool] = False
 
     def __attrs_post_init__(self) -> None:
-        object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(self.name)))
+        self.set_python_name(self.name)
+
+    def set_python_name(self, new_name: str) -> None:
+        object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(new_name)))
 
     def get_base_type_string(self) -> str:
         return self._type_string

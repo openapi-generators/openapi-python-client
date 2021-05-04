@@ -543,6 +543,48 @@ class TestEndpoint:
         assert endpoint.header_parameters == [header_prop]
         assert schemas == schemas_3
 
+    def test__add_parameters_duplicate_properties(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        endpoint = self.make_endpoint()
+        param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="path"
+        )
+        data = oai.Operation.construct(parameters=[param, param])
+        schemas = Schemas()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        assert result == (
+            ParseError(data=data, detail="Could not reconcile duplicate parameters named test_path"),
+            schemas,
+        )
+
+    def test__add_parameters_duplicate_properties_different_location(self):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        endpoint = self.make_endpoint()
+        path_param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="path"
+        )
+        query_param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="query"
+        )
+        schemas = Schemas()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(
+            endpoint=endpoint,
+            data=oai.Operation.construct(parameters=[path_param, query_param]),
+            schemas=schemas,
+            config=config,
+        )[0]
+        assert isinstance(result, Endpoint)
+        assert result.path_parameters[0].python_name == "test_path"
+        assert result.path_parameters[0].name == "test"
+        assert result.query_parameters[0].python_name == "test_query"
+        assert result.query_parameters[0].name == "test"
+
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 

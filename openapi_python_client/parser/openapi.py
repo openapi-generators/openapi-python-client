@@ -1,6 +1,6 @@
+import itertools
 from copy import deepcopy
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 from pydantic import ValidationError
@@ -11,15 +11,6 @@ from ..config import Config
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
-
-
-class ParameterLocation(str, Enum):
-    """The places Parameters can be put when calling an Endpoint"""
-
-    QUERY = "query"
-    PATH = "path"
-    HEADER = "header"
-    COOKIE = "cookie"
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
@@ -217,6 +208,7 @@ class Endpoint:
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
+        used_python_names: Dict[str, Tuple[Property, oai.ParameterLocation]] = {}
         if data.parameters is None:
             return endpoint, schemas
         for param in data.parameters:
@@ -232,18 +224,39 @@ class Endpoint:
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
+
+            if prop.python_name in used_python_names:
+                duplicate, duplicate_location = used_python_names[prop.python_name]
+                if duplicate.python_name == prop.python_name:  # Existing should be converted too for consistency
+                    duplicate.set_python_name(f"{duplicate.python_name}_{duplicate_location}")
+                prop.set_python_name(f"{prop.python_name}_{param.param_in}")
+            else:
+                used_python_names[prop.python_name] = (prop, param.param_in)
+
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
-            if param.param_in == ParameterLocation.QUERY:
+            if param.param_in == oai.ParameterLocation.QUERY:
                 endpoint.query_parameters.append(prop)
-            elif param.param_in == ParameterLocation.PATH:
+            elif param.param_in == oai.ParameterLocation.PATH:
                 endpoint.path_parameters.append(prop)
-            elif param.param_in == ParameterLocation.HEADER:
+            elif param.param_in == oai.ParameterLocation.HEADER:
                 endpoint.header_parameters.append(prop)
-            elif param.param_in == ParameterLocation.COOKIE:
+            elif param.param_in == oai.ParameterLocation.COOKIE:
                 endpoint.cookie_parameters.append(prop)
             else:
                 return ParseError(data=param, detail="Parameter must be declared in path or query"), schemas
+
+        name_check = set()
+        for prop in itertools.chain(
+            endpoint.query_parameters, endpoint.path_parameters, endpoint.header_parameters, endpoint.cookie_parameters
+        ):
+            if prop.python_name in name_check:
+                return (
+                    ParseError(data=data, detail=f"Could not reconcile duplicate parameters named {prop.python_name}"),
+                    schemas,
+                )
+            name_check.add(prop.python_name)
+
         return endpoint, schemas
 
     @staticmethod

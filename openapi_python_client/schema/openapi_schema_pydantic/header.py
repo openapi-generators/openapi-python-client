@@ -1,5 +1,6 @@
 from pydantic import Field
 
+from ..parameter_location import ParameterLocation
 from .parameter import Parameter
 
 
@@ -14,7 +15,7 @@ class Header(Parameter):
     """
 
     name = Field(default="", const=True)
-    param_in = Field(default="header", const=True, alias="in")
+    param_in = Field(default=ParameterLocation.HEADER, const=True, alias="in")
 
     class Config:
         allow_population_by_field_name = True
