@@ -67,6 +67,7 @@ class Project:
         else:
             loader = package_loader
         self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
+        self.env.globals.update(utils=utils)
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
         self.project_dir: Path = Path.cwd()
