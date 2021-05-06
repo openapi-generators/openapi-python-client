@@ -1,29 +1,16 @@
 """ Contains methods for accessing the API Endpoints """
 
-{% macro snake_to_pascal_case(name) %}
-{%- for part in name.split('_') -%}
-{{ part | capitalize }}
-{%- endfor -%}
-{% endmacro %}
-
-{% macro to_snake_name(name) %}
-{% set last_snakize = {'at': 0} %}
-{%- for part in name -%}
-{{ '_' if not loop.first and part in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' and (loop.index - last_snakize.at) > 1 and not last_snakize.update({'at': loop.index}) }}{{ part | lower }}
-{%- endfor -%}
-{% endmacro %}
-
 import types
 {% for endpoint in endpoints %}
-from {{ package_name }}.api.{{ tag }} import {{ to_snake_name(endpoint.name) }}
+from {{ package_name }}.api.{{ tag }} import {{ utils.snake_case(endpoint.name) }}
 {% endfor %}
 
-class {{ snake_to_pascal_case(tag) }}Endpoints:
+class {{ utils.pascal_case(tag) }}Endpoints:
 
 {% for endpoint in endpoints %}
 
     @classmethod
-    def {{ to_snake_name(endpoint.name) }}(cls) -> types.ModuleType:
+    def {{ utils.snake_case(endpoint.name) }}(cls) -> types.ModuleType:
         {% if endpoint.description %}
         """
             {{ endpoint.description }}
@@ -33,5 +20,5 @@ class {{ snake_to_pascal_case(tag) }}Endpoints:
             {{ endpoint.summary  }}
         """
         {% endif %}
-        return {{ to_snake_name(endpoint.name) }}
+        return {{ utils.snake_case(endpoint.name) }}
 {% endfor %}
