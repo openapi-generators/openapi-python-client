@@ -354,7 +354,7 @@ def build_union_property(
     sub_properties: List[Property] = []
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=f"{name}_type{i}",
+            name=f"{name}_type_{i}",
             required=required,
             data=sub_prop_data,
             schemas=schemas,
