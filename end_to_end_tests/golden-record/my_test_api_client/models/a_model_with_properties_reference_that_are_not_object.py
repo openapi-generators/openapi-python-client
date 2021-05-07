@@ -1,6 +1,6 @@
 import datetime
 from io import BytesIO
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Type, TypeVar, Union, cast
 
 import attr
 from dateutil.parser import isoparse
