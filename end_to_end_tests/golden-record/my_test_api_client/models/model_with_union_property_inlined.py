@@ -11,7 +11,7 @@ T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 
 @attr.s(auto_attribs=True)
 class ModelWithUnionPropertyInlined:
-    """  """
+    """ """
 
     fruit: Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset] = UNSET
 

@@ -222,7 +222,7 @@ def sync(
     nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
     nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """  """
+    """ """
 
     return sync_detailed(
         client=client,
@@ -315,7 +315,7 @@ async def asyncio(
     nullable_model_prop: Union[Unset, None, ModelWithUnionProperty] = UNSET,
     nullable_required_model_prop: Optional[ModelWithUnionProperty],
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """  """
+    """ """
 
     return (
         await asyncio_detailed(

@@ -69,7 +69,7 @@ def sync(
     client: Client,
     my_token: str,
 ) -> Optional[Union[Any, None]]:
-    """ Test optional cookie parameters """
+    """Test optional cookie parameters"""
 
     return sync_detailed(
         client=client,
@@ -98,7 +98,7 @@ async def asyncio(
     client: Client,
     my_token: str,
 ) -> Optional[Union[Any, None]]:
-    """ Test optional cookie parameters """
+    """Test optional cookie parameters"""
 
     return (
         await asyncio_detailed(

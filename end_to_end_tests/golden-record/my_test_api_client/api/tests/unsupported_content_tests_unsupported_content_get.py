@@ -59,7 +59,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[Any]:
-    """  """
+    """ """
 
     return sync_detailed(
         client=client,
@@ -84,7 +84,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[Any]:
-    """  """
+    """ """
 
     return (
         await asyncio_detailed(

@@ -59,7 +59,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[bool]]:
-    """ Get a list of booleans  """
+    """Get a list of booleans"""
 
     return sync_detailed(
         client=client,
@@ -84,7 +84,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[bool]]:
-    """ Get a list of booleans  """
+    """Get a list of booleans"""
 
     return (
         await asyncio_detailed(

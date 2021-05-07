@@ -59,7 +59,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[str]]:
-    """ Get a list of strings  """
+    """Get a list of strings"""
 
     return sync_detailed(
         client=client,
@@ -84,7 +84,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[str]]:
-    """ Get a list of strings  """
+    """Get a list of strings"""
 
     return (
         await asyncio_detailed(
