@@ -3,7 +3,6 @@ __all__ = [
     "Class",
     "EnumProperty",
     "ModelProperty",
-    "NoneProperty",
     "Property",
     "Schemas",
     "build_schemas",
@@ -24,15 +23,6 @@ from .enum_property import EnumProperty
 from .model_property import ModelProperty, build_model_property
 from .property import Property
 from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_data
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class NoneProperty(Property):
-    """A property that is always None"""
-
-    _type_string: ClassVar[str] = "None"
-    _json_type_string: ClassVar[str] = "None"
-    template: ClassVar[Optional[str]] = "none_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)

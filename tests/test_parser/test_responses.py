@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError, PropertyError
-from openapi_python_client.parser.properties import NoneProperty, Schemas, StringProperty
+from openapi_python_client.parser.properties import AnyProperty, Schemas, StringProperty
 
 MODULE_NAME = "openapi_python_client.parser.responses"
 
@@ -20,7 +20,7 @@ def test_response_from_data_no_content():
 
     assert response == Response(
         status_code=200,
-        prop=NoneProperty(name="response_200", default=None, nullable=False, required=True),
+        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True),
         source="None",
     )
 
@@ -46,7 +46,7 @@ def test_response_from_data_no_content_schema():
 
     assert response == Response(
         status_code=200,
-        prop=NoneProperty(name="response_200", default=None, nullable=False, required=True),
+        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True),
         source="None",
     )
 
