@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 import httpx
 
@@ -30,20 +30,12 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Any]:
-    if response.status_code == 200:
-        response_200 = None
-
-        return response_200
-    return None
-
-
 def _build_response(*, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(response=response),
+        parsed=None,
     )
 
 
@@ -64,19 +56,6 @@ def sync_detailed(
     return _build_response(response=response)
 
 
-def sync(
-    *,
-    client: Client,
-    common: Union[Unset, str] = UNSET,
-) -> Optional[Any]:
-    """ """
-
-    return sync_detailed(
-        client=client,
-        common=common,
-    ).parsed
-
-
 async def asyncio_detailed(
     *,
     client: Client,
@@ -91,18 +70,3 @@ async def asyncio_detailed(
         response = await _client.get(**kwargs)
 
     return _build_response(response=response)
-
-
-async def asyncio(
-    *,
-    client: Client,
-    common: Union[Unset, str] = UNSET,
-) -> Optional[Any]:
-    """ """
-
-    return (
-        await asyncio_detailed(
-            client=client,
-            common=common,
-        )
-    ).parsed

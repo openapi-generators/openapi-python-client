@@ -42,7 +42,7 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = None
+        response_200 = response.json()
 
         return response_200
     if response.status_code == 422:

@@ -13,7 +13,7 @@ from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, File
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, arguments, client, kwargs, parse_response %}
 
 {% set return_string = endpoint.response_type() %}
-{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
+{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
 def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
