@@ -1,4 +1,4 @@
-__all__ = ["Class", "Schemas", "parse_reference_path", "update_schemas_with_data"]
+__all__ = ["Class", "Schemas", "parse_reference_path", "update_schemas_with"]
 
 from typing import TYPE_CHECKING, Dict, List, NewType, Union, cast
 from urllib.parse import urlparse
@@ -63,7 +63,30 @@ class Schemas:
     errors: List[ParseError] = attr.ib(factory=list)
 
 
-def update_schemas_with_data(
+def update_schemas_with(
+    *, ref_path: _ReferencePath, data: Union[oai.Reference, oai.Schema], schemas: Schemas, config: Config
+) -> Union[Schemas, PropertyError]:
+    if isinstance(data, oai.Reference):
+        return _update_schemas_with_reference(ref_path=ref_path, data=data, schemas=schemas, config=config)
+    else:
+        return _update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+
+
+def _update_schemas_with_reference(
+    *, ref_path: _ReferencePath, data: oai.Reference, schemas: Schemas, config: Config
+) -> Union[Schemas, PropertyError]:
+    reference_pointer = parse_reference_path(data.ref)
+    if isinstance(reference_pointer, ParseError):
+        return PropertyError(detail=reference_pointer.detail, data=data)
+
+    resolved_reference = schemas.classes_by_reference.get(reference_pointer)
+    if resolved_reference:
+        return attr.evolve(schemas, classes_by_reference={ref_path: resolved_reference, **schemas.classes_by_reference})
+    else:
+        return PropertyError(f"Reference {ref_path} could not be resolved", data=data)
+
+
+def _update_schemas_with_data(
     *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Union[Schemas, PropertyError]:
     from . import build_enum_property, build_model_property

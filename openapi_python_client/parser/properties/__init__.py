@@ -22,7 +22,7 @@ from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty, build_model_property
 from .property import Property
-from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_data
+from .schemas import Class, Schemas, parse_reference_path, update_schemas_with
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -558,18 +558,17 @@ def build_schemas(
         next_round = []
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
-            if isinstance(data, oai.Reference):
-                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
-                continue
             ref_path = parse_reference_path(f"#/components/schemas/{name}")
             if isinstance(ref_path, ParseError):
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
-            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+
+            schemas_or_err = update_schemas_with(ref_path=ref_path, data=data, schemas=schemas, config=config)
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)
                 continue
+
             schemas = schemas_or_err
             still_making_progress = True
         to_process = next_round
