@@ -68,7 +68,7 @@ def sync(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Optional[TestInlineObjectsResponse200]:
-    """ """
+    """  """
 
     return sync_detailed(
         client=client,
@@ -97,7 +97,7 @@ async def asyncio(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Optional[TestInlineObjectsResponse200]:
-    """ """
+    """  """
 
     return (
         await asyncio_detailed(

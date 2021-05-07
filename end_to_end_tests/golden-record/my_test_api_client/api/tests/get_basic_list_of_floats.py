@@ -59,7 +59,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[float]]:
-    """Get a list of floats"""
+    """ Get a list of floats  """
 
     return sync_detailed(
         client=client,
@@ -84,7 +84,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[float]]:
-    """Get a list of floats"""
+    """ Get a list of floats  """
 
     return (
         await asyncio_detailed(

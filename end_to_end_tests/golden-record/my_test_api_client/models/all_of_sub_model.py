@@ -9,7 +9,7 @@ T = TypeVar("T", bound="AllOfSubModel")
 
 @attr.s(auto_attribs=True)
 class AllOfSubModel:
-    """ """
+    """  """
 
     a_sub_property: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)

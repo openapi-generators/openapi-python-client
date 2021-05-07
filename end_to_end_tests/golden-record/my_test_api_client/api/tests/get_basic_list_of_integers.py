@@ -59,7 +59,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[int]]:
-    """Get a list of integers"""
+    """ Get a list of integers  """
 
     return sync_detailed(
         client=client,
@@ -84,7 +84,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[int]]:
-    """Get a list of integers"""
+    """ Get a list of integers  """
 
     return (
         await asyncio_detailed(
