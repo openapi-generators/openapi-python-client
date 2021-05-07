@@ -1,6 +1,7 @@
 """ Contains all the data models used in inputs/outputs """
 
 from .a_model import AModel
+from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
 from .all_of_sub_model import AllOfSubModel
 from .an_all_of_enum import AnAllOfEnum
 from .an_enum import AnEnum

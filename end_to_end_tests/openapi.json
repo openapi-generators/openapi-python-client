@@ -893,10 +893,10 @@
           "one_of_models": {
             "oneOf": [
               {
-                "ref": "#/components/schemas/FreeFormModel"
+                "$ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": false
@@ -904,10 +904,10 @@
           "nullable_one_of_models": {
             "oneOf": [
               {
-                "ref": "#/components/schemas/FreeFormModel"
+                "$ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": true
@@ -915,10 +915,10 @@
           "not_required_one_of_models": {
             "oneOf": [
               {
-                "ref": "#/components/schemas/FreeFormModel"
+                "$ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": false
@@ -926,10 +926,10 @@
           "not_required_nullable_one_of_models": {
             "oneOf": [
               {
-                "ref": "#/components/schemas/FreeFormModel"
+                "$ref": "#/components/schemas/FreeFormModel"
               },
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               },
               {
                 "type": "string"
@@ -940,7 +940,7 @@
           "model": {
             "allOf": [
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": false
@@ -948,7 +948,7 @@
           "nullable_model": {
             "allOf": [
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": true
@@ -956,7 +956,7 @@
           "not_required_model": {
             "allOf": [
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": false
@@ -964,7 +964,7 @@
           "not_required_nullable_model": {
             "allOf": [
               {
-                "ref": "#/components/schemas/ModelWithUnionProperty"
+                "$ref": "#/components/schemas/ModelWithUnionProperty"
               }
             ],
             "nullable": true
@@ -1194,6 +1194,267 @@
         "properties": {
           "inner": {"$ref":  "#/components/schemas/model_reference_doesnt_match"}
         }
+      },
+      "AModelWithPropertiesReferenceThatAreNotObject": {
+        "type": "object",
+        "properties": {
+            "enum_properties_ref": {
+              "$ref": "#/components/schemas/AnOtherArrayOfEnum"
+            },
+            "str_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfString"
+            },
+            "date_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfDate"
+            },
+            "datetime_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfDateTime"
+            },
+            "int32_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfInt32"
+            },
+            "int64_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfInt64"
+            },
+            "float_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfFloat"
+            },
+            "double_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfDouble"
+            },
+            "file_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfFile"
+            },
+            "bytestream_properties_ref": {
+                "$ref": "#/components/schemas/AnOtherArrayOfByteStream"
+            },
+            "enum_properties": {
+              "$ref": "#/components/schemas/AnArrayOfEnum"
+            },
+            "str_properties": {
+                "$ref": "#/components/schemas/AnArrayOfString"
+            },
+            "date_properties": {
+                "$ref": "#/components/schemas/AnArrayOfDate"
+            },
+            "datetime_properties": {
+                "$ref": "#/components/schemas/AnArrayOfDateTime"
+            },
+            "int32_properties": {
+                "$ref": "#/components/schemas/AnArrayOfInt32"
+            },
+            "int64_properties": {
+                "$ref": "#/components/schemas/AnArrayOfInt64"
+            },
+            "float_properties": {
+                "$ref": "#/components/schemas/AnArrayOfFloat"
+            },
+            "double_properties": {
+                "$ref": "#/components/schemas/AnArrayOfDouble"
+            },
+            "file_properties": {
+                "$ref": "#/components/schemas/AnArrayOfFile"
+            },
+            "bytestream_properties": {
+                "$ref": "#/components/schemas/AnArrayOfByteStream"
+            },
+            "enum_property_ref": {
+              "$ref": "#/components/schemas/AnEnum"
+            },
+            "str_property_ref": {
+                "$ref": "#/components/schemas/AString"
+            },
+            "date_property_ref": {
+                "$ref": "#/components/schemas/ADate"
+            },
+            "datetime_property_ref": {
+                "$ref": "#/components/schemas/ADateTime"
+            },
+            "int32_property_ref": {
+                "$ref": "#/components/schemas/AnInt32"
+            },
+            "int64_property_ref": {
+                "$ref": "#/components/schemas/AnInt64"
+            },
+            "float_property_ref": {
+                "$ref": "#/components/schemas/AFloat"
+            },
+            "double_property_ref": {
+                "$ref": "#/components/schemas/ADouble"
+            },
+            "file_property_ref": {
+                "$ref": "#/components/schemas/AFile"
+            },
+            "bytestream_property_ref": {
+                "$ref": "#/components/schemas/AByteStream"
+            }
+        }
+      },
+      "AnArrayOfEnum": {
+        "type": "array",
+        "items": {
+          "title": "AnEnum",
+          "enum": ["FIRST_VALUE", "SECOND_VALUE"],
+          "description": "For testing Enums in all the ways they can be used "
+        }
+      },
+      "AnOtherArrayOfEnum": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AnEnum"
+        }
+      },
+      "AnArrayOfString": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "AnOtherArrayOfString": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AString"
+        }
+      },
+      "AString": {
+        "type": "string",
+        "pattern": "^helloworld.*"
+      },
+      "AnArrayOfDate": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "AnOtherArrayOfDate": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ADate"
+        }
+      },
+      "ADate": {
+        "type": "string",
+        "format": "date"
+      },
+      "AnArrayOfDateTime": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "AnOtherArrayOfDateTime": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ADateTime"
+        }
+      },
+      "ADateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "AnArrayOfInt32": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "AnOtherArrayOfInt32": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AnInt32"
+        }
+      },
+      "AnInt32": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "AnArrayOfInt64": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "AnOtherArrayOfInt64": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AnInt64"
+        }
+      },
+      "AnInt64": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "AnArrayOfFloat": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "AnOtherArrayOfFloat": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AFloat"
+        }
+      },
+      "AFloat": {
+        "type": "number",
+        "format": "float"
+      },
+      "AnArrayOfDouble": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "AnOtherArrayOfDouble": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ADouble"
+        }
+      },
+      "ADouble": {
+        "type": "number",
+        "format": "double"
+      },
+      "AnArrayOfFile": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "AnOtherArrayOfFile": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AFile"
+        }
+      },
+      "AFile": {
+        "type": "string",
+        "format": "binary"
+      },
+      "AnArrayOfByteStream": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "AnOtherArrayOfByteStream": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AByteStream"
+        }
+      },
+      "AByteStream": {
+        "type": "string",
+        "format": "byte"
       }
     }
   }
