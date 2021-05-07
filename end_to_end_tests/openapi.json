@@ -1194,6 +1194,21 @@
         "properties": {
           "inner": {"$ref":  "#/components/schemas/model_reference_doesnt_match"}
         }
+      },
+      "AModelWithIndirectReferenceProperty": {
+        "title": "AModelWithIndirectReferenceProperty",
+        "type": "object",
+        "properties": {
+          "an_enum_indirect_ref": {
+            "$ref": "#/components/schemas/AnEnumDeeperIndirectReference"
+          }
+        }
+      },
+      "AnEnumDeeperIndirectReference": {
+        "$ref": "#/components/schemas/AnEnumIndirectReference"
+      },
+      "AnEnumIndirectReference": {
+        "$ref": "#/components/schemas/AnEnum"
       }
     }
   }
