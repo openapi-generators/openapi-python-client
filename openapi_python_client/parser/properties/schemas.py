@@ -1,6 +1,6 @@
-__all__ = ["Class", "Schemas", "parse_reference_path", "update_schemas_with"]
+__all__ = ["Class", "Schemas", "parse_reference_path", "update_schemas_with", "_ReferencePath"]
 
-from typing import TYPE_CHECKING, Dict, List, NewType, Union, cast
+from typing import TYPE_CHECKING, Dict, Generic, List, NewType, Optional, Set, TypeVar, Union, cast
 from urllib.parse import urlparse
 
 import attr
@@ -8,7 +8,7 @@ import attr
 from ... import Config
 from ... import schema as oai
 from ... import utils
-from ..errors import ParseError, PropertyError
+from ..errors import ParseError, PropertyError, RecursiveReferenceInterupt
 
 if TYPE_CHECKING:  # pragma: no cover
     from .enum_property import EnumProperty
@@ -17,7 +17,7 @@ else:
     EnumProperty = "EnumProperty"
     ModelProperty = "ModelProperty"
 
-
+T = TypeVar("T")
 _ReferencePath = NewType("_ReferencePath", str)
 _ClassName = NewType("_ClassName", str)
 
@@ -27,6 +27,11 @@ def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]
     if parsed.scheme or parsed.path:
         return ParseError(detail=f"Remote references such as {ref_path_raw} are not supported yet.")
     return cast(_ReferencePath, parsed.fragment)
+
+
+@attr.s(auto_attribs=True)
+class _Holder(Generic[T]):
+    data: Optional[T]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -58,22 +63,33 @@ class Class:
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
-    classes_by_reference: Dict[_ReferencePath, Union[EnumProperty, ModelProperty]] = attr.ib(factory=dict)
-    classes_by_name: Dict[_ClassName, Union[EnumProperty, ModelProperty]] = attr.ib(factory=dict)
+    classes_by_reference: Dict[
+        _ReferencePath, _Holder[Union[EnumProperty, ModelProperty, RecursiveReferenceInterupt]]
+    ] = attr.ib(factory=dict)
+    classes_by_name: Dict[
+        _ClassName, _Holder[Union[EnumProperty, ModelProperty, RecursiveReferenceInterupt]]
+    ] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
 
 
 def update_schemas_with(
-    *, ref_path: _ReferencePath, data: Union[oai.Reference, oai.Schema], schemas: Schemas, config: Config
+    *,
+    ref_path: _ReferencePath,
+    data: Union[oai.Reference, oai.Schema],
+    schemas: Schemas,
+    visited: Set[_ReferencePath],
+    config: Config,
 ) -> Union[Schemas, PropertyError]:
     if isinstance(data, oai.Reference):
-        return _update_schemas_with_reference(ref_path=ref_path, data=data, schemas=schemas, config=config)
+        return _update_schemas_with_reference(
+            ref_path=ref_path, data=data, schemas=schemas, visited=visited, config=config
+        )
     else:
-        return _update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+        return _update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, visited=visited, config=config)
 
 
 def _update_schemas_with_reference(
-    *, ref_path: _ReferencePath, data: oai.Reference, schemas: Schemas, config: Config
+    *, ref_path: _ReferencePath, data: oai.Reference, schemas: Schemas, visited: Set[_ReferencePath], config: Config
 ) -> Union[Schemas, PropertyError]:
     reference_pointer = parse_reference_path(data.ref)
     if isinstance(reference_pointer, ParseError):
@@ -87,7 +103,7 @@ def _update_schemas_with_reference(
 
 
 def _update_schemas_with_data(
-    *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
+    *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, visited: Set[_ReferencePath], config: Config
 ) -> Union[Schemas, PropertyError]:
     from . import build_enum_property, build_model_property
 
@@ -100,7 +116,19 @@ def _update_schemas_with_data(
         prop, schemas = build_model_property(
             data=data, name=ref_path, schemas=schemas, required=True, parent_name=None, config=config
         )
+
+    holder = schemas.classes_by_reference.get(ref_path)
     if isinstance(prop, PropertyError):
+        if ref_path in visited and not holder:
+            holder = _Holder(data=RecursiveReferenceInterupt())
+            schemas = attr.evolve(schemas, classes_by_reference={ref_path: holder, **schemas.classes_by_reference})
+            return RecursiveReferenceInterupt(schemas=schemas)
         return prop
-    schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})
+
+    if holder:
+        holder.data = prop
+    else:
+        schemas = attr.evolve(
+            schemas, classes_by_reference={ref_path: _Holder(data=prop), **schemas.classes_by_reference}
+        )
     return schemas

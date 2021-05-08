@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 __all__ = ["ErrorLevel", "GeneratorError", "ParseError", "PropertyError", "ValidationError"]
 
@@ -37,6 +37,13 @@ class PropertyError(ParseError):
     """Error raised when there's a problem creating a Property"""
 
     header = "Problem creating a Property: "
+
+
+@dataclass
+class RecursiveReferenceInterupt(PropertyError):
+    """Error raised when a property have an recursive reference to itself"""
+
+    schemas: Optional[Any] = None  # TODO: shall not use Any here, shall be Schemas, to fix later
 
 
 class ValidationError(Exception):

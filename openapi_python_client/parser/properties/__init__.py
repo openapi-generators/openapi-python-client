@@ -17,12 +17,12 @@ import attr
 from ... import Config
 from ... import schema as oai
 from ... import utils
-from ..errors import ParseError, PropertyError, ValidationError
+from ..errors import ParseError, PropertyError, RecursiveReferenceInterupt, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty, build_model_property
 from .property import Property
-from .schemas import Class, Schemas, parse_reference_path, update_schemas_with
+from .schemas import Class, Schemas, _Holder, _ReferencePath, parse_reference_path, update_schemas_with
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -32,6 +32,59 @@ class NoneProperty(Property):
     _type_string: ClassVar[str] = "None"
     _json_type_string: ClassVar[str] = "None"
     template: ClassVar[Optional[str]] = "none_property.py.jinja"
+
+
+@attr.s(auto_attribs=True, frozen=True)
+class LazySelfReferenceProperty(Property):
+    """A property used to resolve recursive reference.
+    It proxyfy the required method call to its binded Property owner
+    """
+
+    owner: _Holder[Union[ModelProperty, EnumProperty, RecursiveReferenceInterupt]]
+    _resolved: bool = False
+
+    def get_base_type_string(self) -> str:
+        self._ensure_resolved()
+
+        prop = self.owner.data
+        assert isinstance(prop, Property)
+        return prop.get_base_type_string()
+
+    def get_base_json_type_string(self) -> str:
+        self._ensure_resolved()
+
+        prop = self.owner.data
+        assert isinstance(prop, Property)
+        return prop.get_base_json_type_string()
+
+    def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
+        self._ensure_resolved()
+
+        prop = self.owner.data
+        assert isinstance(prop, Property)
+        return prop.get_type_string(no_optional, json)
+
+    def get_instance_type_string(self) -> str:
+        self._ensure_resolved()
+        return super().get_instance_type_string()
+
+    def to_string(self) -> str:
+        self._ensure_resolved()
+
+        if not self.required:
+            return f"{self.python_name}: Union[Unset, {self.get_type_string()}] = UNSET"
+        else:
+            return f"{self.python_name}: {self.get_type_string()}"
+
+    def _ensure_resolved(self) -> None:
+        if self._resolved:
+            return
+
+        if not isinstance(self.owner.data, Property):
+            raise RuntimeError(f"LazySelfReferenceProperty {self.name} owner shall have been resolved.")
+        else:
+            object.__setattr__(self, "_resolved", True)
+            object.__setattr__(self, "nullable", self.owner.data.nullable)
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -410,11 +463,18 @@ def _property_from_ref(
     ref_path = parse_reference_path(data.ref)
     if isinstance(ref_path, ParseError):
         return PropertyError(data=data, detail=ref_path.detail), schemas
+
     existing = schemas.classes_by_reference.get(ref_path)
-    if not existing:
+    if not existing or not existing.data:
         return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
 
-    prop = attr.evolve(existing, required=required, name=name)
+    if isinstance(existing.data, RecursiveReferenceInterupt):
+        return (
+            LazySelfReferenceProperty(required=required, name=name, nullable=False, default=None, owner=existing),
+            schemas,
+        )
+
+    prop = attr.evolve(existing.data, required=required, name=name)
     if parent:
         prop = attr.evolve(prop, nullable=parent.nullable)
         if isinstance(prop, EnumProperty):
@@ -550,12 +610,15 @@ def build_schemas(
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
     errors: List[PropertyError] = []
-
+    recursive_references_waiting_reprocess: Dict[str, Union[oai.Reference, oai.Schema]] = dict()
+    visited: Set[_ReferencePath] = set()
+    depth = 0
     # References could have forward References so keep going as long as we are making progress
     while still_making_progress:
         still_making_progress = False
         errors = []
         next_round = []
+
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
             ref_path = parse_reference_path(f"#/components/schemas/{name}")
@@ -563,15 +626,28 @@ def build_schemas(
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
 
-            schemas_or_err = update_schemas_with(ref_path=ref_path, data=data, schemas=schemas, config=config)
+            visited.add(ref_path)
+            schemas_or_err = update_schemas_with(
+                ref_path=ref_path, data=data, schemas=schemas, visited=visited, config=config
+            )
             if isinstance(schemas_or_err, PropertyError):
-                next_round.append((name, data))
-                errors.append(schemas_or_err)
-                continue
+                if isinstance(schemas_or_err, RecursiveReferenceInterupt):
+                    up_schemas = schemas_or_err.schemas
+                    assert isinstance(up_schemas, Schemas)  # TODO fix typedef in RecursiveReferenceInterupt
+                    schemas_or_err = up_schemas
+                    recursive_references_waiting_reprocess[name] = data
+                else:
+                    next_round.append((name, data))
+                    errors.append(schemas_or_err)
+                    continue
 
             schemas = schemas_or_err
             still_making_progress = True
+        depth += 1
         to_process = next_round
+
+    if len(recursive_references_waiting_reprocess.keys()):
+        schemas = build_schemas(components=recursive_references_waiting_reprocess, schemas=schemas, config=config)
 
     schemas.errors.extend(errors)
     return schemas

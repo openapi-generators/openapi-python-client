@@ -12,6 +12,11 @@ from .schemas import Class, Schemas, parse_reference_path
 
 
 @attr.s(auto_attribs=True, frozen=True)
+class RecusiveProperty(Property):
+    pass
+
+
+@attr.s(auto_attribs=True, frozen=True)
 class ModelProperty(Property):
     """A property which refers to another Schema"""
 
@@ -93,9 +98,12 @@ def _process_properties(
             ref_path = parse_reference_path(sub_prop.ref)
             if isinstance(ref_path, ParseError):
                 return PropertyError(detail=ref_path.detail, data=sub_prop)
-            sub_model = schemas.classes_by_reference.get(ref_path)
-            if sub_model is None:
+
+            sub_model_ref = schemas.classes_by_reference.get(ref_path)
+            if sub_model_ref is None or not isinstance(sub_model_ref.data, Property):
                 return PropertyError(f"Reference {sub_prop.ref} not found")
+
+            sub_model = sub_model_ref.data
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
