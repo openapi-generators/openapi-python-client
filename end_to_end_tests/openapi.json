@@ -1209,6 +1209,29 @@
       },
       "AnEnumIndirectReference": {
         "$ref": "#/components/schemas/AnEnum"
+      },
+      "AModelWithIndirectSelfReferenceProperty": {
+        "type": "object",
+        "properties": {
+          "an_enum": {
+            "$ref": "#/components/schemas/AnEnum"
+          },
+          "required_self_ref": {
+            "$ref": "#/components/schemas/AnDeeperIndirectSelfReference"
+          },
+          "optional_self_ref": {
+            "$ref": "#/components/schemas/AnDeeperIndirectSelfReference"
+           }
+        },
+        "required": [
+          "required_self_ref"
+        ]
+      },
+      "AnDeeperIndirectSelfReference": {
+        "$ref": "#/components/schemas/AnIndirectSelfReference"
+      },
+      "AnIndirectSelfReference": {
+        "$ref": "#/components/schemas/AModelWithIndirectSelfReferenceProperty"
       }
     }
   }

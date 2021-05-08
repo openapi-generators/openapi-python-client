@@ -2,6 +2,7 @@
 
 from .a_model import AModel
 from .a_model_with_indirect_reference_property import AModelWithIndirectReferenceProperty
+from .a_model_with_indirect_self_reference_property import AModelWithIndirectSelfReferenceProperty
 from .all_of_sub_model import AllOfSubModel
 from .an_all_of_enum import AnAllOfEnum
 from .an_enum import AnEnum
