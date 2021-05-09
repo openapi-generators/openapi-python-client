@@ -33,7 +33,7 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_param=False) %}
 {% set inner_property = property.inner_property %}
 {% if property.required %}
 {% if property.nullable %}
@@ -46,7 +46,7 @@ else:
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
-if not isinstance({{ source }}, Unset):
+if not isinstance({{ source }}, Unset){% if query_param %} and {{ source }} is not None{% endif %}:
 {% if property.nullable %}
     if {{ source }} is None:
         {{ destination }} = None

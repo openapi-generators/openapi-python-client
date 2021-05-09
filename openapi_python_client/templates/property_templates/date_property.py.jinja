@@ -10,12 +10,12 @@ isoparse({{ source }}).date()
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, query_param=False) %}
 {% if property.required %}
 {{ destination }} = {{ source }}.isoformat() {% if property.nullable %}if {{ source }} else None {%endif%}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
-if not isinstance({{ source }}, Unset):
+if not isinstance({{ source }}, Unset){% if query_param %} and {{ source }} is not None{% endif %}:
 {% if property.nullable %}
     {{ destination }} = {{ source }}.isoformat() if {{ source }} else None
 {% else %}

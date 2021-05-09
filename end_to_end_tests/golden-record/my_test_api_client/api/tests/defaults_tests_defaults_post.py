@@ -38,11 +38,14 @@ def _get_kwargs(
     cookies: Dict[str, Any] = client.get_cookies()
 
     json_not_required_not_nullable_datetime_prop: Union[Unset, str] = UNSET
-    if not isinstance(not_required_not_nullable_datetime_prop, Unset):
+    if (
+        not isinstance(not_required_not_nullable_datetime_prop, Unset)
+        and not_required_not_nullable_datetime_prop is not None
+    ):
         json_not_required_not_nullable_datetime_prop = not_required_not_nullable_datetime_prop.isoformat()
 
     json_not_required_nullable_datetime_prop: Union[Unset, None, str] = UNSET
-    if not isinstance(not_required_nullable_datetime_prop, Unset):
+    if not isinstance(not_required_nullable_datetime_prop, Unset) and not_required_nullable_datetime_prop is not None:
         json_not_required_nullable_datetime_prop = (
             not_required_nullable_datetime_prop.isoformat() if not_required_nullable_datetime_prop else None
         )
@@ -54,11 +57,11 @@ def _get_kwargs(
     )
 
     json_date_prop: Union[Unset, str] = UNSET
-    if not isinstance(date_prop, Unset):
+    if not isinstance(date_prop, Unset) and date_prop is not None:
         json_date_prop = date_prop.isoformat()
 
     json_list_prop: Union[Unset, List[str]] = UNSET
-    if not isinstance(list_prop, Unset):
+    if not isinstance(list_prop, Unset) and list_prop is not None:
         json_list_prop = []
         for list_prop_item_data in list_prop:
             list_prop_item = list_prop_item_data.value
@@ -66,13 +69,13 @@ def _get_kwargs(
             json_list_prop.append(list_prop_item)
 
     json_union_prop: Union[Unset, float, str]
-    if isinstance(union_prop, Unset):
+    if isinstance(union_prop, Unset) or union_prop is None:
         json_union_prop = UNSET
     else:
         json_union_prop = union_prop
 
     json_union_prop_with_ref: Union[Unset, float, str]
-    if isinstance(union_prop_with_ref, Unset):
+    if isinstance(union_prop_with_ref, Unset) or union_prop_with_ref is None:
         json_union_prop_with_ref = UNSET
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
@@ -83,17 +86,17 @@ def _get_kwargs(
         json_union_prop_with_ref = union_prop_with_ref
 
     json_enum_prop: Union[Unset, str] = UNSET
-    if not isinstance(enum_prop, Unset):
+    if not isinstance(enum_prop, Unset) and enum_prop is not None:
         json_enum_prop = enum_prop.value
 
     json_model_prop: Union[Unset, Dict[str, Any]] = UNSET
-    if not isinstance(model_prop, Unset):
+    if not isinstance(model_prop, Unset) and model_prop is not None:
         json_model_prop = model_prop.to_dict()
 
     json_required_model_prop = required_model_prop.to_dict()
 
     json_nullable_model_prop: Union[Unset, None, Dict[str, Any]] = UNSET
-    if not isinstance(nullable_model_prop, Unset):
+    if not isinstance(nullable_model_prop, Unset) and nullable_model_prop is not None:
         json_nullable_model_prop = nullable_model_prop.to_dict() if nullable_model_prop else None
 
     json_nullable_required_model_prop = nullable_required_model_prop.to_dict() if nullable_required_model_prop else None
