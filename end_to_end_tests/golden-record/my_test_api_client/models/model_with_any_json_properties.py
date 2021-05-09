@@ -46,7 +46,6 @@ class ModelWithAnyJsonProperties:
                 data: object,
             ) -> Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str]:
                 try:
-                    additional_property_type_0: ModelWithAnyJsonPropertiesAdditionalPropertyType0
                     if not isinstance(data, dict):
                         raise TypeError()
                     additional_property_type_0 = ModelWithAnyJsonPropertiesAdditionalPropertyType0.from_dict(data)
@@ -55,7 +54,6 @@ class ModelWithAnyJsonProperties:
                 except:  # noqa: E722
                     pass
                 try:
-                    additional_property_type_1: List[str]
                     if not isinstance(data, list):
                         raise TypeError()
                     additional_property_type_1 = cast(List[str], data)
