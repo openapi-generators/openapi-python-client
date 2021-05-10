@@ -49,6 +49,18 @@ class ModelProperty(Property):
         return imports
 
 
+def _is_subtype(first: Property, second: Property) -> bool:
+    return (
+        first.__class__.__name__ == "EnumProperty"
+        and first.value_type == str
+        and second.__class__.__name__ == "StringProperty"
+    ) or (
+        first.__class__.__name__ == "EnumProperty"
+        and first.value_type == int
+        and second.__class__.__name__ == "IntProperty"
+    )
+
+
 def _merge_properties(first: Property, second: Property) -> Union[Property, PropertyError]:
     nullable = first.nullable and second.nullable
     required = first.required or second.required
@@ -59,26 +71,12 @@ def _merge_properties(first: Property, second: Property) -> Union[Property, Prop
         if first != second:
             return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
         return first
-    elif (
-        first.__class__.__name__ == "StringProperty"
-        and second.__class__.__name__ == "EnumProperty"
-        and second.value_type == str
-        or first.__class__.__name__ == "IntProperty"
-        and second.__class__.__name__ == "EnumProperty"
-        and second.value_type == int
-    ):
-        second = attr.evolve(second, nullable=nullable, required=required)
-        return second
-    elif (
-        second.__class__.__name__ == "StringProperty"
-        and first.__class__.__name__ == "EnumProperty"
-        and first.value_type == str
-        or second.__class__.__name__ == "IntProperty"
-        and first.__class__.__name__ == "EnumProperty"
-        and first.value_type == int
-    ):
+    elif _is_subtype(first, second):
         first = attr.evolve(first, nullable=nullable, required=required)
         return first
+    elif _is_subtype(second, first):
+        second = attr.evolve(second, nullable=nullable, required=required)
+        return second
     else:
         return PropertyError(
             header="Cannot merge properties",
