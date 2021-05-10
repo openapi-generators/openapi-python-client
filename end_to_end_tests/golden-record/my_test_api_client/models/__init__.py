@@ -2,11 +2,13 @@
 
 from .a_model import AModel
 from .all_of_sub_model import AllOfSubModel
+from .all_of_sub_model_type_enum import AllOfSubModelTypeEnum
 from .an_all_of_enum import AnAllOfEnum
 from .an_enum import AnEnum
 from .an_int_enum import AnIntEnum
 from .another_all_of_sub_model import AnotherAllOfSubModel
 from .another_all_of_sub_model_type import AnotherAllOfSubModelType
+from .another_all_of_sub_model_type_enum import AnotherAllOfSubModelTypeEnum
 from .body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
