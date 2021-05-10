@@ -8,6 +8,7 @@ from .an_all_of_enum import AnAllOfEnum
 from .an_enum import AnEnum
 from .an_int_enum import AnIntEnum
 from .another_all_of_sub_model import AnotherAllOfSubModel
+from .another_all_of_sub_model_type import AnotherAllOfSubModelType
 from .body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
 from .body_upload_file_tests_upload_post_additional_property import BodyUploadFileTestsUploadPostAdditionalProperty
 from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadFileTestsUploadPostSomeNullableObject
