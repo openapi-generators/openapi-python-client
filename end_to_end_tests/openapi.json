@@ -1173,6 +1173,9 @@
         "properties": {
           "a_sub_property": {
             "type": "string"
+          },
+          "type": {
+            "type": "string"
           }
         }
       },
@@ -1182,6 +1185,10 @@
         "properties": {
           "another_sub_property": {
             "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["submodel"]
           }
         }
       },

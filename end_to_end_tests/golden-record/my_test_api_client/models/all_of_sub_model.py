@@ -12,16 +12,20 @@ class AllOfSubModel:
     """ """
 
     a_sub_property: Union[Unset, str] = UNSET
+    type: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_sub_property = self.a_sub_property
+        type = self.type
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if a_sub_property is not UNSET:
             field_dict["a_sub_property"] = a_sub_property
+        if type is not UNSET:
+            field_dict["type"] = type
 
         return field_dict
 
@@ -30,8 +34,11 @@ class AllOfSubModel:
         d = src_dict.copy()
         a_sub_property = d.pop("a_sub_property", UNSET)
 
+        type = d.pop("type", UNSET)
+
         all_of_sub_model = cls(
             a_sub_property=a_sub_property,
+            type=type,
         )
 
         all_of_sub_model.additional_properties = d

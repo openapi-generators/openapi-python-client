@@ -7,6 +7,7 @@ from ... import Config
 from ... import schema as oai
 from ... import utils
 from ..errors import ParseError, PropertyError
+from .enum_property import EnumProperty
 from .property import Property
 from .schemas import Class, Schemas, parse_reference_path
 
@@ -49,15 +50,32 @@ class ModelProperty(Property):
 
 
 def _merge_properties(first: Property, second: Property) -> Union[Property, PropertyError]:
-    if first.__class__ != second.__class__:
-        return PropertyError(header="Cannot merge properties", detail="Properties are two different types")
     nullable = first.nullable and second.nullable
     required = first.required or second.required
-    first = attr.evolve(first, nullable=nullable, required=required)
-    second = attr.evolve(second, nullable=nullable, required=required)
-    if first != second:
-        return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
-    return first
+
+    if first.__class__ == second.__class__:
+        first = attr.evolve(first, nullable=nullable, required=required)
+        second = attr.evolve(second, nullable=nullable, required=required)
+        if first != second:
+            return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
+        return first
+    elif first.__class__.__name__ == "StringProperty" and second.__class__ == EnumProperty and second.value_type == str:
+        second = attr.evolve(second, nullable=nullable, required=required)
+        return second
+    elif second.__class__.__name__ == "StringProperty" and first.__class__ == EnumProperty and first.value_type == str:
+        first = attr.evolve(first, nullable=nullable, required=required)
+        return first
+    elif first.__class__.__name__ == "IntProperty" and second.__class__ == EnumProperty and second.value_type == int:
+        second = attr.evolve(second, nullable=nullable, required=required)
+        return second
+    elif second.__class__.__name__ == "IntProperty" and first.__class__ == EnumProperty and first.value_type == int:
+        first = attr.evolve(first, nullable=nullable, required=required)
+        return first
+    else:
+        return PropertyError(
+            header="Cannot merge properties",
+            detail=f"{first.__class__}, {second.__class__}Properties have incompatible types",
+        )
 
 
 class _PropertyData(NamedTuple):
