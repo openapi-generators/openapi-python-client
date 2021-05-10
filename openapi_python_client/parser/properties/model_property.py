@@ -7,6 +7,7 @@ from ... import Config
 from ... import schema as oai
 from ... import utils
 from ..errors import ParseError, PropertyError
+from .enum_property import EnumProperty
 from .property import Property
 from .schemas import Class, Schemas, parse_reference_path
 
@@ -50,18 +51,20 @@ class ModelProperty(Property):
 
 
 def _is_string_enum(prop: Property) -> bool:
-    return prop.__class__.__name__ == "EnumProperty" and prop.value_type == str
+    return isinstance(prop, EnumProperty) and prop.value_type == str
 
 
 def _is_int_enum(prop: Property) -> bool:
-    return prop.__class__.__name__ == "EnumProperty" and prop.value_type == int
+    return isinstance(prop, EnumProperty) and prop.value_type == int
 
 
 def _is_subtype(first: Property, second: Property) -> bool:
+    from . import IntProperty, StringProperty
+
     return any(
         [
-            _is_string_enum(first) and second.__class__.__name__ == "StringProperty",
-            _is_int_enum(first) and second.__class__.__name__ == "IntProperty",
+            _is_string_enum(first) and isinstance(second, StringProperty),
+            _is_int_enum(first) and isinstance(second, IntProperty),
             _is_string_enum(first)
             and _is_string_enum(second)
             and set(first.values.items()) <= set(second.values.items()),
