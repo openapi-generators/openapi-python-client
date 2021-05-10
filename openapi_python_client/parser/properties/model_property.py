@@ -7,7 +7,6 @@ from ... import Config
 from ... import schema as oai
 from ... import utils
 from ..errors import ParseError, PropertyError
-from .enum_property import EnumProperty
 from .property import Property
 from .schemas import Class, Schemas, parse_reference_path
 
@@ -59,16 +58,24 @@ def _merge_properties(first: Property, second: Property) -> Union[Property, Prop
         if first != second:
             return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
         return first
-    elif first.__class__.__name__ == "StringProperty" and second.__class__ == EnumProperty and second.value_type == str:
+    elif (
+        first.__class__.__name__ == "StringProperty"
+        and second.__class__.__name__ == "EnumProperty"
+        and second.value_type == str
+        or first.__class__.__name__ == "IntProperty"
+        and second.__class__.__name__ == "EnumProperty"
+        and second.value_type == int
+    ):
         second = attr.evolve(second, nullable=nullable, required=required)
         return second
-    elif second.__class__.__name__ == "StringProperty" and first.__class__ == EnumProperty and first.value_type == str:
-        first = attr.evolve(first, nullable=nullable, required=required)
-        return first
-    elif first.__class__.__name__ == "IntProperty" and second.__class__ == EnumProperty and second.value_type == int:
-        second = attr.evolve(second, nullable=nullable, required=required)
-        return second
-    elif second.__class__.__name__ == "IntProperty" and first.__class__ == EnumProperty and first.value_type == int:
+    elif (
+        second.__class__.__name__ == "StringProperty"
+        and first.__class__.__name__ == "EnumProperty"
+        and first.value_type == str
+        or second.__class__.__name__ == "IntProperty"
+        and first.__class__.__name__ == "EnumProperty"
+        and first.value_type == int
+    ):
         first = attr.evolve(first, nullable=nullable, required=required)
         return first
     else:
