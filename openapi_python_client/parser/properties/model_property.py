@@ -49,15 +49,24 @@ class ModelProperty(Property):
         return imports
 
 
+def _is_string_enum(prop: Property) -> bool:
+    return prop.__class__.__name__ == "EnumProperty" and prop.value_type == str
+
+
+def _is_int_enum(prop: Property) -> bool:
+    return prop.__class__.__name__ == "EnumProperty" and prop.value_type == int
+
+
 def _is_subtype(first: Property, second: Property) -> bool:
-    return (
-        first.__class__.__name__ == "EnumProperty"
-        and first.value_type == str
-        and second.__class__.__name__ == "StringProperty"
-    ) or (
-        first.__class__.__name__ == "EnumProperty"
-        and first.value_type == int
-        and second.__class__.__name__ == "IntProperty"
+    return any(
+        [
+            _is_string_enum(first) and second.__class__.__name__ == "StringProperty",
+            _is_int_enum(first) and second.__class__.__name__ == "IntProperty",
+            _is_string_enum(first)
+            and _is_string_enum(second)
+            and set(first.values.items()) <= set(second.values.items()),
+            _is_int_enum(first) and _is_int_enum(second) and set(first.values.items()) <= set(second.values.items()),
+        ]
     )
 
 
@@ -65,18 +74,18 @@ def _merge_properties(first: Property, second: Property) -> Union[Property, Prop
     nullable = first.nullable and second.nullable
     required = first.required or second.required
 
-    if first.__class__ == second.__class__:
-        first = attr.evolve(first, nullable=nullable, required=required)
-        second = attr.evolve(second, nullable=nullable, required=required)
-        if first != second:
-            return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
-        return first
-    elif _is_subtype(first, second):
+    if _is_subtype(first, second):
         first = attr.evolve(first, nullable=nullable, required=required)
         return first
     elif _is_subtype(second, first):
         second = attr.evolve(second, nullable=nullable, required=required)
         return second
+    elif first.__class__ == second.__class__:
+        first = attr.evolve(first, nullable=nullable, required=required)
+        second = attr.evolve(second, nullable=nullable, required=required)
+        if first != second:
+            return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
+        return first
     else:
         return PropertyError(
             header="Cannot merge properties",

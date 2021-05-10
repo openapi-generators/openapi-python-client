@@ -1385,6 +1385,10 @@
           },
           "type": {
             "type": "string"
+          },
+          "type_enum": {
+            "type": "int",
+            "enum": [0, 1]
           }
         }
       },
@@ -1398,6 +1402,10 @@
           "type": {
             "type": "string",
             "enum": ["submodel"]
+          },
+          "type_enum": {
+            "type": "int",
+            "enum": [0]
           }
         }
       },

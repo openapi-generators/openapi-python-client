@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.all_of_sub_model_type_enum import AllOfSubModelTypeEnum
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="AllOfSubModel")
@@ -13,11 +14,15 @@ class AllOfSubModel:
 
     a_sub_property: Union[Unset, str] = UNSET
     type: Union[Unset, str] = UNSET
+    type_enum: Union[Unset, AllOfSubModelTypeEnum] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_sub_property = self.a_sub_property
         type = self.type
+        type_enum: Union[Unset, int] = UNSET
+        if not isinstance(self.type_enum, Unset):
+            type_enum = self.type_enum.value
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -26,6 +31,8 @@ class AllOfSubModel:
             field_dict["a_sub_property"] = a_sub_property
         if type is not UNSET:
             field_dict["type"] = type
+        if type_enum is not UNSET:
+            field_dict["type_enum"] = type_enum
 
         return field_dict
 
@@ -36,9 +43,15 @@ class AllOfSubModel:
 
         type = d.pop("type", UNSET)
 
+        type_enum: Union[Unset, AllOfSubModelTypeEnum] = UNSET
+        _type_enum = d.pop("type_enum", UNSET)
+        if not isinstance(_type_enum, Unset):
+            type_enum = AllOfSubModelTypeEnum(_type_enum)
+
         all_of_sub_model = cls(
             a_sub_property=a_sub_property,
             type=type,
+            type_enum=type_enum,
         )
 
         all_of_sub_model.additional_properties = d
