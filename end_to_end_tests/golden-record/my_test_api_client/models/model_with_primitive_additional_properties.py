@@ -33,9 +33,11 @@ class ModelWithPrimitiveAdditionalProperties:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
         _a_date_holder = d.pop("a_date_holder", UNSET)
-        if not isinstance(_a_date_holder, Unset):
+        a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]
+        if isinstance(_a_date_holder, Unset):
+            a_date_holder = UNSET
+        else:
             a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(_a_date_holder)
 
         model_with_primitive_additional_properties = cls(

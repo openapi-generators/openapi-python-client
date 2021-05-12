@@ -31,9 +31,11 @@ class ModelWithPropertyRef:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        inner: Union[Unset, ModelName] = UNSET
         _inner = d.pop("inner", UNSET)
-        if not isinstance(_inner, Unset):
+        inner: Union[Unset, ModelName]
+        if isinstance(_inner, Unset):
+            inner = UNSET
+        else:
             inner = ModelName.from_dict(_inner)
 
         model_with_property_ref = cls(
