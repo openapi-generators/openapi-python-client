@@ -1,7 +1,8 @@
 from typing import Dict, Union
 
-from .reference import Reference
 from .response import Response
+from .reference import Reference
+
 
 Responses = Dict[str, Union[Response, Reference]]
 """

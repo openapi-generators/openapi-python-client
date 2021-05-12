@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel
+from pydantic import AnyUrl, BaseModel, Extra
 
 
 class ExternalDocumentation(BaseModel):
@@ -12,11 +12,12 @@ class ExternalDocumentation(BaseModel):
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
     """
 
-    url: AnyUrl
+    url: AnyUrl = ...
     """
     **REQUIRED**. The URL for the target documentation.
     Value MUST be in the format of a URL.
     """
 
     class Config:
+        extra = Extra.forbid
         schema_extra = {"examples": [{"description": "Find more info here", "url": "https://example.com"}]}

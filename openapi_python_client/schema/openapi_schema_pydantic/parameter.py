@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, Extra
 
 from ..parameter_location import ParameterLocation
 from .example import Example
@@ -18,15 +18,15 @@ class Parameter(BaseModel):
 
     """Fixed Fields"""
 
-    name: str
+    name: str = ...
     """
     **REQUIRED**. The name of the parameter.
-    Parameter names are *case sensitive*.
-
-    - If [`in`](#parameterIn) is `"path"`, the `name` field MUST correspond to a template expression occurring
+    Parameter names are *case sensitive*. 
+    
+    - If [`in`](#parameterIn) is `"path"`, the `name` field MUST correspond to a template expression occurring 
       within the [path](#pathsPath) field in the [Paths Object](#pathsObject).
       See [Path Templating](#pathTemplating) for further information.
-    - If [`in`](#parameterIn) is `"header"` and the `name` field is `"Accept"`, `"Content-Type"` or `"Authorization"`.
+    - If [`in`](#parameterIn) is `"header"` and the `name` field is `"Accept"`, `"Content-Type"` or `"Authorization"`, 
       the parameter definition SHALL be ignored.
     - For all other cases, the `name` corresponds to the parameter name used by the [`in`](#parameterIn) property.
     """
@@ -76,7 +76,7 @@ class Parameter(BaseModel):
     """
     Describes how the parameter value will be serialized depending on the type of the parameter value.
     Default values (based on value of `in`):
-
+    
     - for `query` - `form`;
     - for `path` - `simple`;
     - for `header` - `simple`;
@@ -111,7 +111,7 @@ class Parameter(BaseModel):
     Example of the parameter's potential value.
     The example SHOULD match the specified schema and encoding properties if present.
     The `example` field is mutually exclusive of the `examples` field.
-    Furthermore, if referencing a `schema` that contains an example,
+    Furthermore, if referencing a `schema` that contains an example, 
     the `example` value SHALL _override_ the example provided by the schema.
     To represent examples of media types that cannot naturally be represented in JSON or YAML,
     a string value can contain the example with escaping where necessary.
@@ -127,7 +127,7 @@ class Parameter(BaseModel):
     """
 
     """
-    For more complex scenarios, the [`content`](#parameterContent) property
+    For more complex scenarios, the [`content`](#parameterContent) property 
     can define the media type and schema of the parameter.
     A parameter MUST contain either a `schema` property, or a `content` property, but not both.
     When `example` or `examples` are provided in conjunction with the `schema` object,
@@ -142,6 +142,7 @@ class Parameter(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [

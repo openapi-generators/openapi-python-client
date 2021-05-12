@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 
 
 class Reference(BaseModel):
@@ -16,6 +16,7 @@ class Reference(BaseModel):
     """**REQUIRED**. The reference string."""
 
     class Config:
+        extra = Extra.forbid
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [{"$ref": "#/components/schemas/Pet"}, {"$ref": "Pet.json"}, {"$ref": "definitions.json#/Pet"}]

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class ServerVariable(BaseModel):
@@ -12,11 +12,11 @@ class ServerVariable(BaseModel):
     The array SHOULD NOT be empty.
     """
 
-    default: str
+    default: str = ...
     """
     **REQUIRED**. The default value to use for substitution,
     which SHALL be sent if an alternate value is _not_ supplied.
-    Note this behavior is different than the [Schema Object's](#schemaObject) treatment of default values,
+    Note this behavior is different than the [Schema Object's](#schemaObject) treatment of default values, 
     because in those cases parameter values are optional.
     If the [`enum`](#serverVariableEnum) is defined, the value SHOULD exist in the enum's values.
     """
@@ -26,3 +26,6 @@ class ServerVariable(BaseModel):
     An optional description for the server variable.
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
     """
+
+    class Config:
+        extra = Extra.forbid

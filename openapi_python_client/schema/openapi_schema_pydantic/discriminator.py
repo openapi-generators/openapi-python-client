@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class Discriminator(BaseModel):
@@ -14,7 +14,7 @@ class Discriminator(BaseModel):
     When using the discriminator, _inline_ schemas will not be considered.
     """
 
-    propertyName: str
+    propertyName: str = ...
     """
     **REQUIRED**. The name of the property in the payload that will hold the discriminator value.
     """
@@ -25,6 +25,7 @@ class Discriminator(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         schema_extra = {
             "examples": [
                 {

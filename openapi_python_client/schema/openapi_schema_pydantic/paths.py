@@ -2,6 +2,7 @@ from typing import Dict
 
 from .path_item import PathItem
 
+
 Paths = Dict[str, PathItem]
 """
 Holds the relative paths to the individual endpoints and their operations.
@@ -16,7 +17,7 @@ The Paths MAY be empty, due to [ACL constraints](#securityFiltering).
 """
 A relative path to an individual endpoint.
 The field name MUST begin with a forward slash (`/`).
-The path is **appended** (no relative URL resolution) to the expanded URL
+The path is **appended** (no relative URL resolution) to the expanded URL 
 from the [`Server Object`](#serverObject)'s `url` field in order to construct the full URL.
 [Path templating](#pathTemplating) is allowed.
 When matching URLs, concrete (non-templated) paths would be matched before their templated counterparts.

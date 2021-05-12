@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class XML(BaseModel):
@@ -48,6 +48,7 @@ class XML(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         schema_extra = {
             "examples": [
                 {"namespace": "http://example.com/schema/sample", "prefix": "sample"},

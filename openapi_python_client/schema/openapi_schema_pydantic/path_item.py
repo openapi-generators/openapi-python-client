@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 
 from .operation import Operation
 from .parameter import Parameter
@@ -20,7 +20,7 @@ class PathItem(BaseModel):
     """
     Allows for an external definition of this path item.
     The referenced structure MUST be in the format of a [Path Item Object](#pathItemObject).
-
+    
     In case a Path Item Object field appears both in the defined object and the referenced object,
     the behavior is undefined.
     """
@@ -92,6 +92,7 @@ class PathItem(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [

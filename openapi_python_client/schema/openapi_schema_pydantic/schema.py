@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, Extra, Field
 from .discriminator import Discriminator
 from .external_documentation import ExternalDocumentation
 from .reference import Reference
@@ -36,7 +35,7 @@ class Schema(BaseModel):
     multipleOf: Optional[float] = Field(default=None, gt=0.0)
     """
     The value of "multipleOf" MUST be a number, strictly greater than 0.
-
+    
     A numeric instance is only valid if division by this keyword's value
     results in an integer.
     """
@@ -45,7 +44,7 @@ class Schema(BaseModel):
     """
     The value of "maximum" MUST be a number, representing an upper limit
     for a numeric instance.
-
+    
     If the instance is a number, then this keyword validates if
     "exclusiveMaximum" is true and instance is less than the provided
     value, or else if the instance is less than or exactly equal to the
@@ -57,7 +56,7 @@ class Schema(BaseModel):
     The value of "exclusiveMaximum" MUST be a boolean, representing
     whether the limit in "maximum" is exclusive or not.  An undefined
     value is the same as false.
-
+    
     If "exclusiveMaximum" is true, then a numeric instance SHOULD NOT be
     equal to the value specified in "maximum".  If "exclusiveMaximum" is
     false (or not specified), then a numeric instance MAY be equal to the
@@ -68,7 +67,7 @@ class Schema(BaseModel):
     """
     The value of "minimum" MUST be a number, representing a lower limit
     for a numeric instance.
-
+    
     If the instance is a number, then this keyword validates if
     "exclusiveMinimum" is true and instance is greater than the provided
     value, or else if the instance is greater than or exactly equal to
@@ -80,7 +79,7 @@ class Schema(BaseModel):
     The value of "exclusiveMinimum" MUST be a boolean, representing
     whether the limit in "minimum" is exclusive or not.  An undefined
     value is the same as false.
-
+    
     If "exclusiveMinimum" is true, then a numeric instance SHOULD NOT be
     equal to the value specified in "minimum".  If "exclusiveMinimum" is
     false (or not specified), then a numeric instance MAY be equal to the
@@ -93,10 +92,10 @@ class Schema(BaseModel):
 
     The value of this keyword MUST be an integer.  This integer MUST be
     greater than, or equal to, 0.
-
+    
     A string instance is valid against this keyword if its length is less
     than, or equal to, the value of this keyword.
-
+    
     The length of a string instance is defined as the number of its
     characters as defined by RFC 7159 [RFC7159].
     """
@@ -105,13 +104,13 @@ class Schema(BaseModel):
     """
     A string instance is valid against this keyword if its length is
     greater than, or equal to, the value of this keyword.
-
+    
     The length of a string instance is defined as the number of its
     characters as defined by RFC 7159 [RFC7159].
-
+    
     The value of this keyword MUST be an integer.  This integer MUST be
     greater than, or equal to, 0.
-
+    
     "minLength", if absent, may be considered as being present with
     integer value 0.
     """
@@ -121,7 +120,7 @@ class Schema(BaseModel):
     The value of this keyword MUST be a string.  This string SHOULD be a
     valid regular expression, according to the ECMA 262 regular
     expression dialect.
-
+    
     A string instance is considered valid if the regular expression
     matches the instance successfully.  Recall: regular expressions are
     not implicitly anchored.
@@ -131,7 +130,7 @@ class Schema(BaseModel):
     """
     The value of this keyword MUST be an integer.  This integer MUST be
     greater than, or equal to, 0.
-
+    
     An array instance is valid against "maxItems" if its size is less
     than, or equal to, the value of this keyword.
     """
@@ -140,10 +139,10 @@ class Schema(BaseModel):
     """
     The value of this keyword MUST be an integer.  This integer MUST be
     greater than, or equal to, 0.
-
+    
     An array instance is valid against "minItems" if its size is greater
     than, or equal to, the value of this keyword.
-
+    
     If this keyword is not present, it may be considered present with a
     value of 0.
     """
@@ -155,7 +154,7 @@ class Schema(BaseModel):
     If this keyword has boolean value false, the instance validates
     successfully.  If it has boolean value true, the instance validates
     successfully if all of its elements are unique.
-
+    
     If not present, this keyword may be considered present with boolean
     value false.
     """
@@ -164,7 +163,7 @@ class Schema(BaseModel):
     """
     The value of this keyword MUST be an integer.  This integer MUST be
     greater than, or equal to, 0.
-
+    
     An object instance is valid against "maxProperties" if its number of
     properties is less than, or equal to, the value of this keyword.
     """
@@ -173,10 +172,10 @@ class Schema(BaseModel):
     """
     The value of this keyword MUST be an integer.  This integer MUST be
     greater than, or equal to, 0.
-
+    
     An object instance is valid against "minProperties" if its number of
     properties is greater than, or equal to, the value of this keyword.
-
+    
     If this keyword is not present, it may be considered present with a
     value of 0.
     """
@@ -186,7 +185,7 @@ class Schema(BaseModel):
     The value of this keyword MUST be an array.  This array MUST have at
     least one element.  Elements of this array MUST be strings, and MUST
     be unique.
-
+    
     An object instance is valid against this keyword if its property set
     contains all elements in this keyword's array value.
     """
@@ -195,9 +194,9 @@ class Schema(BaseModel):
     """
     The value of this keyword MUST be an array.  This array SHOULD have
     at least one element.  Elements in the array SHOULD be unique.
-
+    
     Elements in the array MAY be of any type, including null.
-
+    
     An instance validates successfully against this keyword if its value
     is equal to one of the elements in this keyword's array value.
     """
@@ -211,15 +210,15 @@ class Schema(BaseModel):
     """
     **From OpenAPI spec:
     Value MUST be a string. Multiple types via an array are not supported.**
-
+    
     From JSON Schema:
     The value of this keyword MUST be either a string or an array.  If it
     is an array, elements of the array MUST be strings and MUST be
     unique.
-
+    
     String values MUST be one of the seven primitive types defined by the
     core specification.
-
+    
     An instance matches successfully if its primitive type is one of the
     types defined by keyword.  Recall: "number" includes "integer".
     """
@@ -228,48 +227,48 @@ class Schema(BaseModel):
     """
     **From OpenAPI spec:
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.**
-
+    
     From JSON Schema:
     This keyword's value MUST be an array.  This array MUST have at least
     one element.
-
+    
     Elements of the array MUST be objects.  Each object MUST be a valid
     JSON Schema.
-
+    
     An instance validates successfully against this keyword if it
     validates successfully against all schemas defined by this keyword's
     value.
     """
 
-    oneOf: List[Union[Reference, "Schema"]] = []
+    oneOf: Optional[List[Union[Reference, "Schema"]]] = None
     """
     **From OpenAPI spec:
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.**
-
+    
     From JSON Schema:
     This keyword's value MUST be an array.  This array MUST have at least
     one element.
-
+    
     Elements of the array MUST be objects.  Each object MUST be a valid
     JSON Schema.
-
+    
     An instance validates successfully against this keyword if it
     validates successfully against exactly one schema defined by this
     keyword's value.
     """
 
-    anyOf: List[Union[Reference, "Schema"]] = []
+    anyOf: Optional[List[Union[Reference, "Schema"]]] = None
     """
     **From OpenAPI spec:
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.**
-
+    
     From JSON Schema:
     This keyword's value MUST be an array.  This array MUST have at least
     one element.
-
+    
     Elements of the array MUST be objects.  Each object MUST be a valid
     JSON Schema.
-
+    
     An instance validates successfully against this keyword if it
     validates successfully against at least one schema defined by this
     keyword's value.
@@ -279,11 +278,11 @@ class Schema(BaseModel):
     """
     **From OpenAPI spec:
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.**
-
+    
     From JSON Schema:
     This keyword's value MUST be an object.  This object MUST be a valid
     JSON Schema.
-
+    
     An instance is valid against this keyword if it fails to validate
     successfully against the schema defined by this keyword.
     """
@@ -294,13 +293,13 @@ class Schema(BaseModel):
     Value MUST be an object and not an array.
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.
     `items` MUST be present if the `type` is `array`.**
-
+    
     From JSON Schema:
     The value of "items" MUST be either a schema or array of schemas.
 
     Successful validation of an array instance with regards to these two
     keywords is determined as follows:
-
+    
     - if "items" is not present, or its value is an object, validation
       of the instance always succeeds, regardless of the value of
       "additionalItems";
@@ -316,12 +315,12 @@ class Schema(BaseModel):
     **From OpenAPI spec:
     Property definitions MUST be a [Schema Object](#schemaObject)
     and not a standard JSON Schema (inline or referenced).**
-
+    
     From JSON Schema:
     The value of "properties" MUST be an object.  Each value of this
     object MUST be an object, and each object MUST be a valid JSON
     Schema.
-
+    
     If absent, it can be considered the same as an empty object.
     """
 
@@ -331,19 +330,19 @@ class Schema(BaseModel):
     Value can be boolean or object.
     Inline or referenced schema MUST be of a [Schema Object](#schemaObject) and not a standard JSON Schema.
     Consistent with JSON Schema, `additionalProperties` defaults to `true`.**
-
+    
     From JSON Schema:
     The value of "additionalProperties" MUST be a boolean or a schema.
 
     If "additionalProperties" is absent, it may be considered present
     with an empty schema as a value.
-
+    
     If "additionalProperties" is true, validation always succeeds.
-
+    
     If "additionalProperties" is false, validation succeeds only if the
     instance is an object and all properties on the instance were covered
     by "properties" and/or "patternProperties".
-
+    
     If "additionalProperties" is an object, validate the value as a
     schema to all of the properties that weren't validated by
     "properties" nor "patternProperties".
@@ -353,7 +352,7 @@ class Schema(BaseModel):
     """
     **From OpenAPI spec:
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.**
-
+    
     From JSON Schema:
     The value "description" MUST be a string.
 
@@ -368,7 +367,7 @@ class Schema(BaseModel):
     **From OpenAPI spec:
     [Data Type Formats](#dataTypeFormat) for further details.
     While relying on JSON Schema's defined formats, the OAS offers a few additional predefined formats.**
-
+    
     From JSON Schema:
     Structural validation alone may be insufficient to validate that an
     instance meets all the requirements of an application.  The "format"
@@ -376,7 +375,7 @@ class Schema(BaseModel):
     fixed subset of values which are accurately described by
     authoritative resources, be they RFCs or other external
     specifications.
-
+    
     The value of this keyword is called a format attribute.  It MUST be a
     string.  A format attribute can generally only validate a given set
     of instance types.  If the type of the instance to validate is not in
@@ -391,14 +390,14 @@ class Schema(BaseModel):
     as the value of the schema if one is not provided.
     Unlike JSON Schema, the value MUST conform to the defined type for the Schema Object defined at the same level.
     For example, if `type` is `string`, then `default` can be `"foo"` but cannot be `1`.**
-
+    
     From JSON Schema:
     There are no restrictions placed on the value of this keyword.
-
+    
     This keyword can be used to supply a default JSON value associated
     with a particular schema.  It is RECOMMENDED that a default value be
     valid against the associated schema.
-
+    
     This keyword MAY be used in root schemas, and in any subschemas.
     """
 
@@ -406,7 +405,7 @@ class Schema(BaseModel):
     Other than the JSON Schema subset fields, the following fields MAY be used for further schema documentation:
     """
 
-    nullable: bool = False
+    nullable: Optional[bool] = None
     """
     A `true` value adds `"null"` to the allowed type specified by the `type` keyword,
     only if `type` is explicitly defined within the same Schema Object.
@@ -466,12 +465,13 @@ class Schema(BaseModel):
     """
 
     deprecated: Optional[bool] = None
-    """
+    """ 
     Specifies that a schema is deprecated and SHOULD be transitioned out of usage.
     Default value is `false`.
     """
 
     class Config:
+        extra = Extra.forbid
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [

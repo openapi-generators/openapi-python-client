@@ -1,7 +1,8 @@
 from typing import Dict, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
+from .callback import Callback
 from .example import Example
 from .header import Header
 from .link import Link
@@ -44,7 +45,11 @@ class Components(BaseModel):
     links: Optional[Dict[str, Union[Link, Reference]]] = None
     """An object to hold reusable [Link Objects](#linkObject)."""
 
+    callbacks: Optional[Dict[str, Union[Callback, Reference]]] = None
+    """An object to hold reusable [Callback Objects](#callbackObject)."""
+
     class Config:
+        extra = Extra.forbid
         schema_extra = {
             "examples": [
                 {

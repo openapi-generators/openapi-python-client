@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class Example(BaseModel):
@@ -28,11 +28,12 @@ class Example(BaseModel):
     """
     A URL that points to the literal example.
     This provides the capability to reference examples that cannot easily be included in JSON or YAML documents.
-
+    
     The `value` field and `externalValue` field are mutually exclusive.
     """
 
     class Config:
+        extra = Extra.forbid
         schema_extra = {
             "examples": [
                 {"summary": "A foo example", "value": {"foo": "bar"}},

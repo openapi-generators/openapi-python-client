@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 from .header import Header
 from .link import Link
@@ -14,7 +14,7 @@ class Response(BaseModel):
     static `links` to operations based on the response.
     """
 
-    description: str
+    description: str = ...
     """
     **REQUIRED**. A short description of the response.
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
@@ -31,8 +31,8 @@ class Response(BaseModel):
     """
     A map containing descriptions of potential response payloads.
     The key is a media type or [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)
-    and the value describes it.
-
+    and the value describes it.  
+    
     For responses that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
     """
 
@@ -44,6 +44,7 @@ class Response(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         schema_extra = {
             "examples": [
                 {
