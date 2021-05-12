@@ -151,7 +151,14 @@ class Endpoint:
             body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(json_body, ParseError):
-            return ParseError(detail=f"cannot parse body of endpoint {endpoint.name}", data=json_body.data), schemas
+            return (
+                ParseError(
+                    header=f"Cannot parse body of endpoint {endpoint.name}",
+                    detail=json_body.detail,
+                    data=json_body.data,
+                ),
+                schemas,
+            )
 
         endpoint.multipart_body_class = Endpoint.parse_multipart_body(body=data.requestBody, config=config)
 

@@ -234,7 +234,7 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         mocker.patch.object(Endpoint, "parse_request_form_body")
-        parse_error = ParseError(data=mocker.MagicMock())
+        parse_error = ParseError(data=mocker.MagicMock(), detail=mocker.MagicMock())
         other_schemas = mocker.MagicMock()
         mocker.patch.object(Endpoint, "parse_request_json_body", return_value=(parse_error, other_schemas))
         endpoint = self.make_endpoint()
@@ -249,7 +249,11 @@ class TestEndpoint:
         )
 
         assert result == (
-            ParseError(detail=f"cannot parse body of endpoint {endpoint.name}", data=parse_error.data),
+            ParseError(
+                header=f"Cannot parse body of endpoint {endpoint.name}",
+                detail=parse_error.detail,
+                data=parse_error.data,
+            ),
             other_schemas,
         )
 
