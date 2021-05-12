@@ -9,7 +9,6 @@ __all__ = [
     "property_from_data",
 ]
 
-from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
@@ -352,7 +351,13 @@ def build_union_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
-    for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
+
+    sub_data: List[Union[oai.Schema, oai.Reference]] = []
+    for _data in [data.anyOf, data.oneOf]:
+        if isinstance(_data, Iterable):
+            sub_data.extend(_data)
+
+    for i, sub_prop_data in enumerate(sub_data):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type{i}",
             required=required,
@@ -439,8 +444,12 @@ def _property_from_data(
     if isinstance(data, oai.Reference):
         return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
 
+    sub_data: List[Union[oai.Schema, oai.Reference]] = []
+    for _data in [data.allOf, data.anyOf, data.oneOf]:
+        if isinstance(_data, Iterable):
+            sub_data.extend(_data)
+
     # A union of a single reference should just be passed through to that reference (don't create copy class)
-    sub_data = (data.allOf or []) + data.anyOf + data.oneOf
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
         return _property_from_ref(name=name, required=required, parent=data, data=sub_data[0], schemas=schemas)
 
