@@ -88,7 +88,7 @@ def _process_properties(
         return prop_or_error
 
     unprocessed_props = data.properties or {}
-    for sub_prop in data.allOf or []:
+    for sub_prop in data.allOf:
         if isinstance(sub_prop, oai.Reference):
             ref_path = parse_reference_path(sub_prop.ref)
             if isinstance(ref_path, ParseError):

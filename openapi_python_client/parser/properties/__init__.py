@@ -353,7 +353,7 @@ def build_union_property(
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
 
-    for i, sub_prop_data in enumerate(chain(data.anyOf or [], data.oneOf or [])):
+    for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type{i}",
             required=required,
@@ -440,11 +440,7 @@ def _property_from_data(
     if isinstance(data, oai.Reference):
         return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
 
-    sub_data: List[Union[oai.Schema, oai.Reference]] = []
-    for _data in (data.allOf, data.anyOf, data.oneOf):
-        if _data:
-            sub_data.extend(_data)
-
+    sub_data: List[Union[oai.Schema, oai.Reference]] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
         return _property_from_ref(name=name, required=required, parent=data, data=sub_data[0], schemas=schemas)
