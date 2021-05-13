@@ -1,8 +1,11 @@
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from pydantic import BaseModel, Extra
 
 from .reference import Reference
+
+if TYPE_CHECKING:
+    from .header import Header
 
 
 class Encoding(BaseModel):
@@ -22,7 +25,7 @@ class Encoding(BaseModel):
     or a comma-separated list of the two types.
     """
 
-    headers: Optional[Dict[str, Union["Header", Reference]]] = None  # noqa
+    headers: Optional[Dict[str, Union["Header", Reference]]] = None
     """
     A map allowing additional information to be provided as headers, for example `Content-Disposition`.
 

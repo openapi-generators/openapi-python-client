@@ -1,6 +1,9 @@
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
-Callback = Dict[str, "PathItem"]  # noqa
+if TYPE_CHECKING:
+    from .path_item import PathItem
+
+Callback = Dict[str, "PathItem"]
 """
 A map of possible out-of band callbacks related to the parent operation.
 Each value in the map is a [Path Item Object](#pathItemObject)
