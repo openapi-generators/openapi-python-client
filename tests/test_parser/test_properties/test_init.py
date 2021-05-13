@@ -974,14 +974,14 @@ class TestBuildUnionProperty:
             name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
         )
 
-        FloatProperty.assert_called_once_with(name=name, required=required, default=0.0, nullable=False)
-        IntProperty.assert_called_once_with(name=name, required=required, default=0, nullable=False)
+        FloatProperty.assert_called_once_with(name=name, required=required, default=0.0, nullable=None)
+        IntProperty.assert_called_once_with(name=name, required=required, default=0, nullable=None)
         UnionProperty.assert_called_once_with(
             name=name,
             required=required,
             default=None,
             inner_properties=[FloatProperty.return_value, IntProperty.return_value],
-            nullable=False,
+            nullable=None,
         )
         assert p == UnionProperty.return_value
         assert s == Schemas()
