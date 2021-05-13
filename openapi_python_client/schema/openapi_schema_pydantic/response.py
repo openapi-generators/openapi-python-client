@@ -14,7 +14,7 @@ class Response(BaseModel):
     static `links` to operations based on the response.
     """
 
-    description: str = ...
+    description: str
     """
     **REQUIRED**. A short description of the response.
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.

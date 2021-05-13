@@ -12,7 +12,7 @@ class ServerVariable(BaseModel):
     The array SHOULD NOT be empty.
     """
 
-    default: str = ...
+    default: str
     """
     **REQUIRED**. The default value to use for substitution,
     which SHALL be sent if an alternate value is _not_ supplied.

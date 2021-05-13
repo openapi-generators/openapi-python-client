@@ -18,7 +18,7 @@ class Parameter(BaseModel):
 
     """Fixed Fields"""
 
-    name: str = ...
+    name: str
     """
     **REQUIRED**. The name of the parameter.
     Parameter names are *case sensitive*.

@@ -14,7 +14,7 @@ from .tag import Tag
 class OpenAPI(BaseModel):
     """This is the root document object of the OpenAPI document."""
 
-    info: Info = ...
+    info: Info
     """
     **REQUIRED**. Provides metadata about the API. The metadata MAY be used by tooling as required.
     """
@@ -26,7 +26,7 @@ class OpenAPI(BaseModel):
     the default value would be a [Server Object](#serverObject) with a [url](#serverUrl) value of `/`.
     """
 
-    paths: Paths = ...
+    paths: Paths
     """
     **REQUIRED**. The available paths and operations for the API.
     """

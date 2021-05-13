@@ -11,7 +11,7 @@ class Tag(BaseModel):
     It is not mandatory to have a Tag Object per tag defined in the Operation Object instances.
     """
 
-    name: str = ...
+    name: str
     """
     **REQUIRED**. The name of the tag.
     """

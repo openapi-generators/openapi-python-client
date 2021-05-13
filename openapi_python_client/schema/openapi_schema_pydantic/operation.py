@@ -66,7 +66,7 @@ class Operation(BaseModel):
     In other cases where the HTTP spec is vague, `requestBody` SHALL be ignored by consumers.
     """
 
-    responses: Responses = ...
+    responses: Responses
     """
     **REQUIRED**. The list of possible responses as they are returned from executing this operation.
     """

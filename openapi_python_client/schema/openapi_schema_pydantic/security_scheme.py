@@ -15,7 +15,7 @@ class SecurityScheme(BaseModel):
     and [OpenID Connect Discovery](https://tools.ietf.org/html/draft-ietf-oauth-discovery-06).
     """
 
-    type: str = ...
+    type: str
     """
     **REQUIRED**. The type of the security scheme.
     Valid values are `"apiKey"`, `"http"`, `"oauth2"`, `"openIdConnect"`.

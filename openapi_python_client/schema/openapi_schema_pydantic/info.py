@@ -13,7 +13,7 @@ class Info(BaseModel):
     and MAY be presented in editing or documentation generation tools for convenience.
     """
 
-    title: str = ...
+    title: str
     """
     **REQUIRED**. The title of the API.
     """
@@ -40,7 +40,7 @@ class Info(BaseModel):
     The license information for the exposed API.
     """
 
-    version: str = ...
+    version: str
     """
     **REQUIRED**. The version of the OpenAPI document
     (which is distinct from the [OpenAPI Specification version](#oasVersion) or the API implementation version).

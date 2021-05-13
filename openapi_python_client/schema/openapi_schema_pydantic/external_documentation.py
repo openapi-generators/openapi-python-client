@@ -12,7 +12,7 @@ class ExternalDocumentation(BaseModel):
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
     """
 
-    url: AnyUrl = ...
+    url: AnyUrl
     """
     **REQUIRED**. The URL for the target documentation.
     Value MUST be in the format of a URL.

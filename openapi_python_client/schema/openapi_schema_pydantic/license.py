@@ -8,7 +8,7 @@ class License(BaseModel):
     License information for the exposed API.
     """
 
-    name: str = ...
+    name: str
     """
     **REQUIRED**. The license name used for the API.
     """

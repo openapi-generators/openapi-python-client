@@ -16,7 +16,7 @@ class RequestBody(BaseModel):
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
     """
 
-    content: Dict[str, MediaType] = ...
+    content: Dict[str, MediaType]
     """
     **REQUIRED**. The content of the request body.
     The key is a media type or [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)

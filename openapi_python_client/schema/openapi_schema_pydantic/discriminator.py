@@ -14,7 +14,7 @@ class Discriminator(BaseModel):
     When using the discriminator, _inline_ schemas will not be considered.
     """
 
-    propertyName: str = ...
+    propertyName: str
     """
     **REQUIRED**. The name of the property in the payload that will hold the discriminator value.
     """

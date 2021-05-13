@@ -8,7 +8,7 @@ from .server_variable import ServerVariable
 class Server(BaseModel):
     """An object representing a Server."""
 
-    url: str = ...
+    url: str
     """
     **REQUIRED**. A URL to the target host.
 
