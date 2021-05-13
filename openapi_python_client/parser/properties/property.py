@@ -22,7 +22,7 @@ class Property:
 
     name: str
     required: bool
-    nullable: bool = attr.ib(converter=utils.optin_bool_to_bool_converter)
+    nullable: bool
     _type_string: ClassVar[str] = ""
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()

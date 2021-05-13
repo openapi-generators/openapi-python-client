@@ -1,7 +1,7 @@
 import builtins
 import re
 from keyword import iskeyword
-from typing import List, Optional
+from typing import List
 
 delimiters = " _-"
 
@@ -73,13 +73,3 @@ def to_valid_python_identifier(value: str) -> str:
         return new_value
 
     return f"{FIELD_PREFIX}{new_value}"
-
-
-def optin_bool_to_bool_converter(value: Optional[bool]) -> bool:
-    """
-    Given an Option[bool] return a bool
-    None are converted to False
-    """
-    if value is None:
-        return False
-    return value
