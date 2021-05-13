@@ -1,7 +1,6 @@
 from typing import Dict
 
-
-Callback = Dict[str, "PathItem"]
+Callback = Dict[str, "PathItem"]  # noqa
 """
 A map of possible out-of band callbacks related to the parent operation.
 Each value in the map is a [Path Item Object](#pathItemObject)

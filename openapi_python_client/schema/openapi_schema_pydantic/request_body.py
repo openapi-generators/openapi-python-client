@@ -11,8 +11,8 @@ class RequestBody(BaseModel):
     description: Optional[str] = None
     """
     A brief description of the request body.
-    This could contain examples of use.  
-    
+    This could contain examples of use.
+
     [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
     """
 
@@ -21,7 +21,7 @@ class RequestBody(BaseModel):
     **REQUIRED**. The content of the request body.
     The key is a media type or [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)
     and the value describes it.
-    
+
     For requests that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
     """
 

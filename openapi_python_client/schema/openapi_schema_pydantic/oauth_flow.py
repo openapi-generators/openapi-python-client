@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from pydantic import AnyUrl, BaseModel, Extra
 

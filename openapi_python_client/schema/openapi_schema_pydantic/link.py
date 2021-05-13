@@ -31,7 +31,7 @@ class Link(BaseModel):
     operationId: Optional[str] = None
     """
     The name of an _existing_, resolvable OAS operation, as defined with a unique `operationId`.
-    
+
     This field is mutually exclusive of the `operationRef` field.
     """
 
@@ -41,7 +41,7 @@ class Link(BaseModel):
     as specified with `operationId` or identified via `operationRef`.
     The key is the parameter name to be used,
     whereas the value can be a constant or an expression to be evaluated and passed to the linked operation.
-    
+
     The parameter name can be qualified using the [parameter location](#parameterIn) `[{in}.]{name}`
     for operations that use the same parameter name in different locations (e.g. path.id).
     """

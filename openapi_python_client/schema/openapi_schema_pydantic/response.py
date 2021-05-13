@@ -31,8 +31,8 @@ class Response(BaseModel):
     """
     A map containing descriptions of potential response payloads.
     The key is a media type or [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)
-    and the value describes it.  
-    
+    and the value describes it.
+
     For responses that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
     """
 

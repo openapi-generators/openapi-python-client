@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-
 SecurityRequirement = Dict[str, List[str]]
 """
 Lists the required security schemes to execute this operation.

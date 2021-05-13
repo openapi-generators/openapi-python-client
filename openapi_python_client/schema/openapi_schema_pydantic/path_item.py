@@ -20,7 +20,7 @@ class PathItem(BaseModel):
     """
     Allows for an external definition of this path item.
     The referenced structure MUST be in the format of a [Path Item Object](#pathItemObject).
-    
+
     In case a Path Item Object field appears both in the defined object and the referenced object,
     the behavior is undefined.
     """

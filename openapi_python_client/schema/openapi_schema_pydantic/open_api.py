@@ -21,7 +21,7 @@ class OpenAPI(BaseModel):
 
     servers: List[Server] = [Server(url="/")]
     """
-    An array of Server Objects, which provide connectivity information to a target server. 
+    An array of Server Objects, which provide connectivity information to a target server.
     If the `servers` property is not provided, or is an empty array,
     the default value would be a [Server Object](#serverObject) with a [url](#serverUrl) value of `/`.
     """
@@ -38,10 +38,10 @@ class OpenAPI(BaseModel):
 
     security: Optional[List[SecurityRequirement]] = None
     """
-    A declaration of which security mechanisms can be used across the API. 
-    The list of values includes alternative security requirement objects that can be used. 
-    Only one of the security requirement objects need to be satisfied to authorize a request.  
-    Individual operations can override this definition. 
+    A declaration of which security mechanisms can be used across the API.
+    The list of values includes alternative security requirement objects that can be used.
+    Only one of the security requirement objects need to be satisfied to authorize a request.
+    Individual operations can override this definition.
     To make security optional, an empty security requirement (`{}`) can be included in the array.
     """
 

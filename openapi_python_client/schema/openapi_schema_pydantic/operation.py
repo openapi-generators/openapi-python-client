@@ -59,10 +59,10 @@ class Operation(BaseModel):
 
     requestBody: Optional[Union[RequestBody, Reference]] = None
     """
-    The request body applicable for this operation.  
-    
+    The request body applicable for this operation.
+
     The `requestBody` is only supported in HTTP methods where the HTTP 1.1 specification
-    [RFC7231](https://tools.ietf.org/html/rfc7231#section-4.3.1) has explicitly defined semantics for request bodies. 
+    [RFC7231](https://tools.ietf.org/html/rfc7231#section-4.3.1) has explicitly defined semantics for request bodies.
     In other cases where the HTTP spec is vague, `requestBody` SHALL be ignored by consumers.
     """
 
@@ -75,7 +75,7 @@ class Operation(BaseModel):
     """
     A map of possible out-of band callbacks related to the parent operation.
     The key is a unique identifier for the Callback Object.
-    Each value in the map is a [Callback Object](#callbackObject) 
+    Each value in the map is a [Callback Object](#callbackObject)
     that describes a request that may be initiated by the API provider and the expected responses.
     """
 
@@ -99,7 +99,7 @@ class Operation(BaseModel):
     servers: Optional[List[Server]] = None
     """
     An alternative `server` array to service this operation.
-    If an alternative `server` object is specified at the Path Item Object or Root level, 
+    If an alternative `server` object is specified at the Path Item Object or Root level,
     it will be overridden by this value.
     """
 
