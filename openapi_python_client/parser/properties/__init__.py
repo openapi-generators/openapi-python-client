@@ -9,6 +9,7 @@ __all__ = [
     "property_from_data",
 ]
 
+from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
@@ -352,12 +353,7 @@ def build_union_property(
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
 
-    sub_data: List[Union[oai.Schema, oai.Reference]] = []
-    for _data in [data.anyOf, data.oneOf]:
-        if isinstance(_data, Iterable):
-            sub_data.extend(_data)
-
-    for i, sub_prop_data in enumerate(sub_data):
+    for i, sub_prop_data in enumerate(chain(data.anyOf or [], data.oneOf or [])):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type{i}",
             required=required,
@@ -445,8 +441,8 @@ def _property_from_data(
         return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
 
     sub_data: List[Union[oai.Schema, oai.Reference]] = []
-    for _data in [data.allOf, data.anyOf, data.oneOf]:
-        if isinstance(_data, Iterable):
+    for _data in (data.allOf, data.anyOf, data.oneOf):
+        if _data:
             sub_data.extend(_data)
 
     # A union of a single reference should just be passed through to that reference (don't create copy class)
