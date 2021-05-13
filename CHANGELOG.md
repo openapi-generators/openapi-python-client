@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.9.1
+
+### Features
+
+- Allow references to non-object, non-enum types [#371][#418][#425]. Thanks @p1-ra!
+- Allow for attrs 21.x in generated clients [#412]
+- Allow for using any version of Black [#416] [#411]. Thanks @christhekeele!
+
+### Fixes
+
+- Prevent crash when providing a non-string default to a string attribute. [#414] [#415]
+- Deserialization of optional nullable properties when no value is returned from the API [#420] [#381]. Thanks @forest-benchling!
+
 ## 0.9.0 - 2021-05-04
 
 ### Breaking Changes
@@ -45,9 +58,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `none` will not create a project folder at all, only the inner package folder (which won't be inner anymore)
 
 - Attempt to detect and alert users if they are using an unsupported version of OpenAPI (#281).
+
 - The media type application/vnd.api+json will now be handled just like application/json (#307). Thanks @jrversteegh!
+
 - Support passing models into query parameters (#316). Thanks @forest-benchling!
+
 - Add support for cookie parameters (#326).
+
 - New `--file-encoding` command line option (#330). Sets the encoding used when writing generated files (defaults to utf-8). Thanks @dongfangtianyu!
 
 ### Changes
@@ -96,13 +113,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Breaking Changes
 
 - Any request/response field that is not `required` and wasn't specified is now set to `UNSET` instead of `None`.
+
 - Values that are `UNSET` will not be sent along in API calls
+
 - Schemas defined with `type=object` will now be converted into classes, just like if they were created as ref components. The previous behavior was a combination of skipping and using generic Dicts for these schemas.
+
 - Response schema handling was unified with input schema handling, meaning that responses will behave differently than before. Specifically, instead of the content-type deciding what the generated Python type is, the schema itself will.
 
   - As a result of this, endpoints that used to return `bytes` when content-type was application/octet-stream will now return a `File` object if the type of the data is "binary", just like if you were submitting that type instead of receiving it.
 
 - Instead of skipping input properties with no type, enum, anyOf, or oneOf declared, the property will be declared as `None`.
+
 - Class (models and Enums) names will now contain the name of their parent element (if any). For example, a property declared in an endpoint will be named like {endpoint*name}*{previous*class*name}. Classes will no longer be deduplicated by appending a number to the end of the generated name, so if two names conflict with this new naming scheme, there will be an error instead.
 
 ### Additions
@@ -268,6 +289,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changes
 
 - The way most imports are handled was changed which _should_ lead to fewer unused imports in generated files.
+
 - Better error messages
 
   - Most error messages will contain some useful information about why it failed instead of a stack trace
