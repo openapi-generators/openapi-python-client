@@ -28,4 +28,4 @@ class ServerVariable(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow

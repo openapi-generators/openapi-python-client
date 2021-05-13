@@ -44,7 +44,7 @@ class Response(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

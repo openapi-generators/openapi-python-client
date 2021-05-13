@@ -63,7 +63,7 @@ class Link(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {"operationId": "getUserAddressByUUID", "parameters": {"userUuid": "$response.body#/uuid"}},

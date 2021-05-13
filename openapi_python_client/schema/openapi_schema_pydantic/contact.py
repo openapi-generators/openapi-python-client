@@ -26,7 +26,7 @@ class Contact(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {"name": "API Support", "url": "http://www.example.com/support", "email": "support@example.com"}

@@ -35,4 +35,4 @@ class OAuthFlows(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow

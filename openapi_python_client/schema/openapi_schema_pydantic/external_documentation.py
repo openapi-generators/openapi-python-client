@@ -19,5 +19,5 @@ class ExternalDocumentation(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {"examples": [{"description": "Find more info here", "url": "https://example.com"}]}

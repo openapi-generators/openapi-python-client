@@ -20,5 +20,5 @@ class License(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {"examples": [{"name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0.html"}]}

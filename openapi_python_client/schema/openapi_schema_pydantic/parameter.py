@@ -142,7 +142,7 @@ class Parameter(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [

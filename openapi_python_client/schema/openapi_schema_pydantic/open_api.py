@@ -60,4 +60,4 @@ class OpenAPI(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow

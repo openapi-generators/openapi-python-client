@@ -28,5 +28,5 @@ class Tag(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {"examples": [{"name": "pet", "description": "Pets operations"}]}

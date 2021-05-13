@@ -31,7 +31,7 @@ class Server(BaseModel):
     """
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {"url": "https://development.gigantic-server.com/v1", "description": "Development server"},

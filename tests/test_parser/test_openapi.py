@@ -92,15 +92,13 @@ class TestGeneratorData:
             header="Failed to parse OpenAPI document",
             detail=(
                 "You may be trying to use a Swagger document; this is not supported by this project.\n\n"
-                "4 validation errors for OpenAPI\n"
+                "3 validation errors for OpenAPI\n"
                 "info\n"
                 "  field required (type=value_error.missing)\n"
                 "paths\n"
                 "  field required (type=value_error.missing)\n"
                 "openapi\n"
-                "  field required (type=value_error.missing)\n"
-                "swagger\n"
-                "  extra fields not permitted (type=value_error.extra)"
+                "  field required (type=value_error.missing)"
             ),
         )
         Schemas.build.assert_not_called()
