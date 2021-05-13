@@ -44,12 +44,13 @@ class ModelWithUnionProperty:
             if isinstance(data, Unset):
                 return data
             try:
-                a_property_type_0: Union[Unset, AnEnum]
                 if not isinstance(data, str):
                     raise TypeError()
-                a_property_type_0 = UNSET
                 _a_property_type_0 = data
-                if not isinstance(_a_property_type_0, Unset):
+                a_property_type_0: Union[Unset, AnEnum]
+                if isinstance(_a_property_type_0, Unset):
+                    a_property_type_0 = UNSET
+                else:
                     a_property_type_0 = AnEnum(_a_property_type_0)
 
                 return a_property_type_0
@@ -57,10 +58,11 @@ class ModelWithUnionProperty:
                 pass
             if not isinstance(data, int):
                 raise TypeError()
-            a_property_type_1: Union[Unset, AnIntEnum]
-            a_property_type_1 = UNSET
             _a_property_type_1 = data
-            if not isinstance(_a_property_type_1, Unset):
+            a_property_type_1: Union[Unset, AnIntEnum]
+            if isinstance(_a_property_type_1, Unset):
+                a_property_type_1 = UNSET
+            else:
                 a_property_type_1 = AnIntEnum(_a_property_type_1)
 
             return a_property_type_1
