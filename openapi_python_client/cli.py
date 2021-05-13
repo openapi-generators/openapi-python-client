@@ -54,7 +54,7 @@ def _print_parser_error(e: GeneratorError, color: str) -> None:
     typer.echo()
 
 
-def handle_errors(errors: Sequence[GeneratorError]) -> None:
+def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = False) -> None:
     """Turn custom errors into formatted error messages"""
     if len(errors) == 0:
         return
@@ -91,7 +91,7 @@ def handle_errors(errors: Sequence[GeneratorError]) -> None:
         err=True,
     )
 
-    if error_level == ErrorLevel.ERROR:
+    if error_level == ErrorLevel.ERROR or fail_on_warning:
         raise typer.Exit(code=1)
 
 
@@ -119,6 +119,7 @@ def generate(
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    fail_on_warning: bool = False,
 ) -> None:
     """Generate a new OpenAPI Client library"""
     from . import create_new_client
@@ -145,7 +146,7 @@ def generate(
         file_encoding=file_encoding,
         config=config,
     )
-    handle_errors(errors)
+    handle_errors(errors, fail_on_warning)
 
 
 @app.command()
@@ -156,6 +157,7 @@ def update(
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    fail_on_warning: bool = False,
 ) -> None:
     """Update an existing OpenAPI Client library"""
     from . import update_existing_client
@@ -182,4 +184,4 @@ def update(
         file_encoding=file_encoding,
         config=config,
     )
-    handle_errors(errors)
+    handle_errors(errors, fail_on_warning)
