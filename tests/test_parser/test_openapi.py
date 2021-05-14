@@ -530,6 +530,23 @@ class TestEndpoint:
             property_schemas,
         )
 
+    def test__add_parameters_parse_error_on_non_required_path_param(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        endpoint = self.make_endpoint()
+        parsed_schemas = mocker.MagicMock()
+        mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
+        param = oai.Parameter.construct(
+            name="test", required=False, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
+        )
+        schemas = Schemas()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(
+            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=schemas, config=config
+        )
+        assert result == (ParseError(data=param, detail="Path parameter must be required"), parsed_schemas)
+
     def test_validation_error_when_location_not_supported(self, mocker):
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))

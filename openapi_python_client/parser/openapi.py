@@ -259,6 +259,9 @@ class Endpoint:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
 
+            if param.param_in == oai.ParameterLocation.PATH and not param.required:
+                return ParseError(data=param, detail="Path parameter must be required"), schemas
+
             unique_param = (param.name, param.param_in)
             if unique_param in unique_parameters:
                 duplication_detail = (
@@ -282,6 +285,7 @@ class Endpoint:
             if prop.name in parameters_by_location[param.param_in]:
                 # This parameter was defined in the Operation, so ignore the PathItem definition
                 continue
+
             for location, parameters_dict in parameters_by_location.items():
                 if location == param.param_in or prop.name not in parameters_dict:
                     continue

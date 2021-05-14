@@ -833,6 +833,38 @@
         }
       }
     },
+    "/multiple-path-parameters/{param1}/{param2}": {
+      "description": "Test with multiple path parameters",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "operationId": "multiple_path_parameters",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/location/query/optionality": {
       "description": "Test what happens with various combinations of required and nullable in query parameters.",
       "get": {
