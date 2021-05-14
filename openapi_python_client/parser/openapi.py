@@ -245,6 +245,8 @@ class Endpoint:
             if param.param_in == oai.ParameterLocation.QUERY:
                 endpoint.query_parameters.append(prop)
             elif param.param_in == oai.ParameterLocation.PATH:
+                if not param.required:
+                    return ParseError(data=param, detail="Path parameter must be required"), schemas
                 endpoint.path_parameters.append(prop)
             elif param.param_in == oai.ParameterLocation.HEADER:
                 endpoint.header_parameters.append(prop)

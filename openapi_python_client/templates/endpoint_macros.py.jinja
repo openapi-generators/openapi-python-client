@@ -73,6 +73,10 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
+{# path parameters #}
+{% for parameter in endpoint.path_parameters %}
+{{ parameter.to_string() }},
+{% endfor %}
 *,
 {# Proper client based on whether or not the endpoint requires authentication #}
 {% if endpoint.requires_security %}
@@ -80,10 +84,6 @@ client: AuthenticatedClient,
 {% else %}
 client: Client,
 {% endif %}
-{# path parameters #}
-{% for parameter in endpoint.path_parameters %}
-{{ parameter.to_string() }},
-{% endfor %}
 {# Form data if any #}
 {% if endpoint.form_body_class %}
 form_data: {{ endpoint.form_body_class.name }},
@@ -111,10 +111,10 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
 {% macro kwargs(endpoint) %}
-client=client,
 {% for parameter in endpoint.path_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
+client=client,
 {% if endpoint.form_body_class %}
 form_data=form_data,
 {% endif %}

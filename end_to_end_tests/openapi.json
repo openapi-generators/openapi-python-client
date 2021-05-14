@@ -782,6 +782,7 @@
           {
             "name": "param",
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -790,6 +791,38 @@
         "responses": {
           "200": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/multiple-path-parameters/{param1}/{param2}": {
+      "description": "Test with multiple path parameters",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "operationId": "multiple_path_parameters",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
