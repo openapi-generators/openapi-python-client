@@ -61,9 +61,11 @@ class BodyUploadFileTestsUploadPost:
         d = src_dict.copy()
         some_file = File(payload=BytesIO(d.pop("some_file")))
 
-        some_optional_file: Union[Unset, File] = UNSET
         _some_optional_file = d.pop("some_optional_file", UNSET)
-        if not isinstance(_some_optional_file, Unset):
+        some_optional_file: Union[Unset, File]
+        if isinstance(_some_optional_file, Unset):
+            some_optional_file = UNSET
+        else:
             some_optional_file = File(payload=BytesIO(_some_optional_file))
 
         some_string = d.pop("some_string", UNSET)
@@ -72,9 +74,11 @@ class BodyUploadFileTestsUploadPost:
 
         some_array = cast(List[float], d.pop("some_array", UNSET))
 
-        some_object: Union[Unset, BodyUploadFileTestsUploadPostSomeObject] = UNSET
         _some_object = d.pop("some_object", UNSET)
-        if not isinstance(_some_object, Unset):
+        some_object: Union[Unset, BodyUploadFileTestsUploadPostSomeObject]
+        if isinstance(_some_object, Unset):
+            some_object = UNSET
+        else:
             some_object = BodyUploadFileTestsUploadPostSomeObject.from_dict(_some_object)
 
         body_upload_file_tests_upload_post = cls(

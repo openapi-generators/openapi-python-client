@@ -7,7 +7,7 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeObject")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostSomeObject:
-    """  """
+    """ """
 
     num: float
     text: str
