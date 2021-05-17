@@ -24,14 +24,11 @@ def _get_kwargs(
         headers["keep-alive"] = keep_alive
 
     files = {}
-    data = {}
     for key, value in multipart_data.to_dict().items():
-        if is_file(value):
+        if is_file(value) or isinstance(value, str):
             files[key] = value
-        elif isinstance(value, str):
-            data[key] = value
         else:
-            data[key] = json.dumps(value)
+            files[key] = (None, json.dumps(value), "application/json")
 
     return {
         "url": url,
@@ -39,7 +36,6 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "files": files,
-        "data": data,
     }
 
 

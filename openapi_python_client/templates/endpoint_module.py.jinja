@@ -40,14 +40,11 @@ def _get_kwargs(
 
     {% if endpoint.multipart_body_class %}
     files = {}
-    data = {}
     for key, value in multipart_data.to_dict().items():
-         if is_file(value):
+         if is_file(value) or isinstance(value, str):
              files[key] = value
-         elif isinstance(value, str):
-             data[key] = value
          else:
-             data[key] = json.dumps(value)
+             files[key] = (None, json.dumps(value), "application/json")
     {% endif %}
 
     return {
@@ -59,7 +56,6 @@ def _get_kwargs(
         "data": form_data.to_dict(),
         {% elif endpoint.multipart_body_class %}
         "files": files,
-        "data": data,
         {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
         {% endif %}
