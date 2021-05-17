@@ -19,6 +19,10 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 
 {% macro _transform(property, source, destination, stringify) %}
 {% set inner_property = property.inner_property %}
+{% if stringify %}
+{% set stringified_destination = destination %}
+{% set destination = "_temp_" + destination %}
+{% endif %}
 {% if inner_property.template %}
 {% set inner_source = inner_property.python_name + "_data" %}
 {{ destination }} = []
@@ -30,7 +34,7 @@ for {{ inner_source }} in {{ source }}:
 {{ destination }} = {{ source }}
 {% endif %}
 {% if stringify %}
-{{ destination }} = (None, json.dumps({{ destination }}), 'application/json')
+{{ stringified_destination }} = (None, json.dumps({{ destination }}), 'application/json')
 {% endif %}
 {% endmacro %}
 
@@ -38,6 +42,10 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro transform(property, source, destination, declare_type=True, stringify=False) %}
 {% set inner_property = property.inner_property %}
+{% set type_string = property.get_type_string(json=True) %}
+{% if stringify %}
+    {% set type_string = "Union[Unset, Tuple[None, str, str]]" %}
+{% endif %}
 {% if property.required %}
 {% if property.nullable %}
 if {{ source }} is None:
@@ -48,7 +56,7 @@ else:
 {{ _transform(property, source, destination, stringify) }}
 {% endif %}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
+{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
     if {{ source }} is None:

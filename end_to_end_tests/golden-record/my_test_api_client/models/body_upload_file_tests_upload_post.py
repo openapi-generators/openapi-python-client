@@ -1,6 +1,6 @@
 import json
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 import attr
 
@@ -76,18 +76,18 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = (None, json.dumps(self.some_object.to_dict()), "application/json")
 
-        some_optional_file = UNSET
+        some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = self.some_string
         some_number = self.some_number
-        some_array = UNSET
+        some_array: Union[Unset, Tuple[None, str, str]] = UNSET
         if not isinstance(self.some_array, Unset):
-            some_array = self.some_array
-            some_array = (None, json.dumps(some_array), "application/json")
+            _temp_some_array = self.some_array
+            some_array = (None, json.dumps(_temp_some_array), "application/json")
 
-        some_optional_object = UNSET
+        some_optional_object: Union[Unset, Tuple[None, str, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()), "application/json")
 

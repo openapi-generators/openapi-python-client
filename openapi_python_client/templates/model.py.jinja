@@ -47,7 +47,7 @@ class {{ class_name }}:
 {% for property in model.required_properties + model.optional_properties %}
 {% if property.template %}
 {% from "property_templates/" + property.template import transform %}
-{{ transform(property, "self." + property.python_name, property.python_name, declare_type=not multipart, stringify=multipart) }}
+{{ transform(property, "self." + property.python_name, property.python_name, stringify=multipart) }}
 {% else %}
 {{ property.python_name }} = self.{{ property.python_name }}
 {% endif %}
@@ -58,7 +58,7 @@ field_dict: Dict[str, Any] = {}
 {% if model.additional_properties.template %}
 {% from "property_templates/" + model.additional_properties.template import transform %}
 for prop_name, prop in self.additional_properties.items():
-    {{ transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=not multipart, stringify=multipart) | indent(4) }}
+    {{ transform(model.additional_properties, "prop", "field_dict[prop_name]", stringify=multipart) | indent(4) }}
 {% else %}
 field_dict.update(self.additional_properties)
 {% endif %}
