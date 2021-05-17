@@ -17,7 +17,7 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 {% endif %}
 {% endmacro %}
 
-{% macro _transform(property, source, destination) %}
+{% macro _transform(property, source, destination, stringify) %}
 {% set inner_property = property.inner_property %}
 {% if inner_property.template %}
 {% set inner_source = inner_property.python_name + "_data" %}
@@ -29,20 +29,23 @@ for {{ inner_source }} in {{ source }}:
 {% else %}
 {{ destination }} = {{ source }}
 {% endif %}
+{% if stringify %}
+{{ destination }} = (None, json.dumps({{ destination }}), 'application/json')
+{% endif %}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
 {% set inner_property = property.inner_property %}
 {% if property.required %}
 {% if property.nullable %}
 if {{ source }} is None:
     {{ destination }} = None
 else:
-    {{ _transform(property, source, destination) | indent(4) }}
+    {{ _transform(property, source, destination, stringify) | indent(4) }}
 {% else %}
-{{ _transform(property, source, destination) }}
+{{ _transform(property, source, destination, stringify) }}
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
@@ -51,9 +54,9 @@ if not isinstance({{ source }}, Unset):
     if {{ source }} is None:
         {{ destination }} = None
     else:
-        {{ _transform(property, source, destination) | indent(8)}}
+        {{ _transform(property, source, destination, stringify) | indent(8)}}
 {% else %}
-    {{ _transform(property, source, destination) | indent(4)}}
+    {{ _transform(property, source, destination, stringify) | indent(4)}}
 {% endif %}
 {% endif %}
 

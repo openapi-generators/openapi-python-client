@@ -10,20 +10,28 @@
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, dict){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, stringify=False, transform_method="to_dict") %}
+{% set transformed = source + "." + transform_method + "()" %}
+{% if stringify %}
+{% set transformed = "(None, json.dumps(" + transformed + "), 'application/json')" %}
+{% endif %}
 {% if property.required %}
 {% if property.nullable %}
-{{ destination }} = {{ source }}.to_dict() if {{ source }} else None
+{{ destination }} = {{ transformed }} if {{ source }} else None
 {% else %}
-{{ destination }} = {{ source }}.to_dict()
+{{ destination }} = {{ transformed }}
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-    {{ destination }} = {{ source }}.to_dict() if {{ source }} else None
+    {{ destination }} = {{ transformed }} if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}.to_dict()
+    {{ destination }} = {{ transformed }}
 {% endif %}
 {% endif %}
+{% endmacro %}
+
+{% macro transform_multipart(property, source, destination) %}
+{{ transform(property, source, destination, transform_method="to_multipart") }}
 {% endmacro %}

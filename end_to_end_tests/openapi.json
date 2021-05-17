@@ -1053,9 +1053,7 @@
       },
       "Body_upload_file_tests_upload_post": {
         "title": "Body_upload_file_tests_upload_post",
-        "required": [
-          "some_file"
-        ],
+        "required": ["some_file", "some_object", "some_nullable_object"],
         "type": "object",
         "properties": {
           "some_file": {
@@ -1093,6 +1091,26 @@
                 "type": "number"
               },
               "text": {
+                "type": "string"
+              }
+            }
+          },
+          "some_optional_object": {
+            "title": "Some Optional Object",
+            "type": "object",
+            "required": ["foo"],
+            "properties": {
+              "foo": {
+                "type": "string"
+              }
+            }
+          },
+          "some_nullable_object": {
+            "title": "Some Nullable Object",
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "bar": {
                 "type": "string"
               }
             }

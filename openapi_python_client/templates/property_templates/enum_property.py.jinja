@@ -10,7 +10,7 @@
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.value if {{ source }} else None
