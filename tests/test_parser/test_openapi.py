@@ -822,7 +822,7 @@ class TestEndpoint:
         endpoint = self.make_endpoint()
         path = "/multiple-path-parameters/{param1}/{param2}"
         param = oai.Parameter.construct(
-            name=f"param1", required=True, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
+            name="param1", required=True, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
         )
         endpoint.path_parameters.append(param)
 
