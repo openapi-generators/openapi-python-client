@@ -1,6 +1,7 @@
 """ Contains all the data models used in inputs/outputs """
 
 from .a_model import AModel
+from .a_model_with_direct_self_reference_property import AModelWithDirectSelfReferenceProperty
 from .a_model_with_indirect_reference_property import AModelWithIndirectReferenceProperty
 from .a_model_with_indirect_self_reference_property import AModelWithIndirectSelfReferenceProperty
 from .all_of_sub_model import AllOfSubModel

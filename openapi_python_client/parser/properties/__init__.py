@@ -466,7 +466,7 @@ def _property_from_ref(
 
     existing = schemas.classes_by_reference.get(ref_path)
     if not existing or not existing.data:
-        return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+        return PropertyError(data=data, detail=f"Could not find reference {ref_path} in parsed models or enums"), schemas
 
     if isinstance(existing.data, RecursiveReferenceInterupt):
         return (
@@ -613,6 +613,7 @@ def build_schemas(
     recursive_references_waiting_reprocess: Dict[str, Union[oai.Reference, oai.Schema]] = dict()
     visited: Set[_ReferencePath] = set()
     depth = 0
+
     # References could have forward References so keep going as long as we are making progress
     while still_making_progress:
         still_making_progress = False
@@ -626,10 +627,10 @@ def build_schemas(
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
 
-            visited.add(ref_path)
             schemas_or_err = update_schemas_with(
-                ref_path=ref_path, data=data, schemas=schemas, visited=visited, config=config
+                ref_path=ref_path, data=data, schemas=schemas, visited=(ref_path, visited), config=config
             )
+            visited.add(ref_path)
             if isinstance(schemas_or_err, PropertyError):
                 if isinstance(schemas_or_err, RecursiveReferenceInterupt):
                     up_schemas = schemas_or_err.schemas
@@ -637,6 +638,7 @@ def build_schemas(
                     schemas_or_err = up_schemas
                     recursive_references_waiting_reprocess[name] = data
                 else:
+                    visited.remove(ref_path)
                     next_round.append((name, data))
                     errors.append(schemas_or_err)
                     continue

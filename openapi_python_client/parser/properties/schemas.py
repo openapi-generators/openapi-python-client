@@ -1,6 +1,6 @@
 __all__ = ["Class", "Schemas", "parse_reference_path", "update_schemas_with", "_ReferencePath"]
 
-from typing import TYPE_CHECKING, Dict, Generic, List, NewType, Optional, Set, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union, cast
 from urllib.parse import urlparse
 
 import attr
@@ -77,7 +77,7 @@ def update_schemas_with(
     ref_path: _ReferencePath,
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
-    visited: Set[_ReferencePath],
+    visited: Tuple[_ReferencePath, Set[_ReferencePath]],
     config: Config,
 ) -> Union[Schemas, PropertyError]:
     if isinstance(data, oai.Reference):
@@ -89,12 +89,14 @@ def update_schemas_with(
 
 
 def _update_schemas_with_reference(
-    *, ref_path: _ReferencePath, data: oai.Reference, schemas: Schemas, visited: Set[_ReferencePath], config: Config
+    *, ref_path: _ReferencePath, data: oai.Reference, schemas: Schemas, visited: Tuple[_ReferencePath, Set[_ReferencePath]], config: Config
 ) -> Union[Schemas, PropertyError]:
     reference_pointer = parse_reference_path(data.ref)
     if isinstance(reference_pointer, ParseError):
         return PropertyError(detail=reference_pointer.detail, data=data)
 
+    curr, previous = visited
+    previous.add(reference_pointer)
     resolved_reference = schemas.classes_by_reference.get(reference_pointer)
     if resolved_reference:
         return attr.evolve(schemas, classes_by_reference={ref_path: resolved_reference, **schemas.classes_by_reference})
@@ -103,7 +105,7 @@ def _update_schemas_with_reference(
 
 
 def _update_schemas_with_data(
-    *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, visited: Set[_ReferencePath], config: Config
+    *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, visited: Tuple[_ReferencePath, Set[_ReferencePath]], config: Config
 ) -> Union[Schemas, PropertyError]:
     from . import build_enum_property, build_model_property
 
@@ -119,7 +121,8 @@ def _update_schemas_with_data(
 
     holder = schemas.classes_by_reference.get(ref_path)
     if isinstance(prop, PropertyError):
-        if ref_path in visited and not holder:
+        curr, previous = visited
+        if (ref_path in previous or curr in f"{prop.data}") and not holder:
             holder = _Holder(data=RecursiveReferenceInterupt())
             schemas = attr.evolve(schemas, classes_by_reference={ref_path: holder, **schemas.classes_by_reference})
             return RecursiveReferenceInterupt(schemas=schemas)

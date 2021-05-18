@@ -1210,6 +1210,20 @@
       "AnEnumIndirectReference": {
         "$ref": "#/components/schemas/AnEnum"
       },
+      "AModelWithDirectSelfReferenceProperty": {
+        "type": "object",
+        "properties": {
+          "required_self_ref": {
+            "$ref": "#/components/schemas/AModelWithDirectSelfReferenceProperty",
+          },
+          "optional_self_ref": {
+            "$ref": "#/components/schemas/AModelWithDirectSelfReferenceProperty",
+          }
+        },
+        "required": [
+          "required_self_ref"
+        ]
+      },
       "AModelWithIndirectSelfReferenceProperty": {
         "type": "object",
         "properties": {
