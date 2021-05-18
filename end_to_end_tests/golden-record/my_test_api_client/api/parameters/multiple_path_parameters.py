@@ -7,12 +7,16 @@ from ...types import Response
 
 
 def _get_kwargs(
-    param_1: str,
+    param_4: str,
     param_2: int,
+    param_1: str,
+    param_3: int,
     *,
     client: Client,
 ) -> Dict[str, Any]:
-    url = "{}/multiple-path-parameters/{param1}/{param2}".format(client.base_url, param1=param_1, param2=param_2)
+    url = "{}/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}".format(
+        client.base_url, param4=param_4, param2=param_2, param1=param_1, param3=param_3
+    )
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
@@ -35,14 +39,18 @@ def _build_response(*, response: httpx.Response) -> Response[None]:
 
 
 def sync_detailed(
-    param_1: str,
+    param_4: str,
     param_2: int,
+    param_1: str,
+    param_3: int,
     *,
     client: Client,
 ) -> Response[None]:
     kwargs = _get_kwargs(
-        param_1=param_1,
+        param_4=param_4,
         param_2=param_2,
+        param_1=param_1,
+        param_3=param_3,
         client=client,
     )
 
@@ -54,14 +62,18 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
-    param_1: str,
+    param_4: str,
     param_2: int,
+    param_1: str,
+    param_3: int,
     *,
     client: Client,
 ) -> Response[None]:
     kwargs = _get_kwargs(
-        param_1=param_1,
+        param_4=param_4,
         param_2=param_2,
+        param_1=param_1,
+        param_3=param_3,
         client=client,
     )
 

@@ -1,4 +1,5 @@
 import itertools
+import re
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
@@ -11,6 +12,8 @@ from ..config import Config
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
+
+_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
@@ -49,6 +52,8 @@ class EndpointCollection:
                     endpoint, schemas = Endpoint._add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
+                if not isinstance(endpoint, ParseError):
+                    endpoint = Endpoint._sort_parameters(endpoint=endpoint, path=path)
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
@@ -267,6 +272,20 @@ class Endpoint:
             name_check.add(prop.python_name)
 
         return endpoint, schemas
+
+    @staticmethod
+    def _sort_parameters(*, endpoint: "Endpoint", path: str) -> Union["Endpoint", ParseError]:
+        endpoint = deepcopy(endpoint)
+        parameters_form_path = re.findall(_PATH_PARAM_REGEX, path)
+        path_parameter_names = [p.name for p in endpoint.path_parameters]
+        if sorted(parameters_form_path) != sorted(path_parameter_names):
+            return ParseError(
+                data=endpoint.path_parameters,
+                detail="Incorrect path templating (Path parameters do not match with path)",
+            )
+
+        endpoint.path_parameters.sort(key=lambda p: parameters_form_path.index(p.name))
+        return endpoint
 
     @staticmethod
     def from_data(
