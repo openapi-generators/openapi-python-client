@@ -798,6 +798,40 @@ class TestEndpoint:
         assert result.path_parameters["test"].name == "test"
         assert result.query_parameters["test"].name == "test"
 
+    def test__sort_parameters(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        path = "/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}"
+
+        for i in range(1, 5):
+            param = oai.Parameter.construct(
+                name=f"param{i}", required=True, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
+            )
+            endpoint.path_parameters.append(param)
+
+        result = Endpoint._sort_parameters(endpoint=endpoint, path=path)
+        result_names = [p.name for p in result.path_parameters]
+        expected_names = [f"param{i}" for i in (4, 2, 1, 3)]
+
+        assert result_names == expected_names
+
+    def test__sort_parameters_invalid_path_templating(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        path = "/multiple-path-parameters/{param1}/{param2}"
+        param = oai.Parameter.construct(
+            name=f"param1", required=True, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
+        )
+        endpoint.path_parameters.append(param)
+
+        result = Endpoint._sort_parameters(endpoint=endpoint, path=path)
+
+        assert isinstance(result, ParseError)
+        assert result.data == [param]
+        assert "Incorrect path templating" in result.detail
+
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 
