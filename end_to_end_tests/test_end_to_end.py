@@ -1,7 +1,7 @@
 import shutil
-from filecmp import cmpfiles, dircmp
+from filecmp import dircmp
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import pytest
 from typer.testing import CliRunner
@@ -9,21 +9,38 @@ from typer.testing import CliRunner
 from openapi_python_client.cli import app
 
 
+def _dircmp_recursive(dc: dircmp, *, base_path: Path, dc_info: Dict[str, List[Path]]) -> None:
+    for k, v in dc_info.items():
+        v.extend([base_path / f for f in getattr(dc, k)])
+
+    for sub_dir, sub_dc in dc.subdirs.items():
+        _dircmp_recursive(sub_dc, base_path=(base_path / sub_dir), dc_info=dc_info)
+
+
 def _compare_directories(
     record: Path,
     test_subject: Path,
-    expected_differences: Optional[Dict[str, str]] = None,
+    expected_differences: Optional[Dict[Path, str]] = None,
 ):
     first_printable = record.relative_to(Path.cwd())
     second_printable = test_subject.relative_to(Path.cwd())
     dc = dircmp(record, test_subject)
-    missing_files = dc.left_only + dc.right_only
+    dc_info = {
+        "left_only": [],
+        "right_only": [],
+        "diff_files": [],
+        "common_funny": [],
+    }
+    _dircmp_recursive(dc, base_path=Path(""), dc_info=dc_info)
+    missing_files = dc_info["left_only"] + dc_info["right_only"]
     if missing_files:
-        pytest.fail(f"{first_printable} or {second_printable} was missing: {missing_files}", pytrace=False)
+        pytest.fail(
+            f"{first_printable} or {second_printable} was missing: {list(map(str, missing_files))}",
+            pytrace=False,
+        )
 
     expected_differences = expected_differences or {}
-    _, mismatch, errors = cmpfiles(record, test_subject, dc.common_files, shallow=False)
-    mismatch = set(mismatch)
+    mismatch = set(dc_info["diff_files"])
 
     for file_name in mismatch | set(expected_differences.keys()):
         if file_name not in expected_differences:
@@ -36,13 +53,12 @@ def _compare_directories(
         mismatch.remove(file_name)
 
     if mismatch:
+        errors = list(map(str, dc_info["common_funny"]))
+        mismatch_printable = list(map(str, mismatch))
         pytest.fail(
-            f"{first_printable} and {second_printable} had differing files: {mismatch}, and errors {errors}",
+            f"{first_printable} and {second_printable} had differing files: {mismatch_printable}, and errors {errors}",
             pytrace=False,
         )
-
-    for sub_path in dc.common_dirs:
-        _compare_directories(record / sub_path, test_subject / sub_path, expected_differences=expected_differences)
 
 
 def run_e2e_test(extra_args=None, expected_differences=None):
@@ -75,7 +91,14 @@ def test_end_to_end():
 
 
 def test_custom_templates():
+    expected_differences = {
+        "README.md": "my-test-api-client",
+        "my_test_api_client/__init__.py": (
+            '""" Overriden comment """\nfrom .client import AuthenticatedClient, Client\n'
+        ),
+        "my_test_api_client/api/__init__.py": '"""Custom comment"""\n',
+    }
     run_e2e_test(
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates"],
-        expected_differences={"README.md": "my-test-api-client"},
+        expected_differences={Path(k): v for k, v in expected_differences.items()},
     )

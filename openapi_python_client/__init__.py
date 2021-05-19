@@ -241,14 +241,22 @@ class Project:
         # Generate endpoints
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
-        api_init = api_dir / "__init__.py"
-        api_init.write_text('""" Contains methods for accessing the API """', encoding=self.file_encoding)
+        api_init_path = api_dir / "__init__.py"
+        api_init_template = self.env.get_template("api_init.py.jinja")
+        api_init_path.write_text(
+            api_init_template.render(endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag),
+            encoding=self.file_encoding,
+        )
 
+        tag_init_template = self.env.get_template("tag_init.py.jinja")
         endpoint_template = self.env.get_template("endpoint_module.py.jinja")
         for tag, collection in self.openapi.endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
-            (tag_dir / "__init__.py").touch()
+            tag_init_path = tag_dir / "__init__.py"
+            tag_init_path.write_text(
+                tag_init_template.render(endpoint_collection=collection), encoding=self.file_encoding
+            )
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{snake_case(endpoint.name)}.py"
