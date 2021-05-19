@@ -1114,9 +1114,19 @@
                 "type": "string"
               }
             }
+          },
+          "some_enum": {
+            "$ref": "#/components/schemas/DifferentEnum"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "foo": {
+              "type": "string"
+            }
+          }
+        }
       },
       "DifferentEnum": {
         "title": "DifferentEnum",
