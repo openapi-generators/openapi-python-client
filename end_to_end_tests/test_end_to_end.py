@@ -13,7 +13,7 @@ def _compare_directories(
     record: Path,
     test_subject: Path,
     expected_differences: Optional[
-        Dict[str, str]
+        Dict[Path, str]
     ] = None,  # key: path relative to generated directory, value: expected generated content
     depth=0,
 ):
