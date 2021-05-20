@@ -240,7 +240,7 @@ class Project:
         client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate endpoints
-        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag.items()
+        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
@@ -254,14 +254,14 @@ class Project:
         )
 
         endpoint_template = self.env.get_template("endpoint_module.py.jinja")
-        for tag, collection in endpoint_collections_by_tag:
+        for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
 
             endpoint_init_path = tag_dir / "__init__.py"
             endpoint_init_template = self.env.get_template("endpoint_init.py.jinja")
             endpoint_init_path.write_text(
-                endpoint_init_template.render(package_name=self.package_name, tag=tag, endpoints=collection.endpoints),
+                endpoint_init_template.render(package_name=self.package_name, endpoint_collection=collection),
                 encoding=self.file_encoding,
             )
             (tag_dir / "__init__.py").touch()
