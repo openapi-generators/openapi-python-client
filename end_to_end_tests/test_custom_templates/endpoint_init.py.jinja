@@ -1,13 +1,13 @@
 """ Contains methods for accessing the API Endpoints """
 
 import types
-{% for endpoint in endpoints %}
-from {{ package_name }}.api.{{ tag }} import {{ utils.snake_case(endpoint.name) }}
+{% for endpoint in endpoint_collection.endpoints %}
+from {{ package_name }}.api.{{ endpoint_collection.tag }} import {{ utils.snake_case(endpoint.name) }}
 {% endfor %}
 
-class {{ utils.pascal_case(tag) }}Endpoints:
+class {{ utils.pascal_case(endpoint_collection.tag) }}Endpoints:
 
-{% for endpoint in endpoints %}
+{% for endpoint in endpoint_collection.endpoints %}
 
     @classmethod
     def {{ utils.snake_case(endpoint.name) }}(cls) -> types.ModuleType:
