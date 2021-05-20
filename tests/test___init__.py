@@ -403,11 +403,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with(
-            description=project.package_description,
-            project_name=project.project_name,
-            package_name=project.package_name,
-        )
+        readme_template.render.assert_called_once_with()
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -440,11 +436,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with(
-            description=project.package_description,
-            project_name=project.project_name,
-            package_name=project.package_name,
-        )
+        readme_template.render.assert_called_once_with()
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -483,12 +475,7 @@ class TestProject:
 
         project.env.get_template.assert_called_once_with(template_path)
 
-        pyproject_template.render.assert_called_once_with(
-            project_name=project.project_name,
-            package_name=project.package_name,
-            version=project.version,
-            description=project.package_description,
-        )
+        pyproject_template.render.assert_called_once_with()
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render(), encoding="utf-8")
 
     def test__build_setup_py(self, mocker):
@@ -511,12 +498,7 @@ class TestProject:
 
         project.env.get_template.assert_called_once_with("setup.py.jinja")
 
-        setup_template.render.assert_called_once_with(
-            project_name=project.project_name,
-            package_name=project.package_name,
-            version=project.version,
-            description=project.package_description,
-        )
+        setup_template.render.assert_called_once_with()
         setup_path.write_text.assert_called_once_with(setup_template.render(), encoding="utf-8")
 
 
