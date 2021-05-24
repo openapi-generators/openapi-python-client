@@ -19,8 +19,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     str_properties_ref: List[str]
     date_properties_ref: List[datetime.date]
     datetime_properties_ref: List[datetime.datetime]
-    int_32_properties_ref: List[int]
-    int_64_properties_ref: List[int]
+    int32_properties_ref: List[int]
+    int64_properties_ref: List[int]
     float_properties_ref: List[float]
     double_properties_ref: List[float]
     file_properties_ref: List[File]
@@ -29,8 +29,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     str_properties: List[str]
     date_properties: List[datetime.date]
     datetime_properties: List[datetime.datetime]
-    int_32_properties: List[int]
-    int_64_properties: List[int]
+    int32_properties: List[int]
+    int64_properties: List[int]
     float_properties: List[float]
     double_properties: List[float]
     file_properties: List[File]
@@ -39,8 +39,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     str_property_ref: str
     date_property_ref: datetime.date
     datetime_property_ref: datetime.datetime
-    int_32_property_ref: int
-    int_64_property_ref: int
+    int32_property_ref: int
+    int64_property_ref: int
     float_property_ref: float
     double_property_ref: float
     file_property_ref: File
@@ -71,9 +71,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
 
-        int_32_properties_ref = self.int_32_properties_ref
+        int32_properties_ref = self.int32_properties_ref
 
-        int_64_properties_ref = self.int_64_properties_ref
+        int64_properties_ref = self.int64_properties_ref
 
         float_properties_ref = self.float_properties_ref
 
@@ -108,9 +108,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
 
-        int_32_properties = self.int_32_properties
+        int32_properties = self.int32_properties
 
-        int_64_properties = self.int_64_properties
+        int64_properties = self.int64_properties
 
         float_properties = self.float_properties
 
@@ -130,8 +130,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         date_property_ref = self.date_property_ref.isoformat()
         datetime_property_ref = self.datetime_property_ref.isoformat()
 
-        int_32_property_ref = self.int_32_property_ref
-        int_64_property_ref = self.int_64_property_ref
+        int32_property_ref = self.int32_property_ref
+        int64_property_ref = self.int64_property_ref
         float_property_ref = self.float_property_ref
         double_property_ref = self.double_property_ref
         file_property_ref = self.file_property_ref.to_tuple()
@@ -146,8 +146,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
                 "str_properties_ref": str_properties_ref,
                 "date_properties_ref": date_properties_ref,
                 "datetime_properties_ref": datetime_properties_ref,
-                "int32_properties_ref": int_32_properties_ref,
-                "int64_properties_ref": int_64_properties_ref,
+                "int32_properties_ref": int32_properties_ref,
+                "int64_properties_ref": int64_properties_ref,
                 "float_properties_ref": float_properties_ref,
                 "double_properties_ref": double_properties_ref,
                 "file_properties_ref": file_properties_ref,
@@ -156,8 +156,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
                 "str_properties": str_properties,
                 "date_properties": date_properties,
                 "datetime_properties": datetime_properties,
-                "int32_properties": int_32_properties,
-                "int64_properties": int_64_properties,
+                "int32_properties": int32_properties,
+                "int64_properties": int64_properties,
                 "float_properties": float_properties,
                 "double_properties": double_properties,
                 "file_properties": file_properties,
@@ -166,8 +166,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
                 "str_property_ref": str_property_ref,
                 "date_property_ref": date_property_ref,
                 "datetime_property_ref": datetime_property_ref,
-                "int32_property_ref": int_32_property_ref,
-                "int64_property_ref": int_64_property_ref,
+                "int32_property_ref": int32_property_ref,
+                "int64_property_ref": int64_property_ref,
                 "float_property_ref": float_property_ref,
                 "double_property_ref": double_property_ref,
                 "file_property_ref": file_property_ref,
@@ -207,9 +207,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
 
-        int_32_properties_ref = cast(List[int], d.pop("int32_properties_ref"))
+        int32_properties_ref = cast(List[int], d.pop("int32_properties_ref"))
 
-        int_64_properties_ref = cast(List[int], d.pop("int64_properties_ref"))
+        int64_properties_ref = cast(List[int], d.pop("int64_properties_ref"))
 
         float_properties_ref = cast(List[float], d.pop("float_properties_ref"))
 
@@ -249,9 +249,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
 
-        int_32_properties = cast(List[int], d.pop("int32_properties"))
+        int32_properties = cast(List[int], d.pop("int32_properties"))
 
-        int_64_properties = cast(List[int], d.pop("int64_properties"))
+        int64_properties = cast(List[int], d.pop("int64_properties"))
 
         float_properties = cast(List[float], d.pop("float_properties"))
 
@@ -276,9 +276,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         datetime_property_ref = isoparse(d.pop("datetime_property_ref"))
 
-        int_32_property_ref = d.pop("int32_property_ref")
+        int32_property_ref = d.pop("int32_property_ref")
 
-        int_64_property_ref = d.pop("int64_property_ref")
+        int64_property_ref = d.pop("int64_property_ref")
 
         float_property_ref = d.pop("float_property_ref")
 
@@ -293,8 +293,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
             str_properties_ref=str_properties_ref,
             date_properties_ref=date_properties_ref,
             datetime_properties_ref=datetime_properties_ref,
-            int_32_properties_ref=int_32_properties_ref,
-            int_64_properties_ref=int_64_properties_ref,
+            int32_properties_ref=int32_properties_ref,
+            int64_properties_ref=int64_properties_ref,
             float_properties_ref=float_properties_ref,
             double_properties_ref=double_properties_ref,
             file_properties_ref=file_properties_ref,
@@ -303,8 +303,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
             str_properties=str_properties,
             date_properties=date_properties,
             datetime_properties=datetime_properties,
-            int_32_properties=int_32_properties,
-            int_64_properties=int_64_properties,
+            int32_properties=int32_properties,
+            int64_properties=int64_properties,
             float_properties=float_properties,
             double_properties=double_properties,
             file_properties=file_properties,
@@ -313,8 +313,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
             str_property_ref=str_property_ref,
             date_property_ref=date_property_ref,
             datetime_property_ref=datetime_property_ref,
-            int_32_property_ref=int_32_property_ref,
-            int_64_property_ref=int_64_property_ref,
+            int32_property_ref=int32_property_ref,
+            int64_property_ref=int64_property_ref,
             float_property_ref=float_property_ref,
             double_property_ref=double_property_ref,
             file_property_ref=file_property_ref,
