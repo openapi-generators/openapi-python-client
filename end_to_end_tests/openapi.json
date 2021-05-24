@@ -188,6 +188,36 @@
         }
       }
     },
+    "/tests/post_form_data": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "sumnary": "Post from data",
+        "description": "Post form data",
+        "operationId": "post_form_data",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AFormData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/tests/upload": {
       "post": {
         "tags": [
@@ -797,6 +827,20 @@
   },
   "components": {
     "schemas": {
+      "AFormData": {
+        "type": "object",
+        "properties": {
+          "an_optional_field": {
+            "type": "string"
+          },
+          "an_required_field": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "an_required_field"
+        ]
+      },
       "AModel": {
         "title": "AModel",
         "required": [

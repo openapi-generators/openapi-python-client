@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
-from attr import asdict
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, File {% endif %}
@@ -52,7 +51,7 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         {% if endpoint.form_body_class %}
-        "data": asdict(form_data),
+        "data": form_data.to_dict(),
         {% elif endpoint.multipart_body_class %}
         "files": files,
         "data": data,
