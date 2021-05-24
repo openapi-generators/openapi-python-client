@@ -1,5 +1,6 @@
 """ Contains all the data models used in inputs/outputs """
 
+from .a_form_data import AFormData
 from .a_model import AModel
 from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
 from .all_of_sub_model import AllOfSubModel
