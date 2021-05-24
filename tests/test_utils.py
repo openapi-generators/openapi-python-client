@@ -3,6 +3,22 @@ import pytest
 from openapi_python_client import utils
 
 
+@pytest.mark.parametrize(
+    "before, after",
+    [
+        ("connectionID", ["connection", "ID"]),
+        ("connection_id", ["connection", "id"]),
+        ("connection-id", ["connection", "id"]),
+        ("Response200", ["Response", "200"]),
+        ("Response200Okay", ["Response", "200", "Okay"]),
+        ("S3Config", ["S3", "Config"]),
+        ("s3config", ["s3config"]),
+    ],
+)
+def test_split_words(before, after):
+    assert utils.split_words(before) == after
+
+
 def test_snake_case_uppercase_str():
     assert utils.snake_case("HTTP") == "http"
     assert utils.snake_case("HTTP RESPONSE") == "http_response"
