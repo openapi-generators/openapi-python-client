@@ -329,15 +329,17 @@ class Endpoint:
     @staticmethod
     def _sort_parameters(*, endpoint: "Endpoint", path: str) -> Union["Endpoint", ParseError]:
         endpoint = deepcopy(endpoint)
-        parameters_form_path = re.findall(_PATH_PARAM_REGEX, path)
+        parameters_from_path = re.findall(_PATH_PARAM_REGEX, path)
+        try:
+            endpoint.path_parameters.sort(key=lambda p: parameters_from_path.index(p.name))
+        except ValueError:
+            pass  # We're going to catch the difference down below
         path_parameter_names = [p.name for p in endpoint.path_parameters]
-        if sorted(parameters_form_path) != sorted(path_parameter_names):
+        if parameters_from_path != path_parameter_names:
             return ParseError(
                 data=endpoint.path_parameters,
                 detail="Incorrect path templating (Path parameters do not match with path)",
             )
-
-        endpoint.path_parameters.sort(key=lambda p: parameters_form_path.index(p.name))
         return endpoint
 
     @staticmethod
