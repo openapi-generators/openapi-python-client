@@ -337,7 +337,7 @@ class Endpoint:
         path_parameter_names = [p.name for p in endpoint.path_parameters]
         if parameters_from_path != path_parameter_names:
             return ParseError(
-                data=endpoint.path_parameters,
+                data=endpoint,
                 detail="Incorrect path templating (Path parameters do not match with path)",
             )
         return endpoint
