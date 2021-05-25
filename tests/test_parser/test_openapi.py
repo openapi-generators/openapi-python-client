@@ -637,7 +637,7 @@ class TestEndpoint:
         result = Endpoint._sort_parameters(endpoint=endpoint, path=path)
 
         assert isinstance(result, ParseError)
-        assert result.data == [param]
+        assert result.data == endpoint
         assert "Incorrect path templating" in result.detail
 
     def test_from_data_bad_params(self, mocker):
