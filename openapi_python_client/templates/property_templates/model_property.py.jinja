@@ -12,10 +12,11 @@
 
 {% macro transform(property, source, destination, declare_type=True, stringify=False, transform_method="to_dict") %}
 {% set transformed = source + "." + transform_method + "()" %}
-{% set type_string = property.get_type_string(json=True) %}
 {% if stringify %}
     {% set transformed = "(None, json.dumps(" + transformed + "), 'application/json')" %}
     {% set type_string = "Union[Unset, Tuple[None, str, str]]" %}
+{% else %}
+    {% set type_string = property.get_type_string(json=True) %}
 {% endif %}
 {% if property.required %}
 {% if property.nullable %}

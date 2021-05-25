@@ -116,7 +116,7 @@ class Endpoint:
         multipart_body = body_content.get("multipart/form-data")
         if multipart_body is not None and multipart_body.media_type_schema is not None:
             prop, schemas = property_from_data(
-                name="multipart_body",
+                name="multipart_data",
                 required=True,
                 data=multipart_body.media_type_schema,
                 schemas=schemas,

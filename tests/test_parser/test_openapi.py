@@ -187,7 +187,7 @@ class TestEndpoint:
         result = Endpoint.parse_multipart_body(body=body, schemas=schemas_before, parent_name="parent", config=config)
 
         property_from_data.assert_called_once_with(
-            name="multipart_body",
+            name="multipart_data",
             required=True,
             data=schema,
             schemas=schemas_before,
@@ -218,7 +218,7 @@ class TestEndpoint:
         result = Endpoint.parse_multipart_body(body=body, schemas=schemas_before, parent_name="parent", config=config)
 
         property_from_data.assert_called_once_with(
-            name="multipart_body",
+            name="multipart_data",
             required=True,
             data=schema,
             schemas=schemas_before,
