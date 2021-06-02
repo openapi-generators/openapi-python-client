@@ -6,6 +6,9 @@ from typing import List
 {% endif %}
 
 import attr
+{% if model.is_multipart_body %}
+import json
+{% endif %}
 
 from ..types import UNSET, Unset
 
@@ -40,42 +43,57 @@ class {{ class_name }}:
     additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
     {% endif %}
 
+{% macro _to_dict(multipart=False) %}
+{% for property in model.required_properties + model.optional_properties %}
+{% if property.template %}
+{% from "property_templates/" + property.template import transform %}
+{{ transform(property, "self." + property.python_name, property.python_name, stringify=multipart) }}
+{% elif multipart %}
+{{ property.python_name }} = self.{{ property.python_name }} if self.{{ property.python_name }} is UNSET else (None, str(self.{{ property.python_name }}), "text/plain")
+{% else %}
+{{ property.python_name }} = self.{{ property.python_name }}
+{% endif %}
+{% endfor %}
+
+field_dict: Dict[str, Any] = {}
+{% if model.additional_properties %}
+{% if model.additional_properties.template %}
+{% from "property_templates/" + model.additional_properties.template import transform %}
+for prop_name, prop in self.additional_properties.items():
+    {{ transform(model.additional_properties, "prop", "field_dict[prop_name]", stringify=multipart) | indent(4) }}
+{% elif multipart %}
+field_dict.update({
+    key: (None, str(value), "text/plain")
+    for key, value in self.additional_properties.items()
+})
+{% else %}
+field_dict.update(self.additional_properties)
+{% endif %}
+{% endif %}
+field_dict.update({
+    {% for property in model.required_properties + model.optional_properties %}
+    {% if property.required %}
+    "{{ property.name }}": {{ property.python_name }},
+    {% endif %}
+    {% endfor %}
+})
+{% for property in model.optional_properties %}
+{% if not property.required %}
+if {{ property.python_name }} is not UNSET:
+    field_dict["{{ property.name }}"] = {{ property.python_name }}
+{% endif %}
+{% endfor %}
+
+return field_dict
+{% endmacro %}
 
     def to_dict(self) -> Dict[str, Any]:
-        {% for property in model.required_properties + model.optional_properties %}
-        {% if property.template %}
-        {% from "property_templates/" + property.template import transform %}
-        {{ transform(property, "self." + property.python_name, property.python_name) | indent(8) }}
-        {% else %}
-        {{ property.python_name }} =  self.{{ property.python_name }}
-        {% endif %}
-        {% endfor %}
+        {{ _to_dict() | indent(8) }}
 
-        field_dict: Dict[str, Any] = {}
-        {% if model.additional_properties %}
-        {% if model.additional_properties.template %}
-        {% from "property_templates/" + model.additional_properties.template import transform %}
-        for prop_name, prop in self.additional_properties.items():
-            {{ transform(model.additional_properties, "prop", "field_dict[prop_name]") | indent(12) }}
-        {% else %}
-        field_dict.update(self.additional_properties)
-        {% endif %}
-        {% endif %}
-        field_dict.update({
-            {% for property in model.required_properties + model.optional_properties %}
-            {% if property.required %}
-            "{{ property.name }}": {{ property.python_name }},
-            {% endif %}
-            {% endfor %}
-        })
-        {% for property in model.optional_properties %}
-        {% if not property.required %}
-        if {{ property.python_name }} is not UNSET:
-            field_dict["{{ property.name }}"] = {{ property.python_name }}
-        {% endif %}
-        {% endfor %}
-
-        return field_dict
+{% if model.is_multipart_body %}
+    def to_multipart(self) -> Dict[str, Any]:
+        {{ _to_dict(multipart=True) | indent(8) }}
+{% endif %}
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:

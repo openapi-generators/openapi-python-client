@@ -71,6 +71,17 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
+{% macro multipart_body(endpoint) %}
+{% if endpoint.multipart_body %}
+    {% set property = endpoint.multipart_body %}
+    {% set destination = "multipart_" + property.python_name %}
+    {% if property.template %}
+        {% from "property_templates/" + property.template import transform_multipart %}
+{{ transform_multipart(property, property.python_name, destination) }}
+    {% endif %}
+{% endif %}
+{% endmacro %}
+
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
 *,
@@ -89,8 +100,8 @@ client: Client,
 form_data: {{ endpoint.form_body_class.name }},
 {% endif %}
 {# Multipart data if any #}
-{% if endpoint.multipart_body_class %}
-multipart_data: {{ endpoint.multipart_body_class.name }},
+{% if endpoint.multipart_body %}
+multipart_data: {{ endpoint.multipart_body.get_type_string() }},
 {% endif %}
 {# JSON body if any #}
 {% if endpoint.json_body %}
@@ -118,7 +129,7 @@ client=client,
 {% if endpoint.form_body_class %}
 form_data=form_data,
 {% endif %}
-{% if endpoint.multipart_body_class %}
+{% if endpoint.multipart_body %}
 multipart_data=multipart_data,
 {% endif %}
 {% if endpoint.json_body %}
