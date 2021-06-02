@@ -1053,9 +1053,7 @@
       },
       "Body_upload_file_tests_upload_post": {
         "title": "Body_upload_file_tests_upload_post",
-        "required": [
-          "some_file"
-        ],
+        "required": ["some_file", "some_object", "some_nullable_object"],
         "type": "object",
         "properties": {
           "some_file": {
@@ -1063,13 +1061,72 @@
             "type": "string",
             "format": "binary"
           },
+          "some_optional_file": {
+            "title": "Some Optional File",
+            "type": "string",
+            "format": "binary"
+          },
           "some_string": {
             "title": "Some String",
             "type": "string",
             "default": "some_default_string"
+          },
+          "some_number": {
+            "title": "Some Number",
+            "type": "number"
+          },
+          "some_array": {
+            "title": "Some Array",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "some_object": {
+            "title": "Some Object",
+            "type": "object",
+            "required": ["num", "text"],
+            "properties": {
+              "num": {
+                "type": "number"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          },
+          "some_optional_object": {
+            "title": "Some Optional Object",
+            "type": "object",
+            "required": ["foo"],
+            "properties": {
+              "foo": {
+                "type": "string"
+              }
+            }
+          },
+          "some_nullable_object": {
+            "title": "Some Nullable Object",
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "bar": {
+                "type": "string"
+              }
+            }
+          },
+          "some_enum": {
+            "$ref": "#/components/schemas/DifferentEnum"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "foo": {
+              "type": "string"
+            }
+          }
+        }
       },
       "DifferentEnum": {
         "title": "DifferentEnum",
