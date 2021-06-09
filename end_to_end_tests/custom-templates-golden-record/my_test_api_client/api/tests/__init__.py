@@ -14,6 +14,7 @@ from my_test_api_client.api.tests import (
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
     optional_value_tests_optional_query_param,
+    post_form_data,
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
     unsupported_content_tests_unsupported_content_get,
@@ -56,6 +57,13 @@ class TestsEndpoints:
         Get a list of booleans
         """
         return get_basic_list_of_booleans
+
+    @classmethod
+    def post_form_data(cls) -> types.ModuleType:
+        """
+        Post form data
+        """
+        return post_form_data
 
     @classmethod
     def upload_file_tests_upload_post(cls) -> types.ModuleType:
