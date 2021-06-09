@@ -257,7 +257,6 @@ class Project:
                 endpoint_init_template.render(endpoint_collection=collection),
                 encoding=self.file_encoding,
             )
-            (tag_dir / "__init__.py").touch()
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{snake_case(endpoint.name)}.py"
