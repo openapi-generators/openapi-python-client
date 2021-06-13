@@ -82,7 +82,7 @@ def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = Fals
         _print_parser_error(err, color)
 
     gh_link = typer.style(
-        "https://github.com/triaxtec/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
+        "https://github.com/openapi-generators/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
     )
     typer.secho(
         f"If you believe this was a mistake or this tool is missing a feature you need, "

@@ -2,12 +2,12 @@
 name = "openapi-python-client"
 version = "0.9.1"
 description = "Generate modern Python clients from OpenAPI"
-repository = "https://github.com/triaxtec/openapi-python-client"
+repository = "https://github.com/openapi-generators/openapi-python-client"
 license = "MIT"
 keywords=["OpenAPI", "Client", "Generator"]
-authors = ["Dylan Anthony <danthony@triaxtec.com>"]
+authors = ["Dylan Anthony <contact@dylananthony.com>"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Code Generators",
     "Typing :: Typed",

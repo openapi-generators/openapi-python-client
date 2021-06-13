@@ -38,4 +38,4 @@ Once your PR is created, a series of automated checks should run. If any of them
 As soon as possible, your PR will be reviewed. If there are any changes requested there will likely be a bit of back and forth. Once this process is done, your changes will be merged into main and included in the next release. If you need your changes available on PyPI by a certain time, please mention it in the PR, and we'll do our best to accommodate.
 
 [Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/
-[Dobby]: https://triaxtec.github.io/dobby/introduction.html
+[Dobby]: https://dobby-dev.github.io/dobby/introduction.html

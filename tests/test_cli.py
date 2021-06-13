@@ -169,7 +169,7 @@ class TestGenerate:
             "Unable to generate the client\n\n"
             "this is a message\n\n\n"
             "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
-            "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"
+            "https://github.com/openapi-generators/openapi-python-client/issues/new/choose\n"
         )
 
     def test_generate_handle_multiple_warnings(self, _create_new_client):
@@ -191,7 +191,7 @@ class TestGenerate:
             "this is another message\n\n"
             "{'other': 'data'}\n\n"
             "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
-            "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"
+            "https://github.com/openapi-generators/openapi-python-client/issues/new/choose\n"
         )
 
     def test_generate_fail_on_warning(self, _create_new_client):
@@ -213,7 +213,7 @@ class TestGenerate:
             "this is another message\n\n"
             "{'other': 'data'}\n\n"
             "If you believe this was a mistake or this tool is missing a feature you need, please open an issue at "
-            "https://github.com/triaxtec/openapi-python-client/issues/new/choose\n"
+            "https://github.com/openapi-generators/openapi-python-client/issues/new/choose\n"
         )
 
 

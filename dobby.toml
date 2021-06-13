@@ -16,5 +16,5 @@ name = "release"
     command = "npx prettier --write CHANGELOG.md"
 
 [github]
-owner = "triaxtec"
+owner = "openapi-generators"
 repo = "openapi-python-client"
