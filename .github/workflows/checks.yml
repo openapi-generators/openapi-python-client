@@ -15,8 +15,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macOS-latest, windows-latest ]
+        os: [ ubuntu-latest, macOS-latest ]
         python: [ "3.6", "3.7", "3.8", "3.9", "3.10.0-beta.2 - 3.10.0" ]
+    defaults:
+      run:
+        shell: bash
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -42,10 +45,26 @@ jobs:
         poetry config virtualenvs.in-project true
         poetry install --no-interaction
 
-    - name: Run Checks
-      uses: triaxtec/github-actions/python/run-checks@main
-      with:
-        module: openapi_python_client
+    - name: Run Black
+      run: poetry run black . --check
+
+    - name: Run isort
+      run: poetry run isort . --check
+
+    - name: Run flake8
+      run: poetry run flake8 openapi_python_client
+
+    - name: Run safety
+      run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
+
+    - name: Run mypy
+      run: poetry run mypy --show-error-codes openapi_python_client
+
+    - name: Run pytest
+      run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests
+
+    - name: Generate coverage report
+      run: poetry run coverage xml
 
     - name: End to End Tests
       run: poetry run pytest --cov=openapi_python_client end_to_end_tests
