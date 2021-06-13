@@ -11,9 +11,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Python ${{ matrix.python }}, ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ ubuntu-latest, macOS-latest, windows-latest ]
         python: [ "3.6", "3.7", "3.8", "3.9", "3.10.0-beta.2 - 3.10.0" ]
     steps:
     - uses: actions/checkout@v2
@@ -28,8 +30,18 @@ jobs:
         key: ${{ runner.os }}-${{ matrix.python }}-dependencies-${{ hashFiles('**/poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.python }}-dependencies-
+
+    - uses: snok/install-poetry@v1.1.6
+      name: Install Poetry
+      with:
+        virtualenvs-create: true
+
     - name: Install dependencies
-      uses: triaxtec/github-actions/python/install-and-configure-poetry@main
+      run: |
+        poetry config experimental.new-installer false
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
+
     - name: Run Checks
       uses: triaxtec/github-actions/python/run-checks@main
       with:
