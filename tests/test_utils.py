@@ -76,13 +76,6 @@ def test__fix_reserved_words(reserved_word: str, expected: str):
     assert utils.fix_reserved_words(reserved_word) == expected
 
 
-def test_to_valid_python_identifier():
-    assert utils.to_valid_python_identifier("valid") == "valid"
-    assert utils.to_valid_python_identifier("1") == "field_1"
-    assert utils.to_valid_python_identifier("$") == "field_"
-    assert utils.to_valid_python_identifier("for") == "for_"
-
-
 @pytest.mark.parametrize(
     "before, after",
     [

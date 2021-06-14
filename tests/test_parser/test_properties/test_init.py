@@ -38,7 +38,7 @@ class TestProperty:
 
         mocker.patch.object(Property, "_type_string", "TestType")
         mocker.patch.object(Property, "_json_type_string", "str")
-        p = Property(name="test", required=required, default=None, nullable=nullable)
+        p = Property(name="test", required=required, default=None, nullable=nullable, python_name="test")
         assert p.get_type_string(no_optional=no_optional, json=json) == expected
 
     @pytest.mark.parametrize(

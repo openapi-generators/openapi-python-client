@@ -11,6 +11,7 @@ from .. import utils
 from ..config import Config
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
+from .properties.property import _PythonIdentifier, to_valid_python_identifier
 from .responses import Response, response_from_data
 
 
@@ -30,9 +31,9 @@ class EndpointCollection:
     @staticmethod
     def from_data(
         *, data: Dict[str, oai.PathItem], schemas: Schemas, config: Config
-    ) -> Tuple[Dict[str, "EndpointCollection"], Schemas]:
+    ) -> Tuple[Dict[_PythonIdentifier, "EndpointCollection"], Schemas]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
-        endpoints_by_tag: Dict[str, EndpointCollection] = {}
+        endpoints_by_tag: Dict[_PythonIdentifier, EndpointCollection] = {}
 
         methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
@@ -41,7 +42,7 @@ class EndpointCollection:
                 operation: Optional[oai.Operation] = getattr(path_data, method)
                 if operation is None:
                     continue
-                tag = utils.snake_case((operation.tags or ["default"])[0])
+                tag = to_valid_python_identifier((operation.tags or ["default"])[0], prefix="tag")
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
@@ -261,8 +262,8 @@ class Endpoint:
             if prop.python_name in used_python_names:
                 duplicate, duplicate_location = used_python_names[prop.python_name]
                 if duplicate.python_name == prop.python_name:  # Existing should be converted too for consistency
-                    duplicate.set_python_name(f"{duplicate.python_name}_{duplicate_location}")
-                prop.set_python_name(f"{prop.python_name}_{param.param_in}")
+                    duplicate.set_python_name(f"{duplicate.python_name}_{duplicate_location}", config=config)
+                prop.set_python_name(f"{prop.python_name}_{param.param_in}", config=config)
             else:
                 used_python_names[prop.python_name] = (prop, param.param_in)
 
@@ -340,7 +341,7 @@ class GeneratorData:
     version: str
     models: Iterator[ModelProperty]
     errors: List[ParseError]
-    endpoint_collections_by_tag: Dict[str, EndpointCollection]
+    endpoint_collections_by_tag: Dict[_PythonIdentifier, EndpointCollection]
     enums: Iterator[EnumProperty]
 
     @staticmethod

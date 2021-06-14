@@ -1,8 +1,27 @@
-from typing import ClassVar, Optional, Set
+from typing import ClassVar, NewType, Optional, Set
 
 import attr
 
-from ... import utils
+from ... import Config
+from ...utils import fix_keywords, fix_reserved_words, sanitize, snake_case
+
+_PythonIdentifier = NewType("_PythonIdentifier", str)
+
+
+def to_valid_python_identifier(value: str, prefix: str) -> _PythonIdentifier:
+    """
+    Given a string, attempt to coerce it into a valid Python identifier by stripping out invalid characters and, if
+    necessary, prepending a prefix.
+
+    See:
+        https://docs.python.org/3/reference/lexical_analysis.html#identifiers
+    """
+    new_value = fix_reserved_words(fix_keywords(snake_case(sanitize(value))))
+
+    if new_value.isidentifier():
+        return _PythonIdentifier(new_value)
+
+    return _PythonIdentifier(f"{prefix}{new_value}")
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -26,16 +45,13 @@ class Property:
     _type_string: ClassVar[str] = ""
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()
-    python_name: str = attr.ib(init=False)
+    python_name: _PythonIdentifier
 
     template: ClassVar[Optional[str]] = None
     json_is_dict: ClassVar[bool] = False
 
-    def __attrs_post_init__(self) -> None:
-        self.set_python_name(self.name)
-
-    def set_python_name(self, new_name: str) -> None:
-        object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(new_name)))
+    def set_python_name(self, new_name: str, config: Config) -> None:
+        object.__setattr__(self, "python_name", to_valid_python_identifier(new_name, prefix=config.field_prefix))
 
     def get_base_type_string(self) -> str:
         return self._type_string

@@ -26,8 +26,11 @@ def model_property_factory() -> Callable[..., ModelProperty]:
             "optional_properties": [],
             "relative_imports": set(),
             "additional_properties": False,
+            "python_name": "",
             **kwargs,
         }
+        if not kwargs["python_name"]:
+            kwargs["python_name"] = kwargs["name"]
         return ModelProperty(**kwargs)
 
     return _factory
@@ -53,6 +56,8 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
             "value_type": str,
             **kwargs,
         }
+        if not kwargs.get("python_name"):
+            kwargs["python_name"] = kwargs["name"]
         return EnumProperty(**kwargs)
 
     return _factory

@@ -84,7 +84,13 @@ class TestBuildModelProperty:
             (False, False),
             (
                 oai.Schema.construct(type="string"),
-                StringProperty(name="AdditionalProperty", required=True, nullable=False, default=None),
+                StringProperty(
+                    name="AdditionalProperty",
+                    required=True,
+                    nullable=False,
+                    default=None,
+                    python_name="additional_property",
+                ),
             ),
         ],
     )
