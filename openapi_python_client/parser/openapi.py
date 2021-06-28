@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
+import attr
 from pydantic import ValidationError
 
 from .. import schema as oai
@@ -94,7 +95,7 @@ class Endpoint:
     responses: List[Response] = field(default_factory=list)
     form_body_class: Optional[Class] = None
     json_body: Optional[Property] = None
-    multipart_body_class: Optional[Class] = None
+    multipart_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
 
     @staticmethod
@@ -107,13 +108,26 @@ class Endpoint:
         return None
 
     @staticmethod
-    def parse_multipart_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
-        """Return form_body_reference"""
+    def parse_multipart_body(
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
+        """Return multipart_body"""
         body_content = body.content
-        json_body = body_content.get("multipart/form-data")
-        if json_body is not None and isinstance(json_body.media_type_schema, oai.Reference):
-            return Class.from_string(string=json_body.media_type_schema.ref, config=config)
-        return None
+        multipart_body = body_content.get("multipart/form-data")
+        if multipart_body is not None and multipart_body.media_type_schema is not None:
+            prop, schemas = property_from_data(
+                name="multipart_data",
+                required=True,
+                data=multipart_body.media_type_schema,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
+            if isinstance(prop, ModelProperty):
+                prop = attr.evolve(prop, is_multipart_body=True)
+                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
+            return prop, schemas
+        return None, schemas
 
     @staticmethod
     def parse_request_json_body(
@@ -151,14 +165,33 @@ class Endpoint:
             body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(json_body, ParseError):
-            return ParseError(detail=f"cannot parse body of endpoint {endpoint.name}", data=json_body.data), schemas
+            return (
+                ParseError(
+                    header=f"Cannot parse JSON body of endpoint {endpoint.name}",
+                    detail=json_body.detail,
+                    data=json_body.data,
+                ),
+                schemas,
+            )
 
-        endpoint.multipart_body_class = Endpoint.parse_multipart_body(body=data.requestBody, config=config)
+        multipart_body, schemas = Endpoint.parse_multipart_body(
+            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+        )
+        if isinstance(multipart_body, ParseError):
+            return (
+                ParseError(
+                    header=f"Cannot parse multipart body of endpoint {endpoint.name}",
+                    detail=multipart_body.detail,
+                    data=multipart_body.data,
+                ),
+                schemas,
+            )
 
         if endpoint.form_body_class:
             endpoint.relative_imports.add(import_string_from_class(endpoint.form_body_class, prefix="...models"))
-        if endpoint.multipart_body_class:
-            endpoint.relative_imports.add(import_string_from_class(endpoint.multipart_body_class, prefix="...models"))
+        if multipart_body is not None:
+            endpoint.multipart_body = multipart_body
+            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix="..."))
         if json_body is not None:
             endpoint.json_body = json_body
             endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..."))

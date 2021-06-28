@@ -166,13 +166,13 @@ class TestFileProperty:
         p = FileProperty(name="test", required=True, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
             "from io import BytesIO",
-            "from ...types import File",
+            "from ...types import File, FileJsonType",
         }
 
         p = FileProperty(name="test", required=False, default=None, nullable=False)
         assert p.get_imports(prefix=prefix) == {
             "from io import BytesIO",
-            "from ...types import File",
+            "from ...types import File, FileJsonType",
             "from typing import Union",
             "from ...types import UNSET, Unset",
         }
@@ -180,7 +180,7 @@ class TestFileProperty:
         p = FileProperty(name="test", required=False, default=None, nullable=True)
         assert p.get_imports(prefix=prefix) == {
             "from io import BytesIO",
-            "from ...types import File",
+            "from ...types import File, FileJsonType",
             "from typing import Union",
             "from typing import Optional",
             "from ...types import UNSET, Unset",

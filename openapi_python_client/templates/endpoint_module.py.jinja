@@ -1,16 +1,15 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
-from attr import asdict
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, File {% endif %}
+from ...types import Response, UNSET
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body, arguments, client, kwargs, parse_response %}
 
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
@@ -36,15 +35,7 @@ def _get_kwargs(
 
     {{ json_body(endpoint) | indent(4) }}
 
-    {% if endpoint.multipart_body_class %}
-    files = {}
-    data = {}
-    for key, value in multipart_data.to_dict().items():
-         if isinstance(value, File):
-             files[key] = value
-         else:
-             data[key] = value
-    {% endif %}
+    {{ multipart_body(endpoint) | indent(4) }}
 
     return {
         "url": url,
@@ -52,10 +43,9 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         {% if endpoint.form_body_class %}
-        "data": asdict(form_data),
-        {% elif endpoint.multipart_body_class %}
-        "files": files,
-        "data": data,
+        "data": form_data.to_dict(),
+        {% elif endpoint.multipart_body %}
+        "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
         {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
         {% endif %}

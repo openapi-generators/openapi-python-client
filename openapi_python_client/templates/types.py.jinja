@@ -1,5 +1,5 @@
 """ Contains some shared types for properties """
-from typing import BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
+from typing import Any, BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
 
 import attr
 
@@ -41,4 +41,4 @@ class Response(Generic[T]):
     parsed: Optional[T]
 
 
-__all__ = ["File", "Response"]
+__all__ = ["File", "Response", "FileJsonType"]

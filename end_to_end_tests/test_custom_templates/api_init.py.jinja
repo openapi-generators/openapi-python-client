@@ -1,0 +1,13 @@
+""" Contains methods for accessing the API """
+
+from typing import Type
+{% for tag in endpoint_collections_by_tag.keys() %}
+from {{ package_name }}.api.{{ tag }} import {{ utils.pascal_case(tag) }}Endpoints
+{% endfor %}
+
+class {{ utils.pascal_case(package_name) }}Api:
+{% for tag in endpoint_collections_by_tag.keys() %}
+    @classmethod
+    def {{ tag }}(cls) -> Type[{{ utils.pascal_case(tag) }}Endpoints]:
+        return {{ utils.pascal_case(tag) }}Endpoints
+{% endfor %}

@@ -94,7 +94,7 @@ class FileProperty(Property):
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
-    _json_type_string: ClassVar[str] = "Tuple[Optional[str], Union[BinaryIO, TextIO], Optional[str]]"
+    _json_type_string: ClassVar[str] = "FileJsonType"
     template: ClassVar[str] = "file_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -106,7 +106,7 @@ class FileProperty(Property):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({f"from {prefix}types import File", "from io import BytesIO"})
+        imports.update({f"from {prefix}types import File, FileJsonType", "from io import BytesIO"})
         return imports
 
 
@@ -354,7 +354,7 @@ def build_union_property(
     sub_properties: List[Property] = []
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=f"{name}_type{i}",
+            name=f"{name}_type_{i}",
             required=required,
             data=sub_prop_data,
             schemas=schemas,
