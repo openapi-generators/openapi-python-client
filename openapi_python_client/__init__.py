@@ -81,6 +81,15 @@ class Project:
         self.version: str = config.package_version_override or openapi.version
 
         self.env.filters.update(TEMPLATE_FILTERS)
+        self.env.globals.update(
+            utils=utils,
+            package_name=self.package_name,
+            package_dir=self.package_dir,
+            package_description=self.package_description,
+            package_version=self.version,
+            project_name=self.project_name,
+            project_dir=self.project_dir,
+        )
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
@@ -143,9 +152,7 @@ class Project:
         package_init = self.package_dir / "__init__.py"
 
         package_init_template = self.env.get_template("package_init.py.jinja")
-        package_init.write_text(
-            package_init_template.render(description=self.package_description), encoding=self.file_encoding
-        )
+        package_init.write_text(package_init_template.render(), encoding=self.file_encoding)
 
         if self.meta != MetaType.NONE:
             pytyped = self.package_dir / "py.typed"
@@ -167,9 +174,7 @@ class Project:
         readme = self.project_dir / "README.md"
         readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
-            readme_template.render(
-                project_name=self.project_name, description=self.package_description, package_name=self.package_name
-            ),
+            readme_template.render(),
             encoding=self.file_encoding,
         )
 
@@ -183,12 +188,7 @@ class Project:
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
-            pyproject_template.render(
-                project_name=self.project_name,
-                package_name=self.package_name,
-                version=self.version,
-                description=self.package_description,
-            ),
+            pyproject_template.render(),
             encoding=self.file_encoding,
         )
 
@@ -196,12 +196,7 @@ class Project:
         template = self.env.get_template("setup.py.jinja")
         path = self.project_dir / "setup.py"
         path.write_text(
-            template.render(
-                project_name=self.project_name,
-                package_name=self.package_name,
-                version=self.version,
-                description=self.package_description,
-            ),
+            template.render(),
             encoding=self.file_encoding,
         )
 
@@ -239,16 +234,29 @@ class Project:
         client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate endpoints
+        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
-        api_init = api_dir / "__init__.py"
-        api_init.write_text('""" Contains methods for accessing the API """', encoding=self.file_encoding)
+        api_init_path = api_dir / "__init__.py"
+        api_init_template = self.env.get_template("api_init.py.jinja")
+        api_init_path.write_text(
+            api_init_template.render(
+                endpoint_collections_by_tag=endpoint_collections_by_tag,
+            ),
+            encoding=self.file_encoding,
+        )
 
         endpoint_template = self.env.get_template("endpoint_module.py.jinja")
-        for tag, collection in self.openapi.endpoint_collections_by_tag.items():
+        for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
-            (tag_dir / "__init__.py").touch()
+
+            endpoint_init_path = tag_dir / "__init__.py"
+            endpoint_init_template = self.env.get_template("endpoint_init.py.jinja")
+            endpoint_init_path.write_text(
+                endpoint_init_template.render(endpoint_collection=collection),
+                encoding=self.file_encoding,
+            )
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{snake_case(endpoint.name)}.py"

@@ -31,7 +31,7 @@ def convert(type_string: str, value: Any) -> Optional[Any]:
         raise ValidationError()
     try:
         return _CONVERTERS[type_string](value)
-    except (KeyError, ValueError) as e:
+    except (KeyError, ValueError, AttributeError) as e:
         raise ValidationError from e
 
 
@@ -58,8 +58,10 @@ def convert_chain(type_strings: Iterable[str], value: Any) -> Optional[Any]:
     raise ValidationError()
 
 
-def _convert_string(value: str) -> Optional[str]:
-    return f"{utils.remove_string_escapes(value)!r}"
+def _convert_string(value: Any) -> Optional[str]:
+    if isinstance(value, str):
+        value = utils.remove_string_escapes(value)
+    return repr(value)
 
 
 def _convert_datetime(value: str) -> Optional[str]:

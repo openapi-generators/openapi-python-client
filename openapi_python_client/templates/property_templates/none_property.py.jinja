@@ -4,6 +4,6 @@
 
 {% macro check_type_for_construct(property, source) %}{{ source }} is None{% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, query_param=False) %}
+{% macro transform(property, source, destination, declare_type=True, stringify=False, query_param=False) %}
 {{ destination }} =  None
 {% endmacro %}

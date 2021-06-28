@@ -46,12 +46,13 @@ class ModelWithUnionPropertyInlined:
             if isinstance(data, Unset):
                 return data
             try:
-                fruit_type_0: Union[Unset, ModelWithUnionPropertyInlinedFruitType0]
                 if not isinstance(data, dict):
                     raise TypeError()
-                fruit_type_0 = UNSET
                 _fruit_type_0 = data
-                if not isinstance(_fruit_type_0, Unset):
+                fruit_type_0: Union[Unset, ModelWithUnionPropertyInlinedFruitType0]
+                if isinstance(_fruit_type_0, Unset):
+                    fruit_type_0 = UNSET
+                else:
                     fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(_fruit_type_0)
 
                 return fruit_type_0
@@ -59,10 +60,11 @@ class ModelWithUnionPropertyInlined:
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            fruit_type_1: Union[Unset, ModelWithUnionPropertyInlinedFruitType1]
-            fruit_type_1 = UNSET
             _fruit_type_1 = data
-            if not isinstance(_fruit_type_1, Unset):
+            fruit_type_1: Union[Unset, ModelWithUnionPropertyInlinedFruitType1]
+            if isinstance(_fruit_type_1, Unset):
+                fruit_type_1 = UNSET
+            else:
                 fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(_fruit_type_1)
 
             return fruit_type_1

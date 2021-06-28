@@ -11,11 +11,9 @@ from ... import utils
 from ..errors import ParseError, PropertyError
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .enum_property import EnumProperty
-    from .model_property import ModelProperty
+    from .property import Property
 else:
-    EnumProperty = "EnumProperty"
-    ModelProperty = "ModelProperty"
+    Property = "Property"
 
 
 _ReferencePath = NewType("_ReferencePath", str)
@@ -58,26 +56,23 @@ class Class:
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
-    classes_by_reference: Dict[_ReferencePath, Union[EnumProperty, ModelProperty]] = attr.ib(factory=dict)
-    classes_by_name: Dict[_ClassName, Union[EnumProperty, ModelProperty]] = attr.ib(factory=dict)
+    classes_by_reference: Dict[_ReferencePath, Property] = attr.ib(factory=dict)
+    classes_by_name: Dict[_ClassName, Property] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
 
 
 def update_schemas_with_data(
     *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Union[Schemas, PropertyError]:
-    from . import build_enum_property, build_model_property
+    from . import property_from_data
 
-    prop: Union[PropertyError, ModelProperty, EnumProperty]
-    if data.enum is not None:
-        prop, schemas = build_enum_property(
-            data=data, name=ref_path, required=True, schemas=schemas, enum=data.enum, parent_name=None, config=config
-        )
-    else:
-        prop, schemas = build_model_property(
-            data=data, name=ref_path, schemas=schemas, required=True, parent_name=None, config=config
-        )
+    prop: Union[PropertyError, Property]
+    prop, schemas = property_from_data(
+        data=data, name=ref_path, schemas=schemas, required=True, parent_name="", config=config
+    )
+
     if isinstance(prop, PropertyError):
         return prop
+
     schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})
     return schemas
