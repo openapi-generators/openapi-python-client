@@ -26,6 +26,7 @@ class ModelProperty(Property):
 
     template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
+    is_multipart_body: bool = False
 
     def get_base_type_string(self, json: bool = False) -> str:
         return self.class_info.name

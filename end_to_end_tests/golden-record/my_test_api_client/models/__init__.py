@@ -1,6 +1,8 @@
 """ Contains all the data models used in inputs/outputs """
 
+from .a_form_data import AFormData
 from .a_model import AModel
+from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
 from .all_of_sub_model import AllOfSubModel
 from .all_of_sub_model_type_enum import AllOfSubModelTypeEnum
 from .an_all_of_enum import AnAllOfEnum
@@ -10,6 +12,10 @@ from .another_all_of_sub_model import AnotherAllOfSubModel
 from .another_all_of_sub_model_type import AnotherAllOfSubModelType
 from .another_all_of_sub_model_type_enum import AnotherAllOfSubModelTypeEnum
 from .body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
+from .body_upload_file_tests_upload_post_additional_property import BodyUploadFileTestsUploadPostAdditionalProperty
+from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadFileTestsUploadPostSomeNullableObject
+from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
+from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
 from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
 from .http_validation_error import HTTPValidationError

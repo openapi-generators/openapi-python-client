@@ -1,5 +1,5 @@
 [[workflows]]
-name = "Start Task"
+name = "task"
     [[workflows.steps]]
     type = "SelectGitHubIssue"
 
@@ -7,13 +7,13 @@ name = "Start Task"
     type = "SwitchBranches"
 
 [[workflows]]
-name = "Prepare Release"
+name = "release"
     [[workflows.steps]]
     type = "UpdateProjectFromCommits"
 
     [[workflows.steps]]
     type = "Command"
-    command = "prettier --write CHANGELOG.md"
+    command = "npx prettier --write CHANGELOG.md"
 
 [github]
 owner = "triaxtec"
