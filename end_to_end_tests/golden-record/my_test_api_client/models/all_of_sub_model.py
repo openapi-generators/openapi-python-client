@@ -43,9 +43,11 @@ class AllOfSubModel:
 
         type = d.pop("type", UNSET)
 
-        type_enum: Union[Unset, AllOfSubModelTypeEnum] = UNSET
         _type_enum = d.pop("type_enum", UNSET)
-        if not isinstance(_type_enum, Unset):
+        type_enum: Union[Unset, AllOfSubModelTypeEnum]
+        if isinstance(_type_enum, Unset):
+            type_enum = UNSET
+        else:
             type_enum = AllOfSubModelTypeEnum(_type_enum)
 
         all_of_sub_model = cls(

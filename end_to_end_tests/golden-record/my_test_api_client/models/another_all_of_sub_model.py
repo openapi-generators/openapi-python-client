@@ -45,14 +45,18 @@ class AnotherAllOfSubModel:
         d = src_dict.copy()
         another_sub_property = d.pop("another_sub_property", UNSET)
 
-        type: Union[Unset, AnotherAllOfSubModelType] = UNSET
         _type = d.pop("type", UNSET)
-        if not isinstance(_type, Unset):
+        type: Union[Unset, AnotherAllOfSubModelType]
+        if isinstance(_type, Unset):
+            type = UNSET
+        else:
             type = AnotherAllOfSubModelType(_type)
 
-        type_enum: Union[Unset, AnotherAllOfSubModelTypeEnum] = UNSET
         _type_enum = d.pop("type_enum", UNSET)
-        if not isinstance(_type_enum, Unset):
+        type_enum: Union[Unset, AnotherAllOfSubModelTypeEnum]
+        if isinstance(_type_enum, Unset):
+            type_enum = UNSET
+        else:
             type_enum = AnotherAllOfSubModelTypeEnum(_type_enum)
 
         another_all_of_sub_model = cls(
