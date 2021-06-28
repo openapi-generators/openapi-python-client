@@ -69,9 +69,7 @@ def _is_subtype(first: Property, second: Property) -> bool:
         [
             _is_string_enum(first) and isinstance(second, StringProperty),
             _is_int_enum(first) and isinstance(second, IntProperty),
-            _is_string_enum(first)
-            and _is_string_enum(second)
-            and values_are_subset(first, second),
+            _is_string_enum(first) and _is_string_enum(second) and values_are_subset(first, second),
             _is_int_enum(first) and _is_int_enum(second) and values_are_subset(first, second),
         ]
     )
