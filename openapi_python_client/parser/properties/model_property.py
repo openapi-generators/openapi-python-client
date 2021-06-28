@@ -58,6 +58,10 @@ def _is_int_enum(prop: Property) -> bool:
     return isinstance(prop, EnumProperty) and prop.value_type == int
 
 
+def values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
+    return set(first.values.items()) <= set(second.values.items())
+
+
 def _is_subtype(first: Property, second: Property) -> bool:
     from . import IntProperty, StringProperty
 
@@ -67,8 +71,8 @@ def _is_subtype(first: Property, second: Property) -> bool:
             _is_int_enum(first) and isinstance(second, IntProperty),
             _is_string_enum(first)
             and _is_string_enum(second)
-            and set(first.values.items()) <= set(second.values.items()),
-            _is_int_enum(first) and _is_int_enum(second) and set(first.values.items()) <= set(second.values.items()),
+            and values_are_subset(first, second),
+            _is_int_enum(first) and _is_int_enum(second) and values_are_subset(first, second),
         ]
     )
 
