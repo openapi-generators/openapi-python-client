@@ -67,8 +67,10 @@ def _is_subtype(first: Property, second: Property) -> bool:
             _is_int_enum(first) and isinstance(second, IntProperty),
             _is_string_enum(first)
             and _is_string_enum(second)
-            and set(first.values.items()) <= set(second.values.items()),
-            _is_int_enum(first) and _is_int_enum(second) and set(first.values.items()) <= set(second.values.items()),
+            and set(e.value for e in first) <= set(e.value for e in second),
+            _is_int_enum(first)
+            and _is_int_enum(second)
+            and set(e.value for e in first) <= set(e.value for e in second),
         ]
     )
 
