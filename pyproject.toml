@@ -46,7 +46,7 @@ safety = "*"
 pytest-cov = "*"
 python-multipart = "*"
 flake8 = "*"
-typer-cli = "^0.0.11"
+typer-cli = "^0.0.12"
 
 [tool.taskipy.tasks]
 check = """

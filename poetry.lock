@@ -622,7 +622,7 @@ doc = ["mkdocs (>=1.1.2,<2.0.0)", "mkdocs-material (>=5.4.0,<6.0.0)", "markdown-
 
 [[package]]
 name = "typer-cli"
-version = "0.0.11"
+version = "0.0.12"
 description = "Run Typer scripts with completion, without having to create a package, using Typer CLI."
 category = "dev"
 optional = false
@@ -630,7 +630,6 @@ python-versions = ">=3.6,<4.0"
 
 [package.dependencies]
 colorama = ">=0.4.3,<0.5.0"
-importlib_metadata = ">=1.5,<3.0"
 shellingham = ">=1.3.2,<2.0.0"
 typer = ">=0.3.0,<0.4.0"
 
@@ -670,7 +669,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "98a16e7c413adf257375678e2aaadd139defcaf007f33499d8a719cae1260e93"
+content-hash = "50067d693474f578fd8e49dda4bb207e67b41497d22b44468379aed25c2602e9"
 
 [metadata.files]
 appdirs = [
@@ -1094,8 +1093,8 @@ typer = [
     {file = "typer-0.3.2.tar.gz", hash = "sha256:5455d750122cff96745b0dec87368f56d023725a7ebc9d2e54dd23dc86816303"},
 ]
 typer-cli = [
-    {file = "typer-cli-0.0.11.tar.gz", hash = "sha256:bb90d4edde3d53f076909a7be9ac35f12e573096fc0f3802b3d6f42929a1219e"},
-    {file = "typer_cli-0.0.11-py3-none-any.whl", hash = "sha256:ecff43bc8c5d786deaa25b7d14ebfc59b32e40b07895259c3e86604af188f39b"},
+    {file = "typer-cli-0.0.12.tar.gz", hash = "sha256:d2c4a7a5c0326c20fb0970eed3c2173f76ba6b8b33d9bbece3a3dd91d673f096"},
+    {file = "typer_cli-0.0.12-py3-none-any.whl", hash = "sha256:f9b810d4fbdb750b28ceaa5fd8f737db596570418ae092e6d54a64d378e843ca"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
