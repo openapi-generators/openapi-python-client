@@ -31,7 +31,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ matrix.python }}-dependencies-
     - name: Install dependencies
-      uses: triaxtec/github-actions/python/install-and-configure-poetry@main
+      run: |
+        pip install --upgrade pip
+        pip install poetry
+        poetry config virtualenvs.in-project true
+        poetry run pip install --upgrade pip
+        poetry install
     - name: Run Checks
       uses: triaxtec/github-actions/python/run-checks@main
       with:
