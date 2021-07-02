@@ -230,8 +230,6 @@ class AModel:
                 return one_of_models_type_1
             except:  # noqa: E722
                 pass
-            if not True:
-                raise TypeError()
             one_of_models_type_2 = data
 
             return one_of_models_type_2
