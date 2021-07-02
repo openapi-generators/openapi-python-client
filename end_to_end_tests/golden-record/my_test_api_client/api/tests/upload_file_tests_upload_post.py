@@ -33,9 +33,9 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, None]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = None
+        response_200 = response.json()
 
         return response_200
     if response.status_code == 422:
@@ -45,7 +45,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidatio
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, None]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -59,7 +59,7 @@ def sync_detailed(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
-) -> Response[Union[HTTPValidationError, None]]:
+) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
@@ -78,7 +78,7 @@ def sync(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
-) -> Optional[Union[HTTPValidationError, None]]:
+) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload a file"""
 
     return sync_detailed(
@@ -93,7 +93,7 @@ async def asyncio_detailed(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
-) -> Response[Union[HTTPValidationError, None]]:
+) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
@@ -111,7 +111,7 @@ async def asyncio(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
-) -> Optional[Union[HTTPValidationError, None]]:
+) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload a file"""
 
     return (

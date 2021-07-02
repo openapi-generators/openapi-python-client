@@ -325,7 +325,7 @@ class Endpoint:
         """Get the Python type of any response from this endpoint"""
         types = sorted({response.prop.get_type_string() for response in self.responses})
         if len(types) == 0:
-            return "None"
+            return "Any"
         if len(types) == 1:
             return self.responses[0].prop.get_type_string()
         return f"Union[{', '.join(types)}]"

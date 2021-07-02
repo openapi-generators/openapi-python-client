@@ -850,7 +850,7 @@ class TestPropertyFromData:
         )
 
     def test_property_from_data_no_valid_props_in_data(self):
-        from openapi_python_client.parser.properties import NoneProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import AnyProperty, Schemas, property_from_data
 
         schemas = Schemas()
         data = oai.Schema()
@@ -859,7 +859,7 @@ class TestPropertyFromData:
             name="blah", required=True, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
         )
 
-        assert prop == NoneProperty(name="blah", required=True, nullable=False, default=None)
+        assert prop == AnyProperty(name="blah", required=True, nullable=False, default=None)
         assert new_schemas == schemas
 
     def test_property_from_data_validation_error(self, mocker):

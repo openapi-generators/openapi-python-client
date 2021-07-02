@@ -1,8 +1,8 @@
 __all__ = [
+    "AnyProperty",
     "Class",
     "EnumProperty",
     "ModelProperty",
-    "NoneProperty",
     "Property",
     "Schemas",
     "build_schemas",
@@ -26,12 +26,12 @@ from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_d
 
 
 @attr.s(auto_attribs=True, frozen=True)
-class NoneProperty(Property):
-    """A property that is always None (used for empty schemas)"""
+class AnyProperty(Property):
+    """A property that can be any type (used for empty schemas)"""
 
-    _type_string: ClassVar[str] = "None"
-    _json_type_string: ClassVar[str] = "None"
-    template: ClassVar[Optional[str]] = "none_property.py.jinja"
+    _type_string: ClassVar[str] = "Any"
+    _json_type_string: ClassVar[str] = "Any"
+    template: ClassVar[Optional[str]] = "any_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -499,7 +499,7 @@ def _property_from_data(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
     elif not data.type:
-        return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
+        return AnyProperty(name=name, required=required, nullable=False, default=None), schemas
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
 
 

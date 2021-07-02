@@ -7,7 +7,7 @@ import attr
 from .. import Config
 from .. import schema as oai
 from .errors import ParseError, PropertyError
-from .properties import NoneProperty, Property, Schemas, property_from_data
+from .properties import AnyProperty, Property, Schemas, property_from_data
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -28,10 +28,10 @@ _SOURCE_BY_CONTENT_TYPE = {
 
 
 def empty_response(status_code: int, response_name: str) -> Response:
-    """Return an empty response, for when no response type is defined"""
+    """Return an untyped response, for when no response type is defined"""
     return Response(
         status_code=status_code,
-        prop=NoneProperty(
+        prop=AnyProperty(
             name=response_name,
             default=None,
             nullable=False,

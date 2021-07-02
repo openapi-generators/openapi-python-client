@@ -858,6 +858,7 @@
         ],
         "type": "object",
         "properties": {
+          "any_value": {},
           "an_enum_value": {
             "$ref": "#/components/schemas/AnEnum"
           },
@@ -947,7 +948,8 @@
               },
               {
                 "$ref": "#/components/schemas/ModelWithUnionProperty"
-              }
+              },
+              {}
             ],
             "nullable": false
           },

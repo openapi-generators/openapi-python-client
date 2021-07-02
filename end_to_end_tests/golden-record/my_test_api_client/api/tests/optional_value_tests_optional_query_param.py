@@ -35,9 +35,9 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, None]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = None
+        response_200 = response.json()
 
         return response_200
     if response.status_code == 422:
@@ -47,7 +47,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidatio
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, None]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -60,7 +60,7 @@ def sync_detailed(
     *,
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
-) -> Response[Union[HTTPValidationError, None]]:
+) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         query_param=query_param,
@@ -77,7 +77,7 @@ def sync(
     *,
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
-) -> Optional[Union[HTTPValidationError, None]]:
+) -> Optional[Union[Any, HTTPValidationError]]:
     """Test optional query parameters"""
 
     return sync_detailed(
@@ -90,7 +90,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
-) -> Response[Union[HTTPValidationError, None]]:
+) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         query_param=query_param,
@@ -106,7 +106,7 @@ async def asyncio(
     *,
     client: Client,
     query_param: Union[Unset, List[str]] = UNSET,
-) -> Optional[Union[HTTPValidationError, None]]:
+) -> Optional[Union[Any, HTTPValidationError]]:
     """Test optional query parameters"""
 
     return (
