@@ -823,6 +823,16 @@
           }
         }
       }
+    },
+    "/tag_with_number": {
+      "get": {
+        "tags": [1],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   },
   "components": {
