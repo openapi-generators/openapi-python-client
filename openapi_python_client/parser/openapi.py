@@ -42,7 +42,7 @@ class EndpointCollection:
                 operation: Optional[oai.Operation] = getattr(path_data, method)
                 if operation is None:
                     continue
-                tag = to_valid_python_identifier((operation.tags or ["default"])[0], prefix="tag")
+                tag = to_valid_python_identifier(value=(operation.tags or ["default"])[0], prefix="tag")
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config

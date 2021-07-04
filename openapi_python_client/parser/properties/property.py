@@ -8,7 +8,7 @@ from ...utils import fix_keywords, fix_reserved_words, sanitize, snake_case
 _PythonIdentifier = NewType("_PythonIdentifier", str)
 
 
-def to_valid_python_identifier(value: str, prefix: str) -> _PythonIdentifier:
+def to_valid_python_identifier(*, value: str, prefix: str) -> _PythonIdentifier:
     """
     Given a string, attempt to coerce it into a valid Python identifier by stripping out invalid characters and, if
     necessary, prepending a prefix.
@@ -51,7 +51,7 @@ class Property:
     json_is_dict: ClassVar[bool] = False
 
     def set_python_name(self, new_name: str, config: Config) -> None:
-        object.__setattr__(self, "python_name", to_valid_python_identifier(new_name, prefix=config.field_prefix))
+        object.__setattr__(self, "python_name", to_valid_python_identifier(value=new_name, prefix=config.field_prefix))
 
     def get_base_type_string(self) -> str:
         return self._type_string

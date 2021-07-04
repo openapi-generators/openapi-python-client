@@ -1049,7 +1049,7 @@ class TestEndpointCollection:
                 "amf_subscription_info_document": EndpointCollection(
                     "amf_subscription_info_document", endpoints=[endpoint_2]
                 ),
-                "tag3_abc": EndpointCollection("tag3_abc", endpoints=[endpoint_3])
+                "tag3_abc": EndpointCollection("tag3_abc", endpoints=[endpoint_3]),
             },
             schemas_3,
         )
