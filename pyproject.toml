@@ -50,6 +50,7 @@ typer-cli = "^0.0.12"
 types-PyYAML = "^5.4.3"
 types-certifi = "^0.1.4"
 types-python-dateutil = "^0.1.4"
+types-dataclasses = { version = "^0.1.5", python = "<3.7" }
 
 [tool.taskipy.tasks]
 check = """
