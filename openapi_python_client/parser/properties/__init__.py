@@ -177,7 +177,6 @@ class UnionProperty(Property):
     has_properties_without_templates: bool = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
-        super().__attrs_post_init__()
         object.__setattr__(
             self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
         )
@@ -235,16 +234,18 @@ class UnionProperty(Property):
 
 
 def _string_based_property(
-    name: str, required: bool, data: oai.Schema
+    name: str, required: bool, data: oai.Schema, config: Config
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
+    python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
     if string_format == "date-time":
         return DateTimeProperty(
             name=name,
             required=required,
             default=convert("datetime.datetime", data.default),
             nullable=data.nullable,
+            python_name=python_name,
         )
     elif string_format == "date":
         return DateProperty(
@@ -252,6 +253,7 @@ def _string_based_property(
             required=required,
             default=convert("datetime.date", data.default),
             nullable=data.nullable,
+            python_name=python_name,
         )
     elif string_format == "binary":
         return FileProperty(
@@ -259,6 +261,7 @@ def _string_based_property(
             required=required,
             default=None,
             nullable=data.nullable,
+            python_name=python_name,
         )
     else:
         return StringProperty(
@@ -267,6 +270,7 @@ def _string_based_property(
             required=required,
             pattern=data.pattern,
             nullable=data.nullable,
+            python_name=python_name,
         )
 
 
@@ -326,6 +330,7 @@ def build_enum_property(
         values=values,
         value_type=value_type,
         default=None,
+        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
 
     default = get_enum_default(prop, data)
@@ -373,6 +378,7 @@ def build_union_property(
             default=default,
             inner_properties=sub_properties,
             nullable=data.nullable,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         ),
         schemas,
     )
@@ -395,6 +401,7 @@ def build_list_property(
             default=None,
             inner_property=inner_prop,
             nullable=data.nullable,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         ),
         schemas,
     )
@@ -406,6 +413,7 @@ def _property_from_ref(
     parent: Union[oai.Schema, None],
     data: oai.Reference,
     schemas: Schemas,
+    config: Config,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     ref_path = parse_reference_path(data.ref)
     if isinstance(ref_path, ParseError):
@@ -414,7 +422,12 @@ def _property_from_ref(
     if not existing:
         return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
 
-    prop = attr.evolve(existing, required=required, name=name)
+    prop = attr.evolve(
+        existing,
+        required=required,
+        name=name,
+        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+    )
     if parent:
         prop = attr.evolve(prop, nullable=parent.nullable)
         if isinstance(prop, EnumProperty):
@@ -437,12 +450,14 @@ def _property_from_data(
     """Generate a Property from the OpenAPI dictionary representation of it"""
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
+        return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas, config=config)
 
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     sub_data = (data.allOf or []) + data.anyOf + data.oneOf
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
-        return _property_from_ref(name=name, required=required, parent=data, data=sub_data[0], schemas=schemas)
+        return _property_from_ref(
+            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config
+        )
 
     if data.enum:
         return build_enum_property(
@@ -459,7 +474,7 @@ def _property_from_data(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
     elif data.type == "string":
-        return _string_based_property(name=name, required=required, data=data), schemas
+        return _string_based_property(name=name, required=required, data=data, config=config), schemas
     elif data.type == "number":
         return (
             FloatProperty(
@@ -467,6 +482,7 @@ def _property_from_data(
                 default=convert("float", data.default),
                 required=required,
                 nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )
@@ -477,6 +493,7 @@ def _property_from_data(
                 default=convert("int", data.default),
                 required=required,
                 nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )
@@ -487,6 +504,7 @@ def _property_from_data(
                 required=required,
                 default=convert("bool", data.default),
                 nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )
@@ -499,7 +517,16 @@ def _property_from_data(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
     elif not data.type:
-        return AnyProperty(name=name, required=required, nullable=False, default=None), schemas
+        return (
+            AnyProperty(
+                name=name,
+                required=required,
+                nullable=False,
+                default=None,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            ),
+            schemas,
+        )
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
 
 

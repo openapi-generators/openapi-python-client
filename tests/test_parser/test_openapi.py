@@ -460,12 +460,12 @@ class TestEndpoint:
         response_1 = Response(
             status_code=200,
             source="source",
-            prop=DateTimeProperty(name="datetime", required=True, nullable=False, default=None),
+            prop=DateTimeProperty(name="datetime", required=True, nullable=False, default=None, python_name="datetime"),
         )
         response_2 = Response(
             status_code=404,
             source="source",
-            prop=DateProperty(name="date", required=True, nullable=False, default=None),
+            prop=DateProperty(name="date", required=True, nullable=False, default=None, python_name="date"),
         )
         response_from_data = mocker.patch(
             f"{MODULE_NAME}.response_from_data", side_effect=[(response_1, schemas_1), (response_2, schemas_2)]
@@ -1004,7 +1004,7 @@ class TestEndpointCollection:
 
         path_1_put = oai.Operation.construct()
         path_1_post = oai.Operation.construct(tags=["AMF Subscription Info (Document)", "tag_3"])
-        path_2_get = oai.Operation.construct()
+        path_2_get = oai.Operation.construct(tags=["3. ABC"])
         data = {
             "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
             "path_2": oai.PathItem.construct(get=path_2_get),
@@ -1039,16 +1039,17 @@ class TestEndpointCollection:
                     config=config,
                 ),
                 mocker.call(
-                    data=path_2_get, path="path_2", method="get", tag="default", schemas=schemas_2, config=config
+                    data=path_2_get, path="path_2", method="get", tag="tag3_abc", schemas=schemas_2, config=config
                 ),
             ],
         )
         assert result == (
             {
-                "default": EndpointCollection("default", endpoints=[endpoint_1, endpoint_3]),
+                "default": EndpointCollection("default", endpoints=[endpoint_1]),
                 "amf_subscription_info_document": EndpointCollection(
                     "amf_subscription_info_document", endpoints=[endpoint_2]
                 ),
+                "tag3_abc": EndpointCollection("tag3_abc", endpoints=[endpoint_3]),
             },
             schemas_3,
         )

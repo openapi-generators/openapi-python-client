@@ -1,8 +1,11 @@
+__all__ = ["Property"]
+
 from typing import ClassVar, Optional, Set
 
 import attr
 
-from ... import utils
+from ... import Config
+from ...utils import PythonIdentifier
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -26,16 +29,13 @@ class Property:
     _type_string: ClassVar[str] = ""
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()
-    python_name: str = attr.ib(init=False)
+    python_name: PythonIdentifier
 
     template: ClassVar[Optional[str]] = None
     json_is_dict: ClassVar[bool] = False
 
-    def __attrs_post_init__(self) -> None:
-        self.set_python_name(self.name)
-
-    def set_python_name(self, new_name: str) -> None:
-        object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(new_name)))
+    def set_python_name(self, new_name: str, config: Config) -> None:
+        object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
 
     def get_base_type_string(self) -> str:
         return self._type_string

@@ -6,6 +6,7 @@ import attr
 
 from .. import Config
 from .. import schema as oai
+from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
 
@@ -27,7 +28,7 @@ _SOURCE_BY_CONTENT_TYPE = {
 }
 
 
-def empty_response(status_code: int, response_name: str) -> Response:
+def empty_response(*, status_code: int, response_name: str, config: Config) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
         status_code=status_code,
@@ -36,6 +37,7 @@ def empty_response(status_code: int, response_name: str) -> Response:
             default=None,
             nullable=False,
             required=True,
+            python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
         ),
         source="None",
     )
@@ -49,7 +51,7 @@ def response_from_data(
     response_name = f"response_{status_code}"
     if isinstance(data, oai.Reference) or data.content is None:
         return (
-            empty_response(status_code=status_code, response_name=response_name),
+            empty_response(status_code=status_code, response_name=response_name, config=config),
             schemas,
         )
 
@@ -64,7 +66,7 @@ def response_from_data(
 
     if schema_data is None:
         return (
-            empty_response(status_code, response_name),
+            empty_response(status_code=status_code, response_name=response_name, config=config),
             schemas,
         )
 

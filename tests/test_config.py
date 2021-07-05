@@ -22,11 +22,9 @@ def test_load_from_path(mocker):
 
     config = Config.load_from_path(fake_path)
     safe_load.assert_called()
-    assert utils.FIELD_PREFIX == "blah"
+    assert config.field_prefix == "blah"
     assert config.class_overrides["Class1"] == override1
     assert config.class_overrides["Class2"] == override2
     assert config.project_name_override == "project-name"
     assert config.package_name_override == "package_name"
     assert config.package_version_override == "package_version"
-
-    utils.FIELD_PREFIX = "field_"

@@ -1,9 +1,23 @@
 import builtins
 import re
 from keyword import iskeyword
-from typing import List
+from typing import Any, List
 
 delimiters = " _-"
+
+
+class PythonIdentifier(str):
+    """A string which has been validated / transformed into a valid identifier for Python"""
+
+    def __new__(cls, value: str, prefix: str) -> "PythonIdentifier":
+        new_value = fix_reserved_words(fix_keywords(snake_case(sanitize(value))))
+
+        if not new_value.isidentifier():
+            new_value = f"{prefix}{new_value}"
+        return str.__new__(cls, new_value)
+
+    def __deepcopy__(self, _: Any) -> "PythonIdentifier":
+        return self
 
 
 def sanitize(value: str) -> str:
@@ -55,23 +69,3 @@ def kebab_case(value: str) -> str:
 
 def remove_string_escapes(value: str) -> str:
     return value.replace('"', r"\"")
-
-
-# This can be changed by config.Config.load_config
-FIELD_PREFIX = "field_"
-
-
-def to_valid_python_identifier(value: str) -> str:
-    """
-    Given a string, attempt to coerce it into a valid Python identifier by stripping out invalid characters and, if
-    necessary, prepending a prefix.
-
-    See:
-        https://docs.python.org/3/reference/lexical_analysis.html#identifiers
-    """
-    new_value = fix_reserved_words(fix_keywords(sanitize(value)))
-
-    if new_value.isidentifier():
-        return new_value
-
-    return f"{FIELD_PREFIX}{new_value}"

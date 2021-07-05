@@ -1,3 +1,4 @@
+import os
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
@@ -101,17 +102,24 @@ def test_end_to_end():
 
 def test_custom_templates():
     expected_differences = {}  # key: path relative to generated directory, value: expected generated content
+    api_dir = Path("my_test_api_client").joinpath("api")
+    golden_tpls_root_dir = Path(__file__).parent.joinpath("custom-templates-golden-record")
+
     expected_difference_paths = [
         Path("README.md"),
-        Path("my_test_api_client").joinpath("api", "__init__.py"),
-        Path("my_test_api_client").joinpath("api", "tests", "__init__.py"),
-        Path("my_test_api_client").joinpath("api", "default", "__init__.py"),
-        Path("my_test_api_client").joinpath("api", "parameters", "__init__.py"),
+        api_dir.joinpath("__init__.py"),
     ]
 
-    golden_tpls_root_dir = Path(__file__).parent.joinpath("custom-templates-golden-record")
     for expected_difference_path in expected_difference_paths:
         expected_differences[expected_difference_path] = (golden_tpls_root_dir / expected_difference_path).read_text()
+
+    # Each API module (defined by tag) has a custom __init__.py in it now.
+    for endpoint_mod in golden_tpls_root_dir.joinpath(api_dir).iterdir():
+        if not endpoint_mod.is_dir():
+            continue
+        relative_path = api_dir.joinpath(endpoint_mod.name, "__init__.py")
+        expected_text = endpoint_mod.joinpath("__init__.py").read_text()
+        expected_differences[relative_path] = expected_text
 
     run_e2e_test(
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates/"],

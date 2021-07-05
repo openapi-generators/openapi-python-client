@@ -20,7 +20,7 @@ def test_response_from_data_no_content():
 
     assert response == Response(
         status_code=200,
-        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True),
+        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True, python_name="response_200"),
         source="None",
     )
 
@@ -46,7 +46,7 @@ def test_response_from_data_no_content_schema():
 
     assert response == Response(
         status_code=200,
-        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True),
+        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True, python_name="response_200"),
         source="None",
     )
 
@@ -70,10 +70,10 @@ def test_response_from_data_property_error(mocker):
     )
 
 
-def test_response_from_data_property(mocker):
+def test_response_from_data_property(mocker, property_factory):
     from openapi_python_client.parser import responses
 
-    prop = StringProperty(name="prop", required=True, nullable=False, default=None)
+    prop = property_factory()
     property_from_data = mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     data = oai.Response.construct(
         description="", content={"application/json": oai.MediaType.construct(media_type_schema="something")}
