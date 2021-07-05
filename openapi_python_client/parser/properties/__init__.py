@@ -21,7 +21,7 @@ from ..errors import ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
 from .model_property import ModelProperty, build_model_property
-from .property import Property, to_valid_python_identifier
+from .property import Property
 from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_data
 
 
@@ -238,7 +238,7 @@ def _string_based_property(
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
-    python_name = to_valid_python_identifier(value=name, prefix=config.field_prefix)
+    python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
     if string_format == "date-time":
         return DateTimeProperty(
             name=name,
@@ -330,7 +330,7 @@ def build_enum_property(
         values=values,
         value_type=value_type,
         default=None,
-        python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
 
     default = get_enum_default(prop, data)
@@ -378,7 +378,7 @@ def build_union_property(
             default=default,
             inner_properties=sub_properties,
             nullable=data.nullable,
-            python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         ),
         schemas,
     )
@@ -401,7 +401,7 @@ def build_list_property(
             default=None,
             inner_property=inner_prop,
             nullable=data.nullable,
-            python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         ),
         schemas,
     )
@@ -426,7 +426,7 @@ def _property_from_ref(
         existing,
         required=required,
         name=name,
-        python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
     if parent:
         prop = attr.evolve(prop, nullable=parent.nullable)
@@ -482,7 +482,7 @@ def _property_from_data(
                 default=convert("float", data.default),
                 required=required,
                 nullable=data.nullable,
-                python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )
@@ -493,7 +493,7 @@ def _property_from_data(
                 default=convert("int", data.default),
                 required=required,
                 nullable=data.nullable,
-                python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )
@@ -504,7 +504,7 @@ def _property_from_data(
                 required=required,
                 default=convert("bool", data.default),
                 nullable=data.nullable,
-                python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )
@@ -523,7 +523,7 @@ def _property_from_data(
                 required=required,
                 nullable=False,
                 default=None,
-                python_name=to_valid_python_identifier(value=name, prefix=config.field_prefix),
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             ),
             schemas,
         )

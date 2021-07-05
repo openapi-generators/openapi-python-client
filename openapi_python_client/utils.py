@@ -1,9 +1,23 @@
 import builtins
 import re
 from keyword import iskeyword
-from typing import List
+from typing import Any, List
 
 delimiters = " _-"
+
+
+class PythonIdentifier(str):
+    """A string which has been validated / transformed into a valid identifier for Python"""
+
+    def __new__(cls, value: str, prefix: str) -> "PythonIdentifier":
+        new_value = fix_reserved_words(fix_keywords(snake_case(sanitize(value))))
+
+        if not new_value.isidentifier():
+            new_value = f"{prefix}{new_value}"
+        return str.__new__(cls, new_value)
+
+    def __deepcopy__(self, _: Any) -> "PythonIdentifier":
+        return self
 
 
 def sanitize(value: str) -> str:

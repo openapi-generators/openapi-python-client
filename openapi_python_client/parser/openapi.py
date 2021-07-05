@@ -11,7 +11,6 @@ from .. import utils
 from ..config import Config
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
-from .properties.property import _PythonIdentifier, to_valid_python_identifier
 from .responses import Response, response_from_data
 
 
@@ -31,9 +30,9 @@ class EndpointCollection:
     @staticmethod
     def from_data(
         *, data: Dict[str, oai.PathItem], schemas: Schemas, config: Config
-    ) -> Tuple[Dict[_PythonIdentifier, "EndpointCollection"], Schemas]:
+    ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
-        endpoints_by_tag: Dict[_PythonIdentifier, EndpointCollection] = {}
+        endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
 
         methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
@@ -42,7 +41,7 @@ class EndpointCollection:
                 operation: Optional[oai.Operation] = getattr(path_data, method)
                 if operation is None:
                     continue
-                tag = to_valid_python_identifier(value=(operation.tags or ["default"])[0], prefix="tag")
+                tag = utils.PythonIdentifier(value=(operation.tags or ["default"])[0], prefix="tag")
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
@@ -341,7 +340,7 @@ class GeneratorData:
     version: str
     models: Iterator[ModelProperty]
     errors: List[ParseError]
-    endpoint_collections_by_tag: Dict[_PythonIdentifier, EndpointCollection]
+    endpoint_collections_by_tag: Dict[utils.PythonIdentifier, EndpointCollection]
     enums: Iterator[EnumProperty]
 
     @staticmethod

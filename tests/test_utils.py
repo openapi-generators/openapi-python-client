@@ -3,6 +3,23 @@ import pytest
 from openapi_python_client import utils
 
 
+class TestPythonIdentifier:
+    def test_valid_identifier_is_not_changed(self):
+        assert utils.PythonIdentifier(value="valid_field", prefix="field") == "valid_field"
+
+    def test_numbers_are_prefixed(self):
+        assert utils.PythonIdentifier(value="1", prefix="field") == "field1"
+
+    def test_invalid_symbols_are_stripped(self):
+        assert utils.PythonIdentifier(value="$abc", prefix="prefix") == "abc"
+
+    def test_keywords_are_postfixed(self):
+        assert utils.PythonIdentifier(value="for", prefix="prefix") == "for_"
+
+    def test_empty_is_prefixed(self):
+        assert utils.PythonIdentifier(value="", prefix="something") == "something"
+
+
 @pytest.mark.parametrize(
     "before, after",
     [

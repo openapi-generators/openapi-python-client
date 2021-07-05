@@ -6,9 +6,9 @@ import attr
 
 from .. import Config
 from .. import schema as oai
+from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
-from .properties.property import to_valid_python_identifier
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -37,7 +37,7 @@ def empty_response(*, status_code: int, response_name: str, config: Config) -> R
             default=None,
             nullable=False,
             required=True,
-            python_name=to_valid_python_identifier(value=response_name, prefix=config.field_prefix),
+            python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
         ),
         source="None",
     )
