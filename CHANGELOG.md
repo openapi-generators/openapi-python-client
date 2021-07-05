@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.0
+
+### Breaking Changes
+
+- Normalize generated module names to allow more tags [#428 & #448]. Thanks @iamnoah & @forest-benchling!
+- Improved the consistency of snake_cased identifiers which will cause some to be renamed [#413 & #432]. Thanks @ramnes!
+- Allow more types in multipart payloads by defaulting to JSON for complex types [#372]. Thanks @csymeonides-mf!
+
+### Features
+
+- Allow custom templates for API and endpoint `__init__` files. [#442] Thanks @p1-ra!
+
+### Fixes
+
+- Treat empty schemas like `Any` instead of `None`. Thanks @forest-benchling! [#417 & #445]
+
 ## 0.9.2
 
 ### Features
