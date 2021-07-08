@@ -62,11 +62,7 @@ class Property:
             if self.nullable:
                 return f"Union[Unset, None, {type_string}]"
             else:
-                if query_parameter:
-                    # For query parameters, None has the same meaning as Unset
-                    return f"Union[Unset, None, {type_string}]"
-                else:
-                    return f"Union[Unset, {type_string}]"
+                return f"Union[Unset, {type_string}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""

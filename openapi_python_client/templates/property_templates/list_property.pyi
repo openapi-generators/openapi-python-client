@@ -48,7 +48,7 @@ else:
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(query_parameter=query_parameter, json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-{% if property.nullable or query_parameter %}
+{% if property.nullable %}
     if {{ source }} is None:
         {{ destination }} = None
     else:

@@ -45,7 +45,7 @@ def _parse_{{ property.python_name }}(data: {{ property.get_type_string(json=Tru
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
 {% endif %}
-{% if property.nullable or (query_parameter and not property.required) %}
+{% if property.nullable %}
     {% if property.required %}
 if {{ source }} is None:
     {% else %}{# There's an if UNSET statement before this #}
