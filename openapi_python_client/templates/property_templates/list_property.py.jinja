@@ -17,7 +17,7 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 {% endif %}
 {% endmacro %}
 
-{% macro _transform(property, source, destination, stringify) %}
+{% macro _transform(property, source, destination, stringify, transform_method) %}
 {% set inner_property = property.inner_property %}
 {% if stringify %}
 {% set stringified_destination = destination %}
@@ -28,7 +28,7 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 {{ destination }} = []
 for {{ inner_source }} in {{ source }}:
     {% from "property_templates/" + inner_property.template import transform %}
-    {{ transform(inner_property, inner_source, inner_property.python_name) | indent(4) }}
+    {{ transform(inner_property, inner_source, inner_property.python_name, transform_method) | indent(4) }}
     {{ destination }}.append({{ inner_property.python_name }})
 {% else %}
 {{ destination }} = {{ source }}
@@ -40,7 +40,7 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
+{% macro transform(property, source, destination, declare_type=True, stringify=False, transform_method="to_dict") %}
 {% set inner_property = property.inner_property %}
 {% if stringify %}
     {% set type_string = "Union[Unset, Tuple[None, str, str]]" %}
@@ -52,9 +52,9 @@ for {{ inner_source }} in {{ source }}:
 if {{ source }} is None:
     {{ destination }} = None
 else:
-    {{ _transform(property, source, destination, stringify) | indent(4) }}
+    {{ _transform(property, source, destination, stringify, transform_method) | indent(4) }}
 {% else %}
-{{ _transform(property, source, destination, stringify) }}
+{{ _transform(property, source, destination, stringify, transform_method) }}
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
@@ -63,11 +63,15 @@ if not isinstance({{ source }}, Unset):
     if {{ source }} is None:
         {{ destination }} = None
     else:
-        {{ _transform(property, source, destination, stringify) | indent(8)}}
+        {{ _transform(property, source, destination, stringify, transform_method) | indent(8)}}
 {% else %}
-    {{ _transform(property, source, destination, stringify) | indent(4)}}
+    {{ _transform(property, source, destination, stringify, transform_method) | indent(4)}}
 {% endif %}
 {% endif %}
 
 
+{% endmacro %}
+
+{% macro transform_multipart(property, source, destination) %}
+{{ transform(property, source, destination, transform_method="to_multipart") }}
 {% endmacro %}
