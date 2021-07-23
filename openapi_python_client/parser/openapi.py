@@ -51,11 +51,6 @@ class EndpointCollection:
                     endpoint, schemas = Endpoint._add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
-                # Add `Operation` parameters
-                if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint._add_parameters(
-                        endpoint=endpoint, data=operation, schemas=schemas, config=config
-                    )
 
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
@@ -267,18 +262,16 @@ class Endpoint:
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
             prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
-            new_prop = {prop.python_name: prop}
 
-            if param.param_in == oai.ParameterLocation.QUERY:
-                endpoint.query_parameters.update(new_prop)
-            elif param.param_in == oai.ParameterLocation.PATH:
-                endpoint.path_parameters.update(new_prop)
-            elif param.param_in == oai.ParameterLocation.HEADER:
-                endpoint.header_parameters.update(new_prop)
-            elif param.param_in == oai.ParameterLocation.COOKIE:
-                endpoint.cookie_parameters.update(new_prop)
-            else:
-                return ParseError(data=param, detail="Parameter must be declared in path or query"), schemas
+            parameters_by_location = {
+                oai.ParameterLocation.QUERY: endpoint.query_parameters,
+                oai.ParameterLocation.PATH: endpoint.path_parameters,
+                oai.ParameterLocation.HEADER: endpoint.header_parameters,
+                oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
+            }
+            param_location: oai.ParameterLocation = param.param_in
+            param_python_name: PythonIdentifier = prop.python_name
+            parameters_by_location[param_location].setdefault(param_python_name, prop)
 
         return endpoint, schemas
 
