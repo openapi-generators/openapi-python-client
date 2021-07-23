@@ -245,6 +245,9 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
         if data.parameters is None:
             return endpoint, schemas
+
+        used_identifiers: Set[PythonIdentifier] = set()
+
         for param in data.parameters:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
@@ -271,7 +274,16 @@ class Endpoint:
             }
             param_location: oai.ParameterLocation = param.param_in
             param_python_name: PythonIdentifier = prop.python_name
+
+            if param_python_name in used_identifiers:
+                return (
+                    ParseError(data=data, detail="Parameters MUST NOT duplicates. "
+                                                 f"A unique parameter is defined by a combination of a name and location. "
+                                                 f"Duplicated parameters detected: `{prop.name}` in `{param_location}`."),
+                    schemas
+                )
             parameters_by_location[param_location].setdefault(param_python_name, prop)
+            used_identifiers.add(param_python_name)
 
         return endpoint, schemas
 
