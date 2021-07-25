@@ -9,7 +9,7 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     client: Client,
-    common: Union[Unset, str] = UNSET,
+    common_query: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/common_parameters".format(client.base_url)
 
@@ -17,7 +17,7 @@ def _get_kwargs(
     cookies: Dict[str, Any] = client.get_cookies()
 
     params: Dict[str, Any] = {
-        "common": common,
+        "common": common_query,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -42,11 +42,11 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 def sync_detailed(
     *,
     client: Client,
-    common: Union[Unset, str] = UNSET,
+    common_query: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
-        common=common,
+        common_query=common_query,
     )
 
     response = httpx.post(
@@ -59,11 +59,11 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Client,
-    common: Union[Unset, str] = UNSET,
+    common_query: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
-        common=common,
+        common_query=common_query,
     )
 
     async with httpx.AsyncClient() as _client:
