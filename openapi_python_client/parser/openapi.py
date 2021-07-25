@@ -277,10 +277,13 @@ class Endpoint:
 
             if param_python_name in used_identifiers:
                 return (
-                    ParseError(data=data, detail="Parameters MUST NOT duplicates. "
-                                                 f"A unique parameter is defined by a combination of a name and location. "
-                                                 f"Duplicated parameters detected: `{prop.name}` in `{param_location}`."),
-                    schemas
+                    ParseError(
+                        data=data,
+                        detail="Parameters MUST NOT duplicates. "
+                        f"A unique parameter is defined by a combination of a name and location. "
+                        f"Duplicated parameters detected: `{prop.name}` in `{param_location}`.",
+                    ),
+                    schemas,
                 )
             parameters_by_location[param_location].setdefault(param_python_name, prop)
             used_identifiers.add(param_python_name)
