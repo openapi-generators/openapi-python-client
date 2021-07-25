@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 
+import pydantic
 import pytest
 
 import openapi_python_client.schema as oai
@@ -527,22 +528,15 @@ class TestEndpoint:
             property_schemas,
         )
 
-    def test__add_parameters_fail_loudly_when_location_not_supported(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
-        endpoint = self.make_endpoint()
+    def test_validation_error_when_location_not_supported(self, mocker):
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
-        param = oai.Parameter.construct(
-            name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
-        )
-        schemas = Schemas()
-        config = MagicMock()
-
-        result = Endpoint._add_parameters(
-            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=schemas, config=config
-        )
-        assert result == (ParseError(data=param, detail="Parameter must be declared in path or query"), parsed_schemas)
+        try:
+            oai.Parameter.construct(
+                name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
+            )
+        except Exception as e:
+            assert e is pydantic.ValidationError
 
     def test__add_parameters_happy(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
@@ -622,10 +616,13 @@ class TestEndpoint:
         query_prop.get_imports.assert_called_once_with(prefix="...")
         header_prop.get_imports.assert_called_once_with(prefix="...")
         assert endpoint.relative_imports == {"import_3", path_prop_import, query_prop_import, header_prop_import}
-        assert endpoint.path_parameters == [path_prop]
-        assert endpoint.query_parameters == [query_prop]
-        assert endpoint.header_parameters == [header_prop]
+        assert endpoint.path_parameters == {path_prop.name: path_prop}
+        assert endpoint.query_parameters == {query_prop.name: query_prop}
+        assert endpoint.header_parameters == {header_prop.name: header_prop}
         assert schemas == schemas_3
+
+    def test__add_parameters_override_properties(self, mocker):
+        pass  # TODO
 
     def test__add_parameters_duplicate_properties(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
@@ -640,7 +637,9 @@ class TestEndpoint:
 
         result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         assert result == (
-            ParseError(data=data, detail="Could not reconcile duplicate parameters named test_path"),
+            ParseError(data=data, detail="Parameters MUST NOT duplicates. "
+                                         "A unique parameter is defined by a combination of a name and location. "
+                                         "Duplicated parameters named `test` detected in `path`."),
             schemas,
         )
 
@@ -664,10 +663,8 @@ class TestEndpoint:
             config=config,
         )[0]
         assert isinstance(result, Endpoint)
-        assert result.path_parameters[0].python_name == "test_path"
-        assert result.path_parameters[0].name == "test"
-        assert result.query_parameters[0].python_name == "test_query"
-        assert result.query_parameters[0].name == "test"
+        assert result.path_parameters["test"].name == "test"
+        assert result.query_parameters["test"].name == "test"
 
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
@@ -953,6 +950,9 @@ class TestEndpointCollection:
             },
             schemas_3,
         )
+
+    def test_from_data_overriding_common_parameters(self, mocker):
+        pass  # TODO
 
     def test_from_data_errors(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, EndpointCollection, ParseError
