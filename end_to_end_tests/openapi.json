@@ -917,7 +917,22 @@
           },
           {
             "name": "param",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "cookie",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
