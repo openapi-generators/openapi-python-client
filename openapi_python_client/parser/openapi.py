@@ -90,10 +90,10 @@ class Endpoint:
     tag: str
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
-    path_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
-    header_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
-    cookie_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
+    query_parameters: Dict[str, Property] = field(default_factory=dict)
+    path_parameters: Dict[str, Property] = field(default_factory=dict)
+    header_parameters: Dict[str, Property] = field(default_factory=dict)
+    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
     form_body_class: Optional[Class] = None
     json_body: Optional[Property] = None
@@ -272,21 +272,19 @@ class Endpoint:
                 oai.ParameterLocation.HEADER: endpoint.header_parameters,
                 oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
             }
-            param_location: oai.ParameterLocation = param.param_in
-            param_python_name: PythonIdentifier = prop.python_name
 
-            if param_python_name in used_identifiers:
+            if prop.python_name in used_identifiers:
                 return (
                     ParseError(
                         data=data,
                         detail="Parameters MUST NOT duplicates. "
                         f"A unique parameter is defined by a combination of a name and location. "
-                        f"Duplicated parameters detected: `{prop.name}` in `{param_location}`.",
+                        f"Duplicated parameters named `{prop.name}` detected in `{param.param_in}`.",
                     ),
                     schemas,
                 )
-            parameters_by_location[param_location].setdefault(param_python_name, prop)
-            used_identifiers.add(param_python_name)
+            parameters_by_location[param.param_in].setdefault(prop.name, prop)
+            used_identifiers.add(prop.python_name)
 
         return endpoint, schemas
 
