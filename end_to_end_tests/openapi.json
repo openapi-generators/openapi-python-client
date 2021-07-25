@@ -850,6 +850,57 @@
         }
       }
     },
+    "/common_parameters_overriding/{param}": {
+      "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "parameters": [
+          {
+            "name": "param",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "overriden_in_GET"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "parameters"
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "parameters": [
+        {
+            "name": "param",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+      ]
+    },
     "/same-name-multiple-locations/{param}": {
       "description": "Test that if you have a property of the same name in multiple locations, it produces valid code",
       "get": {
