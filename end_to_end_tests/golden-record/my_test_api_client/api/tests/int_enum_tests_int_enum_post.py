@@ -11,17 +11,17 @@ from ...types import UNSET, Response
 def _get_kwargs(
     *,
     client: Client,
-    int_enum: AnIntEnum,
+    int_enum_query: AnIntEnum,
 ) -> Dict[str, Any]:
     url = "{}/tests/int_enum".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    json_int_enum = int_enum.value
+    json_int_enum_query = int_enum_query.value
 
     params: Dict[str, Any] = {
-        "int_enum": json_int_enum,
+        "int_enum": json_int_enum_query,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -58,11 +58,11 @@ def _build_response(*, response: httpx.Response) -> Response[Union[Any, HTTPVali
 def sync_detailed(
     *,
     client: Client,
-    int_enum: AnIntEnum,
+    int_enum_query: AnIntEnum,
 ) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        int_enum=int_enum,
+        int_enum_query=int_enum_query,
     )
 
     response = httpx.post(
@@ -75,24 +75,24 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    int_enum: AnIntEnum,
+    int_enum_query: AnIntEnum,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """ """
 
     return sync_detailed(
         client=client,
-        int_enum=int_enum,
+        int_enum_query=int_enum_query,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Client,
-    int_enum: AnIntEnum,
+    int_enum_query: AnIntEnum,
 ) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        int_enum=int_enum,
+        int_enum_query=int_enum_query,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -104,13 +104,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    int_enum: AnIntEnum,
+    int_enum_query: AnIntEnum,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """ """
 
     return (
         await asyncio_detailed(
             client=client,
-            int_enum=int_enum,
+            int_enum_query=int_enum_query,
         )
     ).parsed

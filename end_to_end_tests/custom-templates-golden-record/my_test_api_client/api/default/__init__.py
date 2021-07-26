@@ -2,7 +2,7 @@
 
 import types
 
-from my_test_api_client.api.default import get_common_parameters, post_common_parameters
+from . import get_common_parameters, post_common_parameters
 
 
 class DefaultEndpoints:

@@ -13,28 +13,28 @@ from ...types import UNSET, Response
 def _get_kwargs(
     *,
     client: Client,
-    an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    an_enum_value_query: List[AnEnum],
+    some_date_query: Union[datetime.date, datetime.datetime],
 ) -> Dict[str, Any]:
     url = "{}/tests/".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    json_an_enum_value = []
-    for an_enum_value_item_data in an_enum_value:
+    json_an_enum_value_query = []
+    for an_enum_value_item_data in an_enum_value_query:
         an_enum_value_item = an_enum_value_item_data.value
 
-        json_an_enum_value.append(an_enum_value_item)
+        json_an_enum_value_query.append(an_enum_value_item)
 
-    if isinstance(some_date, datetime.date):
-        json_some_date = some_date.isoformat()
+    if isinstance(some_date_query, datetime.date):
+        json_some_date_query = some_date_query.isoformat()
     else:
-        json_some_date = some_date.isoformat()
+        json_some_date_query = some_date_query.isoformat()
 
     params: Dict[str, Any] = {
-        "an_enum_value": json_an_enum_value,
-        "some_date": json_some_date,
+        "an_enum_value": json_an_enum_value_query,
+        "some_date": json_some_date_query,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -80,13 +80,13 @@ def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidatio
 def sync_detailed(
     *,
     client: Client,
-    an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    an_enum_value_query: List[AnEnum],
+    some_date_query: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List[AModel]]]:
     kwargs = _get_kwargs(
         client=client,
-        an_enum_value=an_enum_value,
-        some_date=some_date,
+        an_enum_value_query=an_enum_value_query,
+        some_date_query=some_date_query,
     )
 
     response = httpx.get(
@@ -99,28 +99,28 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    an_enum_value_query: List[AnEnum],
+    some_date_query: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
     """Get a list of things"""
 
     return sync_detailed(
         client=client,
-        an_enum_value=an_enum_value,
-        some_date=some_date,
+        an_enum_value_query=an_enum_value_query,
+        some_date_query=some_date_query,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Client,
-    an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    an_enum_value_query: List[AnEnum],
+    some_date_query: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List[AModel]]]:
     kwargs = _get_kwargs(
         client=client,
-        an_enum_value=an_enum_value,
-        some_date=some_date,
+        an_enum_value_query=an_enum_value_query,
+        some_date_query=some_date_query,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -132,15 +132,15 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    an_enum_value: List[AnEnum],
-    some_date: Union[datetime.date, datetime.datetime],
+    an_enum_value_query: List[AnEnum],
+    some_date_query: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
     """Get a list of things"""
 
     return (
         await asyncio_detailed(
             client=client,
-            an_enum_value=an_enum_value,
-            some_date=some_date,
+            an_enum_value_query=an_enum_value_query,
+            some_date_query=some_date_query,
         )
     ).parsed
