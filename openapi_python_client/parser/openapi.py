@@ -246,7 +246,7 @@ class Endpoint:
         if data.parameters is None:
             return endpoint, schemas
 
-        used_identifiers: Set[PythonIdentifier] = set()
+        used_python_identifiers: Set[PythonIdentifier] = set()
 
         for param in data.parameters:
             if isinstance(param, oai.Reference) or param.param_schema is None:
@@ -273,7 +273,7 @@ class Endpoint:
                 oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
             }
 
-            if prop.python_name in used_identifiers:
+            if prop.python_name in used_python_identifiers:
                 return (
                     ParseError(
                         data=data,
@@ -284,7 +284,7 @@ class Endpoint:
                     schemas,
                 )
             parameters_by_location[param.param_in].setdefault(prop.name, prop)
-            used_identifiers.add(prop.python_name)
+            used_python_identifiers.add(prop.python_name)
 
         return endpoint, schemas
 
