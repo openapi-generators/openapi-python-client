@@ -547,11 +547,13 @@ class TestEndpoint:
         path_prop = mocker.MagicMock(autospec=Property)
         path_prop_import = mocker.MagicMock()
         path_prop.get_imports = mocker.MagicMock(return_value={path_prop_import})
+        path_prop.python_name = 'path_prop_name'
 
         query_prop_name = 'query_prop_name'
         query_prop = mocker.MagicMock(autospec=Property)
         query_prop_import = mocker.MagicMock()
         query_prop.get_imports = mocker.MagicMock(return_value={query_prop_import})
+        query_prop.python_name = 'query_prop_name'
 
         header_prop_name = 'header_prop_name'
         header_prop_operation = mocker.MagicMock(autospec=Property)
@@ -559,17 +561,20 @@ class TestEndpoint:
         header_prop_operation.required = False
         header_prop_operation_import = mocker.MagicMock()
         header_prop_operation.get_imports = mocker.MagicMock(return_value={header_prop_operation_import})
+        header_prop_operation.python_name = 'header_prop_name'
 
         header_prop_path = mocker.MagicMock(autospec=Property)
         header_prop_path.name = header_prop_name
         header_prop_path.required = True
         header_prop_path_import = mocker.MagicMock()
         header_prop_path.get_imports = mocker.MagicMock(return_value={header_prop_path_import})
+        header_prop_path.python_name = 'header_prop_name'
 
         cookie_prop_name = 'cookie_prop_name'
         cookie_prop = mocker.MagicMock(autospec=Property)
         cookie_prop_import = mocker.MagicMock()
         cookie_prop.get_imports = mocker.MagicMock(return_value={cookie_prop_import})
+        cookie_prop.python_name = 'cookie_prop_name'
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
