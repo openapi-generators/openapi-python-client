@@ -12,15 +12,15 @@ def _get_kwargs(
     *,
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
-    keep_alive_header: Union[Unset, bool] = UNSET,
+    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/upload".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    if keep_alive_header is not UNSET:
-        headers["keep-alive"] = keep_alive_header
+    if keep_alive is not UNSET:
+        headers["keep-alive"] = keep_alive
 
     multipart_multipart_data = multipart_data.to_multipart()
 
@@ -58,12 +58,12 @@ def sync_detailed(
     *,
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
-    keep_alive_header: Union[Unset, bool] = UNSET,
+    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
-        keep_alive_header=keep_alive_header,
+        keep_alive=keep_alive,
     )
 
     response = httpx.post(
@@ -77,14 +77,14 @@ def sync(
     *,
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
-    keep_alive_header: Union[Unset, bool] = UNSET,
+    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload a file"""
 
     return sync_detailed(
         client=client,
         multipart_data=multipart_data,
-        keep_alive_header=keep_alive_header,
+        keep_alive=keep_alive,
     ).parsed
 
 
@@ -92,12 +92,12 @@ async def asyncio_detailed(
     *,
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
-    keep_alive_header: Union[Unset, bool] = UNSET,
+    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
-        keep_alive_header=keep_alive_header,
+        keep_alive=keep_alive,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -110,7 +110,7 @@ async def asyncio(
     *,
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
-    keep_alive_header: Union[Unset, bool] = UNSET,
+    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload a file"""
 
@@ -118,6 +118,6 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             multipart_data=multipart_data,
-            keep_alive_header=keep_alive_header,
+            keep_alive=keep_alive,
         )
     ).parsed

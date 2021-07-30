@@ -2,7 +2,7 @@
 
 import types
 
-from . import get_tag_with_number
+from my_test_api_client.api.tag1 import get_tag_with_number
 
 
 class Tag1Endpoints:

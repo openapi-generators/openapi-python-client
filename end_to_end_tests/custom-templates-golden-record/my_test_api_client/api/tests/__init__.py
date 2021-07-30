@@ -2,7 +2,7 @@
 
 import types
 
-from . import (
+from my_test_api_client.api.tests import (
     defaults_tests_defaults_post,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,

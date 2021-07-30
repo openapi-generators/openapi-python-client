@@ -10,19 +10,19 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     client: Client,
-    query_param_query: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, List[str]] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/optional_query_param/".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    json_query_param_query: Union[Unset, List[str]] = UNSET
-    if not isinstance(query_param_query, Unset):
-        json_query_param_query = query_param_query
+    json_query_param: Union[Unset, List[str]] = UNSET
+    if not isinstance(query_param, Unset):
+        json_query_param = query_param
 
     params: Dict[str, Any] = {
-        "query_param": json_query_param_query,
+        "query_param": json_query_param,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -59,11 +59,11 @@ def _build_response(*, response: httpx.Response) -> Response[Union[Any, HTTPVali
 def sync_detailed(
     *,
     client: Client,
-    query_param_query: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, List[str]] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        query_param_query=query_param_query,
+        query_param=query_param,
     )
 
     response = httpx.get(
@@ -76,24 +76,24 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-    query_param_query: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, List[str]] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Test optional query parameters"""
 
     return sync_detailed(
         client=client,
-        query_param_query=query_param_query,
+        query_param=query_param,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Client,
-    query_param_query: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, List[str]] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
-        query_param_query=query_param_query,
+        query_param=query_param,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -105,13 +105,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-    query_param_query: Union[Unset, List[str]] = UNSET,
+    query_param: Union[Unset, List[str]] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Test optional query parameters"""
 
     return (
         await asyncio_detailed(
             client=client,
-            query_param_query=query_param_query,
+            query_param=query_param,
         )
     ).parsed
