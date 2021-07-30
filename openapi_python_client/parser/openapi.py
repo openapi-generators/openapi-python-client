@@ -99,6 +99,7 @@ class Endpoint:
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
+    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
     def parse_request_form_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
@@ -246,11 +247,27 @@ class Endpoint:
         if data.parameters is None:
             return endpoint, schemas
 
-        used_python_identifiers: Set[PythonIdentifier] = set()
+        unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
+        parameters_by_location = {
+            oai.ParameterLocation.QUERY: endpoint.query_parameters,
+            oai.ParameterLocation.PATH: endpoint.path_parameters,
+            oai.ParameterLocation.HEADER: endpoint.header_parameters,
+            oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
+        }
 
         for param in data.parameters:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
+
+            unique_param = (param.name, param.param_in)
+            if unique_param in unique_parameters:
+                duplication_detail = (
+                    "Parameters MUST NOT duplicates. A unique parameter is defined by a combination of a name and location. "
+                    f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                )
+                return ParseError(data=data, detail=duplication_detail), schemas
+            unique_parameters.add(unique_param)
+
             prop, schemas = property_from_data(
                 name=param.name,
                 required=param.required,
@@ -262,29 +279,19 @@ class Endpoint:
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
 
+            for location, parameters_dict in parameters_by_location.items():
+                if prop.name in parameters_dict:
+                    existing_prop: Property = parameters_dict[prop.name]
+                    # Existing should be converted too for consistency
+                    endpoint.used_python_identifiers.remove(existing_prop.python_name)
+                    existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
+                    endpoint.used_python_identifiers.add(existing_prop.python_name)
+
+                    prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
+
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
-
-            prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
-
-            parameters_by_location = {
-                oai.ParameterLocation.QUERY: endpoint.query_parameters,
-                oai.ParameterLocation.PATH: endpoint.path_parameters,
-                oai.ParameterLocation.HEADER: endpoint.header_parameters,
-                oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
-            }
-
-            if prop.python_name in used_python_identifiers:
-                return (
-                    ParseError(
-                        data=data,
-                        detail="Parameters MUST NOT duplicates. "
-                        f"A unique parameter is defined by a combination of a name and location. "
-                        f"Duplicated parameters named `{prop.name}` detected in `{param.param_in}`.",
-                    ),
-                    schemas,
-                )
             parameters_by_location[param.param_in].setdefault(prop.name, prop)
-            used_python_identifiers.add(prop.python_name)
+            endpoint.used_python_identifiers.add(prop.python_name)
 
         return endpoint, schemas
 
