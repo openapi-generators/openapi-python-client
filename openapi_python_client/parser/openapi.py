@@ -280,7 +280,10 @@ class Endpoint:
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
 
             for location, parameters_dict in parameters_by_location.items():
-                if prop.name in parameters_dict:
+                existing_prop: Optional[Property] = parameters_dict.get(prop.name)
+                same_location: bool = location == param.param_in
+
+                if existing_prop and not same_location:
                     existing_prop: Property = parameters_dict[prop.name]
                     # Existing should be converted too for consistency
                     endpoint.used_python_identifiers.remove(existing_prop.python_name)
