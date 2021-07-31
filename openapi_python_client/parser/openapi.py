@@ -284,7 +284,6 @@ class Endpoint:
                 same_location: bool = location == param.param_in
 
                 if existing_prop and not same_location:
-                    existing_prop: Property = parameters_dict[prop.name]
                     # Existing should be converted too for consistency
                     endpoint.used_python_identifiers.remove(existing_prop.python_name)
                     existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
