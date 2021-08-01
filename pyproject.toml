@@ -57,7 +57,7 @@ check = """
 isort .\
  && black .\
  && flake8 openapi_python_client\
- && safety check --bare\
+ && poetry export -f requirements.txt | poetry run safety check --bare --stdin\
  && mypy openapi_python_client\
  && pytest --cov openapi_python_client tests --cov-report=term-missing\
 """

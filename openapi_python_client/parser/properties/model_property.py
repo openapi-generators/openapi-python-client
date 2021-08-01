@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union, cast
+from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
 import attr
 
@@ -50,56 +50,57 @@ class ModelProperty(Property):
         return imports
 
 
-def _is_string_enum(prop: Property) -> bool:
-    return isinstance(prop, EnumProperty) and prop.value_type == str
-
-
-def _is_int_enum(prop: Property) -> bool:
-    return isinstance(prop, EnumProperty) and prop.value_type == int
-
-
-def values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
+def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
     return set(first.values.items()) <= set(second.values.items())
 
 
-def _is_subtype(first: Property, second: Property) -> bool:
+def _types_are_subset(first: EnumProperty, second: Property) -> bool:
     from . import IntProperty, StringProperty
 
-    return any(
-        [
-            _is_string_enum(first) and isinstance(second, StringProperty),
-            _is_int_enum(first) and isinstance(second, IntProperty),
-            _is_string_enum(first) and _is_string_enum(second)
-            # cast because MyPy fails to deduce type
-            and values_are_subset(cast(EnumProperty, first), cast(EnumProperty, second)),
-            _is_int_enum(first) and _is_int_enum(second)
-            # cast because MyPy fails to deduce type
-            and values_are_subset(cast(EnumProperty, first), cast(EnumProperty, second)),
-        ]
-    )
+    if first.value_type == int and isinstance(second, IntProperty):
+        return True
+    if first.value_type == str and isinstance(second, StringProperty):
+        return True
+    return False
+
+
+def _enum_subset(first: Property, second: Property) -> Optional[EnumProperty]:
+    """Return the EnumProperty that is the subset of the other, if possible."""
+
+    if isinstance(first, EnumProperty):
+        if isinstance(second, EnumProperty):
+            if _values_are_subset(first, second):
+                return first
+            if _values_are_subset(second, first):
+                return second
+            return None
+        return first if _types_are_subset(first, second) else None
+    if isinstance(second, EnumProperty) and _types_are_subset(second, first):
+        return second
+    return None
 
 
 def _merge_properties(first: Property, second: Property) -> Union[Property, PropertyError]:
     nullable = first.nullable and second.nullable
     required = first.required or second.required
 
-    if _is_subtype(first, second):
-        first = attr.evolve(first, nullable=nullable, required=required)
-        return first
-    elif _is_subtype(second, first):
-        second = attr.evolve(second, nullable=nullable, required=required)
-        return second
-    elif first.__class__ == second.__class__:
+    err = None
+
+    if first.__class__ == second.__class__:
         first = attr.evolve(first, nullable=nullable, required=required)
         second = attr.evolve(second, nullable=nullable, required=required)
-        if first != second:
-            return PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
-        return first
-    else:
-        return PropertyError(
-            header="Cannot merge properties",
-            detail=f"{first.__class__}, {second.__class__}Properties have incompatible types",
-        )
+        if first == second:
+            return first
+        err = PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
+
+    enum_subset = _enum_subset(first, second)
+    if enum_subset is not None:
+        return attr.evolve(enum_subset, nullable=nullable, required=required)
+
+    return err or PropertyError(
+        header="Cannot merge properties",
+        detail=f"{first.__class__}, {second.__class__}Properties have incompatible types",
+    )
 
 
 class _PropertyData(NamedTuple):
@@ -118,16 +119,18 @@ def _process_properties(
     relative_imports: Set[str] = set()
     required_set = set(data.required or [])
 
-    def _check_existing(prop: Property) -> Union[Property, PropertyError]:
+    def _add_if_no_conflict(new_prop: Property) -> Optional[PropertyError]:
         nonlocal properties
 
-        existing = properties.get(prop.name)
-        prop_or_error = _merge_properties(existing, prop) if existing else prop
-        if isinstance(prop_or_error, PropertyError):
-            prop_or_error.header = f"Found conflicting properties named {prop.name} when creating {class_name}"
-            return prop_or_error
-        properties[prop_or_error.name] = prop_or_error
-        return prop_or_error
+        existing = properties.get(new_prop.name)
+        merged_prop_or_error = _merge_properties(existing, new_prop) if existing else new_prop
+        if isinstance(merged_prop_or_error, PropertyError):
+            merged_prop_or_error.header = (
+                f"Found conflicting properties named {new_prop.name} when creating {class_name}"
+            )
+            return merged_prop_or_error
+        properties[merged_prop_or_error.name] = merged_prop_or_error
+        return None
 
     unprocessed_props = data.properties or {}
     for sub_prop in data.allOf or []:
@@ -141,24 +144,23 @@ def _process_properties(
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
-                prop_or_error = _check_existing(prop)
-                if isinstance(prop_or_error, PropertyError):
-                    return prop_or_error
+                err = _add_if_no_conflict(prop)
+                if err is not None:
+                    return err
         else:
             unprocessed_props.update(sub_prop.properties or {})
             required_set.update(sub_prop.required or [])
 
     for key, value in unprocessed_props.items():
         prop_required = key in required_set
+        prop_or_error: Union[Property, PropertyError, None]
         prop_or_error, schemas = property_from_data(
             name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name, config=config
         )
         if isinstance(prop_or_error, Property):
-            prop_or_error = _check_existing(prop_or_error)
+            prop_or_error = _add_if_no_conflict(prop_or_error)
         if isinstance(prop_or_error, PropertyError):
             return prop_or_error
-
-        properties[prop_or_error.name] = prop_or_error
 
     required_properties = []
     optional_properties = []
