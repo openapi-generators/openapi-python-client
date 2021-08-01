@@ -43,6 +43,6 @@ jobs:
     - name: Generate E2E Coverage
       run: poetry run coverage xml -o e2e-coverage.xml
 
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v2
       with:
         files: ./coverage.xml,./e2e-coverage.xml
