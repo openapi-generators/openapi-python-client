@@ -5,7 +5,7 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
-from openapi_python_client.parser.properties import DateTimeProperty, ModelProperty, StringProperty
+from openapi_python_client.parser.properties import StringProperty
 
 
 @pytest.mark.parametrize(
@@ -240,6 +240,175 @@ class TestProcessProperties:
 
         result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
 
+        assert isinstance(result, PropertyError)
+
+    def test_allof_string_and_string_enum(self, model_property_factory, enum_property_factory, string_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property = enum_property_factory(
+            values={"foo": "foo"},
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(
+                    optional_properties=[string_property_factory(required=False, nullable=True)]
+                ),
+                "/Second": model_property_factory(optional_properties=[enum_property]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+        assert result.required_props[0] == enum_property
+
+    def test_allof_string_enum_and_string(self, model_property_factory, enum_property_factory, string_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property = enum_property_factory(
+            required=False,
+            nullable=True,
+            values={"foo": "foo"},
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[enum_property]),
+                "/Second": model_property_factory(
+                    optional_properties=[string_property_factory(required=False, nullable=True)]
+                ),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+        assert result.optional_props[0] == enum_property
+
+    def test_allof_int_and_int_enum(self, model_property_factory, enum_property_factory, int_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property = enum_property_factory(
+            values={"foo": 1},
+            value_type=int,
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[int_property_factory()]),
+                "/Second": model_property_factory(optional_properties=[enum_property]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+        assert result.required_props[0] == enum_property
+
+    def test_allof_enum_incompatible_type(self, model_property_factory, enum_property_factory, int_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property = enum_property_factory(
+            values={"foo": 1},
+            value_type=str,
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[int_property_factory()]),
+                "/Second": model_property_factory(optional_properties=[enum_property]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+        assert isinstance(result, PropertyError)
+
+    def test_allof_string_enums(self, model_property_factory, enum_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property1 = enum_property_factory(
+            name="an_enum",
+            value_type=str,
+            values={"foo": "foo"},
+        )
+        enum_property2 = enum_property_factory(
+            name="an_enum",
+            values={"foo": "foo", "bar": "bar"},
+            value_type=str,
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[enum_property1]),
+                "/Second": model_property_factory(optional_properties=[enum_property2]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+        assert result.required_props[0] == enum_property1
+
+    def test_allof_int_enums(self, model_property_factory, enum_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property1 = enum_property_factory(
+            name="an_enum",
+            values={"foo": 1, "bar": 2},
+            value_type=int,
+        )
+        enum_property2 = enum_property_factory(
+            name="an_enum",
+            values={"foo": 1},
+            value_type=int,
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[enum_property1]),
+                "/Second": model_property_factory(optional_properties=[enum_property2]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+        assert result.required_props[0] == enum_property2
+
+    def test_allof_enums_are_not_subsets(self, model_property_factory, enum_property_factory):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(
+            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        )
+        enum_property1 = enum_property_factory(
+            name="an_enum",
+            values={"foo": 1, "bar": 2},
+            value_type=int,
+        )
+        enum_property2 = enum_property_factory(
+            name="an_enum",
+            values={"foo": 1, "baz": 3},
+            value_type=int,
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/First": model_property_factory(optional_properties=[enum_property1]),
+                "/Second": model_property_factory(optional_properties=[enum_property2]),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
         assert isinstance(result, PropertyError)
 
     def test_duplicate_properties(self, model_property_factory, string_property_factory):

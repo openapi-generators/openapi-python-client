@@ -8,6 +8,7 @@ from openapi_python_client.parser.properties import (
     DateTimeProperty,
     EnumProperty,
     FileProperty,
+    IntProperty,
     ListProperty,
     ModelProperty,
     Property,
@@ -54,7 +55,7 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         kwargs = {
-            "class_info": Class(name="", module_name=""),
+            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
             "values": {},
             "value_type": str,
             **kwargs,
@@ -105,6 +106,21 @@ def string_property_factory() -> Callable[..., StringProperty]:
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         return StringProperty(**kwargs)
+
+    return _factory
+
+
+@pytest.fixture
+def int_property_factory() -> Callable[..., IntProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+
+    You can pass the same params into this as the StringProperty constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        return IntProperty(**kwargs)
 
     return _factory
 
