@@ -301,8 +301,6 @@ class Endpoint:
                 endpoint.used_python_identifiers.add(existing_prop.python_name)
                 prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
 
-            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
-
             if prop.python_name in endpoint.used_python_identifiers:
                 return (
                     ParseError(
@@ -310,6 +308,11 @@ class Endpoint:
                     ),
                     schemas,
                 )
+            if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
+                # There is no NULL for query params, so nullable and not required are the same.
+                prop = attr.evolve(prop, required=False, nullable=True)
+
+            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
             endpoint.used_python_identifiers.add(prop.python_name)
             parameters_by_location[param.param_in][prop.name] = prop
 

@@ -373,7 +373,7 @@
         "operationId": "defaults_tests_defaults_post",
         "parameters": [
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "String Prop",
               "type": "string",
@@ -383,55 +383,7 @@
             "in": "query"
           },
           {
-            "required": false,
-            "schema": {
-              "title": "Not Required, Not Nullable Datetime Prop",
-              "nullable": false,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "not_required_not_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
-              "title": "Not Required, Nullable Datetime Prop",
-              "nullable": true,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "not_required_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
             "required": true,
-            "schema": {
-              "title": "Required, Not Nullable Datetime Prop",
-              "nullable": false,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "required_not_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
-            "required": true,
-            "schema": {
-              "title": "Required, Nullable Datetime Prop",
-              "nullable": true,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "required_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
-            "required": false,
             "schema": {
               "title": "Date Prop",
               "type": "string",
@@ -442,7 +394,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Float Prop",
               "type": "number",
@@ -452,7 +404,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Int Prop",
               "type": "integer",
@@ -462,7 +414,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Boolean Prop",
               "type": "boolean",
@@ -472,7 +424,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "List Prop",
               "type": "array",
@@ -488,7 +440,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Union Prop",
               "anyOf": [
@@ -522,7 +474,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "$ref": "#/components/schemas/AnEnum"
             },
@@ -530,7 +482,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "$ref": "#/components/schemas/ModelWithUnionProperty"
             },
@@ -543,32 +495,6 @@
               "$ref": "#/components/schemas/ModelWithUnionProperty"
             },
             "name": "required_model_prop",
-            "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ModelWithUnionProperty"
-                }
-              ],
-              "nullable": true
-            },
-            "name": "nullable_model_prop",
-            "in": "query"
-          },
-          {
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ModelWithUnionProperty"
-                }
-              ],
-              "nullable": true
-            },
-            "name": "nullable_required_model_prop",
             "in": "query"
           }
         ],
@@ -743,54 +669,6 @@
         }
       }
     },
-    "/tests/optional_query_param/": {
-      "get": {
-        "tags": [
-          "tests"
-        ],
-        "summary": "Optional Query Params test",
-        "description": "Test optional query parameters",
-        "operationId": "optional_value_tests_optional_query_param",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Query Param",
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "example": [
-                "string1",
-                "string2"
-              ]
-            },
-            "name": "query_param",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/auth/token_with_cookie": {
       "get": {
         "tags": [
@@ -901,44 +779,6 @@
           }
       ]
     },
-    "/same_identifier_conflict/{param}/{param_path}": {
-      "description": "Test that if you have properties with the same Python identifier, it not produces code",
-      "get": {
-        "tags": [
-          "parameters"
-        ],
-        "parameters": [
-          {
-            "name": "param_path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "param",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "param",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/same-name-multiple-locations/{param}": {
       "description": "Test that if you have a property of the same name in multiple locations, it produces valid code",
       "get": {
@@ -991,6 +831,57 @@
             "description": "Success"
           }
         }
+      }
+    },
+    "/location/query/optionality": {
+      "description": "Test what happens with various combinations of required and nullable in query parameters.",
+      "get": {
+        "tags": [
+          "location"
+        ],
+        "parameters": [
+          {
+            "name": "not_null_required",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": false
+            },
+            "in": "query"
+          },
+          {
+            "name": "null_required",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "in": "query"
+          },
+          {
+            "name": "null_not_required",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "in": "query"
+          },
+          {
+            "name": "not_null_not_required",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": false
+            },
+            "in": "query"
+          }
+        ],
+        "responses": {}
       }
     }
   },

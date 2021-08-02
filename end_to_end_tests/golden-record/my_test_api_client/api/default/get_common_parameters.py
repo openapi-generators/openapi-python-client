@@ -9,7 +9,7 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     client: Client,
-    common: Union[Unset, str] = UNSET,
+    common: Union[Unset, None, str] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/common_parameters".format(client.base_url)
 
@@ -42,7 +42,7 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 def sync_detailed(
     *,
     client: Client,
-    common: Union[Unset, str] = UNSET,
+    common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
@@ -59,7 +59,7 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Client,
-    common: Union[Unset, str] = UNSET,
+    common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
