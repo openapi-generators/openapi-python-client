@@ -1448,6 +1448,13 @@
         "properties": {
           "a_sub_property": {
             "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "type_enum": {
+            "type": "int",
+            "enum": [0, 1]
           }
         }
       },
@@ -1457,6 +1464,14 @@
         "properties": {
           "another_sub_property": {
             "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["submodel"]
+          },
+          "type_enum": {
+            "type": "int",
+            "enum": [0]
           }
         }
       },
