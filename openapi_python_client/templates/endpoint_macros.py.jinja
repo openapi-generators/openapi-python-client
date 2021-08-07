@@ -27,7 +27,7 @@ if {{ parameter.python_name }} is not UNSET:
 
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
-    {% for _, property in endpoint.query_parameters.items() %}
+    {% for property in endpoint.query_parameters.values() %}
         {% set destination = "json_" + property.python_name %}
         {% if property.template %}
             {% from "property_templates/" + property.template import transform %}
