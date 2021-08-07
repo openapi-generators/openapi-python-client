@@ -13,7 +13,7 @@ if {{ parameter.python_name }} is not UNSET:
 
 {% macro cookie_params(endpoint) %}
 {% if endpoint.cookie_parameters %}
-    {% for _, parameter in endpoint.cookie_parameters.items() %}
+    {% for parameter in endpoint.cookie_parameters.values() %}
         {% if parameter.required %}
 cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% else %}
