@@ -19,7 +19,7 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}{{ endpoint.path }}".format(
         client.base_url
-        {%- for _, parameter in endpoint.path_parameters.items() -%}
+        {%- for parameter in endpoint.path_parameters.values() -%}
         ,{{parameter.name}}={{parameter.python_name}}
         {%- endfor -%}
     )
