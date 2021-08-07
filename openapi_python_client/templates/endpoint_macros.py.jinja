@@ -138,7 +138,7 @@ json_body=json_body,
 {% for _, parameter in endpoint.query_parameters.items() %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
-{% for _, parameter in endpoint.header_parameters.items() %}
+{% for parameter in endpoint.header_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% for parameter in endpoint.cookie_parameters.values() %}
