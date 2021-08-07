@@ -1,6 +1,6 @@
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters %}
-    {% for _, parameter in endpoint.header_parameters.items() %}
+    {% for parameter in endpoint.header_parameters.values() %}
         {% if parameter.required %}
 headers["{{ parameter.name | kebabcase}}"] = {{ parameter.python_name }}
         {% else %}
