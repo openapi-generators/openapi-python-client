@@ -115,7 +115,7 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {{ parameter.to_string() }},
 {% endfor %}
 {# cookie parameters #}
-{% for _, parameter in endpoint.cookie_parameters.items() %}
+{% for parameter in endpoint.cookie_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% endmacro %}
