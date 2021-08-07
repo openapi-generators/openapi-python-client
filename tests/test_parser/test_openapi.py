@@ -531,12 +531,10 @@ class TestEndpoint:
     def test_validation_error_when_location_not_supported(self, mocker):
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
-        try:
-            oai.Parameter.construct(
+        with pytest.raises(pydantic.ValidationError):
+            oai.Parameter(
                 name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
             )
-        except Exception as e:
-            assert e is pydantic.ValidationError
 
     def test__add_parameters_happy(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
