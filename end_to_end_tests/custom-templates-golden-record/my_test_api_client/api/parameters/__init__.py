@@ -6,6 +6,7 @@ from . import (
     delete_common_parameters_overriding_param,
     get_common_parameters_overriding_param,
     get_same_name_multiple_locations_param,
+    multiple_path_parameters,
 )
 
 
@@ -21,3 +22,7 @@ class ParametersEndpoints:
     @classmethod
     def get_same_name_multiple_locations_param(cls) -> types.ModuleType:
         return get_same_name_multiple_locations_param
+
+    @classmethod
+    def multiple_path_parameters(cls) -> types.ModuleType:
+        return multiple_path_parameters

@@ -7,15 +7,15 @@ from ...types import Response
 
 
 def _get_kwargs(
-    param_4: str,
-    param_2: int,
-    param_1: str,
-    param_3: int,
+    param4: str,
+    param2: int,
+    param1: str,
+    param3: int,
     *,
     client: Client,
 ) -> Dict[str, Any]:
     url = "{}/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}".format(
-        client.base_url, param4=param_4, param2=param_2, param1=param_1, param3=param_3
+        client.base_url, param4=param4, param2=param2, param1=param1, param3=param3
     )
 
     headers: Dict[str, Any] = client.get_headers()
@@ -29,7 +29,7 @@ def _get_kwargs(
     }
 
 
-def _build_response(*, response: httpx.Response) -> Response[None]:
+def _build_response(*, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -39,18 +39,18 @@ def _build_response(*, response: httpx.Response) -> Response[None]:
 
 
 def sync_detailed(
-    param_4: str,
-    param_2: int,
-    param_1: str,
-    param_3: int,
+    param4: str,
+    param2: int,
+    param1: str,
+    param3: int,
     *,
     client: Client,
-) -> Response[None]:
+) -> Response[Any]:
     kwargs = _get_kwargs(
-        param_4=param_4,
-        param_2=param_2,
-        param_1=param_1,
-        param_3=param_3,
+        param4=param4,
+        param2=param2,
+        param1=param1,
+        param3=param3,
         client=client,
     )
 
@@ -62,18 +62,18 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
-    param_4: str,
-    param_2: int,
-    param_1: str,
-    param_3: int,
+    param4: str,
+    param2: int,
+    param1: str,
+    param3: int,
     *,
     client: Client,
-) -> Response[None]:
+) -> Response[Any]:
     kwargs = _get_kwargs(
-        param_4=param_4,
-        param_2=param_2,
-        param_1=param_1,
-        param_3=param_3,
+        param4=param4,
+        param2=param2,
+        param1=param1,
+        param3=param3,
         client=client,
     )
 

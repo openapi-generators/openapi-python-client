@@ -52,7 +52,7 @@ class EndpointCollection:
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint._add_parameters(
+                    endpoint, schemas = Endpoint.add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
                 if isinstance(endpoint, ParseError):
@@ -244,7 +244,7 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def _add_parameters(
+    def add_parameters(
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
@@ -327,9 +327,9 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def _sort_parameters(*, endpoint: "Endpoint", path: str) -> Union["Endpoint", ParseError]:
+    def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
         endpoint = deepcopy(endpoint)
-        parameters_from_path = re.findall(_PATH_PARAM_REGEX, path)
+        parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
         try:
             endpoint.path_parameters.sort(key=lambda p: parameters_from_path.index(p.name))
         except ValueError:
@@ -337,8 +337,7 @@ class Endpoint:
         path_parameter_names = [p.name for p in endpoint.path_parameters]
         if parameters_from_path != path_parameter_names:
             return ParseError(
-                data=endpoint,
-                detail="Incorrect path templating (Path parameters do not match with path)",
+                detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
         return endpoint
 
@@ -363,7 +362,7 @@ class Endpoint:
             tag=tag,
         )
 
-        result, schemas = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        result, schemas = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         if isinstance(result, ParseError):
             return result, schemas
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
