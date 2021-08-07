@@ -108,7 +108,7 @@ multipart_data: {{ endpoint.multipart_body.get_type_string() }},
 json_body: {{ endpoint.json_body.get_type_string() }},
 {% endif %}
 {# query parameters #}
-{% for _, parameter in endpoint.query_parameters.items() %}
+{% for parameter in endpoint.query_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% for _, parameter in endpoint.header_parameters.items() %}
