@@ -92,7 +92,7 @@ client: AuthenticatedClient,
 client: Client,
 {% endif %}
 {# path parameters #}
-{% for _, parameter in endpoint.path_parameters.items() %}
+{% for parameter in endpoint.path_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 {# Form data if any #}
