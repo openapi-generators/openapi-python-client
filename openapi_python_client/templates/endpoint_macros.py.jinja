@@ -123,7 +123,7 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
 {% macro kwargs(endpoint) %}
 client=client,
-{% for _, parameter in endpoint.path_parameters.items() %}
+{% for parameter in endpoint.path_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% if endpoint.form_body_class %}
