@@ -135,7 +135,7 @@ multipart_data=multipart_data,
 {% if endpoint.json_body %}
 json_body=json_body,
 {% endif %}
-{% for _, parameter in endpoint.query_parameters.items() %}
+{% for parameter in endpoint.query_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% for parameter in endpoint.header_parameters.values() %}
