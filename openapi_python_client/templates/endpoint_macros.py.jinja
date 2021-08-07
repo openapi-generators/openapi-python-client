@@ -111,7 +111,7 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {% for parameter in endpoint.query_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
-{% for _, parameter in endpoint.header_parameters.items() %}
+{% for parameter in endpoint.header_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 {# cookie parameters #}
