@@ -534,6 +534,66 @@ class TestEndpoint:
         with pytest.raises(pydantic.ValidationError):
             oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
 
+    def test__add_parameters_with_location_postfix_conflict(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint
+        from openapi_python_client.parser.properties import Property
+
+        endpoint = self.make_endpoint()
+        path_prop_name_conflicted = "prop_name_path"
+        path_prop_conflicted = mocker.MagicMock(autospec=Property)
+        path_prop_conflicted_import = mocker.MagicMock()
+        path_prop_conflicted.get_imports = mocker.MagicMock(return_value={path_prop_conflicted_import})
+        path_prop_conflicted.python_name = "prop_name_path"
+
+        query_prop_name = "prop_name"
+        query_prop = mocker.MagicMock(autospec=Property)
+        query_prop_import = mocker.MagicMock()
+        query_prop.get_imports = mocker.MagicMock(return_value={query_prop_import})
+        query_prop.python_name = "prop_name_query"
+
+        path_prop_name = "prop_name"
+        path_prop = mocker.MagicMock(autospec=Property)
+        path_prop_import = mocker.MagicMock()
+        path_prop.get_imports = mocker.MagicMock(return_value={path_prop_import})
+        path_prop.python_name = "prop_name_path"
+
+        schemas_1 = mocker.MagicMock()
+        schemas_2 = mocker.MagicMock()
+        schemas_3 = mocker.MagicMock()
+        property_from_data = mocker.patch(
+            f"{MODULE_NAME}.property_from_data",
+            side_effect=[
+                (path_prop_conflicted, schemas_1),
+                (query_prop, schemas_2),
+                (path_prop, schemas_3),
+            ],
+        )
+        path_conflicted_schema = mocker.MagicMock()
+        query_schema = mocker.MagicMock()
+        path_schema = mocker.MagicMock()
+
+        data = oai.Operation.construct(
+            parameters=[
+                oai.Parameter.construct(
+                    name=path_prop_name_conflicted, required=True, param_schema=path_conflicted_schema, param_in="path"
+                ),
+                oai.Parameter.construct(
+                    name=query_prop_name, required=False, param_schema=query_schema, param_in="query"
+                ),
+                oai.Parameter.construct(name=path_prop_name, required=True, param_schema=path_schema, param_in="path"),
+                oai.Reference.construct(),  # Should be ignored
+                oai.Parameter.construct(),  # Should be ignored
+            ]
+        )
+        initial_schemas = mocker.MagicMock()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(
+            endpoint=endpoint, data=data, schemas=initial_schemas, config=config
+        )[0]
+        assert isinstance(result, ParseError)
+        assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
+
     def test__add_parameters_happy(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
         from openapi_python_client.parser.properties import Property
