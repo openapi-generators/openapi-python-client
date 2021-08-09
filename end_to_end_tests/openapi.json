@@ -901,6 +901,44 @@
           }
       ]
     },
+    "/same_identifier_conflict/{param}/{param_path}": {
+      "description": "Test that if you have properties with the same Python identifier, it not produces code",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "parameters": [
+          {
+            "name": "param_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/same-name-multiple-locations/{param}": {
       "description": "Test that if you have a property of the same name in multiple locations, it produces valid code",
       "get": {
