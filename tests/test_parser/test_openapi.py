@@ -532,47 +532,45 @@ class TestEndpoint:
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
         with pytest.raises(pydantic.ValidationError):
-            oai.Parameter(
-                name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
-            )
+            oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
 
     def test__add_parameters_happy(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
         from openapi_python_client.parser.properties import Property
 
         endpoint = self.make_endpoint()
-        path_prop_name = 'path_prop_name'
+        path_prop_name = "path_prop_name"
         path_prop = mocker.MagicMock(autospec=Property)
         path_prop_import = mocker.MagicMock()
         path_prop.get_imports = mocker.MagicMock(return_value={path_prop_import})
-        path_prop.python_name = 'path_prop_name'
+        path_prop.python_name = "path_prop_name"
 
-        query_prop_name = 'query_prop_name'
+        query_prop_name = "query_prop_name"
         query_prop = mocker.MagicMock(autospec=Property)
         query_prop_import = mocker.MagicMock()
         query_prop.get_imports = mocker.MagicMock(return_value={query_prop_import})
-        query_prop.python_name = 'query_prop_name'
+        query_prop.python_name = "query_prop_name"
 
-        header_prop_name = 'header_prop_name'
+        header_prop_name = "header_prop_name"
         header_prop_operation = mocker.MagicMock(autospec=Property)
         header_prop_operation.name = header_prop_name
         header_prop_operation.required = False
         header_prop_operation_import = mocker.MagicMock()
         header_prop_operation.get_imports = mocker.MagicMock(return_value={header_prop_operation_import})
-        header_prop_operation.python_name = 'header_prop_name'
+        header_prop_operation.python_name = "header_prop_name"
 
         header_prop_path = mocker.MagicMock(autospec=Property)
         header_prop_path.name = header_prop_name
         header_prop_path.required = True
         header_prop_path_import = mocker.MagicMock()
         header_prop_path.get_imports = mocker.MagicMock(return_value={header_prop_path_import})
-        header_prop_path.python_name = 'header_prop_name'
+        header_prop_path.python_name = "header_prop_name"
 
-        cookie_prop_name = 'cookie_prop_name'
+        cookie_prop_name = "cookie_prop_name"
         cookie_prop = mocker.MagicMock(autospec=Property)
         cookie_prop_import = mocker.MagicMock()
         cookie_prop.get_imports = mocker.MagicMock(return_value={cookie_prop_import})
-        cookie_prop.python_name = 'cookie_prop_name'
+        cookie_prop.python_name = "cookie_prop_name"
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -581,19 +579,23 @@ class TestEndpoint:
         schemas_5 = mocker.MagicMock()
         property_from_data = mocker.patch(
             f"{MODULE_NAME}.property_from_data",
-            side_effect=[(path_prop, schemas_1), (query_prop, schemas_2), (header_prop_operation, schemas_3), (header_prop_path, schemas_4), (cookie_prop, schemas_5)],
+            side_effect=[
+                (path_prop, schemas_1),
+                (query_prop, schemas_2),
+                (header_prop_operation, schemas_3),
+                (header_prop_path, schemas_4),
+                (cookie_prop, schemas_5),
+            ],
         )
         path_schema = mocker.MagicMock()
         query_schema = mocker.MagicMock()
         header_operation_schema = mocker.MagicMock()
         cookie_schema = mocker.MagicMock()
-        header_path_schema = mocker.MagicMock()
+        header_pathitem_schema = mocker.MagicMock()
 
         operation_data = oai.Operation.construct(
             parameters=[
-                oai.Parameter.construct(
-                    name=path_prop_name, required=True, param_schema=path_schema, param_in="path"
-                ),
+                oai.Parameter.construct(name=path_prop_name, required=True, param_schema=path_schema, param_in="path"),
                 oai.Parameter.construct(
                     name=query_prop_name, required=False, param_schema=query_schema, param_in="query"
                 ),
@@ -613,7 +615,7 @@ class TestEndpoint:
         path_item_data = oai.PathItem.construct(
             parameters=[
                 oai.Parameter.construct(
-                    name=header_prop_name, required=True, param_schema=header_path_schema, param_in="header"
+                    name=header_prop_name, required=True, param_schema=header_pathitem_schema, param_in="header"
                 ),
                 oai.Parameter.construct(
                     name=cookie_prop_name, required=False, param_schema=cookie_schema, param_in="cookie"
@@ -655,7 +657,7 @@ class TestEndpoint:
                 mocker.call(
                     name=header_prop_name,
                     required=True,
-                    data=header_path_schema,
+                    data=header_pathitem_schema,
                     schemas=schemas_3,
                     parent_name="name",
                     config=config,
@@ -675,7 +677,14 @@ class TestEndpoint:
         header_prop_operation.get_imports.assert_called_once_with(prefix="...")
         cookie_prop.get_imports.assert_called_once_with(prefix="...")
         header_prop_path.get_imports.assert_called_once_with(prefix="...")
-        assert endpoint.relative_imports == {"import_3", path_prop_import, query_prop_import, header_prop_operation_import, cookie_prop_import, header_prop_path_import}
+        assert endpoint.relative_imports == {
+            "import_3",
+            path_prop_import,
+            query_prop_import,
+            header_prop_operation_import,
+            cookie_prop_import,
+            header_prop_path_import,
+        }
         assert endpoint.path_parameters == {path_prop.name: path_prop}
         assert endpoint.query_parameters == {query_prop.name: query_prop}
         assert endpoint.header_parameters == {header_prop_operation.name: header_prop_operation}
@@ -696,9 +705,12 @@ class TestEndpoint:
 
         result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         assert result == (
-            ParseError(data=data, detail="Parameters MUST NOT duplicates. "
-                                         "A unique parameter is defined by a combination of a name and location. "
-                                         "Duplicated parameters named `test` detected in `path`."),
+            ParseError(
+                data=data,
+                detail="Parameters MUST NOT duplicates. "
+                "A unique parameter is defined by a combination of a name and location. "
+                "Duplicated parameters named `test` detected in `path`.",
+            ),
             schemas,
         )
 
