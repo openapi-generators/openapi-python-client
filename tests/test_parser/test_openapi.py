@@ -588,9 +588,7 @@ class TestEndpoint:
         initial_schemas = mocker.MagicMock()
         config = MagicMock()
 
-        result = Endpoint._add_parameters(
-            endpoint=endpoint, data=data, schemas=initial_schemas, config=config
-        )[0]
+        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
         assert isinstance(result, ParseError)
         assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 

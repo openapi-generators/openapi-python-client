@@ -290,7 +290,10 @@ class Endpoint:
 
                     if existing_prop.python_name in endpoint.used_python_identifiers:
                         return (
-                            ParseError(detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected", data=data),
+                            ParseError(
+                                detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
+                                data=data,
+                            ),
                             schemas,
                         )
                     endpoint.used_python_identifiers.add(existing_prop.python_name)
@@ -301,7 +304,9 @@ class Endpoint:
             if prop.name not in parameters_by_location[param.param_in]:
                 if prop.python_name in endpoint.used_python_identifiers:
                     return (
-                        ParseError(detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data),
+                        ParseError(
+                            detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
+                        ),
                         schemas,
                     )
                 endpoint.used_python_identifiers.add(prop.python_name)
