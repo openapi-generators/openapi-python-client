@@ -287,13 +287,25 @@ class Endpoint:
                     # Existing should be converted too for consistency
                     endpoint.used_python_identifiers.remove(existing_prop.python_name)
                     existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
-                    endpoint.used_python_identifiers.add(existing_prop.python_name)
 
+                    if existing_prop.python_name in endpoint.used_python_identifiers:
+                        return (
+                            ParseError(detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected", data=data),
+                            schemas,
+                        )
+                    endpoint.used_python_identifiers.add(existing_prop.python_name)
                     prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
 
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
-            parameters_by_location[param.param_in].setdefault(prop.name, prop)
-            endpoint.used_python_identifiers.add(prop.python_name)
+
+            if prop.name not in parameters_by_location[param.param_in]:
+                if prop.python_name in endpoint.used_python_identifiers:
+                    return (
+                        ParseError(detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data),
+                        schemas,
+                    )
+                endpoint.used_python_identifiers.add(prop.python_name)
+                parameters_by_location[param.param_in][prop.name] = prop
 
         return endpoint, schemas
 
