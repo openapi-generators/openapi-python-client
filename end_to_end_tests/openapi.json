@@ -193,7 +193,7 @@
         "tags": [
           "tests"
         ],
-        "sumnary": "Post from data",
+        "summary": "Post from data",
         "description": "Post form data",
         "operationId": "post_form_data",
         "requestBody": {
@@ -947,7 +947,7 @@
     },
     "/tag_with_number": {
       "get": {
-        "tags": [1],
+        "tags": ["1"],
         "responses": {
           "200": {
             "description": "Success"
@@ -1453,7 +1453,7 @@
             "type": "string"
           },
           "type_enum": {
-            "type": "int",
+            "type": "integer",
             "enum": [0, 1]
           }
         }
@@ -1470,7 +1470,7 @@
             "enum": ["submodel"]
           },
           "type_enum": {
-            "type": "int",
+            "type": "integer",
             "enum": [0]
           }
         }
