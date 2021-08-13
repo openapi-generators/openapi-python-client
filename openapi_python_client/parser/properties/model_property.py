@@ -174,7 +174,7 @@ def _process_properties(
         relative_imports.update(prop.get_imports(prefix=".."))
 
     # Except circular import
-    relative_imports = {relative_import for relative_import in relative_imports if "import " + class_name + "\n" not in relative_import}
+    relative_imports = {relative_import for relative_import in relative_imports if not relative_import.endswith("import " + class_name)}
 
     return _PropertyData(
         optional_props=optional_properties,
