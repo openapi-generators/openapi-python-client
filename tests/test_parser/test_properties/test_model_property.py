@@ -127,19 +127,6 @@ class TestBuildModelProperty:
             additional_properties=True,
         )
 
-    def test_model_name_conflict(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
-
-        data = oai.Schema.construct()
-        schemas = Schemas(classes_by_name={"OtherModel": None})
-
-        err, new_schemas = build_model_property(
-            data=data, name="OtherModel", schemas=schemas, required=True, parent_name=None, config=Config()
-        )
-
-        assert new_schemas == schemas
-        assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
-
     def test_bad_props_return_error(self):
         from openapi_python_client.parser.properties import Schemas, build_model_property
 
