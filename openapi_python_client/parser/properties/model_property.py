@@ -257,9 +257,6 @@ def build_model_property(
         additional_properties=additional_properties,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
-    if class_info.name in schemas.classes_by_name:
-        error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')
-        return error, schemas
 
     schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas
