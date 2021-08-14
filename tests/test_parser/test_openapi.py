@@ -734,14 +734,12 @@ class TestEndpoint:
         query_prop.get_imports.assert_called_once_with(prefix="...")
         header_prop_operation.get_imports.assert_called_once_with(prefix="...")
         cookie_prop.get_imports.assert_called_once_with(prefix="...")
-        header_prop_path.get_imports.assert_called_once_with(prefix="...")
         assert endpoint.relative_imports == {
             "import_3",
             path_prop_import,
             query_prop_import,
             header_prop_operation_import,
             cookie_prop_import,
-            header_prop_path_import,
         }
         assert endpoint.path_parameters == {path_prop.name: path_prop}
         assert endpoint.query_parameters == {query_prop.name: query_prop}
@@ -765,7 +763,7 @@ class TestEndpoint:
         assert result == (
             ParseError(
                 data=data,
-                detail="Parameters MUST NOT duplicates. "
+                detail="Parameters MUST NOT contain duplicates. "
                 "A unique parameter is defined by a combination of a name and location. "
                 "Duplicated parameters named `test` detected in `path`.",
             ),
