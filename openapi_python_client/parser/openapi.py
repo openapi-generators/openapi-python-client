@@ -282,10 +282,9 @@ if prop.name in parameters_by_location[param.param_in]:
     # This parameter was defined in the operation, so ignore the PathItem definition
     continue
             for location, parameters_dict in parameters_by_location.items():
-                existing_prop: Optional[Property] = parameters_dict.get(prop.name)
-                same_location: bool = location == param.param_in
-
-                if existing_prop and not same_location:
+                if location == param.param_in or prop.name not in parameters_dict:
+                    continue
+                existing_prop: Property = parameters_dict[prop.name]
                     # Existing should be converted too for consistency
                     endpoint.used_python_identifiers.remove(existing_prop.python_name)
                     existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
