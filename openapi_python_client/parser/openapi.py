@@ -262,7 +262,8 @@ class Endpoint:
             unique_param = (param.name, param.param_in)
             if unique_param in unique_parameters:
                 duplication_detail = (
-                    "Parameters MUST NOT contain duplicates. A unique parameter is defined by a combination of a name and location. "
+                    "Parameters MUST NOT contain duplicates. "
+                    "A unique parameter is defined by a combination of a name and location. "
                     f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
                 )
                 return ParseError(data=data, detail=duplication_detail), schemas
