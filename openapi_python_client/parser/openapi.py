@@ -278,7 +278,9 @@ class Endpoint:
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
-
+if prop.name in parameters_by_location[param.param_in]:
+    # This parameter was defined in the operation, so ignore the PathItem definition
+    continue
             for location, parameters_dict in parameters_by_location.items():
                 existing_prop: Optional[Property] = parameters_dict.get(prop.name)
                 same_location: bool = location == param.param_in
