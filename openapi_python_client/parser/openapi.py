@@ -278,27 +278,27 @@ class Endpoint:
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
-if prop.name in parameters_by_location[param.param_in]:
-    # This parameter was defined in the operation, so ignore the PathItem definition
-    continue
+            if prop.name in parameters_by_location[param.param_in]:
+                # This parameter was defined in the Operation, so ignore the PathItem definition
+                continue
             for location, parameters_dict in parameters_by_location.items():
                 if location == param.param_in or prop.name not in parameters_dict:
                     continue
                 existing_prop: Property = parameters_dict[prop.name]
-                    # Existing should be converted too for consistency
-                    endpoint.used_python_identifiers.remove(existing_prop.python_name)
-                    existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
+                # Existing should be converted too for consistency
+                endpoint.used_python_identifiers.remove(existing_prop.python_name)
+                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
 
-                    if existing_prop.python_name in endpoint.used_python_identifiers:
-                        return (
-                            ParseError(
-                                detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
-                                data=data,
-                            ),
-                            schemas,
-                        )
-                    endpoint.used_python_identifiers.add(existing_prop.python_name)
-                    prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
+                if existing_prop.python_name in endpoint.used_python_identifiers:
+                    return (
+                        ParseError(
+                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
+                            data=data,
+                        ),
+                        schemas,
+                    )
+                endpoint.used_python_identifiers.add(existing_prop.python_name)
+                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
 
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
