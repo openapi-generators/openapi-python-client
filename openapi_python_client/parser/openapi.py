@@ -409,11 +409,6 @@ class GeneratorData:
                     "You may be trying to use a Swagger document; this is not supported by this project.\n\n" + detail
                 )
             return GeneratorError(header="Failed to parse OpenAPI document", detail=detail)
-        if openapi.openapi.major != 3:
-            return GeneratorError(
-                header="openapi-python-client only supports OpenAPI 3.x",
-                detail=f"The version of the provided document was {openapi.openapi}",
-            )
         schemas = Schemas()
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)

@@ -107,25 +107,6 @@ class TestGeneratorData:
         Schemas.build.assert_not_called()
         Schemas.assert_not_called()
 
-    def test_from_dict_invalid_version(self, mocker):
-        Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
-        OpenAPI = mocker.patch(f"{MODULE_NAME}.oai.OpenAPI")
-        openapi = OpenAPI.parse_obj.return_value
-        openapi.openapi = oai.SemVer("2.1.3")
-        in_dict = mocker.MagicMock()
-        config = mocker.MagicMock()
-
-        from openapi_python_client.parser.openapi import GeneratorData
-
-        generator_data = GeneratorData.from_dict(in_dict, config=config)
-
-        assert generator_data == GeneratorError(
-            header="openapi-python-client only supports OpenAPI 3.x",
-            detail="The version of the provided document was 2.1.3",
-        )
-        Schemas.build.assert_not_called()
-        Schemas.assert_not_called()
-
 
 class TestEndpoint:
     def make_endpoint(self):
