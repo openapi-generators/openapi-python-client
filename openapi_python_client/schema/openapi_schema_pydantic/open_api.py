@@ -1,3 +1,4 @@
+# pylint: disable=W0611
 from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel
@@ -26,4 +27,4 @@ class OpenAPI(BaseModel):
     security: Optional[List[SecurityRequirement]] = None
     tags: Optional[List[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
-    openapi: Union[Literal["3.0.0"], Literal["3.0.1"], Literal["3.0.2"], Literal["3.0.3"]]
+    openapi: 'Union[Literal["3.0.0"], Literal["3.0.1"], Literal["3.0.2"], Literal["3.0.3"]]'
