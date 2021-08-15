@@ -96,7 +96,7 @@ class Endpoint:
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: OrderedDict[str, Property] = field(default_factory=OrderedDict)
+    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
