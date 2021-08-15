@@ -1,5 +1,5 @@
-import itertools
 import re
+from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
@@ -55,6 +55,8 @@ class EndpointCollection:
                     endpoint, schemas = Endpoint.add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
+                if not isinstance(endpoint, ParseError):
+                    endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
@@ -64,7 +66,6 @@ class EndpointCollection:
                 for error in endpoint.errors:
                     error.header = f"WARNING parsing {method.upper()} {path} within {tag}."
                     collection.parse_errors.append(error)
-                endpoint = Endpoint.sort_parameters(endpoint=endpoint, path=path)
                 collection.endpoints.append(endpoint)
 
         return endpoints_by_tag, schemas
@@ -95,7 +96,7 @@ class Endpoint:
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: Dict[str, Property] = field(default_factory=dict)
+    path_parameters: OrderedDict[str, Property] = field(default_factory=OrderedDict)
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
@@ -331,10 +332,13 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
         parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
         try:
-            endpoint.path_parameters.sort(key=lambda p: parameters_from_path.index(p.name))
+            sorted_params = sorted(
+                endpoint.path_parameters.values(), key=lambda param: parameters_from_path.index(param.name)
+            )
+            endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
         except ValueError:
             pass  # We're going to catch the difference down below
-        path_parameter_names = [p.name for p in endpoint.path_parameters]
+        path_parameter_names = [name for name in endpoint.path_parameters]
         if parameters_from_path != path_parameter_names:
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",

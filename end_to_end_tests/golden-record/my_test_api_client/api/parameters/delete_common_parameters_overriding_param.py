@@ -7,9 +7,9 @@ from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
+    param_path: str,
     *,
     client: Client,
-    param_path: str,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/common_parameters_overriding/{param}".format(client.base_url, param=param_path)
@@ -41,14 +41,14 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 
 
 def sync_detailed(
+    param_path: str,
     *,
     client: Client,
-    param_path: str,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
-        client=client,
         param_path=param_path,
+        client=client,
         param_query=param_query,
     )
 
@@ -60,14 +60,14 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
+    param_path: str,
     *,
     client: Client,
-    param_path: str,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
-        client=client,
         param_path=param_path,
+        client=client,
         param_query=param_query,
     )
 

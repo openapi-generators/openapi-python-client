@@ -530,22 +530,20 @@ class TestEndpoint:
             property_schemas,
         )
 
-    def test_add_parameters_parse_error_on_non_required_path_param(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
+    def test__add_parameters_parse_error_on_non_required_path_param(self):
         endpoint = self.make_endpoint()
-        parsed_schemas = mocker.MagicMock()
-        mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
         param = oai.Parameter.construct(
-            name="test", required=False, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
+            name="test",
+            required=False,
+            param_schema=oai.Schema.construct(type="string"),
+            param_in=oai.ParameterLocation.PATH,
         )
         schemas = Schemas()
-        config = MagicMock()
 
         result = Endpoint.add_parameters(
-            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=schemas, config=config
+            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=schemas, config=Config()
         )
-        assert result == (ParseError(data=param, detail="Path parameter must be required"), parsed_schemas)
+        assert result == (ParseError(data=param, detail="Path parameter must be required"), schemas)
 
     def test_validation_error_when_location_not_supported(self, mocker):
         parsed_schemas = mocker.MagicMock()
@@ -656,7 +654,7 @@ class TestEndpoint:
             ]
         )
 
-        (endpoint, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (endpoint, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert isinstance(endpoint, Endpoint)
         assert (
@@ -679,7 +677,7 @@ class TestEndpoint:
             ]
         )
 
-        (endpoint, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (endpoint, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert isinstance(endpoint, Endpoint)
         assert len(endpoint.path_parameters) == 0
@@ -692,11 +690,13 @@ class TestEndpoint:
                     name="param",
                     param_in="path",
                     param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    required=True,
                 ),
                 oai.Parameter.construct(
                     name="param_path",
                     param_in="path",
                     param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    required=True,
                 ),
                 oai.Parameter.construct(
                     name="param",
@@ -706,7 +706,7 @@ class TestEndpoint:
             ]
         )
 
-        (err, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (err, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert isinstance(err, ParseError)
         assert "param_path" in err.detail
@@ -742,7 +742,7 @@ class TestEndpoint:
             ]
         )
 
-        (endpoint, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (endpoint, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert len(endpoint.query_parameters) == 4, "Not all query params were added"
         for param in endpoint.query_parameters.values():
@@ -798,33 +798,29 @@ class TestEndpoint:
         assert result.path_parameters["test"].name == "test"
         assert result.query_parameters["test"].name == "test"
 
-    def test_sort_parameters(self, mocker):
+    def test_sort_parameters(self, string_property_factory):
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}"
 
         for i in range(1, 5):
-            param = oai.Parameter.construct(
-                name=f"param{i}", required=True, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
-            )
-            endpoint.path_parameters.append(param)
+            prop = string_property_factory(name=f"param{i}")
+            endpoint.path_parameters[prop.name] = prop
 
         result = Endpoint.sort_parameters(endpoint=endpoint)
-        result_names = [p.name for p in result.path_parameters]
+        result_names = [name for name in result.path_parameters]
         expected_names = [f"param{i}" for i in (4, 2, 1, 3)]
 
         assert result_names == expected_names
 
-    def test_sort_parameters_invalid_path_templating(self, mocker):
+    def test_sort_parameters_invalid_path_templating(self, string_property_factory):
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters/{param1}/{param2}"
-        param = oai.Parameter.construct(
-            name="param1", required=True, param_schema=mocker.MagicMock(), param_in=oai.ParameterLocation.PATH
-        )
-        endpoint.path_parameters.append(param)
+        param = string_property_factory(name="param1")
+        endpoint.path_parameters[param.name] = param
 
         result = Endpoint.sort_parameters(endpoint=endpoint)
 
