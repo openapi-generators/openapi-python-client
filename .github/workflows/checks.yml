@@ -51,7 +51,7 @@ jobs:
       run: poetry run mypy --show-error-codes openapi_python_client
 
     - name: Run pytest
-      run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests
+      run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py
 
     - name: Generate coverage report
       shell: bash

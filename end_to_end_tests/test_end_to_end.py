@@ -36,27 +36,17 @@ def _compare_directories(
     _, mismatches, errors = cmpfiles(record, test_subject, dc.common_files, shallow=False)
     mismatches = set(mismatches)
 
-    expected_path_mismatches = []
     for file_name in mismatches:
         mismatch_file_path = test_subject.joinpath(file_name)
-        expected_content = expected_differences.get(mismatch_file_path)
-        if expected_content is None:
-            continue
+
+        if mismatch_file_path in expected_differences:
+            expected_content = expected_differences[mismatch_file_path]
+            del expected_differences[mismatch_file_path]
+        else:
+            expected_content = (record / file_name).read_text()
 
         generated_content = (test_subject / file_name).read_text()
         assert generated_content == expected_content, f"Unexpected output in {mismatch_file_path}"
-        expected_path_mismatches.append(mismatch_file_path)
-
-    for path_mismatch in expected_path_mismatches:
-        matched_file_name = path_mismatch.name
-        mismatches.remove(matched_file_name)
-        del expected_differences[path_mismatch]
-
-    if mismatches:
-        pytest.fail(
-            f"{first_printable} and {second_printable} had differing files: {mismatches}, and errors {errors}",
-            pytrace=False,
-        )
 
     for sub_path in dc.common_dirs:
         _compare_directories(
