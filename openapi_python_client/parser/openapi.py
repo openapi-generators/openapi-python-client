@@ -303,16 +303,15 @@ class Endpoint:
 
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
-            if prop.name not in parameters_by_location[param.param_in]:
-                if prop.python_name in endpoint.used_python_identifiers:
-                    return (
-                        ParseError(
-                            detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
-                        ),
-                        schemas,
-                    )
-                endpoint.used_python_identifiers.add(prop.python_name)
-                parameters_by_location[param.param_in][prop.name] = prop
+            if prop.python_name in endpoint.used_python_identifiers:
+                return (
+                    ParseError(
+                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
+                    ),
+                    schemas,
+                )
+            endpoint.used_python_identifiers.add(prop.python_name)
+            parameters_by_location[param.param_in][prop.name] = prop
 
         return endpoint, schemas
 
