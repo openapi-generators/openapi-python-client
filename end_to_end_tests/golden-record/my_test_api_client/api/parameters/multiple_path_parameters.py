@@ -14,7 +14,7 @@ def _get_kwargs(
     *,
     client: Client,
 ) -> Dict[str, Any]:
-    url = "{}/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}".format(
+    url = "{}/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
         client.base_url, param4=param4, param2=param2, param1=param1, param3=param3
     )
 

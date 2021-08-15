@@ -833,7 +833,7 @@
         }
       }
     },
-    "/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}": {
+    "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}": {
       "description": "Test that multiple path parameters are ordered by appearance in path",
       "get": {
         "tags": [
