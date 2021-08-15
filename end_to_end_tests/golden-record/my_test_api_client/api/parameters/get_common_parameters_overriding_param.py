@@ -1,29 +1,21 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import httpx
 
 from ...client import Client
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response
 
 
 def _get_kwargs(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
-    param_header: Union[Unset, str] = UNSET,
-    param_cookie: Union[Unset, str] = UNSET,
+    param_query: str = "overriden_in_GET",
 ) -> Dict[str, Any]:
-    url = "{}/same-name-multiple-locations/{param}".format(client.base_url, param=param_path)
+    url = "{}/common_parameters_overriding/{param}".format(client.base_url, param=param_path)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
-
-    if param_header is not UNSET:
-        headers["param"] = param_header
-
-    if param_cookie is not UNSET:
-        cookies["param"] = param_cookie
 
     params: Dict[str, Any] = {
         "param": param_query,
@@ -52,16 +44,12 @@ def sync_detailed(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
-    param_header: Union[Unset, str] = UNSET,
-    param_cookie: Union[Unset, str] = UNSET,
+    param_query: str = "overriden_in_GET",
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
         param_path=param_path,
         param_query=param_query,
-        param_header=param_header,
-        param_cookie=param_cookie,
     )
 
     response = httpx.get(
@@ -75,16 +63,12 @@ async def asyncio_detailed(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
-    param_header: Union[Unset, str] = UNSET,
-    param_cookie: Union[Unset, str] = UNSET,
+    param_query: str = "overriden_in_GET",
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
         param_path=param_path,
         param_query=param_query,
-        param_header=param_header,
-        param_cookie=param_cookie,
     )
 
     async with httpx.AsyncClient() as _client:

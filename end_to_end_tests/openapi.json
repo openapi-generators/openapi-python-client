@@ -193,7 +193,7 @@
         "tags": [
           "tests"
         ],
-        "sumnary": "Post from data",
+        "summary": "Post from data",
         "description": "Post form data",
         "operationId": "post_form_data",
         "requestBody": {
@@ -850,6 +850,95 @@
         }
       }
     },
+    "/common_parameters_overriding/{param}": {
+      "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "parameters": [
+          {
+            "name": "param",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "overriden_in_GET"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "parameters"
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "parameters": [
+        {
+            "name": "param",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+      ]
+    },
+    "/same_identifier_conflict/{param}/{param_path}": {
+      "description": "Test that if you have properties with the same Python identifier, it not produces code",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "parameters": [
+          {
+            "name": "param_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/same-name-multiple-locations/{param}": {
       "description": "Test that if you have a property of the same name in multiple locations, it produces valid code",
       "get": {
@@ -866,7 +955,22 @@
           },
           {
             "name": "param",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "cookie",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -881,7 +985,7 @@
     },
     "/tag_with_number": {
       "get": {
-        "tags": [1],
+        "tags": ["1"],
         "responses": {
           "200": {
             "description": "Success"
@@ -1387,7 +1491,7 @@
             "type": "string"
           },
           "type_enum": {
-            "type": "int",
+            "type": "integer",
             "enum": [0, 1]
           }
         }
@@ -1404,7 +1508,7 @@
             "enum": ["submodel"]
           },
           "type_enum": {
-            "type": "int",
+            "type": "integer",
             "enum": [0]
           }
         }

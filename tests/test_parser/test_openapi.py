@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 
+import pydantic
 import pytest
 
 import openapi_python_client.schema as oai
@@ -527,57 +528,173 @@ class TestEndpoint:
             property_schemas,
         )
 
-    def test__add_parameters_fail_loudly_when_location_not_supported(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
-        endpoint = self.make_endpoint()
+    def test_validation_error_when_location_not_supported(self, mocker):
         parsed_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(mocker.MagicMock(), parsed_schemas))
-        param = oai.Parameter.construct(
-            name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location"
+        with pytest.raises(pydantic.ValidationError):
+            oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
+
+    def test__add_parameters_with_location_postfix_conflict1(self, mocker):
+        """Checks when the PythonIdentifier of new parameter already used."""
+        from openapi_python_client.parser.openapi import Endpoint
+        from openapi_python_client.parser.properties import Property
+
+        endpoint = self.make_endpoint()
+
+        path_prop_conflicted = Property(
+            name="prop_name_path", required=False, nullable=False, default=None, python_name="prop_name_path"
         )
-        schemas = Schemas()
+        query_prop = Property(name="prop_name", required=False, nullable=False, default=None, python_name="prop_name")
+        path_prop = Property(name="prop_name", required=False, nullable=False, default=None, python_name="prop_name")
+
+        schemas_1 = mocker.MagicMock()
+        schemas_2 = mocker.MagicMock()
+        schemas_3 = mocker.MagicMock()
+        property_from_data = mocker.patch(
+            f"{MODULE_NAME}.property_from_data",
+            side_effect=[
+                (path_prop_conflicted, schemas_1),
+                (query_prop, schemas_2),
+                (path_prop, schemas_3),
+            ],
+        )
+        path_conflicted_schema = mocker.MagicMock()
+        query_schema = mocker.MagicMock()
+        path_schema = mocker.MagicMock()
+
+        data = oai.Operation.construct(
+            parameters=[
+                oai.Parameter.construct(
+                    name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
+                ),
+                oai.Parameter.construct(
+                    name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
+                ),
+                oai.Parameter.construct(name=path_prop.name, required=True, param_schema=path_schema, param_in="path"),
+                oai.Reference.construct(),  # Should be ignored
+                oai.Parameter.construct(),  # Should be ignored
+            ]
+        )
+        initial_schemas = mocker.MagicMock()
         config = MagicMock()
 
-        result = Endpoint._add_parameters(
-            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=schemas, config=config
+        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
+        assert isinstance(result, ParseError)
+        assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
+
+    def test__add_parameters_with_location_postfix_conflict2(self, mocker):
+        """Checks when an existing parameter has a conflicting PythonIdentifier after renaming."""
+        from openapi_python_client.parser.openapi import Endpoint
+        from openapi_python_client.parser.properties import Property
+
+        endpoint = self.make_endpoint()
+        path_prop_conflicted = Property(
+            name="prop_name_path", required=False, nullable=False, default=None, python_name="prop_name_path"
         )
-        assert result == (ParseError(data=param, detail="Parameter must be declared in path or query"), parsed_schemas)
+        path_prop = Property(name="prop_name", required=False, nullable=False, default=None, python_name="prop_name")
+        query_prop = Property(name="prop_name", required=False, nullable=False, default=None, python_name="prop_name")
+        schemas_1 = mocker.MagicMock()
+        schemas_2 = mocker.MagicMock()
+        schemas_3 = mocker.MagicMock()
+        property_from_data = mocker.patch(
+            f"{MODULE_NAME}.property_from_data",
+            side_effect=[
+                (path_prop_conflicted, schemas_1),
+                (path_prop, schemas_2),
+                (query_prop, schemas_3),
+            ],
+        )
+        path_conflicted_schema = mocker.MagicMock()
+        path_schema = mocker.MagicMock()
+        query_schema = mocker.MagicMock()
+
+        data = oai.Operation.construct(
+            parameters=[
+                oai.Parameter.construct(
+                    name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
+                ),
+                oai.Parameter.construct(name=path_prop.name, required=True, param_schema=path_schema, param_in="path"),
+                oai.Parameter.construct(
+                    name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
+                ),
+                oai.Reference.construct(),  # Should be ignored
+                oai.Parameter.construct(),  # Should be ignored
+            ]
+        )
+        initial_schemas = mocker.MagicMock()
+        config = MagicMock()
+
+        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
+        assert isinstance(result, ParseError)
+        assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 
     def test__add_parameters_happy(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
         from openapi_python_client.parser.properties import Property
 
         endpoint = self.make_endpoint()
+        path_prop_name = "path_prop_name"
         path_prop = mocker.MagicMock(autospec=Property)
         path_prop_import = mocker.MagicMock()
         path_prop.get_imports = mocker.MagicMock(return_value={path_prop_import})
+        path_prop.python_name = "path_prop_name"
+
+        query_prop_name = "query_prop_name"
         query_prop = mocker.MagicMock(autospec=Property)
         query_prop_import = mocker.MagicMock()
         query_prop.get_imports = mocker.MagicMock(return_value={query_prop_import})
-        header_prop = mocker.MagicMock(autospec=Property)
-        header_prop_import = mocker.MagicMock()
-        header_prop.get_imports = mocker.MagicMock(return_value={header_prop_import})
+        query_prop.python_name = "query_prop_name"
+
+        header_prop_name = "header_prop_name"
+        header_prop_operation = mocker.MagicMock(autospec=Property)
+        header_prop_operation.name = header_prop_name
+        header_prop_operation.required = False
+        header_prop_operation_import = mocker.MagicMock()
+        header_prop_operation.get_imports = mocker.MagicMock(return_value={header_prop_operation_import})
+        header_prop_operation.python_name = "header_prop_name"
+
+        header_prop_path = mocker.MagicMock(autospec=Property)
+        header_prop_path.name = header_prop_name
+        header_prop_path.required = True
+        header_prop_path_import = mocker.MagicMock()
+        header_prop_path.get_imports = mocker.MagicMock(return_value={header_prop_path_import})
+        header_prop_path.python_name = "header_prop_name"
+
+        cookie_prop_name = "cookie_prop_name"
+        cookie_prop = mocker.MagicMock(autospec=Property)
+        cookie_prop_import = mocker.MagicMock()
+        cookie_prop.get_imports = mocker.MagicMock(return_value={cookie_prop_import})
+        cookie_prop.python_name = "cookie_prop_name"
+
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
+        schemas_4 = mocker.MagicMock()
+        schemas_5 = mocker.MagicMock()
         property_from_data = mocker.patch(
             f"{MODULE_NAME}.property_from_data",
-            side_effect=[(path_prop, schemas_1), (query_prop, schemas_2), (header_prop, schemas_3)],
+            side_effect=[
+                (path_prop, schemas_1),
+                (query_prop, schemas_2),
+                (header_prop_operation, schemas_3),
+                (header_prop_path, schemas_4),
+                (cookie_prop, schemas_5),
+            ],
         )
         path_schema = mocker.MagicMock()
         query_schema = mocker.MagicMock()
-        header_schema = mocker.MagicMock()
-        data = oai.Operation.construct(
+        header_operation_schema = mocker.MagicMock()
+        cookie_schema = mocker.MagicMock()
+        header_pathitem_schema = mocker.MagicMock()
+
+        operation_data = oai.Operation.construct(
             parameters=[
+                oai.Parameter.construct(name=path_prop_name, required=True, param_schema=path_schema, param_in="path"),
                 oai.Parameter.construct(
-                    name="path_prop_name", required=True, param_schema=path_schema, param_in="path"
+                    name=query_prop_name, required=False, param_schema=query_schema, param_in="query"
                 ),
                 oai.Parameter.construct(
-                    name="query_prop_name", required=False, param_schema=query_schema, param_in="query"
-                ),
-                oai.Parameter.construct(
-                    name="header_prop_name", required=False, param_schema=header_schema, param_in="header"
+                    name=header_prop_name, required=False, param_schema=header_operation_schema, param_in="header"
                 ),
                 oai.Reference.construct(),  # Should be ignored
                 oai.Parameter.construct(),  # Should be ignored
@@ -587,13 +704,28 @@ class TestEndpoint:
         config = MagicMock()
 
         (endpoint, schemas) = Endpoint._add_parameters(
-            endpoint=endpoint, data=data, schemas=initial_schemas, config=config
+            endpoint=endpoint, data=operation_data, schemas=initial_schemas, config=config
+        )
+        path_item_data = oai.PathItem.construct(
+            parameters=[
+                oai.Parameter.construct(
+                    name=header_prop_name, required=True, param_schema=header_pathitem_schema, param_in="header"
+                ),
+                oai.Parameter.construct(
+                    name=cookie_prop_name, required=False, param_schema=cookie_schema, param_in="cookie"
+                ),
+                oai.Reference.construct(),  # Should be ignored
+                oai.Parameter.construct(),  # Should be ignored
+            ]
+        )
+        (endpoint, schemas) = Endpoint._add_parameters(
+            endpoint=endpoint, data=path_item_data, schemas=schemas, config=config
         )
 
         property_from_data.assert_has_calls(
             [
                 mocker.call(
-                    name="path_prop_name",
+                    name=path_prop_name,
                     required=True,
                     data=path_schema,
                     schemas=initial_schemas,
@@ -601,7 +733,7 @@ class TestEndpoint:
                     config=config,
                 ),
                 mocker.call(
-                    name="query_prop_name",
+                    name=query_prop_name,
                     required=False,
                     data=query_schema,
                     schemas=schemas_1,
@@ -609,10 +741,26 @@ class TestEndpoint:
                     config=config,
                 ),
                 mocker.call(
-                    name="header_prop_name",
+                    name=header_prop_name,
                     required=False,
-                    data=header_schema,
+                    data=header_operation_schema,
                     schemas=schemas_2,
+                    parent_name="name",
+                    config=config,
+                ),
+                mocker.call(
+                    name=header_prop_name,
+                    required=True,
+                    data=header_pathitem_schema,
+                    schemas=schemas_3,
+                    parent_name="name",
+                    config=config,
+                ),
+                mocker.call(
+                    name=cookie_prop_name,
+                    required=False,
+                    data=cookie_schema,
+                    schemas=schemas_4,
                     parent_name="name",
                     config=config,
                 ),
@@ -620,12 +768,21 @@ class TestEndpoint:
         )
         path_prop.get_imports.assert_called_once_with(prefix="...")
         query_prop.get_imports.assert_called_once_with(prefix="...")
-        header_prop.get_imports.assert_called_once_with(prefix="...")
-        assert endpoint.relative_imports == {"import_3", path_prop_import, query_prop_import, header_prop_import}
-        assert endpoint.path_parameters == [path_prop]
-        assert endpoint.query_parameters == [query_prop]
-        assert endpoint.header_parameters == [header_prop]
-        assert schemas == schemas_3
+        header_prop_operation.get_imports.assert_called_once_with(prefix="...")
+        cookie_prop.get_imports.assert_called_once_with(prefix="...")
+        assert endpoint.relative_imports == {
+            "import_3",
+            path_prop_import,
+            query_prop_import,
+            header_prop_operation_import,
+            cookie_prop_import,
+        }
+        assert endpoint.path_parameters == {path_prop.name: path_prop}
+        assert endpoint.query_parameters == {query_prop.name: query_prop}
+        assert endpoint.header_parameters == {header_prop_operation.name: header_prop_operation}
+        assert endpoint.header_parameters[header_prop_operation.name].required is False
+        assert endpoint.cookie_parameters == {cookie_prop.name: cookie_prop}
+        assert schemas == schemas_5
 
     def test__add_parameters_duplicate_properties(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
@@ -640,7 +797,12 @@ class TestEndpoint:
 
         result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         assert result == (
-            ParseError(data=data, detail="Could not reconcile duplicate parameters named test_path"),
+            ParseError(
+                data=data,
+                detail="Parameters MUST NOT contain duplicates. "
+                "A unique parameter is defined by a combination of a name and location. "
+                "Duplicated parameters named `test` detected in `path`.",
+            ),
             schemas,
         )
 
@@ -664,10 +826,8 @@ class TestEndpoint:
             config=config,
         )[0]
         assert isinstance(result, Endpoint)
-        assert result.path_parameters[0].python_name == "test_path"
-        assert result.path_parameters[0].name == "test"
-        assert result.query_parameters[0].python_name == "test_query"
-        assert result.query_parameters[0].name == "test"
+        assert result.path_parameters["test"].name == "test"
+        assert result.query_parameters["test"].name == "test"
 
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint

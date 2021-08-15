@@ -1,4 +1,3 @@
-import itertools
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
@@ -9,6 +8,7 @@ from pydantic import ValidationError
 from .. import schema as oai
 from .. import utils
 from ..config import Config
+from ..utils import PythonIdentifier
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
@@ -46,10 +46,12 @@ class EndpointCollection:
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
                 )
+                # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
                     endpoint, schemas = Endpoint._add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
+
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
@@ -88,15 +90,16 @@ class Endpoint:
     tag: str
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: List[Property] = field(default_factory=list)
-    path_parameters: List[Property] = field(default_factory=list)
-    header_parameters: List[Property] = field(default_factory=list)
-    cookie_parameters: List[Property] = field(default_factory=list)
+    query_parameters: Dict[str, Property] = field(default_factory=dict)
+    path_parameters: Dict[str, Property] = field(default_factory=dict)
+    header_parameters: Dict[str, Property] = field(default_factory=dict)
+    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
     form_body_class: Optional[Class] = None
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
+    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
     def parse_request_form_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
@@ -241,12 +244,31 @@ class Endpoint:
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
-        used_python_names: Dict[str, Tuple[Property, oai.ParameterLocation]] = {}
         if data.parameters is None:
             return endpoint, schemas
+
+        unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
+        parameters_by_location = {
+            oai.ParameterLocation.QUERY: endpoint.query_parameters,
+            oai.ParameterLocation.PATH: endpoint.path_parameters,
+            oai.ParameterLocation.HEADER: endpoint.header_parameters,
+            oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
+        }
+
         for param in data.parameters:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
+
+            unique_param = (param.name, param.param_in)
+            if unique_param in unique_parameters:
+                duplication_detail = (
+                    "Parameters MUST NOT contain duplicates. "
+                    "A unique parameter is defined by a combination of a name and location. "
+                    f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                )
+                return ParseError(data=data, detail=duplication_detail), schemas
+            unique_parameters.add(unique_param)
+
             prop, schemas = property_from_data(
                 name=param.name,
                 required=param.required,
@@ -257,38 +279,39 @@ class Endpoint:
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
+            if prop.name in parameters_by_location[param.param_in]:
+                # This parameter was defined in the Operation, so ignore the PathItem definition
+                continue
+            for location, parameters_dict in parameters_by_location.items():
+                if location == param.param_in or prop.name not in parameters_dict:
+                    continue
+                existing_prop: Property = parameters_dict[prop.name]
+                # Existing should be converted too for consistency
+                endpoint.used_python_identifiers.remove(existing_prop.python_name)
+                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
 
-            if prop.python_name in used_python_names:
-                duplicate, duplicate_location = used_python_names[prop.python_name]
-                if duplicate.python_name == prop.python_name:  # Existing should be converted too for consistency
-                    duplicate.set_python_name(f"{duplicate.python_name}_{duplicate_location}", config=config)
-                prop.set_python_name(f"{prop.python_name}_{param.param_in}", config=config)
-            else:
-                used_python_names[prop.python_name] = (prop, param.param_in)
+                if existing_prop.python_name in endpoint.used_python_identifiers:
+                    return (
+                        ParseError(
+                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
+                            data=data,
+                        ),
+                        schemas,
+                    )
+                endpoint.used_python_identifiers.add(existing_prop.python_name)
+                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
 
             endpoint.relative_imports.update(prop.get_imports(prefix="..."))
 
-            if param.param_in == oai.ParameterLocation.QUERY:
-                endpoint.query_parameters.append(prop)
-            elif param.param_in == oai.ParameterLocation.PATH:
-                endpoint.path_parameters.append(prop)
-            elif param.param_in == oai.ParameterLocation.HEADER:
-                endpoint.header_parameters.append(prop)
-            elif param.param_in == oai.ParameterLocation.COOKIE:
-                endpoint.cookie_parameters.append(prop)
-            else:
-                return ParseError(data=param, detail="Parameter must be declared in path or query"), schemas
-
-        name_check = set()
-        for prop in itertools.chain(
-            endpoint.query_parameters, endpoint.path_parameters, endpoint.header_parameters, endpoint.cookie_parameters
-        ):
-            if prop.python_name in name_check:
+            if prop.python_name in endpoint.used_python_identifiers:
                 return (
-                    ParseError(data=data, detail=f"Could not reconcile duplicate parameters named {prop.python_name}"),
+                    ParseError(
+                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
+                    ),
                     schemas,
                 )
-            name_check.add(prop.python_name)
+            endpoint.used_python_identifiers.add(prop.python_name)
+            parameters_by_location[param.param_in][prop.name] = prop
 
         return endpoint, schemas
 
