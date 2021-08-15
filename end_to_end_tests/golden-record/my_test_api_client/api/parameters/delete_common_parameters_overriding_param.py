@@ -10,7 +10,7 @@ def _get_kwargs(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/common_parameters_overriding/{param}".format(client.base_url, param=param_path)
 
@@ -44,7 +44,7 @@ def sync_detailed(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,
@@ -63,7 +63,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
         client=client,

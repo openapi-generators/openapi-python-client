@@ -10,7 +10,7 @@ def _get_kwargs(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
@@ -52,7 +52,7 @@ def sync_detailed(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
@@ -75,7 +75,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     param_path: str,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
