@@ -496,7 +496,7 @@ class TestEndpoint:
         }
         assert response_schemas == schemas_2
 
-    def test__add_parameters_handles_no_params(self):
+    def test_add_parameters_handles_no_params(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
@@ -504,14 +504,14 @@ class TestEndpoint:
         config = MagicMock()
 
         # Just checking there's no exception here
-        assert Endpoint._add_parameters(
+        assert Endpoint.add_parameters(
             endpoint=endpoint, data=oai.Operation.construct(), schemas=schemas, config=config
         ) == (
             endpoint,
             schemas,
         )
 
-    def test__add_parameters_parse_error(self, mocker):
+    def test_add_parameters_parse_error(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
@@ -522,13 +522,28 @@ class TestEndpoint:
         param = oai.Parameter.construct(name="test", required=True, param_schema=mocker.MagicMock(), param_in="cookie")
         config = MagicMock()
 
-        result = Endpoint._add_parameters(
+        result = Endpoint.add_parameters(
             endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=initial_schemas, config=config
         )
         assert result == (
             ParseError(data=parse_error.data, detail=f"cannot parse parameter of endpoint {endpoint.name}"),
             property_schemas,
         )
+
+    def test__add_parameters_parse_error_on_non_required_path_param(self):
+        endpoint = self.make_endpoint()
+        param = oai.Parameter.construct(
+            name="test",
+            required=False,
+            param_schema=oai.Schema.construct(type="string"),
+            param_in=oai.ParameterLocation.PATH,
+        )
+        schemas = Schemas()
+
+        result = Endpoint.add_parameters(
+            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=schemas, config=Config()
+        )
+        assert result == (ParseError(data=param, detail="Path parameter must be required"), schemas)
 
     def test_validation_error_when_location_not_supported(self, mocker):
         parsed_schemas = mocker.MagicMock()
@@ -580,7 +595,7 @@ class TestEndpoint:
         initial_schemas = mocker.MagicMock()
         config = MagicMock()
 
-        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
+        result = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
         assert isinstance(result, ParseError)
         assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 
@@ -626,7 +641,7 @@ class TestEndpoint:
         initial_schemas = mocker.MagicMock()
         config = MagicMock()
 
-        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
+        result = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=initial_schemas, config=config)[0]
         assert isinstance(result, ParseError)
         assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 
@@ -639,7 +654,7 @@ class TestEndpoint:
             ]
         )
 
-        (endpoint, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (endpoint, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert isinstance(endpoint, Endpoint)
         assert (
@@ -662,7 +677,7 @@ class TestEndpoint:
             ]
         )
 
-        (endpoint, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (endpoint, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert isinstance(endpoint, Endpoint)
         assert len(endpoint.path_parameters) == 0
@@ -675,11 +690,13 @@ class TestEndpoint:
                     name="param",
                     param_in="path",
                     param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    required=True,
                 ),
                 oai.Parameter.construct(
                     name="param_path",
                     param_in="path",
                     param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    required=True,
                 ),
                 oai.Parameter.construct(
                     name="param",
@@ -689,7 +706,7 @@ class TestEndpoint:
             ]
         )
 
-        (err, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (err, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert isinstance(err, ParseError)
         assert "param_path" in err.detail
@@ -725,7 +742,7 @@ class TestEndpoint:
             ]
         )
 
-        (endpoint, _) = endpoint._add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
+        (endpoint, _) = endpoint.add_parameters(endpoint=endpoint, data=data, schemas=Schemas(), config=Config())
 
         assert len(endpoint.query_parameters) == 4, "Not all query params were added"
         for param in endpoint.query_parameters.values():
@@ -736,7 +753,7 @@ class TestEndpoint:
                 assert param.nullable
                 assert not param.required
 
-    def test__add_parameters_duplicate_properties(self):
+    def test_add_parameters_duplicate_properties(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
@@ -747,7 +764,7 @@ class TestEndpoint:
         schemas = Schemas()
         config = MagicMock()
 
-        result = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        result = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         assert result == (
             ParseError(
                 data=data,
@@ -758,7 +775,7 @@ class TestEndpoint:
             schemas,
         )
 
-    def test__add_parameters_duplicate_properties_different_location(self):
+    def test_add_parameters_duplicate_properties_different_location(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
@@ -771,7 +788,7 @@ class TestEndpoint:
         schemas = Schemas()
         config = MagicMock()
 
-        result = Endpoint._add_parameters(
+        result = Endpoint.add_parameters(
             endpoint=endpoint,
             data=oai.Operation.construct(parameters=[path_param, query_param]),
             schemas=schemas,
@@ -781,6 +798,50 @@ class TestEndpoint:
         assert result.path_parameters["test"].name == "test"
         assert result.query_parameters["test"].name == "test"
 
+    def test_sort_parameters(self, string_property_factory):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        endpoint.path = "/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}"
+
+        for i in range(1, 5):
+            prop = string_property_factory(name=f"param{i}")
+            endpoint.path_parameters[prop.name] = prop
+
+        result = Endpoint.sort_parameters(endpoint=endpoint)
+        result_names = [name for name in result.path_parameters]
+        expected_names = [f"param{i}" for i in (4, 2, 1, 3)]
+
+        assert result_names == expected_names
+
+    def test_sort_parameters_missing_param(self, string_property_factory):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        endpoint.path = "/multiple-path-parameters/{param1}/{param2}"
+        param = string_property_factory(name="param1")
+        endpoint.path_parameters[param.name] = param
+
+        result = Endpoint.sort_parameters(endpoint=endpoint)
+
+        assert isinstance(result, ParseError)
+        assert "Incorrect path templating" in result.detail
+        assert endpoint.path in result.detail
+
+    def test_sort_parameters_extra_param(self, string_property_factory):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        endpoint.path = "/multiple-path-parameters"
+        param = string_property_factory(name="param1")
+        endpoint.path_parameters[param.name] = param
+
+        result = Endpoint.sort_parameters(endpoint=endpoint)
+
+        assert isinstance(result, ParseError)
+        assert "Incorrect path templating" in result.detail
+        assert endpoint.path in result.detail
+
     def test_from_data_bad_params(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 
@@ -788,7 +849,7 @@ class TestEndpoint:
         method = mocker.MagicMock()
         parse_error = ParseError(data=mocker.MagicMock())
         return_schemas = mocker.MagicMock()
-        _add_parameters = mocker.patch.object(Endpoint, "_add_parameters", return_value=(parse_error, return_schemas))
+        add_parameters = mocker.patch.object(Endpoint, "add_parameters", return_value=(parse_error, return_schemas))
         data = oai.Operation.construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
@@ -811,8 +872,8 @@ class TestEndpoint:
         method = mocker.MagicMock()
         parse_error = ParseError(data=mocker.MagicMock())
         param_schemas = mocker.MagicMock()
-        _add_parameters = mocker.patch.object(
-            Endpoint, "_add_parameters", return_value=(mocker.MagicMock(), param_schemas)
+        add_parameters = mocker.patch.object(
+            Endpoint, "add_parameters", return_value=(mocker.MagicMock(), param_schemas)
         )
         response_schemas = mocker.MagicMock()
         _add_responses = mocker.patch.object(Endpoint, "_add_responses", return_value=(parse_error, response_schemas))
@@ -838,7 +899,7 @@ class TestEndpoint:
         method = mocker.MagicMock()
         param_schemas = mocker.MagicMock()
         param_endpoint = mocker.MagicMock()
-        _add_parameters = mocker.patch.object(Endpoint, "_add_parameters", return_value=(param_endpoint, param_schemas))
+        add_parameters = mocker.patch.object(Endpoint, "add_parameters", return_value=(param_endpoint, param_schemas))
         response_schemas = mocker.MagicMock()
         response_endpoint = mocker.MagicMock()
         _add_responses = mocker.patch.object(
@@ -864,7 +925,7 @@ class TestEndpoint:
 
         assert endpoint == _add_body.return_value
 
-        _add_parameters.assert_called_once_with(
+        add_parameters.assert_called_once_with(
             endpoint=Endpoint(
                 path=path,
                 method=method,
@@ -890,8 +951,8 @@ class TestEndpoint:
 
         path = "/path/with/{param}/"
         method = "get"
-        _add_parameters = mocker.patch.object(
-            Endpoint, "_add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock())
+        add_parameters = mocker.patch.object(
+            Endpoint, "add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock())
         )
         _add_responses = mocker.patch.object(
             Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock())
@@ -911,7 +972,7 @@ class TestEndpoint:
 
         assert result == _add_body.return_value
 
-        _add_parameters.assert_called_once_with(
+        add_parameters.assert_called_once_with(
             endpoint=Endpoint(
                 path=path,
                 method=method,
@@ -926,9 +987,9 @@ class TestEndpoint:
             config=config,
         )
         _add_responses.assert_called_once_with(
-            endpoint=_add_parameters.return_value[0],
+            endpoint=add_parameters.return_value[0],
             data=data.responses,
-            schemas=_add_parameters.return_value[1],
+            schemas=add_parameters.return_value[1],
             config=config,
         )
         _add_body.assert_called_once_with(
@@ -944,8 +1005,8 @@ class TestEndpoint:
             security=None,
             responses=mocker.MagicMock(),
         )
-        _add_parameters = mocker.patch.object(
-            Endpoint, "_add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock())
+        add_parameters = mocker.patch.object(
+            Endpoint, "add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock())
         )
         _add_responses = mocker.patch.object(
             Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock())
@@ -959,7 +1020,7 @@ class TestEndpoint:
 
         Endpoint.from_data(data=data, path=path, method=method, tag="a", schemas=schemas, config=config)
 
-        _add_parameters.assert_called_once_with(
+        add_parameters.assert_called_once_with(
             endpoint=Endpoint(
                 path=path,
                 method=method,
@@ -974,9 +1035,9 @@ class TestEndpoint:
             config=config,
         )
         _add_responses.assert_called_once_with(
-            endpoint=_add_parameters.return_value[0],
+            endpoint=add_parameters.return_value[0],
             data=data.responses,
-            schemas=_add_parameters.return_value[1],
+            schemas=add_parameters.return_value[1],
             config=config,
         )
         _add_body.assert_called_once_with(
@@ -1029,9 +1090,9 @@ class TestEndpointCollection:
             "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
             "path_2": oai.PathItem.construct(get=path_2_get),
         }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"})
-        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="tag_2", relative_imports={"2"})
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"})
+        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
+        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="tag_2", relative_imports={"2"}, path="path_1")
+        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"}, path="path_2")
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
@@ -1112,7 +1173,7 @@ class TestEndpointCollection:
             side_effect=[
                 (ParseError(data="1"), schemas_1),
                 (ParseError(data="2"), schemas_2),
-                (mocker.MagicMock(errors=[ParseError(data="3")]), schemas_3),
+                (mocker.MagicMock(errors=[ParseError(data="3")], path="path_2"), schemas_3),
             ],
         )
         schemas = mocker.MagicMock()
@@ -1148,9 +1209,11 @@ class TestEndpointCollection:
             "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
             "path_2": oai.PathItem.construct(get=path_2_get),
         }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"})
-        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="AMFSubscriptionInfo (Document)", relative_imports={"2"})
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"})
+        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
+        endpoint_2 = mocker.MagicMock(
+            autospec=Endpoint, tag="AMFSubscriptionInfo (Document)", relative_imports={"2"}, path="path_1"
+        )
+        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"}, path="path_2")
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()

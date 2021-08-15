@@ -7,9 +7,9 @@ from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
+    param_path: str,
     *,
     client: Client,
-    param_path: str,
     param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
@@ -49,16 +49,16 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 
 
 def sync_detailed(
+    param_path: str,
     *,
     client: Client,
-    param_path: str,
     param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
-        client=client,
         param_path=param_path,
+        client=client,
         param_query=param_query,
         param_header=param_header,
         param_cookie=param_cookie,
@@ -72,16 +72,16 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
+    param_path: str,
     *,
     client: Client,
-    param_path: str,
     param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
-        client=client,
         param_path=param_path,
+        client=client,
         param_query=param_query,
         param_header=param_header,
         param_cookie=param_cookie,

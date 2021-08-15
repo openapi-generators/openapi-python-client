@@ -1,3 +1,5 @@
+import re
+from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
@@ -12,6 +14,8 @@ from ..utils import PythonIdentifier
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
+
+_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
@@ -48,10 +52,11 @@ class EndpointCollection:
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint._add_parameters(
+                    endpoint, schemas = Endpoint.add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
-
+                if not isinstance(endpoint, ParseError):
+                    endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
@@ -91,7 +96,7 @@ class Endpoint:
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: Dict[str, Property] = field(default_factory=dict)
+    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
@@ -240,7 +245,7 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def _add_parameters(
+    def add_parameters(
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         endpoint = deepcopy(endpoint)
@@ -258,6 +263,9 @@ class Endpoint:
         for param in data.parameters:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
+
+            if param.param_in == oai.ParameterLocation.PATH and not param.required:
+                return ParseError(data=param, detail="Path parameter must be required"), schemas
 
             unique_param = (param.name, param.param_in)
             if unique_param in unique_parameters:
@@ -282,6 +290,7 @@ class Endpoint:
             if prop.name in parameters_by_location[param.param_in]:
                 # This parameter was defined in the Operation, so ignore the PathItem definition
                 continue
+
             for location, parameters_dict in parameters_by_location.items():
                 if location == param.param_in or prop.name not in parameters_dict:
                     continue
@@ -319,6 +328,24 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
+    def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
+        endpoint = deepcopy(endpoint)
+        parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
+        try:
+            sorted_params = sorted(
+                endpoint.path_parameters.values(), key=lambda param: parameters_from_path.index(param.name)
+            )
+            endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
+        except ValueError:
+            pass  # We're going to catch the difference down below
+        path_parameter_names = [name for name in endpoint.path_parameters]
+        if parameters_from_path != path_parameter_names:
+            return ParseError(
+                detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
+            )
+        return endpoint
+
+    @staticmethod
     def from_data(
         *, data: oai.Operation, path: str, method: str, tag: str, schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
@@ -339,7 +366,7 @@ class Endpoint:
             tag=tag,
         )
 
-        result, schemas = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        result, schemas = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         if isinstance(result, ParseError):
             return result, schemas
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
