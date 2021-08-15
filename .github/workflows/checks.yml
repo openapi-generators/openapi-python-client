@@ -30,22 +30,33 @@ jobs:
           ${{ runner.os }}-${{ matrix.python }}-dependencies-
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
         pip install poetry
         poetry config virtualenvs.in-project true
         poetry run pip install --upgrade pip
         poetry install
-    - name: Run Checks
-      uses: triaxtec/github-actions/python/run-checks@main
-      with:
-        module: openapi_python_client
 
-    - name: End to End Tests
-      run: poetry run pytest --cov=openapi_python_client end_to_end_tests
+    - name: Run Black
+      run: poetry run black . --check
 
-    - name: Generate E2E Coverage
-      run: poetry run coverage xml -o e2e-coverage.xml
+    - name: Run isort
+      run: poetry run isort . --check
+
+    - name: Run flake8
+      run: poetry run flake8 openapi_python_client
+
+    - name: Run safety
+      run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
+
+    - name: Run mypy
+      run: poetry run mypy --show-error-codes openapi_python_client
+
+    - name: Run pytest
+      run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests
+
+    - name: Generate coverage report
+      shell: bash
+      run: poetry run coverage xml
 
     - uses: codecov/codecov-action@v2
       with:
-        files: ./coverage.xml,./e2e-coverage.xml
+        files: ./coverage.xml
