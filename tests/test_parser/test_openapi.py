@@ -814,11 +814,25 @@ class TestEndpoint:
 
         assert result_names == expected_names
 
-    def test_sort_parameters_invalid_path_templating(self, string_property_factory):
+    def test_sort_parameters_missing_param(self, string_property_factory):
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters/{param1}/{param2}"
+        param = string_property_factory(name="param1")
+        endpoint.path_parameters[param.name] = param
+
+        result = Endpoint.sort_parameters(endpoint=endpoint)
+
+        assert isinstance(result, ParseError)
+        assert "Incorrect path templating" in result.detail
+        assert endpoint.path in result.detail
+
+    def test_sort_parameters_extra_param(self, string_property_factory):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        endpoint.path = "/multiple-path-parameters"
         param = string_property_factory(name="param1")
         endpoint.path_parameters[param.name] = param
 
