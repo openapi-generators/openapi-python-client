@@ -51,6 +51,7 @@ types-PyYAML = "^5.4.3"
 types-certifi = "^0.1.4"
 types-python-dateutil = "^0.1.4"
 types-dataclasses = { version = "^0.1.5", python = "<3.7" }
+pylint = "^2.9.6"
 
 [tool.taskipy.tasks]
 check = """
@@ -93,6 +94,12 @@ skip = [".venv", "tests/test_templates"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = ["duplicate-code", "missing-module-docstring", "too-few-public-methods"]
 
 [build-system]
 requires = ["poetry>=1.0"]

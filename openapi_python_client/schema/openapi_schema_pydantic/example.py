@@ -4,35 +4,19 @@ from pydantic import BaseModel
 
 
 class Example(BaseModel):
+    """ Examples added to parameters / components to help clarify usage.
+
+    References:
+        - https://swagger.io/docs/specification/adding-examples/
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject
+    """
 
     summary: Optional[str] = None
-    """
-    Short description for the example.
-    """
-
     description: Optional[str] = None
-    """
-    Long description for the example.
-    [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-    """
-
     value: Optional[Any] = None
-    """
-    Embedded literal example.
-    The `value` field and `externalValue` field are mutually exclusive.
-    To represent examples of media types that cannot naturally represented in JSON or YAML,
-    use a string value to contain the example, escaping where necessary.
-    """
-
     externalValue: Optional[str] = None
-    """
-    A URL that points to the literal example.
-    This provides the capability to reference examples that cannot easily be included in JSON or YAML documents.
 
-    The `value` field and `externalValue` field are mutually exclusive.
-    """
-
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         schema_extra = {
             "examples": [
                 {"summary": "A foo example", "value": {"foo": "bar"}},

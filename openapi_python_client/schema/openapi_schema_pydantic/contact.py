@@ -6,26 +6,16 @@ from pydantic import AnyUrl, BaseModel
 class Contact(BaseModel):
     """
     Contact information for the exposed API.
+
+    See Also:
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#contactObject
     """
 
     name: Optional[str] = None
-    """
-    The identifying name of the contact person/organization.
-    """
-
     url: Optional[AnyUrl] = None
-    """
-    The URL pointing to the contact information.
-    MUST be in the format of a URL.
-    """
-
     email: Optional[str] = None
-    """
-    The email address of the contact person/organization.
-    MUST be in the format of an email address.
-    """
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         schema_extra = {
             "examples": [
                 {"name": "API Support", "url": "http://www.example.com/support", "email": "support@example.com"}
