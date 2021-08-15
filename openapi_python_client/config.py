@@ -6,11 +6,21 @@ from pydantic import BaseModel
 
 
 class ClassOverride(BaseModel):
+    """An override of a single generated class.
+
+    See https://github.com/openapi-generators/openapi-python-client#class_overrides
+    """
+
     class_name: Optional[str] = None
     module_name: Optional[str] = None
 
 
 class Config(BaseModel):
+    """Contains any configurable values passed by the user.
+
+    See https://github.com/openapi-generators/openapi-python-client#configuration
+    """
+
     class_overrides: Dict[str, ClassOverride] = {}
     project_name_override: Optional[str]
     package_name_override: Optional[str]

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Example(BaseModel):
-    """ Examples added to parameters / components to help clarify usage.
+    """Examples added to parameters / components to help clarify usage.
 
     References:
         - https://swagger.io/docs/specification/adding-examples/

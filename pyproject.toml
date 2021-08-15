@@ -99,7 +99,20 @@ omit = ["openapi_python_client/templates/*"]
 max-line-length = 120
 
 [tool.pylint.messages_control]
-disable = ["duplicate-code", "missing-module-docstring", "too-few-public-methods"]
+disable = [
+    # DRY < MOIST
+    "duplicate-code",
+    # Sometimes necessary to prevent cycles
+    "import-outside-toplevel",
+    # Modules are mostly used for organization here, there is no lib API
+    "missing-module-docstring",
+    # Organization is important, even when just separating classes
+    "too-few-public-methods",
+    # Disable any type-checking, that's what mypy is for
+    "no-member",
+    # False positives
+    "cyclic-import",
+]
 
 [build-system]
 requires = ["poetry>=1.0"]

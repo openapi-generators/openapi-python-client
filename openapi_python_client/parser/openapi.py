@@ -81,6 +81,7 @@ def generate_operation_id(*, path: str, method: str) -> str:
     return f"{method}_{clean_path}"
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Endpoint:
     """
