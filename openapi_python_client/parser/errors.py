@@ -40,4 +40,4 @@ class PropertyError(ParseError):
 
 
 class ValidationError(Exception):
-    pass
+    """Used internally to exit quickly from property parsing due to some internal exception."""

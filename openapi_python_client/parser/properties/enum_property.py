@@ -22,10 +22,10 @@ class EnumProperty(Property):
 
     template: ClassVar[str] = "enum_property.py.jinja"
 
-    def get_base_type_string(self, json: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         return self.class_info.name
 
-    def get_base_json_type_string(self, json: bool = False) -> str:
+    def get_base_json_type_string(self) -> str:
         return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> Set[str]:

@@ -60,6 +60,7 @@ isort .\
  && flake8 openapi_python_client\
  && poetry export -f requirements.txt | poetry run safety check --bare --stdin\
  && mypy openapi_python_client\
+ && pylint openapi_python_client\
  && pytest --cov openapi_python_client tests --cov-report=term-missing\
 """
 regen = "python -m end_to_end_tests.regen_golden_record"

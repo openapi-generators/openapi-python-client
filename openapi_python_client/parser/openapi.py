@@ -245,10 +245,32 @@ class Endpoint:
             endpoint.responses.append(response)
         return endpoint, schemas
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def add_parameters(
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
+        """Process the defined `parameters` for an Endpoint.
+
+        Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
+        parameters should therefore be added __after__ operation parameters.
+
+        Args:
+            endpoint: The endpoint to add parameters to.
+            data: The Operation or PathItem to add parameters from.
+            schemas: The cumulative Schemas of processing so far which should contain details for any references.
+            config: User-provided config for overrides within parameters.
+
+        Returns:
+            `(result, schemas)` where `result` is either an updated Endpoint containing the parameters or a ParseError
+                describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any new enums
+                or classes.
+
+        See Also:
+            - https://swagger.io/docs/specification/describing-parameters/
+            - https://swagger.io/docs/specification/paths-and-operations/
+        """
+
         endpoint = deepcopy(endpoint)
         if data.parameters is None:
             return endpoint, schemas
@@ -330,6 +352,16 @@ class Endpoint:
 
     @staticmethod
     def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
+        """
+        Sorts the path parameters of an `endpoint` so that they match the order declared in `endpoint.path`.
+
+        Args:
+            endpoint: The endpoint to sort the parameters of.
+
+        Returns:
+            Either an updated `endpoint` with sorted path parameters or a `ParseError` if something was wrong with
+                the path parameters and they could not be sorted.
+        """
         endpoint = deepcopy(endpoint)
         parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
         try:
@@ -339,8 +371,8 @@ class Endpoint:
             endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
         except ValueError:
             pass  # We're going to catch the difference down below
-        path_parameter_names = [name for name in endpoint.path_parameters]
-        if parameters_from_path != path_parameter_names:
+
+        if parameters_from_path != list(endpoint.path_parameters):
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
@@ -398,13 +430,13 @@ class GeneratorData:
     enums: Iterator[EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
+    def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
         """Create an OpenAPI from dict"""
         try:
-            openapi = oai.OpenAPI.parse_obj(d)
-        except ValidationError as e:
-            detail = str(e)
-            if "swagger" in d:
+            openapi = oai.OpenAPI.parse_obj(data)
+        except ValidationError as err:
+            detail = str(err)
+            if "swagger" in data:
                 detail = (
                     "You may be trying to use a Swagger document; this is not supported by this project.\n\n" + detail
                 )
