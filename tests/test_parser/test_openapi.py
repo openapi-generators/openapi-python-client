@@ -535,29 +535,17 @@ class TestEndpoint:
             oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
 
     def test__add_parameters_with_location_postfix_conflict1(self, mocker):
-        """Checks when the PythonIdentifier of new parameter already used"""
+        """Checks when the PythonIdentifier of new parameter already used."""
         from openapi_python_client.parser.openapi import Endpoint
         from openapi_python_client.parser.properties import Property
 
         endpoint = self.make_endpoint()
 
-        path_prop_name_conflicted = "prop_name_path"
-        path_prop_conflicted = mocker.MagicMock(autospec=Property)
-        path_prop_conflicted_import = mocker.MagicMock()
-        path_prop_conflicted.get_imports = mocker.MagicMock(return_value={path_prop_conflicted_import})
-        path_prop_conflicted.python_name = "prop_name_path"
-
-        query_prop_name = "prop_name"
-        query_prop = mocker.MagicMock(autospec=Property)
-        query_prop_import = mocker.MagicMock()
-        query_prop.get_imports = mocker.MagicMock(return_value={query_prop_import})
-        query_prop.python_name = "prop_name_query"
-
-        path_prop_name = "prop_name"
-        path_prop = mocker.MagicMock(autospec=Property)
-        path_prop_import = mocker.MagicMock()
-        path_prop.get_imports = mocker.MagicMock(return_value={path_prop_import})
-        path_prop.python_name = "prop_name_path"
+        path_prop_conflicted = Property(
+            name="prop_name_path", required=False, nullable=False, default=None, python_name="prop_name_path"
+        )
+        query_prop = Property(name="prop_name", required=False, nullable=False, default=None, python_name="prop_name")
+        path_prop = Property(name="prop_name", required=False, nullable=False, default=None, python_name="prop_name")
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -577,12 +565,12 @@ class TestEndpoint:
         data = oai.Operation.construct(
             parameters=[
                 oai.Parameter.construct(
-                    name=path_prop_name_conflicted, required=True, param_schema=path_conflicted_schema, param_in="path"
+                    name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
                 ),
                 oai.Parameter.construct(
-                    name=query_prop_name, required=False, param_schema=query_schema, param_in="query"
+                    name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
                 ),
-                oai.Parameter.construct(name=path_prop_name, required=True, param_schema=path_schema, param_in="path"),
+                oai.Parameter.construct(name=path_prop.name, required=True, param_schema=path_schema, param_in="path"),
                 oai.Reference.construct(),  # Should be ignored
                 oai.Parameter.construct(),  # Should be ignored
             ]
