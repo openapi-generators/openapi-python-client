@@ -112,6 +112,7 @@ disable = [
     "too-few-public-methods",
     # Disable any type-checking, that's what mypy is for
     "no-member",
+    "no-name-in-module",
     # False positives
     "cyclic-import",
 ]
