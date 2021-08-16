@@ -20,7 +20,6 @@ from .parser.errors import GeneratorError
 from .utils import snake_case
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
-    # pylint: disable=import-error
     from importlib_metadata import version
 else:
     from importlib.metadata import version  # type: ignore
