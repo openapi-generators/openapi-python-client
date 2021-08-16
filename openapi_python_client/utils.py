@@ -54,7 +54,8 @@ def fix_reserved_words(value: str) -> str:
 def snake_case(value: str) -> str:
     """Converts to snake_case"""
     words = split_words(sanitize(value))
-    return "_".join(words).lower()
+    value = "_".join(words).lower()
+    return fix_reserved_words(value)
 
 
 def pascal_case(value: str) -> str:
