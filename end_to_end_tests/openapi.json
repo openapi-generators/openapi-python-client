@@ -938,8 +938,9 @@
       "description": "Ensure that Python keywords are renamed properly.",
       "get": {
         "tags": [
-          "naming"
+          "true"
         ],
+        "operationId": "false",
         "parameters": [
           {
             "name": "import",
