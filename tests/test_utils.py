@@ -36,6 +36,22 @@ def test_split_words(before, after):
     assert utils.split_words(before) == after
 
 
+@pytest.mark.parametrize(
+    "reserved_word, expected",
+    [
+        ("self", "self_"),
+        ("int", "int_"),
+        ("dict", "dict_"),
+        ("not_reserved", "not_reserved"),
+        ("type", "type"),
+        ("id", "id"),
+        ("None", "none"),
+    ],
+)
+def test_snake_case_fix_reserved_words(reserved_word: str, expected: str):
+    assert utils.snake_case(reserved_word) == expected
+
+
 def test_snake_case_uppercase_str():
     assert utils.snake_case("HTTP") == "http"
     assert utils.snake_case("HTTP RESPONSE") == "http_response"
