@@ -58,6 +58,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self.openapi: GeneratorData = openapi
         self.meta: MetaType = meta
         self.file_encoding = file_encoding
+        self.config = config
 
         package_loader = PackageLoader(__package__)
         loader: BaseLoader
@@ -87,6 +88,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self.env.filters.update(TEMPLATE_FILTERS)
         self.env.globals.update(
             utils=utils,
+            python_identifier=lambda x: utils.PythonIdentifier(x, config.field_prefix),
+            class_name=lambda x: utils.ClassName(x, config.field_prefix),
             package_name=self.package_name,
             package_dir=self.package_dir,
             package_description=self.package_description,
