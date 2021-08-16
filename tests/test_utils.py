@@ -20,6 +20,23 @@ class TestPythonIdentifier:
         assert utils.PythonIdentifier(value="", prefix="something") == "something"
 
 
+class TestClassName:
+    def test_valid_is_not_changed(self):
+        assert utils.ClassName(value="ValidClass", prefix="field") == "ValidClass"
+
+    def test_numbers_are_prefixed(self):
+        assert utils.ClassName(value="1", prefix="field") == "Field1"
+
+    def test_invalid_symbols_are_stripped(self):
+        assert utils.ClassName(value="$abc", prefix="prefix") == "Abc"
+
+    def test_keywords_are_postfixed(self):
+        assert utils.ClassName(value="none", prefix="prefix") == "None_"
+
+    def test_empty_is_prefixed(self):
+        assert utils.ClassName(value="", prefix="something") == "Something"
+
+
 @pytest.mark.parametrize(
     "before, after",
     [
