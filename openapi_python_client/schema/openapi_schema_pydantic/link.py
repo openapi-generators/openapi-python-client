@@ -17,52 +17,20 @@ class Link(BaseModel):
     For computing links, and providing instructions to execute them,
     a [runtime expression](#runtimeExpression) is used for accessing values in an operation
     and using them as parameters while invoking the linked operation.
+
+    References:
+        - https://swagger.io/docs/specification/links/
+        - https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#linkObject
     """
 
     operationRef: Optional[str] = None
-    """
-    A relative or absolute URI reference to an OAS operation.
-    This field is mutually exclusive of the `operationId` field,
-    and MUST point to an [Operation Object](#operationObject).
-    Relative `operationRef` values MAY be used to locate an existing [Operation Object](#operationObject)
-    in the OpenAPI definition.
-    """
-
     operationId: Optional[str] = None
-    """
-    The name of an _existing_, resolvable OAS operation, as defined with a unique `operationId`.
-
-    This field is mutually exclusive of the `operationRef` field.
-    """
-
     parameters: Optional[Dict[str, Any]] = None
-    """
-    A map representing parameters to pass to an operation
-    as specified with `operationId` or identified via `operationRef`.
-    The key is the parameter name to be used,
-    whereas the value can be a constant or an expression to be evaluated and passed to the linked operation.
-
-    The parameter name can be qualified using the [parameter location](#parameterIn) `[{in}.]{name}`
-    for operations that use the same parameter name in different locations (e.g. path.id).
-    """
-
     requestBody: Optional[Any] = None
-    """
-    A literal value or [{expression}](#runtimeExpression) to use as a request body when calling the target operation.
-    """
-
     description: Optional[str] = None
-    """
-    A description of the link.
-    [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-    """
-
     server: Optional[Server] = None
-    """
-    A server object to be used by the target operation.
-    """
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         schema_extra = {
             "examples": [
                 {"operationId": "getUserAddressByUUID", "parameters": {"userUuid": "$response.body#/uuid"}},

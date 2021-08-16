@@ -1,14 +1,12 @@
 """ Utils for converting default values into valid Python """
 __all__ = ["convert", "convert_chain"]
 
-from typing import Any, Callable, Dict, Iterable, Optional, TypeVar
+from typing import Any, Callable, Dict, Iterable, Optional
 
 from dateutil.parser import isoparse
 
 from ... import utils
 from ..errors import ValidationError
-
-T = TypeVar("T")
 
 
 def convert(type_string: str, value: Any) -> Optional[Any]:
@@ -31,8 +29,8 @@ def convert(type_string: str, value: Any) -> Optional[Any]:
         raise ValidationError()
     try:
         return _CONVERTERS[type_string](value)
-    except (KeyError, ValueError, AttributeError) as e:
-        raise ValidationError from e
+    except (KeyError, ValueError, AttributeError) as err:
+        raise ValidationError from err
 
 
 def convert_chain(type_strings: Iterable[str], value: Any) -> Optional[Any]:

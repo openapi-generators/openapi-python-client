@@ -28,7 +28,7 @@ class ModelProperty(Property):
     json_is_dict: ClassVar[bool] = True
     is_multipart_body: bool = False
 
-    def get_base_type_string(self, json: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         return self.class_info.name
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -71,10 +71,11 @@ def _enum_subset(first: Property, second: Property) -> Optional[EnumProperty]:
         if isinstance(second, EnumProperty):
             if _values_are_subset(first, second):
                 return first
-            if _values_are_subset(second, first):
+            if _values_are_subset(second, first):  # pylint: disable=arguments-out-of-order
                 return second
             return None
         return first if _types_are_subset(first, second) else None
+    # pylint: disable=arguments-out-of-order
     if isinstance(second, EnumProperty) and _types_are_subset(second, first):
         return second
     return None
@@ -110,6 +111,7 @@ class _PropertyData(NamedTuple):
     schemas: Schemas
 
 
+# pylint: disable=too-many-locals,too-many-branches
 def _process_properties(
     *, data: oai.Schema, schemas: Schemas, class_name: str, config: Config
 ) -> Union[_PropertyData, PropertyError]:

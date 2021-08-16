@@ -33,6 +33,7 @@ attrs = "^21.0.0"
 python-dateutil = "^2.8.1"
 httpx = ">=0.15.4,<0.19.0"
 autoflake = "^1.4"
+typing-extensions = { version = "*", python = "<3.8" }
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
@@ -51,6 +52,7 @@ types-PyYAML = "^5.4.3"
 types-certifi = "^0.1.4"
 types-python-dateutil = "^0.1.4"
 types-dataclasses = { version = "^0.1.5", python = "<3.7" }
+pylint = "^2.9.6"
 
 [tool.taskipy.tasks]
 check = """
@@ -59,6 +61,7 @@ isort .\
  && flake8 openapi_python_client\
  && poetry export -f requirements.txt | poetry run safety check --bare --stdin\
  && mypy openapi_python_client\
+ && pylint openapi_python_client\
  && pytest --cov openapi_python_client tests --cov-report=term-missing\
 """
 regen = "python -m end_to_end_tests.regen_golden_record"
@@ -93,6 +96,27 @@ skip = [".venv", "tests/test_templates"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = [
+    # DRY < MOIST
+    "duplicate-code",
+    # Sometimes necessary to prevent cycles
+    "import-outside-toplevel",
+    # Modules are mostly used for organization here, there is no lib API
+    "missing-module-docstring",
+    # Organization is important, even when just separating classes
+    "too-few-public-methods",
+    # Disable any type-checking, that's what mypy is for
+    "no-member",
+    "no-name-in-module",
+    "import-error",
+    # False positives
+    "cyclic-import",
+]
 
 [build-system]
 requires = ["poetry>=1.0"]

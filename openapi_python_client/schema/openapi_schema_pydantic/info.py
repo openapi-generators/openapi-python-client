@@ -11,42 +11,20 @@ class Info(BaseModel):
     The object provides metadata about the API.
     The metadata MAY be used by the clients if needed,
     and MAY be presented in editing or documentation generation tools for convenience.
+
+    References:
+        - https://swagger.io/docs/specification/api-general-info/
+        -https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#infoObject
     """
 
     title: str
-    """
-    **REQUIRED**. The title of the API.
-    """
-
     description: Optional[str] = None
-    """
-    A short description of the API.
-    [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-    """
-
     termsOfService: Optional[AnyUrl] = None
-    """
-    A URL to the Terms of Service for the API.
-    MUST be in the format of a URL.
-    """
-
     contact: Optional[Contact] = None
-    """
-    The contact information for the exposed API.
-    """
-
     license: Optional[License] = None
-    """
-    The license information for the exposed API.
-    """
-
     version: str
-    """
-    **REQUIRED**. The version of the OpenAPI document
-    (which is distinct from the [OpenAPI Specification version](#oasVersion) or the API implementation version).
-    """
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         schema_extra = {
             "examples": [
                 {

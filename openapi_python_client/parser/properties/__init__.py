@@ -184,11 +184,11 @@ class UnionProperty(Property):
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
         return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
 
-    def _get_type_string_from_inner_type_strings(self, inner_types: Set[str]) -> str:
+    @staticmethod
+    def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:
         if len(inner_types) == 1:
             return inner_types.pop()
-        else:
-            return f"Union[{', '.join(sorted(inner_types))}]"
+        return f"Union[{', '.join(sorted(inner_types))}]"
 
     def get_base_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
@@ -197,6 +197,18 @@ class UnionProperty(Property):
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
     def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
+        """
+        Get the set of all the types that should appear within the `Union` representing this property.
+
+        This function is called from the union property macros, thus the public visibility.
+
+        Args:
+            no_optional: Do not include `None` or `Unset` in this set.
+            json: If True, this returns the JSON types, not the Python types, of this property.
+
+        Returns:
+            A set of strings containing the types that should appear within `Union`.
+        """
         type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
@@ -230,6 +242,11 @@ class UnionProperty(Property):
         return imports
 
     def inner_properties_with_template(self) -> Iterator[Property]:
+        """
+        Get all the properties that make up this `Union`.
+
+        Called by the union property macros to aid in construction / deserialization.
+        """
         return (prop for prop in self.inner_properties if prop.template)
 
 
@@ -247,7 +264,7 @@ def _string_based_property(
             nullable=data.nullable,
             python_name=python_name,
         )
-    elif string_format == "date":
+    if string_format == "date":
         return DateProperty(
             name=name,
             required=required,
@@ -255,7 +272,7 @@ def _string_based_property(
             nullable=data.nullable,
             python_name=python_name,
         )
-    elif string_format == "binary":
+    if string_format == "binary":
         return FileProperty(
             name=name,
             required=required,
@@ -263,15 +280,14 @@ def _string_based_property(
             nullable=data.nullable,
             python_name=python_name,
         )
-    else:
-        return StringProperty(
-            name=name,
-            default=convert("str", data.default),
-            required=required,
-            pattern=data.pattern,
-            nullable=data.nullable,
-            python_name=python_name,
-        )
+    return StringProperty(
+        name=name,
+        default=convert("str", data.default),
+        required=required,
+        pattern=data.pattern,
+        nullable=data.nullable,
+        python_name=python_name,
+    )
 
 
 def build_enum_property(
@@ -342,20 +358,49 @@ def build_enum_property(
     return prop, schemas
 
 
-def get_enum_default(prop: EnumProperty, data: oai.Schema) -> Union[Optional[Any], PropertyError]:
-    if data.default is None:
+def get_enum_default(prop: EnumProperty, data: oai.Schema) -> Union[Optional[str], PropertyError]:
+    """
+    Run through the available values in an EnumProperty and return the string representing the default value
+    in `data`.
+
+    Args:
+        prop: The EnumProperty to search for the default value.
+        data: The schema containing the default value for this enum.
+
+    Returns:
+        If `default` is `None`, then `None`.
+            If `default` is a valid value in `prop`, then the string representing that variant (e.g. MyEnum.MY_VARIANT)
+            If `default` is a value that doesn't match a variant of the enum, then a `PropertyError`.
+    """
+    default = data.default
+    if default is None:
         return None
 
     inverse_values = {v: k for k, v in prop.values.items()}
     try:
-        return f"{prop.class_info.name}.{inverse_values[data.default]}"
+        return f"{prop.class_info.name}.{inverse_values[default]}"
     except KeyError:
-        return PropertyError(detail=f"{data.default} is an invalid default for enum {prop.class_info.name}", data=data)
+        return PropertyError(detail=f"{default} is an invalid default for enum {prop.class_info.name}", data=data)
 
 
 def build_union_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
+    """
+    Create a `UnionProperty` the right way.
+
+    Args:
+        data: The `Schema` describing the `UnionProperty`.
+        name: The name of the property where it appears in the OpenAPI document.
+        required: Whether or not this property is required where it's being used.
+        schemas: The `Schemas` so far describing existing classes / references.
+        parent_name: The name of the thing which holds this property (used for renaming inner classes).
+        config: User-defined config values for modifying inner properties.
+
+    Returns:
+        `(result, schemas)` where `schemas` is the updated version of the input `schemas` and `result` is the
+            constructed `UnionProperty` or a `PropertyError` describing what went wrong.
+    """
     sub_properties: List[Property] = []
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
@@ -370,7 +415,7 @@ def build_union_property(
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
         sub_properties.append(sub_prop)
 
-    default = convert_chain((prop._type_string for prop in sub_properties), data.default)
+    default = convert_chain((prop.get_base_type_string() for prop in sub_properties), data.default)
     return (
         UnionProperty(
             name=name,
@@ -387,6 +432,21 @@ def build_union_property(
 def build_list_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
+    """
+    Build a ListProperty the right way, use this instead of the normal constructor.
+
+    Args:
+        data: `oai.Schema` representing this `ListProperty`.
+        name: The name of this property where it's used.
+        required: Whether or not this `ListProperty` can be `Unset` where it's used.
+        schemas: Collected `Schemas` so far containing any classes or references.
+        parent_name: The name of the thing containing this property (used for naming inner classes).
+        config: User-provided config for overriding default behaviors.
+
+    Returns:
+        `(result, schemas)` where `schemas` is an updated version of the input named the same including any inner
+        classes that were defined and `result` is either the `ListProperty` or a `PropertyError`.
+    """
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
@@ -407,6 +467,7 @@ def build_list_property(
     )
 
 
+# pylint: disable=too-many-arguments
 def _property_from_ref(
     name: str,
     required: bool,
@@ -439,6 +500,7 @@ def _property_from_ref(
     return prop, schemas
 
 
+# pylint: disable=too-many-arguments,too-many-return-statements
 def _property_from_data(
     name: str,
     required: bool,
@@ -469,13 +531,13 @@ def _property_from_data(
             parent_name=parent_name,
             config=config,
         )
-    elif data.anyOf or data.oneOf:
+    if data.anyOf or data.oneOf:
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    elif data.type == "string":
+    if data.type == "string":
         return _string_based_property(name=name, required=required, data=data, config=config), schemas
-    elif data.type == "number":
+    if data.type == "number":
         return (
             FloatProperty(
                 name=name,
@@ -486,7 +548,7 @@ def _property_from_data(
             ),
             schemas,
         )
-    elif data.type == "integer":
+    if data.type == "integer":
         return (
             IntProperty(
                 name=name,
@@ -497,7 +559,7 @@ def _property_from_data(
             ),
             schemas,
         )
-    elif data.type == "boolean":
+    if data.type == "boolean":
         return (
             BooleanProperty(
                 name=name,
@@ -508,15 +570,15 @@ def _property_from_data(
             ),
             schemas,
         )
-    elif data.type == "array":
+    if data.type == "array":
         return build_list_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    elif data.type == "object" or data.allOf:
+    if data.type == "object" or data.allOf:
         return build_model_property(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
-    elif not data.type:
+    if not data.type:
         return (
             AnyProperty(
                 name=name,

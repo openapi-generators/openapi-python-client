@@ -35,12 +35,20 @@ class Property:
     json_is_dict: ClassVar[bool] = False
 
     def set_python_name(self, new_name: str, config: Config) -> None:
+        """Mutates this Property to set a new python_name.
+
+        Required to mutate due to how Properties are stored and the difficulty of updating them in-dict.
+        `new_name` will be validated before it is set, so `python_name` is not guaranteed to equal `new_name` after
+        calling this.
+        """
         object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
 
     def get_base_type_string(self) -> str:
+        """Get the string describing the Python type of this property."""
         return self._type_string
 
     def get_base_json_type_string(self) -> str:
+        """Get the string describing the JSON type of this property."""
         return self._json_type_string
 
     def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
@@ -58,12 +66,12 @@ class Property:
 
         if no_optional or (self.required and not self.nullable):
             return type_string
-        elif self.required and self.nullable:
+        if self.required and self.nullable:
             return f"Optional[{type_string}]"
-        elif not self.required and self.nullable:
+        if not self.required and self.nullable:
             return f"Union[Unset, None, {type_string}]"
-        else:
-            return f"Union[Unset, {type_string}]"
+
+        return f"Union[Unset, {type_string}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -98,5 +106,4 @@ class Property:
 
         if default is not None:
             return f"{self.python_name}: {self.get_type_string()} = {default}"
-        else:
-            return f"{self.python_name}: {self.get_type_string()}"
+        return f"{self.python_name}: {self.get_type_string()}"
