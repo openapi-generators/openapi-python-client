@@ -2,10 +2,11 @@
 
 from typing import Type
 
-from my_test_api_client.api.default import DefaultEndpoints
-from my_test_api_client.api.parameters import ParametersEndpoints
-from my_test_api_client.api.tag1 import Tag1Endpoints
-from my_test_api_client.api.tests import TestsEndpoints
+from .default import DefaultEndpoints
+from .location import LocationEndpoints
+from .parameters import ParametersEndpoints
+from .tag1 import Tag1Endpoints
+from .tests import TestsEndpoints
 
 
 class MyTestApiClientApi:
@@ -24,3 +25,7 @@ class MyTestApiClientApi:
     @classmethod
     def tag1(cls) -> Type[Tag1Endpoints]:
         return Tag1Endpoints
+
+    @classmethod
+    def location(cls) -> Type[LocationEndpoints]:
+        return LocationEndpoints

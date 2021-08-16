@@ -1,32 +1,31 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import httpx
 
 from ...client import Client
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 def _get_kwargs(
+    param4: str,
+    param2: int,
+    param1: str,
+    param3: int,
     *,
     client: Client,
-    common: Union[Unset, None, str] = UNSET,
 ) -> Dict[str, Any]:
-    url = "{}/common_parameters".format(client.base_url)
+    url = "{}/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
+        client.base_url, param4=param4, param2=param2, param1=param1, param3=param3
+    )
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
-
-    params: Dict[str, Any] = {
-        "common": common,
-    }
-    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        "params": params,
     }
 
 
@@ -40,13 +39,19 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 
 
 def sync_detailed(
+    param4: str,
+    param2: int,
+    param1: str,
+    param3: int,
     *,
     client: Client,
-    common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
+        param4=param4,
+        param2=param2,
+        param1=param1,
+        param3=param3,
         client=client,
-        common=common,
     )
 
     response = httpx.get(
@@ -57,13 +62,19 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
+    param4: str,
+    param2: int,
+    param1: str,
+    param3: int,
     *,
     client: Client,
-    common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
+        param4=param4,
+        param2=param2,
+        param1=param1,
+        param3=param3,
         client=client,
-        common=common,
     )
 
     async with httpx.AsyncClient() as _client:

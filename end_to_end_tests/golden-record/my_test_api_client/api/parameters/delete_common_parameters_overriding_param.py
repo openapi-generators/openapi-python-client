@@ -7,17 +7,18 @@ from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
+    param_path: str,
     *,
     client: Client,
-    common: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
 ) -> Dict[str, Any]:
-    url = "{}/common_parameters".format(client.base_url)
+    url = "{}/common_parameters_overriding/{param}".format(client.base_url, param=param_path)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     params: Dict[str, Any] = {
-        "common": common,
+        "param": param_query,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -40,16 +41,18 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 
 
 def sync_detailed(
+    param_path: str,
     *,
     client: Client,
-    common: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
+        param_path=param_path,
         client=client,
-        common=common,
+        param_query=param_query,
     )
 
-    response = httpx.get(
+    response = httpx.delete(
         **kwargs,
     )
 
@@ -57,16 +60,18 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
+    param_path: str,
     *,
     client: Client,
-    common: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
+        param_path=param_path,
         client=client,
-        common=common,
+        param_query=param_query,
     )
 
     async with httpx.AsyncClient() as _client:
-        response = await _client.get(**kwargs)
+        response = await _client.delete(**kwargs)
 
     return _build_response(response=response)

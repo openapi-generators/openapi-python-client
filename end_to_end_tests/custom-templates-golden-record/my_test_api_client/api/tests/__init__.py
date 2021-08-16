@@ -2,7 +2,7 @@
 
 import types
 
-from my_test_api_client.api.tests import (
+from . import (
     defaults_tests_defaults_post,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
@@ -13,7 +13,6 @@ from my_test_api_client.api.tests import (
     json_body_tests_json_body_post,
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
-    optional_value_tests_optional_query_param,
     post_form_data,
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
@@ -128,13 +127,6 @@ class TestsEndpoints:
         Test Inline Objects
         """
         return test_inline_objects
-
-    @classmethod
-    def optional_value_tests_optional_query_param(cls) -> types.ModuleType:
-        """
-        Test optional query parameters
-        """
-        return optional_value_tests_optional_query_param
 
     @classmethod
     def token_with_cookie_auth_token_with_cookie_get(cls) -> types.ModuleType:

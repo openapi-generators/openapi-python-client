@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.2
+
+### Features
+
+- Allow path parameters to be positional args [#429 & #464]. Thanks @tsotnikov!
+- Include both `UNSET` and `None` static types for nullable or optional query params [#421, #380, #462]. Thanks @forest-benchling!
+- Allow allOf enums to be subsets of one another or their base types [#379, #423, #461]. Thanks @forest-benchling! (#461)
+
+### Fixes
+
+- Parameters from `PathItem` can now be overriden in `Operation` [#458 & #457]. Thanks @mtovts!
+
 ## 0.10.1
 
 ### Fixes

@@ -1,4 +1,5 @@
-import itertools
+import re
+from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
@@ -9,9 +10,12 @@ from pydantic import ValidationError
 from .. import schema as oai
 from .. import utils
 from ..config import Config
+from ..utils import PythonIdentifier
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
 from .responses import Response, response_from_data
+
+_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
@@ -46,10 +50,13 @@ class EndpointCollection:
                 endpoint, schemas = Endpoint.from_data(
                     data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
                 )
+                # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint._add_parameters(
+                    endpoint, schemas = Endpoint.add_parameters(
                         endpoint=endpoint, data=path_data, schemas=schemas, config=config
                     )
+                if not isinstance(endpoint, ParseError):
+                    endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
                         f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
@@ -74,6 +81,7 @@ def generate_operation_id(*, path: str, method: str) -> str:
     return f"{method}_{clean_path}"
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Endpoint:
     """
@@ -88,15 +96,16 @@ class Endpoint:
     tag: str
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: List[Property] = field(default_factory=list)
-    path_parameters: List[Property] = field(default_factory=list)
-    header_parameters: List[Property] = field(default_factory=list)
-    cookie_parameters: List[Property] = field(default_factory=list)
+    query_parameters: Dict[str, Property] = field(default_factory=dict)
+    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
+    header_parameters: Dict[str, Property] = field(default_factory=dict)
+    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
     form_body_class: Optional[Class] = None
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
+    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
     def parse_request_form_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
@@ -236,17 +245,61 @@ class Endpoint:
             endpoint.responses.append(response)
         return endpoint, schemas
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
-    def _add_parameters(
+    def add_parameters(
         *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
+        """Process the defined `parameters` for an Endpoint.
+
+        Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
+        parameters should therefore be added __after__ operation parameters.
+
+        Args:
+            endpoint: The endpoint to add parameters to.
+            data: The Operation or PathItem to add parameters from.
+            schemas: The cumulative Schemas of processing so far which should contain details for any references.
+            config: User-provided config for overrides within parameters.
+
+        Returns:
+            `(result, schemas)` where `result` is either an updated Endpoint containing the parameters or a ParseError
+                describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any new enums
+                or classes.
+
+        See Also:
+            - https://swagger.io/docs/specification/describing-parameters/
+            - https://swagger.io/docs/specification/paths-and-operations/
+        """
+
         endpoint = deepcopy(endpoint)
-        used_python_names: Dict[str, Tuple[Property, oai.ParameterLocation]] = {}
         if data.parameters is None:
             return endpoint, schemas
+
+        unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
+        parameters_by_location = {
+            oai.ParameterLocation.QUERY: endpoint.query_parameters,
+            oai.ParameterLocation.PATH: endpoint.path_parameters,
+            oai.ParameterLocation.HEADER: endpoint.header_parameters,
+            oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
+        }
+
         for param in data.parameters:
             if isinstance(param, oai.Reference) or param.param_schema is None:
                 continue
+
+            if param.param_in == oai.ParameterLocation.PATH and not param.required:
+                return ParseError(data=param, detail="Path parameter must be required"), schemas
+
+            unique_param = (param.name, param.param_in)
+            if unique_param in unique_parameters:
+                duplication_detail = (
+                    "Parameters MUST NOT contain duplicates. "
+                    "A unique parameter is defined by a combination of a name and location. "
+                    f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                )
+                return ParseError(data=data, detail=duplication_detail), schemas
+            unique_parameters.add(unique_param)
+
             prop, schemas = property_from_data(
                 name=param.name,
                 required=param.required,
@@ -257,40 +310,73 @@ class Endpoint:
             )
             if isinstance(prop, ParseError):
                 return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
+            if prop.name in parameters_by_location[param.param_in]:
+                # This parameter was defined in the Operation, so ignore the PathItem definition
+                continue
 
-            if prop.python_name in used_python_names:
-                duplicate, duplicate_location = used_python_names[prop.python_name]
-                if duplicate.python_name == prop.python_name:  # Existing should be converted too for consistency
-                    duplicate.set_python_name(f"{duplicate.python_name}_{duplicate_location}", config=config)
-                prop.set_python_name(f"{prop.python_name}_{param.param_in}", config=config)
-            else:
-                used_python_names[prop.python_name] = (prop, param.param_in)
+            for location, parameters_dict in parameters_by_location.items():
+                if location == param.param_in or prop.name not in parameters_dict:
+                    continue
+                existing_prop: Property = parameters_dict[prop.name]
+                # Existing should be converted too for consistency
+                endpoint.used_python_identifiers.remove(existing_prop.python_name)
+                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
 
-            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
+                if existing_prop.python_name in endpoint.used_python_identifiers:
+                    return (
+                        ParseError(
+                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
+                            data=data,
+                        ),
+                        schemas,
+                    )
+                endpoint.used_python_identifiers.add(existing_prop.python_name)
+                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
 
-            if param.param_in == oai.ParameterLocation.QUERY:
-                endpoint.query_parameters.append(prop)
-            elif param.param_in == oai.ParameterLocation.PATH:
-                endpoint.path_parameters.append(prop)
-            elif param.param_in == oai.ParameterLocation.HEADER:
-                endpoint.header_parameters.append(prop)
-            elif param.param_in == oai.ParameterLocation.COOKIE:
-                endpoint.cookie_parameters.append(prop)
-            else:
-                return ParseError(data=param, detail="Parameter must be declared in path or query"), schemas
-
-        name_check = set()
-        for prop in itertools.chain(
-            endpoint.query_parameters, endpoint.path_parameters, endpoint.header_parameters, endpoint.cookie_parameters
-        ):
-            if prop.python_name in name_check:
+            if prop.python_name in endpoint.used_python_identifiers:
                 return (
-                    ParseError(data=data, detail=f"Could not reconcile duplicate parameters named {prop.python_name}"),
+                    ParseError(
+                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
+                    ),
                     schemas,
                 )
-            name_check.add(prop.python_name)
+            if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
+                # There is no NULL for query params, so nullable and not required are the same.
+                prop = attr.evolve(prop, required=False, nullable=True)
+
+            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
+            endpoint.used_python_identifiers.add(prop.python_name)
+            parameters_by_location[param.param_in][prop.name] = prop
 
         return endpoint, schemas
+
+    @staticmethod
+    def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
+        """
+        Sorts the path parameters of an `endpoint` so that they match the order declared in `endpoint.path`.
+
+        Args:
+            endpoint: The endpoint to sort the parameters of.
+
+        Returns:
+            Either an updated `endpoint` with sorted path parameters or a `ParseError` if something was wrong with
+                the path parameters and they could not be sorted.
+        """
+        endpoint = deepcopy(endpoint)
+        parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
+        try:
+            sorted_params = sorted(
+                endpoint.path_parameters.values(), key=lambda param: parameters_from_path.index(param.name)
+            )
+            endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
+        except ValueError:
+            pass  # We're going to catch the difference down below
+
+        if parameters_from_path != list(endpoint.path_parameters):
+            return ParseError(
+                detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
+            )
+        return endpoint
 
     @staticmethod
     def from_data(
@@ -313,7 +399,7 @@ class Endpoint:
             tag=tag,
         )
 
-        result, schemas = Endpoint._add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        result, schemas = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
         if isinstance(result, ParseError):
             return result, schemas
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
@@ -344,22 +430,17 @@ class GeneratorData:
     enums: Iterator[EnumProperty]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
+    def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
         """Create an OpenAPI from dict"""
         try:
-            openapi = oai.OpenAPI.parse_obj(d)
-        except ValidationError as e:
-            detail = str(e)
-            if "swagger" in d:
+            openapi = oai.OpenAPI.parse_obj(data)
+        except ValidationError as err:
+            detail = str(err)
+            if "swagger" in data:
                 detail = (
                     "You may be trying to use a Swagger document; this is not supported by this project.\n\n" + detail
                 )
             return GeneratorError(header="Failed to parse OpenAPI document", detail=detail)
-        if openapi.openapi.major != 3:
-            return GeneratorError(
-                header="openapi-python-client only supports OpenAPI 3.x",
-                detail=f"The version of the provided document was {openapi.openapi}",
-            )
         schemas = Schemas()
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)

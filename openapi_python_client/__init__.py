@@ -28,6 +28,8 @@ __version__ = version(__package__)
 
 
 class MetaType(str, Enum):
+    """The types of metadata supported for project generation."""
+
     NONE = "none"
     POETRY = "poetry"
     SETUP = "setup"
@@ -41,7 +43,9 @@ TEMPLATE_FILTERS = {
 }
 
 
-class Project:
+class Project:  # pylint: disable=too-many-instance-attributes
+    """Represents a Python project (the top level file-tree) to generate"""
+
     def __init__(
         self,
         *,
@@ -129,6 +133,7 @@ class Project:
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            check=True,
         )
         subprocess.run(
             "isort .",
@@ -136,8 +141,11 @@ class Project:
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            check=True,
         )
-        subprocess.run("black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(
+            "black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+        )
 
     def _get_errors(self) -> Sequence[GeneratorError]:
         errors = []
@@ -263,7 +271,7 @@ class Project:
                 module_path.write_text(endpoint_template.render(endpoint=endpoint), encoding=self.file_encoding)
 
 
-def _get_project_for_url_or_path(
+def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,

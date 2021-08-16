@@ -2,7 +2,7 @@
 
 import types
 {% for endpoint in endpoint_collection.endpoints %}
-from {{ package_name }}.api.{{ endpoint_collection.tag }} import {{ utils.snake_case(endpoint.name) }}
+from . import {{ utils.snake_case(endpoint.name) }}
 {% endfor %}
 
 class {{ utils.pascal_case(endpoint_collection.tag) }}Endpoints:

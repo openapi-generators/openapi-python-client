@@ -74,10 +74,6 @@ def test_no_string_escapes():
     assert utils.remove_string_escapes('an "evil" string') == 'an \\"evil\\" string'
 
 
-def test__fix_keywords():
-    assert utils.fix_keywords("None") == "None_"
-
-
 @pytest.mark.parametrize(
     "reserved_word, expected",
     [
@@ -87,6 +83,7 @@ def test__fix_keywords():
         ("not_reserved", "not_reserved"),
         ("type", "type"),
         ("id", "id"),
+        ("None", "None_"),
     ],
 )
 def test__fix_reserved_words(reserved_word: str, expected: str):

@@ -7,15 +7,23 @@ from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
+    param_path: str,
     *,
     client: Client,
-    param_path: Union[Unset, str] = UNSET,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
+    param_header: Union[Unset, str] = UNSET,
+    param_cookie: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/same-name-multiple-locations/{param}".format(client.base_url, param=param_path)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
+
+    if param_header is not UNSET:
+        headers["param"] = param_header
+
+    if param_cookie is not UNSET:
+        cookies["param"] = param_cookie
 
     params: Dict[str, Any] = {
         "param": param_query,
@@ -41,15 +49,19 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 
 
 def sync_detailed(
+    param_path: str,
     *,
     client: Client,
-    param_path: Union[Unset, str] = UNSET,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
+    param_header: Union[Unset, str] = UNSET,
+    param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
-        client=client,
         param_path=param_path,
+        client=client,
         param_query=param_query,
+        param_header=param_header,
+        param_cookie=param_cookie,
     )
 
     response = httpx.get(
@@ -60,15 +72,19 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
+    param_path: str,
     *,
     client: Client,
-    param_path: Union[Unset, str] = UNSET,
-    param_query: Union[Unset, str] = UNSET,
+    param_query: Union[Unset, None, str] = UNSET,
+    param_header: Union[Unset, str] = UNSET,
+    param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     kwargs = _get_kwargs(
-        client=client,
         param_path=param_path,
+        client=client,
         param_query=param_query,
+        param_header=param_header,
+        param_cookie=param_cookie,
     )
 
     async with httpx.AsyncClient() as _client:

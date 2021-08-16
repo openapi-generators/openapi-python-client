@@ -13,7 +13,7 @@ from ..errors import ParseError, PropertyError
 if TYPE_CHECKING:  # pragma: no cover
     from .property import Property
 else:
-    Property = "Property"
+    Property = "Property"  # pylint: disable=invalid-name
 
 
 _ReferencePath = NewType("_ReferencePath", str)
@@ -21,6 +21,13 @@ _ClassName = NewType("_ClassName", str)
 
 
 def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]:
+    """
+    Takes a raw string provided in a `$ref` and turns it into a validated `_ReferencePath` or a `ParseError` if
+    validation fails.
+
+    See Also:
+        - https://swagger.io/docs/specification/using-ref/
+    """
     parsed = urlparse(ref_path_raw)
     if parsed.scheme or parsed.path:
         return ParseError(detail=f"Remote references such as {ref_path_raw} are not supported yet.")
@@ -64,6 +71,21 @@ class Schemas:
 def update_schemas_with_data(
     *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Union[Schemas, PropertyError]:
+    """
+    Update a `Schemas` using some new reference.
+
+    Args:
+        ref_path: The output of `parse_reference_path` (validated $ref).
+        data: The schema of the thing to add to Schemas.
+        schemas: `Schemas` up until now.
+        config: User-provided config for overriding default behavior.
+
+    Returns:
+        Either the updated `schemas` input or a `PropertyError` if something went wrong.
+
+    See Also:
+        - https://swagger.io/docs/specification/using-ref/
+    """
     from . import property_from_data
 
     prop: Union[PropertyError, Property]

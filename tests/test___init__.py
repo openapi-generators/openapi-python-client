@@ -519,6 +519,7 @@ def test__reformat(mocker):
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                check=True,
             ),
             mocker.call(
                 "isort .",
@@ -526,8 +527,16 @@ def test__reformat(mocker):
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                check=True,
             ),
-            mocker.call("black .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE),
+            mocker.call(
+                "black .",
+                cwd=project.project_dir,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            ),
         ]
     )
 
