@@ -1,5 +1,6 @@
 # pylint: disable=W0611
-from typing import List, Literal, Optional, Union
+import sys
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -10,6 +11,11 @@ from .paths import Paths
 from .security_requirement import SecurityRequirement
 from .server import Server
 from .tag import Tag
+
+if sys.version_info.minor < 8:
+    from typing_extensions import Literal
+else:
+    from typing import Literal  # type: ignore
 
 
 class OpenAPI(BaseModel):
