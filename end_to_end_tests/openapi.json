@@ -933,6 +933,26 @@
         ],
         "responses": {}
       }
+    },
+    "/naming/keywords": {
+      "description": "Ensure that Python keywords are renamed properly.",
+      "get": {
+        "tags": [
+          "naming"
+        ],
+        "parameters": [
+          {
+            "name": "import",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            },
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -1761,6 +1781,12 @@
       "AByteStream": {
         "type": "string",
         "format": "byte"
+      },
+      "import":  {
+        "type": "object"
+      },
+      "None":  {
+        "type": "object"
       }
     }
   }
