@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.3
+
+### Features
+
+- Expose `python_identifier` and `class_name` functions to custom templates to rename with the same behavior as the parser.
+
+### Fixes
+
+- Treat `true` and `false` as reserved words.
+- Prevent generating Python files named the same as reserved / key words.
+- Properly replace reserved words in class and module names [#475, #476]. Thanks @mtovts!
+
 ## 0.10.2
 
 ### Features

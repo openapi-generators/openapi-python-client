@@ -73,7 +73,7 @@ class TestBuildModelProperty:
         )
 
         model, _ = build_model_property(
-            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=MagicMock()
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=Config()
         )
 
         assert model.additional_properties == expected_additional_properties
@@ -138,7 +138,7 @@ class TestBuildModelProperty:
         schemas = Schemas()
 
         err, new_schemas = build_model_property(
-            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=MagicMock()
+            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=Config()
         )
 
         assert new_schemas == schemas

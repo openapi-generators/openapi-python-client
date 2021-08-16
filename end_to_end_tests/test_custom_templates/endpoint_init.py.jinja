@@ -2,15 +2,15 @@
 
 import types
 {% for endpoint in endpoint_collection.endpoints %}
-from . import {{ utils.snake_case(endpoint.name) }}
+from . import {{ python_identifier(endpoint.name) }}
 {% endfor %}
 
-class {{ utils.pascal_case(endpoint_collection.tag) }}Endpoints:
+class {{ class_name(endpoint_collection.tag) }}Endpoints:
 
 {% for endpoint in endpoint_collection.endpoints %}
 
     @classmethod
-    def {{ utils.snake_case(endpoint.name) }}(cls) -> types.ModuleType:
+    def {{ python_identifier(endpoint.name) }}(cls) -> types.ModuleType:
         {% if endpoint.description %}
         """
             {{ endpoint.description }}
@@ -20,5 +20,5 @@ class {{ utils.pascal_case(endpoint_collection.tag) }}Endpoints:
             {{ endpoint.summary  }}
         """
         {% endif %}
-        return {{ utils.snake_case(endpoint.name) }}
+        return {{ python_identifier(endpoint.name) }}
 {% endfor %}

@@ -7,7 +7,7 @@ DELIMITERS = " _-"
 
 
 class PythonIdentifier(str):
-    """A string which has been validated / transformed into a valid identifier for Python"""
+    """A snake_case string which has been validated / transformed into a valid identifier for Python"""
 
     def __new__(cls, value: str, prefix: str) -> "PythonIdentifier":
         new_value = fix_reserved_words(snake_case(sanitize(value)))
@@ -17,6 +17,21 @@ class PythonIdentifier(str):
         return str.__new__(cls, new_value)
 
     def __deepcopy__(self, _: Any) -> "PythonIdentifier":
+        return self
+
+
+class ClassName(str):
+    """A PascalCase string which has been validated / transformed into a valid class name for Python"""
+
+    def __new__(cls, value: str, prefix: str) -> "ClassName":
+        new_value = fix_reserved_words(pascal_case(sanitize(value)))
+
+        if not new_value.isidentifier():
+            value = f"{prefix}{new_value}"
+            new_value = fix_reserved_words(pascal_case(sanitize(value)))
+        return str.__new__(cls, new_value)
+
+    def __deepcopy__(self, _: Any) -> "ClassName":
         return self
 
 
@@ -33,7 +48,7 @@ def split_words(value: str) -> List[str]:
     return re.findall(rf"[^{DELIMITERS}]+", value)
 
 
-RESERVED_WORDS = (set(dir(builtins)) | {"self"}) - {"type", "id"}
+RESERVED_WORDS = (set(dir(builtins)) | {"self", "true", "false"}) - {"type", "id"}
 
 
 def fix_reserved_words(value: str) -> str:

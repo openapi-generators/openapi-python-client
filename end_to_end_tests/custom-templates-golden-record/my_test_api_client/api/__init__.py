@@ -7,6 +7,7 @@ from .location import LocationEndpoints
 from .parameters import ParametersEndpoints
 from .tag1 import Tag1Endpoints
 from .tests import TestsEndpoints
+from .true_ import True_Endpoints
 
 
 class MyTestApiClientApi:
@@ -29,3 +30,7 @@ class MyTestApiClientApi:
     @classmethod
     def location(cls) -> Type[LocationEndpoints]:
         return LocationEndpoints
+
+    @classmethod
+    def true_(cls) -> Type[True_Endpoints]:
+        return True_Endpoints
