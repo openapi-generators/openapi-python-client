@@ -4,10 +4,10 @@ from typing import Type
 
 from .default import DefaultEndpoints
 from .location import LocationEndpoints
-from .naming import NamingEndpoints
 from .parameters import ParametersEndpoints
 from .tag1 import Tag1Endpoints
 from .tests import TestsEndpoints
+from .true_ import True_Endpoints
 
 
 class MyTestApiClientApi:
@@ -32,5 +32,5 @@ class MyTestApiClientApi:
         return LocationEndpoints
 
     @classmethod
-    def naming(cls) -> Type[NamingEndpoints]:
-        return NamingEndpoints
+    def true_(cls) -> Type[True_Endpoints]:
+        return True_Endpoints

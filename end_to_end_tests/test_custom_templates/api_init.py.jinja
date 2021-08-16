@@ -2,12 +2,12 @@
 
 from typing import Type
 {% for tag in endpoint_collections_by_tag.keys() %}
-from .{{ tag }} import {{ utils.pascal_case(tag) }}Endpoints
+from .{{ tag }} import {{ class_name(tag) }}Endpoints
 {% endfor %}
 
-class {{ utils.pascal_case(package_name) }}Api:
+class {{ class_name(package_name) }}Api:
 {% for tag in endpoint_collections_by_tag.keys() %}
     @classmethod
-    def {{ tag }}(cls) -> Type[{{ utils.pascal_case(tag) }}Endpoints]:
-        return {{ utils.pascal_case(tag) }}Endpoints
+    def {{ tag }}(cls) -> Type[{{ class_name(tag) }}Endpoints]:
+        return {{ class_name(tag) }}Endpoints
 {% endfor %}
