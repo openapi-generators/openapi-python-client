@@ -17,7 +17,6 @@ from openapi_python_client import utils
 from .config import Config
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import GeneratorError
-from .utils import snake_case
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
     from importlib_metadata import version
@@ -270,7 +269,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
 
             for endpoint in collection.endpoints:
-                module_path = tag_dir / f"{snake_case(endpoint.name)}.py"
+                module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
                 module_path.write_text(endpoint_template.render(endpoint=endpoint), encoding=self.file_encoding)
 
 
