@@ -10,7 +10,7 @@ class PythonIdentifier(str):
     """A string which has been validated / transformed into a valid identifier for Python"""
 
     def __new__(cls, value: str, prefix: str) -> "PythonIdentifier":
-        new_value = fix_reserved_words(snake_case(sanitize(value)))
+        new_value = snake_case(sanitize(value))
 
         if not new_value.isidentifier():
             new_value = f"{prefix}{new_value}"
