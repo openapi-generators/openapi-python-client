@@ -1,4 +1,5 @@
 import pytest
+
 import openapi_python_client.schema as oai
 
 
@@ -22,7 +23,12 @@ class TestDataType:
     @pytest.mark.parametrize(
         "type_",
         (
-            "string", "number", "integer", "boolean", "array", "object",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "array",
+            "object",
         ),
     )
     def test_schema_happy(self, type_):

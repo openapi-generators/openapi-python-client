@@ -729,6 +729,20 @@ class TestBuildUnionProperty:
         assert p == expected
         assert s == Schemas()
 
+    def test_build_union_property_invalid_property(self, mocker):
+        name = "bad_union"
+        required = mocker.MagicMock()
+        reference = oai.Reference.construct(ref="#/components/schema/NotExist")
+        data = oai.Schema(anyOf=[reference])
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
+
+        from openapi_python_client.parser.properties import Schemas, build_union_property
+
+        p, s = build_union_property(
+            name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
+        )
+        assert p == PropertyError(detail=f"Invalid property in union {name}", data=reference)
+
 
 class TestStringBasedProperty:
     @pytest.mark.parametrize("nullable", (True, False))
