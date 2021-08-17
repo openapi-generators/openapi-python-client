@@ -729,19 +729,6 @@ class TestBuildUnionProperty:
         assert p == expected
         assert s == Schemas()
 
-    def test_schema_bad_type(self, mocker):
-        import pydantic
-
-        with pytest.raises(pydantic.ValidationError):
-            oai.Schema(anyOf=[{"type": "garbage"}])
-
-        with pytest.raises(pydantic.ValidationError):
-            oai.Schema(
-                properties={
-                    "bad": oai.Schema(type="not_real"),
-                },
-            )
-
 
 class TestStringBasedProperty:
     @pytest.mark.parametrize("nullable", (True, False))
