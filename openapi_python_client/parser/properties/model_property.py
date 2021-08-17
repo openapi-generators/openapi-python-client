@@ -173,8 +173,10 @@ def _process_properties(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
-    # Except circular import
-    relative_imports = {relative_import for relative_import in relative_imports if not relative_import.endswith("import " + class_name)}
+    # Except self import
+    relative_imports = {
+        relative_import for relative_import in relative_imports if not relative_import.endswith("import " + class_name)
+    }
 
     return _PropertyData(
         optional_props=optional_properties,
@@ -214,6 +216,15 @@ def _get_additional_properties(
     return additional_properties, schemas
 
 
+def _get_empty_properties(schemas: Schemas) -> _PropertyData:
+    return _PropertyData(
+        optional_props=[],
+        required_props=[],
+        relative_imports=set(),
+        schemas=schemas,
+    )
+
+
 def build_model_property(
     *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str], config: Config
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
@@ -234,32 +245,40 @@ def build_model_property(
         class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_string)}"
     class_info = Class.from_string(string=class_string, config=config)
 
-    property_data = _process_properties(data=data, schemas=schemas, class_name=class_info.name, config=config)
-    if isinstance(property_data, PropertyError):
-        return property_data, schemas
-    schemas = property_data.schemas
+    existing = schemas.classes_by_name.get(class_info.name)
+    if isinstance(existing, ModelProperty):
+        property_data = _process_properties(data=data, schemas=schemas, class_name=class_info.name, config=config)
+        if isinstance(property_data, PropertyError):
+            return property_data, schemas
+        schemas = property_data.schemas
+        prop = attr.evolve(
+            existing,
+            required_properties=property_data.required_props,
+            optional_properties=property_data.optional_props,
+        )
+    else:
+        property_data = _get_empty_properties(schemas=schemas)
+        additional_properties, schemas = _get_additional_properties(
+            schema_additional=data.additionalProperties, schemas=schemas, class_name=class_info.name, config=config
+        )
+        if isinstance(additional_properties, Property):
+            property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
+        elif isinstance(additional_properties, PropertyError):
+            return additional_properties, schemas
 
-    additional_properties, schemas = _get_additional_properties(
-        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_info.name, config=config
-    )
-    if isinstance(additional_properties, Property):
-        property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
-    elif isinstance(additional_properties, PropertyError):
-        return additional_properties, schemas
-
-    prop = ModelProperty(
-        class_info=class_info,
-        required_properties=property_data.required_props,
-        optional_properties=property_data.optional_props,
-        relative_imports=property_data.relative_imports,
-        description=data.description or "",
-        default=None,
-        nullable=data.nullable,
-        required=required,
-        name=name,
-        additional_properties=additional_properties,
-        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-    )
+        prop = ModelProperty(
+            class_info=class_info,
+            required_properties=property_data.required_props,
+            optional_properties=property_data.optional_props,
+            relative_imports=property_data.relative_imports,
+            description=data.description or "",
+            default=None,
+            nullable=data.nullable,
+            required=required,
+            name=name,
+            additional_properties=additional_properties,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        )
 
     schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas

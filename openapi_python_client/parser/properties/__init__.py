@@ -11,7 +11,7 @@ __all__ = [
 
 from copy import deepcopy
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
@@ -637,71 +637,49 @@ def build_schemas(
     *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
 ) -> Schemas:
     """Get a list of Schemas from an OpenAPI dict"""
-    to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
-    still_making_progress = True
     errors: List[PropertyError] = []
 
-    # References could have forward References so keep going as long as we are making progress
-    while still_making_progress:
-        still_making_progress = False
-        errors = []
-        next_round = []
-        # Only accumulate errors from the last round, since we might fix some along the way
-        for name, data in to_process:
-            if isinstance(data, oai.Reference):
-                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
-                continue
-            ref_path = parse_reference_path(f"#/components/schemas/{name}")
-            if isinstance(ref_path, ParseError):
-                schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
-                continue
+    # Create classes witch can be referenced
+    schemas = build_schemas_without_properties(components=components, schemas=schemas, config=config)
 
-            indirect_references = _get_indirect_references(data=data, schemas=schemas)
-            # Create classes wi can be re
-            schemas = build_classes_without_properties(
-                indirect_references=indirect_references, components=components, schemas=schemas, config=config
-            )
+    for name, data in components.items():
+        if isinstance(data, oai.Reference):
+            schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
+            continue
+        ref_path = parse_reference_path(f"#/components/schemas/{name}")
+        if isinstance(ref_path, ParseError):
+            schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
+            continue
 
-            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
-            if isinstance(schemas_or_err, PropertyError):
-                next_round.append((name, data))
-                errors.append(schemas_or_err)
-                continue
-            schemas = schemas_or_err
-            still_making_progress = True
-        to_process = next_round
+        schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+        if isinstance(schemas_or_err, PropertyError):
+            errors.append(schemas_or_err)
+            continue
+        schemas = schemas_or_err
 
-    schemas.errors.extend(errors)
     return schemas
 
 
-def _get_indirect_references(data: oai.Schema, schemas: Schemas) -> Set[str]:
-    """Gets references to unprocessed classes."""
-    if data.properties:
-        processed_references: Set[str] = set(schemas.classes_by_reference.keys())
-        prop_references: Set[str] = set(prop.ref for prop in data.properties.values() if isinstance(prop, oai.Reference))
-        indirect_references: Set[str] = set(ref.strip('#') for ref in prop_references) - processed_references
-        return indirect_references
-    return set()
-
-
-def build_classes_without_properties(
-    indirect_references: Set[str], components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
-) -> Union[Schemas, PropertyError]:
+def build_schemas_without_properties(
+    components: Dict[str, Union[oai.Reference, oai.Schema]],
+    schemas: Schemas,
+    config: Config,
+) -> Schemas:
     """Adds classes with empty properties. This allows to reference these classes.
     Properties will be filled in later.
     """
-    for reference in indirect_references:
-        prop_name = reference.rsplit(sep='/', maxsplit=1)[1]
-        if prop_name not in components:
-            return PropertyError(detail=f"Could not find reference in parsed models or enums: #/components/schemas/{prop_name}")
+    for name, schema in components.items():
+        data = deepcopy(schema)
+        if isinstance(data, oai.Reference):
+            # Unsupported now. Adds to errors in the top loop.
+            continue
+        ref_path = parse_reference_path(f"#/components/schemas/{name}")
+        if isinstance(ref_path, ParseError):
+            continue
 
-        prop_ref_path = parse_reference_path(f"#/components/schemas/{prop_name}")
-        data = deepcopy(components.get(prop_name))
-        # Add model for reference without properties. Properties will be added later by order.
+        # Add model for reference without properties. Properties will be added later.
         data.properties = None
-
-        schemas_or_err = update_schemas_with_data(ref_path=prop_ref_path, data=data, schemas=schemas, config=config)
+        schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
         if isinstance(schemas_or_err, ParseError):
             schemas.errors.append(schemas_or_err)
             continue
