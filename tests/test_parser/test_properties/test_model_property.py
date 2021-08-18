@@ -140,6 +140,34 @@ class TestBuildModelProperty:
         assert new_schemas == schemas
         assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
 
+    def test_model_bad_properties(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
+
+        data = oai.Schema(
+            properties={
+                "bad": oai.Reference.construct(ref="#/components/schema/NotExist"),
+            },
+        )
+        result = build_model_property(
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=Config()
+        )[0]
+        assert isinstance(result, PropertyError)
+
+    def test_model_bad_additional_properties(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
+
+        additional_properties = oai.Schema(
+            type="object",
+            properties={
+                "bad": oai.Reference(ref="#/components/schemas/not_exist"),
+            },
+        )
+        data = oai.Schema(additionalProperties=additional_properties)
+        result = build_model_property(
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=Config()
+        )[0]
+        assert isinstance(result, PropertyError)
+
 
 class TestProcessProperties:
     def test_conflicting_properties_different_types(
