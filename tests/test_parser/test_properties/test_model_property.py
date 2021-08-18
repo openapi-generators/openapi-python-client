@@ -162,6 +162,20 @@ class TestProcessProperties:
 
         assert isinstance(result, PropertyError)
 
+    def test_process_properties_reference_not_exist(self):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema(
+            properties={
+                "bad": oai.Reference.construct(ref="#/components/schema/NotExist"),
+            },
+        )
+
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config())
+
+        assert isinstance(result, PropertyError)
+
     def test_invalid_reference(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
