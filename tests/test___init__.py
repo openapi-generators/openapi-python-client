@@ -465,7 +465,7 @@ class TestProject:
 
         pyproject_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
-        template_path = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template_path = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml.jinja"
         templates = {
             template_path: pyproject_template,
         }
