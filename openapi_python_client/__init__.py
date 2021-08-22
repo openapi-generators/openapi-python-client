@@ -194,7 +194,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         git_ignore_path.write_text(git_ignore_template.render(), encoding=self.file_encoding)
 
     def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
-        template = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml.jinja"
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
