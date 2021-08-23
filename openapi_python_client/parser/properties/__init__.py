@@ -17,7 +17,6 @@ import attr
 from ... import Config
 from ... import schema as oai
 from ... import utils
-from ...schema import DataType
 from ..errors import ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
@@ -536,9 +535,9 @@ def _property_from_data(
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    if data.type == DataType.STRING:
+    if data.type == oai.DataType.STRING:
         return _string_based_property(name=name, required=required, data=data, config=config), schemas
-    if data.type == DataType.NUMBER:
+    if data.type == oai.DataType.NUMBER:
         return (
             FloatProperty(
                 name=name,
@@ -549,7 +548,7 @@ def _property_from_data(
             ),
             schemas,
         )
-    if data.type == DataType.INTEGER:
+    if data.type == oai.DataType.INTEGER:
         return (
             IntProperty(
                 name=name,
@@ -560,7 +559,7 @@ def _property_from_data(
             ),
             schemas,
         )
-    if data.type == DataType.BOOLEAN:
+    if data.type == oai.DataType.BOOLEAN:
         return (
             BooleanProperty(
                 name=name,
@@ -571,11 +570,11 @@ def _property_from_data(
             ),
             schemas,
         )
-    if data.type == DataType.ARRAY:
+    if data.type == oai.DataType.ARRAY:
         return build_list_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    if data.type == DataType.OBJECT or data.allOf:
+    if data.type == oai.DataType.OBJECT or data.allOf:
         return build_model_property(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
