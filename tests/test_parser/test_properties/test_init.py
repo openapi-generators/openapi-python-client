@@ -605,21 +605,6 @@ class TestPropertyFromData:
         assert prop == attr.evolve(existing_model, name=name, required=required, nullable=nullable, python_name=name)
         build_union_property.assert_not_called()
 
-    def test_property_from_data_unsupported_type(self, mocker):
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Schema.construct(type=mocker.MagicMock())
-
-        from openapi_python_client.parser.errors import PropertyError
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        assert property_from_data(
-            name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
-        ) == (
-            PropertyError(data=data, detail=f"unknown type {data.type}"),
-            Schemas(),
-        )
-
     def test_property_from_data_no_valid_props_in_data(self):
         from openapi_python_client.parser.properties import AnyProperty, Schemas, property_from_data
 
@@ -744,19 +729,19 @@ class TestBuildUnionProperty:
         assert p == expected
         assert s == Schemas()
 
-    def test_property_from_data_union_bad_type(self, mocker):
+    def test_build_union_property_invalid_property(self, mocker):
         name = "bad_union"
         required = mocker.MagicMock()
-        data = oai.Schema(anyOf=[{"type": "garbage"}])
+        reference = oai.Reference.construct(ref="#/components/schema/NotExist")
+        data = oai.Schema(anyOf=[reference])
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
-        from openapi_python_client.parser.properties import Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, build_union_property
 
-        p, s = property_from_data(
+        p, s = build_union_property(
             name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
         )
-
-        assert p == PropertyError(detail=f"Invalid property in union {name}", data=oai.Schema(type="garbage"))
+        assert p == PropertyError(detail=f"Invalid property in union {name}", data=reference)
 
 
 class TestStringBasedProperty:

@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from ..data_type import DataType
 from .discriminator import Discriminator
 from .external_documentation import ExternalDocumentation
 from .reference import Reference
@@ -35,7 +36,7 @@ class Schema(BaseModel):
     minProperties: Optional[int] = Field(default=None, ge=0)
     required: Optional[List[str]] = Field(default=None, min_items=1)
     enum: Optional[List[Any]] = Field(default=None, min_items=1)
-    type: Optional[str] = None
+    type: Optional[DataType] = Field(default=None)
     allOf: Optional[List[Union[Reference, "Schema"]]] = None
     oneOf: List[Union[Reference, "Schema"]] = []
     anyOf: List[Union[Reference, "Schema"]] = []
