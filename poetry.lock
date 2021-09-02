@@ -730,7 +730,7 @@ typer = ">=0.3.0,<0.4.0"
 
 [[package]]
 name = "types-certifi"
-version = "0.1.4"
+version = "2020.4.0"
 description = "Typing stubs for certifi"
 category = "dev"
 optional = false
@@ -804,7 +804,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "61b6dfb87d3d6c5f4f72551b8db0bf1cf874cb6e4f9efd14a7a7b400d0492dea"
+content-hash = "272554de291abb77860c74ee28fba25487e00a605231873381f959a795bdb447"
 
 [metadata.files]
 anyio = [
@@ -1361,8 +1361,8 @@ typer-cli = [
     {file = "typer_cli-0.0.12-py3-none-any.whl", hash = "sha256:f9b810d4fbdb750b28ceaa5fd8f737db596570418ae092e6d54a64d378e843ca"},
 ]
 types-certifi = [
-    {file = "types-certifi-0.1.4.tar.gz", hash = "sha256:7c134d978f15e4aa2d2b1a85b2a92241ed6b256c3452511b7783b6a28b304b71"},
-    {file = "types_certifi-0.1.4-py2.py3-none-any.whl", hash = "sha256:afe4d94726491d843f10e5746797689ea5dcbd78454a653be47d72a8c8ce3bed"},
+    {file = "types-certifi-2020.4.0.tar.gz", hash = "sha256:787d1a0c7897a1c658f8f7958ae57141b3fff13acb866e5bcd31cfb45037546f"},
+    {file = "types_certifi-2020.4.0-py3-none-any.whl", hash = "sha256:0ffdbe451d3b02f6d2cfd87bcfb2f086a4ff1fa76a35d51cfc3771e261d7a8fd"},
 ]
 types-dataclasses = [
     {file = "types-dataclasses-0.1.7.tar.gz", hash = "sha256:248075d093d8f7c1541ce515594df7ae40233d1340afde11ce7125368c5209b8"},
