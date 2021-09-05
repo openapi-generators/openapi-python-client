@@ -29,12 +29,13 @@ using it (Python developers).
 
 ## Installation
 
-I recommend you install with [pipx](https://pipxproject.github.io/pipx/) so you don't conflict with any other packages
-you might have: `pipx install openapi-python-client`.
+I recommend you install with [pipx](https://pipxproject.github.io/pipx/) so you don't conflict with any other packages you might have: `pipx install openapi-python-client --include-deps`.
 
-Better yet, use `pipx run openapi-python-client <normal params / options>` to always use the latest version of the generator.
+> Note the `--include-deps` option which will also make `black`, `isort`, and `autoflake` available in your path so that `openapi-python-client` can use them to clean up the generated code.
 
-You can install with normal pip if you want to though: `pip install openapi-python-client`
+**If you use `pipx run` then the post-generation hooks will not be available unless you install them manually.**
+
+You can also install with normal pip: `pip install openapi-python-client`
 
 Then, if you want tab completion: `openapi-python-client --install-completion`
 
@@ -114,8 +115,7 @@ class_overrides:
     module_name: short_name
 ```
 
-The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the
-models folder.
+The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the models folder.
 
 ### project_name_override and package_name_override
 
@@ -148,6 +148,17 @@ Example:
 
 ```yaml
 package_version_override: 1.2.3
+```
+
+### post_hooks
+
+In the config file, there's an easy way to tell `openapi-python-client` to run additional commands after generation. Here's an example showing the default commands that will run if you don't override them in config:
+
+```yaml
+post_hooks:
+   - "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports ."
+   - "isort ."
+   - "black ."
 ```
 
 [changelog.md]: CHANGELOG.md
