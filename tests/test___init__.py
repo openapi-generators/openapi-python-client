@@ -5,7 +5,7 @@ import jinja2
 import pytest
 import yaml
 
-from openapi_python_client import Config, GeneratorError
+from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
 
 def test__get_project_for_url_or_path(mocker):
@@ -241,6 +241,17 @@ def make_project(**kwargs):
     return Project(**kwargs)
 
 
+@pytest.fixture
+def project_with_dir() -> Project:
+    """Return a Project with the project dir pre-made (needed for cwd of commands). Unlinks after the test completes"""
+    project = make_project()
+    project.project_dir.mkdir()
+
+    yield project
+
+    project.project_dir.rmdir()
+
+
 class TestProject:
     def test___init__(self, mocker):
         openapi = mocker.MagicMock(title="My Test API")
@@ -303,7 +314,7 @@ class TestProject:
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
-        project._reformat = mocker.MagicMock()
+        project._run_post_hooks = mocker.MagicMock()
         project._get_errors = mocker.MagicMock()
 
         result = project.build()
@@ -313,7 +324,7 @@ class TestProject:
         project._build_metadata.assert_called_once()
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
-        project._reformat.assert_called_once()
+        project._run_post_hooks.assert_called_once()
         project._get_errors.assert_called_once()
         assert result == project._get_errors.return_value
 
@@ -327,7 +338,7 @@ class TestProject:
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
-        project._reformat = mocker.MagicMock()
+        project._run_post_hooks = mocker.MagicMock()
         project._get_errors = mocker.MagicMock()
 
         project.build()
@@ -354,7 +365,7 @@ class TestProject:
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
-        project._reformat = mocker.MagicMock()
+        project._run_post_hooks = mocker.MagicMock()
         project._get_errors = mocker.MagicMock()
 
         result = project.update()
@@ -363,7 +374,7 @@ class TestProject:
         project._create_package.assert_called_once()
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
-        project._reformat.assert_called_once()
+        project._run_post_hooks.assert_called_once()
         project._get_errors.assert_called_once()
         assert result == project._get_errors.return_value
 
@@ -501,44 +512,42 @@ class TestProject:
         setup_template.render.assert_called_once_with()
         setup_path.write_text.assert_called_once_with(setup_template.render(), encoding="utf-8")
 
+    def test__run_post_hooks_reports_missing_commands(self, project_with_dir):
+        fake_command_name = "blahblahdoesntexist"
+        project_with_dir.config.post_hooks = [fake_command_name]
+        need_to_make_cwd = not project_with_dir.project_dir.exists()
+        if need_to_make_cwd:
+            project_with_dir.project_dir.mkdir()
 
-def test__reformat(mocker):
-    import subprocess
+        project_with_dir._run_post_hooks()
 
-    sub_run = mocker.patch("subprocess.run")
-    project = make_project()
-    project.project_dir = mocker.MagicMock(autospec=pathlib.Path)
+        assert len(project_with_dir.errors) == 1
+        error = project_with_dir.errors[0]
+        assert error.level == ErrorLevel.WARNING
+        assert error.header == "Skipping Integration"
+        assert fake_command_name in error.detail
 
-    project._reformat()
+    def test__run_post_hooks_reports_stdout_of_commands_that_error_with_no_stderr(self, project_with_dir):
+        failing_command = "python -c \"print('a message'); exit(1)\""
+        project_with_dir.config.post_hooks = [failing_command]
+        project_with_dir._run_post_hooks()
 
-    sub_run.assert_has_calls(
-        [
-            mocker.call(
-                "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
-                cwd=project.package_dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-            ),
-            mocker.call(
-                "isort .",
-                cwd=project.project_dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-            ),
-            mocker.call(
-                "black .",
-                cwd=project.project_dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-            ),
-        ]
-    )
+        assert len(project_with_dir.errors) == 1
+        error = project_with_dir.errors[0]
+        assert error.level == ErrorLevel.ERROR
+        assert error.header == "python failed"
+        assert "a message" in error.detail
+
+    def test__run_post_hooks_reports_stderr_of_commands_that_error(self, project_with_dir):
+        failing_command = "python -c \"print('a message'); raise Exception('some exception')\""
+        project_with_dir.config.post_hooks = [failing_command]
+        project_with_dir._run_post_hooks()
+
+        assert len(project_with_dir.errors) == 1
+        error = project_with_dir.errors[0]
+        assert error.level == ErrorLevel.ERROR
+        assert error.header == "python failed"
+        assert "some exception" in error.detail
 
 
 def test__get_errors(mocker):
@@ -559,7 +568,7 @@ def test__get_errors(mocker):
     assert project._get_errors() == [1, 2, 3]
 
 
-def test__custom_templates(mocker):
+def test_custom_templates(mocker):
     from openapi_python_client import GeneratorData, MetaType, Project
 
     openapi = mocker.MagicMock(
