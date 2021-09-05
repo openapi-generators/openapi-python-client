@@ -5,7 +5,8 @@ import subprocess
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Union
+from subprocess import CalledProcessError
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import httpcore
 import httpx
@@ -16,7 +17,7 @@ from openapi_python_client import utils
 
 from .config import Config
 from .parser import GeneratorData, import_string_from_class
-from .parser.errors import GeneratorError
+from .parser.errors import ErrorLevel, GeneratorError
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
     from importlib_metadata import version
@@ -96,6 +97,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             project_name=self.project_name,
             project_dir=self.project_dir,
         )
+        self.errors: List[GeneratorError] = []
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
@@ -112,7 +114,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._build_metadata()
         self._build_models()
         self._build_api()
-        self._reformat()
+        self._run_post_hooks()
         return self._get_errors()
 
     def update(self) -> Sequence[GeneratorError]:
@@ -125,35 +127,42 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._create_package()
         self._build_models()
         self._build_api()
-        self._reformat()
+        self._run_post_hooks()
         return self._get_errors()
 
-    def _reformat(self) -> None:
-        subprocess.run(
-            "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
-            cwd=self.package_dir,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
-        subprocess.run(
-            "isort .",
-            cwd=self.project_dir,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
-        subprocess.run(
-            "black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
-        )
+    def _run_post_hooks(self) -> None:
+        for command in self.config.post_hooks:
+            self._run_command(command)
 
-    def _get_errors(self) -> Sequence[GeneratorError]:
-        errors = []
+    def _run_command(self, cmd: str) -> None:
+        cmd_name = cmd.split(" ")[0]
+        command_exists = shutil.which(cmd_name)
+        if not command_exists:
+            self.errors.append(
+                GeneratorError(
+                    level=ErrorLevel.WARNING, header="Skipping Integration", detail=f"{cmd_name} is not in PATH"
+                )
+            )
+            return
+        try:
+            subprocess.run(
+                cmd, cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+            )
+        except CalledProcessError as err:
+            self.errors.append(
+                GeneratorError(
+                    level=ErrorLevel.ERROR,
+                    header=f"{cmd_name} failed",
+                    detail=err.stderr.decode() or err.output.decode(),
+                )
+            )
+
+    def _get_errors(self) -> List[GeneratorError]:
+        errors: List[GeneratorError] = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
         errors.extend(self.openapi.errors)
+        errors.extend(self.errors)
         return errors
 
     def _create_package(self) -> None:
