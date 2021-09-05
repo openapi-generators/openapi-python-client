@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.4
+
+### Features
+
+- Allow customization of post-generation steps with the `post_hooks` config option.
+- Allow httpx 0.19.\* (#481)
+
+### Fixes
+
+- Don't crash the generator when one of the post-generation hooks is missing [fixes #479]. Thanks @chamini2 and @karolzlot!
+
 ## 0.10.3
 
 ### Features
