@@ -23,6 +23,7 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "data": form_data.to_dict(),
+        "verify": client.verify_ssl,
     }
 
 

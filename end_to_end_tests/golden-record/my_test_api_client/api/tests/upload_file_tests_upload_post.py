@@ -30,6 +30,7 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "files": multipart_multipart_data,
+        "verify": client.verify_ssl,
     }
 
 
