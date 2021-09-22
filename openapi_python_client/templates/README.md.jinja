@@ -41,6 +41,25 @@ my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
 response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)
 ```
 
+By default when you're calling an https api it will attempt to verify that ssl is working correctly.
+Using certificate verification is highly recommended most of the time and is the default.
+But sometimes you may need to authenticate to a server (especially an internal server) using a custom certificate bundle.
+
+```python
+client = AuthenticatedClient(base_url="https://internal_api.example.com", 
+                             token="SuperSecretToken",
+                             verify_ssl='/path/to/certificate_bundle.pem')
+```
+
+or even disable ssl verification altogether, despite the fact that it can cause security risks.
+
+```python
+client = AuthenticatedClient(base_url="https://internal_api.example.com", 
+                             token="SuperSecretToken", 
+                             verify_ssl=False)
+```
+but be careful with it.
+
 Things to know:
 1. Every path/method combo becomes a Python module with four functions:
     1. `sync`: Blocking request that returns parsed data (if successful) or `None`
