@@ -27,6 +27,7 @@ class Property:
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()
     python_name: str = attr.ib(init=False)
+    description: Optional[str]
 
     template: ClassVar[Optional[str]] = None
     json_is_dict: ClassVar[bool] = False

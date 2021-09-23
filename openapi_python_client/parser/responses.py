@@ -28,7 +28,7 @@ _SOURCE_BY_CONTENT_TYPE = {
 def empty_response(status_code: int, response_name: str) -> Response:
     return Response(
         status_code=status_code,
-        prop=NoneProperty(name=response_name, default=None, nullable=False, required=True),
+        prop=NoneProperty(name=response_name, default=None, nullable=False, required=True, description=None),
         source="None",
     )
 
