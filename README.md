@@ -21,7 +21,7 @@ This tool focuses on creating the best developer experience for Python developer
 
 1. Using all the latest and greatest Python features like type annotations and dataclasses.
 2. Having documentation and usage instructions specific to this one generator.
-3. Being easier to improve and extend, especially for python developers. Since openapi-python-client is written in python and jinja2 templates, while openapi-generator is a larger Java project which uses more restrictive mustache templates.
+1. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
 
 ## Installation
 
