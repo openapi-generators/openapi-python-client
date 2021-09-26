@@ -59,7 +59,7 @@ class EndpointCollection:
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
                     endpoint.header = (
-                        f"ERROR parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
+                        f"WARNING parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
                     )
                     collection.parse_errors.append(endpoint)
                     continue
