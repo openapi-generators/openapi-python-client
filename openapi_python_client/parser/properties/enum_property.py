@@ -1,6 +1,6 @@
 __all__ = ["EnumProperty"]
 
-from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union
+from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast
 
 import attr
 
@@ -41,11 +41,12 @@ class EnumProperty(Property):
         return imports
 
     @staticmethod
-    def values_from_list(values: List[ValueType]) -> Dict[str, ValueType]:
+    def values_from_list(values: Union[List[str], List[int]]) -> Dict[str, ValueType]:
         """Convert a list of values into dict of {name: value}"""
         output: Dict[str, ValueType] = {}
 
         for i, value in enumerate(values):
+            value = cast(Union[str, int], value)
             if isinstance(value, int):
                 if value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value

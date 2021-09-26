@@ -296,7 +296,7 @@ def build_enum_property(
     name: str,
     required: bool,
     schemas: Schemas,
-    enum: List[Union[str, int]],
+    enum: Union[List[str], List[int]],
     parent_name: Optional[str],
     config: Config,
 ) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
