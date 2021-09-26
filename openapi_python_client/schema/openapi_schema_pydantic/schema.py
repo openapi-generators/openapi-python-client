@@ -35,7 +35,7 @@ class Schema(BaseModel):
     maxProperties: Optional[int] = Field(default=None, ge=0)
     minProperties: Optional[int] = Field(default=None, ge=0)
     required: Optional[List[str]] = Field(default=None, min_items=1)
-    enum: Optional[List[Any]] = Field(default=None, min_items=1)
+    enum: Optional[List[Union[str, int]]] = Field(default=None, min_items=1)
     type: Optional[DataType] = Field(default=None)
     allOf: Optional[List[Union[Reference, "Schema"]]] = None
     oneOf: List[Union[Reference, "Schema"]] = []
