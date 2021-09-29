@@ -36,6 +36,8 @@ def model_property_factory() -> Callable[..., ModelProperty]:
             "relative_imports": set(),
             "additional_properties": False,
             "python_name": "",
+            "description": "",
+            "example": "",
             **kwargs,
         }
         return ModelProperty(**kwargs)
@@ -210,6 +212,8 @@ def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         "required": True,
         "nullable": False,
         "default": None,
+        "description": "",
+        "example": "",
         **kwargs,
     }
     if not kwargs.get("python_name"):

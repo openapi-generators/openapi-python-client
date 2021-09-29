@@ -12,6 +12,8 @@ def date_property(required=True, nullable=True, default=None) -> DateProperty:
         nullable=nullable,
         default=default,
         python_name="a_prop",
+        description="",
+        example="",
     )
 
 
