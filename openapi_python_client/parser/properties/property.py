@@ -110,7 +110,8 @@ class Property:
             return f"{self.python_name}: {self.get_type_string()} = {default}"
         return f"{self.python_name}: {self.get_type_string()}"
 
-    def to_docstring(self):
+    def to_docstring(self) -> str:
+        """Returns property docstring"""
         doc = f"{self.python_name} ({self.get_type_string()}): {self.description}"
         if self.default:
             doc += f"|default: {self.default}"
