@@ -355,6 +355,8 @@ def build_enum_property(
         value_type=value_type,
         default=None,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        description=data.description,
+        example=data.example,
     )
 
     default = get_enum_default(prop, data)
