@@ -31,6 +31,7 @@ class {{ class_name }}:
     """
     {% if model.title %}{{ model.title | wordwrap(76) }}{% endif %}
     {% if model.description %}{{ model.description | wordwrap(76) }}{% endif %}
+    
     {% if model.example %}Example:{{ model.example | string | wordwrap(76) }}{% endif %}
     
     Properties:
