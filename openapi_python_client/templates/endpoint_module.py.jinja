@@ -90,10 +90,11 @@ def sync_detailed(
 ) -> Response[{{ return_string }}]:
     """
     {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
-    {% else %}
-    {{ endpoint.title | wordwrap(76)}}
-    {% endif %}
+    
     {{ endpoint.description | wordwrap(76)}}
+    {% else %}
+    {{ endpoint.description | wordwrap(76)}}
+    {% endif %}
     {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
     Args:
         {% for parameter in endpoint.query_parameters.values() %}
@@ -125,10 +126,12 @@ def sync(
 ) -> Optional[{{ return_string }}]:
     """
     {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
-    {% else %}
-    {{ endpoint.title | wordwrap(76)}}
-    {% endif %}
+    
     {{ endpoint.description | wordwrap(76)}}
+    {% else %}
+    {{ endpoint.description | wordwrap(76)}}
+    {% endif %}
+
     {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
     Args:
         {% for parameter in endpoint.query_parameters.values() %}
@@ -154,10 +157,12 @@ async def asyncio_detailed(
 ) -> Response[{{ return_string }}]:
     """
     {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+    
+    {{ endpoint.description | wordwrap(76)}}
     {% else %}
-    {{ endpoint.title | wordwrap(76)}}
+    {{ endpoint.description | wordwrap(76)}}
     {% endif %}
-    {{ endpoint.description | wordwrap(76)}}    
+
     {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
     Args:
         {% for parameter in endpoint.query_parameters.values() %}
@@ -191,10 +196,12 @@ async def asyncio(
 ) -> Optional[{{ return_string }}]:
     """
     {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+    
+    {{ endpoint.description | wordwrap(76)}}
     {% else %}
-    {{ endpoint.title | wordwrap(76)}}
+    {{ endpoint.description | wordwrap(76)}}
     {% endif %}
-    {{ endpoint.description | wordwrap(76)}}  
+    
     {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}  
     Args:
         {% for parameter in endpoint.query_parameters.values() %}
