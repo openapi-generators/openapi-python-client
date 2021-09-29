@@ -20,8 +20,15 @@ def test_response_from_data_no_content():
 
     assert response == Response(
         status_code=200,
-        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True, python_name="response_200",
-                         description='', example=''),
+        prop=AnyProperty(
+            name="response_200",
+            default=None,
+            nullable=False,
+            required=True,
+            python_name="response_200",
+            description="",
+            example="",
+        ),
         source="None",
     )
 
@@ -47,8 +54,15 @@ def test_response_from_data_no_content_schema():
 
     assert response == Response(
         status_code=200,
-        prop=AnyProperty(name="response_200", default=None, nullable=False, required=True, python_name="response_200",
-                         description=data.description, example=data.example),
+        prop=AnyProperty(
+            name="response_200",
+            default=None,
+            nullable=False,
+            required=True,
+            python_name="response_200",
+            description=data.description,
+            example=data.example,
+        ),
         source="None",
     )
 
