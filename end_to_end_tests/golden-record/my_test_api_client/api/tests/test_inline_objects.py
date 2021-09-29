@@ -52,6 +52,13 @@ def sync_detailed(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Response[TestInlineObjectsResponse200]:
+    """
+    Test Inline Objects
+
+
+        Returns:
+            Response[TestInlineObjectsResponse200]
+    """
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -69,8 +76,14 @@ def sync(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Optional[TestInlineObjectsResponse200]:
-    """ """
+    """
+    Test Inline Objects
 
+
+
+        Returns:
+            Optional[TestInlineObjectsResponse200]
+    """
     return sync_detailed(
         client=client,
         json_body=json_body,
@@ -82,6 +95,15 @@ async def asyncio_detailed(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Response[TestInlineObjectsResponse200]:
+    """
+    Test Inline Objects
+
+
+
+
+        Returns:
+            Response[TestInlineObjectsResponse200]
+    """
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -98,8 +120,14 @@ async def asyncio(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Optional[TestInlineObjectsResponse200]:
-    """ """
+    """
+    Test Inline Objects
 
+
+
+        Returns:
+            Optional[TestInlineObjectsResponse200]
+    """
     return (
         await asyncio_detailed(
             client=client,

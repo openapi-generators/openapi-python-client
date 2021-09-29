@@ -84,6 +84,16 @@ def sync_detailed(
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List[AModel]]]:
+    """
+    Get List
+
+        Get a list of things
+        Args:
+            an_enum_value (List[AnEnum]): None:
+            some_date (Union[datetime.date, datetime.datetime]): None:
+        Returns:
+            Response[Union[HTTPValidationError, List[AModel]]]
+    """
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
@@ -103,8 +113,17 @@ def sync(
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
-    """Get a list of things"""
+    """
+    Get List
 
+        Get a list of things
+
+        Args:
+            an_enum_value (List[AnEnum]): None:
+            some_date (Union[datetime.date, datetime.datetime]): None:
+        Returns:
+            Optional[Union[HTTPValidationError, List[AModel]]]
+    """
     return sync_detailed(
         client=client,
         an_enum_value=an_enum_value,
@@ -118,6 +137,18 @@ async def asyncio_detailed(
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List[AModel]]]:
+    """
+    Get List
+
+        Get a list of things
+
+        Args:
+            an_enum_value (List[AnEnum]): None:
+            some_date (Union[datetime.date, datetime.datetime]): None:
+
+        Returns:
+            Response[Union[HTTPValidationError, List[AModel]]]
+    """
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
@@ -136,8 +167,18 @@ async def asyncio(
     an_enum_value: List[AnEnum],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
-    """Get a list of things"""
+    """
+    Get List
 
+        Get a list of things
+
+
+        Args:
+            an_enum_value (List[AnEnum]): None:
+            some_date (Union[datetime.date, datetime.datetime]): None:
+        Returns:
+            Optional[Union[HTTPValidationError, List[AModel]]]
+    """
     return (
         await asyncio_detailed(
             client=client,

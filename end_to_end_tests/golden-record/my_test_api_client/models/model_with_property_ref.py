@@ -10,7 +10,13 @@ T = TypeVar("T", bound="ModelWithPropertyRef")
 
 @attr.s(auto_attribs=True)
 class ModelWithPropertyRef:
-    """ """
+    """
+
+
+    Properties:
+        inner (Union[Unset, ModelName]):
+
+    """
 
     inner: Union[Unset, ModelName] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)

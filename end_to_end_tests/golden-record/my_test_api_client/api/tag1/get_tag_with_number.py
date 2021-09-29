@@ -37,6 +37,11 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[Any]:
+    """
+
+    Returns:
+        Response[Any]
+    """
     kwargs = _get_kwargs(
         client=client,
     )
@@ -52,6 +57,13 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[Any]:
+    """
+
+
+
+    Returns:
+        Response[Any]
+    """
     kwargs = _get_kwargs(
         client=client,
     )

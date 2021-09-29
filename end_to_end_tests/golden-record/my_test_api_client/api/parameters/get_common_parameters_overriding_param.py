@@ -47,6 +47,13 @@ def sync_detailed(
     client: Client,
     param_query: str = "overriden_in_GET",
 ) -> Response[Any]:
+    """
+
+    Args:
+        param_query (str): None|default: 'overriden_in_GET':
+    Returns:
+        Response[Any]
+    """
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,
@@ -66,6 +73,15 @@ async def asyncio_detailed(
     client: Client,
     param_query: str = "overriden_in_GET",
 ) -> Response[Any]:
+    """
+
+
+    Args:
+        param_query (str): None|default: 'overriden_in_GET':
+
+    Returns:
+        Response[Any]
+    """
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,

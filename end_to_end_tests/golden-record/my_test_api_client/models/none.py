@@ -7,7 +7,12 @@ T = TypeVar("T", bound="None_")
 
 @attr.s(auto_attribs=True)
 class None_:
-    """ """
+    """
+
+
+    Properties:
+
+    """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

@@ -9,7 +9,13 @@ T = TypeVar("T", bound="ModelWithUnionPropertyInlinedFruitType1")
 
 @attr.s(auto_attribs=True)
 class ModelWithUnionPropertyInlinedFruitType1:
-    """ """
+    """
+
+
+    Properties:
+        bananas (Union[Unset, str]): None
+
+    """
 
     bananas: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)

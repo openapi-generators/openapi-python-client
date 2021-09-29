@@ -7,7 +7,13 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeOptionalObject")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostSomeOptionalObject:
-    """ """
+    """
+
+
+    Properties:
+        foo (str): None
+
+    """
 
     foo: str
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)

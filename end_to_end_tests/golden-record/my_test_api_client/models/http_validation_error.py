@@ -10,7 +10,13 @@ T = TypeVar("T", bound="HTTPValidationError")
 
 @attr.s(auto_attribs=True)
 class HTTPValidationError:
-    """ """
+    """
+
+
+    Properties:
+        detail (Union[Unset, List[ValidationError]]): None
+
+    """
 
     detail: Union[Unset, List[ValidationError]] = UNSET
 
