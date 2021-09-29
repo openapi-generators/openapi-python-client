@@ -61,6 +61,8 @@ class TestBuildModelProperty:
                     nullable=False,
                     default=None,
                     python_name="additional_property",
+                    description="",
+                    example="",
                 ),
             ),
         ],
