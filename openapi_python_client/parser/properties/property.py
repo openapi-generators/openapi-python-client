@@ -30,6 +30,8 @@ class Property:
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     default: Optional[str] = attr.ib()
     python_name: PythonIdentifier
+    description: Optional[str] = attr.ib()
+    example: Optional[str] = attr.ib()
 
     template: ClassVar[Optional[str]] = None
     json_is_dict: ClassVar[bool] = False
@@ -107,3 +109,11 @@ class Property:
         if default is not None:
             return f"{self.python_name}: {self.get_type_string()} = {default}"
         return f"{self.python_name}: {self.get_type_string()}"
+
+    def to_docstring(self):
+        doc = f"{self.python_name} ({self.get_type_string()}): {self.description}"
+        if self.default:
+            doc += f"|default: {self.default}"
+        if self.example:
+            doc += f"|ex: {self.example}"
+        return doc

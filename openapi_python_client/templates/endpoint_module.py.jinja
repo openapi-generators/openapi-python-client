@@ -88,6 +88,27 @@ def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
+    """
+    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+    {% else %}
+    {{ endpoint.title | wordwrap(76)}}
+    {% endif %}
+    {{ endpoint.description | wordwrap(76)}}
+    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
+    Args:
+        {% for parameter in endpoint.query_parameters.values() %}
+        {{ parameter.to_docstring() }}:
+        {% endfor %}
+        {% for parameter in endpoint.header_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+        {% for parameter in endpoint.cookie_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+    {% endif %}
+    Returns:
+        Response[{{ return_string }}]
+    """
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -102,8 +123,27 @@ def sync_detailed(
 def sync(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """ {{ endpoint.description }} """
-
+    """
+    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+    {% else %}
+    {{ endpoint.title | wordwrap(76)}}
+    {% endif %}
+    {{ endpoint.description | wordwrap(76)}}
+    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
+    Args:
+        {% for parameter in endpoint.query_parameters.values() %}
+        {{ parameter.to_docstring() }}:
+        {% endfor %}
+        {% for parameter in endpoint.header_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+        {% for parameter in endpoint.cookie_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+    {% endif %}
+    Returns:
+        Optional[{{ return_string }}]
+    """
     return sync_detailed(
         {{ kwargs(endpoint) }}
     ).parsed
@@ -112,6 +152,28 @@ def sync(
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
+    """
+    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+    {% else %}
+    {{ endpoint.title | wordwrap(76)}}
+    {% endif %}
+    {{ endpoint.description | wordwrap(76)}}    
+    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
+    Args:
+        {% for parameter in endpoint.query_parameters.values() %}
+        {{ parameter.to_docstring() }}:
+        {% endfor %}
+        {% for parameter in endpoint.header_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+        {% for parameter in endpoint.cookie_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+    {% endif %}
+
+    Returns:
+        Response[{{ return_string }}]
+    """
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -127,9 +189,29 @@ async def asyncio_detailed(
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """ {{ endpoint.description }} """
-
+    """
+    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+    {% else %}
+    {{ endpoint.title | wordwrap(76)}}
+    {% endif %}
+    {{ endpoint.description | wordwrap(76)}}  
+    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}  
+    Args:
+        {% for parameter in endpoint.query_parameters.values() %}
+        {{ parameter.to_docstring() }}:
+        {% endfor %}
+        {% for parameter in endpoint.header_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+        {% for parameter in endpoint.cookie_parameters.values() %}
+        {{ parameter.to_docstring() }},
+        {% endfor %}
+    {% endif %}
+    Returns:
+        Optional[{{ return_string }}]
+    """
     return (await asyncio_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
 {% endif %}
+

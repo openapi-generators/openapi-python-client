@@ -28,7 +28,16 @@ T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ class_name }}:
-    """ {{ model.description }} """
+    """
+    {% if model.title %}{{ model.title | wordwrap(76) }}{% endif %}
+    {% if model.description %}{{ model.description | wordwrap(76) }}{% endif %}
+    {% if model.example %}Example:{{ model.example | string | wordwrap(76) }}{% endif %}
+    
+    Properties:
+    {% for property in model.required_properties + model.optional_properties %}
+        {{ property.to_docstring() | wordwrap(72) }} 
+    {% endfor %}    
+    """
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
     {{ property.to_string() }}

@@ -38,6 +38,8 @@ def empty_response(*, status_code: int, response_name: str, config: Config) -> R
             nullable=False,
             required=True,
             python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
+            description='',
+            example='',
         ),
         source="None",
     )
