@@ -218,7 +218,7 @@ class TestGetJson:
 
     def test__get_document_bad_yaml(self, mocker):
         get = mocker.patch("httpx.get")
-        loads = mocker.patch("yaml.safe_load", side_effect=yaml.YAMLError)
+        loads = mocker.patch("yaml.safe_load", side_effect=yaml.YAMLError("error line 2"))
 
         from openapi_python_client import _get_document
 
@@ -228,7 +228,44 @@ class TestGetJson:
         get.assert_not_called()
         path.read_bytes.assert_called_once()
         loads.assert_called_once_with(path.read_bytes())
-        assert result == GeneratorError(header="Invalid YAML from provided source")
+        assert result == GeneratorError(header="Invalid YAML from provided source: error line 2")
+
+    def test__get_document_json(self, mocker):
+        class FakeResponse:
+            content = b'{\n\t"foo": "bar"}'
+            headers = {"content-type": "application/json; encoding=utf8"}
+
+        get = mocker.patch("httpx.get", return_value=FakeResponse())
+        yaml_loads = mocker.patch("yaml.safe_load")
+        json_result = mocker.MagicMock()
+        json_loads = mocker.patch("json.loads", return_value=json_result)
+
+        from openapi_python_client import _get_document
+
+        url = mocker.MagicMock()
+        result = _get_document(url=url, path=None)
+
+        get.assert_called_once()
+        json_loads.assert_called_once_with(FakeResponse.content.decode())
+        assert result == json_result
+
+    def test__get_document_bad_json(self, mocker):
+        class FakeResponse:
+            content = b'{"foo"}'
+            headers = {"content-type": "application/json; encoding=utf8"}
+
+        get = mocker.patch("httpx.get", return_value=FakeResponse())
+        json_result = mocker.MagicMock()
+
+        from openapi_python_client import _get_document
+
+        url = mocker.MagicMock()
+        result = _get_document(url=url, path=None)
+
+        get.assert_called_once()
+        assert result == GeneratorError(
+            header="Invalid JSON from provided source: " "Expecting ':' delimiter: line 1 column 7 (char 6)"
+        )
 
 
 def make_project(**kwargs):
