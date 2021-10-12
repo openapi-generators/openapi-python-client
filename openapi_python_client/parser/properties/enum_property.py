@@ -8,7 +8,7 @@ from ... import utils
 from .property import Property
 from .schemas import Class
 
-ValueType = Union[str, int]
+ValueType = Union[str, int, None]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -41,8 +41,8 @@ class EnumProperty(Property):
         return imports
 
     @staticmethod
-    def values_from_list(values: Union[List[str], List[int]]) -> Dict[str, ValueType]:
-        """Convert a list of values into dict of {name: value}"""
+    def values_from_list(values: Union[List[Optional[str]], List[Optional[int]]]) -> Dict[str, ValueType]:
+        """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: Dict[str, ValueType] = {}
 
         for i, value in enumerate(values):
@@ -60,5 +60,6 @@ class EnumProperty(Property):
             if key in output:
                 raise ValueError(f"Duplicate key {key} in Enum")
             sanitized_key = utils.snake_case(key).upper()
-            output[sanitized_key] = utils.remove_string_escapes(value)
+            output[sanitized_key] = utils.remove_string_escapes(value) if isinstance(value, str) else value
+            # If value is the string "null", this becomes Python's None instead of a str, so must special-case it
         return output
