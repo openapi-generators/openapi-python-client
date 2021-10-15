@@ -332,6 +332,14 @@ def build_enum_property(
                 schemas,
             )
 
+    # Remove None from str / int list, if present, and mark property as nullable
+    # If list only has None, with no str or int, make special None enum instead
+    keys_to_remove = [key for key, value in values.items() if value is None]
+    if keys_to_remove and len(keys_to_remove) < len(values.items()):
+        data.nullable = True
+        for key in keys_to_remove:
+            values.pop(key)
+
     for value in values.values():
         value_type = type(value)
         break

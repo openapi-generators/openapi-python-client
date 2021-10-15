@@ -1,0 +1,9 @@
+from enum import Enum
+
+class {{ enum.class_info.name }}(Enum):
+    {% for key, value in enum.values.items() %}
+    {{ key }} = {{ value }}
+    {% endfor %}
+ 
+    def __str__(self) -> str:
+        return str(self.value)

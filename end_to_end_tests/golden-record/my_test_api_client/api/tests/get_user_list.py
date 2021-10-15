@@ -6,6 +6,8 @@ import httpx
 from ...client import Client
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
+from ...models.an_enum_with_null import AnEnumWithNull
+from ...models.an_enum_with_only_null import AnEnumWithOnlyNull
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
 
@@ -14,6 +16,8 @@ def _get_kwargs(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
+    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_only_null: List[AnEnumWithOnlyNull],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Dict[str, Any]:
     url = "{}/tests/".format(client.base_url)
@@ -27,6 +31,20 @@ def _get_kwargs(
 
         json_an_enum_value.append(an_enum_value_item)
 
+    json_an_enum_value_with_null = []
+    for an_enum_value_with_null_item_data in an_enum_value_with_null:
+        an_enum_value_with_null_item = (
+            an_enum_value_with_null_item_data.value if an_enum_value_with_null_item_data else None
+        )
+
+        json_an_enum_value_with_null.append(an_enum_value_with_null_item)
+
+    json_an_enum_value_with_only_null = []
+    for an_enum_value_with_only_null_item_data in an_enum_value_with_only_null:
+        an_enum_value_with_only_null_item = an_enum_value_with_only_null_item_data.value
+
+        json_an_enum_value_with_only_null.append(an_enum_value_with_only_null_item)
+
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
     else:
@@ -34,6 +52,8 @@ def _get_kwargs(
 
     params: Dict[str, Any] = {
         "an_enum_value": json_an_enum_value,
+        "an_enum_value_with_null": json_an_enum_value_with_null,
+        "an_enum_value_with_only_null": json_an_enum_value_with_only_null,
         "some_date": json_some_date,
     }
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -82,11 +102,15 @@ def sync_detailed(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
+    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_only_null: List[AnEnumWithOnlyNull],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List[AModel]]]:
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
+        an_enum_value_with_null=an_enum_value_with_null,
+        an_enum_value_with_only_null=an_enum_value_with_only_null,
         some_date=some_date,
     )
 
@@ -101,6 +125,8 @@ def sync(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
+    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_only_null: List[AnEnumWithOnlyNull],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
     """Get a list of things"""
@@ -108,6 +134,8 @@ def sync(
     return sync_detailed(
         client=client,
         an_enum_value=an_enum_value,
+        an_enum_value_with_null=an_enum_value_with_null,
+        an_enum_value_with_only_null=an_enum_value_with_only_null,
         some_date=some_date,
     ).parsed
 
@@ -116,11 +144,15 @@ async def asyncio_detailed(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
+    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_only_null: List[AnEnumWithOnlyNull],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List[AModel]]]:
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
+        an_enum_value_with_null=an_enum_value_with_null,
+        an_enum_value_with_only_null=an_enum_value_with_only_null,
         some_date=some_date,
     )
 
@@ -134,6 +166,8 @@ async def asyncio(
     *,
     client: Client,
     an_enum_value: List[AnEnum],
+    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_only_null: List[AnEnumWithOnlyNull],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List[AModel]]]:
     """Get a list of things"""
@@ -142,6 +176,8 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             an_enum_value=an_enum_value,
+            an_enum_value_with_null=an_enum_value_with_null,
+            an_enum_value_with_only_null=an_enum_value_with_only_null,
             some_date=some_date,
         )
     ).parsed
