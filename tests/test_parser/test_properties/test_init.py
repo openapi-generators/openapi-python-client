@@ -222,6 +222,8 @@ class TestEnumProperty:
             (True, False, "{}"),
             (False, True, "Union[Unset, None, {}]"),
             (True, True, "Optional[{}]"),
+            (True, False, "Optional[{}]"),
+            (True, False, "{}"),
         ),
     )
     def test_get_type_string(self, mocker, enum_property_factory, required, nullable, expected):
@@ -273,6 +275,37 @@ class TestEnumProperty:
         with pytest.raises(ValueError):
             EnumProperty.values_from_list(data)
 
+    def test_values_from_list_with_null(self):
+        from openapi_python_client.parser.properties import EnumProperty
+
+        data = ["abc", "123", "a23", "1bc", 4, -3, "a Thing WIth spaces", "", "null"]
+
+        result = EnumProperty.values_from_list(data)
+
+        # None / null is removed from result, and result is now Optional[{}]
+        assert result == {
+            "ABC": "abc",
+            "VALUE_1": "123",
+            "A23": "a23",
+            "VALUE_3": "1bc",
+            "VALUE_4": 4,
+            "VALUE_NEGATIVE_3": -3,
+            "A_THING_WITH_SPACES": "a Thing WIth spaces",
+            "VALUE_7": "",
+        }
+
+    def test_values_from_list_with_only_null(self):
+        from openapi_python_client.parser.properties import EnumProperty
+
+        data = ["null"]
+
+        result = EnumProperty.values_from_list(data)
+
+        # None / null is not removed from result since it's the only value
+        assert result == {
+            "VALUE_0": None,
+        }
+
 
 class TestPropertyFromData:
     def test_property_from_data_str_enum(self, enum_property_factory):
@@ -301,6 +334,67 @@ class TestPropertyFromData:
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
             "AnEnum": existing,
+            "ParentAnEnum": prop,
+        }
+
+    def test_property_from_data_str_enum_with_null(self, enum_property_factory):
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.schema import Schema
+
+        existing = enum_property_factory()
+        data = Schema(title="AnEnumWithNull", enum=["A", "B", "C", "null"], nullable=False, default="B")
+        name = "my_enum"
+        required = True
+
+        schemas = Schemas(classes_by_name={"AnEnum": existing})
+
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
+        )
+
+        # None / null is removed from enum, and property is now nullable
+        assert prop == enum_property_factory(
+            name=name,
+            required=required,
+            values={"A": "A", "B": "B", "C": "C"},
+            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            value_type=str,
+            default="ParentAnEnum.B",
+        )
+        assert prop.nullable is True
+        assert schemas != new_schemas, "Provided Schemas was mutated"
+        assert new_schemas.classes_by_name == {
+            "AnEnumWithNull": existing,
+            "ParentAnEnum": prop,
+        }
+
+    def test_property_from_data_null_enum(self, enum_property_factory):
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.schema import Schema
+
+        existing = enum_property_factory()
+        data = Schema(title="AnEnumWithOnlyNull", enum=["null"], nullable=False, default=None)
+        name = "my_enum"
+        required = True
+
+        schemas = Schemas(classes_by_name={"AnEnum": existing})
+
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
+        )
+
+        assert prop == enum_property_factory(
+            name=name,
+            required=required,
+            values={"VALUE_0": None},
+            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            value_type=type(None),
+            default=None,
+        )
+        assert prop.nullable is False
+        assert schemas != new_schemas, "Provided Schemas was mutated"
+        assert new_schemas.classes_by_name == {
+            "AnEnumWithOnlyNull": existing,
             "ParentAnEnum": prop,
         }
 

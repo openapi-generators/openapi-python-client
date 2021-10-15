@@ -225,6 +225,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_dir.mkdir()
         models_init = models_dir / "__init__.py"
         imports = []
+        NoneType = type(None)
 
         model_template = self.env.get_template("model.py.jinja")
         for model in self.openapi.models:
@@ -234,11 +235,14 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
+        null_enum_template = self.env.get_template("null_enum.py.jinja")
         int_enum_template = self.env.get_template("int_enum.py.jinja")
         for enum in self.openapi.enums:
             module_path = models_dir / f"{enum.class_info.module_name}.py"
             if enum.value_type is int:
                 module_path.write_text(int_enum_template.render(enum=enum), encoding=self.file_encoding)
+            elif enum.value_type is NoneType:
+                module_path.write_text(null_enum_template.render(enum=enum), encoding=self.file_encoding)
             else:
                 module_path.write_text(str_enum_template.render(enum=enum), encoding=self.file_encoding)
             imports.append(import_string_from_class(enum.class_info))
