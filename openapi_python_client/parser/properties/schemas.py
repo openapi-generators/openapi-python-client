@@ -94,6 +94,13 @@ def update_schemas_with_data(
     )
 
     if isinstance(prop, PropertyError):
+        prop.detail = f"{prop.header}: {prop.detail}"
+        prop.header = f"Unable to parse schema {ref_path}"
+        if isinstance(prop.data, oai.Reference) and prop.data.ref.endswith(ref_path):  # pragma: nocover
+            prop.detail += (
+                "\n\nRecursive and circular references are not supported. "
+                "See https://github.com/openapi-generators/openapi-python-client/issues/466"
+            )
         return prop
 
     schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})

@@ -722,7 +722,9 @@ class TestBuildListProperty:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
         )
 
-        assert p == PropertyError(data="blah", detail=f"invalid data in items of array {name}")
+        assert isinstance(p, PropertyError)
+        assert p.data == "blah"
+        assert p.header.startswith(f"invalid data in items of array {name}")
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
