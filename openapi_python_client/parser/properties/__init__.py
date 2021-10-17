@@ -35,6 +35,14 @@ class AnyProperty(Property):
 
 
 @attr.s(auto_attribs=True, frozen=True)
+class NoneProperty(Property):
+    """A property that can only be None"""
+
+    _type_string: ClassVar[str] = "None"
+    _json_type_string: ClassVar[str] = "None"
+
+
+@attr.s(auto_attribs=True, frozen=True)
 class StringProperty(Property):
     """A property of type str"""
 
@@ -299,7 +307,7 @@ def build_enum_property(
     enum: Union[List[Optional[str]], List[Optional[int]]],
     parent_name: Optional[str],
     config: Config,
-) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
+) -> Tuple[Union[EnumProperty, NoneProperty, PropertyError], Schemas]:
     """
     Create an EnumProperty from schema data.
 
@@ -316,11 +324,34 @@ def build_enum_property(
         A tuple containing either the created property or a PropertyError describing what went wrong AND update schemas.
     """
 
+    if len(enum) == 0:
+        return PropertyError(detail="No values provided for Enum", data=data), schemas
+
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     class_info = Class.from_string(string=class_name, config=config)
-    values = EnumProperty.values_from_list(enum)
+
+    # OpenAPI allows for null as an enum value, but it doesn't make sense with how enums are constructed in Python.
+    # So instead, if null is a possible value, make the property nullable.
+    # Mypy is not smart enough to know that the type is right though
+    value_list: Union[List[str], List[int]] = [value for value in enum if value is not None]  # type: ignore
+    if len(value_list) < len(enum):
+        data.nullable = True
+
+    # It's legal to have an enum that only contains null as a value, we don't bother constructing an enum in that case
+    if len(value_list) == 0:
+        return (
+            NoneProperty(
+                name=name,
+                required=required,
+                nullable=False,
+                default="None",
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            ),
+            schemas,
+        )
+    values = EnumProperty.values_from_list(value_list)
 
     if class_info.name in schemas.classes_by_name:
         existing = schemas.classes_by_name[class_info.name]
@@ -332,19 +363,7 @@ def build_enum_property(
                 schemas,
             )
 
-    # Remove None from str / int list, if present, and mark property as nullable
-    # If list only has None, with no str or int, make special None enum instead
-    keys_to_remove = [key for key, value in values.items() if value is None]
-    if keys_to_remove and len(keys_to_remove) < len(values.items()):
-        data.nullable = True
-        for key in keys_to_remove:
-            values.pop(key)
-
-    for value in values.values():
-        value_type = type(value)
-        break
-    else:
-        return PropertyError(data=data, detail="No values provided for Enum"), schemas
+    value_type = type(next(iter(values.values())))
 
     prop = EnumProperty(
         name=name,

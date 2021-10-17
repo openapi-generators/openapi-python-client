@@ -8,7 +8,6 @@ from .all_of_sub_model_type_enum import AllOfSubModelTypeEnum
 from .an_all_of_enum import AnAllOfEnum
 from .an_enum import AnEnum
 from .an_enum_with_null import AnEnumWithNull
-from .an_enum_with_only_null import AnEnumWithOnlyNull
 from .an_int_enum import AnIntEnum
 from .another_all_of_sub_model import AnotherAllOfSubModel
 from .another_all_of_sub_model_type import AnotherAllOfSubModelType
