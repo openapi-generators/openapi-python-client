@@ -296,7 +296,7 @@ def build_enum_property(
     name: str,
     required: bool,
     schemas: Schemas,
-    enum: List[Union[str, int]],
+    enum: Union[List[str], List[int]],
     parent_name: Optional[str],
     config: Config,
 ) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
@@ -535,9 +535,9 @@ def _property_from_data(
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    if data.type == "string":
+    if data.type == oai.DataType.STRING:
         return _string_based_property(name=name, required=required, data=data, config=config), schemas
-    if data.type == "number":
+    if data.type == oai.DataType.NUMBER:
         return (
             FloatProperty(
                 name=name,
@@ -548,7 +548,7 @@ def _property_from_data(
             ),
             schemas,
         )
-    if data.type == "integer":
+    if data.type == oai.DataType.INTEGER:
         return (
             IntProperty(
                 name=name,
@@ -559,7 +559,7 @@ def _property_from_data(
             ),
             schemas,
         )
-    if data.type == "boolean":
+    if data.type == oai.DataType.BOOLEAN:
         return (
             BooleanProperty(
                 name=name,
@@ -570,26 +570,24 @@ def _property_from_data(
             ),
             schemas,
         )
-    if data.type == "array":
+    if data.type == oai.DataType.ARRAY:
         return build_list_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    if data.type == "object" or data.allOf:
+    if data.type == oai.DataType.OBJECT or data.allOf:
         return build_model_property(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
-    if not data.type:
-        return (
-            AnyProperty(
-                name=name,
-                required=required,
-                nullable=False,
-                default=None,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-            ),
-            schemas,
-        )
-    return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
+    return (
+        AnyProperty(
+            name=name,
+            required=required,
+            nullable=False,
+            default=None,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        ),
+        schemas,
+    )
 
 
 def property_from_data(

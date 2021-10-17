@@ -1,11 +1,14 @@
 """ Generate modern Python clients from OpenAPI """
 
+import json
+import mimetypes
 import shutil
 import subprocess
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Union
+from subprocess import CalledProcessError
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import httpcore
 import httpx
@@ -16,7 +19,7 @@ from openapi_python_client import utils
 
 from .config import Config
 from .parser import GeneratorData, import_string_from_class
-from .parser.errors import GeneratorError
+from .parser.errors import ErrorLevel, GeneratorError
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
     from importlib_metadata import version
@@ -96,6 +99,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             project_name=self.project_name,
             project_dir=self.project_dir,
         )
+        self.errors: List[GeneratorError] = []
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
@@ -112,7 +116,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._build_metadata()
         self._build_models()
         self._build_api()
-        self._reformat()
+        self._run_post_hooks()
         return self._get_errors()
 
     def update(self) -> Sequence[GeneratorError]:
@@ -125,35 +129,42 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._create_package()
         self._build_models()
         self._build_api()
-        self._reformat()
+        self._run_post_hooks()
         return self._get_errors()
 
-    def _reformat(self) -> None:
-        subprocess.run(
-            "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
-            cwd=self.package_dir,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
-        subprocess.run(
-            "isort .",
-            cwd=self.project_dir,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
-        subprocess.run(
-            "black .", cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
-        )
+    def _run_post_hooks(self) -> None:
+        for command in self.config.post_hooks:
+            self._run_command(command)
 
-    def _get_errors(self) -> Sequence[GeneratorError]:
-        errors = []
+    def _run_command(self, cmd: str) -> None:
+        cmd_name = cmd.split(" ")[0]
+        command_exists = shutil.which(cmd_name)
+        if not command_exists:
+            self.errors.append(
+                GeneratorError(
+                    level=ErrorLevel.WARNING, header="Skipping Integration", detail=f"{cmd_name} is not in PATH"
+                )
+            )
+            return
+        try:
+            subprocess.run(
+                cmd, cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+            )
+        except CalledProcessError as err:
+            self.errors.append(
+                GeneratorError(
+                    level=ErrorLevel.ERROR,
+                    header=f"{cmd_name} failed",
+                    detail=err.stderr.decode() or err.output.decode(),
+                )
+            )
+
+    def _get_errors(self) -> List[GeneratorError]:
+        errors: List[GeneratorError] = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
         errors.extend(self.openapi.errors)
+        errors.extend(self.errors)
         return errors
 
     def _create_package(self) -> None:
@@ -194,7 +205,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         git_ignore_path.write_text(git_ignore_template.render(), encoding=self.file_encoding)
 
     def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
-        template = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml.jinja"
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
@@ -352,21 +363,40 @@ def update_existing_client(
     return project.update()
 
 
+def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
+    if content_type == "application/json":
+        try:
+            return json.loads(data.decode())
+        except ValueError as err:
+            return GeneratorError(header="Invalid JSON from provided source: {}".format(str(err)))
+    else:
+        try:
+            return yaml.safe_load(data)
+        except yaml.YAMLError as err:
+            return GeneratorError(header="Invalid YAML from provided source: {}".format(str(err)))
+
+
 def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
+    content_type: Optional[str]
     if url is not None and path is not None:
         return GeneratorError(header="Provide URL or Path, not both.")
     if url is not None:
         try:
             response = httpx.get(url)
             yaml_bytes = response.content
+            if "content-type" in response.headers:
+                content_type = response.headers["content-type"].split(";")[0]
+            else:
+                content_type = mimetypes.guess_type(url, strict=True)[0]
+
         except (httpx.HTTPError, httpcore.NetworkError):
             return GeneratorError(header="Could not get OpenAPI document from provided URL")
     elif path is not None:
         yaml_bytes = path.read_bytes()
+        content_type = mimetypes.guess_type(path.as_uri(), strict=True)[0]
+
     else:
         return GeneratorError(header="No URL or Path provided")
-    try:
-        return yaml.safe_load(yaml_bytes)
-    except yaml.YAMLError:
-        return GeneratorError(header="Invalid YAML from provided source")
+
+    return _load_yaml_or_json(yaml_bytes, content_type)

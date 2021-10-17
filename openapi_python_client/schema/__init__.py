@@ -4,6 +4,7 @@ __all__ = [
     "Operation",
     "Parameter",
     "ParameterLocation",
+    "DataType",
     "PathItem",
     "Reference",
     "RequestBody",
@@ -13,6 +14,7 @@ __all__ = [
 ]
 
 
+from .data_type import DataType
 from .openapi_schema_pydantic import (
     MediaType,
     OpenAPI,

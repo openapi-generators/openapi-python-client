@@ -16,7 +16,13 @@
 ## Writing Code
 
 1. Write some code and make sure it's covered by unit tests. All unit tests are in the `tests` directory and the file structure should mirror the structure of the source code in the `openapi_python_client` directory.
+
+### Run Checks and Tests
+
 2. When in a Poetry shell (`poetry shell`) run `task check` in order to run most of the same checks CI runs. This will auto-reformat the code, check type annotations, run unit tests, check code coverage, and lint the code.
+
+### Rework end to end tests 
+
 3. If you're writing a new feature, try to add it to the end to end test.
    1. If adding support for a new OpenAPI feature, add it somewhere in `end_to_end_tests/openapi.json`
    2. Regenerate the "golden records" with `task regen`. This client is generated from the OpenAPI document used for end to end testing.

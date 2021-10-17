@@ -1,4 +1,5 @@
-from typing import Dict
+import ssl
+from typing import Dict, Union
 
 import attr
 
@@ -11,6 +12,7 @@ class Client:
     cookies: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     headers: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     timeout: float = attr.ib(5.0, kw_only=True)
+    verify_ssl: Union[str, bool, ssl.SSLContext] = attr.ib(True, kw_only=True)
 
     def get_headers(self) -> Dict[str, str]:
         """Get headers to be used in all endpoints"""

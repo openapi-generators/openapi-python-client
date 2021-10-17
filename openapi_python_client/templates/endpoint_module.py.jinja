@@ -52,6 +52,7 @@ def _get_kwargs(
         {% if endpoint.query_parameters %}
         "params": params,
         {% endif %}
+        "verify": client.verify_ssl,
     }
 
 

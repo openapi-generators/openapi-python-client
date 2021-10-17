@@ -140,41 +140,33 @@ class TestBuildModelProperty:
         assert new_schemas == schemas
         assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
 
-    def test_bad_props_return_error(self):
+    def test_model_bad_properties(self):
         from openapi_python_client.parser.properties import Schemas, build_model_property
 
         data = oai.Schema(
             properties={
-                "bad": oai.Schema(type="not_real"),
+                "bad": oai.Reference.construct(ref="#/components/schema/NotExist"),
             },
         )
-        schemas = Schemas()
+        result = build_model_property(
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=Config()
+        )[0]
+        assert isinstance(result, PropertyError)
 
-        err, new_schemas = build_model_property(
-            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=Config()
-        )
-
-        assert new_schemas == schemas
-        assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
-
-    def test_bad_additional_props_return_error(self):
-        from openapi_python_client.parser.properties import Config, Schemas, build_model_property
+    def test_model_bad_additional_properties(self):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
 
         additional_properties = oai.Schema(
             type="object",
             properties={
-                "bad": oai.Schema(type="not_real"),
+                "bad": oai.Reference(ref="#/components/schemas/not_exist"),
             },
         )
         data = oai.Schema(additionalProperties=additional_properties)
-        schemas = Schemas()
-
-        err, new_schemas = build_model_property(
-            data=data, name="prop", schemas=schemas, required=True, parent_name=None, config=Config()
-        )
-
-        assert new_schemas == schemas
-        assert err == PropertyError(detail="unknown type not_real", data=oai.Schema(type="not_real"))
+        result = build_model_property(
+            data=data, name="prop", schemas=Schemas(), required=True, parent_name="parent", config=Config()
+        )[0]
+        assert isinstance(result, PropertyError)
 
 
 class TestProcessProperties:
@@ -195,6 +187,20 @@ class TestProcessProperties:
         )
 
         result = _process_properties(data=data, schemas=schemas, class_name="", config=Config())
+
+        assert isinstance(result, PropertyError)
+
+    def test_process_properties_reference_not_exist(self):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema(
+            properties={
+                "bad": oai.Reference.construct(ref="#/components/schema/NotExist"),
+            },
+        )
+
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config())
 
         assert isinstance(result, PropertyError)
 
