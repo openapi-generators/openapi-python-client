@@ -394,7 +394,7 @@ def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str
             return GeneratorError(header="Could not get OpenAPI document from provided URL")
     elif path is not None:
         yaml_bytes = path.read_bytes()
-        content_type = mimetypes.guess_type(path.as_uri(), strict=True)[0]
+        content_type = mimetypes.guess_type(path.absolute().as_uri(), strict=True)[0]
 
     else:
         return GeneratorError(header="No URL or Path provided")
