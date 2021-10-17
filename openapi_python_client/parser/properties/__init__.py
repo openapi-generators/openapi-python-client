@@ -480,7 +480,8 @@ def build_list_property(
         name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name, config=config
     )
     if isinstance(inner_prop, PropertyError):
-        return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}"), schemas
+        inner_prop.header = f'invalid data in items of array named "{name}"'
+        return inner_prop, schemas
     return (
         ListProperty(
             name=name,
