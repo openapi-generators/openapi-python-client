@@ -739,7 +739,7 @@ python-versions = "*"
 
 [[package]]
 name = "types-dataclasses"
-version = "0.1.7"
+version = "0.6.1"
 description = "Typing stubs for dataclasses"
 category = "dev"
 optional = false
@@ -805,7 +805,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "97da85288a070f7dce4a749d442fd305d49069a8d83d2265ebd672a2721e98d0"
+content-hash = "1bee9dfa69e77ddbcf4dff38000a7b0c68c01c4fe1dde1f08a4769ab000023ef"
 
 [metadata.files]
 anyio = [
@@ -1366,8 +1366,8 @@ types-certifi = [
     {file = "types_certifi-2020.4.0-py3-none-any.whl", hash = "sha256:0ffdbe451d3b02f6d2cfd87bcfb2f086a4ff1fa76a35d51cfc3771e261d7a8fd"},
 ]
 types-dataclasses = [
-    {file = "types-dataclasses-0.1.7.tar.gz", hash = "sha256:248075d093d8f7c1541ce515594df7ae40233d1340afde11ce7125368c5209b8"},
-    {file = "types_dataclasses-0.1.7-py3-none-any.whl", hash = "sha256:fc372bb68b878ac7a68fd04230d923d4a6303a137ecb0b9700b90630bdfcbfc9"},
+    {file = "types-dataclasses-0.6.1.tar.gz", hash = "sha256:6568532fed11f854e4db2eb48063385b323b93ecadd09f10a215d56246c306d7"},
+    {file = "types_dataclasses-0.6.1-py3-none-any.whl", hash = "sha256:aa45bb0dacdba09e3195a36ff8337bba45eac03b6f31c4645e87b4a2a47830dd"},
 ]
 types-python-dateutil = [
     {file = "types-python-dateutil-2.8.0.tar.gz", hash = "sha256:540c6c53c3a52433d7088254e3afdc3f6c86b5ae452aaa1b796c26d01c9fd73c"},
