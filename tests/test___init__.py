@@ -510,7 +510,7 @@ class TestProject:
 
         pyproject_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
-        template_path = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template_path = "pyproject.toml.jinja"
         templates = {
             template_path: pyproject_template,
         }
@@ -520,7 +520,7 @@ class TestProject:
 
         project.env.get_template.assert_called_once_with(template_path)
 
-        pyproject_template.render.assert_called_once_with()
+        pyproject_template.render.assert_called_once_with(use_poetry=use_poetry)
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render(), encoding="utf-8")
 
     def test__build_setup_py(self, mocker):

@@ -11,12 +11,15 @@ packages = [
 ]
 include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 
-
 [tool.poetry.dependencies]
 python = "^3.6"
 httpx = ">=0.15.4,<0.21.0"
 attrs = ">=20.1.0,<22.0.0"
 python-dateutil = "^2.8.0"
+
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
 
 [tool.black]
 line-length = 120
@@ -34,7 +37,3 @@ exclude = '''
 [tool.isort]
 line_length = 120
 profile = "black"
-
-[build-system]
-requires = ["poetry>=1.0"]
-build-backend = "poetry.masonry.api"
