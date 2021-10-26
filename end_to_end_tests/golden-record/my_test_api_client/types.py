@@ -1,4 +1,6 @@
 """ Contains some shared types for properties """
+import logging
+import sys
 from typing import BinaryIO, Generic, MutableMapping, Optional, TextIO, Tuple, TypeVar, Union
 
 import attr
@@ -40,4 +42,8 @@ class Response(Generic[T]):
     parsed: Optional[T]
 
 
-__all__ = ["File", "Response", "FileJsonType"]
+HTTP_CALL_LOGGER = logging.getLogger(__name__.split(".")[0] + ".http_call")
+HTTP_CALL_LOGGER.setLevel(logging.WARNING)
+HTTP_CALL_LOGGER.addHandler(logging.StreamHandler(sys.stderr))
+
+__all__ = ["File", "Response", "FileJsonType", "HTTP_CALL_LOGGER"]

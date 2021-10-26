@@ -5,7 +5,7 @@ import httpx
 from ...client import Client
 from ...models.an_int_enum import AnIntEnum
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response
+from ...types import HTTP_CALL_LOGGER, UNSET, Response
 
 
 def _get_kwargs(
@@ -56,6 +56,26 @@ def _build_response(*, response: httpx.Response) -> Response[Union[Any, HTTPVali
     )
 
 
+def _log_before_call(*, kwargs: Dict[str, Any]) -> None:
+    import json
+    import urllib.parse
+
+    url_full = kwargs["url"]
+
+    if kwargs.get("params", None):
+        url_full += "?" + urllib.parse.urlencode(kwargs["params"])
+    HTTP_CALL_LOGGER.info(f"Calling POST '{url_full}'")
+    if kwargs.get("files"):
+        HTTP_CALL_LOGGER.debug(f"with files: {kwargs['files']}")
+    elif kwargs.get("dict", kwargs.get("json", None)):
+        dict_string = json.dumps(kwargs.get("dict", kwargs.get("json", None)), indent=4, sort_keys=True)
+        HTTP_CALL_LOGGER.debug(f"with data:\n{dict_string}")
+    headers_without_auth = dict(kwargs["cookies"])
+    headers_without_auth.pop("Authorization", None)
+    cookies, timeout = kwargs["cookies"], kwargs["timeout"]
+    HTTP_CALL_LOGGER.debug(f"{headers_without_auth=}\n{cookies=}\n{timeout=}")
+
+
 def sync_detailed(
     *,
     client: Client,
@@ -66,6 +86,7 @@ def sync_detailed(
         int_enum=int_enum,
     )
 
+    _log_before_call(kwargs=kwargs)
     response = httpx.post(
         **kwargs,
     )
@@ -97,6 +118,7 @@ async def asyncio_detailed(
     )
 
     async with httpx.AsyncClient() as _client:
+        _log_before_call(kwargs=kwargs)
         response = await _client.post(**kwargs)
 
     return _build_response(response=response)
