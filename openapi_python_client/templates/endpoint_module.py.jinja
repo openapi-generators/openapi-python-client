@@ -84,7 +84,8 @@ def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}
         {% endif %}
     )
 
-def _log_before_call(*, kwargs: Dict[str, Any]):
+
+def _log_before_call(*, kwargs: Dict[str, Any]) -> None:
     import json
     import urllib.parse
     url_full = kwargs['url']
@@ -101,6 +102,7 @@ def _log_before_call(*, kwargs: Dict[str, Any]):
     headers_without_auth.pop('Authorization', None)
     cookies, timeout = kwargs['cookies'], kwargs['timeout']
     HTTP_CALL_LOGGER.debug(f"{headers_without_auth=}\n{cookies=}\n{timeout=}")
+
 
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
