@@ -27,7 +27,6 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "params": params,
-        "verify": client.verify_ssl,
     }
 
 
@@ -51,6 +50,7 @@ def sync_detailed(
     )
 
     response = httpx.post(
+        verify=client.verify_ssl,
         **kwargs,
     )
 
@@ -67,7 +67,7 @@ async def asyncio_detailed(
         common=common,
     )
 
-    async with httpx.AsyncClient() as _client:
+    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.post(**kwargs)
 
     return _build_response(response=response)

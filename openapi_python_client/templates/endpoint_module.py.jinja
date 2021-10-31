@@ -52,7 +52,6 @@ def _get_kwargs(
         {% if endpoint.query_parameters %}
         "params": params,
         {% endif %}
-        "verify": client.verify_ssl,
     }
 
 
@@ -93,6 +92,7 @@ def sync_detailed(
     )
 
     response = httpx.{{ endpoint.method }}(
+        verify=client.verify_ssl,
         **kwargs,
     )
 
@@ -116,7 +116,7 @@ async def asyncio_detailed(
         {{ kwargs(endpoint) }}
     )
 
-    async with httpx.AsyncClient() as _client:
+    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.{{ endpoint.method }}(
             **kwargs
         )
