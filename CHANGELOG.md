@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.7
+
+### Fixes
+
+- SSL verify argument to async clients [#533 & #510]. Thanks @fsvenson and @mvaught02!
+- Remove unused CHANGELOG from generated setup.py [#529]. Thanks @johnthagen!
+
 ## 0.10.6
 
 ### Features
