@@ -44,6 +44,8 @@ $ openapi-python-client generate [OPTIONS]
 
 Update an existing OpenAPI Client library
 
+> **Note:** The `update` command performs the same operations as `generate` except it does not overwrite specific metadata for the generated client such as the `README.md`, `.gitignore`, and `pyproject.toml`.
+
 **Usage**:
 
 ```console
