@@ -161,7 +161,11 @@ def update(
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
     fail_on_warning: bool = False,
 ) -> None:
-    """Update an existing OpenAPI Client library"""
+    """Update an existing OpenAPI Client library
+
+    The update command performs the same operations as generate except it does not overwrite specific metadata for the
+    generated client such as the README.md, .gitignore, and pyproject.toml.
+    """
     from . import update_existing_client
 
     if not url and not path:
