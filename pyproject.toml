@@ -62,7 +62,8 @@ isort .\
  && poetry export -f requirements.txt | poetry run safety check --bare --stdin\
  && mypy openapi_python_client\
  && pylint openapi_python_client\
- && pytest --cov openapi_python_client tests --cov-report=term-missing\
+ && TASKIPY=true pytest --cov openapi_python_client tests --cov-report=term-missing --basetemp=tests/tmp\
+ && rm -r tests/tmp\
 """
 regen = "python -m end_to_end_tests.regen_golden_record"
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
