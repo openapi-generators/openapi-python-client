@@ -1,4 +1,6 @@
 import json
+import os
+from pathlib import Path
 
 import pytest
 import yaml
@@ -19,8 +21,14 @@ def json_with_tabs(d):
         ("example.json", json_with_tabs),
     ],
 )
-def test_load_from_path(tmp_path, filename, dump):
+@pytest.mark.parametrize("relative", (True, False), ids=("relative", "absolute"))
+def test_load_from_path(tmp_path: Path, filename, dump, relative):
     yml_file = tmp_path.joinpath(filename)
+    if relative:
+        if not os.getenv("TASKIPY"):
+            pytest.skip("Only test relative paths when running with `task check`")
+            return
+        yml_file = yml_file.relative_to(Path.cwd())
     override1 = {"class_name": "ExampleClass", "module_name": "example_module"}
     override2 = {"class_name": "DifferentClass", "module_name": "different_module"}
     data = {

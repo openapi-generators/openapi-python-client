@@ -37,7 +37,7 @@ class Config(BaseModel):
     @staticmethod
     def load_from_path(path: Path) -> "Config":
         """Creates a Config from provided JSON or YAML file and sets a bunch of globals from it"""
-        mime = mimetypes.guess_type(path.as_uri(), strict=True)[0]
+        mime = mimetypes.guess_type(path.absolute().as_uri(), strict=True)[0]
         if mime == "application/json":
             config_data = json.loads(path.read_text())
         else:
