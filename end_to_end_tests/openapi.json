@@ -1870,6 +1870,10 @@
       },
       "None":  {
         "type": "object"
+      },
+      "model.reference.with.Periods": {
+        "type": "object",
+        "description": "A Model with periods in its reference"
       }
     }
   }

@@ -23,6 +23,7 @@ from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .model_from_all_of import ModelFromAllOf
 from .model_name import ModelName
+from .model_reference_with_periods import ModelReferenceWithPeriods
 from .model_with_additional_properties_inlined import ModelWithAdditionalPropertiesInlined
 from .model_with_additional_properties_inlined_additional_property import (
     ModelWithAdditionalPropertiesInlinedAdditionalProperty,
