@@ -3,7 +3,7 @@ import re
 from keyword import iskeyword
 from typing import Any, List
 
-DELIMITERS = " _-"
+DELIMITERS = r"\. _-"
 
 
 class PythonIdentifier(str):
