@@ -14,6 +14,7 @@ from . import (
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
     post_form_data,
+    post_tests_json_body_string,
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
     unsupported_content_tests_unsupported_content_get,
@@ -85,6 +86,13 @@ class TestsEndpoints:
         Try sending a JSON body
         """
         return json_body_tests_json_body_post
+
+    @classmethod
+    def post_tests_json_body_string(cls) -> types.ModuleType:
+        """
+        Json Body Which is String
+        """
+        return post_tests_json_body_string
 
     @classmethod
     def defaults_tests_defaults_post(cls) -> types.ModuleType:

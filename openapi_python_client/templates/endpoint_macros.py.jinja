@@ -67,6 +67,8 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
     {% if property.template %}
         {% from "property_templates/" + property.template import transform %}
 {{ transform(property, property.python_name, destination) }}
+    {% else %}
+{{ destination }} = {{ property.python_name }}
     {% endif %}
 {% endif %}
 {% endmacro %}
