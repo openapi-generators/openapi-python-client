@@ -28,6 +28,7 @@ def _get_kwargs(
         multipart_multipart_data.append(multipart_data_item)
 
     return {
+        "method": "post",
         "url": url,
         "headers": headers,
         "cookies": cookies,

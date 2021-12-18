@@ -26,6 +26,7 @@ def _get_kwargs(
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
+        "method": "post",
         "url": url,
         "headers": headers,
         "cookies": cookies,

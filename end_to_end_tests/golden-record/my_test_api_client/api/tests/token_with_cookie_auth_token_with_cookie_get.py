@@ -19,6 +19,7 @@ def _get_kwargs(
     cookies["MyToken"] = my_token
 
     return {
+        "method": "get",
         "url": url,
         "headers": headers,
         "cookies": cookies,

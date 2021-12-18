@@ -21,6 +21,7 @@ def _get_kwargs(
     json_json_body = json_body.to_dict()
 
     return {
+        "method": "post",
         "url": url,
         "headers": headers,
         "cookies": cookies,
