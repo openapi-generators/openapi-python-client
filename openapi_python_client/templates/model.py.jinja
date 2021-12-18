@@ -68,9 +68,10 @@ class {{ class_name }}:
 {% for property in model.required_properties + model.optional_properties %}
 {% if property.template %}
 {% from "property_templates/" + property.template import transform %}
-{{ transform(property, "self." + property.python_name, property.python_name, stringify=multipart) }}
+{# Stopped here #}
+{{ transform(property, "self." + property.python_name, property.python_name, multipart=multipart) }}
 {% elif multipart %}
-{{ property.python_name }} = self.{{ property.python_name }} if self.{{ property.python_name }} is UNSET else (None, str(self.{{ property.python_name }}), "text/plain")
+{{ property.python_name }} = self.{{ property.python_name }} if self.{{ property.python_name }} is UNSET else (None, str(self.{{ property.python_name }}).encode(), "text/plain")
 {% else %}
 {{ property.python_name }} = self.{{ property.python_name }}
 {% endif %}
@@ -81,10 +82,10 @@ field_dict: Dict[str, Any] = {}
 {% if model.additional_properties.template %}
 {% from "property_templates/" + model.additional_properties.template import transform %}
 for prop_name, prop in self.additional_properties.items():
-    {{ transform(model.additional_properties, "prop", "field_dict[prop_name]", stringify=multipart) | indent(4) }}
+    {{ transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart) | indent(4) }}
 {% elif multipart %}
 field_dict.update({
-    key: (None, str(value), "text/plain")
+    key: (None, str(value).encode(), "text/plain")
     for key, value in self.additional_properties.items()
 })
 {% else %}
