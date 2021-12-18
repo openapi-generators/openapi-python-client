@@ -19,13 +19,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
+
+      - name: Get Python Version
+        id: get_python_version
+        run: echo "::set-output name=python_version::$(python --version)"
+
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
           path: .venv
-          key: ${{ runner.os }}-${{ matrix.python }}-dependencies-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python }}-dependencies
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
       - name: Install Poetry
         run: pip install poetry
 
