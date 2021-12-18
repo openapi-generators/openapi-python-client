@@ -38,7 +38,7 @@ def _get_kwargs(
     {{ multipart_body(endpoint) | indent(4) }}
 
     return {
-		"method": "{{ endpoint.method }}",
+	    "method": "{{ endpoint.method }}",
         "url": url,
         "headers": headers,
         "cookies": cookies,
