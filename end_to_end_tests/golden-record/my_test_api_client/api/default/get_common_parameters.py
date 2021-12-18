@@ -22,6 +22,7 @@ def _get_kwargs(
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
+        "method": "get",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -49,7 +50,7 @@ def sync_detailed(
         common=common,
     )
 
-    response = httpx.get(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -68,6 +69,6 @@ async def asyncio_detailed(
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.get(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)
