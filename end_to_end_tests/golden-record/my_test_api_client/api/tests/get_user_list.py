@@ -109,7 +109,7 @@ def sync_detailed(
         some_date=some_date,
     )
 
-    response = httpx.get(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -153,7 +153,7 @@ async def asyncio_detailed(
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.get(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)
 
