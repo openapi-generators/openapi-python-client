@@ -46,11 +46,14 @@ def sync_detailed(
 ) -> Response[Any]:
     """
 
+
     Args:
         common (Union[Unset, None, str]): None:
+
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
         common=common,
@@ -78,6 +81,7 @@ async def asyncio_detailed(
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
         common=common,

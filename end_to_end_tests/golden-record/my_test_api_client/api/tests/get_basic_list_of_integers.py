@@ -47,10 +47,13 @@ def sync_detailed(
     """
     Get Basic List Of Integers
 
-        Get a list of integers
-        Returns:
-            Response[List[int]]
+    Get a list of integers
+
+
+    Returns:
+        Response[List[int]]
     """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -70,11 +73,13 @@ def sync(
     """
     Get Basic List Of Integers
 
-        Get a list of integers
+    Get a list of integers
 
-        Returns:
-            Optional[List[int]]
+
+    Returns:
+        Response[List[int]]
     """
+
     return sync_detailed(
         client=client,
     ).parsed
@@ -87,12 +92,13 @@ async def asyncio_detailed(
     """
     Get Basic List Of Integers
 
-        Get a list of integers
+    Get a list of integers
 
 
-        Returns:
-            Response[List[int]]
+    Returns:
+        Response[List[int]]
     """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -110,11 +116,13 @@ async def asyncio(
     """
     Get Basic List Of Integers
 
-        Get a list of integers
+    Get a list of integers
 
-        Returns:
-            Optional[List[int]]
+
+    Returns:
+        Response[List[int]]
     """
+
     return (
         await asyncio_detailed(
             client=client,

@@ -147,3 +147,30 @@ json_body=json_body,
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% endmacro %}
+
+{% macro docstring(endpoint, return_string) %}
+"""
+{% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+
+{{ endpoint.description | wordwrap(76)}}
+{% else %}
+{{ endpoint.description | wordwrap(76)}}
+{% endif %}
+
+{% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
+Args:
+    {% for parameter in endpoint.query_parameters.values() %}
+    {{ parameter.to_docstring() }}:
+    {% endfor %}
+    {% for parameter in endpoint.header_parameters.values() %}
+    {{ parameter.to_docstring() }},
+    {% endfor %}
+    {% for parameter in endpoint.cookie_parameters.values() %}
+    {{ parameter.to_docstring() }},
+    {% endfor %}
+{% endif %}
+
+Returns:
+    Response[{{ return_string }}]
+"""
+{% endmacro %}

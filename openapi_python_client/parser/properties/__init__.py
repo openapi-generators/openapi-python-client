@@ -356,6 +356,8 @@ def build_enum_property(
                 nullable=False,
                 default="None",
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=None,
+                example=None,
             ),
             schemas,
         )

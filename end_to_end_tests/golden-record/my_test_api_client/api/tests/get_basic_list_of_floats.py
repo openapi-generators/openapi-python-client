@@ -47,10 +47,13 @@ def sync_detailed(
     """
     Get Basic List Of Floats
 
-        Get a list of floats
-        Returns:
-            Response[List[float]]
+    Get a list of floats
+
+
+    Returns:
+        Response[List[float]]
     """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -70,11 +73,13 @@ def sync(
     """
     Get Basic List Of Floats
 
-        Get a list of floats
+    Get a list of floats
 
-        Returns:
-            Optional[List[float]]
+
+    Returns:
+        Response[List[float]]
     """
+
     return sync_detailed(
         client=client,
     ).parsed
@@ -87,12 +92,13 @@ async def asyncio_detailed(
     """
     Get Basic List Of Floats
 
-        Get a list of floats
+    Get a list of floats
 
 
-        Returns:
-            Response[List[float]]
+    Returns:
+        Response[List[float]]
     """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -110,11 +116,13 @@ async def asyncio(
     """
     Get Basic List Of Floats
 
-        Get a list of floats
+    Get a list of floats
 
-        Returns:
-            Optional[List[float]]
+
+    Returns:
+        Response[List[float]]
     """
+
     return (
         await asyncio_detailed(
             client=client,

@@ -7,7 +7,7 @@ from openapi_python_client.parser.properties import AnyProperty, Schemas, String
 MODULE_NAME = "openapi_python_client.parser.responses"
 
 
-def test_response_from_data_no_content():
+def test_response_from_data_no_content(any_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
     response, schemas = response_from_data(
@@ -20,14 +20,12 @@ def test_response_from_data_no_content():
 
     assert response == Response(
         status_code=200,
-        prop=AnyProperty(
+        prop=any_property_factory(
             name="response_200",
             default=None,
             nullable=False,
             required=True,
-            python_name="response_200",
             description="",
-            example="",
         ),
         source="None",
     )
@@ -44,7 +42,7 @@ def test_response_from_data_unsupported_content_type():
     assert response == ParseError(data=data, detail="Unsupported content_type {'blah': None}")
 
 
-def test_response_from_data_no_content_schema():
+def test_response_from_data_no_content_schema(any_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
     data = oai.Response.construct(description="", content={"application/json": oai.MediaType.construct()})
@@ -54,14 +52,12 @@ def test_response_from_data_no_content_schema():
 
     assert response == Response(
         status_code=200,
-        prop=AnyProperty(
+        prop=any_property_factory(
             name="response_200",
             default=None,
             nullable=False,
             required=True,
-            python_name="response_200",
             description=data.description,
-            example=data.example,
         ),
         source="None",
     )

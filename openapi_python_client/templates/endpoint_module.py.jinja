@@ -9,7 +9,8 @@ from ...types import Response, UNSET
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
+    arguments, client, kwargs, parse_response, docstring %}
 
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
@@ -87,28 +88,8 @@ def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
-    """
-    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
-    
-    {{ endpoint.description | wordwrap(76)}}
-    {% else %}
-    {{ endpoint.description | wordwrap(76)}}
-    {% endif %}
-    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
-    Args:
-        {% for parameter in endpoint.query_parameters.values() %}
-        {{ parameter.to_docstring() }}:
-        {% endfor %}
-        {% for parameter in endpoint.header_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-        {% for parameter in endpoint.cookie_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-    {% endif %}
-    Returns:
-        Response[{{ return_string }}]
-    """
+    {{ docstring(endpoint, return_string) | indent(4) }}
+
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -124,29 +105,8 @@ def sync_detailed(
 def sync(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """
-    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
-    
-    {{ endpoint.description | wordwrap(76)}}
-    {% else %}
-    {{ endpoint.description | wordwrap(76)}}
-    {% endif %}
+    {{ docstring(endpoint, return_string) | indent(4) }}
 
-    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
-    Args:
-        {% for parameter in endpoint.query_parameters.values() %}
-        {{ parameter.to_docstring() }}:
-        {% endfor %}
-        {% for parameter in endpoint.header_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-        {% for parameter in endpoint.cookie_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-    {% endif %}
-    Returns:
-        Optional[{{ return_string }}]
-    """
     return sync_detailed(
         {{ kwargs(endpoint) }}
     ).parsed
@@ -155,30 +115,8 @@ def sync(
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
-    """
-    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
-    
-    {{ endpoint.description | wordwrap(76)}}
-    {% else %}
-    {{ endpoint.description | wordwrap(76)}}
-    {% endif %}
+    {{ docstring(endpoint, return_string) | indent(4) }}
 
-    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
-    Args:
-        {% for parameter in endpoint.query_parameters.values() %}
-        {{ parameter.to_docstring() }}:
-        {% endfor %}
-        {% for parameter in endpoint.header_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-        {% for parameter in endpoint.cookie_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-    {% endif %}
-
-    Returns:
-        Response[{{ return_string }}]
-    """
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -194,29 +132,8 @@ async def asyncio_detailed(
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """
-    {% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
-    
-    {{ endpoint.description | wordwrap(76)}}
-    {% else %}
-    {{ endpoint.description | wordwrap(76)}}
-    {% endif %}
-    
-    {% if endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}  
-    Args:
-        {% for parameter in endpoint.query_parameters.values() %}
-        {{ parameter.to_docstring() }}:
-        {% endfor %}
-        {% for parameter in endpoint.header_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-        {% for parameter in endpoint.cookie_parameters.values() %}
-        {{ parameter.to_docstring() }},
-        {% endfor %}
-    {% endif %}
-    Returns:
-        Optional[{{ return_string }}]
-    """
+    {{ docstring(endpoint, return_string) | indent(4) }}
+
     return (await asyncio_detailed(
         {{ kwargs(endpoint) }}
     )).parsed

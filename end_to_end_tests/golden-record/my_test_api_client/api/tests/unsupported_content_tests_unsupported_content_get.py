@@ -40,9 +40,12 @@ def sync_detailed(
     Unsupported Content
 
 
-        Returns:
-            Response[Any]
+
+
+    Returns:
+        Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -65,9 +68,10 @@ async def asyncio_detailed(
 
 
 
-        Returns:
-            Response[Any]
+    Returns:
+        Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
     )

@@ -1,3 +1,4 @@
+from typing import Type
 from unittest.mock import MagicMock, call
 
 import attr
@@ -6,7 +7,14 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError, ValidationError
-from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty, NoneProperty, Schemas
+from openapi_python_client.parser.properties import (
+    BooleanProperty,
+    FloatProperty,
+    IntProperty,
+    NoneProperty,
+    Property,
+    Schemas,
+)
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -336,7 +344,7 @@ class TestPropertyFromData:
             "ParentAnEnum": prop,
         }
 
-    def test_property_from_data_null_enum(self, enum_property_factory):
+    def test_property_from_data_null_enum(self, enum_property_factory, none_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
@@ -350,9 +358,7 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
-        assert prop == NoneProperty(
-            name="my_enum", required=required, nullable=False, default="None", python_name="my_enum"
-        )
+        assert prop == none_property_factory(name="my_enum", required=required, nullable=False, default="None")
 
     def test_property_from_data_int_enum(self, enum_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -527,12 +533,14 @@ class TestPropertyFromData:
             ("boolean", BooleanProperty, bool),
         ],
     )
-    def test_property_from_data_simple_types(self, openapi_type, prop_type, python_type):
+    def test_property_from_data_simple_types(self, openapi_type: str, prop_type: Type[Property], python_type):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
         name = "test_prop"
         required = True
-        data = oai.Schema.construct(type=openapi_type, default=1)
+        description = "a description"
+        example = "an example"
+        data = oai.Schema.construct(type=openapi_type, default=1, description=description, example=example)
         schemas = Schemas()
 
         p, new_schemas = property_from_data(
@@ -540,7 +548,13 @@ class TestPropertyFromData:
         )
 
         assert p == prop_type(
-            name=name, required=required, default=python_type(data.default), nullable=False, python_name=name
+            name=name,
+            required=required,
+            default=python_type(data.default),
+            nullable=False,
+            python_name=name,
+            description=description,
+            example=example,
         )
         assert new_schemas == schemas
 
@@ -552,7 +566,13 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
         )
         assert p == prop_type(
-            name=name, required=required, default=python_type(data.default), nullable=True, python_name=name
+            name=name,
+            required=required,
+            default=python_type(data.default),
+            nullable=True,
+            python_name=name,
+            description=description,
+            example=example,
         )
 
         # Test bad default value
@@ -655,8 +675,8 @@ class TestPropertyFromData:
         assert prop == attr.evolve(existing_model, name=name, required=required, nullable=nullable, python_name=name)
         build_union_property.assert_not_called()
 
-    def test_property_from_data_no_valid_props_in_data(self):
-        from openapi_python_client.parser.properties import AnyProperty, Schemas, property_from_data
+    def test_property_from_data_no_valid_props_in_data(self, any_property_factory):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
         schemas = Schemas()
         data = oai.Schema()
@@ -666,7 +686,7 @@ class TestPropertyFromData:
             name=name, required=True, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
         )
 
-        assert prop == AnyProperty(name=name, required=True, nullable=False, default=None, python_name=name)
+        assert prop == any_property_factory(name=name, required=True, nullable=False, default=None)
         assert new_schemas == schemas
 
     def test_property_from_data_validation_error(self, mocker):

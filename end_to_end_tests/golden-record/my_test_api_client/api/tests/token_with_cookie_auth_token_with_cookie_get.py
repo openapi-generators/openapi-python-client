@@ -43,12 +43,15 @@ def sync_detailed(
     """
     TOKEN_WITH_COOKIE
 
-        Test optional cookie parameters
-        Args:
-            my_token (str): None,
-        Returns:
-            Response[Any]
+    Test optional cookie parameters
+
+    Args:
+        my_token (str): None,
+
+    Returns:
+        Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
         my_token=my_token,
@@ -70,14 +73,15 @@ async def asyncio_detailed(
     """
     TOKEN_WITH_COOKIE
 
-        Test optional cookie parameters
+    Test optional cookie parameters
 
-        Args:
-            my_token (str): None,
+    Args:
+        my_token (str): None,
 
-        Returns:
-            Response[Any]
+    Returns:
+        Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
         my_token=my_token,

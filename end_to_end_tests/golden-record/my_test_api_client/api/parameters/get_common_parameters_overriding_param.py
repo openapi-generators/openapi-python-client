@@ -48,11 +48,14 @@ def sync_detailed(
 ) -> Response[Any]:
     """
 
+
     Args:
         param_query (str): None|default: 'overriden_in_GET':
+
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,
@@ -82,6 +85,7 @@ async def asyncio_detailed(
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,

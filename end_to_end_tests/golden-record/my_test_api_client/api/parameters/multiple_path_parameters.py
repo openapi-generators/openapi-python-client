@@ -48,9 +48,12 @@ def sync_detailed(
 ) -> Response[Any]:
     """
 
+
+
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         param4=param4,
         param2=param2,
@@ -82,6 +85,7 @@ async def asyncio_detailed(
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         param4=param4,
         param2=param2,

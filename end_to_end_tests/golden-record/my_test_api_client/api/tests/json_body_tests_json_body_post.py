@@ -58,10 +58,13 @@ def sync_detailed(
     """
     Json Body
 
-        Try sending a JSON body
-        Returns:
-            Response[Union[Any, HTTPValidationError]]
+    Try sending a JSON body
+
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -83,11 +86,13 @@ def sync(
     """
     Json Body
 
-        Try sending a JSON body
+    Try sending a JSON body
 
-        Returns:
-            Optional[Union[Any, HTTPValidationError]]
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     return sync_detailed(
         client=client,
         json_body=json_body,
@@ -102,12 +107,13 @@ async def asyncio_detailed(
     """
     Json Body
 
-        Try sending a JSON body
+    Try sending a JSON body
 
 
-        Returns:
-            Response[Union[Any, HTTPValidationError]]
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -127,11 +133,13 @@ async def asyncio(
     """
     Json Body
 
-        Try sending a JSON body
+    Try sending a JSON body
 
-        Returns:
-            Optional[Union[Any, HTTPValidationError]]
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     return (
         await asyncio_detailed(
             client=client,

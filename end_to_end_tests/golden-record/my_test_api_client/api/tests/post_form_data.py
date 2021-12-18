@@ -43,10 +43,13 @@ def sync_detailed(
     """
     Post from data
 
-        Post form data
-        Returns:
-            Response[Any]
+    Post form data
+
+
+    Returns:
+        Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
         form_data=form_data,
@@ -68,12 +71,13 @@ async def asyncio_detailed(
     """
     Post from data
 
-        Post form data
+    Post form data
 
 
-        Returns:
-            Response[Any]
+    Returns:
+        Response[Any]
     """
+
     kwargs = _get_kwargs(
         client=client,
         form_data=form_data,

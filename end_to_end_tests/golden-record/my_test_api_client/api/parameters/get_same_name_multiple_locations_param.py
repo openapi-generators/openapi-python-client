@@ -58,13 +58,16 @@ def sync_detailed(
 ) -> Response[Any]:
     """
 
+
     Args:
         param_query (Union[Unset, None, str]): None:
         param_header (Union[Unset, str]): None,
         param_cookie (Union[Unset, str]): None,
+
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,
@@ -100,6 +103,7 @@ async def asyncio_detailed(
     Returns:
         Response[Any]
     """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,

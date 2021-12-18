@@ -103,13 +103,18 @@ def sync_detailed(
     """
     Get List
 
-        Get a list of things
-        Args:
-            an_enum_value (List[AnEnum]): None:
-            some_date (Union[datetime.date, datetime.datetime]): None:
-        Returns:
-            Response[Union[HTTPValidationError, List[AModel]]]
+    Get a list of things
+
+    Args:
+        an_enum_value (List[AnEnum]): None:
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None:
+        an_enum_value_with_only_null (List[None]): None:
+        some_date (Union[datetime.date, datetime.datetime]): None:
+
+    Returns:
+        Response[Union[HTTPValidationError, List[AModel]]]
     """
+
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
@@ -137,14 +142,18 @@ def sync(
     """
     Get List
 
-        Get a list of things
+    Get a list of things
 
-        Args:
-            an_enum_value (List[AnEnum]): None:
-            some_date (Union[datetime.date, datetime.datetime]): None:
-        Returns:
-            Optional[Union[HTTPValidationError, List[AModel]]]
+    Args:
+        an_enum_value (List[AnEnum]): None:
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None:
+        an_enum_value_with_only_null (List[None]): None:
+        some_date (Union[datetime.date, datetime.datetime]): None:
+
+    Returns:
+        Response[Union[HTTPValidationError, List[AModel]]]
     """
+
     return sync_detailed(
         client=client,
         an_enum_value=an_enum_value,
@@ -165,15 +174,18 @@ async def asyncio_detailed(
     """
     Get List
 
-        Get a list of things
+    Get a list of things
 
-        Args:
-            an_enum_value (List[AnEnum]): None:
-            some_date (Union[datetime.date, datetime.datetime]): None:
+    Args:
+        an_enum_value (List[AnEnum]): None:
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None:
+        an_enum_value_with_only_null (List[None]): None:
+        some_date (Union[datetime.date, datetime.datetime]): None:
 
-        Returns:
-            Response[Union[HTTPValidationError, List[AModel]]]
+    Returns:
+        Response[Union[HTTPValidationError, List[AModel]]]
     """
+
     kwargs = _get_kwargs(
         client=client,
         an_enum_value=an_enum_value,
@@ -199,15 +211,18 @@ async def asyncio(
     """
     Get List
 
-        Get a list of things
+    Get a list of things
 
+    Args:
+        an_enum_value (List[AnEnum]): None:
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None:
+        an_enum_value_with_only_null (List[None]): None:
+        some_date (Union[datetime.date, datetime.datetime]): None:
 
-        Args:
-            an_enum_value (List[AnEnum]): None:
-            some_date (Union[datetime.date, datetime.datetime]): None:
-        Returns:
-            Optional[Union[HTTPValidationError, List[AModel]]]
+    Returns:
+        Response[Union[HTTPValidationError, List[AModel]]]
     """
+
     return (
         await asyncio_detailed(
             client=client,

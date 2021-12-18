@@ -66,12 +66,15 @@ def sync_detailed(
     """
     Upload multiple files
 
-        Upload several files in the same request
-        Args:
-            keep_alive (Union[Unset, bool]): None,
-        Returns:
-            Response[Union[Any, HTTPValidationError]]
+    Upload several files in the same request
+
+    Args:
+        keep_alive (Union[Unset, bool]): None,
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
@@ -95,13 +98,15 @@ def sync(
     """
     Upload multiple files
 
-        Upload several files in the same request
+    Upload several files in the same request
 
-        Args:
-            keep_alive (Union[Unset, bool]): None,
-        Returns:
-            Optional[Union[Any, HTTPValidationError]]
+    Args:
+        keep_alive (Union[Unset, bool]): None,
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     return sync_detailed(
         client=client,
         multipart_data=multipart_data,
@@ -118,14 +123,15 @@ async def asyncio_detailed(
     """
     Upload multiple files
 
-        Upload several files in the same request
+    Upload several files in the same request
 
-        Args:
-            keep_alive (Union[Unset, bool]): None,
+    Args:
+        keep_alive (Union[Unset, bool]): None,
 
-        Returns:
-            Response[Union[Any, HTTPValidationError]]
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
@@ -147,14 +153,15 @@ async def asyncio(
     """
     Upload multiple files
 
-        Upload several files in the same request
+    Upload several files in the same request
 
+    Args:
+        keep_alive (Union[Unset, bool]): None,
 
-        Args:
-            keep_alive (Union[Unset, bool]): None,
-        Returns:
-            Optional[Union[Any, HTTPValidationError]]
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
     """
+
     return (
         await asyncio_detailed(
             client=client,
