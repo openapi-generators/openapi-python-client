@@ -3,7 +3,6 @@ import pathlib
 import httpcore
 import jinja2
 import pytest
-import yaml
 
 from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
@@ -148,7 +147,7 @@ def test_update_existing_client_project_error(mocker):
 class TestGetJson:
     def test__get_document_no_url_or_path(self, mocker):
         get = mocker.patch("httpx.get")
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
         from openapi_python_client import _get_document
@@ -157,12 +156,12 @@ class TestGetJson:
 
         assert result == GeneratorError(header="No URL or Path provided")
         get.assert_not_called()
-        Path.assert_not_called()
+        _Path.assert_not_called()
         loads.assert_not_called()
 
     def test__get_document_url_and_path(self, mocker):
         get = mocker.patch("httpx.get")
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
         from openapi_python_client import _get_document
@@ -171,12 +170,12 @@ class TestGetJson:
 
         assert result == GeneratorError(header="Provide URL or Path, not both.")
         get.assert_not_called()
-        Path.assert_not_called()
+        _Path.assert_not_called()
         loads.assert_not_called()
 
     def test__get_document_bad_url(self, mocker):
         get = mocker.patch("httpx.get", side_effect=httpcore.NetworkError)
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
         from openapi_python_client import _get_document
@@ -186,49 +185,84 @@ class TestGetJson:
 
         assert result == GeneratorError(header="Could not get OpenAPI document from provided URL")
         get.assert_called_once_with(url)
-        Path.assert_not_called()
+        _Path.assert_not_called()
         loads.assert_not_called()
 
     def test__get_document_url_no_path(self, mocker):
         get = mocker.patch("httpx.get")
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
+
+        from openapi_python_client import _get_document
+
+        url = "test"
+        _get_document(url=url, path=None)
+
+        get.assert_called_once_with(url)
+        _Path.assert_not_called()
+        loads.assert_called_once_with(get().content)
+
+    def test__get_document_path_no_url(self, tmp_path, mocker):
+        get = mocker.patch("httpx.get")
+        loads = mocker.patch("yaml.safe_load")
+        path = tmp_path / "test.yaml"
+        path.write_text("some test data")
+
+        from openapi_python_client import _get_document
+
+        _get_document(url=None, path=path)
+
+        get.assert_not_called()
+        loads.assert_called_once_with(b"some test data")
+
+    def test__get_document_bad_yaml(self, mocker, tmp_path):
+        get = mocker.patch("httpx.get")
+        from openapi_python_client import _get_document
+
+        path = tmp_path / "test.yaml"
+        path.write_text("'")
+        result = _get_document(url=None, path=path)
+
+        get.assert_not_called()
+        assert isinstance(result, GeneratorError)
+        assert "Invalid YAML" in result.header
+
+    def test__get_document_json(self, mocker):
+        class FakeResponse:
+            content = b'{\n\t"foo": "bar"}'
+            headers = {"content-type": "application/json; encoding=utf8"}
+
+        get = mocker.patch("httpx.get", return_value=FakeResponse())
+        yaml_loads = mocker.patch("yaml.safe_load")
+        json_result = mocker.MagicMock()
+        json_loads = mocker.patch("json.loads", return_value=json_result)
 
         from openapi_python_client import _get_document
 
         url = mocker.MagicMock()
-        _get_document(url=url, path=None)
+        result = _get_document(url=url, path=None)
 
-        get.assert_called_once_with(url)
-        Path.assert_not_called()
-        loads.assert_called_once_with(get().content)
+        get.assert_called_once()
+        json_loads.assert_called_once_with(FakeResponse.content.decode())
+        yaml_loads.assert_not_called()
+        assert result == json_result
 
-    def test__get_document_path_no_url(self, mocker):
-        get = mocker.patch("httpx.get")
-        loads = mocker.patch("yaml.safe_load")
+    def test__get_document_bad_json(self, mocker):
+        class FakeResponse:
+            content = b'{"foo"}'
+            headers = {"content-type": "application/json; encoding=utf8"}
 
-        from openapi_python_client import _get_document
-
-        path = mocker.MagicMock()
-        _get_document(url=None, path=path)
-
-        get.assert_not_called()
-        path.read_bytes.assert_called_once()
-        loads.assert_called_once_with(path.read_bytes())
-
-    def test__get_document_bad_yaml(self, mocker):
-        get = mocker.patch("httpx.get")
-        loads = mocker.patch("yaml.safe_load", side_effect=yaml.YAMLError)
+        get = mocker.patch("httpx.get", return_value=FakeResponse())
 
         from openapi_python_client import _get_document
 
-        path = mocker.MagicMock()
-        result = _get_document(url=None, path=path)
+        url = mocker.MagicMock()
+        result = _get_document(url=url, path=None)
 
-        get.assert_not_called()
-        path.read_bytes.assert_called_once()
-        loads.assert_called_once_with(path.read_bytes())
-        assert result == GeneratorError(header="Invalid YAML from provided source")
+        get.assert_called_once()
+        assert result == GeneratorError(
+            header="Invalid JSON from provided source: " "Expecting ':' delimiter: line 1 column 7 (char 6)"
+        )
 
 
 def make_project(**kwargs):
@@ -476,7 +510,7 @@ class TestProject:
 
         pyproject_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
-        template_path = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template_path = "pyproject.toml.jinja"
         templates = {
             template_path: pyproject_template,
         }
@@ -486,7 +520,7 @@ class TestProject:
 
         project.env.get_template.assert_called_once_with(template_path)
 
-        pyproject_template.render.assert_called_once_with()
+        pyproject_template.render.assert_called_once_with(use_poetry=use_poetry)
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render(), encoding="utf-8")
 
     def test__build_setup_py(self, mocker):

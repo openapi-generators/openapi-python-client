@@ -1,5 +1,7 @@
 """ Generate modern Python clients from OpenAPI """
 
+import json
+import mimetypes
 import shutil
 import subprocess
 import sys
@@ -203,11 +205,11 @@ class Project:  # pylint: disable=too-many-instance-attributes
         git_ignore_path.write_text(git_ignore_template.render(), encoding=self.file_encoding)
 
     def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
-        template = "pyproject.toml" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template = "pyproject.toml.jinja"
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
-            pyproject_template.render(),
+            pyproject_template.render(use_poetry=use_poetry),
             encoding=self.file_encoding,
         )
 
@@ -361,21 +363,40 @@ def update_existing_client(
     return project.update()
 
 
+def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
+    if content_type == "application/json":
+        try:
+            return json.loads(data.decode())
+        except ValueError as err:
+            return GeneratorError(header="Invalid JSON from provided source: {}".format(str(err)))
+    else:
+        try:
+            return yaml.safe_load(data)
+        except yaml.YAMLError as err:
+            return GeneratorError(header="Invalid YAML from provided source: {}".format(str(err)))
+
+
 def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
+    content_type: Optional[str]
     if url is not None and path is not None:
         return GeneratorError(header="Provide URL or Path, not both.")
     if url is not None:
         try:
             response = httpx.get(url)
             yaml_bytes = response.content
+            if "content-type" in response.headers:
+                content_type = response.headers["content-type"].split(";")[0]
+            else:
+                content_type = mimetypes.guess_type(url, strict=True)[0]
+
         except (httpx.HTTPError, httpcore.NetworkError):
             return GeneratorError(header="Could not get OpenAPI document from provided URL")
     elif path is not None:
         yaml_bytes = path.read_bytes()
+        content_type = mimetypes.guess_type(path.absolute().as_uri(), strict=True)[0]
+
     else:
         return GeneratorError(header="No URL or Path provided")
-    try:
-        return yaml.safe_load(yaml_bytes)
-    except yaml.YAMLError:
-        return GeneratorError(header="Invalid YAML from provided source")
+
+    return _load_yaml_or_json(yaml_bytes, content_type)

@@ -42,7 +42,7 @@ class EnumProperty(Property):
 
     @staticmethod
     def values_from_list(values: Union[List[str], List[int]]) -> Dict[str, ValueType]:
-        """Convert a list of values into dict of {name: value}"""
+        """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: Dict[str, ValueType] = {}
 
         for i, value in enumerate(values):

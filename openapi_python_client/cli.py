@@ -82,7 +82,7 @@ def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = Fals
         _print_parser_error(err, color)
 
     gh_link = typer.style(
-        "https://github.com/triaxtec/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
+        "https://github.com/openapi-generators/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
     )
     typer.secho(
         f"If you believe this was a mistake or this tool is missing a feature you need, "
@@ -161,7 +161,11 @@ def update(
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
     fail_on_warning: bool = False,
 ) -> None:
-    """Update an existing OpenAPI Client library"""
+    """Update an existing OpenAPI Client library
+
+    The update command performs the same operations as generate except it does not overwrite specific metadata for the
+    generated client such as the README.md, .gitignore, and pyproject.toml.
+    """
     from . import update_existing_client
 
     if not url and not path:

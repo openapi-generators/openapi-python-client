@@ -1,3 +1,4 @@
+{% if use_poetry %}
 [tool.poetry]
 name = "{{ project_name }}"
 version = "{{ package_version }}"
@@ -11,13 +12,17 @@ packages = [
 ]
 include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
 
-
 [tool.poetry.dependencies]
 python = "^3.6"
-httpx = ">=0.15.4,<0.20.0"
+httpx = ">=0.15.4,<0.22.0"
 attrs = ">=20.1.0,<22.0.0"
 python-dateutil = "^2.8.0"
 
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
+
+{% endif %}
 [tool.black]
 line-length = 120
 target_version = ['py36', 'py37', 'py38']
@@ -33,9 +38,4 @@ exclude = '''
 
 [tool.isort]
 line_length = 120
-multi_line_output = 3
-include_trailing_comma = true
-
-[build-system]
-requires = ["poetry>=1.0"]
-build-backend = "poetry.masonry.api"
+profile = "black"

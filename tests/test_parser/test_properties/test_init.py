@@ -6,7 +6,7 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError, ValidationError
-from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty, Schemas
+from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty, NoneProperty, Schemas
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -304,8 +304,58 @@ class TestPropertyFromData:
             "ParentAnEnum": prop,
         }
 
+    def test_property_from_data_str_enum_with_null(self, enum_property_factory):
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.schema import Schema
+
+        existing = enum_property_factory()
+        data = Schema(title="AnEnum", enum=["A", "B", "C", None], nullable=False, default="B")
+        name = "my_enum"
+        required = True
+
+        schemas = Schemas(classes_by_name={"AnEnum": existing})
+
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
+        )
+
+        # None / null is removed from enum, and property is now nullable
+        assert prop == enum_property_factory(
+            name=name,
+            required=required,
+            nullable=True,
+            values={"A": "A", "B": "B", "C": "C"},
+            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            value_type=str,
+            default="ParentAnEnum.B",
+        )
+        assert prop.nullable is True
+        assert schemas != new_schemas, "Provided Schemas was mutated"
+        assert new_schemas.classes_by_name == {
+            "AnEnum": existing,
+            "ParentAnEnum": prop,
+        }
+
+    def test_property_from_data_null_enum(self, enum_property_factory):
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.schema import Schema
+
+        data = Schema(title="AnEnumWithOnlyNull", enum=[None], nullable=False, default=None)
+        name = "my_enum"
+        required = True
+
+        schemas = Schemas()
+
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
+        )
+
+        assert prop == NoneProperty(
+            name="my_enum", required=required, nullable=False, default="None", python_name="my_enum"
+        )
+
     def test_property_from_data_int_enum(self, enum_property_factory):
-        from openapi_python_client.parser.properties import Class, EnumProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         name = "my_enum"
@@ -672,7 +722,9 @@ class TestBuildListProperty:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
         )
 
-        assert p == PropertyError(data="blah", detail=f"invalid data in items of array {name}")
+        assert isinstance(p, PropertyError)
+        assert p.data == "blah"
+        assert p.header.startswith(f"invalid data in items of array {name}")
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
@@ -923,14 +975,17 @@ class TestBuildSchemas:
         assert result.errors == [PropertyError()]
 
 
-def test_build_enum_property_conflict(mocker):
+def test_build_enum_property_conflict():
     from openapi_python_client.parser.properties import Schemas, build_enum_property
 
     data = oai.Schema()
-    schemas = Schemas(classes_by_name={"Existing": mocker.MagicMock()})
+    schemas = Schemas()
 
+    _, schemas = build_enum_property(
+        data=data, name="Existing", required=True, schemas=schemas, enum=["a"], parent_name=None, config=Config()
+    )
     err, schemas = build_enum_property(
-        data=data, name="Existing", required=True, schemas=schemas, enum=[], parent_name=None, config=Config()
+        data=data, name="Existing", required=True, schemas=schemas, enum=["a", "b"], parent_name=None, config=Config()
     )
 
     assert schemas == schemas

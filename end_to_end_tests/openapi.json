@@ -30,6 +30,30 @@
           {
             "required": true,
             "schema": {
+              "title": "An Enum Value With Null And String Values",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AnEnumWithNull"
+              }
+            },
+            "name": "an_enum_value_with_null",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "An Enum Value With Only Null Values",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AnEnumWithOnlyNull"
+              }
+            },
+            "name": "an_enum_value_with_only_null",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
               "title": "Some Date",
               "anyOf": [
                 {
@@ -348,6 +372,46 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/json_body/string": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Json Body Which is String",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -1163,6 +1227,22 @@
           "SECOND_VALUE"
         ],
         "description": "For testing Enums in all the ways they can be used "
+      },
+      "AnEnumWithNull": {
+        "title": "AnEnumWithNull",
+        "enum": [
+          "FIRST_VALUE",
+          "SECOND_VALUE",
+          null
+        ],
+        "description": "For testing Enums with mixed string / null values "
+      },
+      "AnEnumWithOnlyNull": {
+        "title": "AnEnumWithOnlyNull",
+        "enum": [
+          null
+        ],
+        "description": "For testing Enums with only null values "
       },
       "AnAllOfEnum": {
         "title": "AnAllOfEnum",

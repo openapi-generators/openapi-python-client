@@ -52,7 +52,6 @@ def _get_kwargs(
         {% if endpoint.query_parameters %}
         "params": params,
         {% endif %}
-        "verify": client.verify_ssl,
     }
 
 
@@ -64,7 +63,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[{{ return_string }}
             {% from "property_templates/" + response.prop.template import construct %}
         {{ construct(response.prop, response.source) | indent(8) }}
         {% else %}
-        {{ response.prop.python_name }} = {{ response.source }}
+        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}
         return {{ response.prop.python_name }}
     {% endfor %}
@@ -115,6 +114,7 @@ def sync_detailed(
     )
 
     response = httpx.{{ endpoint.method }}(
+        verify=client.verify_ssl,
         **kwargs,
     )
 
@@ -183,7 +183,7 @@ async def asyncio_detailed(
         {{ kwargs(endpoint) }}
     )
 
-    async with httpx.AsyncClient() as _client:
+    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.{{ endpoint.method }}(
             **kwargs
         )

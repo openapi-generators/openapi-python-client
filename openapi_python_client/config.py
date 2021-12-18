@@ -1,3 +1,5 @@
+import json
+import mimetypes
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -35,6 +37,10 @@ class Config(BaseModel):
     @staticmethod
     def load_from_path(path: Path) -> "Config":
         """Creates a Config from provided JSON or YAML file and sets a bunch of globals from it"""
-        config_data = yaml.safe_load(path.read_text())
+        mime = mimetypes.guess_type(path.absolute().as_uri(), strict=True)[0]
+        if mime == "application/json":
+            config_data = json.loads(path.read_text())
+        else:
+            config_data = yaml.safe_load(path.read_text())
         config = Config(**config_data)
         return config

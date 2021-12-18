@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.7
+
+### Fixes
+
+- SSL verify argument to async clients [#533 & #510]. Thanks @fsvenson and @mvaught02!
+- Remove unused CHANGELOG from generated setup.py [#529]. Thanks @johnthagen!
+
+## 0.10.6
+
+### Features
+
+- Improve error messages related to invalid arrays and circular or recursive references [#519].
+- Add httpx 0.20.\* support [#514].
+
+### Fixes
+
+- Use isort "black" profile in generated clients [#523]. Thanks @johnthagen!
+- setup.py should generate importable packages named <project>\_client [#492, #520, #521]. Thanks @tedo-benchling & @Leem0sh!
+- Allow None in enum properties [#504, #512, #516]. Thanks @juspence!
+- properly support JSON OpenAPI documents and config files [#488, #509, #515]. Thanks @tardyp and @Gelbpunkt!
+
 ## 0.10.5
 
 ### Features
