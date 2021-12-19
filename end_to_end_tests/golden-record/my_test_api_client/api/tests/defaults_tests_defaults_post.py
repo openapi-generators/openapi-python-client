@@ -122,14 +122,15 @@ def sync_detailed(
     """Defaults
 
     Args:
-        string_prop (str): None|default: 'the default string'
-        date_prop (datetime.date): None|default: isoparse('1010-10-10').date()
-        float_prop (float): None|default: 3.14
-        int_prop (int): None|default: 7
-        boolean_prop (bool): None
-        list_prop (List[AnEnum]): None
-        union_prop (Union[float, str]): None|default: 'not a float'
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]): None|default: 0.6
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
+            0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -179,14 +180,15 @@ def sync(
     """Defaults
 
     Args:
-        string_prop (str): None|default: 'the default string'
-        date_prop (datetime.date): None|default: isoparse('1010-10-10').date()
-        float_prop (float): None|default: 3.14
-        int_prop (int): None|default: 7
-        boolean_prop (bool): None
-        list_prop (List[AnEnum]): None
-        union_prop (Union[float, str]): None|default: 'not a float'
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]): None|default: 0.6
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
+            0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -229,14 +231,15 @@ async def asyncio_detailed(
     """Defaults
 
     Args:
-        string_prop (str): None|default: 'the default string'
-        date_prop (datetime.date): None|default: isoparse('1010-10-10').date()
-        float_prop (float): None|default: 3.14
-        int_prop (int): None|default: 7
-        boolean_prop (bool): None
-        list_prop (List[AnEnum]): None
-        union_prop (Union[float, str]): None|default: 'not a float'
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]): None|default: 0.6
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
+            0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -284,14 +287,15 @@ async def asyncio(
     """Defaults
 
     Args:
-        string_prop (str): None|default: 'the default string'
-        date_prop (datetime.date): None|default: isoparse('1010-10-10').date()
-        float_prop (float): None|default: 3.14
-        int_prop (int): None|default: 7
-        boolean_prop (bool): None
-        list_prop (List[AnEnum]): None
-        union_prop (Union[float, str]): None|default: 'not a float'
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]): None|default: 0.6
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
+            0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):

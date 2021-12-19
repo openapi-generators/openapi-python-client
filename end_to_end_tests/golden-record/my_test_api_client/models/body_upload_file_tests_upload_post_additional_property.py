@@ -13,7 +13,7 @@ class BodyUploadFileTestsUploadPostAdditionalProperty:
 
 
     Properties:
-        foo (Union[Unset, str]): None
+        foo (Union[Unset, str]):
 
     """
 

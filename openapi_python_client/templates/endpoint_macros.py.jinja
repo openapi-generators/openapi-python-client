@@ -161,17 +161,8 @@ json_body=json_body,
 {% endif %}
 {% if endpoint.path_parameters or endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
 Args:
-    {% for parameter in endpoint.path_parameters.values() %}
-    {{ parameter.to_docstring() }}
-    {% endfor %}
-    {% for parameter in endpoint.query_parameters.values() %}
-    {{ parameter.to_docstring() }}
-    {% endfor %}
-    {% for parameter in endpoint.header_parameters.values() %}
-    {{ parameter.to_docstring() }}
-    {% endfor %}
-    {% for parameter in endpoint.cookie_parameters.values() %}
-    {{ parameter.to_docstring() }}
+    {% for parameter in endpoint.all_parameters() %}
+    {{ parameter.to_docstring() | wordwrap(70) | indent(8) }}
     {% endfor %}
 
 {% endif %}

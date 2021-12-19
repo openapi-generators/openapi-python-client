@@ -13,7 +13,7 @@ class TestInlineObjectsJsonBody:
 
 
     Properties:
-        a_property (Union[Unset, str]): None
+        a_property (Union[Unset, str]):
 
     """
 

@@ -16,7 +16,7 @@ class ModelWithUnionPropertyInlined:
 
         Properties:
             fruit (Union[ModelWithUnionPropertyInlinedFruitType0,
-    ModelWithUnionPropertyInlinedFruitType1, Unset]): None
+    ModelWithUnionPropertyInlinedFruitType1, Unset]):
 
     """
 

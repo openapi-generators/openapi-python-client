@@ -15,10 +15,10 @@ class ModelFromAllOf:
 
 
     Properties:
-        a_sub_property (Union[Unset, str]): None
-        type (Union[Unset, AnotherAllOfSubModelType]): None
-        type_enum (Union[Unset, AnotherAllOfSubModelTypeEnum]): None
-        another_sub_property (Union[Unset, str]): None
+        a_sub_property (Union[Unset, str]):
+        type (Union[Unset, AnotherAllOfSubModelType]):
+        type_enum (Union[Unset, AnotherAllOfSubModelTypeEnum]):
+        another_sub_property (Union[Unset, str]):
 
     """
 

@@ -11,9 +11,9 @@ class ValidationError:
 
 
     Properties:
-        loc (List[str]): None
-        msg (str): None
-        type (str): None
+        loc (List[str]):
+        msg (str):
+        type (str):
 
     """
 

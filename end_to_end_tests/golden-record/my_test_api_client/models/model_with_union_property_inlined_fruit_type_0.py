@@ -13,7 +13,7 @@ class ModelWithUnionPropertyInlinedFruitType0:
 
 
     Properties:
-        apples (Union[Unset, str]): None
+        apples (Union[Unset, str]):
 
     """
 

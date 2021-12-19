@@ -17,37 +17,37 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
 
         Properties:
-            enum_properties_ref (List[AnEnum]): None
-            str_properties_ref (List[str]): None
-            date_properties_ref (List[datetime.date]): None
-            datetime_properties_ref (List[datetime.datetime]): None
-            int32_properties_ref (List[int]): None
-            int64_properties_ref (List[int]): None
-            float_properties_ref (List[float]): None
-            double_properties_ref (List[float]): None
-            file_properties_ref (List[File]): None
-            bytestream_properties_ref (List[str]): None
-            enum_properties (List[AnEnum]): None
-            str_properties (List[str]): None
-            date_properties (List[datetime.date]): None
-            datetime_properties (List[datetime.datetime]): None
-            int32_properties (List[int]): None
-            int64_properties (List[int]): None
-            float_properties (List[float]): None
-            double_properties (List[float]): None
-            file_properties (List[File]): None
-            bytestream_properties (List[str]): None
+            enum_properties_ref (List[AnEnum]):
+            str_properties_ref (List[str]):
+            date_properties_ref (List[datetime.date]):
+            datetime_properties_ref (List[datetime.datetime]):
+            int32_properties_ref (List[int]):
+            int64_properties_ref (List[int]):
+            float_properties_ref (List[float]):
+            double_properties_ref (List[float]):
+            file_properties_ref (List[File]):
+            bytestream_properties_ref (List[str]):
+            enum_properties (List[AnEnum]):
+            str_properties (List[str]):
+            date_properties (List[datetime.date]):
+            datetime_properties (List[datetime.datetime]):
+            int32_properties (List[int]):
+            int64_properties (List[int]):
+            float_properties (List[float]):
+            double_properties (List[float]):
+            file_properties (List[File]):
+            bytestream_properties (List[str]):
             enum_property_ref (AnEnum): For testing Enums in all the ways they can
     be used
-            str_property_ref (str): None
-            date_property_ref (datetime.date): None
-            datetime_property_ref (datetime.datetime): None
-            int32_property_ref (int): None
-            int64_property_ref (int): None
-            float_property_ref (float): None
-            double_property_ref (float): None
-            file_property_ref (File): None
-            bytestream_property_ref (str): None
+            str_property_ref (str):
+            date_property_ref (datetime.date):
+            datetime_property_ref (datetime.datetime):
+            int32_property_ref (int):
+            int64_property_ref (int):
+            float_property_ref (float):
+            double_property_ref (float):
+            file_property_ref (File):
+            bytestream_property_ref (str):
 
     """
 

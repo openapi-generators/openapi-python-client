@@ -48,10 +48,10 @@ def sync_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param4 (str): None
-        param2 (int): None
-        param1 (str): None
-        param3 (int): None
+        param4 (str):
+        param2 (int):
+        param1 (str):
+        param3 (int):
 
     Returns:
         Response[Any]
@@ -83,10 +83,10 @@ async def asyncio_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param4 (str): None
-        param2 (int): None
-        param1 (str): None
-        param3 (int): None
+        param4 (str):
+        param2 (int):
+        param1 (str):
+        param3 (int):
 
     Returns:
         Response[Any]

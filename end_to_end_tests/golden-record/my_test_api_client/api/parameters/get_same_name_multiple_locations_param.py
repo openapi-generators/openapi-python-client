@@ -58,10 +58,10 @@ def sync_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param_path (str): None
-        param_query (Union[Unset, None, str]): None
-        param_header (Union[Unset, str]): None
-        param_cookie (Union[Unset, str]): None
+        param_path (str):
+        param_query (Union[Unset, None, str]):
+        param_header (Union[Unset, str]):
+        param_cookie (Union[Unset, str]):
 
     Returns:
         Response[Any]
@@ -93,10 +93,10 @@ async def asyncio_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param_path (str): None
-        param_query (Union[Unset, None, str]): None
-        param_header (Union[Unset, str]): None
-        param_cookie (Union[Unset, str]): None
+        param_path (str):
+        param_query (Union[Unset, None, str]):
+        param_header (Union[Unset, str]):
+        param_cookie (Union[Unset, str]):
 
     Returns:
         Response[Any]

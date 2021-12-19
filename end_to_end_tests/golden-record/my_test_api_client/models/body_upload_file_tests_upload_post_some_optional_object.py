@@ -11,7 +11,7 @@ class BodyUploadFileTestsUploadPostSomeOptionalObject:
 
 
     Properties:
-        foo (str): None
+        foo (str):
 
     """
 

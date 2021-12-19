@@ -804,8 +804,10 @@
             "in": "query",
             "required": true,
             "schema": {
+              "description": "A parameter with the same name as another.",
+              "example": "an example string",
               "type": "string",
-              "default": "overriden_in_GET"
+              "default": "overridden_in_GET"
             }
           }
         ],

@@ -105,10 +105,10 @@ def sync_detailed(
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]): None
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None
-        an_enum_value_with_only_null (List[None]): None
-        some_date (Union[datetime.date, datetime.datetime]): None
+        an_enum_value (List[AnEnum]):
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_only_null (List[None]):
+        some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
         Response[Union[HTTPValidationError, List[AModel]]]
@@ -143,10 +143,10 @@ def sync(
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]): None
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None
-        an_enum_value_with_only_null (List[None]): None
-        some_date (Union[datetime.date, datetime.datetime]): None
+        an_enum_value (List[AnEnum]):
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_only_null (List[None]):
+        some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
         Response[Union[HTTPValidationError, List[AModel]]]
@@ -174,10 +174,10 @@ async def asyncio_detailed(
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]): None
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None
-        an_enum_value_with_only_null (List[None]): None
-        some_date (Union[datetime.date, datetime.datetime]): None
+        an_enum_value (List[AnEnum]):
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_only_null (List[None]):
+        some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
         Response[Union[HTTPValidationError, List[AModel]]]
@@ -210,10 +210,10 @@ async def asyncio(
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]): None
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]): None
-        an_enum_value_with_only_null (List[None]): None
-        some_date (Union[datetime.date, datetime.datetime]): None
+        an_enum_value (List[AnEnum]):
+        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_only_null (List[None]):
+        some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
         Response[Union[HTTPValidationError, List[AModel]]]

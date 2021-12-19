@@ -416,6 +416,16 @@ class Endpoint:
             return self.responses[0].prop.get_type_string()
         return f"Union[{', '.join(types)}]"
 
+    def all_parameters(self) -> Iterator[Property]:
+        yield from self.path_parameters.values()
+        yield from self.query_parameters.values()
+        yield from self.header_parameters.values()
+        yield from self.cookie_parameters.values()
+        if self.multipart_body:
+            yield self.multipart_body
+        if self.json_body:
+            yield self.json_body
+
 
 @dataclass
 class GeneratorData:

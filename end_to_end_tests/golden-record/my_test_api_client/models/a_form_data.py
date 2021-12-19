@@ -13,8 +13,8 @@ class AFormData:
 
 
     Properties:
-        an_required_field (str): None
-        an_optional_field (Union[Unset, str]): None
+        an_required_field (str):
+        an_optional_field (Union[Unset, str]):
 
     """
 

@@ -65,7 +65,8 @@ def sync_detailed(
      Upload a file
 
     Args:
-        keep_alive (Union[Unset, bool]): None
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -96,7 +97,8 @@ def sync(
      Upload a file
 
     Args:
-        keep_alive (Union[Unset, bool]): None
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -120,7 +122,8 @@ async def asyncio_detailed(
      Upload a file
 
     Args:
-        keep_alive (Union[Unset, bool]): None
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -149,7 +152,8 @@ async def asyncio(
      Upload a file
 
     Args:
-        keep_alive (Union[Unset, bool]): None
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
 
     Returns:
         Response[Union[Any, HTTPValidationError]]

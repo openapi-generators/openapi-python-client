@@ -26,12 +26,12 @@ class BodyUploadFileTestsUploadPost:
 
 
         Properties:
-            some_file (File): None
+            some_file (File):
             some_object (BodyUploadFileTestsUploadPostSomeObject):
-            some_optional_file (Union[Unset, File]): None
-            some_string (Union[Unset, str]): None|default: 'some_default_string'
-            some_number (Union[Unset, float]): None
-            some_array (Union[Unset, List[float]]): None
+            some_optional_file (Union[Unset, File]):
+            some_string (Union[Unset, str]):  Default: 'some_default_string'.
+            some_number (Union[Unset, float]):
+            some_array (Union[Unset, List[float]]):
             some_optional_object (Union[Unset,
     BodyUploadFileTestsUploadPostSomeOptionalObject]):
             some_nullable_object

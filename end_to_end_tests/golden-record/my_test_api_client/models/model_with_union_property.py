@@ -15,7 +15,7 @@ class ModelWithUnionProperty:
 
 
     Properties:
-        a_property (Union[AnEnum, AnIntEnum, Unset]): None
+        a_property (Union[AnEnum, AnIntEnum, Unset]):
 
     """
 

@@ -45,7 +45,7 @@ def sync_detailed(
      Test optional cookie parameters
 
     Args:
-        my_token (str): None
+        my_token (str):
 
     Returns:
         Response[Any]
@@ -74,7 +74,7 @@ async def asyncio_detailed(
      Test optional cookie parameters
 
     Args:
-        my_token (str): None
+        my_token (str):
 
     Returns:
         Response[Any]

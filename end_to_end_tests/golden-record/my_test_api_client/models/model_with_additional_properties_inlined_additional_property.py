@@ -13,7 +13,7 @@ class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
 
 
     Properties:
-        extra_props_prop (Union[Unset, str]): None
+        extra_props_prop (Union[Unset, str]):
 
     """
 

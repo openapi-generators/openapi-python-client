@@ -16,7 +16,7 @@ class ModelWithAdditionalPropertiesInlined:
 
 
     Properties:
-        a_number (Union[Unset, float]): None
+        a_number (Union[Unset, float]):
 
     """
 

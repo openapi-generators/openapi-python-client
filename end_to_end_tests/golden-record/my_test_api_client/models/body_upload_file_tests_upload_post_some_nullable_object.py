@@ -13,7 +13,7 @@ class BodyUploadFileTestsUploadPostSomeNullableObject:
 
 
     Properties:
-        bar (Union[Unset, str]): None
+        bar (Union[Unset, str]):
 
     """
 

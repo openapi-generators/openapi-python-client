@@ -11,8 +11,8 @@ class BodyUploadFileTestsUploadPostSomeObject:
 
 
     Properties:
-        num (float): None
-        text (str): None
+        num (float):
+        text (str):
 
     """
 

@@ -48,8 +48,8 @@ def sync_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param_path (str): None
-        param_query (Union[Unset, None, str]): None
+        param_path (str):
+        param_query (Union[Unset, None, str]):
 
     Returns:
         Response[Any]
@@ -77,8 +77,8 @@ async def asyncio_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param_path (str): None
-        param_query (Union[Unset, None, str]): None
+        param_path (str):
+        param_query (Union[Unset, None, str]):
 
     Returns:
         Response[Any]
