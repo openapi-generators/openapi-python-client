@@ -149,10 +149,10 @@ json_body=json_body,
 {% endmacro %}
 
 {% macro docstring(endpoint, return_string) %}
-"""{% if endpoint.summary %}{{ endpoint.summary | wordwrap(76)}}
+"""{% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
 
 {% endif -%}
-{%- if endpoint.description %} {{ endpoint.description | wordwrap(76) }}
+{%- if endpoint.description %} {{ endpoint.description | wordwrap(100) }}
 
 {% endif %}
 {% if not endpoint.summary and not endpoint.description %}
@@ -162,7 +162,7 @@ json_body=json_body,
 {% if endpoint.path_parameters or endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
 Args:
     {% for parameter in endpoint.all_parameters() %}
-    {{ parameter.to_docstring() | wordwrap(70) | indent(8) }}
+    {{ parameter.to_docstring() | wordwrap(90) | indent(8) }}
     {% endfor %}
 
 {% endif %}

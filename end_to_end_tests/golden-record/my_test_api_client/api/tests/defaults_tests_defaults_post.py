@@ -129,8 +129,7 @@ def sync_detailed(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
-            0.6.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -187,8 +186,7 @@ def sync(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
-            0.6.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -238,8 +236,7 @@ async def asyncio_detailed(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
-            0.6.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -294,8 +291,7 @@ async def asyncio(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default:
-            0.6.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
