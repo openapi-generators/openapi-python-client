@@ -8,11 +8,8 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeOptionalObject")
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostSomeOptionalObject:
     """
-
-
-    Properties:
+    Attributes:
         foo (str):
-
     """
 
     foo: str

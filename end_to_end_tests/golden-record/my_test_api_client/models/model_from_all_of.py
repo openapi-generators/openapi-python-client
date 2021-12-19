@@ -12,14 +12,11 @@ T = TypeVar("T", bound="ModelFromAllOf")
 @attr.s(auto_attribs=True)
 class ModelFromAllOf:
     """
-
-
-    Properties:
+    Attributes:
         a_sub_property (Union[Unset, str]):
         type (Union[Unset, AnotherAllOfSubModelType]):
         type_enum (Union[Unset, AnotherAllOfSubModelTypeEnum]):
         another_sub_property (Union[Unset, str]):
-
     """
 
     a_sub_property: Union[Unset, str] = UNSET

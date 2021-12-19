@@ -23,21 +23,16 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPost:
     """
-
-
-        Properties:
-            some_file (File):
-            some_object (BodyUploadFileTestsUploadPostSomeObject):
-            some_optional_file (Union[Unset, File]):
-            some_string (Union[Unset, str]):  Default: 'some_default_string'.
-            some_number (Union[Unset, float]):
-            some_array (Union[Unset, List[float]]):
-            some_optional_object (Union[Unset,
-    BodyUploadFileTestsUploadPostSomeOptionalObject]):
-            some_nullable_object
-    (Optional[BodyUploadFileTestsUploadPostSomeNullableObject]):
-            some_enum (Union[Unset, DifferentEnum]): An enumeration.
-
+    Attributes:
+        some_file (File):
+        some_object (BodyUploadFileTestsUploadPostSomeObject):
+        some_optional_file (Union[Unset, File]):
+        some_string (Union[Unset, str]):  Default: 'some_default_string'.
+        some_number (Union[Unset, float]):
+        some_array (Union[Unset, List[float]]):
+        some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
+        some_nullable_object (Optional[BodyUploadFileTestsUploadPostSomeNullableObject]):
+        some_enum (Union[Unset, DifferentEnum]): An enumeration.
     """
 
     some_file: File

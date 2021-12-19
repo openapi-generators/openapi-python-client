@@ -9,12 +9,7 @@ T = TypeVar("T", bound="ModelWithPrimitiveAdditionalPropertiesADateHolder")
 
 @attr.s(auto_attribs=True)
 class ModelWithPrimitiveAdditionalPropertiesADateHolder:
-    """
-
-
-    Properties:
-
-    """
+    """ """
 
     additional_properties: Dict[str, datetime.datetime] = attr.ib(init=False, factory=dict)
 

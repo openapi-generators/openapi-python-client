@@ -11,11 +11,8 @@ T = TypeVar("T", bound="ModelWithPropertyRef")
 @attr.s(auto_attribs=True)
 class ModelWithPropertyRef:
     """
-
-
-    Properties:
+    Attributes:
         inner (Union[Unset, ModelName]):
-
     """
 
     inner: Union[Unset, ModelName] = UNSET

@@ -10,11 +10,8 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeNullableObject")
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostSomeNullableObject:
     """
-
-
-    Properties:
+    Attributes:
         bar (Union[Unset, str]):
-
     """
 
     bar: Union[Unset, str] = UNSET

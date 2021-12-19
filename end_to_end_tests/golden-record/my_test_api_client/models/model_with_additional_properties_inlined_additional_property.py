@@ -10,11 +10,8 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
 @attr.s(auto_attribs=True)
 class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
     """
-
-
-    Properties:
+    Attributes:
         extra_props_prop (Union[Unset, str]):
-
     """
 
     extra_props_prop: Union[Unset, str] = UNSET
