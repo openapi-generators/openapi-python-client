@@ -59,6 +59,9 @@ def sync_detailed(
 
      Try sending a JSON body
 
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
+
     Returns:
         Response[Union[Any, HTTPValidationError]]
     """
@@ -85,6 +88,9 @@ def sync(
 
      Try sending a JSON body
 
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
+
     Returns:
         Response[Union[Any, HTTPValidationError]]
     """
@@ -103,6 +109,9 @@ async def asyncio_detailed(
     """Json Body
 
      Try sending a JSON body
+
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -127,6 +136,9 @@ async def asyncio(
     """Json Body
 
      Try sending a JSON body
+
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
 
     Returns:
         Response[Union[Any, HTTPValidationError]]

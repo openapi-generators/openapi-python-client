@@ -416,7 +416,7 @@ class Endpoint:
             return self.responses[0].prop.get_type_string()
         return f"Union[{', '.join(types)}]"
 
-    def all_parameters(self) -> Iterator[Property]:
+    def iter_all_parameters(self) -> Iterator[Property]:
         """Iterate through all the parameters of this endpoint"""
         yield from self.path_parameters.values()
         yield from self.query_parameters.values()
@@ -426,6 +426,10 @@ class Endpoint:
             yield self.multipart_body
         if self.json_body:
             yield self.json_body
+
+    def list_all_parameters(self) -> List[Property]:
+        """Return a List of all the parameters of this endpoint"""
+        return list(self.iter_all_parameters())
 
 
 @dataclass

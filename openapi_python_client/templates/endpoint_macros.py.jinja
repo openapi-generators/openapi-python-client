@@ -159,9 +159,10 @@ json_body=json_body,
 {# Leave extra space so that Args or Returns isn't at the top #}
 
 {% endif %}
-{% if endpoint.path_parameters or endpoint.query_parameters or endpoint.header_parameters or endpoint.cookie_parameters %}
+{% set all_parameters = endpoint.list_all_parameters() %}
+{% if all_parameters %}
 Args:
-    {% for parameter in endpoint.all_parameters() %}
+    {% for parameter in all_parameters %}
     {{ parameter.to_docstring() | wordwrap(90) | indent(8) }}
     {% endfor %}
 
