@@ -417,7 +417,7 @@ class Endpoint:
         return f"Union[{', '.join(types)}]"
 
     def all_parameters(self) -> Iterator[Property]:
-        """Iterate through all the parameters of this endpoint """
+        """Iterate through all the parameters of this endpoint"""
         yield from self.path_parameters.values()
         yield from self.query_parameters.values()
         yield from self.header_parameters.values()
