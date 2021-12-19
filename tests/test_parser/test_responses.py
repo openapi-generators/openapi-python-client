@@ -31,6 +31,29 @@ def test_response_from_data_no_content(any_property_factory):
     )
 
 
+def test_response_from_data_reference(any_property_factory):
+    from openapi_python_client.parser.responses import Response, response_from_data
+
+    response, schemas = response_from_data(
+        status_code=200,
+        data=oai.Reference.construct(),
+        schemas=Schemas(),
+        parent_name="parent",
+        config=MagicMock(),
+    )
+
+    assert response == Response(
+        status_code=200,
+        prop=any_property_factory(
+            name="response_200",
+            default=None,
+            nullable=False,
+            required=True,
+        ),
+        source="None",
+    )
+
+
 def test_response_from_data_unsupported_content_type():
     from openapi_python_client.parser.responses import response_from_data
 
