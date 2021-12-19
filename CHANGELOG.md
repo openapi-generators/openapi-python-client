@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.8
+
+### Features
+
+- New and improved docstrings in generated functions and classes [#503, #505, #551]. Thanks @rtaycher!
+- Support httpx 0.21.\* (#537)
+
+### Fixes
+
+- Basic types as JSON bodies and responses [#487 & #550]. Thanks @Gelbpunkt!
+- Relative paths to config files [#538 & #544]. Thanks to @motybz, @MalteBecker, & @abhinav-cashify!
+
 ## 0.10.7
 
 ### Fixes
