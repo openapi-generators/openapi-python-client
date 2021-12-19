@@ -9,7 +9,8 @@ from ...types import Response, UNSET
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
+    arguments, client, kwargs, parse_response, docstring %}
 
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
@@ -87,6 +88,8 @@ def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
+    {{ docstring(endpoint, return_string) | indent(4) }}
+
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -102,7 +105,7 @@ def sync_detailed(
 def sync(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """ {{ endpoint.description }} """
+    {{ docstring(endpoint, return_string) | indent(4) }}
 
     return sync_detailed(
         {{ kwargs(endpoint) }}
@@ -112,6 +115,8 @@ def sync(
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
+    {{ docstring(endpoint, return_string) | indent(4) }}
+
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
@@ -127,9 +132,10 @@ async def asyncio_detailed(
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """ {{ endpoint.description }} """
+    {{ docstring(endpoint, return_string) | indent(4) }}
 
     return (await asyncio_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
 {% endif %}
+

@@ -40,6 +40,17 @@ def sync_detailed(
     client: Client,
     my_token: str,
 ) -> Response[Any]:
+    """TOKEN_WITH_COOKIE
+
+     Test optional cookie parameters
+
+    Args:
+        my_token (str):
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         my_token=my_token,
@@ -58,6 +69,17 @@ async def asyncio_detailed(
     client: Client,
     my_token: str,
 ) -> Response[Any]:
+    """TOKEN_WITH_COOKIE
+
+     Test optional cookie parameters
+
+    Args:
+        my_token (str):
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         my_token=my_token,

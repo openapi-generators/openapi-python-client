@@ -68,6 +68,17 @@ def sync_detailed(
     null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
 ) -> Response[Any]:
+    """
+    Args:
+        not_null_required (datetime.datetime):
+        null_required (Union[Unset, None, datetime.datetime]):
+        null_not_required (Union[Unset, None, datetime.datetime]):
+        not_null_not_required (Union[Unset, None, datetime.datetime]):
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         not_null_required=not_null_required,
@@ -92,6 +103,17 @@ async def asyncio_detailed(
     null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
 ) -> Response[Any]:
+    """
+    Args:
+        not_null_required (datetime.datetime):
+        null_required (Union[Unset, None, datetime.datetime]):
+        null_not_required (Union[Unset, None, datetime.datetime]):
+        not_null_not_required (Union[Unset, None, datetime.datetime]):
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         not_null_required=not_null_required,

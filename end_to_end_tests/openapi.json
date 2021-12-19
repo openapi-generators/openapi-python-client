@@ -793,8 +793,8 @@
       }
     },
     "/common_parameters_overriding/{param}": {
-      "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
       "get": {
+        "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
         "tags": [
           "parameters"
         ],
@@ -804,8 +804,10 @@
             "in": "query",
             "required": true,
             "schema": {
+              "description": "A parameter with the same name as another.",
+              "example": "an example string",
               "type": "string",
-              "default": "overriden_in_GET"
+              "default": "overridden_in_GET"
             }
           }
         ],

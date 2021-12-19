@@ -119,6 +119,25 @@ def sync_detailed(
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Defaults
+
+    Args:
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        enum_prop (AnEnum): For testing Enums in all the ways they can be used
+        model_prop (ModelWithUnionProperty):
+        required_model_prop (ModelWithUnionProperty):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
@@ -157,7 +176,24 @@ def sync(
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """ """
+    """Defaults
+
+    Args:
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        enum_prop (AnEnum): For testing Enums in all the ways they can be used
+        model_prop (ModelWithUnionProperty):
+        required_model_prop (ModelWithUnionProperty):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return sync_detailed(
         client=client,
@@ -190,6 +226,25 @@ async def asyncio_detailed(
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Defaults
+
+    Args:
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        enum_prop (AnEnum): For testing Enums in all the ways they can be used
+        model_prop (ModelWithUnionProperty):
+        required_model_prop (ModelWithUnionProperty):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         string_prop=string_prop,
@@ -226,7 +281,24 @@ async def asyncio(
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """ """
+    """Defaults
+
+    Args:
+        string_prop (str):  Default: 'the default string'.
+        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        float_prop (float):  Default: 3.14.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):
+        list_prop (List[AnEnum]):
+        union_prop (Union[float, str]):  Default: 'not a float'.
+        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        enum_prop (AnEnum): For testing Enums in all the ways they can be used
+        model_prop (ModelWithUnionProperty):
+        required_model_prop (ModelWithUnionProperty):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return (
         await asyncio_detailed(

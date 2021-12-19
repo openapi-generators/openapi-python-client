@@ -60,6 +60,15 @@ def sync_detailed(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Int Enum
+
+    Args:
+        int_enum (AnIntEnum): An enumeration.
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         int_enum=int_enum,
@@ -78,7 +87,14 @@ def sync(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """ """
+    """Int Enum
+
+    Args:
+        int_enum (AnIntEnum): An enumeration.
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return sync_detailed(
         client=client,
@@ -91,6 +107,15 @@ async def asyncio_detailed(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Int Enum
+
+    Args:
+        int_enum (AnIntEnum): An enumeration.
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         int_enum=int_enum,
@@ -107,7 +132,14 @@ async def asyncio(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """ """
+    """Int Enum
+
+    Args:
+        int_enum (AnIntEnum): An enumeration.
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return (
         await asyncio_detailed(

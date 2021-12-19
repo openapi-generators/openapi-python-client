@@ -53,6 +53,15 @@ def sync_detailed(
     client: Client,
     json_body: str,
 ) -> Response[Union[HTTPValidationError, str]]:
+    """Json Body Which is String
+
+    Args:
+        json_body (str):
+
+    Returns:
+        Response[Union[HTTPValidationError, str]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -71,7 +80,14 @@ def sync(
     client: Client,
     json_body: str,
 ) -> Optional[Union[HTTPValidationError, str]]:
-    """ """
+    """Json Body Which is String
+
+    Args:
+        json_body (str):
+
+    Returns:
+        Response[Union[HTTPValidationError, str]]
+    """
 
     return sync_detailed(
         client=client,
@@ -84,6 +100,15 @@ async def asyncio_detailed(
     client: Client,
     json_body: str,
 ) -> Response[Union[HTTPValidationError, str]]:
+    """Json Body Which is String
+
+    Args:
+        json_body (str):
+
+    Returns:
+        Response[Union[HTTPValidationError, str]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -100,7 +125,14 @@ async def asyncio(
     client: Client,
     json_body: str,
 ) -> Optional[Union[HTTPValidationError, str]]:
-    """ """
+    """Json Body Which is String
+
+    Args:
+        json_body (str):
+
+    Returns:
+        Response[Union[HTTPValidationError, str]]
+    """
 
     return (
         await asyncio_detailed(

@@ -46,6 +46,15 @@ def sync_detailed(
     client: Client,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
+    """
+    Args:
+        param_path (str):
+        param_query (Union[Unset, None, str]):
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,
@@ -66,6 +75,15 @@ async def asyncio_detailed(
     client: Client,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
+    """
+    Args:
+        param_path (str):
+        param_query (Union[Unset, None, str]):
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,

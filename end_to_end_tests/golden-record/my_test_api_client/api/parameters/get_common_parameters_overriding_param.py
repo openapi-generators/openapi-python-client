@@ -10,7 +10,7 @@ def _get_kwargs(
     param_path: str,
     *,
     client: Client,
-    param_query: str = "overriden_in_GET",
+    param_query: str = "overridden_in_GET",
 ) -> Dict[str, Any]:
     url = "{}/common_parameters_overriding/{param}".format(client.base_url, param=param_path)
 
@@ -44,8 +44,19 @@ def sync_detailed(
     param_path: str,
     *,
     client: Client,
-    param_query: str = "overriden_in_GET",
+    param_query: str = "overridden_in_GET",
 ) -> Response[Any]:
+    """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
+
+    Args:
+        param_path (str):
+        param_query (str): A parameter with the same name as another. Default:
+            'overridden_in_GET'. Example: an example string.
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,
@@ -64,8 +75,19 @@ async def asyncio_detailed(
     param_path: str,
     *,
     client: Client,
-    param_query: str = "overriden_in_GET",
+    param_query: str = "overridden_in_GET",
 ) -> Response[Any]:
+    """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
+
+    Args:
+        param_path (str):
+        param_query (str): A parameter with the same name as another. Default:
+            'overridden_in_GET'. Example: an example string.
+
+    Returns:
+        Response[Any]
+    """
+
     kwargs = _get_kwargs(
         param_path=param_path,
         client=client,

@@ -16,7 +16,32 @@ T = TypeVar("T", bound="AModel")
 
 @attr.s(auto_attribs=True)
 class AModel:
-    """A Model for testing all the ways custom objects can be used"""
+    """A Model for testing all the ways custom objects can be used
+
+    Attributes:
+        an_enum_value (AnEnum): For testing Enums in all the ways they can be used
+        an_allof_enum_with_overridden_default (AnAllOfEnum):  Default: AnAllOfEnum.OVERRIDDEN_DEFAULT.
+        a_camel_date_time (Union[datetime.date, datetime.datetime]):
+        a_date (datetime.date):
+        required_not_nullable (str):
+        one_of_models (Union[Any, FreeFormModel, ModelWithUnionProperty]):
+        model (ModelWithUnionProperty):
+        any_value (Union[Unset, Any]):
+        an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
+        nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
+        a_nullable_date (Optional[datetime.date]):
+        a_not_required_date (Union[Unset, datetime.date]):
+        attr_1_leading_digit (Union[Unset, str]):
+        required_nullable (Optional[str]):
+        not_required_nullable (Union[Unset, None, str]):
+        not_required_not_nullable (Union[Unset, str]):
+        nullable_one_of_models (Union[FreeFormModel, ModelWithUnionProperty, None]):
+        not_required_one_of_models (Union[FreeFormModel, ModelWithUnionProperty, Unset]):
+        not_required_nullable_one_of_models (Union[FreeFormModel, ModelWithUnionProperty, None, Unset, str]):
+        nullable_model (Optional[ModelWithUnionProperty]):
+        not_required_model (Union[Unset, ModelWithUnionProperty]):
+        not_required_nullable_model (Union[Unset, None, ModelWithUnionProperty]):
+    """
 
     an_enum_value: AnEnum
     a_camel_date_time: Union[datetime.date, datetime.datetime]

@@ -60,6 +60,18 @@ def sync_detailed(
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Upload File
+
+     Upload a file
+
+    Args:
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
@@ -80,7 +92,17 @@ def sync(
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Upload a file"""
+    """Upload File
+
+     Upload a file
+
+    Args:
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return sync_detailed(
         client=client,
@@ -95,6 +117,18 @@ async def asyncio_detailed(
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Upload File
+
+     Upload a file
+
+    Args:
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
@@ -113,7 +147,17 @@ async def asyncio(
     multipart_data: BodyUploadFileTestsUploadPost,
     keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Upload a file"""
+    """Upload File
+
+     Upload a file
+
+    Args:
+        keep_alive (Union[Unset, bool]):
+        multipart_data (BodyUploadFileTestsUploadPost):
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return (
         await asyncio_detailed(
