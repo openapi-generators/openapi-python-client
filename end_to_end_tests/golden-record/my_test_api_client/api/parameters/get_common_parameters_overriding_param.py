@@ -46,11 +46,12 @@ def sync_detailed(
     client: Client,
     param_query: str = "overriden_in_GET",
 ) -> Response[Any]:
-    """
-
+    """Test that if you have an overriding property from `PathItem` in `Operation`,
+    it produces valid code
 
     Args:
-        param_query (str): None|default: 'overriden_in_GET':
+        param_path (str): None
+        param_query (str): None|default: 'overriden_in_GET'
 
     Returns:
         Response[Any]
@@ -76,11 +77,12 @@ async def asyncio_detailed(
     client: Client,
     param_query: str = "overriden_in_GET",
 ) -> Response[Any]:
-    """
-
+    """Test that if you have an overriding property from `PathItem` in `Operation`,
+    it produces valid code
 
     Args:
-        param_query (str): None|default: 'overriden_in_GET':
+        param_path (str): None
+        param_query (str): None|default: 'overriden_in_GET'
 
     Returns:
         Response[Any]

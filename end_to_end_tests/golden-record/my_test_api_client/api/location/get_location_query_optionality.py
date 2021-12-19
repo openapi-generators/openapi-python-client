@@ -69,13 +69,11 @@ def sync_detailed(
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
 ) -> Response[Any]:
     """
-
-
     Args:
-        not_null_required (datetime.datetime): None:
-        null_required (Union[Unset, None, datetime.datetime]): None:
-        null_not_required (Union[Unset, None, datetime.datetime]): None:
-        not_null_not_required (Union[Unset, None, datetime.datetime]): None:
+        not_null_required (datetime.datetime): None
+        null_required (Union[Unset, None, datetime.datetime]): None
+        null_not_required (Union[Unset, None, datetime.datetime]): None
+        not_null_not_required (Union[Unset, None, datetime.datetime]): None
 
     Returns:
         Response[Any]
@@ -106,13 +104,11 @@ async def asyncio_detailed(
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
 ) -> Response[Any]:
     """
-
-
     Args:
-        not_null_required (datetime.datetime): None:
-        null_required (Union[Unset, None, datetime.datetime]): None:
-        null_not_required (Union[Unset, None, datetime.datetime]): None:
-        not_null_not_required (Union[Unset, None, datetime.datetime]): None:
+        not_null_required (datetime.datetime): None
+        null_required (Union[Unset, None, datetime.datetime]): None
+        null_not_required (Union[Unset, None, datetime.datetime]): None
+        not_null_not_required (Union[Unset, None, datetime.datetime]): None
 
     Returns:
         Response[Any]

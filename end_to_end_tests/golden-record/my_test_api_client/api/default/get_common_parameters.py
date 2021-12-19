@@ -45,10 +45,8 @@ def sync_detailed(
     common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     """
-
-
     Args:
-        common (Union[Unset, None, str]): None:
+        common (Union[Unset, None, str]): None
 
     Returns:
         Response[Any]
@@ -73,10 +71,8 @@ async def asyncio_detailed(
     common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
     """
-
-
     Args:
-        common (Union[Unset, None, str]): None:
+        common (Union[Unset, None, str]): None
 
     Returns:
         Response[Any]

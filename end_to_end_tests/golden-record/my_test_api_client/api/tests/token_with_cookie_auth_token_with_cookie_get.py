@@ -40,13 +40,12 @@ def sync_detailed(
     client: Client,
     my_token: str,
 ) -> Response[Any]:
-    """
-    TOKEN_WITH_COOKIE
+    """TOKEN_WITH_COOKIE
 
-    Test optional cookie parameters
+     Test optional cookie parameters
 
     Args:
-        my_token (str): None,
+        my_token (str): None
 
     Returns:
         Response[Any]
@@ -70,13 +69,12 @@ async def asyncio_detailed(
     client: Client,
     my_token: str,
 ) -> Response[Any]:
-    """
-    TOKEN_WITH_COOKIE
+    """TOKEN_WITH_COOKIE
 
-    Test optional cookie parameters
+     Test optional cookie parameters
 
     Args:
-        my_token (str): None,
+        my_token (str): None
 
     Returns:
         Response[Any]

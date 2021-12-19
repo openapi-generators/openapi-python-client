@@ -45,10 +45,8 @@ def sync_detailed(
     import_: str,
 ) -> Response[Any]:
     """
-
-
     Args:
-        import_ (str): None:
+        import_ (str): None
 
     Returns:
         Response[Any]
@@ -73,10 +71,8 @@ async def asyncio_detailed(
     import_: str,
 ) -> Response[Any]:
     """
-
-
     Args:
-        import_ (str): None:
+        import_ (str): None
 
     Returns:
         Response[Any]

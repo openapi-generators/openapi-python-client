@@ -40,11 +40,9 @@ def sync_detailed(
     client: Client,
     form_data: AFormData,
 ) -> Response[Any]:
-    """
-    Post from data
+    """Post from data
 
-    Post form data
-
+     Post form data
 
     Returns:
         Response[Any]
@@ -68,11 +66,9 @@ async def asyncio_detailed(
     client: Client,
     form_data: AFormData,
 ) -> Response[Any]:
-    """
-    Post from data
+    """Post from data
 
-    Post form data
-
+     Post form data
 
     Returns:
         Response[Any]

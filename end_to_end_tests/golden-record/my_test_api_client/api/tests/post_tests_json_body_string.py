@@ -53,11 +53,7 @@ def sync_detailed(
     client: Client,
     json_body: str,
 ) -> Response[Union[HTTPValidationError, str]]:
-    """
-    Json Body Which is String
-
-
-
+    """Json Body Which is String
 
     Returns:
         Response[Union[HTTPValidationError, str]]
@@ -81,11 +77,7 @@ def sync(
     client: Client,
     json_body: str,
 ) -> Optional[Union[HTTPValidationError, str]]:
-    """
-    Json Body Which is String
-
-
-
+    """Json Body Which is String
 
     Returns:
         Response[Union[HTTPValidationError, str]]
@@ -102,11 +94,7 @@ async def asyncio_detailed(
     client: Client,
     json_body: str,
 ) -> Response[Union[HTTPValidationError, str]]:
-    """
-    Json Body Which is String
-
-
-
+    """Json Body Which is String
 
     Returns:
         Response[Union[HTTPValidationError, str]]
@@ -128,11 +116,7 @@ async def asyncio(
     client: Client,
     json_body: str,
 ) -> Optional[Union[HTTPValidationError, str]]:
-    """
-    Json Body Which is String
-
-
-
+    """Json Body Which is String
 
     Returns:
         Response[Union[HTTPValidationError, str]]

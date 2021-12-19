@@ -60,13 +60,10 @@ def sync_detailed(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """
-    Int Enum
-
-
+    """Int Enum
 
     Args:
-        int_enum (AnIntEnum): An enumeration.:
+        int_enum (AnIntEnum): An enumeration.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -90,13 +87,10 @@ def sync(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """
-    Int Enum
-
-
+    """Int Enum
 
     Args:
-        int_enum (AnIntEnum): An enumeration.:
+        int_enum (AnIntEnum): An enumeration.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -113,13 +107,10 @@ async def asyncio_detailed(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """
-    Int Enum
-
-
+    """Int Enum
 
     Args:
-        int_enum (AnIntEnum): An enumeration.:
+        int_enum (AnIntEnum): An enumeration.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -141,13 +132,10 @@ async def asyncio(
     client: Client,
     int_enum: AnIntEnum,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """
-    Int Enum
-
-
+    """Int Enum
 
     Args:
-        int_enum (AnIntEnum): An enumeration.:
+        int_enum (AnIntEnum): An enumeration.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]

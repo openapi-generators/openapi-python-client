@@ -44,11 +44,9 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[List[int]]:
-    """
-    Get Basic List Of Integers
+    """Get Basic List Of Integers
 
-    Get a list of integers
-
+     Get a list of integers
 
     Returns:
         Response[List[int]]
@@ -70,11 +68,9 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[int]]:
-    """
-    Get Basic List Of Integers
+    """Get Basic List Of Integers
 
-    Get a list of integers
-
+     Get a list of integers
 
     Returns:
         Response[List[int]]
@@ -89,11 +85,9 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[List[int]]:
-    """
-    Get Basic List Of Integers
+    """Get Basic List Of Integers
 
-    Get a list of integers
-
+     Get a list of integers
 
     Returns:
         Response[List[int]]
@@ -113,11 +107,9 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[int]]:
-    """
-    Get Basic List Of Integers
+    """Get Basic List Of Integers
 
-    Get a list of integers
-
+     Get a list of integers
 
     Returns:
         Response[List[int]]

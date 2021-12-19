@@ -44,11 +44,9 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[List[str]]:
-    """
-    Get Basic List Of Strings
+    """Get Basic List Of Strings
 
-    Get a list of strings
-
+     Get a list of strings
 
     Returns:
         Response[List[str]]
@@ -70,11 +68,9 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[str]]:
-    """
-    Get Basic List Of Strings
+    """Get Basic List Of Strings
 
-    Get a list of strings
-
+     Get a list of strings
 
     Returns:
         Response[List[str]]
@@ -89,11 +85,9 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[List[str]]:
-    """
-    Get Basic List Of Strings
+    """Get Basic List Of Strings
 
-    Get a list of strings
-
+     Get a list of strings
 
     Returns:
         Response[List[str]]
@@ -113,11 +107,9 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[str]]:
-    """
-    Get Basic List Of Strings
+    """Get Basic List Of Strings
 
-    Get a list of strings
-
+     Get a list of strings
 
     Returns:
         Response[List[str]]

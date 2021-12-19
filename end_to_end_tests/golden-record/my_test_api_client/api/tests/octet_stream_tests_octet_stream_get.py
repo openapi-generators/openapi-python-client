@@ -45,11 +45,7 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[File]:
-    """
-    Octet Stream
-
-
-
+    """Octet Stream
 
     Returns:
         Response[File]
@@ -71,11 +67,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[File]:
-    """
-    Octet Stream
-
-
-
+    """Octet Stream
 
     Returns:
         Response[File]
@@ -90,11 +82,7 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[File]:
-    """
-    Octet Stream
-
-
-
+    """Octet Stream
 
     Returns:
         Response[File]
@@ -114,11 +102,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[File]:
-    """
-    Octet Stream
-
-
-
+    """Octet Stream
 
     Returns:
         Response[File]

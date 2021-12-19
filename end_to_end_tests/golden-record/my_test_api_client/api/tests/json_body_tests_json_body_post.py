@@ -55,11 +55,9 @@ def sync_detailed(
     client: Client,
     json_body: AModel,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """
-    Json Body
+    """Json Body
 
-    Try sending a JSON body
-
+     Try sending a JSON body
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -83,11 +81,9 @@ def sync(
     client: Client,
     json_body: AModel,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """
-    Json Body
+    """Json Body
 
-    Try sending a JSON body
-
+     Try sending a JSON body
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -104,11 +100,9 @@ async def asyncio_detailed(
     client: Client,
     json_body: AModel,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """
-    Json Body
+    """Json Body
 
-    Try sending a JSON body
-
+     Try sending a JSON body
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -130,11 +124,9 @@ async def asyncio(
     client: Client,
     json_body: AModel,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """
-    Json Body
+    """Json Body
 
-    Try sending a JSON body
-
+     Try sending a JSON body
 
     Returns:
         Response[Union[Any, HTTPValidationError]]

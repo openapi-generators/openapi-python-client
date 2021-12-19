@@ -37,9 +37,6 @@ def sync_detailed(
     client: Client,
 ) -> Response[Any]:
     """
-
-
-
     Returns:
         Response[Any]
     """
@@ -61,9 +58,6 @@ async def asyncio_detailed(
     client: Client,
 ) -> Response[Any]:
     """
-
-
-
     Returns:
         Response[Any]
     """

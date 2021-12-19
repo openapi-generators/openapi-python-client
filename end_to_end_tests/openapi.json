@@ -793,8 +793,8 @@
       }
     },
     "/common_parameters_overriding/{param}": {
-      "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
       "get": {
+        "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
         "tags": [
           "parameters"
         ],

@@ -47,8 +47,11 @@ def sync_detailed(
     client: Client,
 ) -> Response[Any]:
     """
-
-
+    Args:
+        param4 (str): None
+        param2 (int): None
+        param1 (str): None
+        param3 (int): None
 
     Returns:
         Response[Any]
@@ -79,8 +82,11 @@ async def asyncio_detailed(
     client: Client,
 ) -> Response[Any]:
     """
-
-
+    Args:
+        param4 (str): None
+        param2 (int): None
+        param1 (str): None
+        param3 (int): None
 
     Returns:
         Response[Any]

@@ -51,11 +51,7 @@ def sync_detailed(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Response[TestInlineObjectsResponse200]:
-    """
-    Test Inline Objects
-
-
-
+    """Test Inline Objects
 
     Returns:
         Response[TestInlineObjectsResponse200]
@@ -79,11 +75,7 @@ def sync(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Optional[TestInlineObjectsResponse200]:
-    """
-    Test Inline Objects
-
-
-
+    """Test Inline Objects
 
     Returns:
         Response[TestInlineObjectsResponse200]
@@ -100,11 +92,7 @@ async def asyncio_detailed(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Response[TestInlineObjectsResponse200]:
-    """
-    Test Inline Objects
-
-
-
+    """Test Inline Objects
 
     Returns:
         Response[TestInlineObjectsResponse200]
@@ -126,11 +114,7 @@ async def asyncio(
     client: Client,
     json_body: TestInlineObjectsJsonBody,
 ) -> Optional[TestInlineObjectsResponse200]:
-    """
-    Test Inline Objects
-
-
-
+    """Test Inline Objects
 
     Returns:
         Response[TestInlineObjectsResponse200]

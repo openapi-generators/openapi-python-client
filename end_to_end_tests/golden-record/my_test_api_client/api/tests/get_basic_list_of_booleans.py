@@ -44,11 +44,9 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[List[bool]]:
-    """
-    Get Basic List Of Booleans
+    """Get Basic List Of Booleans
 
-    Get a list of booleans
-
+     Get a list of booleans
 
     Returns:
         Response[List[bool]]
@@ -70,11 +68,9 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[bool]]:
-    """
-    Get Basic List Of Booleans
+    """Get Basic List Of Booleans
 
-    Get a list of booleans
-
+     Get a list of booleans
 
     Returns:
         Response[List[bool]]
@@ -89,11 +85,9 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[List[bool]]:
-    """
-    Get Basic List Of Booleans
+    """Get Basic List Of Booleans
 
-    Get a list of booleans
-
+     Get a list of booleans
 
     Returns:
         Response[List[bool]]
@@ -113,11 +107,9 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[bool]]:
-    """
-    Get Basic List Of Booleans
+    """Get Basic List Of Booleans
 
-    Get a list of booleans
-
+     Get a list of booleans
 
     Returns:
         Response[List[bool]]

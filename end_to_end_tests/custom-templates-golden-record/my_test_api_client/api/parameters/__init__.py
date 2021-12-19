@@ -13,6 +13,9 @@ from . import (
 class ParametersEndpoints:
     @classmethod
     def get_common_parameters_overriding_param(cls) -> types.ModuleType:
+        """
+        Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
+        """
         return get_common_parameters_overriding_param
 
     @classmethod
