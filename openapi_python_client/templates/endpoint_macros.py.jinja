@@ -5,7 +5,11 @@
 headers["{{ parameter.name | kebabcase}}"] = {{ parameter.python_name }}
         {% else %}
 if {{ parameter.python_name }} is not UNSET:
-    headers["{{ parameter.name | kebabcase}}"] = {{ parameter.python_name }}
+    headers["{{ parameter.name | kebabcase}}"] = {% if isbool(parameter) %}
+    str({{ parameter.python_name }})
+    {% else %}
+    {{ parameter.python_name}}
+    {% endif %}
         {% endif %}
     {% endfor %}
 {% endif %}

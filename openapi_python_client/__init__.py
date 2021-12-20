@@ -267,7 +267,9 @@ class Project:  # pylint: disable=too-many-instance-attributes
             encoding=self.file_encoding,
         )
 
-        endpoint_template = self.env.get_template("endpoint_module.py.jinja")
+        endpoint_template = self.env.get_template(
+            "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
+        )
         for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
@@ -281,7 +283,12 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
-                module_path.write_text(endpoint_template.render(endpoint=endpoint), encoding=self.file_encoding)
+                module_path.write_text(
+                    endpoint_template.render(
+                        endpoint=endpoint,
+                    ),
+                    encoding=self.file_encoding,
+                )
 
 
 def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
