@@ -226,9 +226,14 @@ def build_model_property(
         parent_name: The name of the property that this property is inside of (affects class naming)
         config: Config data for this run of the generator, used to modifying names
     """
-    class_string = data.title or name
-    if parent_name:
-        class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_string)}"
+    if not config.use_path_prefixes_for_title_model_names and data.title:
+        class_string = data.title
+    else:
+        title = data.title or name
+        if parent_name:
+            class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(title)}"
+        else:
+            class_string = utils.pascal_case(title)
     class_info = Class.from_string(string=class_string, config=config)
 
     property_data = _process_properties(data=data, schemas=schemas, class_name=class_info.name, config=config)
