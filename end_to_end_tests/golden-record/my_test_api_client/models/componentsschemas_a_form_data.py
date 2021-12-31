@@ -2,51 +2,53 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_name import ModelName
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ModelWithPropertyRef")
+T = TypeVar("T", bound="ComponentsschemasAFormData")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithPropertyRef:
+class ComponentsschemasAFormData:
     """
     Attributes:
-        inner (Union[Unset, ModelName]):
+        an_required_field (str):
+        an_optional_field (Union[Unset, str]):
     """
 
-    inner: Union[Unset, ModelName] = UNSET
+    an_required_field: str
+    an_optional_field: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        inner: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.inner, Unset):
-            inner = self.inner.to_dict()
+        an_required_field = self.an_required_field
+        an_optional_field = self.an_optional_field
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if inner is not UNSET:
-            field_dict["inner"] = inner
+        field_dict.update(
+            {
+                "an_required_field": an_required_field,
+            }
+        )
+        if an_optional_field is not UNSET:
+            field_dict["an_optional_field"] = an_optional_field
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        _inner = d.pop("inner", UNSET)
-        inner: Union[Unset, ModelName]
-        if isinstance(_inner, Unset):
-            inner = UNSET
-        else:
-            inner = ModelName.from_dict(_inner)
+        an_required_field = d.pop("an_required_field")
 
-        model_with_property_ref = cls(
-            inner=inner,
+        an_optional_field = d.pop("an_optional_field", UNSET)
+
+        componentsschemas_a_form_data = cls(
+            an_required_field=an_required_field,
+            an_optional_field=an_optional_field,
         )
 
-        model_with_property_ref.additional_properties = d
-        return model_with_property_ref
+        componentsschemas_a_form_data.additional_properties = d
+        return componentsschemas_a_form_data
 
     @property
     def additional_keys(self) -> List[str]:
