@@ -2,11 +2,11 @@ from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-T = TypeVar("T", bound="ComponentsschemasNone")
+T = TypeVar("T", bound="Import")
 
 
 @attr.s(auto_attribs=True)
-class ComponentsschemasNone:
+class Import:
     """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -22,10 +22,10 @@ class ComponentsschemasNone:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        componentsschemas_none = cls()
+        import_ = cls()
 
-        componentsschemas_none.additional_properties = d
-        return componentsschemas_none
+        import_.additional_properties = d
+        return import_
 
     @property
     def additional_keys(self) -> List[str]:

@@ -2,23 +2,23 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.componentsschemas_model_with_additional_properties_inlined_additional_property import (
-    ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty,
+from ..models.model_with_additional_properties_inlined_additional_property import (
+    ModelWithAdditionalPropertiesInlinedAdditionalProperty,
 )
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ComponentsschemasModelWithAdditionalPropertiesInlined")
+T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlined")
 
 
 @attr.s(auto_attribs=True)
-class ComponentsschemasModelWithAdditionalPropertiesInlined:
+class ModelWithAdditionalPropertiesInlined:
     """
     Attributes:
         a_number (Union[Unset, float]):
     """
 
     a_number: Union[Unset, float] = UNSET
-    additional_properties: Dict[str, ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty] = attr.ib(
+    additional_properties: Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperty] = attr.ib(
         init=False, factory=dict
     )
 
@@ -40,31 +40,27 @@ class ComponentsschemasModelWithAdditionalPropertiesInlined:
         d = src_dict.copy()
         a_number = d.pop("a_number", UNSET)
 
-        componentsschemas_model_with_additional_properties_inlined = cls(
+        model_with_additional_properties_inlined = cls(
             a_number=a_number,
         )
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_property = ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty.from_dict(
-                prop_dict
-            )
+            additional_property = ModelWithAdditionalPropertiesInlinedAdditionalProperty.from_dict(prop_dict)
 
             additional_properties[prop_name] = additional_property
 
-        componentsschemas_model_with_additional_properties_inlined.additional_properties = additional_properties
-        return componentsschemas_model_with_additional_properties_inlined
+        model_with_additional_properties_inlined.additional_properties = additional_properties
+        return model_with_additional_properties_inlined
 
     @property
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty:
+    def __getitem__(self, key: str) -> ModelWithAdditionalPropertiesInlinedAdditionalProperty:
         return self.additional_properties[key]
 
-    def __setitem__(
-        self, key: str, value: ComponentsschemasModelWithAdditionalPropertiesInlinedAdditionalProperty
-    ) -> None:
+    def __setitem__(self, key: str, value: ModelWithAdditionalPropertiesInlinedAdditionalProperty) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

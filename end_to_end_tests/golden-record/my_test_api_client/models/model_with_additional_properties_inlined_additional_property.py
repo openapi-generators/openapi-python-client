@@ -2,51 +2,43 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_name import ModelName
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ComponentsschemasModelWithPropertyRef")
+T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
 
 
 @attr.s(auto_attribs=True)
-class ComponentsschemasModelWithPropertyRef:
+class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
     """
     Attributes:
-        inner (Union[Unset, ModelName]):
+        extra_props_prop (Union[Unset, str]):
     """
 
-    inner: Union[Unset, ModelName] = UNSET
+    extra_props_prop: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        inner: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.inner, Unset):
-            inner = self.inner.to_dict()
+        extra_props_prop = self.extra_props_prop
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if inner is not UNSET:
-            field_dict["inner"] = inner
+        if extra_props_prop is not UNSET:
+            field_dict["extra_props_prop"] = extra_props_prop
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        _inner = d.pop("inner", UNSET)
-        inner: Union[Unset, ModelName]
-        if isinstance(_inner, Unset):
-            inner = UNSET
-        else:
-            inner = ModelName.from_dict(_inner)
+        extra_props_prop = d.pop("extra_props_prop", UNSET)
 
-        componentsschemas_model_with_property_ref = cls(
-            inner=inner,
+        model_with_additional_properties_inlined_additional_property = cls(
+            extra_props_prop=extra_props_prop,
         )
 
-        componentsschemas_model_with_property_ref.additional_properties = d
-        return componentsschemas_model_with_property_ref
+        model_with_additional_properties_inlined_additional_property.additional_properties = d
+        return model_with_additional_properties_inlined_additional_property
 
     @property
     def additional_keys(self) -> List[str]:

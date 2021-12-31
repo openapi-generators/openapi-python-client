@@ -8,11 +8,11 @@ from dateutil.parser import isoparse
 from ..models.an_enum import AnEnum
 from ..types import File
 
-T = TypeVar("T", bound="ComponentsschemasAModelWithPropertiesReferenceThatAreNotObject")
+T = TypeVar("T", bound="AModelWithPropertiesReferenceThatAreNotObject")
 
 
 @attr.s(auto_attribs=True)
-class ComponentsschemasAModelWithPropertiesReferenceThatAreNotObject:
+class AModelWithPropertiesReferenceThatAreNotObject:
     """
     Attributes:
         enum_properties_ref (List[AnEnum]):
@@ -320,7 +320,7 @@ class ComponentsschemasAModelWithPropertiesReferenceThatAreNotObject:
 
         bytestream_property_ref = d.pop("bytestream_property_ref")
 
-        componentsschemas_a_model_with_properties_reference_that_are_not_object = cls(
+        a_model_with_properties_reference_that_are_not_object = cls(
             enum_properties_ref=enum_properties_ref,
             str_properties_ref=str_properties_ref,
             date_properties_ref=date_properties_ref,
@@ -353,8 +353,8 @@ class ComponentsschemasAModelWithPropertiesReferenceThatAreNotObject:
             bytestream_property_ref=bytestream_property_ref,
         )
 
-        componentsschemas_a_model_with_properties_reference_that_are_not_object.additional_properties = d
-        return componentsschemas_a_model_with_properties_reference_that_are_not_object
+        a_model_with_properties_reference_that_are_not_object.additional_properties = d
+        return a_model_with_properties_reference_that_are_not_object
 
     @property
     def additional_keys(self) -> List[str]:

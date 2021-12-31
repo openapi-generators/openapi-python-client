@@ -233,7 +233,7 @@ def build_model_property(
         if parent_name:
             class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(title)}"
         else:
-            class_string = utils.pascal_case(title)
+            class_string = title
     class_info = Class.from_string(string=class_string, config=config)
 
     property_data = _process_properties(data=data, schemas=schemas, class_name=class_info.name, config=config)
