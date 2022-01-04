@@ -19,7 +19,7 @@ def _get_kwargs(
     cookies: Dict[str, Any] = client.get_cookies()
 
     if keep_alive is not UNSET:
-        headers["keep-alive"] = keep_alive
+        headers["keep-alive"] = str(keep_alive)
 
     multipart_multipart_data = []
     for multipart_data_item_data in multipart_data:
