@@ -2,7 +2,11 @@
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters.values() %}
         {% if parameter.required %}
-headers["{{ parameter.name | kebabcase}}"] = {{ parameter.python_name }}
+headers["{{ parameter.name | kebabcase}}"] = {% if isbool(parameter) %}
+    str({{ parameter.python_name }})
+    {% else %}
+    {{ parameter.python_name}}
+    {% endif %}
         {% else %}
 if {{ parameter.python_name }} is not UNSET:
     headers["{{ parameter.name | kebabcase}}"] = {% if isbool(parameter) %}
