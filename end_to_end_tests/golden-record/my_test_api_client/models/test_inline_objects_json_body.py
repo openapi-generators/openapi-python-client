@@ -9,7 +9,10 @@ T = TypeVar("T", bound="TestInlineObjectsJsonBody")
 
 @attr.s(auto_attribs=True)
 class TestInlineObjectsJsonBody:
-    """ """
+    """
+    Attributes:
+        a_property (Union[Unset, str]):
+    """
 
     a_property: Union[Unset, str] = UNSET
 

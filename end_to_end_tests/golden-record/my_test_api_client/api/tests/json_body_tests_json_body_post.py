@@ -56,6 +56,17 @@ def sync_detailed(
     client: Client,
     json_body: AModel,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Json Body
+
+     Try sending a JSON body
+
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -74,7 +85,16 @@ def sync(
     client: Client,
     json_body: AModel,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Try sending a JSON body"""
+    """Json Body
+
+     Try sending a JSON body
+
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return sync_detailed(
         client=client,
@@ -87,6 +107,17 @@ async def asyncio_detailed(
     client: Client,
     json_body: AModel,
 ) -> Response[Union[Any, HTTPValidationError]]:
+    """Json Body
+
+     Try sending a JSON body
+
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -103,7 +134,16 @@ async def asyncio(
     client: Client,
     json_body: AModel,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Try sending a JSON body"""
+    """Json Body
+
+     Try sending a JSON body
+
+    Args:
+        json_body (AModel): A Model for testing all the ways custom objects can be used
+
+    Returns:
+        Response[Union[Any, HTTPValidationError]]
+    """
 
     return (
         await asyncio_detailed(

@@ -46,6 +46,12 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[File]:
+    """Octet Stream
+
+    Returns:
+        Response[File]
+    """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -62,7 +68,11 @@ def sync(
     *,
     client: Client,
 ) -> Optional[File]:
-    """ """
+    """Octet Stream
+
+    Returns:
+        Response[File]
+    """
 
     return sync_detailed(
         client=client,
@@ -73,6 +83,12 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[File]:
+    """Octet Stream
+
+    Returns:
+        Response[File]
+    """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -87,7 +103,11 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[File]:
-    """ """
+    """Octet Stream
+
+    Returns:
+        Response[File]
+    """
 
     return (
         await asyncio_detailed(

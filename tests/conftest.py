@@ -11,6 +11,7 @@ from openapi_python_client.parser.properties import (
     IntProperty,
     ListProperty,
     ModelProperty,
+    NoneProperty,
     Property,
     StringProperty,
     UnionProperty,
@@ -36,6 +37,8 @@ def model_property_factory() -> Callable[..., ModelProperty]:
             "relative_imports": set(),
             "additional_properties": False,
             "python_name": "",
+            "description": "",
+            "example": "",
             **kwargs,
         }
         return ModelProperty(**kwargs)
@@ -126,6 +129,21 @@ def int_property_factory() -> Callable[..., IntProperty]:
 
 
 @pytest.fixture
+def none_property_factory() -> Callable[..., NoneProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+
+    You can pass the same params into this as the StringProperty constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        return NoneProperty(**kwargs)
+
+    return _factory
+
+
+@pytest.fixture
 def date_time_property_factory() -> Callable[..., DateTimeProperty]:
     """
     This fixture surfaces in the test as a function which manufactures DateTimeProperties with defaults.
@@ -210,6 +228,8 @@ def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         "required": True,
         "nullable": False,
         "default": None,
+        "description": None,
+        "example": None,
         **kwargs,
     }
     if not kwargs.get("python_name"):

@@ -45,6 +45,14 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[List[bool]]:
+    """Get Basic List Of Booleans
+
+     Get a list of booleans
+
+    Returns:
+        Response[List[bool]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -61,7 +69,13 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[bool]]:
-    """Get a list of booleans"""
+    """Get Basic List Of Booleans
+
+     Get a list of booleans
+
+    Returns:
+        Response[List[bool]]
+    """
 
     return sync_detailed(
         client=client,
@@ -72,6 +86,14 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[List[bool]]:
+    """Get Basic List Of Booleans
+
+     Get a list of booleans
+
+    Returns:
+        Response[List[bool]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -86,7 +108,13 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[bool]]:
-    """Get a list of booleans"""
+    """Get Basic List Of Booleans
+
+     Get a list of booleans
+
+    Returns:
+        Response[List[bool]]
+    """
 
     return (
         await asyncio_detailed(

@@ -388,6 +388,46 @@
         }
       }
     },
+    "/tests/json_body/string": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Json Body Which is String",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tests/defaults": {
       "post": {
         "tags": [
@@ -753,8 +793,8 @@
       }
     },
     "/common_parameters_overriding/{param}": {
-      "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
       "get": {
+        "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
         "tags": [
           "parameters"
         ],
@@ -764,8 +804,10 @@
             "in": "query",
             "required": true,
             "schema": {
+              "description": "A parameter with the same name as another.",
+              "example": "an example string",
               "type": "string",
-              "default": "overriden_in_GET"
+              "default": "overridden_in_GET"
             }
           }
         ],

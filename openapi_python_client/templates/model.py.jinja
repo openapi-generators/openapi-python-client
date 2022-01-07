@@ -28,7 +28,28 @@ T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ class_name }}:
-    """ {{ model.description }} """
+    """{% if model.title %}{{ model.title | wordwrap(116) }}
+
+    {% endif -%}
+    {%- if model.description %}{{ model.description | wordwrap(116) }}
+
+    {% endif %}
+    {% if not model.title and not model.description %}
+    {# Leave extra space so that a section doesn't start on the first line #}
+
+    {% endif %}
+    {% if model.example %}
+    Example:
+        {{ model.example | string | wordwrap(112) | indent(12) }}
+
+    {% endif %}
+    {% if model.required_properties or model.optional_properties %}
+    Attributes:
+    {% for property in model.required_properties + model.optional_properties %}
+        {{ property.to_docstring() | wordwrap(112) | indent(12) }}
+    {% endfor %}{% endif %}
+    """
+
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
     {{ property.to_string() }}

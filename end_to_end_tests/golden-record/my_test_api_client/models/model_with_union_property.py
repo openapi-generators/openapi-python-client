@@ -11,7 +11,10 @@ T = TypeVar("T", bound="ModelWithUnionProperty")
 
 @attr.s(auto_attribs=True)
 class ModelWithUnionProperty:
-    """ """
+    """
+    Attributes:
+        a_property (Union[AnEnum, AnIntEnum, Unset]):
+    """
 
     a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
 
