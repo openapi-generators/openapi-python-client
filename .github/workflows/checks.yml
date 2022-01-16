@@ -106,9 +106,8 @@ jobs:
           poetry install
       - name: Regenerate Integration Client
         run: |
-          poetry shell
           cd integration_tests
-          openapi-python-client update --url http://localhost:3000/openapi.json
+          poetry run openapi-python-client update --url http://localhost:3000/openapi.json
       - name: Check if there are changes to the client
         run: changed_files=$(git status --porcelain | wc -l) && [ changed_files != 0 ] && exit 1
       - name: Cache Generated Client Dependencies
