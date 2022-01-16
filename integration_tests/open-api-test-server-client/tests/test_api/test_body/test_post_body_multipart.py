@@ -30,9 +30,7 @@ def test():
 
     content = response.parsed
     if not isinstance(content, PostBodyMultipartResponse200):
-        raise AssertionError(
-            f"Received status {response.status_code} from test server with payload: {content!r}"
-        )
+        raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")
 
     assert content.a_string == a_string
     assert content.file_name == file_name
