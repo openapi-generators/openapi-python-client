@@ -10,7 +10,13 @@ T = TypeVar("T", bound="PublicError")
 
 @attr.s(auto_attribs=True)
 class PublicError:
-    """ """
+    """
+    Attributes:
+        errors (Union[Unset, List[str]]):
+        extra_parameters (Union[Unset, List[str]]):
+        invalid_parameters (Union[Unset, List[Problem]]):
+        missing_parameters (Union[Unset, List[str]]):
+    """
 
     errors: Union[Unset, List[str]] = UNSET
     extra_parameters: Union[Unset, List[str]] = UNSET

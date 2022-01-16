@@ -22,6 +22,7 @@ def _get_kwargs(
     multipart_multipart_data = multipart_data.to_multipart()
 
     return {
+        "method": "post",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -56,12 +57,20 @@ def sync_detailed(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Response[Union[PostBodyMultipartResponse200, PublicError]]:
+    """
+    Args:
+        multipart_data (PostBodyMultipartMultipartData):
+
+    Returns:
+        Response[Union[PostBodyMultipartResponse200, PublicError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
     )
 
-    response = httpx.post(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -74,7 +83,13 @@ def sync(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Optional[Union[PostBodyMultipartResponse200, PublicError]]:
-    """ """
+    """
+    Args:
+        multipart_data (PostBodyMultipartMultipartData):
+
+    Returns:
+        Response[Union[PostBodyMultipartResponse200, PublicError]]
+    """
 
     return sync_detailed(
         client=client,
@@ -87,13 +102,21 @@ async def asyncio_detailed(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Response[Union[PostBodyMultipartResponse200, PublicError]]:
+    """
+    Args:
+        multipart_data (PostBodyMultipartMultipartData):
+
+    Returns:
+        Response[Union[PostBodyMultipartResponse200, PublicError]]
+    """
+
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.post(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)
 
@@ -103,7 +126,13 @@ async def asyncio(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Optional[Union[PostBodyMultipartResponse200, PublicError]]:
-    """ """
+    """
+    Args:
+        multipart_data (PostBodyMultipartMultipartData):
+
+    Returns:
+        Response[Union[PostBodyMultipartResponse200, PublicError]]
+    """
 
     return (
         await asyncio_detailed(
