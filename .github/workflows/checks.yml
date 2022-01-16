@@ -73,3 +73,57 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           files: ./coverage.xml
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: 3.10
+    services:
+      openapi-test-server:
+        image: ghcr.io/openapi-generators/openapi-test-server:latest
+        ports:
+          - "3000:3000"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-dependencies-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-dependencies
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          python -m venv .venv
+          poetry run python -m pip install --upgrade pip
+          poetry install
+      - name: Regenerate Integration Client
+        run: |
+          poetry shell
+          cd integration_tests
+          openapi-python-client update --url http://localhost:3000/openapi.json
+      - name: Check if there are changes to the client
+        run: changed_files=$(git status --porcelain | wc -l) && [ changed_files != 0 ] && exit 1
+      - name: Cache Generated Client Dependencies
+        uses: actions/cache@v2
+        with:
+          path: integration_tests/openapi-test-server-client/.venv
+          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-integration-dependencies
+      - name: Install Integration Dependencies
+        run: |
+          cd integration_tests/openapi-test-server-client
+          python -m venv .venv
+          poetry run python -m pip install --upgrade pip
+          poetry install
+      - name: Run Tests
+        run: |
+          cd integration_tests/openapi-test-server-client
+          poetry run pytest

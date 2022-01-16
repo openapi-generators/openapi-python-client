@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "open-api-test-server-client"
+version = "0.0.1"
+description = "A client library for accessing OpenAPI Test Server"
+
+authors = []
+
+readme = "README.md"
+packages = [
+    {include = "open_api_test_server_client"},
+]
+include = ["CHANGELOG.md", "open_api_test_server_client/py.typed"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+httpx = ">=0.15.4,<0.22.0"
+attrs = ">=20.1.0,<22.0.0"
+python-dateutil = "^2.8.0"
+
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.black]
+line-length = 120
+target_version = ['py36', 'py37', 'py38']
+exclude = '''
+(
+  /(
+    | \.git
+    | \.venv
+    | \.mypy_cache
+  )/
+)
+'''
+
+[tool.isort]
+line_length = 120
+profile = "black"
