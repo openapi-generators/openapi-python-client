@@ -80,6 +80,7 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "chore: Regenerate E2E Golden Record"
+          file_pattern: end_to_end_tests/golden-record end_to_end_tests/custom-templates-golden-record
 
   integration:
     name: Integration Tests
