@@ -77,8 +77,6 @@ jobs:
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
-    env:
-      PYTHON_VERSION: 3.10
     services:
       openapi-test-server:
         image: ghcr.io/openapi-generators/openapi-test-server:latest
@@ -89,14 +87,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: "3.10"
+      - name: Get Python Version
+        id: get_python_version
+        run: echo "::set-output name=python_version::$(python --version)"
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
           path: .venv
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-dependencies-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-dependencies
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
       - name: Install dependencies
         run: |
           pip install poetry
@@ -114,9 +115,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: integration_tests/openapi-test-server-client/.venv
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-integration-dependencies
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies
       - name: Install Integration Dependencies
         run: |
           cd integration_tests/openapi-test-server-client
