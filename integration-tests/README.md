@@ -5,7 +5,7 @@ A client library for accessing OpenAPI Test Server
 First, create a client:
 
 ```python
-from open_api_test_server_client import Client
+from integration_tests import Client
 
 client = Client(base_url="https://api.example.com")
 ```
@@ -13,7 +13,7 @@ client = Client(base_url="https://api.example.com")
 If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
 
 ```python
-from open_api_test_server_client import AuthenticatedClient
+from integration_tests import AuthenticatedClient
 
 client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSecretToken")
 ```
@@ -21,9 +21,9 @@ client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSec
 Now call your endpoint and use your models:
 
 ```python
-from open_api_test_server_client.models import MyDataModel
-from open_api_test_server_client.api.my_tag import get_my_data_model
-from open_api_test_server_client.types import Response
+from integration_tests.models import MyDataModel
+from integration_tests.api.my_tag import get_my_data_model
+from integration_tests.types import Response
 
 my_data: MyDataModel = get_my_data_model.sync(client=client)
 # or if you need more info (e.g. status_code)
@@ -33,9 +33,9 @@ response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
 Or do the same thing with an async version:
 
 ```python
-from open_api_test_server_client.models import MyDataModel
-from open_api_test_server_client.api.my_tag import get_my_data_model
-from open_api_test_server_client.types import Response
+from integration_tests.models import MyDataModel
+from integration_tests.api.my_tag import get_my_data_model
+from integration_tests.types import Response
 
 my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
 response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)

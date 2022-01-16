@@ -1,9 +1,9 @@
 from io import BytesIO
 
-from open_api_test_server_client import Client
-from open_api_test_server_client.api.body import post_body_multipart
-from open_api_test_server_client.models import PostBodyMultipartMultipartData, PostBodyMultipartResponse200
-from open_api_test_server_client.types import File
+from integration_tests import Client
+from integration_tests.api.body import post_body_multipart
+from integration_tests.models import PostBodyMultipartMultipartData, PostBodyMultipartResponse200
+from integration_tests.types import File
 
 
 def test():
