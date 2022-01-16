@@ -123,7 +123,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         """Update an existing project"""
 
         if not self.package_dir.is_dir():
-            raise FileNotFoundError()
+            return [GeneratorError(detail=f"Directory {self.package_dir} not found")]
         print(f"Updating {self.package_name}")
         shutil.rmtree(self.package_dir)
         self._create_package()
