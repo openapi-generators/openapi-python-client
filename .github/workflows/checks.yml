@@ -113,24 +113,23 @@ jobs:
           poetry install
       - name: Regenerate Integration Client
         run: |
-          cd integration_tests
-          poetry run openapi-python-client update --url http://localhost:3000/openapi.json
+          poetry run openapi-python-client update --url http://localhost:3000/openapi.json --config integration-tests-config.yaml
       - name: Cache Generated Client Dependencies
         uses: actions/cache@v2
         with:
-          path: integration_tests/openapi-test-server-client/.venv
+          path: integration-tests/.venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies
       - name: Install Integration Dependencies
         run: |
-          cd integration_tests/openapi-test-server-client
+          cd integration-tests
           python -m venv .venv
           poetry run python -m pip install --upgrade pip
           poetry install
       - name: Run Tests
         run: |
-          cd integration_tests/openapi-test-server-client
+          cd integration-tests
           poetry run pytest
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
