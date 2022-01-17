@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
