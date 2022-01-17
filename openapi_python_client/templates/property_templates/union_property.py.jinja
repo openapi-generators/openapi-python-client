@@ -35,7 +35,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
+{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% if not property.required or property.nullable %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %}
 
@@ -61,7 +61,7 @@ elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
 else:
     {% endif %}
     {% from "property_templates/" + inner_property.template import transform %}
-    {{ transform(inner_property, source, destination, declare_type=False, stringify=stringify) | indent(4) }}
+    {{ transform(inner_property, source, destination, declare_type=False, multipart=multipart) | indent(4) }}
 {% endfor %}
 {% if property.has_properties_without_templates and (property.inner_properties_with_template() | any or not property.required)%}
 else:
