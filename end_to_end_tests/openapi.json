@@ -1696,6 +1696,15 @@
           }
         }
       },
+      "ModelWithDateTimeProperty" : {
+        "type": "object",
+        "properties": {
+          "datetime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "AnArrayOfEnum": {
         "type": "array",
         "items": {

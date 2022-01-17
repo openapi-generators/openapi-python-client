@@ -17,10 +17,10 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 {% endif %}
 {% endmacro %}
 
-{% macro _transform(property, source, destination, stringify, transform_method) %}
+{% macro _transform(property, source, destination, multipart, transform_method) %}
 {% set inner_property = property.inner_property %}
-{% if stringify %}
-{% set stringified_destination = destination %}
+{% if multipart %}
+{% set multipart_destination = destination %}
 {% set destination = "_temp_" + destination %}
 {% endif %}
 {% if inner_property.template %}
@@ -33,17 +33,17 @@ for {{ inner_source }} in {{ source }}:
 {% else %}
 {{ destination }} = {{ source }}
 {% endif %}
-{% if stringify %}
-{{ stringified_destination }} = (None, json.dumps({{ destination }}), 'application/json')
+{% if multipart %}
+{{ multipart_destination }} = (None, json.dumps({{ destination }}).encode(), 'application/json')
 {% endif %}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, stringify=False, transform_method="to_dict") %}
+{% macro transform(property, source, destination, declare_type=True, multipart=False, transform_method="to_dict") %}
 {% set inner_property = property.inner_property %}
-{% if stringify %}
-    {% set type_string = "Union[Unset, Tuple[None, str, str]]" %}
+{% if multipart %}
+    {% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
 {% else %}
     {% set type_string = property.get_type_string(json=True) %}
 {% endif %}
@@ -52,9 +52,9 @@ for {{ inner_source }} in {{ source }}:
 if {{ source }} is None:
     {{ destination }} = None
 else:
-    {{ _transform(property, source, destination, stringify, transform_method) | indent(4) }}
+    {{ _transform(property, source, destination, multipart, transform_method) | indent(4) }}
 {% else %}
-{{ _transform(property, source, destination, stringify, transform_method) }}
+{{ _transform(property, source, destination, multipart, transform_method) }}
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
@@ -63,9 +63,9 @@ if not isinstance({{ source }}, Unset):
     if {{ source }} is None:
         {{ destination }} = None
     else:
-        {{ _transform(property, source, destination, stringify, transform_method) | indent(8)}}
+        {{ _transform(property, source, destination, multipart, transform_method) | indent(8)}}
 {% else %}
-    {{ _transform(property, source, destination, stringify, transform_method) | indent(4)}}
+    {{ _transform(property, source, destination, multipart, transform_method) | indent(4)}}
 {% endif %}
 {% endif %}
 

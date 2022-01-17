@@ -65,12 +65,17 @@ isort .\
  && TASKIPY=true pytest --cov openapi_python_client tests --cov-report=term-missing --basetemp=tests/tmp\
  && rm -r tests/tmp\
 """
-regen = "python -m end_to_end_tests.regen_golden_record"
+regen = """
+task regen_e2e\
+&& task regen_integration\
+"""
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = """
 task regen\
 && task e2e\
 """
+regen_e2e = "python -m end_to_end_tests.regen_golden_record"
+regen_integration = "openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests-config.yaml"
 docs = "typer openapi_python_client/cli.py utils docs > usage.md"
 
 [tool.black]
@@ -120,5 +125,5 @@ disable = [
 ]
 
 [build-system]
-requires = ["poetry>=1.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

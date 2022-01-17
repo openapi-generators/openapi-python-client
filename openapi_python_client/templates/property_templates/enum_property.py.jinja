@@ -10,12 +10,12 @@
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
+{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% set transformed = source + ".value" %}
 {% set type_string = property.get_type_string(json=True) %}
-{% if stringify %}
-    {% set transformed = "(None, str(" + transformed + "), 'text/plain')" %}
-    {% set type_string = "Union[Unset, Tuple[None, str, str]]" %}
+{% if multipart %}
+    {% set transformed = "(None, str(" + transformed + ").encode(), \"text/plain\")" %}
+    {% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
 {% endif %}
 {% if property.required %}
 {% if property.nullable %}

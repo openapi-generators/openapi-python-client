@@ -1,16 +1,13 @@
-{% if use_poetry %}
 [tool.poetry]
-name = "{{ project_name }}"
-version = "{{ package_version }}"
-description = "{{ package_description }}"
-
+name = "integration-tests"
+version = "0.0.1"
+description = "A client library for accessing OpenAPI Test Server"
 authors = []
-
 readme = "README.md"
 packages = [
-    {include = "{{ package_name }}"},
+    {include = "integration_tests"},
 ]
-include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
+include = ["CHANGELOG.md", "open_api_test_server_client/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -18,11 +15,13 @@ httpx = ">=0.15.4,<0.22.0"
 attrs = ">=20.1.0,<22.0.0"
 python-dateutil = "^2.8.0"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
 
-{% endif %}
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
+
 [tool.black]
 line-length = 120
 target_version = ['py36', 'py37', 'py38']

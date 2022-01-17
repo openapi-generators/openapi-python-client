@@ -21,13 +21,14 @@
 
 2. When in a Poetry shell (`poetry shell`) run `task check` in order to run most of the same checks CI runs. This will auto-reformat the code, check type annotations, run unit tests, check code coverage, and lint the code.
 
-### Rework end to end tests 
+### Rework end-to-end tests 
 
-3. If you're writing a new feature, try to add it to the end to end test.
+3. If you're writing a new feature, try to add it to the end-to-end test.
    1. If adding support for a new OpenAPI feature, add it somewhere in `end_to_end_tests/openapi.json`
-   2. Regenerate the "golden records" with `task regen`. This client is generated from the OpenAPI document used for end to end testing.
+   2. Regenerate the "golden records" with `task regen`. This client is generated from the OpenAPI document used for end-to-end testing.
    3. Check the changes to `end_to_end_tests/golden-record` to confirm only what you intended to change did change and that the changes look correct.
-4. Run the end to end tests with `task e2e`. This will generate clients against `end_to_end_tests/openapi.json` and compare them with the golden record. The tests will fail if **anything is different**. The end to end tests are not included in `task check` as they take longer to run and don't provide very useful feedback in the event of failure. If an e2e test does fail, the easiest way to check what's wrong is to run `task regen` and check the diffs. You can also use `task re` which will run `regen` and `e2e` in that order.
+4. **If you added a test above OR modified the templates**: Run the end-to-end tests with `task e2e`. This will generate clients against `end_to_end_tests/openapi.json` and compare them with the golden record. The tests will fail if **anything is different**. The end-to-end tests are not included in `task check` as they take longer to run and don't provide very useful feedback in the event of failure. If an e2e test does fail, the easiest way to check what's wrong is to run `task regen` and check the diffs. You can also use `task re` which will run `regen` and `e2e` in that order.
+
 
 ## Creating a Pull Request
 
