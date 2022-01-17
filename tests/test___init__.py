@@ -3,6 +3,7 @@ import pathlib
 import httpcore
 import jinja2
 import pytest
+from pytest_mock import MockFixture
 
 from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
@@ -412,15 +413,15 @@ class TestProject:
         project._get_errors.assert_called_once()
         assert result == project._get_errors.return_value
 
-    def test_update_missing_dir(self, mocker):
+    def test_update_missing_dir(self, mocker: MockFixture):
         project = make_project()
-        project.package_dir = mocker.MagicMock()
+        mocker.patch.object(project, "package_dir")
         project.package_dir.is_dir.return_value = False
-        project._build_models = mocker.MagicMock()
+        mocker.patch.object(project, "_build_models")
 
-        with pytest.raises(FileNotFoundError):
-            project.update()
+        errs = project.update()
 
+        assert len(errs) == 1
         project.package_dir.is_dir.assert_called_once()
         project._build_models.assert_not_called()
 
