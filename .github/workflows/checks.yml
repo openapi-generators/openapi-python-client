@@ -78,6 +78,7 @@ jobs:
           files: ./coverage.xml
 
       - uses: stefanzweifel/git-auto-commit-action@v4
+        if: runner.os == 'Linux'
         with:
           commit_message: "chore: Regenerate E2E Golden Record"
           file_pattern: end_to_end_tests/golden-record end_to_end_tests/custom-templates-golden-record
