@@ -13,7 +13,7 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}/tests/octet_stream".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     return {

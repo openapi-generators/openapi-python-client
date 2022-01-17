@@ -1,12 +1,13 @@
 from io import BytesIO
 
-from integration_tests import Client
 from integration_tests.api.body import post_body_multipart
-from integration_tests.models import PostBodyMultipartMultipartData, PostBodyMultipartResponse200
+from integration_tests.client import Client
+from integration_tests.models.post_body_multipart_multipart_data import PostBodyMultipartMultipartData
+from integration_tests.models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from integration_tests.types import File
 
 
-def test():
+def test() -> None:
     client = Client("http://localhost:3000")
 
     a_string = "a test string"

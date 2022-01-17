@@ -33,7 +33,7 @@ class Property:
     description: Optional[str] = attr.ib()
     example: Optional[str] = attr.ib()
 
-    template: ClassVar[Optional[str]] = None
+    template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False
 
     def set_python_name(self, new_name: str, config: Config) -> None:

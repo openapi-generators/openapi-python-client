@@ -31,7 +31,6 @@ class AnyProperty(Property):
 
     _type_string: ClassVar[str] = "Any"
     _json_type_string: ClassVar[str] = "Any"
-    template: ClassVar[Optional[str]] = "any_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -124,6 +123,7 @@ class FloatProperty(Property):
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
+    template: ClassVar[str] = "float_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -132,6 +132,7 @@ class IntProperty(Property):
 
     _type_string: ClassVar[str] = "int"
     _json_type_string: ClassVar[str] = "int"
+    template: ClassVar[str] = "int_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -140,6 +141,7 @@ class BooleanProperty(Property):
 
     _type_string: ClassVar[str] = "bool"
     _json_type_string: ClassVar[str] = "bool"
+    template: ClassVar[str] = "boolean_property.py.jinja"
 
 
 InnerProp = TypeVar("InnerProp", bound=Property)
@@ -182,12 +184,6 @@ class UnionProperty(Property):
 
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.py.jinja"
-    has_properties_without_templates: bool = attr.ib(init=False)
-
-    def __attrs_post_init__(self) -> None:
-        object.__setattr__(
-            self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
-        )
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
         return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
@@ -248,14 +244,6 @@ class UnionProperty(Property):
             imports.update(inner_prop.get_imports(prefix=prefix))
         imports.add("from typing import cast, Union")
         return imports
-
-    def inner_properties_with_template(self) -> Iterator[Property]:
-        """
-        Get all the properties that make up this `Union`.
-
-        Called by the union property macros to aid in construction / deserialization.
-        """
-        return (prop for prop in self.inner_properties if prop.template)
 
 
 def _string_based_property(

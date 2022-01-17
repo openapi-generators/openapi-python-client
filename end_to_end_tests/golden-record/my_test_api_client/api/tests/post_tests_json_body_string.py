@@ -14,7 +14,7 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}/tests/json_body/string".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     json_json_body = json_body

@@ -1,0 +1,3 @@
+{% macro transform_header(property, source, destination) %}
+{{ destination }} = "true" if {{ source }} else "false"
+{% endmacro %}

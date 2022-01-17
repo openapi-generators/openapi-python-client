@@ -18,7 +18,7 @@ def _get_kwargs(
         client.base_url, param4=param4, param2=param2, param1=param1, param3=param3
     )
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     return {
