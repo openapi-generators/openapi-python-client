@@ -61,6 +61,9 @@ jobs:
       - name: Run pylint
         run: poetry run pylint openapi_python_client
 
+      - name: Regenerate Golden Record
+        run: poetry run task regen_e2e
+
       - name: Run pytest
         run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
         env:
@@ -73,3 +76,63 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           files: ./coverage.xml
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: runner.os == 'Linux'
+        with:
+          commit_message: "chore: Regenerate E2E Golden Record"
+          file_pattern: end_to_end_tests/golden-record end_to_end_tests/custom-templates-golden-record
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      openapi-test-server:
+        image: ghcr.io/openapi-generators/openapi-test-server:latest
+        ports:
+          - "3000:3000"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Get Python Version
+        id: get_python_version
+        run: echo "::set-output name=python_version::$(python --version)"
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          python -m venv .venv
+          poetry run python -m pip install --upgrade pip
+          poetry install
+      - name: Regenerate Integration Client
+        run: |
+          poetry run openapi-python-client update --url http://localhost:3000/openapi.json --config integration-tests-config.yaml
+      - name: Cache Generated Client Dependencies
+        uses: actions/cache@v2
+        with:
+          path: integration-tests/.venv
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies
+      - name: Install Integration Dependencies
+        run: |
+          cd integration-tests
+          python -m venv .venv
+          poetry run python -m pip install --upgrade pip
+          poetry install
+      - name: Run Tests
+        run: |
+          cd integration-tests
+          poetry run pytest
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: Regenerate Integration Client"
