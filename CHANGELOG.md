@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Breaking changes to any of the following will cause the **minor** version to be incremented (as long as this project is 0.x). Only these pieces are considered part of the public API:
+
+- The _behavior_ of the generated code. Specifically, the way in which generated endpoints and classes are called and the way in which those calls communicate with an OpenAPI server. Any other property of the generated code is not considered part of the versioned, public API (e.g., code formatting, comments).
+- The invocation of the CLI (e.g., commands or arguments).
+
+Programmatic usage of this project (e.g., importing it as a Python module) and the usage of custom templates are not considered part of the public API and therefore may change behavior at any time without notice.
+
+The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
+
 ## 0.10.8
 
 ### Features
