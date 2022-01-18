@@ -756,7 +756,7 @@ python-versions = "*"
 
 [[package]]
 name = "types-pyyaml"
-version = "5.4.6"
+version = "6.0.3"
 description = "Typing stubs for PyYAML"
 category = "dev"
 optional = false
@@ -806,7 +806,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "6d4acb40d9d394193f5d174ea4aeb50cbae7472159ae75330ddac75b2f3a0a98"
+content-hash = "b590f7337d287f939a1ccc5d5dd33b5eafa7c23d7c88ed4195a6fb4c91c727ed"
 
 [metadata.files]
 anyio = [
@@ -1390,8 +1390,8 @@ types-python-dateutil = [
     {file = "types_python_dateutil-2.8.0-py3-none-any.whl", hash = "sha256:9954d87dc982344bb2aad73a7fe505bdca72f89088ef653c4c40f52649183437"},
 ]
 types-pyyaml = [
-    {file = "types-PyYAML-5.4.6.tar.gz", hash = "sha256:745dcb4b1522423026bcc83abb9925fba747f1e8602d902f71a4058f9e7fb662"},
-    {file = "types_PyYAML-5.4.6-py3-none-any.whl", hash = "sha256:96f8d3d96aa1a18a465e8f6a220e02cff2f52632314845a364ecbacb0aea6e30"},
+    {file = "types-PyYAML-6.0.3.tar.gz", hash = "sha256:6ea4eefa8579e0ce022f785a62de2bcd647fad4a81df5cf946fd67e4b059920b"},
+    {file = "types_PyYAML-6.0.3-py3-none-any.whl", hash = "sha256:8b50294b55a9db89498cdc5a65b1b4545112b6cd1cf4465bd693d828b0282a17"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.0-py2-none-any.whl", hash = "sha256:0ac0f89795dd19de6b97debb0c6af1c70987fd80a2d62d1958f7e56fcc31b497"},

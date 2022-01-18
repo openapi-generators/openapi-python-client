@@ -48,7 +48,7 @@ pytest-cov = "*"
 python-multipart = "*"
 flake8 = "*"
 typer-cli = "^0.0.12"
-types-PyYAML = "^5.4.3"
+types-PyYAML = "^6.0.0"
 types-certifi = "^2020.0.0"
 types-python-dateutil = "^2.0.0"
 types-dataclasses = { version = "^0.6.0", python = "<3.7" }
