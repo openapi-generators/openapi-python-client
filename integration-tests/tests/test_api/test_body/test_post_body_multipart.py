@@ -7,9 +7,7 @@ from integration_tests.models.post_body_multipart_response_200 import PostBodyMu
 from integration_tests.types import File
 
 
-def test() -> None:
-    client = Client("http://localhost:3000")
-
+def test(client: Client) -> None:
     a_string = "a test string"
     payload = b"some file content"
     file_name = "cool_stuff.txt"
