@@ -49,6 +49,12 @@ class StringProperty(Property):
     pattern: Optional[str] = None
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -123,6 +129,12 @@ class FloatProperty(Property):
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
     template: ClassVar[str] = "float_property.py.jinja"
 
 
@@ -132,6 +144,12 @@ class IntProperty(Property):
 
     _type_string: ClassVar[str] = "int"
     _json_type_string: ClassVar[str] = "int"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
     template: ClassVar[str] = "int_property.py.jinja"
 
 
@@ -141,6 +159,12 @@ class BooleanProperty(Property):
 
     _type_string: ClassVar[str] = "bool"
     _json_type_string: ClassVar[str] = "bool"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
     template: ClassVar[str] = "boolean_property.py.jinja"
 
 
