@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       openapi-test-server:
-        image: ghcr.io/openapi-generators/openapi-test-server:latest
+        image: ghcr.io/openapi-generators/openapi-test-server:0.0.1
         ports:
           - "3000:3000"
     steps:
