@@ -61,9 +61,6 @@ jobs:
       - name: Run pylint
         run: poetry run pylint openapi_python_client
 
-      - name: Regenerate Golden Record
-        run: poetry run task regen_e2e
-
       - name: Run pytest
         run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
         env:
@@ -76,12 +73,6 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           files: ./coverage.xml
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        if: runner.os == 'Linux'
-        with:
-          commit_message: "chore: Regenerate E2E Golden Record"
-          file_pattern: end_to_end_tests/golden-record end_to_end_tests/custom-templates-golden-record
 
   integration:
     name: Integration Tests
@@ -116,6 +107,8 @@ jobs:
       - name: Regenerate Integration Client
         run: |
           poetry run openapi-python-client update --url http://localhost:3000/openapi.json --config integration-tests-config.yaml
+      - name: Check for any file changes
+        run: changed_files=$(git status --porcelain | wc -l) && [ changed_files != 0 ] && exit 1
       - name: Cache Generated Client Dependencies
         uses: actions/cache@v2
         with:
@@ -133,6 +126,3 @@ jobs:
         run: |
           cd integration-tests
           poetry run pytest
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore: Regenerate Integration Client"
