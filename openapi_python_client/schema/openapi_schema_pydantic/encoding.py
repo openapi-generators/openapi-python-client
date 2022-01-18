@@ -6,6 +6,8 @@ from .reference import Reference
 
 if TYPE_CHECKING:
     from .header import Header
+else:
+    Header = "Header"  # pylint: disable=invalid-name
 
 
 class Encoding(BaseModel):
@@ -17,7 +19,7 @@ class Encoding(BaseModel):
     """
 
     contentType: Optional[str] = None
-    headers: Optional[Dict[str, Union["Header", Reference]]] = None
+    headers: Optional[Dict[str, Union[Header, Reference]]] = None
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False

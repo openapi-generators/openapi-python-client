@@ -33,9 +33,7 @@ class Components(BaseModel):
     headers: Optional[Dict[str, Union[Header, Reference]]] = None
     securitySchemes: Optional[Dict[str, Union[SecurityScheme, Reference]]] = None
     links: Optional[Dict[str, Union[Link, Reference]]] = None
-
     callbacks: Optional[Dict[str, Union[Callback, Reference]]] = None
-    """An object to hold reusable [Callback Objects](#callbackObject)."""
 
     class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
