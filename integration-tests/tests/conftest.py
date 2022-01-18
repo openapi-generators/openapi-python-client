@@ -1,4 +1,5 @@
 import pytest
+
 from integration_tests.client import Client
 
 
