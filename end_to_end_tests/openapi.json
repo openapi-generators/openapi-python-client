@@ -30,6 +30,30 @@
           {
             "required": true,
             "schema": {
+              "title": "An Enum Value With Null And String Values",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AnEnumWithNull"
+              }
+            },
+            "name": "an_enum_value_with_null",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "An Enum Value With Only Null Values",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AnEnumWithOnlyNull"
+              }
+            },
+            "name": "an_enum_value_with_only_null",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
               "title": "Some Date",
               "anyOf": [
                 {
@@ -188,6 +212,36 @@
         }
       }
     },
+    "/tests/post_form_data": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Post from data",
+        "description": "Post form data",
+        "operationId": "post_form_data",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AFormData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/tests/upload": {
       "post": {
         "tags": [
@@ -196,22 +250,57 @@
         "summary": "Upload File",
         "description": "Upload a file ",
         "operationId": "upload_file_tests_upload_post",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Keep-Alive",
-              "type": "boolean"
-            },
-            "name": "keep-alive",
-            "in": "header"
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/Body_upload_file_tests_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/upload/multiple": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Upload multiple files",
+        "description": "Upload several files in the same request",
+        "operationId": "upload_multiple_files_tests_upload_post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "binary"
+                }
               }
             }
           },
@@ -279,6 +368,46 @@
         }
       }
     },
+    "/tests/json_body/string": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Json Body Which is String",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tests/defaults": {
       "post": {
         "tags": [
@@ -288,7 +417,7 @@
         "operationId": "defaults_tests_defaults_post",
         "parameters": [
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "String Prop",
               "type": "string",
@@ -298,55 +427,7 @@
             "in": "query"
           },
           {
-            "required": false,
-            "schema": {
-              "title": "Not Required, Not Nullable Datetime Prop",
-              "nullable": false,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "not_required_not_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
-              "title": "Not Required, Nullable Datetime Prop",
-              "nullable": true,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "not_required_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
             "required": true,
-            "schema": {
-              "title": "Required, Not Nullable Datetime Prop",
-              "nullable": false,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "required_not_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
-            "required": true,
-            "schema": {
-              "title": "Required, Nullable Datetime Prop",
-              "nullable": true,
-              "type": "string",
-              "format": "date-time",
-              "default": "1010-10-10T00:00:00"
-            },
-            "name": "required_nullable_datetime_prop",
-            "in": "query"
-          },
-          {
-            "required": false,
             "schema": {
               "title": "Date Prop",
               "type": "string",
@@ -357,7 +438,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Float Prop",
               "type": "number",
@@ -367,7 +448,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Int Prop",
               "type": "integer",
@@ -377,7 +458,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Boolean Prop",
               "type": "boolean",
@@ -387,7 +468,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "List Prop",
               "type": "array",
@@ -403,7 +484,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "title": "Union Prop",
               "anyOf": [
@@ -437,7 +518,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "$ref": "#/components/schemas/AnEnum"
             },
@@ -445,7 +526,7 @@
             "in": "query"
           },
           {
-            "required": false,
+            "required": true,
             "schema": {
               "$ref": "#/components/schemas/ModelWithUnionProperty"
             },
@@ -458,32 +539,6 @@
               "$ref": "#/components/schemas/ModelWithUnionProperty"
             },
             "name": "required_model_prop",
-            "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ModelWithUnionProperty"
-                }
-              ],
-              "nullable": true
-            },
-            "name": "nullable_model_prop",
-            "in": "query"
-          },
-          {
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ModelWithUnionProperty"
-                }
-              ],
-              "nullable": true
-            },
-            "name": "nullable_required_model_prop",
             "in": "query"
           }
         ],
@@ -658,54 +713,6 @@
         }
       }
     },
-    "/tests/optional_query_param/": {
-      "get": {
-        "tags": [
-          "tests"
-        ],
-        "summary": "Optional Query Params test",
-        "description": "Test optional query parameters",
-        "operationId": "optional_value_tests_optional_query_param",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Query Param",
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "example": [
-                "string1",
-                "string2"
-              ]
-            },
-            "name": "query_param",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/auth/token_with_cookie": {
       "get": {
         "tags": [
@@ -765,6 +772,59 @@
         }
       }
     },
+    "/common_parameters_overriding/{param}": {
+      "get": {
+        "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
+        "tags": [
+          "parameters"
+        ],
+        "parameters": [
+          {
+            "name": "param",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "A parameter with the same name as another.",
+              "example": "an example string",
+              "type": "string",
+              "default": "overridden_in_GET"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "parameters"
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "parameters": [
+        {
+            "name": "param",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+      ]
+    },
     "/same-name-multiple-locations/{param}": {
       "description": "Test that if you have a property of the same name in multiple locations, it produces valid code",
       "get": {
@@ -781,7 +841,22 @@
           },
           {
             "name": "param",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
+            "in": "cookie",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param",
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -793,10 +868,199 @@
           }
         }
       }
+    },
+    "/tag_with_number": {
+      "get": {
+        "tags": ["1"],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}": {
+      "description": "Test that multiple path parameters are ordered by appearance in path",
+      "get": {
+        "tags": [
+          "parameters"
+        ],
+        "operationId": "multiple_path_parameters",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "param4",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "param3",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    "/location/query/optionality": {
+      "description": "Test what happens with various combinations of required and nullable in query parameters.",
+      "get": {
+        "tags": [
+          "location"
+        ],
+        "parameters": [
+          {
+            "name": "not_null_required",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": false
+            },
+            "in": "query"
+          },
+          {
+            "name": "null_required",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "in": "query"
+          },
+          {
+            "name": "null_not_required",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "in": "query"
+          },
+          {
+            "name": "not_null_not_required",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": false
+            },
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/location/header/types": {
+      "description": "Test the valid types to send in headers.",
+      "get": {
+        "tags": [
+          "location"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "Boolean-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "name": "String-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "name": "Number-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "name": "Integer-Header",
+            "in": "header"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/naming/keywords": {
+      "description": "Ensure that Python keywords are renamed properly.",
+      "get": {
+        "tags": [
+          "true"
+        ],
+        "operationId": "false",
+        "parameters": [
+          {
+            "name": "import",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            },
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
     "schemas": {
+      "AFormData": {
+        "type": "object",
+        "properties": {
+          "an_optional_field": {
+            "type": "string"
+          },
+          "an_required_field": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "an_required_field"
+        ]
+      },
       "AModel": {
         "title": "AModel",
         "required": [
@@ -814,6 +1078,7 @@
         ],
         "type": "object",
         "properties": {
+          "any_value": {},
           "an_enum_value": {
             "$ref": "#/components/schemas/AnEnum"
           },
@@ -903,7 +1168,8 @@
               },
               {
                 "$ref": "#/components/schemas/ModelWithUnionProperty"
-              }
+              },
+              {}
             ],
             "nullable": false
           },
@@ -987,6 +1253,22 @@
         ],
         "description": "For testing Enums in all the ways they can be used "
       },
+      "AnEnumWithNull": {
+        "title": "AnEnumWithNull",
+        "enum": [
+          "FIRST_VALUE",
+          "SECOND_VALUE",
+          null
+        ],
+        "description": "For testing Enums with mixed string / null values "
+      },
+      "AnEnumWithOnlyNull": {
+        "title": "AnEnumWithOnlyNull",
+        "enum": [
+          null
+        ],
+        "description": "For testing Enums with only null values "
+      },
       "AnAllOfEnum": {
         "title": "AnAllOfEnum",
         "enum": [
@@ -1009,9 +1291,7 @@
       },
       "Body_upload_file_tests_upload_post": {
         "title": "Body_upload_file_tests_upload_post",
-        "required": [
-          "some_file"
-        ],
+        "required": ["some_file", "some_object", "some_nullable_object"],
         "type": "object",
         "properties": {
           "some_file": {
@@ -1019,13 +1299,72 @@
             "type": "string",
             "format": "binary"
           },
+          "some_optional_file": {
+            "title": "Some Optional File",
+            "type": "string",
+            "format": "binary"
+          },
           "some_string": {
             "title": "Some String",
             "type": "string",
             "default": "some_default_string"
+          },
+          "some_number": {
+            "title": "Some Number",
+            "type": "number"
+          },
+          "some_array": {
+            "title": "Some Array",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "some_object": {
+            "title": "Some Object",
+            "type": "object",
+            "required": ["num", "text"],
+            "properties": {
+              "num": {
+                "type": "number"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          },
+          "some_optional_object": {
+            "title": "Some Optional Object",
+            "type": "object",
+            "required": ["foo"],
+            "properties": {
+              "foo": {
+                "type": "string"
+              }
+            }
+          },
+          "some_nullable_object": {
+            "title": "Some Nullable Object",
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "bar": {
+                "type": "string"
+              }
+            }
+          },
+          "some_enum": {
+            "$ref": "#/components/schemas/DifferentEnum"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "foo": {
+              "type": "string"
+            }
+          }
+        }
       },
       "DifferentEnum": {
         "title": "DifferentEnum",
@@ -1214,6 +1553,13 @@
         "properties": {
           "a_sub_property": {
             "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "type_enum": {
+            "type": "integer",
+            "enum": [0, 1]
           }
         }
       },
@@ -1223,6 +1569,14 @@
         "properties": {
           "another_sub_property": {
             "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["submodel"]
+          },
+          "type_enum": {
+            "type": "integer",
+            "enum": [0]
           }
         }
       },
@@ -1362,6 +1716,15 @@
           },
           "bytestream_property_ref": {
             "$ref": "#/components/schemas/AByteStream"
+          }
+        }
+      },
+      "ModelWithDateTimeProperty" : {
+        "type": "object",
+        "properties": {
+          "datetime": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -1533,6 +1896,16 @@
       "AByteStream": {
         "type": "string",
         "format": "byte"
+      },
+      "import":  {
+        "type": "object"
+      },
+      "None":  {
+        "type": "object"
+      },
+      "model.reference.with.Periods": {
+        "type": "object",
+        "description": "A Model with periods in its reference"
       }
     }
   }

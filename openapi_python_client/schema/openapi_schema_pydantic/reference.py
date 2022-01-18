@@ -10,12 +10,15 @@ class Reference(BaseModel):
 
     For this specification, reference resolution is accomplished as defined by the JSON Reference specification
     and not by the JSON Schema specification.
+
+    References:
+        - https://swagger.io/docs/specification/using-ref/
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#referenceObject
     """
 
     ref: str = Field(alias="$ref")
-    """**REQUIRED**. The reference string."""
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
         allow_population_by_field_name = True
         schema_extra = {

@@ -1,0 +1,24 @@
+""" Contains methods for accessing the API Endpoints """
+
+import types
+{% for endpoint in endpoint_collection.endpoints %}
+from . import {{ python_identifier(endpoint.name) }}
+{% endfor %}
+
+class {{ class_name(endpoint_collection.tag) }}Endpoints:
+
+{% for endpoint in endpoint_collection.endpoints %}
+
+    @classmethod
+    def {{ python_identifier(endpoint.name) }}(cls) -> types.ModuleType:
+        {% if endpoint.description %}
+        """
+            {{ endpoint.description }}
+        """
+        {% elif endpoint.summary %}
+        """
+            {{ endpoint.summary  }}
+        """
+        {% endif %}
+        return {{ python_identifier(endpoint.name) }}
+{% endfor %}

@@ -8,31 +8,16 @@ from .oauth_flow import OAuthFlow
 class OAuthFlows(BaseModel):
     """
     Allows configuration of the supported OAuth Flows.
+
+    References:
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oauthFlowsObject
+        - https://swagger.io/docs/specification/authentication/oauth2/
     """
 
     implicit: Optional[OAuthFlow] = None
-    """
-    Configuration for the OAuth Implicit flow
-    """
-
     password: Optional[OAuthFlow] = None
-    """
-    Configuration for the OAuth Resource Owner Password flow
-    """
-
     clientCredentials: Optional[OAuthFlow] = None
-    """
-    Configuration for the OAuth Client Credentials flow.
-
-    Previously called `application` in OpenAPI 2.0.
-    """
-
     authorizationCode: Optional[OAuthFlow] = None
-    """
-    Configuration for the OAuth Authorization Code flow.
 
-    Previously called `accessCode` in OpenAPI 2.0.
-    """
-
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow

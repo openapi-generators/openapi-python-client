@@ -1,31 +1,31 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
-from attr import asdict
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET{% if endpoint.multipart_body_class %}, File {% endif %}
+from ...types import Response, UNSET
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
+    arguments, client, kwargs, parse_response, docstring %}
 
 {% set return_string = endpoint.response_type() %}
-{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
+{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
 def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Dict[str, Any]:
     url = "{}{{ endpoint.path }}".format(
         client.base_url
-        {%- for parameter in endpoint.path_parameters -%}
+        {%- for parameter in endpoint.path_parameters.values() -%}
         ,{{parameter.name}}={{parameter.python_name}}
         {%- endfor -%}
     )
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     {{ header_params(endpoint) | indent(4) }}
@@ -36,26 +36,18 @@ def _get_kwargs(
 
     {{ json_body(endpoint) | indent(4) }}
 
-    {% if endpoint.multipart_body_class %}
-    files = {}
-    data = {}
-    for key, value in multipart_data.to_dict().items():
-         if isinstance(value, File):
-             files[key] = value
-         else:
-             data[key] = value
-    {% endif %}
+    {{ multipart_body(endpoint) | indent(4) }}
 
     return {
+	    "method": "{{ endpoint.method }}",
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
         {% if endpoint.form_body_class %}
-        "data": asdict(form_data),
-        {% elif endpoint.multipart_body_class %}
-        "files": files,
-        "data": data,
+        "data": form_data.to_dict(),
+        {% elif endpoint.multipart_body %}
+        "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
         {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
         {% endif %}
@@ -69,11 +61,11 @@ def _get_kwargs(
 def _parse_response(*, response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
     if response.status_code == {{ response.status_code }}:
-        {% if response.prop.template %}
-            {% from "property_templates/" + response.prop.template import construct %}
-        {{ construct(response.prop, response.source) | indent(8) }}
+        {% import "property_templates/" + response.prop.template as prop_template %}
+        {% if prop_template.construct %}
+        {{ prop_template.construct(response.prop, response.source) | indent(8) }}
         {% else %}
-        {{ response.prop.python_name }} = {{ response.source }}
+        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}
         return {{ response.prop.python_name }}
     {% endfor %}
@@ -97,11 +89,14 @@ def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
+    {{ docstring(endpoint, return_string) | indent(4) }}
+
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
 
-    response = httpx.{{ endpoint.method }}(
+    response = httpx.request(
+        verify=client.verify_ssl,
         **kwargs,
     )
 
@@ -111,7 +106,7 @@ def sync_detailed(
 def sync(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """ {{ endpoint.description }} """
+    {{ docstring(endpoint, return_string) | indent(4) }}
 
     return sync_detailed(
         {{ kwargs(endpoint) }}
@@ -121,12 +116,14 @@ def sync(
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
+    {{ docstring(endpoint, return_string) | indent(4) }}
+
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
     )
 
-    async with httpx.AsyncClient() as _client:
-        response = await _client.{{ endpoint.method }}(
+    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
+        response = await _client.request(
             **kwargs
         )
 
@@ -136,9 +133,10 @@ async def asyncio_detailed(
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    """ {{ endpoint.description }} """
+    {{ docstring(endpoint, return_string) | indent(4) }}
 
     return (await asyncio_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
 {% endif %}
+

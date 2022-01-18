@@ -6,31 +6,18 @@ from .media_type import MediaType
 
 
 class RequestBody(BaseModel):
-    """Describes a single request body."""
+    """Describes a single request body.
+
+    References:
+        - https://swagger.io/docs/specification/describing-request-body/
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject
+    """
 
     description: Optional[str] = None
-    """
-    A brief description of the request body.
-    This could contain examples of use.
-
-    [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-    """
-
     content: Dict[str, MediaType]
-    """
-    **REQUIRED**. The content of the request body.
-    The key is a media type or [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)
-    and the value describes it.
-
-    For requests that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
-    """
-
     required: bool = False
-    """
-    Determines if the request body is required in the request. Defaults to `false`.
-    """
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
         schema_extra = {
             "examples": [

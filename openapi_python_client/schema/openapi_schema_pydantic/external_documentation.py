@@ -4,20 +4,15 @@ from pydantic import AnyUrl, BaseModel, Extra
 
 
 class ExternalDocumentation(BaseModel):
-    """Allows referencing an external resource for extended documentation."""
+    """Allows referencing an external resource for extended documentation.
+
+    References:
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#externalDocumentationObject
+    """
 
     description: Optional[str] = None
-    """
-    A short description of the target documentation.
-    [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-    """
-
     url: AnyUrl
-    """
-    **REQUIRED**. The URL for the target documentation.
-    Value MUST be in the format of a URL.
-    """
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
         schema_extra = {"examples": [{"description": "Find more info here", "url": "https://example.com"}]}

@@ -1,6 +1,6 @@
 __all__ = ["EnumProperty"]
 
-from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union
+from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast
 
 import attr
 
@@ -22,10 +22,10 @@ class EnumProperty(Property):
 
     template: ClassVar[str] = "enum_property.py.jinja"
 
-    def get_base_type_string(self, json: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         return self.class_info.name
 
-    def get_base_json_type_string(self, json: bool = False) -> str:
+    def get_base_json_type_string(self) -> str:
         return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -41,11 +41,12 @@ class EnumProperty(Property):
         return imports
 
     @staticmethod
-    def values_from_list(values: List[ValueType]) -> Dict[str, ValueType]:
-        """Convert a list of values into dict of {name: value}"""
+    def values_from_list(values: Union[List[str], List[int]]) -> Dict[str, ValueType]:
+        """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: Dict[str, ValueType] = {}
 
         for i, value in enumerate(values):
+            value = cast(Union[str, int], value)
             if isinstance(value, int):
                 if value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value

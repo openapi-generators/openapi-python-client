@@ -27,34 +27,34 @@ def _process_config(path: Optional[pathlib.Path]) -> Config:
 
     try:
         return Config.load_from_path(path=path)
-    except:  # noqa
-        raise typer.BadParameter("Unable to parse config")
+    except Exception as err:
+        raise typer.BadParameter("Unable to parse config") from err
 
 
 # noinspection PyUnusedLocal
+# pylint: disable=unused-argument
 @app.callback(name="openapi-python-client")
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
 ) -> None:
     """Generate a Python client from an OpenAPI JSON document"""
-    pass
 
 
-def _print_parser_error(e: GeneratorError, color: str) -> None:
-    typer.secho(e.header, bold=True, fg=color, err=True)
+def _print_parser_error(err: GeneratorError, color: str) -> None:
+    typer.secho(err.header, bold=True, fg=color, err=True)
     typer.echo()
-    if e.detail:
-        typer.secho(e.detail, fg=color, err=True)
+    if err.detail:
+        typer.secho(err.detail, fg=color, err=True)
         typer.echo()
 
-    if isinstance(e, ParseError) and e.data is not None:
-        formatted_data = pformat(e.data)
+    if isinstance(err, ParseError) and err.data is not None:
+        formatted_data = pformat(err.data)
         typer.secho(formatted_data, fg=color, err=True)
 
     typer.echo()
 
 
-def handle_errors(errors: Sequence[GeneratorError]) -> None:
+def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = False) -> None:
     """Turn custom errors into formatted error messages"""
     if len(errors) == 0:
         return
@@ -82,7 +82,7 @@ def handle_errors(errors: Sequence[GeneratorError]) -> None:
         _print_parser_error(err, color)
 
     gh_link = typer.style(
-        "https://github.com/triaxtec/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
+        "https://github.com/openapi-generators/openapi-python-client/issues/new/choose", fg=typer.colors.BRIGHT_BLUE
     )
     typer.secho(
         f"If you believe this was a mistake or this tool is missing a feature you need, "
@@ -91,7 +91,7 @@ def handle_errors(errors: Sequence[GeneratorError]) -> None:
         err=True,
     )
 
-    if error_level == ErrorLevel.ERROR:
+    if error_level == ErrorLevel.ERROR or fail_on_warning:
         raise typer.Exit(code=1)
 
 
@@ -111,6 +111,7 @@ _meta_option = typer.Option(
 CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to use")
 
 
+# pylint: disable=too-many-arguments
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
@@ -119,6 +120,7 @@ def generate(
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    fail_on_warning: bool = False,
 ) -> None:
     """Generate a new OpenAPI Client library"""
     from . import create_new_client
@@ -132,9 +134,9 @@ def generate(
 
     try:
         codecs.getencoder(file_encoding)
-    except LookupError:
+    except LookupError as err:
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from err
 
     config = _process_config(config_path)
     errors = create_new_client(
@@ -145,9 +147,10 @@ def generate(
         file_encoding=file_encoding,
         config=config,
     )
-    handle_errors(errors)
+    handle_errors(errors, fail_on_warning)
 
 
+# pylint: disable=too-many-arguments
 @app.command()
 def update(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
@@ -156,8 +159,13 @@ def update(
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    fail_on_warning: bool = False,
 ) -> None:
-    """Update an existing OpenAPI Client library"""
+    """Update an existing OpenAPI Client library
+
+    The update command performs the same operations as generate except it does not overwrite specific metadata for the
+    generated client such as the README.md, .gitignore, and pyproject.toml.
+    """
     from . import update_existing_client
 
     if not url and not path:
@@ -169,9 +177,9 @@ def update(
 
     try:
         codecs.getencoder(file_encoding)
-    except LookupError:
+    except LookupError as err:
         typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from err
 
     config = _process_config(config_path)
     errors = update_existing_client(
@@ -182,4 +190,4 @@ def update(
         file_encoding=file_encoding,
         config=config,
     )
-    handle_errors(errors)
+    handle_errors(errors, fail_on_warning)

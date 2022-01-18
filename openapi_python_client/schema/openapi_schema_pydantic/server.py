@@ -6,31 +6,18 @@ from .server_variable import ServerVariable
 
 
 class Server(BaseModel):
-    """An object representing a Server."""
+    """An object representing a Server.
+
+    References:
+        - https://swagger.io/docs/specification/api-host-and-base-path/
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject
+    """
 
     url: str
-    """
-    **REQUIRED**. A URL to the target host.
-
-    This URL supports Server Variables and MAY be relative,
-    to indicate that the host location is relative to the location where the OpenAPI document is being served.
-    Variable substitutions will be made when a variable is named in `{`brackets`}`.
-    """
-
     description: Optional[str] = None
-    """
-    An optional string describing the host designated by the URL.
-    [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-    """
-
     variables: Optional[Dict[str, ServerVariable]] = None
-    """
-    A map between a variable name and its value.
 
-    The value is used for substitution in the server's URL template.
-    """
-
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
         schema_extra = {
             "examples": [

@@ -6,6 +6,9 @@ from typing import List
 {% endif %}
 
 import attr
+{% if model.is_multipart_body %}
+import json
+{% endif %}
 
 from ..types import UNSET, Unset
 
@@ -25,7 +28,28 @@ T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ class_name }}:
-    """ {{ model.description }} """
+    """{% if model.title %}{{ model.title | wordwrap(116) }}
+
+    {% endif -%}
+    {%- if model.description %}{{ model.description | wordwrap(116) }}
+
+    {% endif %}
+    {% if not model.title and not model.description %}
+    {# Leave extra space so that a section doesn't start on the first line #}
+
+    {% endif %}
+    {% if model.example %}
+    Example:
+        {{ model.example | string | wordwrap(112) | indent(12) }}
+
+    {% endif %}
+    {% if model.required_properties or model.optional_properties %}
+    Attributes:
+    {% for property in model.required_properties + model.optional_properties %}
+        {{ property.to_docstring() | wordwrap(112) | indent(12) }}
+    {% endfor %}{% endif %}
+    """
+
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
     {{ property.to_string() }}
@@ -40,42 +64,61 @@ class {{ class_name }}:
     additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
     {% endif %}
 
+{% macro _to_dict(multipart=False) %}
+{% for property in model.required_properties + model.optional_properties %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if prop_template.transform %}
+{{ prop_template.transform(property, "self." + property.python_name, property.python_name, multipart=multipart) }}
+{% elif multipart %}
+{{ property.python_name }} = self.{{ property.python_name }} if isinstance(self.{{ property.python_name }}, Unset) else (None, str(self.{{ property.python_name }}).encode(), "text/plain")
+{% else %}
+{{ property.python_name }} = self.{{ property.python_name }}
+{% endif %}
+{% endfor %}
+
+field_dict: Dict[str, Any] = {}
+{% if model.additional_properties %}
+{% if model.additional_properties.template %}{# Can be a bool instead of an object #}
+    {% import "property_templates/" + model.additional_properties.template as prop_template %}
+{% else %}
+    {% set prop_template = None %}
+{% endif %}
+{% if prop_template and prop_template.transform %}
+for prop_name, prop in self.additional_properties.items():
+    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart) | indent(4) }}
+{% elif multipart %}
+field_dict.update({
+    key: (None, str(value).encode(), "text/plain")
+    for key, value in self.additional_properties.items()
+})
+{% else %}
+field_dict.update(self.additional_properties)
+{% endif %}
+{% endif %}
+field_dict.update({
+    {% for property in model.required_properties + model.optional_properties %}
+    {% if property.required %}
+    "{{ property.name }}": {{ property.python_name }},
+    {% endif %}
+    {% endfor %}
+})
+{% for property in model.optional_properties %}
+{% if not property.required %}
+if {{ property.python_name }} is not UNSET:
+    field_dict["{{ property.name }}"] = {{ property.python_name }}
+{% endif %}
+{% endfor %}
+
+return field_dict
+{% endmacro %}
 
     def to_dict(self) -> Dict[str, Any]:
-        {% for property in model.required_properties + model.optional_properties %}
-        {% if property.template %}
-        {% from "property_templates/" + property.template import transform %}
-        {{ transform(property, "self." + property.python_name, property.python_name) | indent(8) }}
-        {% else %}
-        {{ property.python_name }} =  self.{{ property.python_name }}
-        {% endif %}
-        {% endfor %}
+        {{ _to_dict() | indent(8) }}
 
-        field_dict: Dict[str, Any] = {}
-        {% if model.additional_properties %}
-        {% if model.additional_properties.template %}
-        {% from "property_templates/" + model.additional_properties.template import transform %}
-        for prop_name, prop in self.additional_properties.items():
-            {{ transform(model.additional_properties, "prop", "field_dict[prop_name]") | indent(12) }}
-        {% else %}
-        field_dict.update(self.additional_properties)
-        {% endif %}
-        {% endif %}
-        field_dict.update({
-            {% for property in model.required_properties + model.optional_properties %}
-            {% if property.required %}
-            "{{ property.name }}": {{ property.python_name }},
-            {% endif %}
-            {% endfor %}
-        })
-        {% for property in model.optional_properties %}
-        {% if not property.required %}
-        if {{ property.python_name }} is not UNSET:
-            field_dict["{{ property.name }}"] = {{ property.python_name }}
-        {% endif %}
-        {% endfor %}
-
-        return field_dict
+{% if model.is_multipart_body %}
+    def to_multipart(self) -> Dict[str, Any]:
+        {{ _to_dict(multipart=True) | indent(8) }}
+{% endif %}
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
@@ -86,9 +129,9 @@ class {{ class_name }}:
     {% else %}
         {% set property_source = 'd.pop("' + property.name + '", UNSET)' %}
     {% endif %}
-    {% if property.template %}
-        {% from "property_templates/" + property.template import construct %}
-        {{ construct(property, property_source) | indent(8) }}
+    {% import "property_templates/" + property.template as prop_template %}
+    {% if prop_template.construct %}
+        {{ prop_template.construct(property, property_source) | indent(8) }}
     {% else %}
         {{ property.python_name }} = {{ property_source }}
     {% endif %}
@@ -101,11 +144,15 @@ class {{ class_name }}:
         )
 
 {% if model.additional_properties %}
-    {% if model.additional_properties.template %}
-        {% from "property_templates/" + model.additional_properties.template import construct %}
+    {% if model.additional_properties.template %}{# Can be a bool instead of an object #}
+        {% import "property_templates/" + model.additional_properties.template as prop_template %}
+    {% else %}
+        {% set prop_template = None %}
+    {% endif %}
+    {% if prop_template and prop_template.construct %}
         additional_properties = {}
         for prop_name, prop_dict in d.items():
-            {{ construct(model.additional_properties, "prop_dict") | indent(12) }}
+            {{ prop_template.construct(model.additional_properties, "prop_dict") | indent(12) }}
             additional_properties[prop_name] = {{ model.additional_properties.python_name }}
 
         {{ module_name }}.additional_properties = additional_properties

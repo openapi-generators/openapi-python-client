@@ -4,6 +4,127 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Breaking changes to any of the following will cause the **minor** version to be incremented (as long as this project is 0.x). Only these pieces are considered part of the public API:
+
+- The _behavior_ of the generated code. Specifically, the way in which generated endpoints and classes are called and the way in which those calls communicate with an OpenAPI server. Any other property of the generated code is not considered part of the versioned, public API (e.g., code formatting, comments).
+- The invocation of the CLI (e.g., commands or arguments).
+
+Programmatic usage of this project (e.g., importing it as a Python module) and the usage of custom templates are not considered part of the public API and therefore may change behavior at any time without notice.
+
+The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
+
+## 0.10.8
+
+### Features
+
+- New and improved docstrings in generated functions and classes [#503, #505, #551]. Thanks @rtaycher!
+- Support httpx 0.21.\* (#537)
+
+### Fixes
+
+- Basic types as JSON bodies and responses [#487 & #550]. Thanks @Gelbpunkt!
+- Relative paths to config files [#538 & #544]. Thanks to @motybz, @MalteBecker, & @abhinav-cashify!
+
+## 0.10.7
+
+### Fixes
+
+- SSL verify argument to async clients [#533 & #510]. Thanks @fsvenson and @mvaught02!
+- Remove unused CHANGELOG from generated setup.py [#529]. Thanks @johnthagen!
+
+## 0.10.6
+
+### Features
+
+- Improve error messages related to invalid arrays and circular or recursive references [#519].
+- Add httpx 0.20.\* support [#514].
+
+### Fixes
+
+- Use isort "black" profile in generated clients [#523]. Thanks @johnthagen!
+- setup.py should generate importable packages named <project>\_client [#492, #520, #521]. Thanks @tedo-benchling & @Leem0sh!
+- Allow None in enum properties [#504, #512, #516]. Thanks @juspence!
+- properly support JSON OpenAPI documents and config files [#488, #509, #515]. Thanks @tardyp and @Gelbpunkt!
+
+## 0.10.5
+
+### Features
+
+- Add verify_ssl option to generated Client, allowing users to ignore or customize ssl verification (#497). Thanks @rtaycher!
+
+### Fixes
+
+- Properly label a path template issue as a warning (#494). Thanks @chamini2!
+- Don't allow mixed types in enums.
+- Don't crash when a null is in an enum (#500). Thanks @juspence!
+
+## 0.10.4
+
+### Features
+
+- Allow customization of post-generation steps with the `post_hooks` config option.
+- Allow httpx 0.19.\* (#481)
+
+### Fixes
+
+- Don't crash the generator when one of the post-generation hooks is missing [fixes #479]. Thanks @chamini2 and @karolzlot!
+
+## 0.10.3
+
+### Features
+
+- Expose `python_identifier` and `class_name` functions to custom templates to rename with the same behavior as the parser.
+
+### Fixes
+
+- Treat `true` and `false` as reserved words.
+- Prevent generating Python files named the same as reserved / key words.
+- Properly replace reserved words in class and module names [#475, #476]. Thanks @mtovts!
+
+## 0.10.2
+
+### Features
+
+- Allow path parameters to be positional args [#429 & #464]. Thanks @tsotnikov!
+- Include both `UNSET` and `None` static types for nullable or optional query params [#421, #380, #462]. Thanks @forest-benchling!
+- Allow allOf enums to be subsets of one another or their base types [#379, #423, #461]. Thanks @forest-benchling! (#461)
+
+### Fixes
+
+- Parameters from `PathItem` can now be overriden in `Operation` [#458 & #457]. Thanks @mtovts!
+
+## 0.10.1
+
+### Fixes
+
+- Support multipart requests with type: array [#452 & #451]. Thanks @csymeonides-mf @slamora and @dpursehouse
+
+## 0.10.0
+
+### Breaking Changes
+
+- Normalize generated module names to allow more tags [#428 & #448]. Thanks @iamnoah & @forest-benchling!
+- Improved the consistency of snake_cased identifiers which will cause some to be renamed [#413 & #432]. Thanks @ramnes!
+- Allow more types in multipart payloads by defaulting to JSON for complex types [#372]. Thanks @csymeonides-mf!
+
+### Features
+
+- Allow custom templates for API and endpoint `__init__` files. [#442] Thanks @p1-ra!
+
+### Fixes
+
+- Treat empty schemas like `Any` instead of `None`. Thanks @forest-benchling! [#417 & #445]
+
+## 0.9.2
+
+### Features
+
+- Add option to fail on warning [#427]. Thanks @forest-benchling!
+
+### Fixes
+
+- Properly strip out `UNSET` values from form data [#430]. Thanks @p1-ra!
+
 ## 0.9.1
 
 ### Features

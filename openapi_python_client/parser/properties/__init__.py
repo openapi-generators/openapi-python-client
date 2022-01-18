@@ -1,8 +1,8 @@
 __all__ = [
+    "AnyProperty",
     "Class",
     "EnumProperty",
     "ModelProperty",
-    "NoneProperty",
     "Property",
     "Schemas",
     "build_schemas",
@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
@@ -26,12 +26,19 @@ from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_d
 
 
 @attr.s(auto_attribs=True, frozen=True)
+class AnyProperty(Property):
+    """A property that can be any type (used for empty schemas)"""
+
+    _type_string: ClassVar[str] = "Any"
+    _json_type_string: ClassVar[str] = "Any"
+
+
+@attr.s(auto_attribs=True, frozen=True)
 class NoneProperty(Property):
-    """A property that is always None (used for empty schemas)"""
+    """A property that can only be None"""
 
     _type_string: ClassVar[str] = "None"
     _json_type_string: ClassVar[str] = "None"
-    template: ClassVar[Optional[str]] = "none_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -42,6 +49,12 @@ class StringProperty(Property):
     pattern: Optional[str] = None
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -94,7 +107,7 @@ class FileProperty(Property):
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
-    _json_type_string: ClassVar[str] = "Tuple[Optional[str], Union[BinaryIO, TextIO], Optional[str]]"
+    _json_type_string: ClassVar[str] = "FileJsonType"
     template: ClassVar[str] = "file_property.py.jinja"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -106,7 +119,7 @@ class FileProperty(Property):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({f"from {prefix}types import File", "from io import BytesIO"})
+        imports.update({f"from {prefix}types import File, FileJsonType", "from io import BytesIO"})
         return imports
 
 
@@ -116,6 +129,13 @@ class FloatProperty(Property):
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+    template: ClassVar[str] = "float_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -124,6 +144,13 @@ class IntProperty(Property):
 
     _type_string: ClassVar[str] = "int"
     _json_type_string: ClassVar[str] = "int"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+    template: ClassVar[str] = "int_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -132,6 +159,13 @@ class BooleanProperty(Property):
 
     _type_string: ClassVar[str] = "bool"
     _json_type_string: ClassVar[str] = "bool"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+    template: ClassVar[str] = "boolean_property.py.jinja"
 
 
 InnerProp = TypeVar("InnerProp", bound=Property)
@@ -174,22 +208,15 @@ class UnionProperty(Property):
 
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.py.jinja"
-    has_properties_without_templates: bool = attr.ib(init=False)
-
-    def __attrs_post_init__(self) -> None:
-        super().__attrs_post_init__()
-        object.__setattr__(
-            self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
-        )
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
         return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
 
-    def _get_type_string_from_inner_type_strings(self, inner_types: Set[str]) -> str:
+    @staticmethod
+    def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:
         if len(inner_types) == 1:
             return inner_types.pop()
-        else:
-            return f"Union[{', '.join(sorted(inner_types))}]"
+        return f"Union[{', '.join(sorted(inner_types))}]"
 
     def get_base_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
@@ -198,6 +225,18 @@ class UnionProperty(Property):
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
     def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
+        """
+        Get the set of all the types that should appear within the `Union` representing this property.
+
+        This function is called from the union property macros, thus the public visibility.
+
+        Args:
+            no_optional: Do not include `None` or `Unset` in this set.
+            json: If True, this returns the JSON types, not the Python types, of this property.
+
+        Returns:
+            A set of strings containing the types that should appear within `Union`.
+        """
         type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
@@ -230,44 +269,53 @@ class UnionProperty(Property):
         imports.add("from typing import cast, Union")
         return imports
 
-    def inner_properties_with_template(self) -> Iterator[Property]:
-        return (prop for prop in self.inner_properties if prop.template)
-
 
 def _string_based_property(
-    name: str, required: bool, data: oai.Schema
+    name: str, required: bool, data: oai.Schema, config: Config
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
+    python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
     if string_format == "date-time":
         return DateTimeProperty(
             name=name,
             required=required,
             default=convert("datetime.datetime", data.default),
             nullable=data.nullable,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
         )
-    elif string_format == "date":
+    if string_format == "date":
         return DateProperty(
             name=name,
             required=required,
             default=convert("datetime.date", data.default),
             nullable=data.nullable,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
         )
-    elif string_format == "binary":
+    if string_format == "binary":
         return FileProperty(
             name=name,
             required=required,
             default=None,
             nullable=data.nullable,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
         )
-    else:
-        return StringProperty(
-            name=name,
-            default=convert("str", data.default),
-            required=required,
-            pattern=data.pattern,
-            nullable=data.nullable,
-        )
+    return StringProperty(
+        name=name,
+        default=convert("str", data.default),
+        required=required,
+        pattern=data.pattern,
+        nullable=data.nullable,
+        python_name=python_name,
+        description=data.description,
+        example=data.example,
+    )
 
 
 def build_enum_property(
@@ -276,10 +324,10 @@ def build_enum_property(
     name: str,
     required: bool,
     schemas: Schemas,
-    enum: List[Union[str, int]],
+    enum: Union[List[Optional[str]], List[Optional[int]]],
     parent_name: Optional[str],
     config: Config,
-) -> Tuple[Union[EnumProperty, PropertyError], Schemas]:
+) -> Tuple[Union[EnumProperty, NoneProperty, PropertyError], Schemas]:
     """
     Create an EnumProperty from schema data.
 
@@ -296,11 +344,36 @@ def build_enum_property(
         A tuple containing either the created property or a PropertyError describing what went wrong AND update schemas.
     """
 
+    if len(enum) == 0:
+        return PropertyError(detail="No values provided for Enum", data=data), schemas
+
     class_name = data.title or name
     if parent_name:
         class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
     class_info = Class.from_string(string=class_name, config=config)
-    values = EnumProperty.values_from_list(enum)
+
+    # OpenAPI allows for null as an enum value, but it doesn't make sense with how enums are constructed in Python.
+    # So instead, if null is a possible value, make the property nullable.
+    # Mypy is not smart enough to know that the type is right though
+    value_list: Union[List[str], List[int]] = [value for value in enum if value is not None]  # type: ignore
+    if len(value_list) < len(enum):
+        data.nullable = True
+
+    # It's legal to have an enum that only contains null as a value, we don't bother constructing an enum in that case
+    if len(value_list) == 0:
+        return (
+            NoneProperty(
+                name=name,
+                required=required,
+                nullable=False,
+                default="None",
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=None,
+                example=None,
+            ),
+            schemas,
+        )
+    values = EnumProperty.values_from_list(value_list)
 
     if class_info.name in schemas.classes_by_name:
         existing = schemas.classes_by_name[class_info.name]
@@ -312,11 +385,7 @@ def build_enum_property(
                 schemas,
             )
 
-    for value in values.values():
-        value_type = type(value)
-        break
-    else:
-        return PropertyError(data=data, detail="No values provided for Enum"), schemas
+    value_type = type(next(iter(values.values())))
 
     prop = EnumProperty(
         name=name,
@@ -326,6 +395,9 @@ def build_enum_property(
         values=values,
         value_type=value_type,
         default=None,
+        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        description=data.description,
+        example=data.example,
     )
 
     default = get_enum_default(prop, data)
@@ -337,25 +409,54 @@ def build_enum_property(
     return prop, schemas
 
 
-def get_enum_default(prop: EnumProperty, data: oai.Schema) -> Union[Optional[Any], PropertyError]:
-    if data.default is None:
+def get_enum_default(prop: EnumProperty, data: oai.Schema) -> Union[Optional[str], PropertyError]:
+    """
+    Run through the available values in an EnumProperty and return the string representing the default value
+    in `data`.
+
+    Args:
+        prop: The EnumProperty to search for the default value.
+        data: The schema containing the default value for this enum.
+
+    Returns:
+        If `default` is `None`, then `None`.
+            If `default` is a valid value in `prop`, then the string representing that variant (e.g. MyEnum.MY_VARIANT)
+            If `default` is a value that doesn't match a variant of the enum, then a `PropertyError`.
+    """
+    default = data.default
+    if default is None:
         return None
 
     inverse_values = {v: k for k, v in prop.values.items()}
     try:
-        return f"{prop.class_info.name}.{inverse_values[data.default]}"
+        return f"{prop.class_info.name}.{inverse_values[default]}"
     except KeyError:
-        return PropertyError(detail=f"{data.default} is an invalid default for enum {prop.class_info.name}", data=data)
+        return PropertyError(detail=f"{default} is an invalid default for enum {prop.class_info.name}", data=data)
 
 
 def build_union_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
+    """
+    Create a `UnionProperty` the right way.
+
+    Args:
+        data: The `Schema` describing the `UnionProperty`.
+        name: The name of the property where it appears in the OpenAPI document.
+        required: Whether or not this property is required where it's being used.
+        schemas: The `Schemas` so far describing existing classes / references.
+        parent_name: The name of the thing which holds this property (used for renaming inner classes).
+        config: User-defined config values for modifying inner properties.
+
+    Returns:
+        `(result, schemas)` where `schemas` is the updated version of the input `schemas` and `result` is the
+            constructed `UnionProperty` or a `PropertyError` describing what went wrong.
+    """
     sub_properties: List[Property] = []
 
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
-            name=f"{name}_type{i}",
+            name=f"{name}_type_{i}",
             required=required,
             data=sub_prop_data,
             schemas=schemas,
@@ -366,7 +467,7 @@ def build_union_property(
             return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
         sub_properties.append(sub_prop)
 
-    default = convert_chain((prop._type_string for prop in sub_properties), data.default)
+    default = convert_chain((prop.get_base_type_string() for prop in sub_properties), data.default)
     return (
         UnionProperty(
             name=name,
@@ -374,6 +475,9 @@ def build_union_property(
             default=default,
             inner_properties=sub_properties,
             nullable=data.nullable,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            description=data.description,
+            example=data.example,
         ),
         schemas,
     )
@@ -382,13 +486,29 @@ def build_union_property(
 def build_list_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
+    """
+    Build a ListProperty the right way, use this instead of the normal constructor.
+
+    Args:
+        data: `oai.Schema` representing this `ListProperty`.
+        name: The name of this property where it's used.
+        required: Whether or not this `ListProperty` can be `Unset` where it's used.
+        schemas: Collected `Schemas` so far containing any classes or references.
+        parent_name: The name of the thing containing this property (used for naming inner classes).
+        config: User-provided config for overriding default behaviors.
+
+    Returns:
+        `(result, schemas)` where `schemas` is an updated version of the input named the same including any inner
+        classes that were defined and `result` is either the `ListProperty` or a `PropertyError`.
+    """
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
         name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name, config=config
     )
     if isinstance(inner_prop, PropertyError):
-        return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}"), schemas
+        inner_prop.header = f'invalid data in items of array named "{name}"'
+        return inner_prop, schemas
     return (
         ListProperty(
             name=name,
@@ -396,17 +516,22 @@ def build_list_property(
             default=None,
             inner_property=inner_prop,
             nullable=data.nullable,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            description=data.description,
+            example=data.example,
         ),
         schemas,
     )
 
 
+# pylint: disable=too-many-arguments
 def _property_from_ref(
     name: str,
     required: bool,
     parent: Union[oai.Schema, None],
     data: oai.Reference,
     schemas: Schemas,
+    config: Config,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     ref_path = parse_reference_path(data.ref)
     if isinstance(ref_path, ParseError):
@@ -415,7 +540,12 @@ def _property_from_ref(
     if not existing:
         return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
 
-    prop = attr.evolve(existing, required=required, name=name)
+    prop = attr.evolve(
+        existing,
+        required=required,
+        name=name,
+        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+    )
     if parent:
         prop = attr.evolve(prop, nullable=parent.nullable)
         if isinstance(prop, EnumProperty):
@@ -427,6 +557,7 @@ def _property_from_ref(
     return prop, schemas
 
 
+# pylint: disable=too-many-arguments,too-many-return-statements
 def _property_from_data(
     name: str,
     required: bool,
@@ -438,12 +569,14 @@ def _property_from_data(
     """Generate a Property from the OpenAPI dictionary representation of it"""
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas)
+        return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas, config=config)
 
     sub_data: List[Union[oai.Schema, oai.Reference]] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
-        return _property_from_ref(name=name, required=required, parent=data, data=sub_data[0], schemas=schemas)
+        return _property_from_ref(
+            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config
+        )
 
     if data.enum:
         return build_enum_property(
@@ -455,53 +588,71 @@ def _property_from_data(
             parent_name=parent_name,
             config=config,
         )
-    elif data.anyOf or data.oneOf:
+    if data.anyOf or data.oneOf:
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    elif data.type == "string":
-        return _string_based_property(name=name, required=required, data=data), schemas
-    elif data.type == "number":
+    if data.type == oai.DataType.STRING:
+        return _string_based_property(name=name, required=required, data=data, config=config), schemas
+    if data.type == oai.DataType.NUMBER:
         return (
             FloatProperty(
                 name=name,
                 default=convert("float", data.default),
                 required=required,
                 nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=data.description,
+                example=data.example,
             ),
             schemas,
         )
-    elif data.type == "integer":
+    if data.type == oai.DataType.INTEGER:
         return (
             IntProperty(
                 name=name,
                 default=convert("int", data.default),
                 required=required,
                 nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=data.description,
+                example=data.example,
             ),
             schemas,
         )
-    elif data.type == "boolean":
+    if data.type == oai.DataType.BOOLEAN:
         return (
             BooleanProperty(
                 name=name,
                 required=required,
                 default=convert("bool", data.default),
                 nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=data.description,
+                example=data.example,
             ),
             schemas,
         )
-    elif data.type == "array":
+    if data.type == oai.DataType.ARRAY:
         return build_list_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    elif data.type == "object" or data.allOf:
+    if data.type == oai.DataType.OBJECT or data.allOf:
         return build_model_property(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
-    elif not data.type:
-        return NoneProperty(name=name, required=required, nullable=False, default=None), schemas
-    return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
+    return (
+        AnyProperty(
+            name=name,
+            required=required,
+            nullable=False,
+            default=None,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            description=data.description,
+            example=data.example,
+        ),
+        schemas,
+    )
 
 
 def property_from_data(

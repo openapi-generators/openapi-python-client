@@ -19,36 +19,25 @@ class Components(BaseModel):
     Holds a set of reusable objects for different aspects of the OAS.
     All objects defined within the components object will have no effect on the API
     unless they are explicitly referenced from properties outside the components object.
+
+    References:
+        - https://swagger.io/docs/specification/components/
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
     schemas: Optional[Dict[str, Union[Reference, Schema]]] = None
-    """An object to hold reusable [Schema Objects](#schemaObject)."""
-
     responses: Optional[Dict[str, Union[Response, Reference]]] = None
-    """An object to hold reusable [Response Objects](#responseObject)."""
-
     parameters: Optional[Dict[str, Union[Parameter, Reference]]] = None
-    """An object to hold reusable [Parameter Objects](#parameterObject)."""
-
     examples: Optional[Dict[str, Union[Example, Reference]]] = None
-    """An object to hold reusable [Example Objects](#exampleObject)."""
-
     requestBodies: Optional[Dict[str, Union[RequestBody, Reference]]] = None
-    """An object to hold reusable [Request Body Objects](#requestBodyObject)."""
-
     headers: Optional[Dict[str, Union[Header, Reference]]] = None
-    """An object to hold reusable [Header Objects](#headerObject)."""
-
     securitySchemes: Optional[Dict[str, Union[SecurityScheme, Reference]]] = None
-    """An object to hold reusable [Security Scheme Objects](#securitySchemeObject)."""
-
     links: Optional[Dict[str, Union[Link, Reference]]] = None
-    """An object to hold reusable [Link Objects](#linkObject)."""
 
     callbacks: Optional[Dict[str, Union[Callback, Reference]]] = None
     """An object to hold reusable [Callback Objects](#callbackObject)."""
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
         schema_extra = {
             "examples": [

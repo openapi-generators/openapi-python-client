@@ -1,8 +1,13 @@
+__all__ = ["Property"]
+
 from typing import ClassVar, Optional, Set
 
 import attr
 
-from ... import utils
+from ... import Config
+from ... import schema as oai
+from ...utils import PythonIdentifier
+from ..errors import ParseError
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -25,22 +30,42 @@ class Property:
     nullable: bool
     _type_string: ClassVar[str] = ""
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+    }
     default: Optional[str] = attr.ib()
-    python_name: str = attr.ib(init=False)
+    python_name: PythonIdentifier
+    description: Optional[str] = attr.ib()
+    example: Optional[str] = attr.ib()
 
-    template: ClassVar[Optional[str]] = None
+    template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False
 
-    def __attrs_post_init__(self) -> None:
-        self.set_python_name(self.name)
+    def validate_location(self, location: oai.ParameterLocation) -> Optional[ParseError]:
+        """Returns an error if this type of property is not allowed in the given location"""
+        if location not in self._allowed_locations:
+            return ParseError(detail=f"{self.get_type_string()} is not allowed in {location}")
+        if location == oai.ParameterLocation.PATH and not self.required:
+            return ParseError(detail="Path parameter must be required")
+        return None
 
-    def set_python_name(self, new_name: str) -> None:
-        object.__setattr__(self, "python_name", utils.to_valid_python_identifier(utils.snake_case(new_name)))
+    def set_python_name(self, new_name: str, config: Config) -> None:
+        """Mutates this Property to set a new python_name.
+
+        Required to mutate due to how Properties are stored and the difficulty of updating them in-dict.
+        `new_name` will be validated before it is set, so `python_name` is not guaranteed to equal `new_name` after
+        calling this.
+        """
+        object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
 
     def get_base_type_string(self) -> str:
+        """Get the string describing the Python type of this property."""
         return self._type_string
 
     def get_base_json_type_string(self) -> str:
+        """Get the string describing the JSON type of this property."""
         return self._json_type_string
 
     def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
@@ -58,12 +83,12 @@ class Property:
 
         if no_optional or (self.required and not self.nullable):
             return type_string
-        elif self.required and self.nullable:
+        if self.required and self.nullable:
             return f"Optional[{type_string}]"
-        elif not self.required and self.nullable:
+        if not self.required and self.nullable:
             return f"Union[Unset, None, {type_string}]"
-        else:
-            return f"Union[Unset, {type_string}]"
+
+        return f"Union[Unset, {type_string}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -98,5 +123,13 @@ class Property:
 
         if default is not None:
             return f"{self.python_name}: {self.get_type_string()} = {default}"
-        else:
-            return f"{self.python_name}: {self.get_type_string()}"
+        return f"{self.python_name}: {self.get_type_string()}"
+
+    def to_docstring(self) -> str:
+        """Returns property docstring"""
+        doc = f"{self.python_name} ({self.get_type_string()}): {self.description or ''}"
+        if self.default:
+            doc += f" Default: {self.default}."
+        if self.example:
+            doc += f" Example: {self.example}."
+        return doc

@@ -3,9 +3,9 @@ import pathlib
 import httpcore
 import jinja2
 import pytest
-import yaml
+from pytest_mock import MockFixture
 
-from openapi_python_client import Config, GeneratorError
+from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
 
 def test__get_project_for_url_or_path(mocker):
@@ -148,7 +148,7 @@ def test_update_existing_client_project_error(mocker):
 class TestGetJson:
     def test__get_document_no_url_or_path(self, mocker):
         get = mocker.patch("httpx.get")
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
         from openapi_python_client import _get_document
@@ -157,12 +157,12 @@ class TestGetJson:
 
         assert result == GeneratorError(header="No URL or Path provided")
         get.assert_not_called()
-        Path.assert_not_called()
+        _Path.assert_not_called()
         loads.assert_not_called()
 
     def test__get_document_url_and_path(self, mocker):
         get = mocker.patch("httpx.get")
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
         from openapi_python_client import _get_document
@@ -171,12 +171,12 @@ class TestGetJson:
 
         assert result == GeneratorError(header="Provide URL or Path, not both.")
         get.assert_not_called()
-        Path.assert_not_called()
+        _Path.assert_not_called()
         loads.assert_not_called()
 
     def test__get_document_bad_url(self, mocker):
         get = mocker.patch("httpx.get", side_effect=httpcore.NetworkError)
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
 
         from openapi_python_client import _get_document
@@ -186,49 +186,84 @@ class TestGetJson:
 
         assert result == GeneratorError(header="Could not get OpenAPI document from provided URL")
         get.assert_called_once_with(url)
-        Path.assert_not_called()
+        _Path.assert_not_called()
         loads.assert_not_called()
 
     def test__get_document_url_no_path(self, mocker):
         get = mocker.patch("httpx.get")
-        Path = mocker.patch("openapi_python_client.Path")
+        _Path = mocker.patch("openapi_python_client.Path")
         loads = mocker.patch("yaml.safe_load")
+
+        from openapi_python_client import _get_document
+
+        url = "test"
+        _get_document(url=url, path=None)
+
+        get.assert_called_once_with(url)
+        _Path.assert_not_called()
+        loads.assert_called_once_with(get().content)
+
+    def test__get_document_path_no_url(self, tmp_path, mocker):
+        get = mocker.patch("httpx.get")
+        loads = mocker.patch("yaml.safe_load")
+        path = tmp_path / "test.yaml"
+        path.write_text("some test data")
+
+        from openapi_python_client import _get_document
+
+        _get_document(url=None, path=path)
+
+        get.assert_not_called()
+        loads.assert_called_once_with(b"some test data")
+
+    def test__get_document_bad_yaml(self, mocker, tmp_path):
+        get = mocker.patch("httpx.get")
+        from openapi_python_client import _get_document
+
+        path = tmp_path / "test.yaml"
+        path.write_text("'")
+        result = _get_document(url=None, path=path)
+
+        get.assert_not_called()
+        assert isinstance(result, GeneratorError)
+        assert "Invalid YAML" in result.header
+
+    def test__get_document_json(self, mocker):
+        class FakeResponse:
+            content = b'{\n\t"foo": "bar"}'
+            headers = {"content-type": "application/json; encoding=utf8"}
+
+        get = mocker.patch("httpx.get", return_value=FakeResponse())
+        yaml_loads = mocker.patch("yaml.safe_load")
+        json_result = mocker.MagicMock()
+        json_loads = mocker.patch("json.loads", return_value=json_result)
 
         from openapi_python_client import _get_document
 
         url = mocker.MagicMock()
-        _get_document(url=url, path=None)
+        result = _get_document(url=url, path=None)
 
-        get.assert_called_once_with(url)
-        Path.assert_not_called()
-        loads.assert_called_once_with(get().content)
+        get.assert_called_once()
+        json_loads.assert_called_once_with(FakeResponse.content.decode())
+        yaml_loads.assert_not_called()
+        assert result == json_result
 
-    def test__get_document_path_no_url(self, mocker):
-        get = mocker.patch("httpx.get")
-        loads = mocker.patch("yaml.safe_load")
+    def test__get_document_bad_json(self, mocker):
+        class FakeResponse:
+            content = b'{"foo"}'
+            headers = {"content-type": "application/json; encoding=utf8"}
 
-        from openapi_python_client import _get_document
-
-        path = mocker.MagicMock()
-        _get_document(url=None, path=path)
-
-        get.assert_not_called()
-        path.read_bytes.assert_called_once()
-        loads.assert_called_once_with(path.read_bytes())
-
-    def test__get_document_bad_yaml(self, mocker):
-        get = mocker.patch("httpx.get")
-        loads = mocker.patch("yaml.safe_load", side_effect=yaml.YAMLError)
+        get = mocker.patch("httpx.get", return_value=FakeResponse())
 
         from openapi_python_client import _get_document
 
-        path = mocker.MagicMock()
-        result = _get_document(url=None, path=path)
+        url = mocker.MagicMock()
+        result = _get_document(url=url, path=None)
 
-        get.assert_not_called()
-        path.read_bytes.assert_called_once()
-        loads.assert_called_once_with(path.read_bytes())
-        assert result == GeneratorError(header="Invalid YAML from provided source")
+        get.assert_called_once()
+        assert result == GeneratorError(
+            header="Invalid JSON from provided source: " "Expecting ':' delimiter: line 1 column 7 (char 6)"
+        )
 
 
 def make_project(**kwargs):
@@ -239,6 +274,17 @@ def make_project(**kwargs):
     kwargs = {"openapi": MagicMock(title="My Test API"), "meta": MetaType.POETRY, "config": Config(), **kwargs}
 
     return Project(**kwargs)
+
+
+@pytest.fixture
+def project_with_dir() -> Project:
+    """Return a Project with the project dir pre-made (needed for cwd of commands). Unlinks after the test completes"""
+    project = make_project()
+    project.project_dir.mkdir()
+
+    yield project
+
+    project.project_dir.rmdir()
 
 
 class TestProject:
@@ -303,7 +349,7 @@ class TestProject:
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
-        project._reformat = mocker.MagicMock()
+        project._run_post_hooks = mocker.MagicMock()
         project._get_errors = mocker.MagicMock()
 
         result = project.build()
@@ -313,7 +359,7 @@ class TestProject:
         project._build_metadata.assert_called_once()
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
-        project._reformat.assert_called_once()
+        project._run_post_hooks.assert_called_once()
         project._get_errors.assert_called_once()
         assert result == project._get_errors.return_value
 
@@ -327,7 +373,7 @@ class TestProject:
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
-        project._reformat = mocker.MagicMock()
+        project._run_post_hooks = mocker.MagicMock()
         project._get_errors = mocker.MagicMock()
 
         project.build()
@@ -354,7 +400,7 @@ class TestProject:
         project._build_models = mocker.MagicMock()
         project._build_api = mocker.MagicMock()
         project._create_package = mocker.MagicMock()
-        project._reformat = mocker.MagicMock()
+        project._run_post_hooks = mocker.MagicMock()
         project._get_errors = mocker.MagicMock()
 
         result = project.update()
@@ -363,19 +409,19 @@ class TestProject:
         project._create_package.assert_called_once()
         project._build_models.assert_called_once()
         project._build_api.assert_called_once()
-        project._reformat.assert_called_once()
+        project._run_post_hooks.assert_called_once()
         project._get_errors.assert_called_once()
         assert result == project._get_errors.return_value
 
-    def test_update_missing_dir(self, mocker):
+    def test_update_missing_dir(self, mocker: MockFixture):
         project = make_project()
-        project.package_dir = mocker.MagicMock()
+        mocker.patch.object(project, "package_dir")
         project.package_dir.is_dir.return_value = False
-        project._build_models = mocker.MagicMock()
+        mocker.patch.object(project, "_build_models")
 
-        with pytest.raises(FileNotFoundError):
-            project.update()
+        errs = project.update()
 
+        assert len(errs) == 1
         project.package_dir.is_dir.assert_called_once()
         project._build_models.assert_not_called()
 
@@ -403,11 +449,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with(
-            description=project.package_description,
-            project_name=project.project_name,
-            package_name=project.package_name,
-        )
+        readme_template.render.assert_called_once_with()
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -440,11 +482,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with(
-            description=project.package_description,
-            project_name=project.project_name,
-            package_name=project.package_name,
-        )
+        readme_template.render.assert_called_once_with()
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -473,7 +511,7 @@ class TestProject:
 
         pyproject_template = mocker.MagicMock(autospec=jinja2.Template)
         project.env = mocker.MagicMock(autospec=jinja2.Environment)
-        template_path = "pyproject.toml.jinja" if use_poetry else "pyproject_no_poetry.toml.jinja"
+        template_path = "pyproject.toml.jinja"
         templates = {
             template_path: pyproject_template,
         }
@@ -483,12 +521,7 @@ class TestProject:
 
         project.env.get_template.assert_called_once_with(template_path)
 
-        pyproject_template.render.assert_called_once_with(
-            project_name=project.project_name,
-            package_name=project.package_name,
-            version=project.version,
-            description=project.package_description,
-        )
+        pyproject_template.render.assert_called_once_with(use_poetry=use_poetry)
         pyproject_path.write_text.assert_called_once_with(pyproject_template.render(), encoding="utf-8")
 
     def test__build_setup_py(self, mocker):
@@ -511,43 +544,45 @@ class TestProject:
 
         project.env.get_template.assert_called_once_with("setup.py.jinja")
 
-        setup_template.render.assert_called_once_with(
-            project_name=project.project_name,
-            package_name=project.package_name,
-            version=project.version,
-            description=project.package_description,
-        )
+        setup_template.render.assert_called_once_with()
         setup_path.write_text.assert_called_once_with(setup_template.render(), encoding="utf-8")
 
+    def test__run_post_hooks_reports_missing_commands(self, project_with_dir):
+        fake_command_name = "blahblahdoesntexist"
+        project_with_dir.config.post_hooks = [fake_command_name]
+        need_to_make_cwd = not project_with_dir.project_dir.exists()
+        if need_to_make_cwd:
+            project_with_dir.project_dir.mkdir()
 
-def test__reformat(mocker):
-    import subprocess
+        project_with_dir._run_post_hooks()
 
-    sub_run = mocker.patch("subprocess.run")
-    project = make_project()
-    project.project_dir = mocker.MagicMock(autospec=pathlib.Path)
+        assert len(project_with_dir.errors) == 1
+        error = project_with_dir.errors[0]
+        assert error.level == ErrorLevel.WARNING
+        assert error.header == "Skipping Integration"
+        assert fake_command_name in error.detail
 
-    project._reformat()
+    def test__run_post_hooks_reports_stdout_of_commands_that_error_with_no_stderr(self, project_with_dir):
+        failing_command = "python -c \"print('a message'); exit(1)\""
+        project_with_dir.config.post_hooks = [failing_command]
+        project_with_dir._run_post_hooks()
 
-    sub_run.assert_has_calls(
-        [
-            mocker.call(
-                "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
-                cwd=project.package_dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            ),
-            mocker.call(
-                "isort .",
-                cwd=project.project_dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            ),
-            mocker.call("black .", cwd=project.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE),
-        ]
-    )
+        assert len(project_with_dir.errors) == 1
+        error = project_with_dir.errors[0]
+        assert error.level == ErrorLevel.ERROR
+        assert error.header == "python failed"
+        assert "a message" in error.detail
+
+    def test__run_post_hooks_reports_stderr_of_commands_that_error(self, project_with_dir):
+        failing_command = "python -c \"print('a message'); raise Exception('some exception')\""
+        project_with_dir.config.post_hooks = [failing_command]
+        project_with_dir._run_post_hooks()
+
+        assert len(project_with_dir.errors) == 1
+        error = project_with_dir.errors[0]
+        assert error.level == ErrorLevel.ERROR
+        assert error.header == "python failed"
+        assert "some exception" in error.detail
 
 
 def test__get_errors(mocker):
@@ -568,7 +603,7 @@ def test__get_errors(mocker):
     assert project._get_errors() == [1, 2, 3]
 
 
-def test__custom_templates(mocker):
+def test_custom_templates(mocker):
     from openapi_python_client import GeneratorData, MetaType, Project
 
     openapi = mocker.MagicMock(

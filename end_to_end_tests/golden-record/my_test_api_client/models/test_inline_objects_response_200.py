@@ -9,7 +9,10 @@ T = TypeVar("T", bound="TestInlineObjectsResponse200")
 
 @attr.s(auto_attribs=True)
 class TestInlineObjectsResponse200:
-    """ """
+    """
+    Attributes:
+        a_property (Union[Unset, str]):
+    """
 
     a_property: Union[Unset, str] = UNSET
 

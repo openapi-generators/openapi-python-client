@@ -2,16 +2,23 @@ from pathlib import Path
 
 import jinja2
 
+from openapi_python_client.parser.properties import DateProperty
+
+
+def date_property(required=True, nullable=True, default=None) -> DateProperty:
+    return DateProperty(
+        name="a_prop",
+        required=required,
+        nullable=nullable,
+        default=default,
+        python_name="a_prop",
+        description="",
+        example="",
+    )
+
 
 def test_required_not_nullable():
-    from openapi_python_client.parser.properties import DateProperty
-
-    prop = DateProperty(
-        name="a_prop",
-        required=True,
-        nullable=False,
-        default=None,
-    )
+    prop = date_property(nullable=False)
     here = Path(__file__).parent
     templates_dir = here.parent.parent.parent.parent / "openapi_python_client" / "templates"
 
@@ -28,14 +35,8 @@ def test_required_not_nullable():
 
 
 def test_required_nullable():
-    from openapi_python_client.parser.properties import DateProperty
 
-    prop = DateProperty(
-        name="a_prop",
-        required=True,
-        nullable=True,
-        default=None,
-    )
+    prop = date_property()
     here = Path(__file__).parent
     templates_dir = here.parent.parent.parent.parent / "openapi_python_client" / "templates"
 
@@ -52,14 +53,7 @@ def test_required_nullable():
 
 
 def test_optional_nullable():
-    from openapi_python_client.parser.properties import DateProperty
-
-    prop = DateProperty(
-        name="a_prop",
-        required=False,
-        nullable=True,
-        default=None,
-    )
+    prop = date_property(required=False)
     here = Path(__file__).parent
     templates_dir = here.parent.parent.parent.parent / "openapi_python_client" / "templates"
 

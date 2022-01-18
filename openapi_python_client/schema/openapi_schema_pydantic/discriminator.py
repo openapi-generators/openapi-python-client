@@ -12,19 +12,16 @@ class Discriminator(BaseModel):
     of an alternative schema based on the value associated with it.
 
     When using the discriminator, _inline_ schemas will not be considered.
+
+    References:
+        - https://swagger.io/docs/specification/data-models/inheritance-and-polymorphism/
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminatorObject
     """
 
     propertyName: str
-    """
-    **REQUIRED**. The name of the property in the payload that will hold the discriminator value.
-    """
-
     mapping: Optional[Dict[str, str]] = None
-    """
-    An object to hold mappings between payload values and schema names or references.
-    """
 
-    class Config:
+    class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
         schema_extra = {
             "examples": [
