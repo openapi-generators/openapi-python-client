@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Dict
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .path_item import PathItem
 else:
     PathItem = "PathItem"  # pylint: disable=invalid-name
