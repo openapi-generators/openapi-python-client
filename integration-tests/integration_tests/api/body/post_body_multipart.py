@@ -16,7 +16,7 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}/body/multipart".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     multipart_multipart_data = multipart_data.to_multipart()

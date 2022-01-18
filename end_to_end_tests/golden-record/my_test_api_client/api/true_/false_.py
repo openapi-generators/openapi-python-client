@@ -13,12 +13,12 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}/naming/keywords".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    params: Dict[str, Any] = {
-        "import": import_,
-    }
+    params: Dict[str, Any] = {}
+    params["import"] = import_
+
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {

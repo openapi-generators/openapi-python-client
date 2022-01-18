@@ -73,7 +73,9 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
         else:
             loader = package_loader
-        self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
+        self.env: Environment = Environment(
+            loader=loader, trim_blocks=True, lstrip_blocks=True, extensions=["jinja2.ext.loopcontrols"]
+        )
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
         self.project_dir: Path = Path.cwd()
@@ -267,7 +269,9 @@ class Project:  # pylint: disable=too-many-instance-attributes
             encoding=self.file_encoding,
         )
 
-        endpoint_template = self.env.get_template("endpoint_module.py.jinja")
+        endpoint_template = self.env.get_template(
+            "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
+        )
         for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
@@ -281,7 +285,12 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
-                module_path.write_text(endpoint_template.render(endpoint=endpoint), encoding=self.file_encoding)
+                module_path.write_text(
+                    endpoint_template.render(
+                        endpoint=endpoint,
+                    ),
+                    encoding=self.file_encoding,
+                )
 
 
 def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments

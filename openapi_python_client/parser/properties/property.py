@@ -5,7 +5,9 @@ from typing import ClassVar, Optional, Set
 import attr
 
 from ... import Config
+from ... import schema as oai
 from ...utils import PythonIdentifier
+from ..errors import ParseError
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -28,13 +30,26 @@ class Property:
     nullable: bool
     _type_string: ClassVar[str] = ""
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+    }
     default: Optional[str] = attr.ib()
     python_name: PythonIdentifier
     description: Optional[str] = attr.ib()
     example: Optional[str] = attr.ib()
 
-    template: ClassVar[Optional[str]] = None
+    template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False
+
+    def validate_location(self, location: oai.ParameterLocation) -> Optional[ParseError]:
+        """Returns an error if this type of property is not allowed in the given location"""
+        if location not in self._allowed_locations:
+            return ParseError(detail=f"{self.get_type_string()} is not allowed in {location}")
+        if location == oai.ParameterLocation.PATH and not self.required:
+            return ParseError(detail="Path parameter must be required")
+        return None
 
     def set_python_name(self, new_name: str, config: Config) -> None:
         """Mutates this Property to set a new python_name.

@@ -109,10 +109,14 @@ class BodyUploadFileTestsUploadPost:
             some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = (
-            self.some_string if self.some_string is UNSET else (None, str(self.some_string).encode(), "text/plain")
+            self.some_string
+            if isinstance(self.some_string, Unset)
+            else (None, str(self.some_string).encode(), "text/plain")
         )
         some_number = (
-            self.some_number if self.some_number is UNSET else (None, str(self.some_number).encode(), "text/plain")
+            self.some_number
+            if isinstance(self.some_number, Unset)
+            else (None, str(self.some_number).encode(), "text/plain")
         )
         some_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_array, Unset):

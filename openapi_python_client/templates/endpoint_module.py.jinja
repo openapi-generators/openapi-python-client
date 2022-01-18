@@ -25,7 +25,7 @@ def _get_kwargs(
         {%- endfor -%}
     )
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
     {{ header_params(endpoint) | indent(4) }}
@@ -61,9 +61,9 @@ def _get_kwargs(
 def _parse_response(*, response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
     if response.status_code == {{ response.status_code }}:
-        {% if response.prop.template %}
-            {% from "property_templates/" + response.prop.template import construct %}
-        {{ construct(response.prop, response.source) | indent(8) }}
+        {% import "property_templates/" + response.prop.template as prop_template %}
+        {% if prop_template.construct %}
+        {{ prop_template.construct(response.prop, response.source) | indent(8) }}
         {% else %}
         {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}

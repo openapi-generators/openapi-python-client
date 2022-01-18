@@ -21,6 +21,7 @@ class ModelWithAnyJsonProperties:
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
+
             if isinstance(prop, ModelWithAnyJsonPropertiesAdditionalPropertyType0):
                 field_dict[prop_name] = prop.to_dict()
 

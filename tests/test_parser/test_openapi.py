@@ -507,8 +507,37 @@ class TestEndpoint:
         )
         assert result == (
             ParseError(data=parse_error.data, detail=f"cannot parse parameter of endpoint {endpoint.name}"),
-            property_schemas,
+            initial_schemas,
         )
+
+    @pytest.mark.parametrize(
+        "data_type, allowed",
+        [
+            (oai.DataType.STRING, True),
+            (oai.DataType.INTEGER, True),
+            (oai.DataType.NUMBER, True),
+            (oai.DataType.BOOLEAN, True),
+            (oai.DataType.ARRAY, False),
+            (oai.DataType.OBJECT, False),
+        ],
+    )
+    def test_add_parameters_header_types(self, data_type, allowed):
+        from openapi_python_client.parser.openapi import Endpoint
+
+        endpoint = self.make_endpoint()
+        initial_schemas = Schemas()
+        param = oai.Parameter.construct(
+            name="test", required=True, param_schema=oai.Schema(type=data_type), param_in=oai.ParameterLocation.HEADER
+        )
+        config = Config()
+
+        result = Endpoint.add_parameters(
+            endpoint=endpoint, data=oai.Operation.construct(parameters=[param]), schemas=initial_schemas, config=config
+        )
+        if allowed:
+            assert isinstance(result[0], Endpoint)
+        else:
+            assert isinstance(result[0], ParseError)
 
     def test__add_parameters_parse_error_on_non_required_path_param(self):
         endpoint = self.make_endpoint()
@@ -534,13 +563,12 @@ class TestEndpoint:
     def test__add_parameters_with_location_postfix_conflict1(self, mocker, property_factory):
         """Checks when the PythonIdentifier of new parameter already used."""
         from openapi_python_client.parser.openapi import Endpoint
-        from openapi_python_client.parser.properties import Property
 
         endpoint = self.make_endpoint()
 
-        path_prop_conflicted = property_factory(name="prop_name_path", required=False, nullable=False, default=None)
-        query_prop = property_factory(name="prop_name", required=False, nullable=False, default=None)
-        path_prop = property_factory(name="prop_name", required=False, nullable=False, default=None)
+        path_prop_conflicted = property_factory(name="prop_name_path", required=True, nullable=False, default=None)
+        query_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
+        path_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -582,9 +610,9 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
-        path_prop_conflicted = property_factory(name="prop_name_path", required=False, nullable=False, default=None)
-        path_prop = property_factory(name="prop_name", required=False, nullable=False, default=None)
-        query_prop = property_factory(name="prop_name", required=False, nullable=False, default=None)
+        path_prop_conflicted = property_factory(name="prop_name_path", required=True, nullable=False, default=None)
+        path_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
+        query_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()

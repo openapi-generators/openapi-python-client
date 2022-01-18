@@ -75,7 +75,10 @@ task regen\
 && task e2e\
 """
 regen_e2e = "python -m end_to_end_tests.regen_golden_record"
-regen_integration = "openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests-config.yaml"
+regen_integration = """
+openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests-config.yaml\
+&& mypy integration-tests --strict
+"""
 docs = "typer openapi_python_client/cli.py utils docs > usage.md"
 
 [tool.black]

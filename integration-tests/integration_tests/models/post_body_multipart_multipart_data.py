@@ -43,11 +43,15 @@ class PostBodyMultipartMultipartData:
         return field_dict
 
     def to_multipart(self) -> Dict[str, Any]:
-        a_string = self.a_string if self.a_string is UNSET else (None, str(self.a_string).encode(), "text/plain")
+        a_string = (
+            self.a_string if isinstance(self.a_string, Unset) else (None, str(self.a_string).encode(), "text/plain")
+        )
         file = self.file.to_tuple()
 
         description = (
-            self.description if self.description is UNSET else (None, str(self.description).encode(), "text/plain")
+            self.description
+            if isinstance(self.description, Unset)
+            else (None, str(self.description).encode(), "text/plain")
         )
 
         field_dict: Dict[str, Any] = {}

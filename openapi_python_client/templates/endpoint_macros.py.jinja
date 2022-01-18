@@ -1,12 +1,16 @@
+{% from "property_templates/helpers.jinja" import guarded_statement %}
+
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters.values() %}
-        {% if parameter.required %}
-headers["{{ parameter.name | kebabcase}}"] = {{ parameter.python_name }}
+        {% set destination = 'headers["' +  parameter.name + '"]' %}
+        {% import "property_templates/" + parameter.template as param_template %}
+        {% if param_template.transform_header %}
+            {% set statement = param_template.transform_header(parameter, parameter.python_name, destination) %}
         {% else %}
-if {{ parameter.python_name }} is not UNSET:
-    headers["{{ parameter.name | kebabcase}}"] = {{ parameter.python_name }}
+            {% set statement = destination + " = " + parameter.python_name %}
         {% endif %}
+{{ guarded_statement(parameter, parameter.python_name, statement) }}
     {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -27,35 +31,23 @@ if {{ parameter.python_name }} is not UNSET:
 
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
-    {% for property in endpoint.query_parameters.values() %}
+params: Dict[str, Any] = {}
+{% for property in endpoint.query_parameters.values() %}
+    {% set destination = property.python_name %}
+    {% import "property_templates/" + property.template as prop_template %}
+    {% if prop_template.transform %}
         {% set destination = "json_" + property.python_name %}
-        {% if property.template %}
-            {% from "property_templates/" + property.template import transform %}
-{{ transform(property, property.python_name, destination) }}
-        {% endif %}
-    {% endfor %}
-params: Dict[str, Any] = {
-    {% for property in endpoint.query_parameters.values() %}
-        {% if not property.json_is_dict %}
-            {% if property.template %}
-    "{{ property.name }}": {{ "json_" + property.python_name }},
-            {% else %}
-    "{{ property.name }}": {{ property.python_name }},
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-}
-    {% for property in endpoint.query_parameters.values() %}
-        {% if property.json_is_dict %}
-            {% set property_name = "json_" + property.python_name %}
-            {% if property.required and not property.nullable %}
-params.update({{ property_name }})
-            {% else %}
-if {% if not property.required %}not isinstance({{ property_name }}, Unset){% endif %}{% if not property.required and property.nullable %} and {% endif %}{% if property.nullable %}{{ property_name }} is not None{% endif %}:
-    params.update({{ property_name }})
-            {% endif %}
-        {% endif %}
-    {% endfor %}
+{{ prop_template.transform(property, property.python_name, destination) }}
+    {% endif %}
+    {%- if not property.json_is_dict %}
+params["{{ property.name }}"] = {{ destination }}
+    {% else %}
+{{ guarded_statement(property, destination, "params.update(" + destination + ")") }}
+    {% endif %}
+
+
+{% endfor %}
+
 params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
@@ -64,9 +56,9 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% if endpoint.json_body %}
     {% set property = endpoint.json_body %}
     {% set destination = "json_" + property.python_name %}
-    {% if property.template %}
-        {% from "property_templates/" + property.template import transform %}
-{{ transform(property, property.python_name, destination) }}
+    {% import "property_templates/" + property.template as prop_template %}
+    {% if prop_template.transform %}
+{{ prop_template.transform(property, property.python_name, destination) }}
     {% else %}
 {{ destination }} = {{ property.python_name }}
     {% endif %}
@@ -77,9 +69,9 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% if endpoint.multipart_body %}
     {% set property = endpoint.multipart_body %}
     {% set destination = "multipart_" + property.python_name %}
-    {% if property.template %}
-        {% from "property_templates/" + property.template import transform_multipart %}
-{{ transform_multipart(property, property.python_name, destination) }}
+    {% import "property_templates/" + property.template as prop_template %}
+    {% if prop_template.transform_multipart %}
+{{ prop_template.transform_multipart(property, property.python_name, destination) }}
     {% endif %}
 {% endif %}
 {% endmacro %}

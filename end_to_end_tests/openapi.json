@@ -250,17 +250,7 @@
         "summary": "Upload File",
         "description": "Upload a file ",
         "operationId": "upload_file_tests_upload_post",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Keep-Alive",
-              "type": "boolean"
-            },
-            "name": "keep-alive",
-            "in": "header"
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -301,17 +291,7 @@
         "summary": "Upload multiple files",
         "description": "Upload several files in the same request",
         "operationId": "upload_multiple_files_tests_upload_post",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Keep-Alive",
-              "type": "boolean"
-            },
-            "name": "keep-alive",
-            "in": "header"
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -995,6 +975,49 @@
               "nullable": false
             },
             "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/location/header/types": {
+      "description": "Test the valid types to send in headers.",
+      "get": {
+        "tags": [
+          "location"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "Boolean-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "name": "String-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "name": "Number-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "name": "Integer-Header",
+            "in": "header"
           }
         ],
         "responses": {}
