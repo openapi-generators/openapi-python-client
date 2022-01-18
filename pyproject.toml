@@ -101,7 +101,7 @@ exclude = '''
 [tool.isort]
 line_length = 120
 profile = "black"
-skip = [".venv", "tests/test_templates"]
+skip = [".venv", "tests/test_templates", "integration-tests"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]

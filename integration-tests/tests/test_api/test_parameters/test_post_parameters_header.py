@@ -18,7 +18,7 @@ def test(client: Client) -> None:
     )
 
     parsed = response.parsed
-    assert parsed is not None, f"{response.status_code}: {response.content}"
+    assert parsed is not None, f"{response.status_code}: {response.content!r}"
     assert isinstance(
         parsed,
         PostParametersHeaderResponse200,
