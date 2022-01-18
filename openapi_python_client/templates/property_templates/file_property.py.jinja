@@ -12,7 +12,7 @@ File(
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, bytes){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
+{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ destination }} = {{ source }}.to_tuple() if {{ source }} else None

@@ -16,21 +16,22 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}/same-name-multiple-locations/{param}".format(client.base_url, param=param_path)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    if param_header is not UNSET:
+    if not isinstance(param_header, Unset):
         headers["param"] = param_header
 
     if param_cookie is not UNSET:
         cookies["param"] = param_cookie
 
-    params: Dict[str, Any] = {
-        "param": param_query,
-    }
+    params: Dict[str, Any] = {}
+    params["param"] = param_query
+
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
+        "method": "get",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -75,7 +76,7 @@ def sync_detailed(
         param_cookie=param_cookie,
     )
 
-    response = httpx.get(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -111,6 +112,6 @@ async def asyncio_detailed(
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.get(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)

@@ -10,20 +10,24 @@ isoparse({{ source }})
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, stringify=False) %}
+{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
+{% set transformed = source + ".isoformat()" %}
+{% if multipart %} {# Multipart data must be bytes, not str #}
+{% set transformed = transformed + ".encode()" %}
+{% endif %}
 {% if property.required %}
 {% if property.nullable %}
-{{ destination }} = {{ source }}.isoformat() if {{ source }} else None
+{{ destination }} = {{ transformed }} if {{ source }} else None
 {% else %}
-{{ destination }} = {{ source }}.isoformat()
+{{ destination }} = {{ transformed }}
 {% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
-    {{ destination }} = {{ source }}.isoformat() if {{ source }} else None
+    {{ destination }} = {{ transformed }} if {{ source }} else None
 {% else %}
-    {{ destination }} = {{ source }}.isoformat()
+    {{ destination }} = {{ transformed }}
 {% endif %}
 {% endif %}
 {% endmacro %}

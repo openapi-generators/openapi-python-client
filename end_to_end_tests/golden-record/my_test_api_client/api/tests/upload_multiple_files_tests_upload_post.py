@@ -1,25 +1,21 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, File, Response, Unset
+from ...types import File, Response
 
 
 def _get_kwargs(
     *,
     client: Client,
     multipart_data: List[File],
-    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/tests/upload/multiple".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
-
-    if keep_alive is not UNSET:
-        headers["keep-alive"] = keep_alive
 
     multipart_multipart_data = []
     for multipart_data_item_data in multipart_data:
@@ -28,6 +24,7 @@ def _get_kwargs(
         multipart_multipart_data.append(multipart_data_item)
 
     return {
+        "method": "post",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -38,8 +35,7 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = response.json()
-
+        response_200 = cast(Any, response.json())
         return response_200
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
@@ -61,14 +57,12 @@ def sync_detailed(
     *,
     client: Client,
     multipart_data: List[File],
-    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        keep_alive (Union[Unset, bool]):
         multipart_data (List[File]):
 
     Returns:
@@ -78,10 +72,9 @@ def sync_detailed(
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
-        keep_alive=keep_alive,
     )
 
-    response = httpx.post(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -93,14 +86,12 @@ def sync(
     *,
     client: Client,
     multipart_data: List[File],
-    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        keep_alive (Union[Unset, bool]):
         multipart_data (List[File]):
 
     Returns:
@@ -110,7 +101,6 @@ def sync(
     return sync_detailed(
         client=client,
         multipart_data=multipart_data,
-        keep_alive=keep_alive,
     ).parsed
 
 
@@ -118,14 +108,12 @@ async def asyncio_detailed(
     *,
     client: Client,
     multipart_data: List[File],
-    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        keep_alive (Union[Unset, bool]):
         multipart_data (List[File]):
 
     Returns:
@@ -135,11 +123,10 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         client=client,
         multipart_data=multipart_data,
-        keep_alive=keep_alive,
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.post(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)
 
@@ -148,14 +135,12 @@ async def asyncio(
     *,
     client: Client,
     multipart_data: List[File],
-    keep_alive: Union[Unset, bool] = UNSET,
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        keep_alive (Union[Unset, bool]):
         multipart_data (List[File]):
 
     Returns:
@@ -166,6 +151,5 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             multipart_data=multipart_data,
-            keep_alive=keep_alive,
         )
     ).parsed

@@ -102,36 +102,44 @@ class BodyUploadFileTestsUploadPost:
     def to_multipart(self) -> Dict[str, Any]:
         some_file = self.some_file.to_tuple()
 
-        some_object = (None, json.dumps(self.some_object.to_dict()), "application/json")
+        some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
 
         some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
-        some_string = self.some_string if self.some_string is UNSET else (None, str(self.some_string), "text/plain")
-        some_number = self.some_number if self.some_number is UNSET else (None, str(self.some_number), "text/plain")
-        some_array: Union[Unset, Tuple[None, str, str]] = UNSET
+        some_string = (
+            self.some_string
+            if isinstance(self.some_string, Unset)
+            else (None, str(self.some_string).encode(), "text/plain")
+        )
+        some_number = (
+            self.some_number
+            if isinstance(self.some_number, Unset)
+            else (None, str(self.some_number).encode(), "text/plain")
+        )
+        some_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_array, Unset):
             _temp_some_array = self.some_array
-            some_array = (None, json.dumps(_temp_some_array), "application/json")
+            some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
 
-        some_optional_object: Union[Unset, Tuple[None, str, str]] = UNSET
+        some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
-            some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()), "application/json")
+            some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
 
         some_nullable_object = (
-            (None, json.dumps(self.some_nullable_object.to_dict()), "application/json")
+            (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
             if self.some_nullable_object
             else None
         )
 
-        some_enum: Union[Unset, Tuple[None, str, str]] = UNSET
+        some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
-            some_enum = (None, str(self.some_enum.value), "text/plain")
+            some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = (None, json.dumps(prop.to_dict()), "application/json")
+            field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
 
         field_dict.update(
             {

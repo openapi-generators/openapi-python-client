@@ -79,6 +79,7 @@ class AModel:
 
         a_date = self.a_date.isoformat()
         required_not_nullable = self.required_not_nullable
+
         if isinstance(self.one_of_models, FreeFormModel):
             one_of_models = self.one_of_models.to_dict()
 
@@ -91,7 +92,6 @@ class AModel:
         model = self.model.to_dict()
 
         any_value = self.any_value
-
         an_optional_allof_enum: Union[Unset, str] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum.value
@@ -120,6 +120,7 @@ class AModel:
         nullable_one_of_models: Union[Dict[str, Any], None]
         if self.nullable_one_of_models is None:
             nullable_one_of_models = None
+
         elif isinstance(self.nullable_one_of_models, FreeFormModel):
             nullable_one_of_models = self.nullable_one_of_models.to_dict()
 
@@ -129,6 +130,7 @@ class AModel:
         not_required_one_of_models: Union[Dict[str, Any], Unset]
         if isinstance(self.not_required_one_of_models, Unset):
             not_required_one_of_models = UNSET
+
         elif isinstance(self.not_required_one_of_models, FreeFormModel):
             not_required_one_of_models = UNSET
             if not isinstance(self.not_required_one_of_models, Unset):
@@ -144,6 +146,7 @@ class AModel:
             not_required_nullable_one_of_models = UNSET
         elif self.not_required_nullable_one_of_models is None:
             not_required_nullable_one_of_models = None
+
         elif isinstance(self.not_required_nullable_one_of_models, FreeFormModel):
             not_required_nullable_one_of_models = UNSET
             if not isinstance(self.not_required_nullable_one_of_models, Unset):
@@ -255,9 +258,7 @@ class AModel:
                 return one_of_models_type_1
             except:  # noqa: E722
                 pass
-            one_of_models_type_2 = data
-
-            return one_of_models_type_2
+            return cast(Union[Any, FreeFormModel, ModelWithUnionProperty], data)
 
         one_of_models = _parse_one_of_models(d.pop("one_of_models"))
 

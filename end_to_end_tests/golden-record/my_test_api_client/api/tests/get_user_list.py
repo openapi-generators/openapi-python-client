@@ -21,14 +21,17 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     url = "{}/tests/".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
+    params: Dict[str, Any] = {}
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
         an_enum_value_item = an_enum_value_item_data.value
 
         json_an_enum_value.append(an_enum_value_item)
+
+    params["an_enum_value"] = json_an_enum_value
 
     json_an_enum_value_with_null = []
     for an_enum_value_with_null_item_data in an_enum_value_with_null:
@@ -38,22 +41,23 @@ def _get_kwargs(
 
         json_an_enum_value_with_null.append(an_enum_value_with_null_item)
 
+    params["an_enum_value_with_null"] = json_an_enum_value_with_null
+
     json_an_enum_value_with_only_null = an_enum_value_with_only_null
+
+    params["an_enum_value_with_only_null"] = json_an_enum_value_with_only_null
 
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
     else:
         json_some_date = some_date.isoformat()
 
-    params: Dict[str, Any] = {
-        "an_enum_value": json_an_enum_value,
-        "an_enum_value_with_null": json_an_enum_value_with_null,
-        "an_enum_value_with_only_null": json_an_enum_value_with_only_null,
-        "some_date": json_some_date,
-    }
+    params["some_date"] = json_some_date
+
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
+        "method": "get",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -122,7 +126,7 @@ def sync_detailed(
         some_date=some_date,
     )
 
-    response = httpx.get(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -192,7 +196,7 @@ async def asyncio_detailed(
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.get(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)
 
