@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class Discriminator(BaseModel):
@@ -22,6 +22,7 @@ class Discriminator(BaseModel):
     mapping: Optional[Dict[str, str]] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

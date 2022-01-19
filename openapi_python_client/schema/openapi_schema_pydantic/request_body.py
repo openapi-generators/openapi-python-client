@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 from .media_type import MediaType
 
@@ -18,6 +18,7 @@ class RequestBody(BaseModel):
     required: bool = False
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

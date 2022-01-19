@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import AnyUrl, BaseModel
+from pydantic import AnyUrl, BaseModel, Extra
 
 
 class OAuthFlow(BaseModel):
@@ -13,11 +13,12 @@ class OAuthFlow(BaseModel):
     """
 
     authorizationUrl: Optional[AnyUrl] = None
-    tokenUrl: Optional[str] = None
+    tokenUrl: Optional[AnyUrl] = None
     refreshUrl: Optional[AnyUrl] = None
     scopes: Dict[str, str]
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

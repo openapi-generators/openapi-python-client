@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class Example(BaseModel):
@@ -17,6 +17,7 @@ class Example(BaseModel):
     externalValue: Optional[str] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {"summary": "A foo example", "value": {"foo": "bar"}},

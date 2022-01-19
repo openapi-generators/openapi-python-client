@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 
 from .operation import Operation
 from .parameter import Parameter
@@ -35,6 +35,7 @@ class PathItem(BaseModel):
     parameters: Optional[List[Union[Parameter, Reference]]] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [

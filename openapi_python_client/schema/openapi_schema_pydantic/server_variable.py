@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class ServerVariable(BaseModel):
@@ -14,3 +14,6 @@ class ServerVariable(BaseModel):
     enum: Optional[List[str]] = None
     default: str
     description: Optional[str] = None
+
+    class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow

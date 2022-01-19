@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 from .header import Header
 from .link import Link
@@ -24,6 +24,7 @@ class Response(BaseModel):
     links: Optional[Dict[str, Union[Link, Reference]]] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

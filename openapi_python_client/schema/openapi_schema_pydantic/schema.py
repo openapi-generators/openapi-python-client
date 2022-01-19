@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr
+from pydantic import BaseModel, Extra, Field, StrictInt, StrictStr
 
 from ..data_type import DataType
 from .discriminator import Discriminator
@@ -37,9 +37,9 @@ class Schema(BaseModel):
     required: Optional[List[str]] = Field(default=None, min_items=1)
     enum: Union[None, List[Optional[StrictInt]], List[Optional[StrictStr]]] = Field(default=None, min_items=1)
     type: Optional[DataType] = Field(default=None)
-    allOf: Optional[List[Union[Reference, "Schema"]]] = None
-    oneOf: List[Union[Reference, "Schema"]] = []
-    anyOf: List[Union[Reference, "Schema"]] = []
+    allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
+    oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
+    anyOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     schema_not: Optional[Union[Reference, "Schema"]] = Field(default=None, alias="not")
     items: Optional[Union[Reference, "Schema"]] = None
     properties: Optional[Dict[str, Union[Reference, "Schema"]]] = None
@@ -57,6 +57,7 @@ class Schema(BaseModel):
     deprecated: Optional[bool] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [

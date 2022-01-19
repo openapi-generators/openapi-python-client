@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 from .oauth_flow import OAuthFlow
 
@@ -18,3 +18,6 @@ class OAuthFlows(BaseModel):
     password: Optional[OAuthFlow] = None
     clientCredentials: Optional[OAuthFlow] = None
     authorizationCode: Optional[OAuthFlow] = None
+
+    class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow

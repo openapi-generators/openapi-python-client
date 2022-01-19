@@ -1,8 +1,13 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 from .reference import Reference
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .header import Header
+else:
+    Header = "Header"  # pylint: disable=invalid-name
 
 
 class Encoding(BaseModel):
@@ -14,12 +19,13 @@ class Encoding(BaseModel):
     """
 
     contentType: Optional[str] = None
-    headers: Optional[Dict[str, Reference]] = None
+    headers: Optional[Dict[str, Union[Header, Reference]]] = None
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

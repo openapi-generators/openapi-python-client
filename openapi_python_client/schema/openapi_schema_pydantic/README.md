@@ -1,5 +1,8 @@
 Everything in this directory (including the rest of this file after this paragraph) is a vendored copy of [openapi-schem-pydantic](https://github.com/kuimono/openapi-schema-pydantic) and is licensed under the LICENSE file in this directory.
 
+Included vendored version is the [following](https://github.com/kuimono/openapi-schema-pydantic/commit/0836b429086917feeb973de3367a7ac4c2b3a665)
+Small patches has been applied to it.
+
 ## Alias
 
 Due to the reserved words in python and pydantic,

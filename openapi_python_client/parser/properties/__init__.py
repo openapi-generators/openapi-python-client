@@ -453,6 +453,7 @@ def build_union_property(
             constructed `UnionProperty` or a `PropertyError` describing what went wrong.
     """
     sub_properties: List[Property] = []
+
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type_{i}",
@@ -570,8 +571,8 @@ def _property_from_data(
     if isinstance(data, oai.Reference):
         return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas, config=config)
 
+    sub_data: List[Union[oai.Schema, oai.Reference]] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
-    sub_data = (data.allOf or []) + data.anyOf + data.oneOf
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
         return _property_from_ref(
             name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config

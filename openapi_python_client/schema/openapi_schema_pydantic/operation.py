@@ -1,7 +1,8 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
+from .callback import Callback
 from .external_documentation import ExternalDocumentation
 from .parameter import Parameter
 from .reference import Reference
@@ -27,11 +28,14 @@ class Operation(BaseModel):
     parameters: Optional[List[Union[Parameter, Reference]]] = None
     requestBody: Optional[Union[RequestBody, Reference]] = None
     responses: Responses
+    callbacks: Optional[Dict[str, Callback]] = None
+
     deprecated: bool = False
     security: Optional[List[SecurityRequirement]] = None
     servers: Optional[List[Server]] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

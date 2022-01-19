@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Extra, Field
 
 from .oauth_flows import OAuthFlows
 
@@ -29,6 +29,7 @@ class SecurityScheme(BaseModel):
     openIdConnectUrl: Optional[AnyUrl] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         allow_population_by_field_name = True
         schema_extra = {
             "examples": [
