@@ -13,6 +13,32 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.11.0
+
+### Breaking Changes
+
+- Minimum required `attrs` version in generated clients is now 21.3.0.
+- Python 3.6 is officially not supported. The minimum version has been updated to reflect this.
+- Validation of OpenAPI documents is now more strict.
+- Model names generated from OpenAPI names with periods (`.`) in them will be different.
+- Header values will be explicitly transformed or omitted instead of blindly passed to httpx as-is.
+- `datetime` is now considered a reserved word everywhere, so any properties which were named `datetime` will now be named `datetime_`.
+- `File` uploads can now only accept binary payloads (`BinaryIO`).
+
+### Features
+
+- Don't set a cap on allowed `attrs` version.
+- use poetry-core as build backend in generated clients [#565]. Thanks @fabaff!
+- Use httpx.request to allow bodies for all type of requests [#545, #547]. Thanks @MalteBecker!
+
+### Fixes
+
+- OpenAPI schema validation issues (#426, #568). Thanks @p1-ra!
+- treat period as a delimiter in names (#546). Thanks @alexifm!
+- Non-string header values [#552, #553, #566]. Thanks @John98Zakaria!
+- Generate valid code when a property of a model is named "datetime" [#557 & #558]. Thanks @kmray!
+- Multipart uploads for httpx >= 0.19.0 [#508, #548]. Thanks @skuo1-ilmn & @kairntech!
+
 ## 0.10.8
 
 ### Features
