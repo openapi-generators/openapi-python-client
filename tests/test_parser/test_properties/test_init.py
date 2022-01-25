@@ -505,6 +505,29 @@ class TestPropertyFromData:
         parse_reference_path.assert_called_once_with(data.ref)
         assert prop == PropertyError(data=data, detail="Could not find reference in parsed models or enums")
         assert schemas == new_schemas
+        assert schemas.dependencies == {}
+
+    @pytest.mark.parametrize("references_exist", (True, False))
+    def test_property_from_data_ref(self, property_factory, references_exist):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        name = "new_name"
+        required = False
+        ref_path = "/components/schemas/RefName"
+        data = oai.Reference.construct(ref=f"#{ref_path}")
+        roots = {"new_root"}
+
+        existing_property = property_factory(name="old_name")
+        references = {ref_path: {"old_root"}} if references_exist else {}
+        schemas = Schemas(classes_by_reference={ref_path: existing_property}, dependencies=references)
+
+        prop, new_schemas = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="", config=Config(), roots=roots
+        )
+
+        assert prop == property_factory(name=name, required=required)
+        assert schemas == new_schemas
+        assert schemas.dependencies == {ref_path: {*roots, *references.get(ref_path, set())}}
 
     def test_property_from_data_invalid_ref(self, mocker):
         from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
@@ -595,14 +618,21 @@ class TestPropertyFromData:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
         schemas = Schemas()
         config = MagicMock()
+        roots = {"root"}
 
         response = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config, roots=roots
         )
 
         assert response == build_list_property.return_value
         build_list_property.assert_called_once_with(
-            data=data, name=name, required=required, schemas=schemas, parent_name="parent", config=config
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            roots=roots,
         )
 
     def test_property_from_data_object(self, mocker):
@@ -617,14 +647,21 @@ class TestPropertyFromData:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
         schemas = Schemas()
         config = MagicMock()
+        roots = {"root"}
 
         response = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config, roots=roots
         )
 
         assert response == build_model_property.return_value
         build_model_property.assert_called_once_with(
-            data=data, name=name, required=required, schemas=schemas, parent_name="parent", config=config
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            roots=roots,
         )
 
     def test_property_from_data_union(self, mocker):
@@ -715,7 +752,13 @@ class TestBuildListProperty:
         schemas = properties.Schemas()
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            config=MagicMock(),
+            roots={"root"},
         )
 
         assert p == PropertyError(data=data, detail="type array must have items defined")
@@ -737,9 +780,10 @@ class TestBuildListProperty:
             properties, "property_from_data", return_value=(properties.PropertyError(data="blah"), second_schemas)
         )
         config = MagicMock()
+        roots = {"root"}
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config, roots=roots
         )
 
         assert isinstance(p, PropertyError)
@@ -748,7 +792,13 @@ class TestBuildListProperty:
         assert new_schemas == second_schemas
         assert schemas != new_schemas, "Schema was mutated"
         property_from_data.assert_called_once_with(
-            name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name="parent", config=config
+            name=f"{name}_item",
+            required=True,
+            data=data.items,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            roots=roots,
         )
 
     def test_build_list_property(self, any_property_factory):
@@ -763,7 +813,7 @@ class TestBuildListProperty:
         config = Config()
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=True, data=data, schemas=schemas, parent_name="parent", config=config
+            name=name, required=True, data=data, schemas=schemas, parent_name="parent", config=config, roots={"root"}
         )
 
         assert isinstance(p, properties.ListProperty)
@@ -923,17 +973,18 @@ class TestStringBasedProperty:
         assert p == string_property_factory(name=name, required=required, nullable=nullable)
 
 
-class TestBuildSchemas:
+class TestCreateSchemas:
     def test_skips_references_and_keeps_going(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, build_schemas
+        from openapi_python_client.parser.properties import Schemas, _create_schemas
         from openapi_python_client.schema import Reference, Schema
 
         components = {"a_ref": Reference.construct(), "a_schema": Schema.construct()}
         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
         config = Config()
+        schemas = Schemas()
 
-        result = build_schemas(components=components, schemas=Schemas(), config=config)
+        result = _create_schemas(components=components, schemas=schemas, config=config)
         # Should not even try to parse a path for the Reference
         parse_reference_path.assert_called_once_with("#/components/schemas/a_schema")
         update_schemas_with_data.assert_called_once_with(
@@ -945,9 +996,10 @@ class TestBuildSchemas:
             ),
         )
         assert result == update_schemas_with_data.return_value
+        assert result.schemas_created
 
     def test_records_bad_uris_and_keeps_going(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, build_schemas
+        from openapi_python_client.parser.properties import Schemas, _create_schemas
         from openapi_python_client.schema import Schema
 
         components = {"first": Schema.construct(), "second": Schema.construct()}
@@ -956,8 +1008,9 @@ class TestBuildSchemas:
             f"{MODULE_NAME}.parse_reference_path", side_effect=[PropertyError(detail="some details"), "a_path"]
         )
         config = Config()
+        schemas = Schemas()
 
-        result = build_schemas(components=components, schemas=Schemas(), config=config)
+        result = _create_schemas(components=components, schemas=schemas, config=config)
         parse_reference_path.assert_has_calls(
             [
                 call("#/components/schemas/first"),
@@ -971,9 +1024,10 @@ class TestBuildSchemas:
             schemas=Schemas(errors=[PropertyError(detail="some details", data=components["first"])]),
         )
         assert result == update_schemas_with_data.return_value
+        assert result.schemas_created
 
     def test_retries_failing_properties_while_making_progress(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, build_schemas
+        from openapi_python_client.parser.properties import Schemas, _create_schemas
         from openapi_python_client.schema import Schema
 
         components = {"first": Schema.construct(), "second": Schema.construct()}
@@ -982,8 +1036,9 @@ class TestBuildSchemas:
         )
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
         config = Config()
+        schemas = Schemas()
 
-        result = build_schemas(components=components, schemas=Schemas(), config=config)
+        result = _create_schemas(components=components, schemas=schemas, config=config)
         parse_reference_path.assert_has_calls(
             [
                 call("#/components/schemas/first"),
@@ -993,6 +1048,165 @@ class TestBuildSchemas:
         )
         assert update_schemas_with_data.call_count == 3
         assert result.errors == [PropertyError()]
+        assert result.schemas_created
+
+
+class TestProcessModels:
+    def test_retries_failing_models_while_making_progress(self, mocker, model_property_factory, property_factory):
+        from openapi_python_client.parser.properties import _process_models
+
+        first_model = model_property_factory()
+        schemas = Schemas(
+            classes_by_reference={
+                "first": first_model,
+                "second": model_property_factory(),
+                "non-model": property_factory(),
+            }
+        )
+        process_model = mocker.patch(
+            f"{MODULE_NAME}.process_model", side_effect=[PropertyError(), Schemas(), PropertyError()]
+        )
+        process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
+        config = Config()
+
+        result = _process_models(schemas=schemas, config=config)
+
+        process_model.assert_has_calls(
+            [
+                call(first_model, schemas=schemas, config=config),
+                call(schemas.classes_by_reference["second"], schemas=schemas, config=config),
+                call(first_model, schemas=result, config=config),
+            ]
+        )
+        assert process_model_errors.was_called_once_with([(first_model, PropertyError())])
+        assert all(error in result.errors for error in process_model_errors.return_value)
+
+    def test_detect_recursive_allof_reference_no_retry(self, mocker, model_property_factory):
+        from openapi_python_client.parser.properties import Class, _process_models
+        from openapi_python_client.schema import Reference
+
+        class_name = "class_name"
+        recursive_model = model_property_factory(class_info=Class(name=class_name, module_name="module_name"))
+        schemas = Schemas(
+            classes_by_reference={
+                "recursive": recursive_model,
+                "second": model_property_factory(),
+            }
+        )
+        recursion_error = PropertyError(data=Reference.construct(ref=f"#/{class_name}"))
+        process_model = mocker.patch(f"{MODULE_NAME}.process_model", side_effect=[recursion_error, Schemas()])
+        process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
+        config = Config()
+
+        result = _process_models(schemas=schemas, config=config)
+
+        process_model.assert_has_calls(
+            [
+                call(recursive_model, schemas=schemas, config=config),
+                call(schemas.classes_by_reference["second"], schemas=schemas, config=config),
+            ]
+        )
+        assert process_model_errors.was_called_once_with([(recursive_model, recursion_error)])
+        assert all(error in result.errors for error in process_model_errors.return_value)
+        assert "\n\nRecursive allOf reference found" in recursion_error.detail
+
+
+class TestPropogateRemoval:
+    def test_propogate_removal_class_name(self):
+        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
+        from openapi_python_client.utils import ClassName
+
+        root = ClassName("ClassName", "")
+        ref_path = ReferencePath("/reference")
+        other_class_name = ClassName("OtherClassName", "")
+        schemas = Schemas(
+            classes_by_name={root: None, other_class_name: None},
+            classes_by_reference={ref_path: None},
+            dependencies={ref_path: {other_class_name}, root: {ref_path}},
+        )
+        error = PropertyError()
+
+        _propogate_removal(root=root, schemas=schemas, error=error)
+
+        assert schemas.classes_by_name == {other_class_name: None}
+        assert schemas.classes_by_reference == {ref_path: None}
+        assert not error.detail
+
+    def test_propogate_removal_ref_path(self):
+        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
+        from openapi_python_client.utils import ClassName
+
+        root = ReferencePath("/root/reference")
+        class_name = ClassName("ClassName", "")
+        ref_path = ReferencePath("/ref/path")
+        schemas = Schemas(
+            classes_by_name={class_name: None},
+            classes_by_reference={root: None, ref_path: None},
+            dependencies={root: {ref_path, class_name}},
+        )
+        error = PropertyError()
+
+        _propogate_removal(root=root, schemas=schemas, error=error)
+
+        assert schemas.classes_by_name == {}
+        assert schemas.classes_by_reference == {}
+        assert error.detail == f"\n{root}\n{ref_path}"
+
+    def test_propogate_removal_ref_path_no_refs(self):
+        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
+        from openapi_python_client.utils import ClassName
+
+        root = ReferencePath("/root/reference")
+        class_name = ClassName("ClassName", "")
+        ref_path = ReferencePath("/ref/path")
+        schemas = Schemas(classes_by_name={class_name: None}, classes_by_reference={root: None, ref_path: None})
+        error = PropertyError()
+
+        _propogate_removal(root=root, schemas=schemas, error=error)
+
+        assert schemas.classes_by_name == {class_name: None}
+        assert schemas.classes_by_reference == {ref_path: None}
+        assert error.detail == f"\n{root}"
+
+    def test_propogate_removal_ref_path_already_removed(self):
+        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
+        from openapi_python_client.utils import ClassName
+
+        root = ReferencePath("/root/reference")
+        class_name = ClassName("ClassName", "")
+        ref_path = ReferencePath("/ref/path")
+        schemas = Schemas(
+            classes_by_name={class_name: None},
+            classes_by_reference={ref_path: None},
+            dependencies={root: {ref_path, class_name}},
+        )
+        error = PropertyError()
+
+        _propogate_removal(root=root, schemas=schemas, error=error)
+
+        assert schemas.classes_by_name == {class_name: None}
+        assert schemas.classes_by_reference == {ref_path: None}
+        assert not error.detail
+
+
+def test_process_model_errors(mocker, model_property_factory):
+    from openapi_python_client.parser.properties import _process_model_errors
+
+    propogate_removal = mocker.patch(f"{MODULE_NAME}._propogate_removal")
+    model_errors = [
+        (model_property_factory(roots={"root1", "root2"}), PropertyError(detail="existing detail")),
+        (model_property_factory(roots=set()), PropertyError()),
+        (model_property_factory(roots={"root1", "root3"}), PropertyError(detail="other existing detail")),
+    ]
+    schemas = Schemas()
+
+    result = _process_model_errors(model_errors, schemas=schemas)
+
+    propogate_removal.assert_has_calls(
+        [call(root=root, schemas=schemas, error=error) for model, error in model_errors for root in model.roots]
+    )
+    assert result == [error for _, error in model_errors]
+    assert all("\n\nFailure to process schema has resulted in the removal of:" in error.detail for error in result)
 
 
 def test_build_enum_property_conflict():
@@ -1038,3 +1252,21 @@ def test_build_enum_property_bad_default():
 
     assert schemas == schemas
     assert err == PropertyError(detail="B is an invalid default for enum Existing", data=data)
+
+
+def test_build_schemas(mocker):
+    from openapi_python_client.parser.properties import Schemas, build_schemas
+    from openapi_python_client.schema import Reference, Schema
+
+    create_schemas = mocker.patch(f"{MODULE_NAME}._create_schemas")
+    process_models = mocker.patch(f"{MODULE_NAME}._process_models")
+
+    components = {"a_ref": Reference.construct(), "a_schema": Schema.construct()}
+    schemas = Schemas()
+    config = Config()
+
+    result = build_schemas(components=components, schemas=schemas, config=config)
+
+    create_schemas.assert_called_once_with(components=components, schemas=schemas, config=config)
+    process_models.assert_called_once_with(schemas=create_schemas.return_value, config=config)
+    assert result == process_models.return_value

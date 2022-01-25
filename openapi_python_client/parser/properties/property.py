@@ -1,6 +1,6 @@
 __all__ = ["Property"]
 
-from typing import ClassVar, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
 import attr
 
@@ -8,6 +8,11 @@ from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .model_property import ModelProperty
+else:
+    ModelProperty = "ModelProperty"  # pylint: disable=invalid-name
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -68,7 +73,9 @@ class Property:
         """Get the string describing the JSON type of this property."""
         return self._json_type_string
 
-    def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
+    def get_type_string(
+        self, no_optional: bool = False, json: bool = False, *, model_parent: Optional[ModelProperty] = None
+    ) -> str:
         """
         Get a string representation of type that should be used when declaring this property
 
@@ -80,6 +87,9 @@ class Property:
             type_string = self.get_base_json_type_string()
         else:
             type_string = self.get_base_type_string()
+
+        if model_parent and type_string == model_parent.class_info.name:
+            type_string = f"'{type_string}'"
 
         if no_optional or (self.required and not self.nullable):
             return type_string
@@ -111,8 +121,12 @@ class Property:
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 
-    def to_string(self) -> str:
-        """How this should be declared in a dataclass"""
+    def to_string(self, *, model_parent: Optional[ModelProperty] = None) -> str:
+        """How this should be declared in a dataclass
+
+        Args:
+            model_parent: The ModelProperty which contains this Property (used for template type annotations)
+        """
         default: Optional[str]
         if self.default is not None:
             default = self.default
@@ -122,8 +136,8 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string()} = {default}"
-        return f"{self.python_name}: {self.get_type_string()}"
+            return f"{self.python_name}: {self.get_type_string(model_parent=model_parent)} = {default}"
+        return f"{self.python_name}: {self.get_type_string(model_parent=model_parent)}"
 
     def to_docstring(self) -> str:
         """Returns property docstring"""

@@ -9,7 +9,7 @@ from ... import utils
 from ..errors import ParseError, PropertyError
 from .enum_property import EnumProperty
 from .property import Property
-from .schemas import Class, Schemas, parse_reference_path
+from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -17,16 +17,27 @@ class ModelProperty(Property):
     """A property which refers to another Schema"""
 
     class_info: Class
-    required_properties: List[Property]
-    optional_properties: List[Property]
+    data: oai.Schema
     description: str
-    relative_imports: Set[str]
-    additional_properties: Union[bool, Property]
+    roots: Set[Union[ReferencePath, utils.ClassName]]
+    required_properties: Optional[List[Property]]
+    optional_properties: Optional[List[Property]]
+    relative_imports: Optional[Set[str]]
+    additional_properties: Optional[Union[bool, Property]]
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
     is_multipart_body: bool = False
+
+    def __attrs_post_init__(self) -> None:
+        if self.relative_imports:
+            self.set_relative_imports(self.relative_imports)
+
+    @property
+    def self_import(self) -> str:
+        """Constructs a self import statement from this ModelProperty's attributes"""
+        return f"models.{self.class_info.module_name} import {self.class_info.name}"
 
     def get_base_type_string(self) -> str:
         return self.class_info.name
@@ -42,12 +53,20 @@ class ModelProperty(Property):
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}",
+                f"from {prefix}{self.self_import}",
                 "from typing import Dict",
                 "from typing import cast",
             }
         )
         return imports
+
+    def set_relative_imports(self, relative_imports: Set[str]) -> None:
+        """Set the relative imports set for this ModelProperty, filtering out self imports
+
+        Args:
+            relative_imports: The set of relative import strings
+        """
+        object.__setattr__(self, "relative_imports", {ri for ri in relative_imports if self.self_import not in ri})
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -111,9 +130,14 @@ class _PropertyData(NamedTuple):
     schemas: Schemas
 
 
-# pylint: disable=too-many-locals,too-many-branches
+# pylint: disable=too-many-locals,too-many-branches,too-many-return-statements
 def _process_properties(
-    *, data: oai.Schema, schemas: Schemas, class_name: str, config: Config
+    *,
+    data: oai.Schema,
+    schemas: Schemas,
+    class_name: utils.ClassName,
+    config: Config,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Union[_PropertyData, PropertyError]:
     from . import property_from_data
 
@@ -145,10 +169,16 @@ def _process_properties(
                 return PropertyError(f"Reference {sub_prop.ref} not found")
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
+            # Properties of allOf references first should be processed first
+            if not (
+                isinstance(sub_model.required_properties, list) and isinstance(sub_model.optional_properties, list)
+            ):
+                return PropertyError(f"Reference {sub_model.name} in allOf was not processed", data=sub_prop)
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
                 err = _add_if_no_conflict(prop)
                 if err is not None:
                     return err
+            schemas.add_dependencies(ref_path=ref_path, roots=roots)
         else:
             unprocessed_props.update(sub_prop.properties or {})
             required_set.update(sub_prop.required or [])
@@ -157,7 +187,13 @@ def _process_properties(
         prop_required = key in required_set
         prop_or_error: Union[Property, PropertyError, None]
         prop_or_error, schemas = property_from_data(
-            name=key, required=prop_required, data=value, schemas=schemas, parent_name=class_name, config=config
+            name=key,
+            required=prop_required,
+            data=value,
+            schemas=schemas,
+            parent_name=class_name,
+            config=config,
+            roots=roots,
         )
         if isinstance(prop_or_error, Property):
             prop_or_error = _add_if_no_conflict(prop_or_error)
@@ -185,8 +221,9 @@ def _get_additional_properties(
     *,
     schema_additional: Union[None, bool, oai.Reference, oai.Schema],
     schemas: Schemas,
-    class_name: str,
+    class_name: utils.ClassName,
     config: Config,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[bool, Property, PropertyError], Schemas]:
     from . import property_from_data
 
@@ -207,12 +244,79 @@ def _get_additional_properties(
         schemas=schemas,
         parent_name=class_name,
         config=config,
+        roots=roots,
     )
     return additional_properties, schemas
 
 
+def _process_property_data(
+    *,
+    data: oai.Schema,
+    schemas: Schemas,
+    class_info: Class,
+    config: Config,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
+) -> Tuple[Union[Tuple[_PropertyData, Union[bool, Property]], PropertyError], Schemas]:
+    property_data = _process_properties(
+        data=data, schemas=schemas, class_name=class_info.name, config=config, roots=roots
+    )
+    if isinstance(property_data, PropertyError):
+        return property_data, schemas
+    schemas = property_data.schemas
+
+    additional_properties, schemas = _get_additional_properties(
+        schema_additional=data.additionalProperties,
+        schemas=schemas,
+        class_name=class_info.name,
+        config=config,
+        roots=roots,
+    )
+    if isinstance(additional_properties, Property):
+        property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
+    elif isinstance(additional_properties, PropertyError):
+        return additional_properties, schemas
+
+    return (property_data, additional_properties), schemas
+
+
+def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config) -> Union[Schemas, PropertyError]:
+    """Populate a ModelProperty instance's property data
+    Args:
+        model_prop: The ModelProperty to build property data for
+        schemas: Existing Schemas
+        config: Config data for this run of the generator, used to modifying names
+    Returns:
+        Either the updated `schemas` input or a `PropertyError` if something went wrong.
+    """
+    data_or_err, schemas = _process_property_data(
+        data=model_prop.data,
+        schemas=schemas,
+        class_info=model_prop.class_info,
+        config=config,
+        roots=model_prop.roots,
+    )
+    if isinstance(data_or_err, PropertyError):
+        return data_or_err
+
+    property_data, additional_properties = data_or_err
+
+    object.__setattr__(model_prop, "required_properties", property_data.required_props)
+    object.__setattr__(model_prop, "optional_properties", property_data.optional_props)
+    model_prop.set_relative_imports(property_data.relative_imports)
+    object.__setattr__(model_prop, "additional_properties", additional_properties)
+    return schemas
+
+
+# pylint: disable=too-many-locals
 def build_model_property(
-    *, data: oai.Schema, name: str, schemas: Schemas, required: bool, parent_name: Optional[str], config: Config
+    *,
+    data: oai.Schema,
+    name: str,
+    schemas: Schemas,
+    required: bool,
+    parent_name: Optional[str],
+    config: Config,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
     """
     A single ModelProperty from its OAI data
@@ -230,31 +334,39 @@ def build_model_property(
     if parent_name:
         class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_string)}"
     class_info = Class.from_string(string=class_string, config=config)
-
-    property_data = _process_properties(data=data, schemas=schemas, class_name=class_info.name, config=config)
-    if isinstance(property_data, PropertyError):
-        return property_data, schemas
-    schemas = property_data.schemas
-
-    additional_properties, schemas = _get_additional_properties(
-        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_info.name, config=config
-    )
-    if isinstance(additional_properties, Property):
-        property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
-    elif isinstance(additional_properties, PropertyError):
-        return additional_properties, schemas
+    model_roots = {*roots, class_info.name}
+    required_properties: Optional[List[Property]] = None
+    optional_properties: Optional[List[Property]] = None
+    relative_imports: Optional[Set[str]] = None
+    additional_properties: Optional[Union[bool, Property]] = None
+    if schemas.schemas_created:
+        data_or_err, schemas = _process_property_data(
+            data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots
+        )
+        if isinstance(data_or_err, PropertyError):
+            return data_or_err, schemas
+        property_data, additional_properties = data_or_err
+        required_properties = property_data.required_props
+        optional_properties = property_data.optional_props
+        relative_imports = property_data.relative_imports
+        for root in roots:
+            if isinstance(root, utils.ClassName):
+                continue
+            schemas.add_dependencies(root, {class_info.name})
 
     prop = ModelProperty(
         class_info=class_info,
-        required_properties=property_data.required_props,
-        optional_properties=property_data.optional_props,
-        relative_imports=property_data.relative_imports,
+        data=data,
+        roots=model_roots,
+        required_properties=required_properties,
+        optional_properties=optional_properties,
+        relative_imports=relative_imports,
+        additional_properties=additional_properties,
         description=data.description or "",
         default=None,
         nullable=data.nullable,
         required=required,
         name=name,
-        additional_properties=additional_properties,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         example=data.example,
     )
