@@ -30,7 +30,7 @@ importlib_metadata = {version = ">2,<5", python = "<3.8"}
 pydantic = "^1.6.1"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.1"
-httpx = ">=0.15.4,<0.22.0"
+httpx = ">=0.15.4,<0.22.1"
 autoflake = "^1.4"
 typing-extensions = { version = "*", python = "<3.8" }
 PyYAML = "^6.0"
