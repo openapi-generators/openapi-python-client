@@ -1,8 +1,10 @@
+import datetime
 import json
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 import attr
+from dateutil.parser import isoparse
 
 from ..models.body_upload_file_tests_upload_post_additional_property import (
     BodyUploadFileTestsUploadPostAdditionalProperty,
@@ -28,6 +30,8 @@ class BodyUploadFileTestsUploadPost:
         some_object (BodyUploadFileTestsUploadPostSomeObject):
         some_optional_file (Union[Unset, File]):
         some_string (Union[Unset, str]):  Default: 'some_default_string'.
+        a_datetime (Union[Unset, datetime.datetime]):
+        a_date (Union[Unset, datetime.date]):
         some_number (Union[Unset, float]):
         some_array (Union[Unset, List[float]]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
@@ -40,6 +44,8 @@ class BodyUploadFileTestsUploadPost:
     some_nullable_object: Optional[BodyUploadFileTestsUploadPostSomeNullableObject]
     some_optional_file: Union[Unset, File] = UNSET
     some_string: Union[Unset, str] = "some_default_string"
+    a_datetime: Union[Unset, datetime.datetime] = UNSET
+    a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
     some_array: Union[Unset, List[float]] = UNSET
     some_optional_object: Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject] = UNSET
@@ -58,6 +64,14 @@ class BodyUploadFileTestsUploadPost:
             some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = self.some_string
+        a_datetime: Union[Unset, str] = UNSET
+        if not isinstance(self.a_datetime, Unset):
+            a_datetime = self.a_datetime.isoformat()
+
+        a_date: Union[Unset, str] = UNSET
+        if not isinstance(self.a_date, Unset):
+            a_date = self.a_date.isoformat()
+
         some_number = self.some_number
         some_array: Union[Unset, List[float]] = UNSET
         if not isinstance(self.some_array, Unset):
@@ -88,6 +102,10 @@ class BodyUploadFileTestsUploadPost:
             field_dict["some_optional_file"] = some_optional_file
         if some_string is not UNSET:
             field_dict["some_string"] = some_string
+        if a_datetime is not UNSET:
+            field_dict["a_datetime"] = a_datetime
+        if a_date is not UNSET:
+            field_dict["a_date"] = a_date
         if some_number is not UNSET:
             field_dict["some_number"] = some_number
         if some_array is not UNSET:
@@ -113,6 +131,14 @@ class BodyUploadFileTestsUploadPost:
             if isinstance(self.some_string, Unset)
             else (None, str(self.some_string).encode(), "text/plain")
         )
+        a_datetime: Union[Unset, bytes] = UNSET
+        if not isinstance(self.a_datetime, Unset):
+            a_datetime = self.a_datetime.isoformat().encode()
+
+        a_date: Union[Unset, bytes] = UNSET
+        if not isinstance(self.a_date, Unset):
+            a_date = self.a_date.isoformat().encode()
+
         some_number = (
             self.some_number
             if isinstance(self.some_number, Unset)
@@ -152,6 +178,10 @@ class BodyUploadFileTestsUploadPost:
             field_dict["some_optional_file"] = some_optional_file
         if some_string is not UNSET:
             field_dict["some_string"] = some_string
+        if a_datetime is not UNSET:
+            field_dict["a_datetime"] = a_datetime
+        if a_date is not UNSET:
+            field_dict["a_date"] = a_date
         if some_number is not UNSET:
             field_dict["some_number"] = some_number
         if some_array is not UNSET:
@@ -178,6 +208,20 @@ class BodyUploadFileTestsUploadPost:
             some_optional_file = File(payload=BytesIO(_some_optional_file))
 
         some_string = d.pop("some_string", UNSET)
+
+        _a_datetime = d.pop("a_datetime", UNSET)
+        a_datetime: Union[Unset, datetime.datetime]
+        if isinstance(_a_datetime, Unset):
+            a_datetime = UNSET
+        else:
+            a_datetime = isoparse(_a_datetime)
+
+        _a_date = d.pop("a_date", UNSET)
+        a_date: Union[Unset, datetime.date]
+        if isinstance(_a_date, Unset):
+            a_date = UNSET
+        else:
+            a_date = isoparse(_a_date).date()
 
         some_number = d.pop("some_number", UNSET)
 
@@ -209,6 +253,8 @@ class BodyUploadFileTestsUploadPost:
             some_object=some_object,
             some_optional_file=some_optional_file,
             some_string=some_string,
+            a_datetime=a_datetime,
+            a_date=a_date,
             some_number=some_number,
             some_array=some_array,
             some_optional_object=some_optional_object,
