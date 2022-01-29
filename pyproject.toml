@@ -47,7 +47,6 @@ safety = "*"
 pytest-cov = "*"
 python-multipart = "*"
 flake8 = "*"
-typer-cli = "^0.0.12"
 types-PyYAML = "^6.0.3"
 types-certifi = "^2020.0.0"
 types-python-dateutil = "^2.0.0"
@@ -78,7 +77,6 @@ regen_integration = """
 openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests-config.yaml\
 && mypy integration-tests --strict
 """
-docs = "typer openapi_python_client/cli.py utils docs > usage.md"
 
 [tool.black]
 line-length = 120
