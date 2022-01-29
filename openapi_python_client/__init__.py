@@ -377,12 +377,12 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
         try:
             return json.loads(data.decode())
         except ValueError as err:
-            return GeneratorError(header="Invalid JSON from provided source: {}".format(str(err)))
+            return GeneratorError(header=f"Invalid JSON from provided source: {err}")
     else:
         try:
             return yaml.safe_load(data)
         except yaml.YAMLError as err:
-            return GeneratorError(header="Invalid YAML from provided source: {}".format(str(err)))
+            return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
 def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:

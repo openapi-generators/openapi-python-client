@@ -49,9 +49,6 @@ jobs:
       - name: Run isort
         run: poetry run isort . --check
 
-      - name: Run flake8
-        run: poetry run flake8 openapi_python_client
-
       - name: Run safety
         run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
 

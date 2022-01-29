@@ -46,7 +46,6 @@ taskipy = "*"
 safety = "*"
 pytest-cov = "*"
 python-multipart = "*"
-flake8 = "*"
 types-PyYAML = "^6.0.3"
 types-certifi = "^2020.0.0"
 types-python-dateutil = "^2.0.0"
@@ -56,7 +55,6 @@ pylint = "^2.9.6"
 check = """
 isort .\
  && black .\
- && flake8 openapi_python_client\
  && poetry export -f requirements.txt | poetry run safety check --bare --stdin\
  && mypy openapi_python_client\
  && pylint openapi_python_client\
@@ -123,6 +121,23 @@ disable = [
     # False positives
     "cyclic-import",
 ]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+disallow_any_generics = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "importlib_metadata",
+    "typer",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+junit_family = "xunit2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
