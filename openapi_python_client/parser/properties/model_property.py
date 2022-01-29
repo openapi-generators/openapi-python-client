@@ -316,6 +316,7 @@ def build_model_property(
     required: bool,
     parent_name: Optional[str],
     config: Config,
+    process_properties: bool,
     roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
     """
@@ -329,6 +330,8 @@ def build_model_property(
         required: Whether or not this property is required by the parent (affects typing)
         parent_name: The name of the property that this property is inside of (affects class naming)
         config: Config data for this run of the generator, used to modifying names
+        roots: Set of strings that identify schema objects on which the new ModelProperty will depend
+        process_properties: Determines whether the new ModelProperty will be initialized with property data
     """
     class_string = data.title or name
     if parent_name:
@@ -339,7 +342,7 @@ def build_model_property(
     optional_properties: Optional[List[Property]] = None
     relative_imports: Optional[Set[str]] = None
     additional_properties: Optional[Union[bool, Property]] = None
-    if schemas.schemas_created:
+    if process_properties:
         data_or_err, schemas = _process_property_data(
             data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots
         )

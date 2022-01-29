@@ -64,7 +64,6 @@ class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
     classes_by_reference: Dict[ReferencePath, Property] = attr.ib(factory=dict)
-    schemas_created: bool = False
     dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = attr.ib(factory=dict)
     classes_by_name: Dict[ClassName, Property] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
@@ -102,12 +101,24 @@ def update_schemas_with_data(
 
     prop: Union[PropertyError, Property]
     prop, schemas = property_from_data(
-        data=data, name=ref_path, schemas=schemas, required=True, parent_name="", config=config, roots={ref_path}
+        data=data,
+        name=ref_path,
+        schemas=schemas,
+        required=True,
+        parent_name="",
+        config=config,
+        # Don't process ModelProperty properties because schemas are still being created
+        process_properties=False,
+        roots={ref_path},
     )
 
     if isinstance(prop, PropertyError):
         prop.detail = f"{prop.header}: {prop.detail}"
         prop.header = f"Unable to parse schema {ref_path}"
+        if isinstance(prop.data, oai.Reference) and prop.data.ref.endswith(ref_path):  # pragma: nocover
+            prop.detail += (
+                "\n\nRecursive and circular references are not supported directly in an array schema's 'items' section"
+            )
         return prop
 
     schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})

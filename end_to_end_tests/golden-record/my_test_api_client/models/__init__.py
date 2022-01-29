@@ -6,6 +6,18 @@ from .a_model_with_properties_reference_that_are_not_object import AModelWithPro
 from .all_of_sub_model import AllOfSubModel
 from .all_of_sub_model_type_enum import AllOfSubModelTypeEnum
 from .an_all_of_enum import AnAllOfEnum
+from .an_array_with_a_circular_ref_in_items_object_a_item import AnArrayWithACircularRefInItemsObjectAItem
+from .an_array_with_a_circular_ref_in_items_object_additional_properties_a_item import (
+    AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem,
+)
+from .an_array_with_a_circular_ref_in_items_object_additional_properties_b_item import (
+    AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem,
+)
+from .an_array_with_a_circular_ref_in_items_object_b_item import AnArrayWithACircularRefInItemsObjectBItem
+from .an_array_with_a_recursive_ref_in_items_object_additional_properties_item import (
+    AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem,
+)
+from .an_array_with_a_recursive_ref_in_items_object_item import AnArrayWithARecursiveRefInItemsObjectItem
 from .an_enum import AnEnum
 from .an_enum_with_null import AnEnumWithNull
 from .an_int_enum import AnIntEnum

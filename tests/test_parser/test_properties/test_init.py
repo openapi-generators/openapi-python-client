@@ -619,9 +619,17 @@ class TestPropertyFromData:
         schemas = Schemas()
         config = MagicMock()
         roots = {"root"}
+        process_properties = False
 
         response = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config, roots=roots
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            roots=roots,
+            process_properties=process_properties,
         )
 
         assert response == build_list_property.return_value
@@ -632,6 +640,7 @@ class TestPropertyFromData:
             schemas=schemas,
             parent_name="parent",
             config=config,
+            process_properties=process_properties,
             roots=roots,
         )
 
@@ -648,9 +657,17 @@ class TestPropertyFromData:
         schemas = Schemas()
         config = MagicMock()
         roots = {"root"}
+        process_properties = False
 
         response = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config, roots=roots
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            process_properties=process_properties,
+            roots=roots,
         )
 
         assert response == build_model_property.return_value
@@ -661,6 +678,7 @@ class TestPropertyFromData:
             schemas=schemas,
             parent_name="parent",
             config=config,
+            process_properties=process_properties,
             roots=roots,
         )
 
@@ -758,6 +776,7 @@ class TestBuildListProperty:
             schemas=schemas,
             parent_name="parent",
             config=MagicMock(),
+            process_properties=True,
             roots={"root"},
         )
 
@@ -780,10 +799,18 @@ class TestBuildListProperty:
             properties, "property_from_data", return_value=(properties.PropertyError(data="blah"), second_schemas)
         )
         config = MagicMock()
+        process_properties = False
         roots = {"root"}
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config, roots=roots
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            roots=roots,
+            process_properties=process_properties,
         )
 
         assert isinstance(p, PropertyError)
@@ -798,6 +825,7 @@ class TestBuildListProperty:
             schemas=schemas,
             parent_name="parent",
             config=config,
+            process_properties=process_properties,
             roots=roots,
         )
 
@@ -813,7 +841,14 @@ class TestBuildListProperty:
         config = Config()
 
         p, new_schemas = properties.build_list_property(
-            name=name, required=True, data=data, schemas=schemas, parent_name="parent", config=config, roots={"root"}
+            name=name,
+            required=True,
+            data=data,
+            schemas=schemas,
+            parent_name="parent",
+            config=config,
+            roots={"root"},
+            process_properties=True,
         )
 
         assert isinstance(p, properties.ListProperty)
@@ -996,7 +1031,6 @@ class TestCreateSchemas:
             ),
         )
         assert result == update_schemas_with_data.return_value
-        assert result.schemas_created
 
     def test_records_bad_uris_and_keeps_going(self, mocker):
         from openapi_python_client.parser.properties import Schemas, _create_schemas
@@ -1024,7 +1058,6 @@ class TestCreateSchemas:
             schemas=Schemas(errors=[PropertyError(detail="some details", data=components["first"])]),
         )
         assert result == update_schemas_with_data.return_value
-        assert result.schemas_created
 
     def test_retries_failing_properties_while_making_progress(self, mocker):
         from openapi_python_client.parser.properties import Schemas, _create_schemas
@@ -1048,7 +1081,6 @@ class TestCreateSchemas:
         )
         assert update_schemas_with_data.call_count == 3
         assert result.errors == [PropertyError()]
-        assert result.schemas_created
 
 
 class TestProcessModels:
@@ -1057,7 +1089,7 @@ class TestProcessModels:
 
         first_model = model_property_factory()
         schemas = Schemas(
-            classes_by_reference={
+            classes_by_name={
                 "first": first_model,
                 "second": model_property_factory(),
                 "non-model": property_factory(),
@@ -1074,7 +1106,7 @@ class TestProcessModels:
         process_model.assert_has_calls(
             [
                 call(first_model, schemas=schemas, config=config),
-                call(schemas.classes_by_reference["second"], schemas=schemas, config=config),
+                call(schemas.classes_by_name["second"], schemas=schemas, config=config),
                 call(first_model, schemas=result, config=config),
             ]
         )
@@ -1088,7 +1120,7 @@ class TestProcessModels:
         class_name = "class_name"
         recursive_model = model_property_factory(class_info=Class(name=class_name, module_name="module_name"))
         schemas = Schemas(
-            classes_by_reference={
+            classes_by_name={
                 "recursive": recursive_model,
                 "second": model_property_factory(),
             }
@@ -1103,7 +1135,7 @@ class TestProcessModels:
         process_model.assert_has_calls(
             [
                 call(recursive_model, schemas=schemas, config=config),
-                call(schemas.classes_by_reference["second"], schemas=schemas, config=config),
+                call(schemas.classes_by_name["second"], schemas=schemas, config=config),
             ]
         )
         assert process_model_errors.was_called_once_with([(recursive_model, recursion_error)])

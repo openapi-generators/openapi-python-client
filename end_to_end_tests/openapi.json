@@ -1958,6 +1958,66 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesA"
         }
+      },
+      "AnArrayWithARecursiveRefInItemsObject": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "recursive": {
+              "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObject"
+            }
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectA": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "circular": {
+              "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectB"
+            }
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectB": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "circular": {
+              "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectA"
+            }
+          }
+        }
+      },
+      "AnArrayWithARecursiveRefInItemsObjectAdditionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObjectAdditionalProperties"
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB"
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA"
+          }
+        }
       }
     }
   }

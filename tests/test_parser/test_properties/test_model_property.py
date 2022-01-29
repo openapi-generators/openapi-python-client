@@ -79,11 +79,12 @@ class TestBuildModelProperty:
         model, _ = build_model_property(
             data=data,
             name="prop",
-            schemas=Schemas(schemas_created=True),
+            schemas=Schemas(),
             required=True,
             parent_name="parent",
             config=Config(),
             roots={"root"},
+            process_properties=True,
         )
 
         assert model.additional_properties == expected_additional_properties
@@ -105,14 +106,19 @@ class TestBuildModelProperty:
             description="A class called MyModel",
             nullable=nullable,
         )
-        schemas = Schemas(
-            classes_by_reference={"OtherModel": None}, classes_by_name={"OtherModel": None}, schemas_created=True
-        )
+        schemas = Schemas(classes_by_reference={"OtherModel": None}, classes_by_name={"OtherModel": None})
         class_info = Class(name="ParentMyModel", module_name="parent_my_model")
         roots = {"root"}
 
         model, new_schemas = build_model_property(
-            data=data, name=name, schemas=schemas, required=required, parent_name="parent", config=Config(), roots=roots
+            data=data,
+            name=name,
+            schemas=schemas,
+            required=required,
+            parent_name="parent",
+            config=Config(),
+            roots=roots,
+            process_properties=True,
         )
 
         assert new_schemas != schemas
@@ -158,6 +164,7 @@ class TestBuildModelProperty:
             parent_name=None,
             config=Config(),
             roots={"root"},
+            process_properties=True,
         )
 
         assert new_schemas == schemas
@@ -174,11 +181,12 @@ class TestBuildModelProperty:
         result = build_model_property(
             data=data,
             name="prop",
-            schemas=Schemas(schemas_created=True),
+            schemas=Schemas(),
             required=True,
             parent_name="parent",
             config=Config(),
             roots={"root"},
+            process_properties=True,
         )[0]
         assert isinstance(result, PropertyError)
 
@@ -195,15 +203,16 @@ class TestBuildModelProperty:
         result = build_model_property(
             data=data,
             name="prop",
-            schemas=Schemas(schemas_created=True),
+            schemas=Schemas(),
             required=True,
             parent_name="parent",
             config=Config(),
             roots={"root"},
+            process_properties=True,
         )[0]
         assert isinstance(result, PropertyError)
 
-    def test_schemas_not_created(self, model_property_factory):
+    def test_process_properties_false(self, model_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, build_model_property
 
         name = "prop"
@@ -225,7 +234,14 @@ class TestBuildModelProperty:
         class_info = Class(name="ParentMyModel", module_name="parent_my_model")
 
         model, new_schemas = build_model_property(
-            data=data, name=name, schemas=schemas, required=required, parent_name="parent", config=Config(), roots=roots
+            data=data,
+            name=name,
+            schemas=schemas,
+            required=required,
+            parent_name="parent",
+            config=Config(),
+            roots=roots,
+            process_properties=False,
         )
 
         assert new_schemas != schemas
@@ -293,9 +309,7 @@ class TestProcessProperties:
         roots = {"root"}
         data = oai.Schema(properties={"test_model_property": oai.Schema.construct(type="object")})
 
-        result = _process_properties(
-            data=data, class_name="", schemas=Schemas(schemas_created=True), config=Config(), roots=roots
-        )
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots=roots)
 
         assert all(root in result.optional_props[0].roots for root in roots)
 

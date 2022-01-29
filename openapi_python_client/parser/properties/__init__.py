@@ -497,6 +497,7 @@ def build_list_property(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    process_properties: bool,
     roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
     """
@@ -523,6 +524,7 @@ def build_list_property(
         schemas=schemas,
         parent_name=parent_name,
         config=config,
+        process_properties=process_properties,
         roots=roots,
     )
     if isinstance(inner_prop, PropertyError):
@@ -586,6 +588,7 @@ def _property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    process_properties: bool,
     roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """Generate a Property from the OpenAPI dictionary representation of it"""
@@ -665,6 +668,7 @@ def _property_from_data(
             schemas=schemas,
             parent_name=parent_name,
             config=config,
+            process_properties=process_properties,
             roots=roots,
         )
     if data.type == oai.DataType.OBJECT or data.allOf:
@@ -675,6 +679,7 @@ def _property_from_data(
             required=required,
             parent_name=parent_name,
             config=config,
+            process_properties=process_properties,
             roots=roots,
         )
     return (
@@ -699,6 +704,7 @@ def property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    process_properties: bool = True,
     roots: Set[Union[ReferencePath, utils.ClassName]] = None,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
@@ -719,6 +725,8 @@ def property_from_data(
             of duplication.
         config: Contains the parsed config that the user provided to tweak generation settings. Needed to apply class
             name overrides for generated classes.
+        process_properties: If the new property is a ModelProperty, determines whether it will be initialized with
+            property data
         roots: The set of `ReferencePath`s and `ClassName`s to remove from the schemas if a child reference becomes
             invalid
     Returns:
@@ -734,6 +742,7 @@ def property_from_data(
             schemas=schemas,
             parent_name=parent_name,
             config=config,
+            process_properties=process_properties,
             roots=roots,
         )
     except ValidationError:
@@ -771,7 +780,6 @@ def _create_schemas(
         to_process = next_round
 
     schemas.errors.extend(errors)
-    object.__setattr__(schemas, "schemas_created", True)
     return schemas
 
 
@@ -799,7 +807,7 @@ def _process_model_errors(
 
 
 def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
-    to_process = (prop for prop in schemas.classes_by_reference.values() if isinstance(prop, ModelProperty))
+    to_process = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
     still_making_progress = True
     final_model_errors: List[Tuple[ModelProperty, PropertyError]] = []
     latest_model_errors: List[Tuple[ModelProperty, PropertyError]] = []
