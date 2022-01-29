@@ -13,6 +13,18 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.11.1
+
+### Features
+
+- Allow httpx 0.22.\* (#577)
+
+### Fixes
+
+- Type annotations for optional dates and datetimes in multipart/form (#580)
+- Error generating clients with dates or datetimes in multipart/form [#579]. Thanks @lsaavedr!
+- Include nested packages in generated setup.py [#575, #576]. Thanks @tedo-benchling!
+
 ## 0.11.0
 
 ### Breaking Changes
