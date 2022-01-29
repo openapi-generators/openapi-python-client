@@ -18,7 +18,13 @@ isoparse({{ source }}).date()
 {% if property.required %}
 {{ destination }} = {{ transformed }} {% if property.nullable %}if {{ source }} else None {%endif%}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
+{% if declare_type %}
+{% set type_annotation = property.get_type_string(json=True) %}
+{% if multipart %}{% set type_annotation = type_annotation | replace("str", "bytes") %}{% endif %}
+{{ destination }}: {{ type_annotation }} = UNSET
+{% else %}
+{{ destination }} = UNSET
+{% endif %}
 if not isinstance({{ source }}, Unset):
 {% if property.nullable %}
     {{ destination }} = {{ transformed }} if {{ source }} else None

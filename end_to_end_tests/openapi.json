@@ -1309,6 +1309,16 @@
             "type": "string",
             "default": "some_default_string"
           },
+          "a_datetime": {
+            "title": "A Datetime",
+            "type": "string",
+            "format": "date-time"
+          },
+          "a_date": {
+            "title": "A Date",
+            "type": "string",
+            "format": "date"
+          },
           "some_number": {
             "title": "Some Number",
             "type": "number"
