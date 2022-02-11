@@ -65,8 +65,8 @@ Things to know:
 1. Every path/method combo becomes a Python module with four functions:
     1. `sync`: Blocking request that returns parsed data (if successful) or `None`
     1. `sync_detailed`: Blocking request that always returns a `Request`, optionally with `parsed` set if the request was successful.
-    1. `asyncio`: Like `sync` but the async instead of blocking
-    1. `asyncio_detailed`: Like `sync_detailed` by async instead of blocking
+    1. `asyncio`: Like `sync` but async instead of blocking
+    1. `asyncio_detailed`: Like `sync_detailed` but async instead of blocking
 
 1. All path/query params, and bodies become method arguments.
 1. If your endpoint had any tags on it, the first tag will be used as a module name for the function (my_tag above)
