@@ -432,15 +432,7 @@ def build_union_property(
     *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     sub_properties: List[Property] = []
-    inverted_mappings = {}
-    for k, v in (data.discriminator.mapping if data.discriminator else {}).items():
-        class_name = Reference.from_ref(v).class_name
-        if class_name in inverted_mappings:
-            raise ArgumentError(
-                f"Mapping more than one name to a class is currently not supported (class: {class_name})."
-            )
-        inverted_mappings[Reference.from_ref(v).class_name] = k
-    discriminator_mappings: Dict[str, Property] = {}
+    reference_name_to_subprop = {}
     for sub_prop_data in chain(data.anyOf, data.oneOf):
         sub_prop, schemas = property_from_data(
             name=name, required=required, data=sub_prop_data, schemas=schemas, parent_name=parent_name
@@ -450,9 +442,13 @@ def build_union_property(
 
         sub_properties.append(sub_prop)
         if data.discriminator is not None:
-            discriminated_by = inverted_mappings.get(sub_prop.reference.class_name)
-            if discriminated_by is not None:
-                discriminator_mappings[discriminated_by] = sub_prop
+            reference_name_to_subprop[sub_prop.reference.class_name] = sub_prop
+    
+    discriminator_mappings: Dict[str, Property] = {}
+    if data.discriminator is not None:
+        for k, v in (data.discriminator.mapping if data.discriminator else {}).items():
+            ref_class_name = Reference.from_ref(v).class_name
+            discriminator_mappings[k] = reference_name_to_subprop[ref_class_name]
 
     default = convert_chain((prop._type_string for prop in sub_properties), data.default)
     return (
