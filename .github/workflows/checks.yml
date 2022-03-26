@@ -25,7 +25,7 @@ jobs:
         run: echo "::set-output name=python_version::$(python --version)"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
@@ -89,7 +89,7 @@ jobs:
         id: get_python_version
         run: echo "::set-output name=python_version::$(python --version)"
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
@@ -107,7 +107,7 @@ jobs:
       - name: Check for any file changes
         run: python .github/check_for_changes.py
       - name: Cache Generated Client Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: integration-tests/.venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
