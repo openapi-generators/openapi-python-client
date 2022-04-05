@@ -278,11 +278,11 @@ class TestEndpoint:
         )
         assert response.errors == [
             ParseError(
-                detail=f"Cannot parse response for status code 200, response will be ommitted from generated client",
+                detail=f"Cannot parse response for status code 200, response will be omitted from generated client",
                 data=parse_error.data,
             ),
             ParseError(
-                detail=f"Cannot parse response for status code 404, response will be ommitted from generated client",
+                detail=f"Cannot parse response for status code 404, response will be omitted from generated client",
                 data=parse_error.data,
             ),
         ]
