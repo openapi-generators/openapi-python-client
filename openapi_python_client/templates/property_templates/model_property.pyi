@@ -1,6 +1,12 @@
 {% macro construct(property, source, initial_value=None) %}
 {% if property.required and not property.nullable %}
+{% if source == "response.yaml" %}
+yaml = YAML(typ="base")
+yaml_dict = yaml.load(response.text.encode('utf-8'))
+{{ property.python_name }} = {{ property.reference.class_name }}.from_dict(yaml_dict)
+{% else %}
 {{ property.python_name }} = {{ property.reference.class_name }}.from_dict({{ source }})
+{% endif %}
 {% else %}
 {% if initial_value != None %}
 {{ property.python_name }} = {{ initial_value }}

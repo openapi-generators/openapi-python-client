@@ -56,6 +56,17 @@ if {% if not property.required %}not isinstance({{ property_name }}, Unset) and 
 {% endif %}
 {% endmacro %}
 
+{% macro yaml_body(endpoint) %}
+{% if endpoint.yaml_body %}
+    {% set property = endpoint.yaml_body %}
+    {% set destination = "yaml_" + property.python_name %}
+    {% if property.template %}
+        {% from "property_templates/" + property.template import transform %}
+{{ transform(property, property.python_name, destination) }}
+    {% endif %}
+{% endif %}
+{% endmacro %}
+
 {% macro return_type(endpoint) %}
 {% if endpoint.responses | length == 0 %}
 None
@@ -83,6 +94,10 @@ client: Client,
 {% for parameter in endpoint.path_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
+{# Yaml body if any #}
+{% if endpoint.yaml_body %}
+yaml_body: {{ endpoint.yaml_body.get_type_string() }},
+{% endif %}
 {# Form data if any #}
 {% if endpoint.form_body_reference %}
 form_data: {{ endpoint.form_body_reference.class_name }},
@@ -110,6 +125,9 @@ client=client,
 {% for parameter in endpoint.path_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
+{% if endpoint.yaml_body %}
+yaml_body=yaml_body,
+{% endif %}
 {% if endpoint.form_body_reference %}
 form_data=form_data,
 {% endif %}

@@ -27,7 +27,7 @@ class TestProperty:
             (False, True, False, True, "TestType"),
             (False, True, True, False, "Optional[TestType]"),
             (False, True, True, True, "TestType"),
-            (True, False, False, False, "Union[Unset, None, TestType]"),
+            (True, False, False, False, "Union[Unset, TestType]"),
             (True, False, False, True, "TestType"),
             (True, False, True, False, "TestType"),
             (True, False, True, True, "TestType"),
@@ -41,7 +41,7 @@ class TestProperty:
         from openapi_python_client.parser.properties import Property
 
         mocker.patch.object(Property, "_type_string", "TestType")
-        p = Property(name="test", required=required, default=None, nullable=nullable)
+        p = Property(name="test", required=required, default=None, nullable=nullable, description=None)
         assert p.get_type_string(no_optional=no_optional, query_parameter=query_parameter) == expected
 
     @pytest.mark.parametrize(
@@ -51,9 +51,9 @@ class TestProperty:
             (False, None, True, "test: TestType"),
             (False, "Test", False, "test: Union[Unset, TestType] = Test"),
             (False, "Test", True, "test: TestType = Test"),
-            (True, None, False, "test: Union[Unset, None, TestType] = UNSET"),
+            (True, None, False, "test: Union[Unset, TestType] = UNSET"),
             (True, None, True, "test: TestType"),
-            (True, "Test", False, "test: Union[Unset, None, TestType] = Test"),
+            (True, "Test", False, "test: Union[Unset, TestType] = Test"),
             (True, "Test", True, "test: TestType = Test"),
         ],
     )
@@ -62,20 +62,20 @@ class TestProperty:
 
         name = "test"
         mocker.patch.object(Property, "_type_string", "TestType")
-        p = Property(name=name, required=required, default=default, nullable=False)
+        p = Property(name=name, required=required, default=default, nullable=False, description=None)
 
         assert p.to_string(query_parameter=query_parameter) == expected
 
     def test_get_imports(self):
         from openapi_python_client.parser.properties import Property
 
-        p = Property(name="test", required=True, default=None, nullable=False)
+        p = Property(name="test", required=True, default=None, nullable=False, description=None)
         assert p.get_imports(prefix="") == set()
 
-        p = Property(name="test", required=False, default=None, nullable=False)
+        p = Property(name="test", required=False, default=None, nullable=False, description=None)
         assert p.get_imports(prefix="") == {"from types import UNSET, Unset", "from typing import Union"}
 
-        p = Property(name="test", required=False, default=None, nullable=True)
+        p = Property(name="test", required=False, default=None, nullable=True, description=None)
         assert p.get_imports(prefix="") == {
             "from types import UNSET, Unset",
             "from typing import Optional",
@@ -87,19 +87,19 @@ class TestStringProperty:
     def test_get_type_string(self):
         from openapi_python_client.parser.properties import StringProperty
 
-        p = StringProperty(name="test", required=True, default=None, nullable=False)
+        p = StringProperty(name="test", required=True, default=None, nullable=False, description=None)
 
         base_type_string = f"str"
 
         assert p.get_type_string() == base_type_string
 
-        p = StringProperty(name="test", required=True, default=None, nullable=True)
+        p = StringProperty(name="test", required=True, default=None, nullable=True, description=None)
         assert p.get_type_string() == f"Optional[{base_type_string}]"
 
-        p = StringProperty(name="test", required=False, default=None, nullable=True)
+        p = StringProperty(name="test", required=False, default=None, nullable=True, description=None)
         assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
 
-        p = StringProperty(name="test", required=False, default=None, nullable=False)
+        p = StringProperty(name="test", required=False, default=None, nullable=False, description=None)
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
 
 
@@ -107,14 +107,14 @@ class TestDateTimeProperty:
     def test_get_imports(self):
         from openapi_python_client.parser.properties import DateTimeProperty
 
-        p = DateTimeProperty(name="test", required=True, default=None, nullable=False)
+        p = DateTimeProperty(name="test", required=True, default=None, nullable=False, description=None)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
         }
 
-        p = DateTimeProperty(name="test", required=False, default=None, nullable=False)
+        p = DateTimeProperty(name="test", required=False, default=None, nullable=False, description=None)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
@@ -123,7 +123,7 @@ class TestDateTimeProperty:
             "from ...types import UNSET, Unset",
         }
 
-        p = DateTimeProperty(name="test", required=False, default=None, nullable=True)
+        p = DateTimeProperty(name="test", required=False, default=None, nullable=True, description=None)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
@@ -138,14 +138,14 @@ class TestDateProperty:
     def test_get_imports(self):
         from openapi_python_client.parser.properties import DateProperty
 
-        p = DateProperty(name="test", required=True, default=None, nullable=False)
+        p = DateProperty(name="test", required=True, default=None, nullable=False, description=None)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
         }
 
-        p = DateProperty(name="test", required=False, default=None, nullable=False)
+        p = DateProperty(name="test", required=False, default=None, nullable=False, description=None)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
@@ -154,7 +154,7 @@ class TestDateProperty:
             "from ...types import UNSET, Unset",
         }
 
-        p = DateProperty(name="test", required=False, default=None, nullable=True)
+        p = DateProperty(name="test", required=False, default=None, nullable=True, description=None)
         assert p.get_imports(prefix="...") == {
             "import datetime",
             "from typing import cast",
@@ -170,13 +170,13 @@ class TestFileProperty:
         from openapi_python_client.parser.properties import FileProperty
 
         prefix = "..."
-        p = FileProperty(name="test", required=True, default=None, nullable=False)
+        p = FileProperty(name="test", required=True, default=None, nullable=False, description=None)
         assert p.get_imports(prefix=prefix) == {
             "from io import BytesIO",
             "from ...types import File",
         }
 
-        p = FileProperty(name="test", required=False, default=None, nullable=False)
+        p = FileProperty(name="test", required=False, default=None, nullable=False, description=None)
         assert p.get_imports(prefix=prefix) == {
             "from io import BytesIO",
             "from ...types import File",
@@ -184,7 +184,7 @@ class TestFileProperty:
             "from ...types import UNSET, Unset",
         }
 
-        p = FileProperty(name="test", required=False, default=None, nullable=True)
+        p = FileProperty(name="test", required=False, default=None, nullable=True, description=None)
         assert p.get_imports(prefix=prefix) == {
             "from io import BytesIO",
             "from ...types import File",
@@ -201,21 +201,21 @@ class TestListProperty:
         inner_property = mocker.MagicMock()
         inner_type_string = mocker.MagicMock()
         inner_property.get_type_string.return_value = inner_type_string
-        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False, description=None)
 
         base_type_string = f"List[{inner_type_string}]"
 
         assert p.get_type_string() == base_type_string
 
-        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=True)
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=True, description=None)
         assert p.get_type_string() == f"Optional[{base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
 
-        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=True)
+        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=True, description=None)
         assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
 
-        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=False)
+        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=False, description=None)
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
 
@@ -226,14 +226,14 @@ class TestListProperty:
         inner_import = mocker.MagicMock()
         inner_property.get_imports.return_value = {inner_import}
         prefix = "..."
-        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False)
+        p = ListProperty(name="test", required=True, default=None, inner_property=inner_property, nullable=False, description=None)
 
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import cast, List",
         }
 
-        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=False)
+        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=False, description=None)
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import cast, List",
@@ -241,7 +241,7 @@ class TestListProperty:
             "from ...types import UNSET, Unset",
         }
 
-        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=True)
+        p = ListProperty(name="test", required=False, default=None, inner_property=inner_property, nullable=True, description=None)
         assert p.get_imports(prefix=prefix) == {
             inner_import,
             "from typing import cast, List",
@@ -255,22 +255,22 @@ class TestUnionProperty:
     @pytest.mark.parametrize(
         "query_parameter,nullable,required,no_optional,expected",
         [
-            (False, False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2]"),
-            (False, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (False, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (False, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
-            (False, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (True, False, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, False, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2]"),
-            (True, True, False, True, "Union[inner_type_string_1, inner_type_string_2]"),
-            (True, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2]"),
-            (True, True, True, True, "Union[inner_type_string_1, inner_type_string_2]"),
+            (False, False, False, False, "Union[Unset, inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, False, False, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, False, True, False, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, False, True, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, True, False, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (False, True, True, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, False, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, False, False, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, False, True, False, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, False, True, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, True, False, False, "Union[Unset, None, inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, True, False, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, True, True, False, "Union[None, inner_type_string_1, inner_type_string_2, UnknownType]"),
+            (True, True, True, True, "Union[inner_type_string_1, inner_type_string_2, UnknownType]"),
         ],
     )
     def test_get_type_string(self, mocker, query_parameter, nullable, required, no_optional, expected):
@@ -286,6 +286,9 @@ class TestUnionProperty:
             default=None,
             inner_properties=[inner_property_1, inner_property_2],
             nullable=nullable,
+            discriminator_property=None,
+            discriminator_mappings=None,
+            description=None,
         )
 
         assert p.get_type_string(query_parameter=query_parameter, no_optional=no_optional) == expected
@@ -306,6 +309,9 @@ class TestUnionProperty:
             default=None,
             inner_properties=[inner_property_1, inner_property_2],
             nullable=False,
+            description=None,
+            discriminator_mappings=None,
+            discriminator_property=None,
         )
 
         assert p.get_imports(prefix=prefix) == {
@@ -320,6 +326,9 @@ class TestUnionProperty:
             default=None,
             inner_properties=[inner_property_1, inner_property_2],
             nullable=False,
+            description=None,
+            discriminator_mappings=None,
+            discriminator_property=None,
         )
         assert p.get_imports(prefix=prefix) == {
             inner_import_1,
@@ -335,6 +344,9 @@ class TestUnionProperty:
             default=None,
             inner_properties=[inner_property_1, inner_property_2],
             nullable=True,
+            description=None,
+            discriminator_mappings=None,
+            discriminator_property=None,
         )
         assert p.get_imports(prefix=prefix) == {
             inner_import_1,
@@ -360,6 +372,7 @@ class TestEnumProperty:
             nullable=False,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
 
         base_type_string = f"MyTestEnum"
@@ -374,6 +387,7 @@ class TestEnumProperty:
             nullable=True,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
         assert p.get_type_string() == f"Optional[{base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
@@ -386,6 +400,7 @@ class TestEnumProperty:
             nullable=True,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
         assert p.get_type_string() == f"Union[Unset, None, {base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
@@ -398,6 +413,7 @@ class TestEnumProperty:
             nullable=False,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
         assert p.get_type_string() == f"Union[Unset, {base_type_string}]"
         assert p.get_type_string(no_optional=True) == base_type_string
@@ -416,6 +432,7 @@ class TestEnumProperty:
             nullable=False,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
 
         assert enum_property.get_imports(prefix=prefix) == {
@@ -430,6 +447,7 @@ class TestEnumProperty:
             nullable=False,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
@@ -445,6 +463,7 @@ class TestEnumProperty:
             nullable=True,
             reference=fake_reference,
             value_type=str,
+            description=None,
         )
         assert enum_property.get_imports(prefix=prefix) == {
             f"from {prefix}models.{fake_reference.module_name} import {fake_reference.class_name}",
@@ -505,6 +524,7 @@ class TestPropertyFromData:
             reference=Reference(class_name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
+            description=None,
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.enums == {
@@ -536,6 +556,7 @@ class TestPropertyFromData:
             reference=Reference(class_name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
             default="ParentAnEnum.VALUE_3",
+            description=None,
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.enums == {
@@ -556,6 +577,7 @@ class TestPropertyFromData:
             values={"A": "a"},
             value_type=str,
             reference=Reference(class_name="MyEnum", module_name="my_enum"),
+            description=None,
         )
         schemas = Schemas(enums={"MyEnum": existing_enum})
 
@@ -569,6 +591,7 @@ class TestPropertyFromData:
             values={"A": "a"},
             value_type=str,
             reference=Reference(class_name="MyEnum", module_name="my_enum"),
+            description=None,
         )
         assert schemas == new_schemas
 
@@ -667,7 +690,7 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent"
         )
 
-        assert p == prop_type(name=name, required=required, default=python_type(data.default), nullable=False)
+        assert p == prop_type(name=name, required=required, default=python_type(data.default), nullable=False, description=None)
         assert new_schemas == schemas
 
         # Test nullable values
@@ -675,7 +698,7 @@ class TestPropertyFromData:
         data.nullable = True
 
         p, _ = property_from_data(name=name, required=required, data=data, schemas=schemas, parent_name="parent")
-        assert p == prop_type(name=name, required=required, default=python_type(data.default), nullable=True)
+        assert p == prop_type(name=name, required=required, default=python_type(data.default), nullable=True, description=None)
 
         # Test bad default value
         data.default = "a"
@@ -766,7 +789,7 @@ class TestPropertyFromData:
             name="blah", required=True, data=data, schemas=schemas, parent_name="parent"
         )
 
-        assert prop == NoneProperty(name="blah", required=True, nullable=False, default=None)
+        assert prop == NoneProperty(name="blah", required=True, nullable=False, default=None, description=None)
         assert new_schemas == schemas
 
     def test_property_from_data_validation_error(self, mocker):
@@ -877,14 +900,17 @@ class TestBuildUnionProperty:
 
         p, s = property_from_data(name=name, required=required, data=data, schemas=Schemas(), parent_name="parent")
 
-        FloatProperty.assert_called_once_with(name=name, required=required, default=0.0, nullable=False)
-        IntProperty.assert_called_once_with(name=name, required=required, default=0, nullable=False)
+        FloatProperty.assert_called_once_with(name=name, required=required, default=0.0, nullable=False, description=None)
+        IntProperty.assert_called_once_with(name=name, required=required, default=0, nullable=False, description=None)
         UnionProperty.assert_called_once_with(
             name=name,
             required=required,
             default=None,
             inner_properties=[FloatProperty.return_value, IntProperty.return_value],
             nullable=False,
+            description=None,
+            discriminator_property=None,
+            discriminator_mappings={},
         )
         assert p == UnionProperty.return_value
         assert s == Schemas()
@@ -914,7 +940,7 @@ class TestStringBasedProperty:
 
         p = _string_based_property(name=name, required=required, data=data)
 
-        assert p == StringProperty(name=name, required=required, nullable=True, default="'\\\\\"hello world\\\\\"'")
+        assert p == StringProperty(name=name, required=required, nullable=True, default="'\\\\\"hello world\\\\\"'", description=None)
 
         data.pattern = "abcdef"
         data.nullable = False
@@ -925,7 +951,7 @@ class TestStringBasedProperty:
             data=data,
         )
         assert p == StringProperty(
-            name=name, required=required, nullable=False, default="'\\\\\"hello world\\\\\"'", pattern="abcdef"
+            name=name, required=required, nullable=False, default="'\\\\\"hello world\\\\\"'", pattern="abcdef", description=None
         )
 
     def test__string_based_property_datetime_format(self):
@@ -940,7 +966,7 @@ class TestStringBasedProperty:
         p = _string_based_property(name=name, required=required, data=data)
 
         assert p == DateTimeProperty(
-            name=name, required=required, nullable=True, default="isoparse('2020-11-06T12:00:00')"
+            name=name, required=required, nullable=True, default="isoparse('2020-11-06T12:00:00')", description=None
         )
 
         # Test bad default
@@ -957,7 +983,7 @@ class TestStringBasedProperty:
 
         p = _string_based_property(name=name, required=required, data=data)
 
-        assert p == DateProperty(name=name, required=required, nullable=True, default="isoparse('2020-11-06').date()")
+        assert p == DateProperty(name=name, required=required, nullable=True, default="isoparse('2020-11-06').date()", description=None)
 
         # Test bad default
         data.default = "a"
@@ -972,7 +998,7 @@ class TestStringBasedProperty:
         data = oai.Schema.construct(type="string", schema_format="binary", nullable=True, default="a")
 
         p = _string_based_property(name=name, required=required, data=data)
-        assert p == FileProperty(name=name, required=required, nullable=True, default=None)
+        assert p == FileProperty(name=name, required=required, nullable=True, default=None, description=None)
 
     def test__string_based_property_unsupported_format(self, mocker):
         from openapi_python_client.parser.properties import StringProperty, _string_based_property
@@ -983,7 +1009,7 @@ class TestStringBasedProperty:
 
         p = _string_based_property(name=name, required=required, data=data)
 
-        assert p == StringProperty(name=name, required=required, nullable=True, default=None)
+        assert p == StringProperty(name=name, required=required, nullable=True, default=None, description=None)
 
 
 def test_build_schemas(mocker):
@@ -1062,7 +1088,7 @@ def test_build_enums(mocker):
         (False, False),
         (
             oai.Schema.construct(type="string"),
-            StringProperty(name="AdditionalProperty", required=True, nullable=False, default=None),
+            StringProperty(name="AdditionalProperty", required=True, nullable=False, default=None,description=None),
         ),
     ],
 )
@@ -1102,8 +1128,8 @@ def test_build_model_property(additional_properties_schema, expected_additional_
         default=None,
         reference=Reference(class_name="ParentMyModel", module_name="parent_my_model"),
         references=[],
-        required_properties=[StringProperty(name="req", required=True, nullable=False, default=None)],
-        optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None)],
+        required_properties=[StringProperty(name="req", required=True, nullable=False, default=None, description=None)],
+        optional_properties=[DateTimeProperty(name="opt", required=False, nullable=False, default=None, description=None)],
         description=data.description,
         relative_imports={
             "from dateutil.parser import isoparse",

@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 from attr import asdict
+from ruamel.yaml import YAML
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response
@@ -10,7 +11,7 @@ from ...types import Response
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.pyi" import header_params, query_params, json_body, return_type, arguments, client, kwargs, parse_response %}
+{% from "endpoint_macros.pyi" import header_params, query_params, json_body, yaml_body, return_type, arguments, client, kwargs, parse_response %}
 
 {% set return_string = return_type(endpoint) %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
@@ -33,6 +34,8 @@ def _get_kwargs(
 
     {{ json_body(endpoint) | indent(4) }}
 
+    {{ yaml_body(endpoint) | indent(4) }}
+
     return {
         "url": url,
         "headers": headers,
@@ -46,7 +49,9 @@ def _get_kwargs(
         {% endif %}
         {% if endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
-        {% endif %}
+        {%- elif endpoint.yaml_body %}
+        "json": {{ "yaml_" + endpoint.yaml_body.python_name }},
+        {%- endif %}
         {% if endpoint.query_parameters %}
         "params": params,
         {% endif %}

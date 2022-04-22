@@ -66,6 +66,32 @@ class TestGeneratorData:
 
 
 class TestEndpoint:
+    def test_parse_yaml_body(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+        schema = mocker.MagicMock()
+        body = oai.RequestBody.construct(
+            content={"text/yaml": oai.MediaType.construct(media_type_schema=schema)}
+        )
+        property_from_data = mocker.patch(f"{MODULE_NAME}.property_from_data")
+        schemas = Schemas()
+
+        result = Endpoint.parse_request_yaml_body(body=body, schemas=schemas, parent_name="parent")
+
+        property_from_data.assert_called_once_with(
+            name="yaml_body", required=True, data=schema, schemas=schemas, parent_name="parent"
+        )
+        assert result == property_from_data.return_value
+
+    def test_parse_yaml_body_no_data(self):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        body = oai.RequestBody.construct(content={})
+        schemas = Schemas()
+
+        result = Endpoint.parse_request_yaml_body(body=body, schemas=schemas, parent_name="parent")
+
+        assert result == (None, schemas)
+
     def test_parse_request_form_body(self, mocker):
         ref = mocker.MagicMock()
         body = oai.RequestBody.construct(
@@ -211,6 +237,12 @@ class TestEndpoint:
         parse_request_json_body = mocker.patch.object(
             Endpoint, "parse_request_json_body", return_value=(json_body, parsed_schemas)
         )
+        yaml_body = mocker.MagicMock(autospec=Property)
+        yaml_body_imports = mocker.MagicMock()
+        yaml_body.get_imports.return_value = {yaml_body_imports}
+        parse_request_yaml_body = mocker.patch.object(
+            Endpoint, "parse_request_yaml_body", return_value=(yaml_body, parsed_schemas)
+        )
         import_string_from_reference = mocker.patch(
             f"{MODULE_NAME}.import_string_from_reference", side_effect=["import_1", "import_2"]
         )
@@ -233,6 +265,7 @@ class TestEndpoint:
         assert response_schemas == parsed_schemas
         parse_request_form_body.assert_called_once_with(request_body)
         parse_request_json_body.assert_called_once_with(body=request_body, schemas=initial_schemas, parent_name="name")
+        parse_request_yaml_body.assert_called_once_with(body=request_body, schemas=parsed_schemas, parent_name="name")
         parse_multipart_body.assert_called_once_with(request_body)
         import_string_from_reference.assert_has_calls(
             [
@@ -240,8 +273,10 @@ class TestEndpoint:
                 mocker.call(multipart_body_reference, prefix="...models"),
             ]
         )
+        yaml_body.get_imports.assert_called_once_with(prefix="...")
         json_body.get_imports.assert_called_once_with(prefix="...")
-        assert endpoint.relative_imports == {"import_1", "import_2", "import_3", json_body_imports}
+        assert endpoint.relative_imports == {"import_1", "import_2", "import_3", yaml_body_imports, json_body_imports}
+        assert endpoint.yaml_body == yaml_body
         assert endpoint.json_body == json_body
         assert endpoint.form_body_reference == form_body_reference
         assert endpoint.multipart_body_reference == multipart_body_reference
@@ -312,12 +347,12 @@ class TestEndpoint:
         response_1 = Response(
             status_code=200,
             source="source",
-            prop=DateTimeProperty(name="datetime", required=True, nullable=False, default=None),
+            prop=DateTimeProperty(name="datetime", required=True, nullable=False, default=None, description=None),
         )
         response_2 = Response(
             status_code=404,
             source="source",
-            prop=DateProperty(name="date", required=True, nullable=False, default=None),
+            prop=DateProperty(name="date", required=True, nullable=False, default=None, description=None),
         )
         response_from_data = mocker.patch(
             f"{MODULE_NAME}.response_from_data", side_effect=[(response_1, schemas_1), (response_2, schemas_2)]
