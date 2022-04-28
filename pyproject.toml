@@ -34,7 +34,6 @@ attrs = ">=20.1.0, <22.0"
 python-dateutil = "^2.8.1"
 httpx = ">=0.15.4,<=0.22.0"
 autoflake = "^1.4"
-"ruamel.yaml" = "^0.17.21"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
