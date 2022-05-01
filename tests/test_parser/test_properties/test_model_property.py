@@ -127,6 +127,7 @@ class TestBuildModelProperty:
                 "from typing import Union",
             },
             additional_properties=True,
+            title="MyModel",
         )
 
     def test_model_name_conflict(self):

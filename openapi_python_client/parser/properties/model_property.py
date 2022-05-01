@@ -6,6 +6,7 @@ import attr
 from ... import Config
 from ... import schema as oai
 from ... import utils
+from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .enum_property import EnumProperty
 from .property import Property
@@ -117,21 +118,21 @@ def _process_properties(
 ) -> Union[_PropertyData, PropertyError]:
     from . import property_from_data
 
-    properties: Dict[str, Property] = {}
+    properties: Dict[PythonIdentifier, Property] = {}
     relative_imports: Set[str] = set()
     required_set = set(data.required or [])
 
     def _add_if_no_conflict(new_prop: Property) -> Optional[PropertyError]:
         nonlocal properties
 
-        existing = properties.get(new_prop.name)
+        existing = properties.get(new_prop.python_name)
         merged_prop_or_error = _merge_properties(existing, new_prop) if existing else new_prop
         if isinstance(merged_prop_or_error, PropertyError):
             merged_prop_or_error.header = (
-                f"Found conflicting properties named {new_prop.name} when creating {class_name}"
+                f"Found conflicting properties named {new_prop.python_name} when creating {class_name}"
             )
             return merged_prop_or_error
-        properties[merged_prop_or_error.name] = merged_prop_or_error
+        properties[merged_prop_or_error.python_name] = merged_prop_or_error
         return None
 
     unprocessed_props = data.properties or {}
@@ -255,7 +256,7 @@ def build_model_property(
         required=required,
         name=name,
         additional_properties=additional_properties,
-        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        python_name=utils.PythonIdentifier(value=data.title or name, prefix=config.field_prefix),
         example=data.example,
     )
     if class_info.name in schemas.classes_by_name:

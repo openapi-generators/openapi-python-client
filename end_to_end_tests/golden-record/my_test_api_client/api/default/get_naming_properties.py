@@ -1,8 +1,9 @@
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, Optional
 
 import httpx
 
 from ...client import Client
+from ...models.get_naming_properties_response_200 import GetNamingPropertiesResponse200
 from ...types import Response
 
 
@@ -10,7 +11,7 @@ def _get_kwargs(
     *,
     client: Client,
 ) -> Dict[str, Any]:
-    url = "{}/tests/basic_lists/integers".format(client.base_url)
+    url = "{}/naming/properties".format(client.base_url)
 
     headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
@@ -24,15 +25,15 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[List[int]]:
+def _parse_response(*, response: httpx.Response) -> Optional[GetNamingPropertiesResponse200]:
     if response.status_code == 200:
-        response_get_basic_list_of_integers_tests_basic_lists_integers_get = cast(List[int], response.json())
+        response_200 = GetNamingPropertiesResponse200.from_dict(response.json())
 
-        return response_get_basic_list_of_integers_tests_basic_lists_integers_get
+        return response_200
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[List[int]]:
+def _build_response(*, response: httpx.Response) -> Response[GetNamingPropertiesResponse200]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -44,13 +45,10 @@ def _build_response(*, response: httpx.Response) -> Response[List[int]]:
 def sync_detailed(
     *,
     client: Client,
-) -> Response[List[int]]:
-    """Get Basic List Of Integers
-
-     Get a list of integers
-
+) -> Response[GetNamingPropertiesResponse200]:
+    """
     Returns:
-        Response[List[int]]
+        Response[GetNamingPropertiesResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -68,13 +66,10 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-) -> Optional[List[int]]:
-    """Get Basic List Of Integers
-
-     Get a list of integers
-
+) -> Optional[GetNamingPropertiesResponse200]:
+    """
     Returns:
-        Response[List[int]]
+        Response[GetNamingPropertiesResponse200]
     """
 
     return sync_detailed(
@@ -85,13 +80,10 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-) -> Response[List[int]]:
-    """Get Basic List Of Integers
-
-     Get a list of integers
-
+) -> Response[GetNamingPropertiesResponse200]:
+    """
     Returns:
-        Response[List[int]]
+        Response[GetNamingPropertiesResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -107,13 +99,10 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-) -> Optional[List[int]]:
-    """Get Basic List Of Integers
-
-     Get a list of integers
-
+) -> Optional[GetNamingPropertiesResponse200]:
+    """
     Returns:
-        Response[List[int]]
+        Response[GetNamingPropertiesResponse200]
     """
 
     return (

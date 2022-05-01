@@ -19,6 +19,7 @@ from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsU
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
 from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
+from .get_naming_properties_response_200 import GetNamingPropertiesResponse200
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .model_from_all_of import ModelFromAllOf

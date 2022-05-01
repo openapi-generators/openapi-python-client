@@ -305,6 +305,7 @@ class TestPropertyFromData:
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
+            title="AnEnum",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -336,6 +337,7 @@ class TestPropertyFromData:
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
+            title="AnEnum",
         )
         assert prop.nullable is True
         assert schemas != new_schemas, "Provided Schemas was mutated"
@@ -358,7 +360,9 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
-        assert prop == none_property_factory(name="my_enum", required=required, nullable=False, default="None")
+        assert prop == none_property_factory(
+            name="my_enum", required=required, nullable=False, default="None", title="AnEnumWithOnlyNull"
+        )
 
     def test_property_from_data_int_enum(self, enum_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -384,6 +388,7 @@ class TestPropertyFromData:
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
             default="ParentAnEnum.VALUE_3",
+            title="AnEnum",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {

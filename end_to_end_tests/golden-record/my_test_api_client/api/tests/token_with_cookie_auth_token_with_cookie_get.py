@@ -9,14 +9,14 @@ from ...types import Response
 def _get_kwargs(
     *,
     client: Client,
-    my_token: str,
+    token: str,
 ) -> Dict[str, Any]:
     url = "{}/auth/token_with_cookie".format(client.base_url)
 
     headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    cookies["MyToken"] = my_token
+    cookies["MyToken"] = token
 
     return {
         "method": "get",
@@ -39,14 +39,14 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 def sync_detailed(
     *,
     client: Client,
-    my_token: str,
+    token: str,
 ) -> Response[Any]:
     """TOKEN_WITH_COOKIE
 
      Test optional cookie parameters
 
     Args:
-        my_token (str):
+        token (str):
 
     Returns:
         Response[Any]
@@ -54,7 +54,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         client=client,
-        my_token=my_token,
+        token=token,
     )
 
     response = httpx.request(
@@ -68,14 +68,14 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Client,
-    my_token: str,
+    token: str,
 ) -> Response[Any]:
     """TOKEN_WITH_COOKIE
 
      Test optional cookie parameters
 
     Args:
-        my_token (str):
+        token (str):
 
     Returns:
         Response[Any]
@@ -83,7 +83,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         client=client,
-        my_token=my_token,
+        token=token,
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:

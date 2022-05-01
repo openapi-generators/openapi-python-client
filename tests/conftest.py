@@ -16,6 +16,7 @@ from openapi_python_client.parser.properties import (
     StringProperty,
     UnionProperty,
 )
+from openapi_python_client.utils import PythonIdentifier
 
 
 @pytest.fixture
@@ -232,6 +233,7 @@ def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         "example": None,
         **kwargs,
     }
+    title = kwargs.pop("title", None)
     if not kwargs.get("python_name"):
-        kwargs["python_name"] = kwargs["name"]
+        kwargs["python_name"] = PythonIdentifier(title or kwargs["name"], "field_")
     return kwargs

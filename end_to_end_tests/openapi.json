@@ -809,20 +809,20 @@
       },
       "parameters": [
         {
-            "name": "param",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "param",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+          "name": "param",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
+        },
+        {
+          "name": "param",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
       ]
     },
     "/same-name-multiple-locations/{param}": {
@@ -871,7 +871,9 @@
     },
     "/tag_with_number": {
       "get": {
-        "tags": ["1"],
+        "tags": [
+          "1"
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1043,6 +1045,36 @@
         ],
         "responses": {}
       }
+    },
+    "/naming/properties": {
+      "description": "Ensure that Python properties are renamed properly.",
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Test property name conflict is resolved via `title`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_a": {
+                      "title": "private",
+                      "type": "string"
+                    },
+                    "a": {
+                      "type": "string"
+                    },
+                    "a_": {
+                      "title": "postfix",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1109,7 +1141,7 @@
             "default": []
           },
           "aCamelDateTime": {
-            "title": "Acameldatetime",
+            "title": "aCamelDateTime",
             "anyOf": [
               {
                 "type": "string",
@@ -1127,18 +1159,15 @@
             "format": "date"
           },
           "a_nullable_date": {
-            "title": "A Nullable Date",
             "type": "string",
             "format": "date",
             "nullable": true
           },
           "a_not_required_date": {
-            "title": "A Nullable Date",
             "type": "string",
             "format": "date"
           },
           "1_leading_digit": {
-            "title": "Leading Digit",
             "type": "string"
           },
           "required_nullable": {
@@ -1291,7 +1320,11 @@
       },
       "Body_upload_file_tests_upload_post": {
         "title": "Body_upload_file_tests_upload_post",
-        "required": ["some_file", "some_object", "some_nullable_object"],
+        "required": [
+          "some_file",
+          "some_object",
+          "some_nullable_object"
+        ],
         "type": "object",
         "properties": {
           "some_file": {
@@ -1333,7 +1366,10 @@
           "some_object": {
             "title": "Some Object",
             "type": "object",
-            "required": ["num", "text"],
+            "required": [
+              "num",
+              "text"
+            ],
             "properties": {
               "num": {
                 "type": "number"
@@ -1346,7 +1382,9 @@
           "some_optional_object": {
             "title": "Some Optional Object",
             "type": "object",
-            "required": ["foo"],
+            "required": [
+              "foo"
+            ],
             "properties": {
               "foo": {
                 "type": "string"
@@ -1569,7 +1607,10 @@
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0, 1]
+            "enum": [
+              0,
+              1
+            ]
           }
         }
       },
@@ -1582,11 +1623,15 @@
           },
           "type": {
             "type": "string",
-            "enum": ["submodel"]
+            "enum": [
+              "submodel"
+            ]
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0]
+            "enum": [
+              0
+            ]
           }
         }
       },
@@ -1729,7 +1774,7 @@
           }
         }
       },
-      "ModelWithDateTimeProperty" : {
+      "ModelWithDateTimeProperty": {
         "type": "object",
         "properties": {
           "datetime": {
@@ -1907,10 +1952,10 @@
         "type": "string",
         "format": "byte"
       },
-      "import":  {
+      "import": {
         "type": "object"
       },
-      "None":  {
+      "None": {
         "type": "object"
       },
       "model.reference.with.Periods": {

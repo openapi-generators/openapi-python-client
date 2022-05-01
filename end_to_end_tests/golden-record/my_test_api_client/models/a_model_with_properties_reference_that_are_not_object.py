@@ -122,10 +122,10 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         bytestream_properties_ref = self.bytestream_properties_ref
 
         enum_properties = []
-        for componentsschemas_an_array_of_enum_item_data in self.enum_properties:
-            componentsschemas_an_array_of_enum_item = componentsschemas_an_array_of_enum_item_data.value
+        for an_enum_data in self.enum_properties:
+            an_enum = an_enum_data.value
 
-            enum_properties.append(componentsschemas_an_array_of_enum_item)
+            enum_properties.append(an_enum)
 
         str_properties = self.str_properties
 
@@ -260,10 +260,10 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         enum_properties = []
         _enum_properties = d.pop("enum_properties")
-        for componentsschemas_an_array_of_enum_item_data in _enum_properties:
-            componentsschemas_an_array_of_enum_item = AnEnum(componentsschemas_an_array_of_enum_item_data)
+        for an_enum_data in _enum_properties:
+            an_enum = AnEnum(an_enum_data)
 
-            enum_properties.append(componentsschemas_an_array_of_enum_item)
+            enum_properties.append(an_enum)
 
         str_properties = cast(List[str], d.pop("str_properties"))
 

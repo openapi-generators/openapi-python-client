@@ -32,9 +32,9 @@ class AModel:
         a_nullable_date (Optional[datetime.date]):
         a_not_required_date (Union[Unset, datetime.date]):
         attr_1_leading_digit (Union[Unset, str]):
-        required_nullable (Optional[str]):
-        not_required_nullable (Union[Unset, None, str]):
-        not_required_not_nullable (Union[Unset, str]):
+        required_and_nullable (Optional[str]):
+        not_required_and_nullable (Union[Unset, None, str]):
+        not_required_and_not_nullable (Union[Unset, str]):
         nullable_one_of_models (Union[FreeFormModel, ModelWithUnionProperty, None]):
         not_required_one_of_models (Union[FreeFormModel, ModelWithUnionProperty, Unset]):
         not_required_nullable_one_of_models (Union[FreeFormModel, ModelWithUnionProperty, None, Unset, str]):
@@ -50,7 +50,7 @@ class AModel:
     one_of_models: Union[Any, FreeFormModel, ModelWithUnionProperty]
     model: ModelWithUnionProperty
     a_nullable_date: Optional[datetime.date]
-    required_nullable: Optional[str]
+    required_and_nullable: Optional[str]
     nullable_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, None]
     nullable_model: Optional[ModelWithUnionProperty]
     an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
@@ -59,8 +59,8 @@ class AModel:
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
-    not_required_nullable: Union[Unset, None, str] = UNSET
-    not_required_not_nullable: Union[Unset, str] = UNSET
+    not_required_and_nullable: Union[Unset, None, str] = UNSET
+    not_required_and_not_nullable: Union[Unset, str] = UNSET
     not_required_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, Unset] = UNSET
     not_required_nullable_one_of_models: Union[FreeFormModel, ModelWithUnionProperty, None, Unset, str] = UNSET
     not_required_model: Union[Unset, ModelWithUnionProperty] = UNSET
@@ -114,9 +114,9 @@ class AModel:
             a_not_required_date = self.a_not_required_date.isoformat()
 
         attr_1_leading_digit = self.attr_1_leading_digit
-        required_nullable = self.required_nullable
-        not_required_nullable = self.not_required_nullable
-        not_required_not_nullable = self.not_required_not_nullable
+        required_and_nullable = self.required_and_nullable
+        not_required_and_nullable = self.not_required_and_nullable
+        not_required_and_not_nullable = self.not_required_and_not_nullable
         nullable_one_of_models: Union[Dict[str, Any], None]
         if self.nullable_one_of_models is None:
             nullable_one_of_models = None
@@ -183,7 +183,7 @@ class AModel:
                 "one_of_models": one_of_models,
                 "model": model,
                 "a_nullable_date": a_nullable_date,
-                "required_nullable": required_nullable,
+                "required_nullable": required_and_nullable,
                 "nullable_one_of_models": nullable_one_of_models,
                 "nullable_model": nullable_model,
             }
@@ -198,10 +198,10 @@ class AModel:
             field_dict["a_not_required_date"] = a_not_required_date
         if attr_1_leading_digit is not UNSET:
             field_dict["1_leading_digit"] = attr_1_leading_digit
-        if not_required_nullable is not UNSET:
-            field_dict["not_required_nullable"] = not_required_nullable
-        if not_required_not_nullable is not UNSET:
-            field_dict["not_required_not_nullable"] = not_required_not_nullable
+        if not_required_and_nullable is not UNSET:
+            field_dict["not_required_nullable"] = not_required_and_nullable
+        if not_required_and_not_nullable is not UNSET:
+            field_dict["not_required_not_nullable"] = not_required_and_not_nullable
         if not_required_one_of_models is not UNSET:
             field_dict["not_required_one_of_models"] = not_required_one_of_models
         if not_required_nullable_one_of_models is not UNSET:
@@ -301,11 +301,11 @@ class AModel:
 
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
-        required_nullable = d.pop("required_nullable")
+        required_and_nullable = d.pop("required_nullable")
 
-        not_required_nullable = d.pop("not_required_nullable", UNSET)
+        not_required_and_nullable = d.pop("not_required_nullable", UNSET)
 
-        not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
+        not_required_and_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
         def _parse_nullable_one_of_models(data: object) -> Union[FreeFormModel, ModelWithUnionProperty, None]:
             if data is None:
@@ -435,9 +435,9 @@ class AModel:
             a_nullable_date=a_nullable_date,
             a_not_required_date=a_not_required_date,
             attr_1_leading_digit=attr_1_leading_digit,
-            required_nullable=required_nullable,
-            not_required_nullable=not_required_nullable,
-            not_required_not_nullable=not_required_not_nullable,
+            required_and_nullable=required_and_nullable,
+            not_required_and_nullable=not_required_and_nullable,
+            not_required_and_not_nullable=not_required_and_not_nullable,
             nullable_one_of_models=nullable_one_of_models,
             not_required_one_of_models=not_required_one_of_models,
             not_required_nullable_one_of_models=not_required_nullable_one_of_models,

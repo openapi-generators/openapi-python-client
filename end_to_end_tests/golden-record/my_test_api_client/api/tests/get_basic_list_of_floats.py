@@ -26,9 +26,9 @@ def _get_kwargs(
 
 def _parse_response(*, response: httpx.Response) -> Optional[List[float]]:
     if response.status_code == 200:
-        response_200 = cast(List[float], response.json())
+        response_get_basic_list_of_floats_tests_basic_lists_floats_get = cast(List[float], response.json())
 
-        return response_200
+        return response_get_basic_list_of_floats_tests_basic_lists_floats_get
     return None
 
 

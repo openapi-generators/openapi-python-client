@@ -9,27 +9,27 @@ T = TypeVar("T", bound="ValidationError")
 class ValidationError:
     """
     Attributes:
-        loc (List[str]):
-        msg (str):
-        type (str):
+        location (List[str]):
+        message (str):
+        error_type (str):
     """
 
-    loc: List[str]
-    msg: str
-    type: str
+    location: List[str]
+    message: str
+    error_type: str
 
     def to_dict(self) -> Dict[str, Any]:
-        loc = self.loc
+        location = self.location
 
-        msg = self.msg
-        type = self.type
+        message = self.message
+        error_type = self.error_type
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
-                "loc": loc,
-                "msg": msg,
-                "type": type,
+                "loc": location,
+                "msg": message,
+                "type": error_type,
             }
         )
 
@@ -38,16 +38,16 @@ class ValidationError:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        loc = cast(List[str], d.pop("loc"))
+        location = cast(List[str], d.pop("loc"))
 
-        msg = d.pop("msg")
+        message = d.pop("msg")
 
-        type = d.pop("type")
+        error_type = d.pop("type")
 
         validation_error = cls(
-            loc=loc,
-            msg=msg,
-            type=type,
+            location=location,
+            message=message,
+            error_type=error_type,
         )
 
         return validation_error
