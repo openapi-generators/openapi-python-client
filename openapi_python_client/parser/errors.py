@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-__all__ = ["ErrorLevel", "GeneratorError", "ParseError", "PropertyError", "ValidationError"]
+__all__ = ["ErrorLevel", "GeneratorError", "ParseError", "PropertyError", "ValidationError", "ParameterError"]
 
 from pydantic import BaseModel
 
@@ -37,6 +37,13 @@ class PropertyError(ParseError):
     """Error raised when there's a problem creating a Property"""
 
     header = "Problem creating a Property: "
+
+
+@dataclass
+class ParameterError(ParseError):
+    """Error raised when there's a problem creating a Parameter."""
+
+    header = "Problem creating a Parameter: "
 
 
 class ValidationError(Exception):

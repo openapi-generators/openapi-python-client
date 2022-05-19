@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.11.1"
+version = "0.11.2"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -84,6 +84,7 @@ exclude = '''
   /(
     | \.git
     | \.venv
+    | env
     | \.mypy_cache
     | openapi_python_client/templates
     | tests/test_templates
@@ -96,7 +97,7 @@ exclude = '''
 [tool.isort]
 line_length = 120
 profile = "black"
-skip = [".venv", "tests/test_templates", "integration-tests"]
+skip = [".venv", "tests/test_templates", "integration-tests", "env"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]

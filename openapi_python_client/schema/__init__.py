@@ -6,6 +6,7 @@ __all__ = [
     "ParameterLocation",
     "DataType",
     "PathItem",
+    "Parameter",
     "Reference",
     "RequestBody",
     "Response",
