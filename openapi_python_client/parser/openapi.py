@@ -102,7 +102,7 @@ class Endpoint:
 
     @staticmethod
     def parse_request_yaml_body(
-            *, body: oai.RequestBody, schemas: Schemas, parent_name: str
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
         """ Return yaml_body """
         body_content = body.content

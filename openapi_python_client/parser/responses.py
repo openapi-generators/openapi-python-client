@@ -22,7 +22,7 @@ _SOURCE_BY_CONTENT_TYPE = {
     "application/json": "response.json()",
     "application/octet-stream": "response.content",
     "text/html": "response.text",
-    "text/yaml": "response.yaml", # Only used as an identifier, not the actual source
+    "text/yaml": "response.yaml",  # Only used as an identifier, not the actual source
 }
 
 

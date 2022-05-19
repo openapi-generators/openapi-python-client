@@ -68,10 +68,9 @@ class TestGeneratorData:
 class TestEndpoint:
     def test_parse_yaml_body(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
+
         schema = mocker.MagicMock()
-        body = oai.RequestBody.construct(
-            content={"text/yaml": oai.MediaType.construct(media_type_schema=schema)}
-        )
+        body = oai.RequestBody.construct(content={"text/yaml": oai.MediaType.construct(media_type_schema=schema)})
         property_from_data = mocker.patch(f"{MODULE_NAME}.property_from_data")
         schemas = Schemas()
 

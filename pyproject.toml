@@ -1,6 +1,8 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.7.3"
+# Our versions have diverged and have no relation to upstream code changes
+# Henceforth, openapi-python-package will be maintained internally
+version = "1.0.0"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -71,7 +73,8 @@ gen-setuppy = """
 poetry build \
 && tar --strip-components=1 -xvf "$(ls -1 dist/*tar.gz | tail -1)" '*/setup.py' \
 && isort setup.py \
-&& black setup.py
+&& black setup.py \
+&& sed -i 's/"openapi-python-client"/"benchling-openapi-python-client"/' setup.py
 """
 
 [tool.black]

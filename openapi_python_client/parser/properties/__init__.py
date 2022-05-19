@@ -443,7 +443,7 @@ def build_union_property(
         sub_properties.append(sub_prop)
         if data.discriminator is not None:
             reference_name_to_subprop[sub_prop.reference.class_name] = sub_prop
-    
+
     discriminator_mappings: Dict[str, Property] = {}
     if data.discriminator is not None:
         for k, v in (data.discriminator.mapping if data.discriminator else {}).items():
@@ -571,13 +571,10 @@ def _property_from_data(
     elif data.type == "object" or data.allOf:
         return build_model_property(data=data, name=name, schemas=schemas, required=required, parent_name=parent_name)
     elif not data.type:
-        return NoneProperty(
-            name=name,
-            required=required,
-            nullable=False,
-            default=None,
-            description=data.description
-        ), schemas
+        return (
+            NoneProperty(name=name, required=required, nullable=False, default=None, description=data.description),
+            schemas,
+        )
     return PropertyError(data=data, detail=f"unknown type {data.type}"), schemas
 
 
