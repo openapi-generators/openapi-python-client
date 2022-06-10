@@ -13,6 +13,16 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.11.2
+
+### Features
+
+- Allow httpx 0.23.x (#617)
+
+### Fixes
+
+- typos in generated README (#586). Thanks @adelevie!
+
 ## 0.11.1
 
 ### Features

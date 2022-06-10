@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.11.1"
+version = "0.11.2"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -30,7 +30,7 @@ importlib_metadata = {version = ">2,<5", python = "<3.8"}
 pydantic = "^1.6.1"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.1"
-httpx = ">=0.15.4,<0.23.0"
+httpx = ">=0.15.4,<0.24.0"
 autoflake = "^1.4"
 typing-extensions = { version = "*", python = "<3.8" }
 PyYAML = "^6.0"
