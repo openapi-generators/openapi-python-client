@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel, Extra
+from pydantic import BaseModel, Extra
 
 
 class License(BaseModel):
@@ -12,7 +12,7 @@ class License(BaseModel):
     """
 
     name: str
-    url: Optional[AnyUrl] = None
+    url: Optional[str] = None
 
     class Config:  # pylint: disable=missing-class-docstring
         extra = Extra.allow
