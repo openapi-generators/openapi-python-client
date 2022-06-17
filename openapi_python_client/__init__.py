@@ -225,30 +225,24 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
     def _build_models(self) -> None:
         # Generate models
-        models_dir = self.package_dir / "models"
-        models_dir.mkdir()
-        models_init = models_dir / "__init__.py"
-        imports = []
+        models_module = self.package_dir / "models.py"
+        models_template = self.env.get_template("models.py.jinja")
 
-        model_template = self.env.get_template("model.py.jinja")
-        for model in self.openapi.models:
-            module_path = models_dir / f"{model.class_info.module_name}.py"
-            module_path.write_text(model_template.render(model=model), encoding=self.file_encoding)
-            imports.append(import_string_from_class(model.class_info))
+        with models_module.open(mode="a", encoding=self.file_encoding) as models:
+            models.write(models_template.render())
 
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
         int_enum_template = self.env.get_template("int_enum.py.jinja")
         for enum in self.openapi.enums:
-            module_path = models_dir / f"{enum.class_info.module_name}.py"
-            if enum.value_type is int:
-                module_path.write_text(int_enum_template.render(enum=enum), encoding=self.file_encoding)
-            else:
-                module_path.write_text(str_enum_template.render(enum=enum), encoding=self.file_encoding)
-            imports.append(import_string_from_class(enum.class_info))
+            enum_template = int_enum_template if enum.value_type is int else str_enum_template
+            with models_module.open(mode="a", encoding=self.file_encoding) as models:
+                models.write(enum_template.render(enum=enum))
 
-        models_init_template = self.env.get_template("models_init.py.jinja")
-        models_init.write_text(models_init_template.render(imports=imports), encoding=self.file_encoding)
+        model_template = self.env.get_template("model.py.jinja")
+        for model in self.openapi.models:
+            with models_module.open(mode="a", encoding=self.file_encoding) as models:
+                models.write(model_template.render(model=model))
 
     def _build_api(self) -> None:
         # Generate Client

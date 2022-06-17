@@ -20,7 +20,7 @@ _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
     """Create a string which is used to import a reference"""
-    return f"from {prefix}.{class_.module_name} import {class_.name}"
+    return f"from {prefix} import {class_.name}"
 
 
 @dataclass

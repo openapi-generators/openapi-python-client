@@ -1,30 +1,9 @@
-from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
-
-{% if model.additional_properties %}
-from typing import List
-
-{% endif %}
-
-import attr
-{% if model.is_multipart_body %}
-import json
-{% endif %}
-
-from ..types import UNSET, Unset
-
-{% for relative in model.relative_imports %}
-{{ relative }}
-{% endfor %}
-
-
 {% if model.additional_properties %}
 {% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
 {% endif %}
 
 {% set class_name = model.class_info.name %}
 {% set module_name = model.class_info.module_name %}
-
-T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ class_name }}:
@@ -121,7 +100,7 @@ return field_dict
 {% endif %}
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: Type[{{ class_name }}], src_dict: Dict[str, Any]) -> {{ class_name }}:
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}

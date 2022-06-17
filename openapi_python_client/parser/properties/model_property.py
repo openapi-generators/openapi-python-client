@@ -42,7 +42,7 @@ class ModelProperty(Property):
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}",
+                f"from {prefix}models import {self.class_info.name}",
                 "from typing import Dict",
                 "from typing import cast",
             }
