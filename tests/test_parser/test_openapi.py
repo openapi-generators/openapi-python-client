@@ -1062,15 +1062,6 @@ class TestEndpoint:
 
 
 class TestImportStringFromReference:
-    def test_import_string_from_reference_no_prefix(self, mocker):
-        from openapi_python_client.parser.openapi import import_string_from_class
-        from openapi_python_client.parser.properties import Class
-
-        class_ = mocker.MagicMock(autospec=Class)
-        result = import_string_from_class(class_)
-
-        assert result == f"from .{class_.module_name} import {class_.name}"
-
     def test_import_string_from_reference_with_prefix(self, mocker):
         from openapi_python_client.parser.openapi import import_string_from_class
         from openapi_python_client.parser.properties import Class
@@ -1079,7 +1070,7 @@ class TestImportStringFromReference:
         class_ = mocker.MagicMock(autospec=Class)
         result = import_string_from_class(class_=class_, prefix=prefix)
 
-        assert result == f"from {prefix}.{class_.module_name} import {class_.name}"
+        assert result == f"from {prefix} import {class_.name}"
 
 
 class TestEndpointCollection:
