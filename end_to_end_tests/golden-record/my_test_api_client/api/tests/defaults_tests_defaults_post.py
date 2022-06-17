@@ -5,9 +5,7 @@ import httpx
 from dateutil.parser import isoparse
 
 from ...client import Client
-from ...models.an_enum import AnEnum
-from ...models.http_validation_error import HTTPValidationError
-from ...models.model_with_union_property import ModelWithUnionProperty
+from ...models import AnEnum, HTTPValidationError, ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
 
 

@@ -3,8 +3,7 @@ from typing import Any, Dict, Optional
 import httpx
 
 from ...client import Client
-from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
-from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
+from ...models import TestInlineObjectsJsonBody, TestInlineObjectsResponse200
 from ...types import Response
 
 

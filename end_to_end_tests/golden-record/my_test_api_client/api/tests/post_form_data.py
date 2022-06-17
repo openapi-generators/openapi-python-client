@@ -3,7 +3,7 @@ from typing import Any, Dict
 import httpx
 
 from ...client import Client
-from ...models.a_form_data import AFormData
+from ...models import AFormData
 from ...types import Response
 
 

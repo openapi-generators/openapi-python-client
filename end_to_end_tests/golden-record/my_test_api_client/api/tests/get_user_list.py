@@ -4,10 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ...client import Client
-from ...models.a_model import AModel
-from ...models.an_enum import AnEnum
-from ...models.an_enum_with_null import AnEnumWithNull
-from ...models.http_validation_error import HTTPValidationError
+from ...models import AModel, AnEnum, AnEnumWithNull, HTTPValidationError
 from ...types import UNSET, Response
 
 
