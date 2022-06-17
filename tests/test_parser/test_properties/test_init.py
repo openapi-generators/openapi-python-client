@@ -250,7 +250,7 @@ class TestEnumProperty:
         enum_property = enum_property_factory(class_info=fake_class, required=False)
 
         assert enum_property.get_imports(prefix=prefix) == {
-            f"from {prefix}models.{fake_class.module_name} import {fake_class.name}",
+            f"from {prefix}models import {fake_class.name}",
             "from typing import Union",  # Makes sure unset is handled via base class
             "from ...types import UNSET, Unset",
         }

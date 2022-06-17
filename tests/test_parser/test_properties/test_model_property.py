@@ -39,7 +39,7 @@ def test_get_imports(model_property_factory):
         "from typing import Optional",
         "from typing import Union",
         "from ..types import UNSET, Unset",
-        "from ..models.my_module import MyClass",
+        "from ..models import MyClass",
         "from typing import Dict",
         "from typing import cast",
     }
