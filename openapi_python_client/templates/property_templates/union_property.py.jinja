@@ -66,10 +66,13 @@ elif {{ source }} is None:
     {% else %}
         {% set ns.contains_modified_properties = true %}
     {% endif %}
+    {% set has_first_clause = false %}
     {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
 if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+    {% set has_first_clause = true %}
     {% elif not loop.last or ns.contains_properties_without_transform %}
-elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+{% if not has_first_clause %}if{% else %}elif{% endif %} isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+    {% set has_first_clause = true %}
     {% else %}
 else:
     {% endif %}
