@@ -40,24 +40,24 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
-{% if not property.required or property.nullable %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %}
+{% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
+{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) }}{% endif %}
 
 {% if not property.required %}
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
-{% endif %}
+    {% set ns.has_if = true %}
 {% endif %}
 {% if property.nullable %}
-    {% if property.required %}
-if {{ source }} is None:
-    {% else %}{# There's an if UNSET statement before this #}
+    {% if ns.has_if %}
 elif {{ source }} is None:
+    {% else %}
+if {{ source }} is None:
+        {% set ns.has_if = true %}
     {% endif %}
     {{ destination }} = None
 {% endif %}
 
-{% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required) %}
 {% for inner_property in property.inner_properties %}
     {% import "property_templates/" + inner_property.template as inner_template %}
     {% if not inner_template.transform %}
@@ -66,10 +66,12 @@ elif {{ source }} is None:
     {% else %}
         {% set ns.contains_modified_properties = true %}
     {% endif %}
-    {% if loop.first and property.required and not property.nullable %}{# No if UNSET or if None statement before this #}
+    {% if not ns.has_if %}
 if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+        {% set ns.has_if = true %}
     {% elif not loop.last or ns.contains_properties_without_transform %}
 elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+    {% set has_first_clause = true %}
     {% else %}
 else:
     {% endif %}
