@@ -47,6 +47,8 @@ def _get_kwargs(
 
     params["an_enum_value_with_only_null"] = json_an_enum_value_with_only_null
 
+    json_some_date: str
+
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
     else:
