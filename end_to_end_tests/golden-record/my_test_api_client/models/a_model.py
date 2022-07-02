@@ -71,6 +71,8 @@ class AModel:
 
         an_allof_enum_with_overridden_default = self.an_allof_enum_with_overridden_default.value
 
+        a_camel_date_time: str
+
         if isinstance(self.a_camel_date_time, datetime.datetime):
             a_camel_date_time = self.a_camel_date_time.isoformat()
 
@@ -79,6 +81,7 @@ class AModel:
 
         a_date = self.a_date.isoformat()
         required_not_nullable = self.required_not_nullable
+        one_of_models: Union[Any, Dict[str, Any]]
 
         if isinstance(self.one_of_models, FreeFormModel):
             one_of_models = self.one_of_models.to_dict()
