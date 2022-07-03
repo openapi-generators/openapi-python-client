@@ -1004,7 +1004,11 @@
             "in": "query"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/location/header/types": {
@@ -1047,7 +1051,11 @@
             "in": "header"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/naming/keywords": {
@@ -1068,7 +1076,11 @@
             "in": "query"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     }
   },
