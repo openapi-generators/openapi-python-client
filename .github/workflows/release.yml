@@ -31,10 +31,10 @@ jobs:
         run: knope release
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
-    - name: Setup Poetry
-      run: |
-        python -m pip install --upgrade pip
-        pip install --upgrade poetry
-        poetry config http-basic.pypi __token__ ${{ secrets.PYPI_TOKEN }}
-    - name: Push to PyPI
-      run: poetry publish --build
+      - name: Setup Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade poetry
+          poetry config http-basic.pypi __token__ ${{ secrets.PYPI_TOKEN }}
+      - name: Push to PyPI
+        run: poetry publish --build
