@@ -1,0 +1,26 @@
+name: Release Dry Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
+      - name: Install Knope
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: knope
+      - run: knope release --dry-run

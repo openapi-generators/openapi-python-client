@@ -19,6 +19,22 @@ name = "release"
     type = "Command"
     command = "npx prettier --write CHANGELOG.md"
 
+    [[workflows.steps]]
+    type = "Command"
+    command = "git add pyproject.toml CHANGELOG.md"
+
+    [[workflows.steps]]
+    type = "Command"
+    command = "git commit -m \"chore: Bump to version\""
+    variables = { "version" = "Version" }
+
+    [[workflows.steps]]
+    type = "Command"
+    command = "git push"
+
+    [[workflows.steps]]
+    type = "Release"
+
 [github]
 owner = "openapi-generators"
 repo = "openapi-python-client"
