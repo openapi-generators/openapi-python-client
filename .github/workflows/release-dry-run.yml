@@ -1,12 +1,12 @@
 name: Release Dry Run
 
-on: push
-#  push:
-#    branches:
-#      - main
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  create-release:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
