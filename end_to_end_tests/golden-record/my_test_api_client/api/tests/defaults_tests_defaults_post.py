@@ -51,6 +51,8 @@ def _get_kwargs(
 
     params["list_prop"] = json_list_prop
 
+    json_union_prop: Union[float, str]
+
     json_union_prop = union_prop
 
     params["union_prop"] = json_union_prop

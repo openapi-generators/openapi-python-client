@@ -1,0 +1,37 @@
+name: Release
+
+on: workflow_dispatch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_push_gpgsign: false
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
+      - name: Install Knope
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: knope
+      - name: Bump Version & Create GitHub Release
+        run: knope release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+      - name: Install Poetry
+        run: pip install --upgrade poetry
+      - name: Push to PyPI
+        run: poetry publish --build -u __token__ -p ${{ secrets.PYPI_TOKEN }}

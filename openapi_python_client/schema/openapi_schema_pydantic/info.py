@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel, Extra
+from pydantic import BaseModel, Extra
 
 from .contact import Contact
 from .license import License
@@ -19,7 +19,7 @@ class Info(BaseModel):
 
     title: str
     description: Optional[str] = None
-    termsOfService: Optional[AnyUrl] = None
+    termsOfService: Optional[str] = None
     contact: Optional[Contact] = None
     license: Optional[License] = None
     version: str

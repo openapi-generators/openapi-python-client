@@ -85,7 +85,7 @@ field_dict: Dict[str, Any] = {}
 {% endif %}
 {% if prop_template and prop_template.transform %}
 for prop_name, prop in self.additional_properties.items():
-    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart) | indent(4) }}
+    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart, declare_type=false) | indent(4) }}
 {% elif multipart %}
 field_dict.update({
     key: (None, str(value).encode(), "text/plain")

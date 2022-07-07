@@ -5,6 +5,7 @@ from typing import Type
 from .default import DefaultEndpoints
 from .location import LocationEndpoints
 from .parameters import ParametersEndpoints
+from .responses import ResponsesEndpoints
 from .tag1 import Tag1Endpoints
 from .tests import TestsEndpoints
 from .true_ import True_Endpoints
@@ -14,6 +15,10 @@ class MyTestApiClientApi:
     @classmethod
     def tests(cls) -> Type[TestsEndpoints]:
         return TestsEndpoints
+
+    @classmethod
+    def responses(cls) -> Type[ResponsesEndpoints]:
+        return ResponsesEndpoints
 
     @classmethod
     def default(cls) -> Type[DefaultEndpoints]:

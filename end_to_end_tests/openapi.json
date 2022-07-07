@@ -713,6 +713,33 @@
         }
       }
     },
+    "/responses/unions/simple_before_complex": {
+      "post": {
+        "tags": ["responses"],
+        "description": "Regression test for #603",
+        "responses": {
+          "200": {
+            "description": "A union with simple types before complex ones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["a"],
+                  "properties": {
+                    "a": {
+                      "oneOf": [
+                        {"type": "string"},
+                        {"type": "object"}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/token_with_cookie": {
       "get": {
         "tags": [
@@ -977,7 +1004,11 @@
             "in": "query"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/location/header/types": {
@@ -1020,7 +1051,11 @@
             "in": "header"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/naming/keywords": {
@@ -1041,7 +1076,11 @@
             "in": "query"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     }
   },
