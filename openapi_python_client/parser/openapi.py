@@ -23,7 +23,7 @@ from .properties import (
     build_schemas,
     property_from_data,
 )
-from .properties.schemas import parse_reference_path
+from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
@@ -293,6 +293,8 @@ class Endpoint:
             - https://swagger.io/docs/specification/describing-parameters/
             - https://swagger.io/docs/specification/paths-and-operations/
         """
+        # pylint: disable=too-many-branches, too-many-locals
+        # There isn't much value in breaking down this function further other than to satisfy the linter.
 
         if data.parameters is None:
             return endpoint, schemas, parameters
@@ -307,35 +309,32 @@ class Endpoint:
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
         }
 
-        for _param in data.parameters:
-            param: oai.Parameter
-
-            if _param is None:
-                return ParseError(data=data, detail="Null parameter provided."), schemas, parameters
-
-            if isinstance(_param, oai.Reference):
-                ref_path = parse_reference_path(_param.ref)
-                if isinstance(ref_path, ParseError):
-                    return ref_path, schemas, parameters
-                _resolved_class = parameters.classes_by_reference.get(ref_path)
-                if _resolved_class is None:
-                    return ParseError(data=data, detail=f"Reference `{ref_path}` not found."), schemas, parameters
-                param = _resolved_class
-            elif isinstance(_param, oai.Parameter):
-                param = _param
-
-            unique_param = (param.name, param.param_in)
-            if unique_param in unique_parameters:
-                duplication_detail = (
-                    "Parameters MUST NOT contain duplicates. "
-                    "A unique parameter is defined by a combination of a name and location. "
-                    f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
-                )
-                return ParseError(data=data, detail=duplication_detail), schemas, parameters
-            unique_parameters.add(unique_param)
+        for param in data.parameters:
+            # Obtain the parameter from the reference or just the parameter itself
+            param_or_error = parameter_from_reference(param=param, parameters=parameters)
+            if isinstance(param_or_error, ParseError):
+                return param_or_error, schemas, parameters
+            param = param_or_error
 
             if param.param_schema is None:
                 continue
+
+            unique_param = (param.name, param.param_in)
+            if (param.name, param.param_in) in unique_parameters:
+                return (
+                    ParseError(
+                        data=data,
+                        detail=(
+                            "Parameters MUST NOT contain duplicates. "
+                            "A unique parameter is defined by a combination of a name and location. "
+                            f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                        ),
+                    ),
+                    schemas,
+                    parameters,
+                )
+
+            unique_parameters.add(unique_param)
 
             prop, new_schemas = property_from_data(
                 name=param.name,

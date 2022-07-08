@@ -1,4 +1,11 @@
-__all__ = ["Class", "Schemas", "Parameters", "parse_reference_path", "update_schemas_with_data"]
+__all__ = [
+    "Class",
+    "Schemas",
+    "Parameters",
+    "parse_reference_path",
+    "update_schemas_with_data",
+    "parameter_from_reference",
+]
 
 from typing import TYPE_CHECKING, Dict, List, NewType, Tuple, Union, cast
 from urllib.parse import urlparse
@@ -190,3 +197,35 @@ def update_parameters_with_data(
 
     parameters = attr.evolve(parameters, classes_by_reference={ref_path: param, **parameters.classes_by_reference})
     return parameters
+
+
+def parameter_from_reference(
+    *,
+    param: Union[oai.Reference, Parameter],
+    parameters: Parameters,
+) -> Union[Parameter, ParameterError]:
+    """
+    Returns a Parameter from a Reference or the Parameter itself if one was provided.
+
+    Args:
+        param: A parameter by `Reference`.
+        parameters: `Parameters` up until now.
+
+    Returns:
+        Either the updated `schemas` input or a `PropertyError` if something went wrong.
+
+    See Also:
+        - https://swagger.io/docs/specification/using-ref/
+    """
+    if isinstance(param, Parameter):
+        return param
+
+    ref_path = parse_reference_path(param.ref)
+
+    if isinstance(ref_path, ParseError):
+        return ParameterError(detail=ref_path.detail)
+
+    _resolved_parameter_class = parameters.classes_by_reference.get(ref_path, None)
+    if _resolved_parameter_class is None:
+        return ParameterError(detail=f"Reference `{ref_path}` not found.")
+    return _resolved_parameter_class

@@ -707,7 +707,7 @@ class TestEndpoint:
         )
 
         parameters = mocker.MagicMock()
-        new_param = param_factory(name="blah")
+        new_param = param_factory(name="blah", schema=oai.Schema.construct(nullable=False, type="string"))
         parameters.classes_by_name = {
             "blah": new_param,
         }
