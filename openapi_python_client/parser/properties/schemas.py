@@ -4,7 +4,9 @@ __all__ = [
     "Parameters",
     "parse_reference_path",
     "update_schemas_with_data",
+    "update_parameters_with_data",
     "parameter_from_reference",
+    "parameter_from_data",
 ]
 
 from typing import TYPE_CHECKING, Dict, List, NewType, Tuple, Union, cast
@@ -129,27 +131,15 @@ def parameter_from_data(
     name: str,
     required: bool,
     data: Union[oai.Reference, oai.Parameter],
-    schemas: Schemas,
     parameters: Parameters,
-    config: Config,
-) -> Tuple[Union[Parameter, ParameterError], Schemas, Parameters]:
-    """Generates parameters from"""
-    from . import property_from_data
+) -> Tuple[Union[Parameter, ParameterError], Parameters]:
+    """Generates parameters from an OpenAPI Parameter spec."""
 
     if isinstance(data, oai.Reference):
-        return ParameterError("Unable to resolve another reference"), schemas, parameters
+        return ParameterError("Unable to resolve another reference"), parameters
 
     if data.param_schema is None:
-        return ParameterError("Parameter has no schema"), schemas, parameters
-
-    _, new_schemas = property_from_data(
-        name=name,
-        required=required,
-        data=data.param_schema,
-        schemas=schemas,
-        parent_name="",
-        config=config,
-    )
+        return ParameterError("Parameter has no schema"), parameters
 
     new_param = Parameter(
         name=name,
@@ -160,34 +150,32 @@ def parameter_from_data(
         param_in=data.param_in,
     )
     parameters = attr.evolve(parameters, classes_by_name={**parameters.classes_by_name, name: new_param})
-    return new_param, new_schemas, parameters
+    return new_param, parameters
 
 
 def update_parameters_with_data(
-    *, ref_path: _ReferencePath, data: oai.Parameter, parameters: Parameters, schemas: Schemas, config: Config
+    *, ref_path: _ReferencePath, data: oai.Parameter, parameters: Parameters
 ) -> Union[Parameters, ParameterError]:
     """
-    Update a `Schemas` using some new reference.
+    Update a `Parameters` using some new reference.
 
     Args:
         ref_path: The output of `parse_reference_path` (validated $ref).
         data: The schema of the thing to add to Schemas.
-        schemas: `Schemas` up until now.
+        parameters: `Parameters` up until now.
         config: User-provided config for overriding default behavior.
 
     Returns:
-        Either the updated `schemas` input or a `PropertyError` if something went wrong.
+        Either the updated `parameters` input or a `PropertyError` if something went wrong.
 
     See Also:
         - https://swagger.io/docs/specification/using-ref/
     """
-    param, schemas, parameters = parameter_from_data(
-        data=data, name=data.name, parameters=parameters, schemas=schemas, required=True, config=config
-    )
+    param, parameters = parameter_from_data(data=data, name=data.name, parameters=parameters, required=True)
 
     if isinstance(param, ParameterError):
         param.detail = f"{param.header}: {param.detail}"
-        param.header = f"Unable to parse schema {ref_path}"
+        param.header = f"Unable to parse parameter {ref_path}"
         if isinstance(param.data, oai.Reference) and param.data.ref.endswith(ref_path):  # pragma: nocover
             param.detail += (
                 "\n\nRecursive and circular references are not supported. "
@@ -196,6 +184,7 @@ def update_parameters_with_data(
         return param
 
     parameters = attr.evolve(parameters, classes_by_reference={ref_path: param, **parameters.classes_by_reference})
+    print("ref_path is: %s", ref_path)
     return parameters
 
 

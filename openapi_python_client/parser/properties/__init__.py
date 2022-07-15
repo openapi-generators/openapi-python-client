@@ -743,10 +743,8 @@ def build_parameters(
     *,
     components: Dict[str, Union[oai.Reference, oai.Parameter]],
     parameters: Parameters,
-    schemas: Schemas,
-    config: Config,
 ) -> Parameters:
-    """Get a list of Schemas from an OpenAPI dict"""
+    """Get a list of Parameters from an OpenAPI dict"""
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Parameter]]] = []
     if components is not None:
         to_process = components.items()
@@ -761,15 +759,13 @@ def build_parameters(
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
             if isinstance(data, oai.Reference):
-                parameters.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
+                parameters.errors.append(ParameterError(data=data, detail="Reference parameters are not supported."))
                 continue
             ref_path = parse_reference_path(f"#/components/parameters/{name}")
             if isinstance(ref_path, ParseError):
-                parameters.errors.append(PropertyError(detail=ref_path.detail, data=data))
+                parameters.errors.append(ParameterError(detail=ref_path.detail, data=data))
                 continue
-            parameters_or_err = update_parameters_with_data(
-                ref_path=ref_path, data=data, schemas=schemas, parameters=parameters, config=config
-            )
+            parameters_or_err = update_parameters_with_data(ref_path=ref_path, data=data, parameters=parameters)
             if isinstance(parameters_or_err, ParameterError):
                 next_round.append((name, data))
                 errors.append(parameters_or_err)

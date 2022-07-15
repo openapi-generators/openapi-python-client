@@ -521,9 +521,7 @@ class GeneratorData:
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         if openapi.components and openapi.components.parameters:
-            parameters = build_parameters(
-                components=openapi.components.parameters, schemas=schemas, parameters=parameters, config=config
-            )
+            parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
             data=openapi.paths, schemas=schemas, parameters=parameters, config=config
         )

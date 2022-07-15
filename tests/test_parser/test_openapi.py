@@ -42,8 +42,6 @@ class TestGeneratorData:
         build_schemas.assert_called_once_with(components=openapi.components.schemas, config=config, schemas=Schemas())
         build_parameters.assert_called_once_with(
             components=openapi.components.parameters,
-            config=config,
-            schemas=build_schemas.return_value,
             parameters=parameters,
         )
         EndpointCollection.from_data.assert_called_once_with(
@@ -63,10 +61,12 @@ class TestGeneratorData:
         # Test no components
         openapi.components = None
         build_schemas.reset_mock()
+        build_parameters.reset_mock()
 
         GeneratorData.from_dict(in_dict, config=config)
 
         build_schemas.assert_not_called()
+        build_parameters.assert_not_called()
 
     def test_from_dict_invalid_schema(self, mocker):
         Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
