@@ -184,7 +184,6 @@ def update_parameters_with_data(
         return param
 
     parameters = attr.evolve(parameters, classes_by_reference={ref_path: param, **parameters.classes_by_reference})
-    print("ref_path is: %s", ref_path)
     return parameters
 
 
