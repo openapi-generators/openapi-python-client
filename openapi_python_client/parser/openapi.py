@@ -33,7 +33,11 @@ class EndpointCollection:
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, config: Config
+        *,
+        data: Dict[str, oai.PathItem],
+        schemas: Schemas,
+        config: Config,
+        request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
@@ -48,7 +52,13 @@ class EndpointCollection:
                 tag = utils.PythonIdentifier(value=(operation.tags or ["default"])[0], prefix="tag")
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
                 endpoint, schemas = Endpoint.from_data(
-                    data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
+                    data=operation,
+                    path=path,
+                    method=method,
+                    tag=tag,
+                    schemas=schemas,
+                    config=config,
+                    request_bodies=request_bodies,
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
@@ -163,15 +173,27 @@ class Endpoint:
         data: oai.Operation,
         schemas: Schemas,
         config: Config,
+        request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
     ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
         """Adds form or JSON body to Endpoint if included in data"""
         endpoint = deepcopy(endpoint)
-        if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
-            return endpoint, schemas
 
-        endpoint.form_body_class = Endpoint.parse_request_form_body(body=data.requestBody, config=config)
+        if data.requestBody is None:
+            return endpoint, schemas
+        elif isinstance(data.requestBody, oai.Reference):
+            # strip "#/components/requestBodies/Object" to "Object"
+            body = request_bodies.get(data.requestBody.ref.split("/")[-1])
+            if body is None:
+                return endpoint, schemas
+            elif isinstance(body, oai.Reference):
+                # TODO: handle reference in request body reference
+                return endpoint, schemas
+        else:
+            body = data.requestBody
+
+        endpoint.form_body_class = Endpoint.parse_request_form_body(body=body, config=config)
         json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=body, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(json_body, ParseError):
             return (
@@ -184,7 +206,7 @@ class Endpoint:
             )
 
         multipart_body, schemas = Endpoint.parse_multipart_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=body, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(multipart_body, ParseError):
             return (
@@ -382,7 +404,14 @@ class Endpoint:
 
     @staticmethod
     def from_data(
-        *, data: oai.Operation, path: str, method: str, tag: str, schemas: Schemas, config: Config
+        *,
+        data: oai.Operation,
+        path: str,
+        method: str,
+        tag: str,
+        schemas: Schemas,
+        config: Config,
+        request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
     ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
         """Construct an endpoint from the OpenAPI data"""
 
@@ -405,7 +434,9 @@ class Endpoint:
         if isinstance(result, ParseError):
             return result, schemas
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
-        result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
+        result, schemas = Endpoint._add_body(
+            endpoint=result, data=data, schemas=schemas, config=config, request_bodies=request_bodies
+        )
 
         return result, schemas
 
@@ -461,8 +492,13 @@ class GeneratorData:
         schemas = Schemas()
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
+
+        request_bodies = {}
+        if openapi.components and openapi.components.requestBodies:
+            request_bodies = openapi.components.requestBodies
+
         endpoint_collections_by_tag, schemas = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, config=config
+            data=openapi.paths, schemas=schemas, config=config, request_bodies=request_bodies
         )
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
