@@ -13,7 +13,7 @@ class OAuthFlow(BaseModel):
     """
 
     authorizationUrl: Optional[AnyUrl] = None
-    tokenUrl: Optional[AnyUrl] = None
+    tokenUrl: Optional[str] = None
     refreshUrl: Optional[AnyUrl] = None
     scopes: Dict[str, str]
 

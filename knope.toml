@@ -1,3 +1,7 @@
+[[packages]]
+versioned_files = ["pyproject.toml"]
+changelog = "CHANGELOG.md"
+
 [[workflows]]
 name = "task"
     [[workflows.steps]]
@@ -9,12 +13,12 @@ name = "task"
 [[workflows]]
 name = "release"
     [[workflows.steps]]
-    type = "UpdateProjectFromCommits"
+    type = "PrepareRelease"
 
     [[workflows.steps]]
     type = "Command"
     command = "npx prettier --write CHANGELOG.md"
 
 [github]
-owner = "triaxtec"
+owner = "openapi-generators"
 repo = "openapi-python-client"
