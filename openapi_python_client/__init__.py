@@ -2,6 +2,7 @@
 
 import json
 import mimetypes
+import os
 import shutil
 import subprocess
 import sys
@@ -127,7 +128,21 @@ class Project:  # pylint: disable=too-many-instance-attributes
         if not self.package_dir.is_dir():
             return [GeneratorError(detail=f"Directory {self.package_dir} not found")]
         print(f"Updating {self.package_name}")
-        shutil.rmtree(self.package_dir)
+
+        if not self.config.protected_dirs:
+            shutil.rmtree(self.package_dir)
+        else:
+            files_and_dirs: List[str] = os.listdir(self.package_dir)
+            for protected_dir in self.config.protected_dirs:
+                files_and_dirs.remove(protected_dir)
+
+            for file_or_dir in files_and_dirs:
+                path = os.path.join(self.package_dir, file_or_dir)
+                if os.path.isfile(path):
+                    os.remove(path)
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+
         self._create_package()
         self._build_models()
         self._build_api()
@@ -170,7 +185,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         return errors
 
     def _create_package(self) -> None:
-        self.package_dir.mkdir()
+        self.package_dir.mkdir(exist_ok=True)
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
