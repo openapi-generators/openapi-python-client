@@ -2,7 +2,9 @@
 
 from typing import Type
 
+from .buildings import BuildingsEndpoints
 from .default import DefaultEndpoints
+from .jamf_connect import JamfConnectEndpoints
 from .location import LocationEndpoints
 from .parameters import ParametersEndpoints
 from .responses import ResponsesEndpoints
@@ -39,3 +41,11 @@ class MyTestApiClientApi:
     @classmethod
     def true_(cls) -> Type[True_Endpoints]:
         return True_Endpoints
+
+    @classmethod
+    def buildings(cls) -> Type[BuildingsEndpoints]:
+        return BuildingsEndpoints
+
+    @classmethod
+    def jamf_connect(cls) -> Type[JamfConnectEndpoints]:
+        return JamfConnectEndpoints

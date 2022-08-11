@@ -163,7 +163,6 @@ def update_parameters_with_data(
         ref_path: The output of `parse_reference_path` (validated $ref).
         data: The schema of the thing to add to Schemas.
         parameters: `Parameters` up until now.
-        config: User-provided config for overriding default behavior.
 
     Returns:
         Either the updated `parameters` input or a `PropertyError` if something went wrong.

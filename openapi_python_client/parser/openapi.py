@@ -320,7 +320,7 @@ class Endpoint:
                 continue
 
             unique_param = (param.name, param.param_in)
-            if (param.name, param.param_in) in unique_parameters:
+            if unique_param in unique_parameters:
                 return (
                     ParseError(
                         data=data,
@@ -535,6 +535,6 @@ class GeneratorData:
             version=openapi.info.version,
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             models=models,
-            errors=schemas.errors,
+            errors=schemas.errors + parameters.errors,
             enums=enums,
         )
