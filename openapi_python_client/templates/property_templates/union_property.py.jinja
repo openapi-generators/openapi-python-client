@@ -71,7 +71,6 @@ if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
         {% set ns.has_if = true %}
     {% elif not loop.last or ns.contains_properties_without_transform %}
 elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
-    {% set has_first_clause = true %}
     {% else %}
 else:
     {% endif %}
