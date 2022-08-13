@@ -1082,6 +1082,30 @@
           }
         }
       }
+    },
+    "/parameter-references/{path_param}": {
+      "get": {
+        "tags": [
+          "parameter-references"
+        ],
+        "summary": "Test different types of parameter references",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/string-param"
+          },
+          {
+            "$ref": "#/components/parameters/integer-param"
+          },
+          {"$ref": "#/components/parameters/header-param"},
+          {"$ref": "#/components/parameters/cookie-param"},
+          {"$ref": "#/components/parameters/path-param"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1955,6 +1979,70 @@
       "model.reference.with.Periods": {
         "type": "object",
         "description": "A Model with periods in its reference"
+      }
+    },
+    "parameters": {
+      "integer-param": {
+        "name": "integer param",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "string-param": {
+        "name": "string param",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "object-param": {
+        "name": "object param",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "number": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "header-param": {
+        "name": "header param",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "cookie-param": {
+        "name": "cookie param",
+        "in": "cookie",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "path-param": {
+        "name": "path_param",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
       }
     }
   }

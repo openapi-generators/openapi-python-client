@@ -4,6 +4,7 @@ from typing import Type
 
 from .default import DefaultEndpoints
 from .location import LocationEndpoints
+from .parameter_references import ParameterReferencesEndpoints
 from .parameters import ParametersEndpoints
 from .responses import ResponsesEndpoints
 from .tag1 import Tag1Endpoints
@@ -39,3 +40,7 @@ class MyTestApiClientApi:
     @classmethod
     def true_(cls) -> Type[True_Endpoints]:
         return True_Endpoints
+
+    @classmethod
+    def parameter_references(cls) -> Type[ParameterReferencesEndpoints]:
+        return ParameterReferencesEndpoints

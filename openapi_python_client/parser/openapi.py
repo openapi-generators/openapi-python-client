@@ -12,7 +12,18 @@ from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier
 from .errors import GeneratorError, ParseError, PropertyError
-from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
+from .properties import (
+    Class,
+    EnumProperty,
+    ModelProperty,
+    Parameters,
+    Property,
+    Schemas,
+    build_parameters,
+    build_schemas,
+    property_from_data,
+)
+from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
@@ -33,8 +44,8 @@ class EndpointCollection:
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, config: Config
-    ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas]:
+        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, config: Config
+    ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
 
@@ -47,13 +58,19 @@ class EndpointCollection:
                     continue
                 tag = utils.PythonIdentifier(value=(operation.tags or ["default"])[0], prefix="tag")
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
-                endpoint, schemas = Endpoint.from_data(
-                    data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
+                endpoint, schemas, parameters = Endpoint.from_data(
+                    data=operation,
+                    path=path,
+                    method=method,
+                    tag=tag,
+                    schemas=schemas,
+                    parameters=parameters,
+                    config=config,
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint.add_parameters(
-                        endpoint=endpoint, data=path_data, schemas=schemas, config=config
+                    endpoint, schemas, parameters = Endpoint.add_parameters(
+                        endpoint=endpoint, data=path_data, schemas=schemas, parameters=parameters, config=config
                     )
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
@@ -68,7 +85,7 @@ class EndpointCollection:
                     collection.parse_errors.append(error)
                 collection.endpoints.append(endpoint)
 
-        return endpoints_by_tag, schemas
+        return endpoints_by_tag, schemas, parameters
 
 
 def generate_operation_id(*, path: str, method: str) -> str:
@@ -248,8 +265,13 @@ class Endpoint:
     # pylint: disable=too-many-return-statements
     @staticmethod
     def add_parameters(
-        *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
+        *,
+        endpoint: "Endpoint",
+        data: Union[oai.Operation, oai.PathItem],
+        schemas: Schemas,
+        parameters: Parameters,
+        config: Config,
+    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Process the defined `parameters` for an Endpoint.
 
         Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
@@ -259,6 +281,7 @@ class Endpoint:
             endpoint: The endpoint to add parameters to.
             data: The Operation or PathItem to add parameters from.
             schemas: The cumulative Schemas of processing so far which should contain details for any references.
+            parameters: The cumulative Parameters of processing so far which should contain details for any references.
             config: User-provided config for overrides within parameters.
 
         Returns:
@@ -270,10 +293,13 @@ class Endpoint:
             - https://swagger.io/docs/specification/describing-parameters/
             - https://swagger.io/docs/specification/paths-and-operations/
         """
+        # pylint: disable=too-many-branches, too-many-locals
+        # There isn't much value in breaking down this function further other than to satisfy the linter.
+
+        if data.parameters is None:
+            return endpoint, schemas, parameters
 
         endpoint = deepcopy(endpoint)
-        if data.parameters is None:
-            return endpoint, schemas
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
         parameters_by_location = {
@@ -284,17 +310,30 @@ class Endpoint:
         }
 
         for param in data.parameters:
-            if isinstance(param, oai.Reference) or param.param_schema is None:
+            # Obtain the parameter from the reference or just the parameter itself
+            param_or_error = parameter_from_reference(param=param, parameters=parameters)
+            if isinstance(param_or_error, ParseError):
+                return param_or_error, schemas, parameters
+            param = param_or_error
+
+            if param.param_schema is None:
                 continue
 
             unique_param = (param.name, param.param_in)
             if unique_param in unique_parameters:
-                duplication_detail = (
-                    "Parameters MUST NOT contain duplicates. "
-                    "A unique parameter is defined by a combination of a name and location. "
-                    f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                return (
+                    ParseError(
+                        data=data,
+                        detail=(
+                            "Parameters MUST NOT contain duplicates. "
+                            "A unique parameter is defined by a combination of a name and location. "
+                            f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                        ),
+                    ),
+                    schemas,
+                    parameters,
                 )
-                return ParseError(data=data, detail=duplication_detail), schemas
+
             unique_parameters.add(unique_param)
 
             prop, new_schemas = property_from_data(
@@ -305,13 +344,21 @@ class Endpoint:
                 parent_name=endpoint.name,
                 config=config,
             )
+
             if isinstance(prop, ParseError):
-                return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
+                return (
+                    ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data),
+                    schemas,
+                    parameters,
+                )
+
+            schemas = new_schemas
+
             location_error = prop.validate_location(param.param_in)
             if location_error is not None:
                 location_error.data = param
-                return location_error, schemas
-            schemas = new_schemas
+                return location_error, schemas, parameters
+
             if prop.name in parameters_by_location[param.param_in]:
                 # This parameter was defined in the Operation, so ignore the PathItem definition
                 continue
@@ -331,6 +378,7 @@ class Endpoint:
                             data=data,
                         ),
                         schemas,
+                        parameters,
                     )
                 endpoint.used_python_identifiers.add(existing_prop.python_name)
                 prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
@@ -341,6 +389,7 @@ class Endpoint:
                         detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
                     ),
                     schemas,
+                    parameters,
                 )
             if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
                 # There is no NULL for query params, so nullable and not required are the same.
@@ -350,7 +399,7 @@ class Endpoint:
             endpoint.used_python_identifiers.add(prop.python_name)
             parameters_by_location[param.param_in][prop.name] = prop
 
-        return endpoint, schemas
+        return endpoint, schemas, parameters
 
     @staticmethod
     def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
@@ -382,8 +431,15 @@ class Endpoint:
 
     @staticmethod
     def from_data(
-        *, data: oai.Operation, path: str, method: str, tag: str, schemas: Schemas, config: Config
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
+        *,
+        data: oai.Operation,
+        path: str,
+        method: str,
+        tag: str,
+        schemas: Schemas,
+        parameters: Parameters,
+        config: Config,
+    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
 
         if data.operationId is None:
@@ -401,13 +457,15 @@ class Endpoint:
             tag=tag,
         )
 
-        result, schemas = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        result, schemas, parameters = Endpoint.add_parameters(
+            endpoint=endpoint, data=data, schemas=schemas, parameters=parameters, config=config
+        )
         if isinstance(result, ParseError):
-            return result, schemas
+            return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
         result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
 
-        return result, schemas
+        return result, schemas, parameters
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
@@ -459,10 +517,13 @@ class GeneratorData:
                 )
             return GeneratorError(header="Failed to parse OpenAPI document", detail=detail)
         schemas = Schemas()
+        parameters = Parameters()
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
-        endpoint_collections_by_tag, schemas = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, config=config
+        if openapi.components and openapi.components.parameters:
+            parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
+        endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
+            data=openapi.paths, schemas=schemas, parameters=parameters, config=config
         )
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
@@ -474,6 +535,6 @@ class GeneratorData:
             version=openapi.info.version,
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             models=models,
-            errors=schemas.errors,
+            errors=schemas.errors + parameters.errors,
             enums=enums,
         )
