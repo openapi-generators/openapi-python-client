@@ -1,5 +1,12 @@
 import pytest
 
+from openapi_python_client.parser.errors import ParameterError
+from openapi_python_client.parser.properties import Class, Parameters
+from openapi_python_client.parser.properties.schemas import parameter_from_reference
+from openapi_python_client.schema import Parameter, Reference
+
+MODULE_NAME = "openapi_python_client.parser.properties.schemas"
+
 
 def test_class_from_string_default_config():
     from openapi_python_client import Config
@@ -32,3 +39,109 @@ def test_class_from_string(class_override, module_override, expected_class, expe
     result = Class.from_string(string=ref, config=config)
     assert result.name == expected_class
     assert result.module_name == expected_module
+
+
+class TestParameterFromData:
+    def test_cannot_parse_parameters_by_reference(self):
+        from openapi_python_client.parser.properties import Parameters
+        from openapi_python_client.parser.properties.schemas import parameter_from_data
+
+        ref = Reference.construct(ref="#/components/parameters/a_param")
+        parameters = Parameters()
+        param_or_error, new_parameters = parameter_from_data(
+            name="a_param", required=True, data=ref, parameters=parameters
+        )
+        assert param_or_error == ParameterError("Unable to resolve another reference")
+        assert new_parameters == parameters
+
+    def test_parameters_without_schema_are_ignored(self):
+        from openapi_python_client.parser.properties import Parameters
+        from openapi_python_client.parser.properties.schemas import parameter_from_data
+        from openapi_python_client.schema import ParameterLocation, Schema
+
+        param = Parameter(name="a_schemaless_param", param_in=ParameterLocation.QUERY)
+        parameters = Parameters()
+        param_or_error, new_parameters = parameter_from_data(
+            name=param.name, required=param.required, data=param, parameters=parameters
+        )
+        assert param_or_error == ParameterError("Parameter has no schema")
+        assert new_parameters == parameters
+
+    def test_registers_new_parameters(self):
+        from openapi_python_client.parser.properties import Parameters
+        from openapi_python_client.parser.properties.schemas import parameter_from_data
+        from openapi_python_client.schema import ParameterLocation, Schema
+
+        param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
+        parameters = Parameters()
+        param_or_error, new_parameters = parameter_from_data(
+            name=param.name, required=param.required, data=param, parameters=parameters
+        )
+        assert param_or_error == param
+        assert new_parameters.classes_by_name[param.name] == param
+
+
+class TestParameterFromReference:
+    def test_returns_parameter_if_parameter_provided(self):
+        param = Parameter.construct()
+        params = Parameters()
+        param_or_error = parameter_from_reference(param=param, parameters=params)
+        assert param_or_error == param
+
+    def test_errors_out_if_reference_not_in_parameters(self):
+        ref = Reference.construct(ref="#/components/parameters/a_param")
+        class_info = Class(name="a_param", module_name="module_name")
+        existing_param = Parameter.construct(name="a_param")
+        param_by_ref = Reference.construct(ref="#/components/parameters/another_param")
+        params = Parameters(
+            classes_by_name={class_info.name: existing_param}, classes_by_reference={ref.ref: existing_param}
+        )
+        param_or_error = parameter_from_reference(param=param_by_ref, parameters=params)
+        assert param_or_error == ParameterError(
+            detail="Reference `/components/parameters/another_param` not found.",
+        )
+
+    def test_returns_reference_from_registry(self):
+        existing_param = Parameter.construct(name="a_param")
+        class_info = Class(name="MyParameter", module_name="module_name")
+        params = Parameters(
+            classes_by_name={class_info.name: existing_param},
+            classes_by_reference={"/components/parameters/a_param": existing_param},
+        )
+
+        param_by_ref = Reference.construct(ref="#/components/parameters/a_param")
+        param_or_error = parameter_from_reference(param=param_by_ref, parameters=params)
+        assert param_or_error == existing_param
+
+
+class TestUpdateParametersFromData:
+    def test_reports_parameters_with_errors(self, mocker):
+        from openapi_python_client.parser.properties.schemas import update_parameters_with_data
+        from openapi_python_client.schema import ParameterLocation, Schema
+
+        parameters = Parameters()
+        param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
+        parameter_from_data = mocker.patch(
+            f"{MODULE_NAME}.parameter_from_data", side_effect=[(ParameterError(), parameters)]
+        )
+        ref_path = Reference.construct(ref="#/components/parameters/a_param")
+        new_parameters_or_error = update_parameters_with_data(ref_path=ref_path.ref, data=param, parameters=parameters)
+
+        parameter_from_data.assert_called_once()
+        assert new_parameters_or_error == ParameterError(
+            detail="Unable to parse this part of your OpenAPI document: : None",
+            header="Unable to parse parameter #/components/parameters/a_param",
+        )
+
+    def test_records_references_to_parameters(self, mocker):
+        from openapi_python_client.parser.properties.schemas import update_parameters_with_data
+        from openapi_python_client.schema import ParameterLocation, Schema
+
+        parameters = Parameters()
+        param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
+        parameter_from_data = mocker.patch(f"{MODULE_NAME}.parameter_from_data", side_effect=[(param, parameters)])
+        ref_path = "#/components/parameters/a_param"
+        new_parameters = update_parameters_with_data(ref_path=ref_path, data=param, parameters=parameters)
+
+        parameter_from_data.assert_called_once()
+        assert new_parameters.classes_by_reference[ref_path] == param

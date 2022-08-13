@@ -6,15 +6,8 @@ import pytest
 
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
-from openapi_python_client.parser.errors import PropertyError, ValidationError
-from openapi_python_client.parser.properties import (
-    BooleanProperty,
-    FloatProperty,
-    IntProperty,
-    NoneProperty,
-    Property,
-    Schemas,
-)
+from openapi_python_client.parser.errors import ParameterError, PropertyError, ValidationError
+from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty, Property, Schemas
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -993,6 +986,84 @@ class TestBuildSchemas:
         )
         assert update_schemas_with_data.call_count == 3
         assert result.errors == [PropertyError()]
+
+
+class TestBuildParameters:
+    def test_skips_references_and_keeps_going(self, mocker):
+        from openapi_python_client.parser.properties import Parameters, build_parameters
+        from openapi_python_client.schema import Parameter, Reference
+
+        parameters = {
+            "reference": Reference(ref="#/components/parameters/another_parameter"),
+            "defined": Parameter(
+                name="page",
+                param_in="query",
+                required=False,
+                style="form",
+                explode=True,
+                schema=oai.Schema(type="integer", default=0),
+            ),
+        }
+
+        update_parameters_with_data = mocker.patch(f"{MODULE_NAME}.update_parameters_with_data")
+        parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
+
+        result = build_parameters(components=parameters, parameters=Parameters())
+        # Should not even try to parse a path for the Reference
+        parse_reference_path.assert_called_once_with("#/components/parameters/defined")
+        update_parameters_with_data.assert_called_once_with(
+            ref_path=parse_reference_path.return_value,
+            data=parameters["defined"],
+            parameters=Parameters(
+                errors=[ParameterError(detail="Reference parameters are not supported.", data=parameters["reference"])]
+            ),
+        )
+        assert result == update_parameters_with_data.return_value
+
+    def test_records_bad_uris_and_keeps_going(self, mocker):
+        from openapi_python_client.parser.properties import Parameters, build_parameters
+        from openapi_python_client.schema import Parameter
+
+        parameters = {"first": Parameter.construct(), "second": Parameter.construct()}
+        update_parameters_with_data = mocker.patch(f"{MODULE_NAME}.update_parameters_with_data")
+        parse_reference_path = mocker.patch(
+            f"{MODULE_NAME}.parse_reference_path", side_effect=[ParameterError(detail="some details"), "a_path"]
+        )
+
+        result = build_parameters(components=parameters, parameters=Parameters())
+        parse_reference_path.assert_has_calls(
+            [
+                call("#/components/parameters/first"),
+                call("#/components/parameters/second"),
+            ]
+        )
+        update_parameters_with_data.assert_called_once_with(
+            ref_path="a_path",
+            data=parameters["second"],
+            parameters=Parameters(errors=[ParameterError(detail="some details", data=parameters["first"])]),
+        )
+        assert result == update_parameters_with_data.return_value
+
+    def test_retries_failing_parameters_while_making_progress(self, mocker):
+        from openapi_python_client.parser.properties import Parameters, build_parameters
+        from openapi_python_client.schema import Parameter
+
+        parameters = {"first": Parameter.construct(), "second": Parameter.construct()}
+        update_parameters_with_data = mocker.patch(
+            f"{MODULE_NAME}.update_parameters_with_data", side_effect=[ParameterError(), Parameters(), ParameterError()]
+        )
+
+        parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
+        result = build_parameters(components=parameters, parameters=Parameters())
+        parse_reference_path.assert_has_calls(
+            [
+                call("#/components/parameters/first"),
+                call("#/components/parameters/second"),
+                call("#/components/parameters/first"),
+            ]
+        )
+        assert update_parameters_with_data.call_count == 3
+        assert result.errors == [ParameterError()]
 
 
 def test_build_enum_property_conflict():
