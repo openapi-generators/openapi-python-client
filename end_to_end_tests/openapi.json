@@ -1083,83 +1083,28 @@
         }
       }
     },
-    "/v1/buildings" : {
-      "get" : {
-        "tags" : [ "buildings" ],
-        "summary" : "Search for sorted and paged Buildings\n",
-        "description" : "Search for sorted and paged buildings",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/page"
-        }, {
-          "$ref" : "#/components/parameters/page-size"
-        }, {
-          "name" : "sort",
-          "in" : "query",
-          "description" : "Sorting criteria in the format: property:asc/desc. Default sort is id:asc. Multiple sort criteria are supported and must be separated with a comma. Example: sort=date:desc,name:asc ",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            },
-            "default" : [ "id:asc" ]
+    "/parameter-references/{path_param}": {
+      "get": {
+        "tags": [
+          "parameter-references"
+        ],
+        "summary": "Test different types of parameter references",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/string-param"
+          },
+          {
+            "$ref": "#/components/parameters/integer-param"
+          },
+          {"$ref": "#/components/parameters/header-param"},
+          {"$ref": "#/components/parameters/cookie-param"},
+          {"$ref": "#/components/parameters/path-param"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
           }
-        }, {
-          "name" : "filter",
-          "in" : "query",
-          "description" : "Query in the RSQL format, allowing to filter buildings collection. Default filter is empty query - returning all results for the requested page. Fields allowed in the query: name, streetAddress1, streetAddress2, city, stateProvince, zipPostalCode, country. This param can be combined with paging and sorting. Example: filter=city==\"Chicago\" and name==\"*build*\"",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string",
-            "default" : ""
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Successful response",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/BuildingSearchResults"
-                }
-              }
-            }
-          }
-        },
-        "x-required-privileges" : [ "Read Buildings" ]
-      }
-    },
-    "/v1/jamf-connect/history" : {
-      "get" : {
-        "tags" : [ "jamf-connect" ],
-        "summary" : "Get Jamf Connect history\n",
-        "description" : "Get Jamf Connect history\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/page"
-        }, {
-          "$ref" : "#/components/parameters/page-size"
-        }, {
-          "$ref" : "#/components/parameters/sort"
-        }, {
-          "$ref" : "#/components/parameters/filter"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Details of Jamf Connect history were found",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/HistorySearchResults"
-                }
-              }
-            }
-          }
-        },
-        "x-required-privileges" : [ "Read Jamf Connect Settings" ]
+        }
       }
     }
   },
@@ -2034,156 +1979,69 @@
       "model.reference.with.Periods": {
         "type": "object",
         "description": "A Model with periods in its reference"
-      },
-      "Building" : {
-        "required" : [ "name" ],
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "readOnly" : true,
-            "example" : "1"
-          },
-          "name" : {
-            "type" : "string",
-            "example" : "Apple Park"
-          },
-          "streetAddress1" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "The McIntosh Tree"
-          },
-          "streetAddress2" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "One Apple Park Way"
-          },
-          "city" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "Cupertino"
-          },
-          "stateProvince" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "California"
-          },
-          "zipPostalCode" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "95014"
-          },
-          "country" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "The United States of America"
-          }
-        }
-      },
-      "BuildingSearchResults" : {
-        "type" : "object",
-        "properties" : {
-          "totalCount" : {
-            "type" : "integer",
-            "example" : 3
-          },
-          "results" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Building"
-            }
-          }
-        }
-      },
-      "ObjectHistory" : {
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "integer",
-            "example" : 1
-          },
-          "username" : {
-            "type" : "string",
-            "example" : "admin"
-          },
-          "date" : {
-            "type" : "string",
-            "example" : "2019-02-04T21:09:31.661Z"
-          },
-          "note" : {
-            "type" : "string",
-            "example" : "Sso settings update"
-          },
-          "details" : {
-            "type" : "string",
-            "example" : "Is SSO Enabled false\\nSelected SSO Provider"
-          }
-        }
-      },
-      "HistorySearchResults" : {
-        "type" : "object",
-        "properties" : {
-          "totalCount" : {
-            "type" : "integer",
-            "example" : 1
-          },
-          "results" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/ObjectHistory"
-            }
-          }
-        }
       }
     },
-    "parameters" : {
-      "page" : {
-        "name" : "page",
-        "in" : "query",
-        "required" : false,
-        "style" : "form",
-        "explode" : true,
-        "schema" : {
-          "type" : "integer",
-          "default" : 0
+    "parameters": {
+      "integer-param": {
+        "name": "integer param",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "integer",
+          "default": 0
         }
       },
-      "page-size" : {
-        "name" : "page-size",
-        "in" : "query",
-        "required" : false,
-        "style" : "form",
-        "explode" : true,
-        "schema" : {
-          "type" : "integer",
-          "default" : 100
+      "string-param": {
+        "name": "string param",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "string"
         }
       },
-      "sort" : {
-        "name" : "sort",
-        "in" : "query",
-        "description" : "Sorting criteria in the format: property:asc/desc. Default sort order is descending. Multiple sort criteria are supported and must be entered on separate lines in Swagger UI. In the URI the 'sort' query param is not duplicated for each sort criterion, e.g., ...&sort=name:asc,date:desc. Fields that can be sorted: status, updated",
-        "required" : false,
-        "style" : "form",
-        "explode" : true,
-        "schema" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "default" : [ ]
+      "object-param": {
+        "name": "object param",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "number": {
+              "type": "number"
+            }
+          }
         }
       },
-      "filter" : {
-        "name" : "filter",
-        "in" : "query",
-        "description" : "Query in the RSQL format, allowing to filter results. Default filter is empty query - returning all results for the requested page. Fields allowed in the query: status, updated, version This param can be combined with paging and sorting. Example: filter=username!=admin and details==*disabled* and date<2019-12-15",
-        "required" : false,
-        "style" : "form",
-        "explode" : true,
-        "schema" : {
-          "type" : "string",
-          "default" : ""
+      "header-param": {
+        "name": "header param",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "cookie-param": {
+        "name": "cookie param",
+        "in": "cookie",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "path-param": {
+        "name": "path_param",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
         }
       }
     }

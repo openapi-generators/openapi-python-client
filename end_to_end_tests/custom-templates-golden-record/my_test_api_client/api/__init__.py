@@ -2,10 +2,9 @@
 
 from typing import Type
 
-from .buildings import BuildingsEndpoints
 from .default import DefaultEndpoints
-from .jamf_connect import JamfConnectEndpoints
 from .location import LocationEndpoints
+from .parameter_references import ParameterReferencesEndpoints
 from .parameters import ParametersEndpoints
 from .responses import ResponsesEndpoints
 from .tag1 import Tag1Endpoints
@@ -43,9 +42,5 @@ class MyTestApiClientApi:
         return True_Endpoints
 
     @classmethod
-    def buildings(cls) -> Type[BuildingsEndpoints]:
-        return BuildingsEndpoints
-
-    @classmethod
-    def jamf_connect(cls) -> Type[JamfConnectEndpoints]:
-        return JamfConnectEndpoints
+    def parameter_references(cls) -> Type[ParameterReferencesEndpoints]:
+        return ParameterReferencesEndpoints

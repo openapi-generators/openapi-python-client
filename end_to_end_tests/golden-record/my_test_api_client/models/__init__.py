@@ -17,11 +17,8 @@ from .body_upload_file_tests_upload_post_additional_property import BodyUploadFi
 from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadFileTestsUploadPostSomeNullableObject
 from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
-from .building import Building
-from .building_search_results import BuildingSearchResults
 from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
-from .history_search_results import HistorySearchResults
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .model_from_all_of import ModelFromAllOf
@@ -43,7 +40,6 @@ from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
 from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
 from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from .none import None_
-from .object_history import ObjectHistory
 from .post_responses_unions_simple_before_complex_response_200 import PostResponsesUnionsSimpleBeforeComplexResponse200
 from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,

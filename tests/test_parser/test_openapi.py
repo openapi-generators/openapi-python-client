@@ -54,7 +54,7 @@ class TestGeneratorData:
         assert generator_data.description == openapi.info.description
         assert generator_data.version == openapi.info.version
         assert generator_data.endpoint_collections_by_tag == endpoints_collections_by_tag
-        assert generator_data.errors == schemas.errors
+        assert generator_data.errors == schemas.errors + parameters.errors
         assert list(generator_data.models) == [schemas.classes_by_name["Model"]]
         assert list(generator_data.enums) == [schemas.classes_by_name["Enum"]]
 
