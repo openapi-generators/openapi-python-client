@@ -248,10 +248,11 @@ class Endpoint:
                 status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name, config=config
             )
             if isinstance(response, ParseError):
+                detail_suffix = "" if response.detail is None else f" ({response.detail})"
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Cannot parse response for status code {status_code}, "
+                            f"Cannot parse response for status code {status_code}{detail_suffix}, "
                             f"response will be ommitted from generated client"
                         ),
                         data=response.data,
