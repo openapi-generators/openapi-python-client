@@ -2,7 +2,6 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, Extra, Field
 
-from .operation import Operation
 from .parameter import Parameter
 from .reference import Reference
 from .server import Server
@@ -23,14 +22,14 @@ class PathItem(BaseModel):
     ref: Optional[str] = Field(default=None, alias="$ref")
     summary: Optional[str] = None
     description: Optional[str] = None
-    get: Optional[Operation] = None
-    put: Optional[Operation] = None
-    post: Optional[Operation] = None
-    delete: Optional[Operation] = None
-    options: Optional[Operation] = None
-    head: Optional[Operation] = None
-    patch: Optional[Operation] = None
-    trace: Optional[Operation] = None
+    get: Optional["Operation"] = None
+    put: Optional["Operation"] = None
+    post: Optional["Operation"] = None
+    delete: Optional["Operation"] = None
+    options: Optional["Operation"] = None
+    head: Optional["Operation"] = None
+    patch: Optional["Operation"] = None
+    trace: Optional["Operation"] = None
     servers: Optional[List[Server]] = None
     parameters: Optional[List[Union[Parameter, Reference]]] = None
 
@@ -70,3 +69,9 @@ class PathItem(BaseModel):
                 }
             ]
         }
+
+
+# Operation uses PathItem via Callback, so we need late import and to update forward refs due to circular dependency
+from .operation import Operation  # pylint: disable=wrong-import-position unused-import
+
+PathItem.update_forward_refs()
