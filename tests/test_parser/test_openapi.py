@@ -134,34 +134,42 @@ class TestEndpoint:
             relative_imports={"import_3"},
         )
 
-    def test_parse_request_form_body(self, mocker):
-        ref = mocker.MagicMock()
+    def test_parse_request_form_body(self, mocker, model_property_factory):
+        from openapi_python_client.parser.properties import Class
+
+        schema = oai.Reference.construct(ref=mocker.MagicMock())
         body = oai.RequestBody.construct(
-            content={
-                "application/x-www-form-urlencoded": oai.MediaType.construct(
-                    media_type_schema=oai.Reference.construct(ref=ref)
-                )
-            }
+            content={"application/x-www-form-urlencoded": oai.MediaType.construct(media_type_schema=schema)}
         )
-        from_string = mocker.patch(f"{MODULE_NAME}.Class.from_string")
+        class_info = Class(name="class_name", module_name="module_name")
+        prop_before = model_property_factory(class_info=class_info, is_form_body=False)
+        schemas_before = Schemas()
+        property_from_data = mocker.patch(
+            f"{MODULE_NAME}.property_from_data", return_value=(prop_before, schemas_before)
+        )
         config = mocker.MagicMock()
 
         from openapi_python_client.parser.openapi import Endpoint
 
-        result = Endpoint.parse_request_form_body(body=body, config=config)
+        result = Endpoint.parse_request_form_body(body=body, schemas=schemas_before, parent_name="name", config=config)
 
-        from_string.assert_called_once_with(string=ref, config=config)
-        assert result == from_string.return_value
+        property_from_data.assert_called_once_with(
+            name="data", required=True, data=schema, schemas=schemas_before, parent_name="name", config=config
+        )
+        prop_after = model_property_factory(class_info=class_info, is_form_body=True)
+        schemas_after = Schemas(classes_by_name={class_info.name: prop_after})
+        assert result == (prop_after, schemas_after)
 
     def test_parse_request_form_body_no_data(self):
         body = oai.RequestBody.construct(content={})
         config = MagicMock()
+        schemas = MagicMock()
 
         from openapi_python_client.parser.openapi import Endpoint
 
-        result = Endpoint.parse_request_form_body(body=body, config=config)
+        result = Endpoint.parse_request_form_body(body=body, schemas=schemas, parent_name="name", config=config)
 
-        assert result is None
+        assert result == (None, schemas)
 
     def test_parse_multipart_body(self, mocker, model_property_factory):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
@@ -279,13 +287,13 @@ class TestEndpoint:
     def test_add_body_bad_json_data(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
-        mocker.patch.object(Endpoint, "parse_request_form_body")
+        schemas = Schemas()
+        mocker.patch.object(Endpoint, "parse_request_form_body", return_value=(None, schemas))
         parse_error = ParseError(data=mocker.MagicMock(), detail=mocker.MagicMock())
         other_schemas = mocker.MagicMock()
         mocker.patch.object(Endpoint, "parse_request_json_body", return_value=(parse_error, other_schemas))
         endpoint = self.make_endpoint()
         request_body = mocker.MagicMock()
-        schemas = Schemas()
 
         result = Endpoint._add_body(
             endpoint=endpoint,
@@ -306,14 +314,14 @@ class TestEndpoint:
     def test_add_body_bad_multipart_data(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
-        mocker.patch.object(Endpoint, "parse_request_form_body")
+        schemas = Schemas()
+        mocker.patch.object(Endpoint, "parse_request_form_body", return_value=(None, schemas))
         mocker.patch.object(Endpoint, "parse_request_json_body", return_value=(mocker.MagicMock(), mocker.MagicMock()))
         parse_error = ParseError(data=mocker.MagicMock(), detail=mocker.MagicMock())
         other_schemas = mocker.MagicMock()
         mocker.patch.object(Endpoint, "parse_multipart_body", return_value=(parse_error, other_schemas))
         endpoint = self.make_endpoint()
         request_body = mocker.MagicMock()
-        schemas = Schemas()
 
         result = Endpoint._add_body(
             endpoint=endpoint,
@@ -332,13 +340,19 @@ class TestEndpoint:
         )
 
     def test_add_body_happy(self, mocker):
-        from openapi_python_client.parser.openapi import Class, Endpoint
+        from openapi_python_client.parser.openapi import Endpoint
         from openapi_python_client.parser.properties import Property
 
         request_body = mocker.MagicMock()
         config = mocker.MagicMock()
-        form_body_class = Class(name="A", module_name="a")
-        parse_request_form_body = mocker.patch.object(Endpoint, "parse_request_form_body", return_value=form_body_class)
+
+        form_body = mocker.MagicMock(autospec=Property)
+        form_body_imports = mocker.MagicMock()
+        form_body.get_imports.return_value = {form_body_imports}
+        form_schemas = mocker.MagicMock()
+        parse_request_form_body = mocker.patch.object(
+            Endpoint, "parse_request_form_body", return_value=(form_body, form_schemas)
+        )
 
         multipart_body = mocker.MagicMock(autospec=Property)
         multipart_body_imports = mocker.MagicMock()
@@ -355,7 +369,6 @@ class TestEndpoint:
         parse_request_json_body = mocker.patch.object(
             Endpoint, "parse_request_json_body", return_value=(json_body, json_schemas)
         )
-        import_string_from_class = mocker.patch(f"{MODULE_NAME}.import_string_from_class", return_value="import_1")
 
         endpoint = self.make_endpoint()
         initial_schemas = mocker.MagicMock()
@@ -368,19 +381,21 @@ class TestEndpoint:
         )
 
         assert response_schemas == multipart_schemas
-        parse_request_form_body.assert_called_once_with(body=request_body, config=config)
-        parse_request_json_body.assert_called_once_with(
+        parse_request_form_body.assert_called_once_with(
             body=request_body, schemas=initial_schemas, parent_name="name", config=config
+        )
+        parse_request_json_body.assert_called_once_with(
+            body=request_body, schemas=form_schemas, parent_name="name", config=config
         )
         parse_multipart_body.assert_called_once_with(
             body=request_body, schemas=json_schemas, parent_name="name", config=config
         )
-        import_string_from_class.assert_called_once_with(form_body_class, prefix="...models")
+        form_body.get_imports.assert_called_once_with(prefix="...")
         json_body.get_imports.assert_called_once_with(prefix="...")
         multipart_body.get_imports.assert_called_once_with(prefix="...")
-        assert endpoint.relative_imports == {"import_1", "import_3", json_body_imports, multipart_body_imports}
+        assert endpoint.relative_imports == {"import_3", form_body_imports, json_body_imports, multipart_body_imports}
         assert endpoint.json_body == json_body
-        assert endpoint.form_body_class == form_body_class
+        assert endpoint.form_body == form_body
         assert endpoint.multipart_body == multipart_body
 
     def test__add_responses_status_code_error(self, mocker):
