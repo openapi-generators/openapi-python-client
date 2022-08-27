@@ -460,7 +460,7 @@ class TestEndpoint:
             "404": response_2_data,
         }
         endpoint = self.make_endpoint()
-        parse_error = ParseError(data=mocker.MagicMock())
+        parse_error = ParseError(data=mocker.MagicMock(), detail="some problem")
         response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
         config = MagicMock()
 
@@ -474,11 +474,13 @@ class TestEndpoint:
         )
         assert response.errors == [
             ParseError(
-                detail=f"Cannot parse response for status code 200, response will be ommitted from generated client",
+                detail=f"Cannot parse response for status code 200 (some problem), "
+                "response will be ommitted from generated client",
                 data=parse_error.data,
             ),
             ParseError(
-                detail=f"Cannot parse response for status code 404, response will be ommitted from generated client",
+                detail=f"Cannot parse response for status code 404 (some problem), "
+                "response will be ommitted from generated client",
                 data=parse_error.data,
             ),
         ]
