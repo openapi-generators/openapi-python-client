@@ -1049,6 +1049,32 @@
             },
             "name": "Integer-Header",
             "in": "header"
+          },
+          {
+            "in": "header",
+            "name": "Int-Enum-Header",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          {
+            "in": "header",
+            "name": "String-Enum-Header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one",
+                "two",
+                "three"
+              ]
+            }
           }
         ],
         "responses": {
