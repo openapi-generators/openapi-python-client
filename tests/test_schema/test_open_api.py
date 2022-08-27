@@ -14,3 +14,23 @@ def test_validate_version(version, valid):
     else:
         with pytest.raises(ValidationError):
             OpenAPI.parse_obj(data)
+
+
+def test_parse_with_callback():
+    data = {
+        "openapi": "3.0.1",
+        "info": {"title": "API with Callback", "version": ""},
+        "paths": {
+            "/create": {
+                "post": {
+                    "responses": {"200": {"description": "Success"}},
+                    "callbacks": {"event": {"callback": {"post": {"responses": {"200": {"description": "Success"}}}}}},
+                }
+            }
+        },
+    }
+
+    open_api = OpenAPI.parse_obj(data)
+    create_endpoint = open_api.paths["/create"]
+    assert "200" in create_endpoint.post.responses
+    assert "200" in create_endpoint.post.callbacks["event"]["callback"].post.responses
