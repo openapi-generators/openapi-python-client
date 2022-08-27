@@ -90,8 +90,8 @@ client: AuthenticatedClient,
 client: Client,
 {% endif %}
 {# Form data if any #}
-{% if endpoint.form_body_class %}
-form_data: {{ endpoint.form_body_class.name }},
+{% if endpoint.form_body %}
+form_data: {{ endpoint.form_body.get_type_string() }},
 {% endif %}
 {# Multipart data if any #}
 {% if endpoint.multipart_body %}
@@ -120,7 +120,7 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 client=client,
-{% if endpoint.form_body_class %}
+{% if endpoint.form_body %}
 form_data=form_data,
 {% endif %}
 {% if endpoint.multipart_body %}
