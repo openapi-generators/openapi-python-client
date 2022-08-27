@@ -33,3 +33,7 @@ if not isinstance({{ source }}, Unset):
 {% endif %}
 {% endif %}
 {% endmacro %}
+
+{% macro transform_header(property, source, destination) %}
+{{ destination }} = str({{ source }})
+{% endmacro %}
