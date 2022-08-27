@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any, Dict, Optional, Union
 
 import httpx
@@ -39,11 +40,11 @@ def _get_kwargs(
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
 
         return response_200
-    if response.status_code == 400:
+    if response.status_code == HTTPStatus.BAD_REQUEST:
         response_400 = PublicError.from_dict(response.json())
 
         return response_400
@@ -52,7 +53,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[PostParameter
 
 def _build_response(*, response: httpx.Response) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(response=response),

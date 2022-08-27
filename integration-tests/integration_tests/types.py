@@ -1,4 +1,5 @@
 """ Contains some shared types for properties """
+from http import HTTPStatus
 from typing import BinaryIO, Generic, MutableMapping, Optional, Tuple, TypeVar
 
 import attr
@@ -34,7 +35,7 @@ T = TypeVar("T")
 class Response(Generic[T]):
     """A response from an endpoint"""
 
-    status_code: int
+    status_code: HTTPStatus
     content: bytes
     headers: MutableMapping[str, str]
     parsed: Optional[T]
