@@ -142,7 +142,7 @@ class TestEndpoint:
             content={"application/x-www-form-urlencoded": oai.MediaType.construct(media_type_schema=schema)}
         )
         class_info = Class(name="class_name", module_name="module_name")
-        prop_before = model_property_factory(class_info=class_info, is_form_body=False)
+        prop_before = model_property_factory(class_info=class_info)
         schemas_before = Schemas()
         property_from_data = mocker.patch(
             f"{MODULE_NAME}.property_from_data", return_value=(prop_before, schemas_before)
@@ -156,7 +156,7 @@ class TestEndpoint:
         property_from_data.assert_called_once_with(
             name="data", required=True, data=schema, schemas=schemas_before, parent_name="name", config=config
         )
-        prop_after = model_property_factory(class_info=class_info, is_form_body=True)
+        prop_after = model_property_factory(class_info=class_info)
         schemas_after = Schemas(classes_by_name={class_info.name: prop_after})
         assert result == (prop_after, schemas_after)
 

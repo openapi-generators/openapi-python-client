@@ -141,7 +141,6 @@ class Endpoint:
                 config=config,
             )
             if isinstance(prop, ModelProperty):
-                prop = attr.evolve(prop, is_form_body=True)
                 schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
             return prop, schemas
         return None, schemas
