@@ -3,16 +3,16 @@ from typing import Any, Dict
 import httpx
 
 from ...client import Client
-from ...models.a_form_data import AFormData
+from ...models.post_form_data_inline_data import PostFormDataInlineData
 from ...types import Response
 
 
 def _get_kwargs(
     *,
     client: Client,
-    form_data: AFormData,
+    form_data: PostFormDataInlineData,
 ) -> Dict[str, Any]:
-    url = "{}/tests/post_form_data".format(client.base_url)
+    url = "{}/tests/post_form_data_inline".format(client.base_url)
 
     headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
@@ -39,11 +39,11 @@ def _build_response(*, response: httpx.Response) -> Response[Any]:
 def sync_detailed(
     *,
     client: Client,
-    form_data: AFormData,
+    form_data: PostFormDataInlineData,
 ) -> Response[Any]:
-    """Post form data
+    """Post form data (inline schema)
 
-     Post form data
+     Post form data (inline schema)
 
     Returns:
         Response[Any]
@@ -65,11 +65,11 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Client,
-    form_data: AFormData,
+    form_data: PostFormDataInlineData,
 ) -> Response[Any]:
-    """Post form data
+    """Post form data (inline schema)
 
-     Post form data
+     Post form data (inline schema)
 
     Returns:
         Response[Any]
