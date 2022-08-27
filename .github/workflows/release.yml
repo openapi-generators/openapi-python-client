@@ -17,16 +17,10 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           git_push_gpgsign: false
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-      - uses: Swatinem/rust-cache@v1
       - name: Install Knope
-        uses: actions-rs/cargo@v1
+        uses: knope-dev/action@v1
         with:
-          command: install
-          args: knope
+          version: 0.4.3
       - name: Bump Version & Create GitHub Release
         run: knope release
         env:
