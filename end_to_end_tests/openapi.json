@@ -217,7 +217,7 @@
         "tags": [
           "tests"
         ],
-        "summary": "Post from data",
+        "summary": "Post form data",
         "description": "Post form data",
         "operationId": "post_form_data",
         "requestBody": {
@@ -225,6 +225,47 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/AFormData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/post_form_data_inline": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Post form data (inline schema)",
+        "description": "Post form data (inline schema)",
+        "operationId": "post_form_data_inline",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "an_optional_field": {
+                    "type": "string"
+                  },
+                  "a_required_field": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "a_required_field"
+                ]
               }
             }
           },
@@ -1049,6 +1090,32 @@
             },
             "name": "Integer-Header",
             "in": "header"
+          },
+          {
+            "in": "header",
+            "name": "Int-Enum-Header",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          {
+            "in": "header",
+            "name": "String-Enum-Header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one",
+                "two",
+                "three"
+              ]
+            }
           }
         ],
         "responses": {

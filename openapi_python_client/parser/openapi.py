@@ -118,20 +118,32 @@ class Endpoint:
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
-    form_body_class: Optional[Class] = None
+    form_body: Optional[Property] = None
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
-    def parse_request_form_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
-        """Return form_body_reference"""
+    def parse_request_form_body(
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
+        """Return form_body and updated schemas"""
         body_content = body.content
         form_body = body_content.get("application/x-www-form-urlencoded")
-        if form_body is not None and isinstance(form_body.media_type_schema, oai.Reference):
-            return Class.from_string(string=form_body.media_type_schema.ref, config=config)
-        return None
+        if form_body is not None and form_body.media_type_schema is not None:
+            prop, schemas = property_from_data(
+                name="data",
+                required=True,
+                data=form_body.media_type_schema,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
+            if isinstance(prop, ModelProperty):
+                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
+            return prop, schemas
+        return None, schemas
 
     @staticmethod
     def parse_multipart_body(
@@ -186,7 +198,20 @@ class Endpoint:
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
             return endpoint, schemas
 
-        endpoint.form_body_class = Endpoint.parse_request_form_body(body=data.requestBody, config=config)
+        form_body, schemas = Endpoint.parse_request_form_body(
+            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+        )
+
+        if isinstance(form_body, ParseError):
+            return (
+                ParseError(
+                    header=f"Cannot parse form body of endpoint {endpoint.name}",
+                    detail=form_body.detail,
+                    data=form_body.data,
+                ),
+                schemas,
+            )
+
         json_body, schemas = Endpoint.parse_request_json_body(
             body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
         )
@@ -213,8 +238,9 @@ class Endpoint:
                 schemas,
             )
 
-        if endpoint.form_body_class:
-            endpoint.relative_imports.add(import_string_from_class(endpoint.form_body_class, prefix="...models"))
+        if form_body is not None:
+            endpoint.form_body = form_body
+            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix="..."))
         if multipart_body is not None:
             endpoint.multipart_body = multipart_body
             endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix="..."))
@@ -285,9 +311,9 @@ class Endpoint:
             config: User-provided config for overrides within parameters.
 
         Returns:
-            `(result, schemas)` where `result` is either an updated Endpoint containing the parameters or a ParseError
-                describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any new enums
-                or classes.
+            `(result, schemas, parameters)` where `result` is either an updated Endpoint containing the parameters or a
+            ParseError describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any
+            new enums or classes. `parameters` is an updated version of the `parameters` input, adding new parameters.
 
         See Also:
             - https://swagger.io/docs/specification/describing-parameters/
