@@ -2,6 +2,7 @@ import re
 from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
+from http import HTTPStatus
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import attr
@@ -230,15 +231,16 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
 
-            status_code: int
+            status_code: HTTPStatus
             try:
-                status_code = int(code)
+                status_code = HTTPStatus(int(code))
             except ValueError:
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Invalid response status code {code} (not a number), "
-                            f"response will be ommitted from generated client"
+                            f"Invalid response status code {code} (not a valid HTTP "
+                            f"status code), response will be ommitted from generated "
+                            f"client"
                         )
                     )
                 )
