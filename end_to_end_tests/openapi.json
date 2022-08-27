@@ -1173,6 +1173,62 @@
           }
         }
       }
+    },
+    "/tests/callback": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Path with callback",
+        "description": "Try sending a request related to a callback",
+        "operationId": "callback_test",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "callbacks": {
+          "event": {
+            "callback": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "Success"
+                  },
+                  "503": {
+                    "description": "Unavailable"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

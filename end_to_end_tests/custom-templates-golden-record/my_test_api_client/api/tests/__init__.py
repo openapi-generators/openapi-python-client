@@ -3,6 +3,7 @@
 import types
 
 from . import (
+    callback_test,
     defaults_tests_defaults_post,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
@@ -150,3 +151,10 @@ class TestsEndpoints:
         Test optional cookie parameters
         """
         return token_with_cookie_auth_token_with_cookie_get
+
+    @classmethod
+    def callback_test(cls) -> types.ModuleType:
+        """
+        Try sending a request related to a callback
+        """
+        return callback_test
