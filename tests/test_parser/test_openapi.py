@@ -311,6 +311,35 @@ class TestEndpoint:
             other_schemas,
         )
 
+    def test_add_body_bad_form_data(self, enum_property_factory):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        schemas = Schemas(
+            errors=[ParseError(detail="existing error")],
+        )
+        endpoint = self.make_endpoint()
+        bad_schema = oai.Schema.construct(type=oai.DataType.ARRAY)
+
+        result = Endpoint._add_body(
+            endpoint=endpoint,
+            data=oai.Operation.construct(
+                requestBody=oai.RequestBody.construct(
+                    content={"application/x-www-form-urlencoded": oai.MediaType.construct(media_type_schema=bad_schema)}
+                )
+            ),
+            schemas=schemas,
+            config=Config(),
+        )
+
+        assert result == (
+            ParseError(
+                detail="type array must have items defined",
+                header="Cannot parse form body of endpoint name",
+                data=bad_schema,
+            ),
+            schemas,
+        )
+
     def test_add_body_bad_multipart_data(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
