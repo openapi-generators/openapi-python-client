@@ -42,7 +42,10 @@ class AuthenticatedClient(Client):
     """A Client which has been authenticated for use on secured endpoints"""
 
     token: str
+    prefix: str = "Bearer"
+    auth_header_name: str = "Authorization"
 
     def get_headers(self) -> Dict[str, str]:
+        auth_header_value = f"{self.prefix} {self.token}" if self.prefix else self.token
         """Get headers to be used in authenticated endpoints"""
-        return {"Authorization": f"Bearer {self.token}", **self.headers}
+        return {self.auth_header_name: auth_header_value, **self.headers}
