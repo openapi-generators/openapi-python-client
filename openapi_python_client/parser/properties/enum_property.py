@@ -4,6 +4,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast
 
 import attr
 
+from ... import schema as oai
 from ... import utils
 from .property import Property
 from .schemas import Class
@@ -21,6 +22,13 @@ class EnumProperty(Property):
     default: Optional[Any] = attr.ib()
 
     template: ClassVar[str] = "enum_property.py.jinja"
+
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
 
     def get_base_type_string(self) -> str:
         return self.class_info.name

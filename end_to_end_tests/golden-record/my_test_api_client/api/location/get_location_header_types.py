@@ -4,6 +4,8 @@ from typing import Any, Dict, Union
 import httpx
 
 from ...client import Client
+from ...models.get_location_header_types_int_enum_header import GetLocationHeaderTypesIntEnumHeader
+from ...models.get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
 from ...types import UNSET, Response, Unset
 
 
@@ -14,6 +16,8 @@ def _get_kwargs(
     string_header: Union[Unset, str] = UNSET,
     number_header: Union[Unset, float] = UNSET,
     integer_header: Union[Unset, int] = UNSET,
+    int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
+    string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/location/header/types".format(client.base_url)
 
@@ -31,6 +35,12 @@ def _get_kwargs(
 
     if not isinstance(integer_header, Unset):
         headers["Integer-Header"] = str(integer_header)
+
+    if not isinstance(int_enum_header, Unset):
+        headers["Int-Enum-Header"] = str(int_enum_header)
+
+    if not isinstance(string_enum_header, Unset):
+        headers["String-Enum-Header"] = str(string_enum_header)
 
     return {
         "method": "get",
@@ -57,6 +67,8 @@ def sync_detailed(
     string_header: Union[Unset, str] = UNSET,
     number_header: Union[Unset, float] = UNSET,
     integer_header: Union[Unset, int] = UNSET,
+    int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
+    string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Response[Any]:
     """
     Args:
@@ -64,6 +76,8 @@ def sync_detailed(
         string_header (Union[Unset, str]):
         number_header (Union[Unset, float]):
         integer_header (Union[Unset, int]):
+        int_enum_header (Union[Unset, GetLocationHeaderTypesIntEnumHeader]):
+        string_enum_header (Union[Unset, GetLocationHeaderTypesStringEnumHeader]):
 
     Returns:
         Response[Any]
@@ -75,6 +89,8 @@ def sync_detailed(
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
+        int_enum_header=int_enum_header,
+        string_enum_header=string_enum_header,
     )
 
     response = httpx.request(
@@ -92,6 +108,8 @@ async def asyncio_detailed(
     string_header: Union[Unset, str] = UNSET,
     number_header: Union[Unset, float] = UNSET,
     integer_header: Union[Unset, int] = UNSET,
+    int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
+    string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Response[Any]:
     """
     Args:
@@ -99,6 +117,8 @@ async def asyncio_detailed(
         string_header (Union[Unset, str]):
         number_header (Union[Unset, float]):
         integer_header (Union[Unset, int]):
+        int_enum_header (Union[Unset, GetLocationHeaderTypesIntEnumHeader]):
+        string_enum_header (Union[Unset, GetLocationHeaderTypesStringEnumHeader]):
 
     Returns:
         Response[Any]
@@ -110,6 +130,8 @@ async def asyncio_detailed(
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
+        int_enum_header=int_enum_header,
+        string_enum_header=string_enum_header,
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:

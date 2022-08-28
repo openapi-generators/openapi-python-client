@@ -13,6 +13,19 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.11.6
+
+### Features
+
+- improve the error message when parsing a response fails [#659]. Thanks @supermihi!
+- Authorization header can now be customized in AuthenticatedClient [#660]. Thanks @supermihi!
+- Support inlined form data schema in requestBody [#656, #662]. Thanks @supermihi!
+- Allow enums in headers [#663, #667]. Thanks @supermihi!
+
+### Fixes
+
+- Exception when parsing documents which contain callbacks [#661]. Thanks @dachucky!
+
 ## 0.11.5
 
 ### Features
