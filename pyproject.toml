@@ -2,7 +2,7 @@
 name = "openapi-python-client"
 # Our versions have diverged and have no relation to upstream code changes
 # Henceforth, openapi-python-package will be maintained internally
-version = "1.0.0"
+version = "1.0.1"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -34,7 +34,7 @@ importlib_metadata = {version = ">=4.4", python = "<3.8"}
 pydantic = "^1.6.1"
 attrs = ">=20.1.0, <22.0"
 python-dateutil = "^2.8.1"
-httpx = ">=0.15.4,<=0.22.0"
+httpx = ">=0.23.0"
 autoflake = "^1.4"
 
 [tool.poetry.scripts]
