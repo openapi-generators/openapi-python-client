@@ -122,6 +122,10 @@ return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+        {% endfor %}
+
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}

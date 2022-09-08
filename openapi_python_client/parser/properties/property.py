@@ -89,10 +89,7 @@ class Property:
             type_string = self.get_base_type_string()
 
         if model_parent:
-            if type_string == model_parent.class_info.name:
-                type_string = f"'{type_string}'"
-            if type_string == f"List[{model_parent.class_info.name}]":
-                type_string = f"List['{model_parent.class_info.name}']"
+            type_string = type_string.replace(model_parent.class_info.name, f"'{type_string}'")
 
         if no_optional or (self.required and not self.nullable):
             return type_string
@@ -123,6 +120,16 @@ class Property:
             imports.add("from typing import Union")
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
+
+    # pylint: disable=unused-argument,no-self-use)
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        """Get a set of lazy import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
+        """
+        return set()
 
     def to_string(self, *, model_parent: Optional[ModelProperty] = None) -> str:
         """How this should be declared in a dataclass

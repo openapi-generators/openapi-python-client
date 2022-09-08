@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from itertools import chain
 from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
@@ -23,6 +25,7 @@ class ModelProperty(Property):
     required_properties: Optional[List[Property]]
     optional_properties: Optional[List[Property]]
     relative_imports: Optional[Set[str]]
+    lazy_imports: Optional[Set[str]]
     additional_properties: Optional[Union[bool, Property]]
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
@@ -33,6 +36,8 @@ class ModelProperty(Property):
     def __attrs_post_init__(self) -> None:
         if self.relative_imports:
             self.set_relative_imports(self.relative_imports)
+        if self.lazy_imports:
+            self.set_lazy_imports(self.lazy_imports)
 
     @property
     def self_import(self) -> str:
@@ -53,12 +58,20 @@ class ModelProperty(Property):
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                f"from {prefix}{self.self_import}",
                 "from typing import Dict",
                 "from typing import cast",
             }
         )
         return imports
+
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        """Get a set of lazy import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
+        """
+        return {f"from {prefix}{self.self_import}"}
 
     def set_relative_imports(self, relative_imports: Set[str]) -> None:
         """Set the relative imports set for this ModelProperty, filtering out self imports
@@ -67,6 +80,43 @@ class ModelProperty(Property):
             relative_imports: The set of relative import strings
         """
         object.__setattr__(self, "relative_imports", {ri for ri in relative_imports if self.self_import not in ri})
+
+    def set_lazy_imports(self, lazy_imports: Set[str]) -> None:
+        """Set the lazy imports set for this ModelProperty, filtering out self imports
+
+        Args:
+            lazy_imports: The set of lazy import strings
+        """
+        object.__setattr__(self, "lazy_imports", {li for li in lazy_imports if self.self_import not in li})
+
+    def get_type_string(
+        self, no_optional: bool = False, json: bool = False, *, model_parent: Optional[ModelProperty] = None
+    ) -> str:
+        """
+        Get a string representation of type that should be used when declaring this property
+
+        Args:
+            no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
+            json: True if the type refers to the property after JSON serialization
+        """
+        if json:
+            type_string = self.get_base_json_type_string()
+        else:
+            type_string = self.get_base_type_string()
+
+        if model_parent:
+            type_string = type_string.replace(model_parent.class_info.name, f"'{type_string}'")
+
+        type_string = type_string.replace(self.class_info.name, f"'{type_string}'")
+
+        if no_optional or (self.required and not self.nullable):
+            return type_string
+        if self.required and self.nullable:
+            return f"Optional[{type_string}]"
+        if not self.required and self.nullable:
+            return f"Union[Unset, None, {type_string}]"
+
+        return f"Union[Unset, {type_string}]"
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -127,6 +177,7 @@ class _PropertyData(NamedTuple):
     optional_props: List[Property]
     required_props: List[Property]
     relative_imports: Set[str]
+    lazy_imports: Set[str]
     schemas: Schemas
 
 
@@ -143,6 +194,7 @@ def _process_properties(
 
     properties: Dict[str, Property] = {}
     relative_imports: Set[str] = set()
+    lazy_imports: Set[str] = set()
     required_set = set(data.required or [])
 
     def _add_if_no_conflict(new_prop: Property) -> Optional[PropertyError]:
@@ -207,12 +259,15 @@ def _process_properties(
             required_properties.append(prop)
         else:
             optional_properties.append(prop)
+
+        lazy_imports.update(prop.get_lazy_imports(prefix=".."))
         relative_imports.update(prop.get_imports(prefix=".."))
 
     return _PropertyData(
         optional_props=optional_properties,
         required_props=required_properties,
         relative_imports=relative_imports,
+        lazy_imports=lazy_imports,
         schemas=schemas,
     )
 
@@ -303,6 +358,7 @@ def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config
     object.__setattr__(model_prop, "required_properties", property_data.required_props)
     object.__setattr__(model_prop, "optional_properties", property_data.optional_props)
     model_prop.set_relative_imports(property_data.relative_imports)
+    model_prop.set_lazy_imports(property_data.lazy_imports)
     object.__setattr__(model_prop, "additional_properties", additional_properties)
     return schemas
 
@@ -341,6 +397,7 @@ def build_model_property(
     required_properties: Optional[List[Property]] = None
     optional_properties: Optional[List[Property]] = None
     relative_imports: Optional[Set[str]] = None
+    lazy_imports: Optional[Set[str]] = None
     additional_properties: Optional[Union[bool, Property]] = None
     if process_properties:
         data_or_err, schemas = _process_property_data(
@@ -352,6 +409,7 @@ def build_model_property(
         required_properties = property_data.required_props
         optional_properties = property_data.optional_props
         relative_imports = property_data.relative_imports
+        lazy_imports = property_data.lazy_imports
         for root in roots:
             if isinstance(root, utils.ClassName):
                 continue
@@ -364,6 +422,7 @@ def build_model_property(
         required_properties=required_properties,
         optional_properties=optional_properties,
         relative_imports=relative_imports,
+        lazy_imports=lazy_imports,
         additional_properties=additional_properties,
         description=data.description or "",
         default=None,
