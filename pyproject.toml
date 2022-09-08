@@ -74,7 +74,7 @@ poetry build \
 && tar --strip-components=1 -xvf "$(ls -1 dist/*tar.gz | tail -1)" '*/setup.py' \
 && isort setup.py \
 && black setup.py \
-&& sed -i 's/"openapi-python-client"/"benchling-openapi-python-client"/' setup.py
+&& sed -i '' 's/"openapi-python-client"/"benchling-openapi-python-client"/' setup.py
 """
 
 [tool.black]
