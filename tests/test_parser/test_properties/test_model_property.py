@@ -13,14 +13,14 @@ MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 @pytest.mark.parametrize(
     "no_optional,nullable,required,json,expected",
     [
-        (False, False, False, False, "Union[Unset, MyClass]"),
-        (False, False, True, False, "MyClass"),
-        (False, True, False, False, "Union[Unset, None, MyClass]"),
-        (False, True, True, False, "Optional[MyClass]"),
-        (True, False, False, False, "MyClass"),
-        (True, False, True, False, "MyClass"),
-        (True, True, False, False, "MyClass"),
-        (True, True, True, False, "MyClass"),
+        (False, False, False, False, "Union[Unset, 'MyClass']"),
+        (False, False, True, False, "'MyClass'"),
+        (False, True, False, False, "Union[Unset, None, 'MyClass']"),
+        (False, True, True, False, "Optional['MyClass']"),
+        (True, False, False, False, "'MyClass'"),
+        (True, False, True, False, "'MyClass'"),
+        (True, True, False, False, "'MyClass'"),
+        (True, True, True, False, "'MyClass'"),
         (False, False, True, True, "Dict[str, Any]"),
     ],
 )
@@ -41,9 +41,16 @@ def test_get_imports(model_property_factory):
         "from typing import Optional",
         "from typing import Union",
         "from ..types import UNSET, Unset",
-        "from ..models.my_module import MyClass",
         "from typing import Dict",
         "from typing import cast",
+    }
+
+
+def test_get_lazy_imports(model_property_factory):
+    prop = model_property_factory(required=False, nullable=True)
+
+    assert prop.get_lazy_imports(prefix="..") == {
+        "from ..models.my_module import MyClass",
     }
 
 
@@ -147,6 +154,7 @@ class TestBuildModelProperty:
                 "from ..types import UNSET, Unset",
                 "from typing import Union",
             },
+            lazy_imports=set(),
             additional_properties=True,
         )
 
@@ -662,7 +670,11 @@ class TestProcessModel:
         model_prop = model_property_factory()
         schemas = Schemas()
         property_data = _PropertyData(
-            required_props=["required"], optional_props=["optional"], relative_imports={"relative"}, schemas=schemas
+            required_props=["required"],
+            optional_props=["optional"],
+            relative_imports={"relative"},
+            lazy_imports={"lazy"},
+            schemas=schemas,
         )
         additional_properties = True
         process_property_data = mocker.patch(f"{MODULE_NAME}._process_property_data")
@@ -674,6 +686,7 @@ class TestProcessModel:
         assert model_prop.required_properties == property_data.required_props
         assert model_prop.optional_properties == property_data.optional_props
         assert model_prop.relative_imports == property_data.relative_imports
+        assert model_prop.lazy_imports == property_data.lazy_imports
         assert model_prop.additional_properties == additional_properties
 
 

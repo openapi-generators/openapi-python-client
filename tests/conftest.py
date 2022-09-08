@@ -38,6 +38,7 @@ def model_property_factory() -> Callable[..., ModelProperty]:
             "required_properties": None,
             "optional_properties": None,
             "relative_imports": None,
+            "lazy_imports": None,
             "additional_properties": None,
             "python_name": "",
             "description": "",
