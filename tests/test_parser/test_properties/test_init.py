@@ -1232,6 +1232,8 @@ def test_process_model_errors(mocker, model_property_factory):
     )
     assert result == [error for _, error in model_errors]
     assert all("\n\nFailure to process schema has resulted in the removal of:" in error.detail for error in result)
+
+
 class TestBuildParameters:
     def test_skips_references_and_keeps_going(self, mocker):
         from openapi_python_client.parser.properties import Parameters, build_parameters

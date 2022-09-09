@@ -139,7 +139,7 @@ def update_schemas_with_data(
 class Parameters:
     """Structure for containing all defined, shareable, and reusable parameters"""
 
-    classes_by_reference: Dict[_ReferencePath, Parameter] = attr.ib(factory=dict)
+    classes_by_reference: Dict[ReferencePath, Parameter] = attr.ib(factory=dict)
     classes_by_name: Dict[ClassName, Parameter] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
 
@@ -172,7 +172,7 @@ def parameter_from_data(
 
 
 def update_parameters_with_data(
-    *, ref_path: _ReferencePath, data: oai.Parameter, parameters: Parameters
+    *, ref_path: ReferencePath, data: oai.Parameter, parameters: Parameters
 ) -> Union[Parameters, ParameterError]:
     """
     Update a `Parameters` using some new reference.

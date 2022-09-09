@@ -27,8 +27,8 @@ from .property import Property
 from .schemas import (
     Class,
     Parameters,
-    Schemas,
     ReferencePath,
+    Schemas,
     parse_reference_path,
     update_parameters_with_data,
     update_schemas_with_data,
