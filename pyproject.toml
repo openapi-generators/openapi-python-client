@@ -2,7 +2,7 @@
 name = "openapi-python-client"
 # Our versions have diverged and have no relation to upstream code changes
 # Henceforth, openapi-python-package will be maintained internally
-version = "1.0.1"
+version = "1.0.2"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
