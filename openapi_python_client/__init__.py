@@ -74,7 +74,11 @@ class Project:  # pylint: disable=too-many-instance-attributes
         else:
             loader = package_loader
         self.env: Environment = Environment(
-            loader=loader, trim_blocks=True, lstrip_blocks=True, extensions=["jinja2.ext.loopcontrols"]
+            loader=loader,
+            trim_blocks=True,
+            lstrip_blocks=True,
+            extensions=["jinja2.ext.loopcontrols"],
+            keep_trailing_newline=True,
         )
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"

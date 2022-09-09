@@ -1,0 +1,20 @@
+name: Release Dry Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+      - name: Install Knope
+        uses: knope-dev/action@v1
+        with:
+          version: 0.4.3
+      - run: knope release --dry-run

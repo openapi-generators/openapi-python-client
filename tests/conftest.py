@@ -17,6 +17,8 @@ from openapi_python_client.parser.properties import (
     StringProperty,
     UnionProperty,
 )
+from openapi_python_client.schema.openapi_schema_pydantic import Parameter
+from openapi_python_client.schema.parameter_location import ParameterLocation
 
 
 @pytest.fixture
@@ -222,6 +224,25 @@ def union_property_factory(date_time_property_factory, string_property_factory) 
         if "inner_properties" not in kwargs:
             kwargs["inner_properties"] = [date_time_property_factory(), string_property_factory()]
         return UnionProperty(**kwargs)
+
+    return _factory
+
+
+@pytest.fixture
+def param_factory() -> Callable[..., Parameter]:
+    """
+    This fixture surfaces in the test as a function which manufactures a Parameter with defaults.
+
+    You can pass the same params into this as the Parameter constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = {
+            "name": "",
+            "in": ParameterLocation.QUERY,
+            **kwargs,
+        }
+        return Parameter(**kwargs)
 
     return _factory
 

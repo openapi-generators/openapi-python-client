@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-python-client"
-version = "0.11.3"
+version = "0.11.6"
 description = "Generate modern Python clients from OpenAPI"
 repository = "https://github.com/triaxtec/openapi-python-client"
 license = "MIT"
@@ -21,7 +21,7 @@ include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.7"
 jinja2 = "^3.0.0"
-typer = "^0.4"
+typer = "^0.6"
 colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
 shellingham = "^1.3.2"
 black = "*"
@@ -84,6 +84,7 @@ exclude = '''
   /(
     | \.git
     | \.venv
+    | env
     | \.mypy_cache
     | openapi_python_client/templates
     | tests/test_templates
@@ -96,7 +97,7 @@ exclude = '''
 [tool.isort]
 line_length = 120
 profile = "black"
-skip = [".venv", "tests/test_templates", "integration-tests"]
+skip = [".venv", "tests/test_templates", "integration-tests", "env"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
