@@ -211,6 +211,11 @@ class ListProperty(Property, Generic[InnerProp]):
         imports.add("from typing import cast, List")
         return imports
 
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        lazy_imports = super().get_lazy_imports(prefix=prefix)
+        lazy_imports.update(self.inner_property.get_lazy_imports(prefix=prefix))
+        return lazy_imports
+
 
 @attr.s(auto_attribs=True, frozen=True)
 class UnionProperty(Property):
@@ -284,6 +289,12 @@ class UnionProperty(Property):
             imports.update(inner_prop.get_imports(prefix=prefix))
         imports.add("from typing import cast, Union")
         return imports
+
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        lazy_imports = super().get_lazy_imports(prefix=prefix)
+        for inner_prop in self.inner_properties:
+            lazy_imports.update(inner_prop.get_lazy_imports(prefix=prefix))
+        return lazy_imports
 
 
 def _string_based_property(
