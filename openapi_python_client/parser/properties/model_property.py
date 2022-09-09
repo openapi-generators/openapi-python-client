@@ -105,9 +105,15 @@ class ModelProperty(Property):
             type_string = self.get_base_type_string()
 
         if model_parent:
-            type_string = type_string.replace(model_parent.class_info.name, f"'{type_string}'")
+            if type_string == model_parent.class_info.name:
+                type_string = f"'{type_string}'"
+            if type_string == f"List[{model_parent.class_info.name}]":
+                type_string = f"List['{model_parent.class_info.name}']"
 
-        type_string = type_string.replace(self.class_info.name, f"'{type_string}'")
+        if type_string == self.class_info.name:
+            type_string = f"'{type_string}'"
+        if type_string == f"List[{self.class_info.name}]":
+            type_string = f"List['{self.class_info.name}']"
 
         if no_optional or (self.required and not self.nullable):
             return type_string
