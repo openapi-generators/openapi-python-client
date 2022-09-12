@@ -113,6 +113,9 @@ return field_dict
 {% endmacro %}
 
     def to_dict(self) -> Dict[str, Any]:
+    {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
@@ -122,9 +125,9 @@ return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        {% for lazy_import in model.lazy_imports %}
+    {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
-        {% endfor %}
+    {% endfor %}
 
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
@@ -150,6 +153,13 @@ return field_dict
 {% if model.additional_properties %}
     {% if model.additional_properties.template %}{# Can be a bool instead of an object #}
         {% import "property_templates/" + model.additional_properties.template as prop_template %}
+
+# {{ model.additional_properties }}
+{% if model.additional_properties.lazy_imports %}
+    {% for lazy_import in model.additional_properties.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
+{% endif %}
     {% else %}
         {% set prop_template = None %}
     {% endif %}

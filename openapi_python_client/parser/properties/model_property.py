@@ -90,7 +90,12 @@ class ModelProperty(Property):
         object.__setattr__(self, "lazy_imports", {li for li in lazy_imports if self.self_import not in li})
 
     def get_type_string(
-        self, no_optional: bool = False, json: bool = False, *, model_parent: Optional[ModelProperty] = None
+        self,
+        no_optional: bool = False,
+        json: bool = False,
+        *,
+        model_parent: Optional[ModelProperty] = None,
+        quoted: bool = True,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property
@@ -104,16 +109,17 @@ class ModelProperty(Property):
         else:
             type_string = self.get_base_type_string()
 
-        if model_parent:
-            if type_string == model_parent.class_info.name:
-                type_string = f"'{type_string}'"
-            if type_string == f"List[{model_parent.class_info.name}]":
-                type_string = f"List['{model_parent.class_info.name}']"
+        if quoted:
+            if model_parent:
+                if type_string == model_parent.class_info.name:
+                    type_string = f"'{type_string}'"
+                if type_string == f"List[{model_parent.class_info.name}]":
+                    type_string = f"List['{model_parent.class_info.name}']"
 
-        if type_string == self.class_info.name:
-            type_string = f"'{type_string}'"
-        if type_string == f"List[{self.class_info.name}]":
-            type_string = f"List['{self.class_info.name}']"
+            if type_string == self.class_info.name:
+                type_string = f"'{type_string}'"
+            if type_string == f"List[{self.class_info.name}]":
+                type_string = f"List['{self.class_info.name}']"
 
         if no_optional or (self.required and not self.nullable):
             return type_string
@@ -334,6 +340,7 @@ def _process_property_data(
     )
     if isinstance(additional_properties, Property):
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
+        property_data.lazy_imports.update(additional_properties.get_lazy_imports(prefix=".."))
     elif isinstance(additional_properties, PropertyError):
         return additional_properties, schemas
 

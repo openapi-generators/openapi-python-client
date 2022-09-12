@@ -74,7 +74,12 @@ class Property:
         return self._json_type_string
 
     def get_type_string(
-        self, no_optional: bool = False, json: bool = False, *, model_parent: Optional[ModelProperty] = None
+        self,
+        no_optional: bool = False,
+        json: bool = False,
+        *,
+        model_parent: Optional[ModelProperty] = None,
+        quoted: bool = True,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property
@@ -88,7 +93,7 @@ class Property:
         else:
             type_string = self.get_base_type_string()
 
-        if model_parent:
+        if quoted and model_parent:
             if type_string == model_parent.class_info.name:
                 type_string = f"'{type_string}'"
             if type_string == f"List[{model_parent.class_info.name}]":
@@ -105,7 +110,7 @@ class Property:
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
-        return self.get_type_string(no_optional=True)
+        return self.get_type_string(no_optional=True, quoted=False)
 
     # noinspection PyUnusedLocal
     def get_imports(self, *, prefix: str) -> Set[str]:

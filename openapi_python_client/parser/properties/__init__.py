@@ -224,8 +224,8 @@ class UnionProperty(Property):
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.py.jinja"
 
-    def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
-        return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
+    def _get_inner_type_strings(self, json: bool = False, quoted: bool = True) -> Set[str]:
+        return {p.get_type_string(no_optional=True, json=json, quoted=quoted) for p in self.inner_properties}
 
     @staticmethod
     def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:
@@ -239,7 +239,9 @@ class UnionProperty(Property):
     def get_base_json_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
-    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
+    def get_type_strings_in_union(
+        self, no_optional: bool = False, json: bool = False, *, quoted: bool = True
+    ) -> Set[str]:
         """
         Get the set of all the types that should appear within the `Union` representing this property.
 
@@ -252,7 +254,7 @@ class UnionProperty(Property):
         Returns:
             A set of strings containing the types that should appear within `Union`.
         """
-        type_strings = self._get_inner_type_strings(json=json)
+        type_strings = self._get_inner_type_strings(json=json, quoted=quoted)
         if no_optional:
             return type_strings
         if self.nullable:
@@ -267,13 +269,14 @@ class UnionProperty(Property):
         json: bool = False,
         *,
         model_parent: Optional[ModelProperty] = None,  # pylint:disable=unused-argument
+        quoted: bool = True,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property.
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
+        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json, quoted=quoted)
         return self._get_type_string_from_inner_type_strings(type_strings_in_union)
 
     def get_imports(self, *, prefix: str) -> Set[str]:
