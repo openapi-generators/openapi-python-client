@@ -22,7 +22,13 @@ if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use 
 else:
     from importlib.metadata import version  # type: ignore
 
-__version__ = version(__package__)
+
+# Benchling renames the package to avoid publishing naming collision
+# This can lead to importlib.metadata.PackageNotFoundError: openapi_python_client
+try:
+    __version__ = version(__package__)
+except Exception:
+    pass
 
 
 TEMPLATE_FILTERS = {
