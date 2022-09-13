@@ -13,14 +13,14 @@ MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 @pytest.mark.parametrize(
     "no_optional,nullable,required,json,expected",
     [
-        (False, False, False, False, "Union[Unset, 'MyClass']"),
-        (False, False, True, False, "'MyClass'"),
-        (False, True, False, False, "Union[Unset, None, 'MyClass']"),
-        (False, True, True, False, "Optional['MyClass']"),
-        (True, False, False, False, "'MyClass'"),
-        (True, False, True, False, "'MyClass'"),
-        (True, True, False, False, "'MyClass'"),
-        (True, True, True, False, "'MyClass'"),
+        (False, False, False, False, "Union[Unset, MyClass]"),
+        (False, False, True, False, "MyClass"),
+        (False, True, False, False, "Union[Unset, None, MyClass]"),
+        (False, True, True, False, "Optional[MyClass]"),
+        (True, False, False, False, "MyClass"),
+        (True, False, True, False, "MyClass"),
+        (True, True, False, False, "MyClass"),
+        (True, True, True, False, "MyClass"),
         (False, False, True, True, "Dict[str, Any]"),
     ],
 )
