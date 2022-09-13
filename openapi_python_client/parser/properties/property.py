@@ -65,13 +65,13 @@ class Property:
         """
         object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
 
-    def get_base_type_string(self) -> str:
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
         """Get the string describing the Python type of this property."""
-        return self._type_string
+        return f'"{self._type_string}"' if not self.is_base_type and quoted else self._type_string
 
-    def get_base_json_type_string(self) -> str:
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
         """Get the string describing the JSON type of this property."""
-        return self._json_type_string
+        return f'"{self._json_type_string}"' if not self.is_base_type and quoted else self._json_type_string
 
     def get_type_string(
         self,
@@ -79,7 +79,7 @@ class Property:
         json: bool = False,
         *,
         model_parent: Optional[ModelProperty] = None,
-        quoted: bool = True,
+        quoted: bool = False,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property
@@ -89,9 +89,9 @@ class Property:
             json: True if the type refers to the property after JSON serialization
         """
         if json:
-            type_string = self.get_base_json_type_string()
+            type_string = self.get_base_json_type_string(quoted=quoted)
         else:
-            type_string = self.get_base_type_string()
+            type_string = self.get_base_type_string(quoted=quoted)
 
         if quoted and model_parent:
             if type_string == model_parent.class_info.name:
@@ -154,8 +154,8 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string(model_parent=model_parent)} = {default}"
-        return f"{self.python_name}: {self.get_type_string(model_parent=model_parent)}"
+            return f"{self.python_name}: {self.get_type_string(model_parent=model_parent, quoted=True)} = {default}"
+        return f"{self.python_name}: {self.get_type_string(model_parent=model_parent, quoted=True)}"
 
     def to_docstring(self) -> str:
         """Returns property docstring"""
@@ -165,3 +165,14 @@ class Property:
         if self.example:
             doc += f" Example: {self.example}."
         return doc
+
+    @property
+    def is_base_type(self) -> bool:
+        """Base types, represented by any other of `Property` than `ModelProperty` should not be quoted."""
+        from . import ListProperty, ModelProperty, UnionProperty
+
+        return self.__class__.__name__ not in {
+            ModelProperty.__class__.__name__,
+            ListProperty.__class__.__name__,
+            UnionProperty.__class__.__name__,
+        }

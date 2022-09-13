@@ -188,11 +188,12 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.py.jinja"
 
-    def get_base_type_string(self) -> str:
-        return f"List[{self.inner_property.get_type_string()}]"
+    # pylint: disable=unused-argument
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
+        return f"List[{self.inner_property.get_type_string(quoted=self.inner_property.is_base_type)}]"
 
-    def get_base_json_type_string(self) -> str:
-        return f"List[{self.inner_property.get_type_string(json=True)}]"
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+        return f"List[{self.inner_property.get_type_string(json=True, quoted=self.inner_property.is_base_type)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -224,8 +225,8 @@ class UnionProperty(Property):
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.py.jinja"
 
-    def _get_inner_type_strings(self, json: bool = False, quoted: bool = True) -> Set[str]:
-        return {p.get_type_string(no_optional=True, json=json, quoted=quoted) for p in self.inner_properties}
+    def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
+        return {p.get_type_string(no_optional=True, json=json, quoted=p.is_base_type) for p in self.inner_properties}
 
     @staticmethod
     def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:
@@ -233,15 +234,14 @@ class UnionProperty(Property):
             return inner_types.pop()
         return f"Union[{', '.join(sorted(inner_types))}]"
 
-    def get_base_type_string(self) -> str:
+    # pylint: disable=unused-argument
+    def get_base_type_string(self, *, quoted: bool = True) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
-    def get_base_json_type_string(self) -> str:
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
-    def get_type_strings_in_union(
-        self, no_optional: bool = False, json: bool = False, *, quoted: bool = True
-    ) -> Set[str]:
+    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
         """
         Get the set of all the types that should appear within the `Union` representing this property.
 
@@ -254,7 +254,7 @@ class UnionProperty(Property):
         Returns:
             A set of strings containing the types that should appear within `Union`.
         """
-        type_strings = self._get_inner_type_strings(json=json, quoted=quoted)
+        type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
         if self.nullable:
@@ -269,14 +269,14 @@ class UnionProperty(Property):
         json: bool = False,
         *,
         model_parent: Optional[ModelProperty] = None,  # pylint:disable=unused-argument
-        quoted: bool = True,
+        quoted: bool = False,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property.
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json, quoted=quoted)
+        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
         return self._get_type_string_from_inner_type_strings(type_strings_in_union)
 
     def get_imports(self, *, prefix: str) -> Set[str]:

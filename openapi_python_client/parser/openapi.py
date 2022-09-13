@@ -508,11 +508,11 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string()
+            return self.responses[0].prop.get_type_string(quoted=False)
         return f"Union[{', '.join(types)}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:

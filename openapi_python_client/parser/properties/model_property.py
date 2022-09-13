@@ -44,8 +44,8 @@ class ModelProperty(Property):
         """Constructs a self import statement from this ModelProperty's attributes"""
         return f"models.{self.class_info.module_name} import {self.class_info.name}"
 
-    def get_base_type_string(self) -> str:
-        return self.class_info.name
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
+        return f'"{self.class_info.name}"' if quoted else self.class_info.name
 
     def get_imports(self, *, prefix: str) -> Set[str]:
         """
@@ -95,7 +95,7 @@ class ModelProperty(Property):
         json: bool = False,
         *,
         model_parent: Optional[ModelProperty] = None,
-        quoted: bool = True,
+        quoted: bool = False,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property

@@ -18,7 +18,7 @@ from ..types import UNSET, Unset
 
 
 {% if model.additional_properties %}
-{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(model_parent=model) %}
+{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(model_parent=model, quoted=model.additional_properties.is_base_type) %}
 {% endif %}
 
 {% set class_name = model.class_info.name %}
@@ -128,7 +128,6 @@ return field_dict
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
-
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
