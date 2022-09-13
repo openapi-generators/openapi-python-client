@@ -154,7 +154,6 @@ return field_dict
     {% if model.additional_properties.template %}{# Can be a bool instead of an object #}
         {% import "property_templates/" + model.additional_properties.template as prop_template %}
 
-# {{ model.additional_properties }}
 {% if model.additional_properties.lazy_imports %}
     {% for lazy_import in model.additional_properties.lazy_imports %}
         {{ lazy_import }}
