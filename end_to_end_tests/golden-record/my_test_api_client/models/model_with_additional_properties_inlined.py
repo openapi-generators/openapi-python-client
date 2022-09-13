@@ -2,9 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_with_additional_properties_inlined_additional_property import (
-    ModelWithAdditionalPropertiesInlinedAdditionalProperty,
-)
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlined")
@@ -18,7 +15,7 @@ class ModelWithAdditionalPropertiesInlined:
     """
 
     a_number: Union[Unset, float] = UNSET
-    additional_properties: Dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperty] = attr.ib(
+    additional_properties: Dict[str, "ModelWithAdditionalPropertiesInlinedAdditionalProperty"] = attr.ib(
         init=False, factory=dict
     )
 
@@ -37,6 +34,10 @@ class ModelWithAdditionalPropertiesInlined:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_additional_properties_inlined_additional_property import (
+            ModelWithAdditionalPropertiesInlinedAdditionalProperty,
+        )
+
         d = src_dict.copy()
         a_number = d.pop("a_number", UNSET)
 
@@ -57,10 +58,10 @@ class ModelWithAdditionalPropertiesInlined:
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> ModelWithAdditionalPropertiesInlinedAdditionalProperty:
+    def __getitem__(self, key: str) -> "ModelWithAdditionalPropertiesInlinedAdditionalProperty":
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: ModelWithAdditionalPropertiesInlinedAdditionalProperty) -> None:
+    def __setitem__(self, key: str, value: "ModelWithAdditionalPropertiesInlinedAdditionalProperty") -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.an_array_with_a_circular_ref_in_items_object_b_item import AnArrayWithACircularRefInItemsObjectBItem
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAItem")
@@ -12,10 +11,10 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAItem")
 class AnArrayWithACircularRefInItemsObjectAItem:
     """
     Attributes:
-        circular (Union[Unset, List[AnArrayWithACircularRefInItemsObjectBItem]]):
+        circular (Union[Unset, List['AnArrayWithACircularRefInItemsObjectBItem']]):
     """
 
-    circular: Union[Unset, List[AnArrayWithACircularRefInItemsObjectBItem]] = UNSET
+    circular: Union[Unset, List["AnArrayWithACircularRefInItemsObjectBItem"]] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -39,6 +38,10 @@ class AnArrayWithACircularRefInItemsObjectAItem:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.an_array_with_a_circular_ref_in_items_object_b_item import (
+            AnArrayWithACircularRefInItemsObjectBItem,
+        )
+
         d = src_dict.copy()
         circular = []
         _circular = d.pop("circular", UNSET)

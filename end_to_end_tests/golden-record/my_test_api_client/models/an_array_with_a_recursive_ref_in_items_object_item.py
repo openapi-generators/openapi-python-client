@@ -11,7 +11,7 @@ T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectItem")
 class AnArrayWithARecursiveRefInItemsObjectItem:
     """
     Attributes:
-        recursive (Union[Unset, List[AnArrayWithARecursiveRefInItemsObjectItem]]):
+        recursive (Union[Unset, List['AnArrayWithARecursiveRefInItemsObjectItem']]):
     """
 
     recursive: Union[Unset, List["AnArrayWithARecursiveRefInItemsObjectItem"]] = UNSET

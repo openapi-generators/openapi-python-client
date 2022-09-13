@@ -68,7 +68,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, List[AModel]]]:
+def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -89,7 +89,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidatio
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, List[AModel]]]:
+def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, List["AModel"]]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -105,7 +105,7 @@ def sync_detailed(
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Response[Union[HTTPValidationError, List[AModel]]]:
+) -> Response[Union[HTTPValidationError, List["AModel"]]]:
     """Get List
 
      Get a list of things
@@ -117,7 +117,7 @@ def sync_detailed(
         some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
-        Response[Union[HTTPValidationError, List[AModel]]]
+        Response[Union[HTTPValidationError, List['AModel']]]
     """
 
     kwargs = _get_kwargs(
@@ -143,7 +143,7 @@ def sync(
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Optional[Union[HTTPValidationError, List[AModel]]]:
+) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
     """Get List
 
      Get a list of things
@@ -155,7 +155,7 @@ def sync(
         some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
-        Response[Union[HTTPValidationError, List[AModel]]]
+        Response[Union[HTTPValidationError, List['AModel']]]
     """
 
     return sync_detailed(
@@ -174,7 +174,7 @@ async def asyncio_detailed(
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Response[Union[HTTPValidationError, List[AModel]]]:
+) -> Response[Union[HTTPValidationError, List["AModel"]]]:
     """Get List
 
      Get a list of things
@@ -186,7 +186,7 @@ async def asyncio_detailed(
         some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
-        Response[Union[HTTPValidationError, List[AModel]]]
+        Response[Union[HTTPValidationError, List['AModel']]]
     """
 
     kwargs = _get_kwargs(
@@ -210,7 +210,7 @@ async def asyncio(
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
-) -> Optional[Union[HTTPValidationError, List[AModel]]]:
+) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
     """Get List
 
      Get a list of things
@@ -222,7 +222,7 @@ async def asyncio(
         some_date (Union[datetime.date, datetime.datetime]):
 
     Returns:
-        Response[Union[HTTPValidationError, List[AModel]]]
+        Response[Union[HTTPValidationError, List['AModel']]]
     """
 
     return (

@@ -2,10 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
-from ..models.model_with_any_json_properties_additional_property_type_0 import (
-    ModelWithAnyJsonPropertiesAdditionalPropertyType0,
-)
-
 T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 
 
@@ -14,10 +10,13 @@ class ModelWithAnyJsonProperties:
     """ """
 
     additional_properties: Dict[
-        str, Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str]
+        str, Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]
     ] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
+        from ..models.model_with_any_json_properties_additional_property_type_0 import (
+            ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+        )
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
@@ -37,6 +36,10 @@ class ModelWithAnyJsonProperties:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_any_json_properties_additional_property_type_0 import (
+            ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+        )
+
         d = src_dict.copy()
         model_with_any_json_properties = cls()
 
@@ -45,7 +48,7 @@ class ModelWithAnyJsonProperties:
 
             def _parse_additional_property(
                 data: object,
-            ) -> Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str]:
+            ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
@@ -63,7 +66,7 @@ class ModelWithAnyJsonProperties:
                 except:  # noqa: E722
                     pass
                 return cast(
-                    Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str], data
+                    Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str], data
                 )
 
             additional_property = _parse_additional_property(prop_dict)
@@ -79,13 +82,13 @@ class ModelWithAnyJsonProperties:
 
     def __getitem__(
         self, key: str
-    ) -> Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str]:
+    ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
         return self.additional_properties[key]
 
     def __setitem__(
         self,
         key: str,
-        value: Union[List[str], ModelWithAnyJsonPropertiesAdditionalPropertyType0, bool, float, int, str],
+        value: Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str],
     ) -> None:
         self.additional_properties[key] = value
 

@@ -2,9 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_with_primitive_additional_properties_a_date_holder import (
-    ModelWithPrimitiveAdditionalPropertiesADateHolder,
-)
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
@@ -17,7 +14,7 @@ class ModelWithPrimitiveAdditionalProperties:
         a_date_holder (Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]):
     """
 
-    a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder] = UNSET
+    a_date_holder: Union[Unset, "ModelWithPrimitiveAdditionalPropertiesADateHolder"] = UNSET
     additional_properties: Dict[str, str] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -35,6 +32,10 @@ class ModelWithPrimitiveAdditionalProperties:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_primitive_additional_properties_a_date_holder import (
+            ModelWithPrimitiveAdditionalPropertiesADateHolder,
+        )
+
         d = src_dict.copy()
         _a_date_holder = d.pop("a_date_holder", UNSET)
         a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]

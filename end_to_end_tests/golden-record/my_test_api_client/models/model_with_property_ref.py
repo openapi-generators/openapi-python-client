@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_name import ModelName
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithPropertyRef")
@@ -15,7 +14,7 @@ class ModelWithPropertyRef:
         inner (Union[Unset, ModelName]):
     """
 
-    inner: Union[Unset, ModelName] = UNSET
+    inner: Union[Unset, "ModelName"] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -33,6 +32,8 @@ class ModelWithPropertyRef:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_name import ModelName
+
         d = src_dict.copy()
         _inner = d.pop("inner", UNSET)
         inner: Union[Unset, ModelName]

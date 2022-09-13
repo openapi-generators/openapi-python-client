@@ -6,16 +6,6 @@ from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 import attr
 from dateutil.parser import isoparse
 
-from ..models.body_upload_file_tests_upload_post_additional_property import (
-    BodyUploadFileTestsUploadPostAdditionalProperty,
-)
-from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
-    BodyUploadFileTestsUploadPostSomeNullableObject,
-)
-from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
-from ..models.body_upload_file_tests_upload_post_some_optional_object import (
-    BodyUploadFileTestsUploadPostSomeOptionalObject,
-)
 from ..models.different_enum import DifferentEnum
 from ..types import UNSET, File, FileJsonType, Unset
 
@@ -40,17 +30,17 @@ class BodyUploadFileTestsUploadPost:
     """
 
     some_file: File
-    some_object: BodyUploadFileTestsUploadPostSomeObject
-    some_nullable_object: Optional[BodyUploadFileTestsUploadPostSomeNullableObject]
+    some_object: "BodyUploadFileTestsUploadPostSomeObject"
+    some_nullable_object: Optional["BodyUploadFileTestsUploadPostSomeNullableObject"]
     some_optional_file: Union[Unset, File] = UNSET
     some_string: Union[Unset, str] = "some_default_string"
     a_datetime: Union[Unset, datetime.datetime] = UNSET
     a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
     some_array: Union[Unset, List[float]] = UNSET
-    some_optional_object: Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject] = UNSET
+    some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
-    additional_properties: Dict[str, BodyUploadFileTestsUploadPostAdditionalProperty] = attr.ib(
+    additional_properties: Dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = attr.ib(
         init=False, factory=dict
     )
 
@@ -195,6 +185,17 @@ class BodyUploadFileTestsUploadPost:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.body_upload_file_tests_upload_post_additional_property import (
+            BodyUploadFileTestsUploadPostAdditionalProperty,
+        )
+        from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
+            BodyUploadFileTestsUploadPostSomeNullableObject,
+        )
+        from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
+        from ..models.body_upload_file_tests_upload_post_some_optional_object import (
+            BodyUploadFileTestsUploadPostSomeOptionalObject,
+        )
+
         d = src_dict.copy()
         some_file = File(payload=BytesIO(d.pop("some_file")))
 
@@ -275,10 +276,10 @@ class BodyUploadFileTestsUploadPost:
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> BodyUploadFileTestsUploadPostAdditionalProperty:
+    def __getitem__(self, key: str) -> "BodyUploadFileTestsUploadPostAdditionalProperty":
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: BodyUploadFileTestsUploadPostAdditionalProperty) -> None:
+    def __setitem__(self, key: str, value: "BodyUploadFileTestsUploadPostAdditionalProperty") -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

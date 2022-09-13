@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_with_circular_ref_b import ModelWithCircularRefB
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithCircularRefA")
@@ -15,7 +14,7 @@ class ModelWithCircularRefA:
         circular (Union[Unset, ModelWithCircularRefB]):
     """
 
-    circular: Union[Unset, ModelWithCircularRefB] = UNSET
+    circular: Union[Unset, "ModelWithCircularRefB"] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -33,6 +32,8 @@ class ModelWithCircularRefA:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_circular_ref_b import ModelWithCircularRefB
+
         d = src_dict.copy()
         _circular = d.pop("circular", UNSET)
         circular: Union[Unset, ModelWithCircularRefB]

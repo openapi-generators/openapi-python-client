@@ -2,8 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..models.model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
-
 T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesA")
 
 
@@ -11,9 +9,10 @@ T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesA")
 class ModelWithCircularRefInAdditionalPropertiesA:
     """ """
 
-    additional_properties: Dict[str, ModelWithCircularRefInAdditionalPropertiesB] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, "ModelWithCircularRefInAdditionalPropertiesB"] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
+        pass
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
@@ -25,6 +24,10 @@ class ModelWithCircularRefInAdditionalPropertiesA:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_circular_ref_in_additional_properties_b import (
+            ModelWithCircularRefInAdditionalPropertiesB,
+        )
+
         d = src_dict.copy()
         model_with_circular_ref_in_additional_properties_a = cls()
 
@@ -41,10 +44,10 @@ class ModelWithCircularRefInAdditionalPropertiesA:
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> ModelWithCircularRefInAdditionalPropertiesB:
+    def __getitem__(self, key: str) -> "ModelWithCircularRefInAdditionalPropertiesB":
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: ModelWithCircularRefInAdditionalPropertiesB) -> None:
+    def __setitem__(self, key: str, value: "ModelWithCircularRefInAdditionalPropertiesB") -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

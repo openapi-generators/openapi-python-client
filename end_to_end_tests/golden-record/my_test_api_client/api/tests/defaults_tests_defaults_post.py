@@ -23,8 +23,8 @@ def _get_kwargs(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -129,8 +129,8 @@ def sync_detailed(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -186,8 +186,8 @@ def sync(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -236,8 +236,8 @@ async def asyncio_detailed(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -291,8 +291,8 @@ async def asyncio(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Defaults
 
