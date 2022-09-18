@@ -1,6 +1,12 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 import attr
+
+if TYPE_CHECKING:
+    from ..models.an_array_with_a_circular_ref_in_items_object_additional_properties_a_item import (
+        AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem,
+    )
+
 
 T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem")
 

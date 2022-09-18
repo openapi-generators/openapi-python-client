@@ -1,6 +1,12 @@
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
+
+if TYPE_CHECKING:
+    from ..models.model_with_any_json_properties_additional_property_type_0 import (
+        ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+    )
+
 
 T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 

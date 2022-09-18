@@ -1,6 +1,12 @@
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
+
+if TYPE_CHECKING:
+    from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
+        PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+    )
+
 
 T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200")
 

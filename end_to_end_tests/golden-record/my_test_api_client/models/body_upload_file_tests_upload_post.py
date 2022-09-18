@@ -1,13 +1,26 @@
 import datetime
 import json
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 import attr
 from dateutil.parser import isoparse
 
 from ..models.different_enum import DifferentEnum
 from ..types import UNSET, File, FileJsonType, Unset
+
+if TYPE_CHECKING:
+    from ..models.body_upload_file_tests_upload_post_additional_property import (
+        BodyUploadFileTestsUploadPostAdditionalProperty,
+    )
+    from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
+        BodyUploadFileTestsUploadPostSomeNullableObject,
+    )
+    from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
+    from ..models.body_upload_file_tests_upload_post_some_optional_object import (
+        BodyUploadFileTestsUploadPostSomeOptionalObject,
+    )
+
 
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 

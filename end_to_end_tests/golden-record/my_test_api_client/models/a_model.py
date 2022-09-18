@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 import attr
 from dateutil.parser import isoparse
@@ -8,6 +8,11 @@ from ..models.an_all_of_enum import AnAllOfEnum
 from ..models.an_enum import AnEnum
 from ..models.different_enum import DifferentEnum
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.free_form_model import FreeFormModel
+    from ..models.model_with_union_property import ModelWithUnionProperty
+
 
 T = TypeVar("T", bound="AModel")
 

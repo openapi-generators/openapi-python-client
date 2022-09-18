@@ -1,6 +1,10 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 import attr
+
+if TYPE_CHECKING:
+    from ..models.model_with_circular_ref_in_additional_properties_a import ModelWithCircularRefInAdditionalPropertiesA
+
 
 T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesB")
 

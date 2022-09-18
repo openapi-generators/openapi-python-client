@@ -1,8 +1,14 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.model_with_additional_properties_inlined_additional_property import (
+        ModelWithAdditionalPropertiesInlinedAdditionalProperty,
+    )
+
 
 T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlined")
 

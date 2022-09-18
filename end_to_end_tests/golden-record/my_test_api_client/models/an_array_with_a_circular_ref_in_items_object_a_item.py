@@ -1,8 +1,12 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.an_array_with_a_circular_ref_in_items_object_b_item import AnArrayWithACircularRefInItemsObjectBItem
+
 
 T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAItem")
 

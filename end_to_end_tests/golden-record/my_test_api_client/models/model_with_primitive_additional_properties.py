@@ -1,8 +1,14 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.model_with_primitive_additional_properties_a_date_holder import (
+        ModelWithPrimitiveAdditionalPropertiesADateHolder,
+    )
+
 
 T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
 
