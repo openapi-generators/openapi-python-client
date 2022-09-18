@@ -1,5 +1,6 @@
 __all__ = ["Response", "response_from_data"]
 
+from http import HTTPStatus
 from typing import Optional, Tuple, Union
 
 import attr
@@ -15,7 +16,7 @@ from .properties import AnyProperty, Property, Schemas, property_from_data
 class Response:
     """Describes a single response for an endpoint"""
 
-    status_code: int
+    status_code: HTTPStatus
     prop: Property
     source: str
 
@@ -28,7 +29,9 @@ _SOURCE_BY_CONTENT_TYPE = {
 }
 
 
-def empty_response(*, status_code: int, response_name: str, config: Config, description: Optional[str]) -> Response:
+def empty_response(
+    *, status_code: HTTPStatus, response_name: str, config: Config, description: Optional[str]
+) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
         status_code=status_code,
@@ -46,7 +49,12 @@ def empty_response(*, status_code: int, response_name: str, config: Config, desc
 
 
 def response_from_data(
-    *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas, parent_name: str, config: Config
+    *,
+    status_code: HTTPStatus,
+    data: Union[oai.Response, oai.Reference],
+    schemas: Schemas,
+    parent_name: str,
+    config: Config,
 ) -> Tuple[Union[Response, ParseError], Schemas]:
     """Generate a Response from the OpenAPI dictionary representation of it"""
 

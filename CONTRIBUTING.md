@@ -9,7 +9,7 @@
 ## Setting up a Dev Environment
 
 1. Make sure you have [Poetry](https://python-poetry.org/) installed and up to date.
-2. Make sure you have a supported Python version (e.g. 3.8) installed and accessible to Poetry (e.g. with [pyenv](https://github.com/pyenv/pyenv).
+2. Make sure you have a supported Python version (e.g. 3.8) installed and accessible to Poetry (e.g. with [pyenv](https://github.com/pyenv/pyenv)).
 3. Use `poetry install` in the project directory to create a virtual environment with the relevant dependencies.
 4. Enter a `poetry shell` to make running commands easier.
 

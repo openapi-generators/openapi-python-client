@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from io import BytesIO
 from typing import Any, Dict, Optional
 
@@ -26,7 +27,7 @@ def _get_kwargs(
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[File]:
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_200 = File(payload=BytesIO(response.content))
 
         return response_200
@@ -35,7 +36,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[File]:
 
 def _build_response(*, response: httpx.Response) -> Response[File]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(response=response),
