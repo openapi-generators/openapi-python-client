@@ -1,9 +1,10 @@
-[[packages]]
+[package]
 versioned_files = ["pyproject.toml"]
 changelog = "CHANGELOG.md"
 
 [[workflows]]
 name = "task"
+
     [[workflows.steps]]
     type = "SelectGitHubIssue"
 
@@ -12,16 +13,9 @@ name = "task"
 
 [[workflows]]
 name = "release"
+
     [[workflows.steps]]
     type = "PrepareRelease"
-
-    [[workflows.steps]]
-    type = "Command"
-    command = "npx prettier --write CHANGELOG.md"
-
-    [[workflows.steps]]
-    type = "Command"
-    command = "git add pyproject.toml CHANGELOG.md"
 
     [[workflows.steps]]
     type = "Command"
