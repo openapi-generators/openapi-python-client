@@ -427,13 +427,14 @@ class TestEndpoint:
         assert endpoint.form_body == form_body
         assert endpoint.multipart_body == multipart_body
 
-    def test__add_responses_status_code_error(self, mocker):
+    @pytest.mark.parametrize("response_status_code", ["not_a_number", 499])
+    def test__add_responses_status_code_error(self, response_status_code, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         schemas = Schemas()
         response_1_data = mocker.MagicMock()
         data = {
-            "not_a_number": response_1_data,
+            response_status_code: response_1_data,
         }
         endpoint = self.make_endpoint()
         parse_error = ParseError(data=mocker.MagicMock())
@@ -444,7 +445,7 @@ class TestEndpoint:
 
         assert response.errors == [
             ParseError(
-                detail=f"Invalid response status code not_a_number (not a number), response will be ommitted from generated client"
+                detail=f"Invalid response status code {response_status_code} (not a valid HTTP status code), response will be ommitted from generated client"
             )
         ]
         response_from_data.assert_not_called()

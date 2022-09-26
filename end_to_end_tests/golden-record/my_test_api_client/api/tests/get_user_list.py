@@ -1,4 +1,5 @@
 import datetime
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
@@ -69,7 +70,7 @@ def _get_kwargs(
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_200 = []
         _response_200 = response.json()
         for response_200_item_data in _response_200:
@@ -78,11 +79,11 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidatio
             response_200.append(response_200_item)
 
         return response_200
-    if response.status_code == 422:
+    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
-    if response.status_code == 423:
+    if response.status_code == HTTPStatus.LOCKED:
         response_423 = HTTPValidationError.from_dict(response.json())
 
         return response_423
@@ -91,7 +92,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[HTTPValidatio
 
 def _build_response(*, response: httpx.Response) -> Response[Union[HTTPValidationError, List["AModel"]]]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(response=response),
