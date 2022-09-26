@@ -233,12 +233,14 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_dir.mkdir()
         models_init = models_dir / "__init__.py"
         imports = []
+        alls = []
 
         model_template = self.env.get_template("model.py.jinja")
         for model in self.openapi.models:
             module_path = models_dir / f"{model.class_info.module_name}.py"
             module_path.write_text(model_template.render(model=model), encoding=self.file_encoding)
             imports.append(import_string_from_class(model.class_info))
+            alls.append(model.class_info.name)
 
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
@@ -250,9 +252,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
             else:
                 module_path.write_text(str_enum_template.render(enum=enum), encoding=self.file_encoding)
             imports.append(import_string_from_class(enum.class_info))
+            alls.append(enum.class_info.name)
 
         models_init_template = self.env.get_template("models_init.py.jinja")
-        models_init.write_text(models_init_template.render(imports=imports), encoding=self.file_encoding)
+        models_init.write_text(models_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
     def _build_api(self) -> None:
         # Generate Client
