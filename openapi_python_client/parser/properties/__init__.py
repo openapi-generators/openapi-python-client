@@ -190,10 +190,10 @@ class ListProperty(Property, Generic[InnerProp]):
 
     # pylint: disable=unused-argument
     def get_base_type_string(self, *, quoted: bool = False) -> str:
-        return f"List[{self.inner_property.get_type_string(quoted=self.inner_property.is_base_type)}]"
+        return f"List[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
-        return f"List[{self.inner_property.get_type_string(json=True, quoted=self.inner_property.is_base_type)}]"
+        return f"List[{self.inner_property.get_type_string(json=True, quoted=not self.inner_property.is_base_type)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -226,7 +226,7 @@ class UnionProperty(Property):
     template: ClassVar[str] = "union_property.py.jinja"
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
-        return {p.get_type_string(no_optional=True, json=json, quoted=p.is_base_type) for p in self.inner_properties}
+        return {p.get_type_string(no_optional=True, json=json, quoted=not p.is_base_type) for p in self.inner_properties}
 
     @staticmethod
     def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:
@@ -235,7 +235,7 @@ class UnionProperty(Property):
         return f"Union[{', '.join(sorted(inner_types))}]"
 
     # pylint: disable=unused-argument
-    def get_base_type_string(self, *, quoted: bool = True) -> str:
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:

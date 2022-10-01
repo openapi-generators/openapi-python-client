@@ -172,7 +172,7 @@ class Property:
         from . import ListProperty, ModelProperty, UnionProperty
 
         return self.__class__.__name__ not in {
-            ModelProperty.__class__.__name__,
-            ListProperty.__class__.__name__,
-            UnionProperty.__class__.__name__,
+            ModelProperty.__name__,
+            ListProperty.__name__,
+            UnionProperty.__name__,
         }
