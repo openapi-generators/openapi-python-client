@@ -226,7 +226,9 @@ class UnionProperty(Property):
     template: ClassVar[str] = "union_property.py.jinja"
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
-        return {p.get_type_string(no_optional=True, json=json, quoted=not p.is_base_type) for p in self.inner_properties}
+        return {
+            p.get_type_string(no_optional=True, json=json, quoted=not p.is_base_type) for p in self.inner_properties
+        }
 
     @staticmethod
     def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:

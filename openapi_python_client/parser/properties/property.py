@@ -66,11 +66,11 @@ class Property:
         object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
-        """Get the string describing the Python type of this property."""
+        """Get the string describing the Python type of this property. Base types no require quoting."""
         return f'"{self._type_string}"' if not self.is_base_type and quoted else self._type_string
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
-        """Get the string describing the JSON type of this property."""
+        """Get the string describing the JSON type of this property. Base types no require quoting."""
         return f'"{self._json_type_string}"' if not self.is_base_type and quoted else self._json_type_string
 
     def get_type_string(
