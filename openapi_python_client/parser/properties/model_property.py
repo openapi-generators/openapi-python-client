@@ -111,8 +111,6 @@ class ModelProperty(Property):
             if model_parent:
                 if type_string == model_parent.class_info.name:
                     type_string = f"'{type_string}'"
-                if type_string == f"List[{model_parent.class_info.name}]":
-                    type_string = f"List['{model_parent.class_info.name}']"
 
             if type_string == self.class_info.name:
                 type_string = f"'{type_string}'"
