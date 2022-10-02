@@ -93,12 +93,6 @@ class Property:
         else:
             type_string = self.get_base_type_string(quoted=quoted)
 
-        if quoted and model_parent:
-            if type_string == model_parent.class_info.name:
-                type_string = f"'{type_string}'"
-            if type_string == f"List[{model_parent.class_info.name}]":
-                type_string = f"List['{model_parent.class_info.name}']"
-
         if no_optional or (self.required and not self.nullable):
             return type_string
         if self.required and self.nullable:
