@@ -333,6 +333,16 @@ class TestProcessProperties:
 
         assert isinstance(result, PropertyError)
 
+    def test_process_properties_all_of_reference_not_exist(self):
+        from openapi_python_client.parser.properties import Schemas
+        from openapi_python_client.parser.properties.model_property import _process_properties
+
+        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="#/components/schema/NotExist")])
+
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots={"root"})
+
+        assert isinstance(result, PropertyError)
+
     def test_process_properties_model_property_roots(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
