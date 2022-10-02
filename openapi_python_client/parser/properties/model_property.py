@@ -116,8 +116,6 @@ class ModelProperty(Property):
 
             if type_string == self.class_info.name:
                 type_string = f"'{type_string}'"
-            if type_string == f"List[{self.class_info.name}]":
-                type_string = f"List['{self.class_info.name}']"
 
         if no_optional or (self.required and not self.nullable):
             return type_string
