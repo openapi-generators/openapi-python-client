@@ -54,6 +54,18 @@ class TestModelProperty:
             "from typing import cast",
         }
 
+    @pytest.mark.parametrize(
+        "quoted,expected",
+        [
+            (False, "MyClass"),
+            (True, "'MyClass'"),
+        ]
+    )
+    def test_get_type_string_parent(self, model_property_factory, quoted, expected):
+        parent = model_property_factory()
+        m = model_property_factory()
+        assert m.get_type_string(model_parent=parent, quoted=quoted) == expected
+
     def test_get_lazy_imports(self, model_property_factory):
         prop = model_property_factory(required=False, nullable=True)
 

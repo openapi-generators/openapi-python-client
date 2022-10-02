@@ -129,6 +129,26 @@ class TestListProperty:
     def test_is_base_type(self, list_property_factory):
         assert list_property_factory().is_base_type is False
 
+    @pytest.mark.parametrize("quoted", (True, False))
+    def test_get_base_json_type_string_base_inner(self, list_property_factory, quoted):
+        p = list_property_factory()
+        assert p.get_base_json_type_string(quoted=quoted) == "List[str]"
+
+    @pytest.mark.parametrize("quoted", (True, False))
+    def test_get_base_json_type_string_model_inner(self, list_property_factory, model_property_factory, quoted):
+        m = model_property_factory()
+        p = list_property_factory(inner_property=m)
+        assert p.get_base_json_type_string(quoted=quoted) == "List[Dict[str, Any]]"
+
+    def test_get_lazy_import_base_inner(self, list_property_factory):
+        p = list_property_factory()
+        assert p.get_lazy_imports(prefix="..") == set()
+
+    def test_get_lazy_import_model_inner(self, list_property_factory, model_property_factory):
+        m = model_property_factory()
+        p = list_property_factory(inner_property=m)
+        assert p.get_lazy_imports(prefix="..") == {'from ..models.my_module import MyClass'}
+
     @pytest.mark.parametrize(
         "required, nullable, expected",
         (
@@ -208,6 +228,15 @@ class TestListProperty:
 class TestUnionProperty:
     def test_is_base_type(self, union_property_factory):
         assert union_property_factory().is_base_type is False
+
+    def test_get_lazy_import_base_inner(self, union_property_factory):
+        p = union_property_factory()
+        assert p.get_lazy_imports(prefix="..") == set()
+
+    def test_get_lazy_import_model_inner(self, union_property_factory, model_property_factory):
+        m = model_property_factory()
+        p = union_property_factory(inner_properties=[m])
+        assert p.get_lazy_imports(prefix="..") == {'from ..models.my_module import MyClass'}
 
     @pytest.mark.parametrize(
         "nullable,required,no_optional,json,expected",
