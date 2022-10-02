@@ -13,6 +13,9 @@ MODULE_NAME = "openapi_python_client.parser.properties"
 
 
 class TestStringProperty:
+    def test_is_base_type(self, string_property_factory):
+        assert string_property_factory().is_base_type is True
+
     @pytest.mark.parametrize(
         "required, nullable, expected",
         (
@@ -29,6 +32,9 @@ class TestStringProperty:
 
 
 class TestDateTimeProperty:
+    def test_is_base_type(self, date_time_property_factory):
+        assert date_time_property_factory().is_base_type is True
+
     @pytest.mark.parametrize("required", (True, False))
     @pytest.mark.parametrize("nullable", (True, False))
     def test_get_imports(self, date_time_property_factory, required, nullable):
@@ -51,6 +57,9 @@ class TestDateTimeProperty:
 
 
 class TestDateProperty:
+    def test_is_base_type(self, date_property_factory):
+        assert date_property_factory().is_base_type is True
+
     @pytest.mark.parametrize("required", (True, False))
     @pytest.mark.parametrize("nullable", (True, False))
     def test_get_imports(self, date_property_factory, required, nullable):
@@ -73,6 +82,9 @@ class TestDateProperty:
 
 
 class TestFileProperty:
+    def test_is_base_type(self, file_property_factory):
+        assert file_property_factory().is_base_type is True
+
     @pytest.mark.parametrize("required", (True, False))
     @pytest.mark.parametrize("nullable", (True, False))
     def test_get_imports(self, file_property_factory, required, nullable):
@@ -93,7 +105,30 @@ class TestFileProperty:
         assert p.get_imports(prefix="...") == expected
 
 
+class TestNoneProperty:
+    def test_is_base_type(self, none_property_factory):
+        assert none_property_factory().is_base_type is True
+
+
+class TestBooleanProperty:
+    def test_is_base_type(self, boolean_property_factory):
+        assert boolean_property_factory().is_base_type is True
+
+
+class TestAnyProperty:
+    def test_is_base_type(self, any_property_factory):
+        assert any_property_factory().is_base_type is True
+
+
+class TestIntProperty:
+    def test_is_base_type(self, int_property_factory):
+        assert int_property_factory().is_base_type is True
+
+
 class TestListProperty:
+    def test_is_base_type(self, list_property_factory):
+        assert list_property_factory().is_base_type is False
+
     @pytest.mark.parametrize(
         "required, nullable, expected",
         (
@@ -103,10 +138,50 @@ class TestListProperty:
             (False, True, "Union[Unset, None, List[str]]"),
         ),
     )
-    def test_get_type_string(self, list_property_factory, required, nullable, expected):
+    def test_get_type_string_base_inner(self, list_property_factory, required, nullable, expected):
         p = list_property_factory(required=required, nullable=nullable)
 
         assert p.get_type_string() == expected
+
+    @pytest.mark.parametrize(
+        "required, nullable, expected",
+        (
+            (True, False, "List['MyClass']"),
+            (True, True, "Optional[List['MyClass']]"),
+            (False, False, "Union[Unset, List['MyClass']]"),
+            (False, True, "Union[Unset, None, List['MyClass']]"),
+        ),
+    )
+    def test_get_type_string_model_inner(
+        self, list_property_factory, model_property_factory, required, nullable, expected
+    ):
+        m = model_property_factory()
+        p = list_property_factory(required=required, nullable=nullable, inner_property=m)
+
+        assert p.get_type_string() == expected
+
+    @pytest.mark.parametrize(
+        "quoted,expected",
+        [
+            (False, "List[str]"),
+            (True, "List[str]"),
+        ],
+    )
+    def test_get_base_type_string_base_inner(self, list_property_factory, quoted, expected):
+        p = list_property_factory()
+        assert p.get_base_type_string(quoted=quoted) == expected
+
+    @pytest.mark.parametrize(
+        "quoted,expected",
+        [
+            (False, "List['MyClass']"),
+            (True, "List['MyClass']"),
+        ],
+    )
+    def test_get_base_type_string_model_inner(self, list_property_factory, model_property_factory, quoted, expected):
+        m = model_property_factory()
+        p = list_property_factory(inner_property=m)
+        assert p.get_base_type_string(quoted=quoted) == expected
 
     @pytest.mark.parametrize("required", (True, False))
     @pytest.mark.parametrize("nullable", (True, False))
@@ -131,6 +206,9 @@ class TestListProperty:
 
 
 class TestUnionProperty:
+    def test_is_base_type(self, union_property_factory):
+        assert union_property_factory().is_base_type is False
+
     @pytest.mark.parametrize(
         "nullable,required,no_optional,json,expected",
         [
@@ -173,17 +251,33 @@ class TestUnionProperty:
 
         assert p.get_type_string(no_optional=no_optional, json=json) == expected
 
-    def test_get_base_type_string(self, union_property_factory, date_time_property_factory, string_property_factory):
+    def test_get_base_type_string_base_inners(
+        self, union_property_factory, date_time_property_factory, string_property_factory
+    ):
         p = union_property_factory(inner_properties=[date_time_property_factory(), string_property_factory()])
 
         assert p.get_base_type_string() == "Union[datetime.datetime, str]"
 
-    def test_get_base_type_string_one_element(self, union_property_factory, date_time_property_factory):
+    def test_get_base_type_string_one_base_inner(self, union_property_factory, date_time_property_factory):
         p = union_property_factory(
             inner_properties=[date_time_property_factory()],
         )
 
         assert p.get_base_type_string() == "datetime.datetime"
+
+    def test_get_base_type_string_one_model_inner(self, union_property_factory, model_property_factory):
+        p = union_property_factory(
+            inner_properties=[model_property_factory()],
+        )
+
+        assert p.get_base_type_string() == "'MyClass'"
+
+    def test_get_base_type_string_model_inners(
+        self, union_property_factory, date_time_property_factory, model_property_factory
+    ):
+        p = union_property_factory(inner_properties=[date_time_property_factory(), model_property_factory()])
+
+        assert p.get_base_type_string() == "Union['MyClass', datetime.datetime]"
 
     def test_get_base_json_type_string(self, union_property_factory, date_time_property_factory):
         p = union_property_factory(
@@ -216,6 +310,9 @@ class TestUnionProperty:
 
 
 class TestEnumProperty:
+    def test_is_base_type(self, enum_property_factory):
+        assert enum_property_factory().is_base_type is True
+
     @pytest.mark.parametrize(
         "required, nullable, expected",
         (

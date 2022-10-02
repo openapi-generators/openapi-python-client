@@ -10,48 +10,71 @@ from openapi_python_client.parser.properties import StringProperty
 MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 
 
-@pytest.mark.parametrize(
-    "no_optional,nullable,required,json,expected",
-    [
-        (False, False, False, False, "Union[Unset, MyClass]"),
-        (False, False, True, False, "MyClass"),
-        (False, True, False, False, "Union[Unset, None, MyClass]"),
-        (False, True, True, False, "Optional[MyClass]"),
-        (True, False, False, False, "MyClass"),
-        (True, False, True, False, "MyClass"),
-        (True, True, False, False, "MyClass"),
-        (True, True, True, False, "MyClass"),
-        (False, False, True, True, "Dict[str, Any]"),
-    ],
-)
-def test_get_type_string(no_optional, nullable, required, json, expected, model_property_factory):
-
-    prop = model_property_factory(
-        required=required,
-        nullable=nullable,
+class TestModelProperty:
+    @pytest.mark.parametrize(
+        "no_optional,nullable,required,json,quoted,expected",
+        [
+            (False, False, False, False, False, "Union[Unset, MyClass]"),
+            (False, False, True, False, False, "MyClass"),
+            (False, True, False, False, False, "Union[Unset, None, MyClass]"),
+            (False, True, True, False, False, "Optional[MyClass]"),
+            (True, False, False, False, False, "MyClass"),
+            (True, False, True, False, False, "MyClass"),
+            (True, True, False, False, False, "MyClass"),
+            (True, True, True, False, False, "MyClass"),
+            (False, False, True, True, False, "Dict[str, Any]"),
+            (False, False, False, False, True, "Union[Unset, 'MyClass']"),
+            (False, False, True, False, True, "'MyClass'"),
+            (False, True, False, False, True, "Union[Unset, None, 'MyClass']"),
+            (False, True, True, False, True, "Optional['MyClass']"),
+            (True, False, False, False, True, "'MyClass'"),
+            (True, False, True, False, True, "'MyClass'"),
+            (True, True, False, False, True, "'MyClass'"),
+            (True, True, True, False, True, "'MyClass'"),
+            (False, False, True, True, True, "Dict[str, Any]"),
+        ],
     )
+    def test_get_type_string(self, no_optional, nullable, required, json, expected, model_property_factory, quoted):
 
-    assert prop.get_type_string(no_optional=no_optional, json=json) == expected
+        prop = model_property_factory(
+            required=required,
+            nullable=nullable,
+        )
 
+        assert prop.get_type_string(no_optional=no_optional, json=json, quoted=quoted) == expected
 
-def test_get_imports(model_property_factory):
-    prop = model_property_factory(required=False, nullable=True)
+    def test_get_imports(self, model_property_factory):
+        prop = model_property_factory(required=False, nullable=True)
 
-    assert prop.get_imports(prefix="..") == {
-        "from typing import Optional",
-        "from typing import Union",
-        "from ..types import UNSET, Unset",
-        "from typing import Dict",
-        "from typing import cast",
-    }
+        assert prop.get_imports(prefix="..") == {
+            "from typing import Optional",
+            "from typing import Union",
+            "from ..types import UNSET, Unset",
+            "from typing import Dict",
+            "from typing import cast",
+        }
 
+    def test_get_lazy_imports(self, model_property_factory):
+        prop = model_property_factory(required=False, nullable=True)
 
-def test_get_lazy_imports(model_property_factory):
-    prop = model_property_factory(required=False, nullable=True)
+        assert prop.get_lazy_imports(prefix="..") == {
+            "from ..models.my_module import MyClass",
+        }
 
-    assert prop.get_lazy_imports(prefix="..") == {
-        "from ..models.my_module import MyClass",
-    }
+    def test_is_base_type(self, model_property_factory):
+        assert model_property_factory().is_base_type is False
+
+    @pytest.mark.parametrize(
+        "quoted,expected",
+        [
+            (False, "MyClass"),
+            (True, '"MyClass"'),
+        ],
+    )
+    def test_get_base_type_string(self, quoted, expected, model_property_factory):
+
+        m = model_property_factory()
+        assert m.get_base_type_string(quoted=quoted) == expected
 
 
 class TestBuildModelProperty:

@@ -5,6 +5,7 @@ import pytest
 from openapi_python_client import schema as oai
 from openapi_python_client.parser.properties import (
     AnyProperty,
+    BooleanProperty,
     DateProperty,
     DateTimeProperty,
     EnumProperty,
@@ -43,7 +44,6 @@ def model_property_factory() -> Callable[..., ModelProperty]:
             "lazy_imports": None,
             "additional_properties": None,
             "python_name": "",
-            "description": "",
             "example": "",
             **kwargs,
         }
@@ -145,6 +145,21 @@ def none_property_factory() -> Callable[..., NoneProperty]:
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         return NoneProperty(**kwargs)
+
+    return _factory
+
+
+@pytest.fixture
+def boolean_property_factory() -> Callable[..., BooleanProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+
+    You can pass the same params into this as the StringProperty constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        return BooleanProperty(**kwargs)
 
     return _factory
 
