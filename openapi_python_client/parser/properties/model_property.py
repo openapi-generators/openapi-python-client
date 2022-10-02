@@ -92,7 +92,6 @@ class ModelProperty(Property):
         no_optional: bool = False,
         json: bool = False,
         *,
-        model_parent: Optional[ModelProperty] = None,
         quoted: bool = False,
     ) -> str:
         """
@@ -108,10 +107,6 @@ class ModelProperty(Property):
             type_string = self.get_base_type_string()
 
         if quoted:
-            if model_parent:
-                if type_string == model_parent.class_info.name:
-                    type_string = f"'{type_string}'"
-
             if type_string == self.class_info.name:
                 type_string = f"'{type_string}'"
 

@@ -270,7 +270,6 @@ class UnionProperty(Property):
         no_optional: bool = False,
         json: bool = False,
         *,
-        model_parent: Optional[ModelProperty] = None,  # pylint:disable=unused-argument
         quoted: bool = False,
     ) -> str:
         """

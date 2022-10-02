@@ -78,7 +78,6 @@ class Property:
         no_optional: bool = False,
         json: bool = False,
         *,
-        model_parent: Optional[ModelProperty] = None,
         quoted: bool = False,
     ) -> str:
         """
@@ -133,12 +132,8 @@ class Property:
         """
         return set()
 
-    def to_string(self, *, model_parent: Optional[ModelProperty] = None) -> str:
-        """How this should be declared in a dataclass
-
-        Args:
-            model_parent: The ModelProperty which contains this Property (used for template type annotations)
-        """
+    def to_string(self) -> str:
+        """How this should be declared in a dataclass"""
         default: Optional[str]
         if self.default is not None:
             default = self.default
@@ -148,8 +143,8 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string(model_parent=model_parent, quoted=True)} = {default}"
-        return f"{self.python_name}: {self.get_type_string(model_parent=model_parent, quoted=True)}"
+            return f"{self.python_name}: {self.get_type_string(quoted=True)} = {default}"
+        return f"{self.python_name}: {self.get_type_string(quoted=True)}"
 
     def to_docstring(self) -> str:
         """Returns property docstring"""

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 {% if model.additional_properties %}
-{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(model_parent=model, quoted=not model.additional_properties.is_base_type) %}
+{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(quoted=not model.additional_properties.is_base_type) %}
 {% endif %}
 
 {% set class_name = model.class_info.name %}
@@ -64,7 +64,7 @@ class {{ class_name }}:
     {% endfor %}
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is not none or not property.required %}
-    {{ property.to_string(model_parent=model) }}
+    {{ property.to_string() }}
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
