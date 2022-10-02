@@ -147,7 +147,7 @@ class TestListProperty:
     def test_get_lazy_import_model_inner(self, list_property_factory, model_property_factory):
         m = model_property_factory()
         p = list_property_factory(inner_property=m)
-        assert p.get_lazy_imports(prefix="..") == {'from ..models.my_module import MyClass'}
+        assert p.get_lazy_imports(prefix="..") == {"from ..models.my_module import MyClass"}
 
     @pytest.mark.parametrize(
         "required, nullable, expected",
@@ -236,7 +236,7 @@ class TestUnionProperty:
     def test_get_lazy_import_model_inner(self, union_property_factory, model_property_factory):
         m = model_property_factory()
         p = union_property_factory(inner_properties=[m])
-        assert p.get_lazy_imports(prefix="..") == {'from ..models.my_module import MyClass'}
+        assert p.get_lazy_imports(prefix="..") == {"from ..models.my_module import MyClass"}
 
     @pytest.mark.parametrize(
         "nullable,required,no_optional,json,expected",

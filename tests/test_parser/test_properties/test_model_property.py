@@ -59,7 +59,7 @@ class TestModelProperty:
         [
             (False, "MyClass"),
             (True, "'MyClass'"),
-        ]
+        ],
     )
     def test_get_type_string_parent(self, model_property_factory, quoted, expected):
         parent = model_property_factory()
