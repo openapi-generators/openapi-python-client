@@ -36,8 +36,6 @@ class ModelProperty(Property):
     def __attrs_post_init__(self) -> None:
         if self.relative_imports:
             self.set_relative_imports(self.relative_imports)
-        if self.lazy_imports:
-            self.set_lazy_imports(self.lazy_imports)
 
     @property
     def self_import(self) -> str:
