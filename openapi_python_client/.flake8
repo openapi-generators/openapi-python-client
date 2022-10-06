@@ -1,0 +1,3 @@
+[flake8]
+per-file-ignores =
+  parser/properties/__init__.py: E402

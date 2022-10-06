@@ -1,3 +1,5 @@
+_property = property  # isort: skip
+
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
@@ -160,10 +162,11 @@ class UnionProperty(Property):
     """ A property representing a Union (anyOf) of other properties """
 
     inner_properties: List[Property]
+    relative_imports: Set[str] = set()
     template: ClassVar[str] = "union_property.pyi"
     has_properties_without_templates: bool = attr.ib(init=False)
-    discriminator_property: Optional[str]
-    discriminator_mappings: Dict[str, Property]
+    discriminator_property: Optional[str] = None
+    discriminator_mappings: Dict[str, Property] = {}
 
     def __attrs_post_init__(self) -> None:
         super().__attrs_post_init__()
@@ -180,6 +183,14 @@ class UnionProperty(Property):
 
     def get_base_type_string(self, json: bool = False) -> str:
         return f"Union[{', '.join(self._get_inner_type_strings(json=json))}]"
+
+    def resolve_references(self, components, schemas):
+        self.relative_imports.update(self.get_imports(prefix=".."))
+        return schemas
+
+    @_property
+    def module_name(self):
+        return self.python_name
 
     def get_type_strings_in_union(
         self, no_optional: bool = False, query_parameter: bool = False, json: bool = False
@@ -284,6 +295,14 @@ def build_model_property(
             Used to infer the type name if a `title` property is not available.
         schemas: Existing Schemas which have already been processed (to check name conflicts)
     """
+    if data.anyOf or data.oneOf:
+        prop, schemas = build_union_property(
+            data=data, name=name, required=required, schemas=schemas, parent_name=parent_name
+        )
+        if not isinstance(prop, PropertyError):
+            schemas = attr.evolve(schemas, models={**schemas.models, prop.name: prop})
+        return prop, schemas
+
     required_set = set(data.required or [])
     required_properties: List[Property] = []
     optional_properties: List[Property] = []
@@ -317,6 +336,11 @@ def build_model_property(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
+    discriminator_mappings: Dict[str, Property] = {}
+    if data.discriminator is not None:
+        for k, v in (data.discriminator.mapping or {}).items():
+            discriminator_mappings[k] = Reference.from_ref(v)
+
     additional_properties: Union[bool, Property, PropertyError]
     if data.additionalProperties is None:
         additional_properties = True
@@ -347,6 +371,8 @@ def build_model_property(
         description=data.description or "",
         default=None,
         nullable=data.nullable,
+        discriminator_property=data.discriminator.propertyName if data.discriminator else None,
+        discriminator_mappings=discriminator_mappings,
         required=required,
         name=name,
         additional_properties=additional_properties,
@@ -446,7 +472,7 @@ def build_union_property(
 
     discriminator_mappings: Dict[str, Property] = {}
     if data.discriminator is not None:
-        for k, v in (data.discriminator.mapping if data.discriminator else {}).items():
+        for k, v in (data.discriminator.mapping or {}).items():
             ref_class_name = Reference.from_ref(v).class_name
             discriminator_mappings[k] = reference_name_to_subprop[ref_class_name]
 

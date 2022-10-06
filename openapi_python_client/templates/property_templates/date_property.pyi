@@ -1,4 +1,4 @@
-{% macro construct(property, source, initial_value="None") %}
+{% macro construct(property, source, initial_value="None", nested=False) %}
 {% if property.required and not property.nullable %}
 {{ property.python_name }} = isoparse({{ source }}).date()
 {% else %}

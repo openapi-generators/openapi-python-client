@@ -1,4 +1,6 @@
-{% macro construct(property, source, initial_value=None) %}
+{# This file is shadowed by the template with the same name
+ # in aurelia/packages/api_client_generation/templates #}
+{% macro construct(property, source, initial_value=None, nested=False) %}
 {% if property.required and not property.nullable %}
 {% if source == "response.yaml" %}
 yaml_dict = yaml.safe_load(response.text.encode("utf-8"))

@@ -15,6 +15,7 @@ from openapi_python_client import utils
 
 from .parser import GeneratorData, import_string_from_reference
 from .parser.errors import GeneratorError
+from .parser.properties import UnionProperty
 from .utils import snake_case
 
 if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
@@ -46,7 +47,6 @@ class Project:
 
     def __init__(self, *, openapi: GeneratorData, custom_template_path: Optional[Path] = None) -> None:
         self.openapi: GeneratorData = openapi
-
         package_loader = PackageLoader(__package__)
         loader: BaseLoader
         if custom_template_path is not None:
@@ -174,10 +174,18 @@ class Project:
         imports = []
 
         model_template = self.env.get_template("model.pyi")
+        union_property_template = self.env.get_template("polymorphic_model.pyi")
+
         for model in self.openapi.models.values():
-            module_path = models_dir / f"{model.reference.module_name}.py"
-            module_path.write_text(model_template.render(model=model))
-            imports.append(import_string_from_reference(model.reference))
+            if isinstance(model, UnionProperty):
+                template = union_property_template
+            else:
+                template = model_template
+
+            module_path = models_dir / f"{model.module_name}.py"
+            module_path.write_text(template.render(model=model))
+            if not isinstance(model, UnionProperty):
+                imports.append(import_string_from_reference(model.reference))
 
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.pyi")

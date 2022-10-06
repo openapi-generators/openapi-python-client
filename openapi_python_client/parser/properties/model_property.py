@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import attr
 
@@ -22,6 +22,9 @@ class ModelProperty(Property):
     references: List[oai.Reference]
     required_properties: List[Property]
     optional_properties: List[Property]
+    discriminator_property: Optional[str]
+    discriminator_mappings: Dict[str, Property]
+
     description: str
     relative_imports: Set[str]
     additional_properties: Union[bool, Property]
@@ -29,6 +32,10 @@ class ModelProperty(Property):
 
     template: ClassVar[str] = "model_property.pyi"
     json_is_dict: ClassVar[bool] = True
+
+    @property
+    def module_name(self):
+        return self.reference.module_name
 
     def resolve_references(
         self, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas
@@ -44,7 +51,7 @@ class ModelProperty(Property):
             assert isinstance(referenced_prop, oai.Schema)
             for p, val in (referenced_prop.properties or {}).items():
                 props[p] = (val, source_name)
-            for sub_prop in referenced_prop.allOf or []:
+            for sub_prop in referenced_prop.allOf or referenced_prop.anyOf or referenced_prop.oneOf or []:
                 if isinstance(sub_prop, oai.Reference):
                     self.references.append(sub_prop)
                 else:
@@ -71,9 +78,17 @@ class ModelProperty(Property):
                 self.optional_properties.append(prop)
             self.relative_imports.update(prop.get_imports(prefix=".."))
 
+        for _, value in self.discriminator_mappings.items():
+            self.relative_imports.add(f"from ..models.{value.module_name} import {value.class_name}")
+
         return schemas
 
     def get_base_type_string(self) -> str:
+        if getattr(self, "discriminator_mappings", None):
+            discriminator_types = ", ".join(
+                [ref.class_name for ref in self.discriminator_mappings.values()] + ["UnknownType"]
+            )
+            return f"Union[{discriminator_types}]"
         return self.reference.class_name
 
     def get_imports(self, *, prefix: str) -> Set[str]:

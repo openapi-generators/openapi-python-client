@@ -1,4 +1,4 @@
-{% macro construct(property, source, initial_value="[]") %}
+{% macro construct(property, source, initial_value="[]", nested=False) %}
 {% set inner_property = property.inner_property %}
 {% if inner_property.template %}
 {% set inner_source = inner_property.python_name + "_data" %}

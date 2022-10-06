@@ -1,4 +1,4 @@
-{% macro construct(property, source, initial_value="None") %}
+{% macro construct(property, source, initial_value="None", nested=False) %}
 {{ property.python_name }} = {{ initial_value }}
 {% endmacro %}
 

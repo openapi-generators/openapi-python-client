@@ -1,4 +1,4 @@
-{% macro construct(property, source, initial_value="None") %}
+{% macro construct(property, source, initial_value="None", nested=False) %}
 {% if property.required %}
 {% if property.nullable %}
 {{ property.python_name }} = {{ source }}
