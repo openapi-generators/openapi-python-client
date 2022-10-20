@@ -130,7 +130,7 @@ class TestEndpoint:
             description=None,
             name="name",
             requires_security=False,
-            tag="tag",
+            tags=["tag"],
             relative_imports={"import_3"},
         )
 
@@ -981,7 +981,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=initial_schemas,
             parameters=parameters,
             config=config,
@@ -1016,7 +1016,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=initial_schemas,
             parameters=initial_parameters,
             config=config,
@@ -1059,7 +1059,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=initial_schemas,
             parameters=initial_parameters,
             config=config,
@@ -1075,7 +1075,7 @@ class TestEndpoint:
                 summary="",
                 name=data.operationId,
                 requires_security=True,
-                tag="default",
+                tags=["default"],
             ),
             data=data,
             schemas=initial_schemas,
@@ -1113,7 +1113,7 @@ class TestEndpoint:
         parameters = mocker.MagicMock()
 
         endpoint, return_schemas, return_params = Endpoint.from_data(
-            data=data, path=path, method=method, tag="default", schemas=schemas, parameters=parameters, config=config
+            data=data, path=path, method=method, tags=["default"], schemas=schemas, parameters=parameters, config=config
         )
 
         assert (endpoint, return_schemas) == _add_body.return_value
@@ -1126,7 +1126,7 @@ class TestEndpoint:
                 summary="",
                 name="get_path_with_param",
                 requires_security=True,
-                tag="default",
+                tags=["default"],
             ),
             data=data,
             schemas=schemas,
@@ -1167,7 +1167,7 @@ class TestEndpoint:
         config = MagicMock()
 
         Endpoint.from_data(
-            data=data, path=path, method=method, tag="a", schemas=schemas, parameters=parameters, config=config
+            data=data, path=path, method=method, tags=["a"], schemas=schemas, parameters=parameters, config=config
         )
 
         add_parameters.assert_called_once_with(
@@ -1178,7 +1178,7 @@ class TestEndpoint:
                 summary="",
                 name=data.operationId,
                 requires_security=False,
-                tag="a",
+                tags=["a"],
             ),
             data=data,
             parameters=parameters,
@@ -1241,9 +1241,9 @@ class TestEndpointCollection:
             "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
             "path_2": oai.PathItem.construct(get=path_2_get),
         }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
-        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="tag_2", relative_imports={"2"}, path="path_1")
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"}, path="path_2")
+        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tags=["default"], relative_imports={"1", "2"}, path="path_1")
+        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tags=["tag_2"], relative_imports={"2"}, path="path_1")
+        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tags=["default"], relative_imports={"2", "3"}, path="path_2")
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
@@ -1271,7 +1271,7 @@ class TestEndpointCollection:
                     data=path_1_put,
                     path="path_1",
                     method="put",
-                    tag="default",
+                    tags=["default"],
                     schemas=schemas,
                     parameters=parameters,
                     config=config,
@@ -1280,7 +1280,7 @@ class TestEndpointCollection:
                     data=path_1_post,
                     path="path_1",
                     method="post",
-                    tag="tag_2",
+                    tags=["tag_2", "tag_3"],
                     schemas=schemas_1,
                     parameters=parameters_1,
                     config=config,
@@ -1289,7 +1289,7 @@ class TestEndpointCollection:
                     data=path_2_get,
                     path="path_2",
                     method="get",
-                    tag="default",
+                    tags=["default"],
                     schemas=schemas_2,
                     parameters=parameters_2,
                     config=config,
@@ -1300,6 +1300,7 @@ class TestEndpointCollection:
             {
                 "default": EndpointCollection("default", endpoints=[endpoint_1, endpoint_3]),
                 "tag_2": EndpointCollection("tag_2", endpoints=[endpoint_2]),
+                "tag_3": EndpointCollection("tag_3", endpoints=[endpoint_2]),
             },
             schemas_3,
             parameters_3,
@@ -1372,7 +1373,7 @@ class TestEndpointCollection:
                     data=path_1_put,
                     path="path_1",
                     method="put",
-                    tag="default",
+                    tags=["default"],
                     schemas=schemas,
                     parameters=parameters,
                     config=config,
@@ -1381,7 +1382,7 @@ class TestEndpointCollection:
                     data=path_1_post,
                     path="path_1",
                     method="post",
-                    tag="tag_2",
+                    tags=["tag_2", "tag_3"],
                     schemas=schemas_1,
                     parameters=parameters_1,
                     config=config,
@@ -1390,7 +1391,7 @@ class TestEndpointCollection:
                     data=path_2_get,
                     path="path_2",
                     method="get",
-                    tag="default",
+                    tags=["default"],
                     schemas=schemas_2,
                     parameters=parameters_2,
                     config=config,
@@ -1412,11 +1413,11 @@ class TestEndpointCollection:
             "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
             "path_2": oai.PathItem.construct(get=path_2_get),
         }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
+        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tags=["default"], relative_imports={"1", "2"}, path="path_1")
         endpoint_2 = mocker.MagicMock(
-            autospec=Endpoint, tag="AMFSubscriptionInfo (Document)", relative_imports={"2"}, path="path_1"
+            autospec=Endpoint, tags=["AMFSubscriptionInfo (Document)"], relative_imports={"2"}, path="path_1"
         )
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"}, path="path_2")
+        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tags=["default"], relative_imports={"2", "3"}, path="path_2")
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
@@ -1444,7 +1445,7 @@ class TestEndpointCollection:
                     data=path_1_put,
                     path="path_1",
                     method="put",
-                    tag="default",
+                    tags=["default"],
                     schemas=schemas,
                     parameters=parameters,
                     config=config,
@@ -1453,7 +1454,7 @@ class TestEndpointCollection:
                     data=path_1_post,
                     path="path_1",
                     method="post",
-                    tag="amf_subscription_info_document",
+                    tags=["amf_subscription_info_document", "tag_3"],
                     schemas=schemas_1,
                     parameters=parameters_1,
                     config=config,
@@ -1462,7 +1463,7 @@ class TestEndpointCollection:
                     data=path_2_get,
                     path="path_2",
                     method="get",
-                    tag="tag3_abc",
+                    tags=["tag3_abc"],
                     schemas=schemas_2,
                     parameters=parameters_2,
                     config=config,
@@ -1474,6 +1475,9 @@ class TestEndpointCollection:
                 "default": EndpointCollection("default", endpoints=[endpoint_1]),
                 "amf_subscription_info_document": EndpointCollection(
                     "amf_subscription_info_document", endpoints=[endpoint_2]
+                ),
+                "tag_3": EndpointCollection(
+                    "tag_3", endpoints=[endpoint_2]
                 ),
                 "tag3_abc": EndpointCollection("tag3_abc", endpoints=[endpoint_3]),
             },
