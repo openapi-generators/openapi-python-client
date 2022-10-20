@@ -1,0 +1,98 @@
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body, arguments, client, kwargs, parse_response, docstring %}
+
+from inspect import isawaitable
+from typing import Any, Dict, List, Optional, Union, Callable, Awaitable
+import attr
+
+from ...client import Client
+from ...types import Response, UNSET
+
+{% for endpoint in endpoint_collection.endpoints %}
+{% for relative in endpoint.relative_imports %}
+{{ relative }}
+{% endfor %}
+{% endfor %}
+
+@attr.s(auto_attribs=True)
+class Endpoints:
+    _client: Union[Client, Callable[[], Client]]
+
+    def _get_client(self) -> Client:
+        client = self._client
+        if callable(client):
+            client = client()
+        return client
+
+    {% for endpoint in endpoint_collection.endpoints %}
+    {% set f_name = python_identifier(endpoint.name) %}
+    {% set return_string = endpoint.response_type() %}
+    {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
+    def {{f_name}}_detailed(
+        self,
+        {{ arguments(endpoint, include_client=False) | indent(4) }}
+    ) -> Response[{{ return_string }}]:
+        {{ docstring(endpoint, return_string) | indent(4) }}
+
+        from . import {{ f_name }} as _endpoint
+        return _endpoint.sync_detailed(
+            {{ kwargs(endpoint, include_client = False) }}
+            client = self._get_client(),
+        )
+
+    {% if parsed_responses %}
+    def {{f_name}}(
+        self,
+        {{ arguments(endpoint, include_client=False) | indent(4) }}
+    ) -> Optional[{{ return_string }}]:
+        {{ docstring(endpoint, return_string) | indent(4) }}
+
+        from . import {{ f_name }} as _endpoint
+        return _endpoint.sync(
+            {{ kwargs(endpoint, include_client = False) }}
+            client = self._get_client(),
+        )
+    {% endif %}
+    {% endfor %}
+
+@attr.s(auto_attribs=True)
+class AsyncEndpoints:
+    _client: Union[Client, Callable[[], Client], Callable[[], Awaitable[Client]]]
+
+    async def _get_client(self) -> Client:
+        client = self._client
+        if callable(client):
+            client = client()
+        if isawaitable(client):
+            client = await client
+        return client
+
+    {% for endpoint in endpoint_collection.endpoints %}
+    {% set f_name = python_identifier(endpoint.name) %}
+    {% set return_string = endpoint.response_type() %}
+    {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
+    async def {{f_name}}_detailed(
+        self,
+        {{ arguments(endpoint, include_client = False) | indent(4) }}
+    ) -> Response[{{ return_string }}]:
+        {{ docstring(endpoint, return_string) | indent(4) }}
+
+        from . import {{ f_name }} as _endpoint
+        return await _endpoint.asyncio_detailed(
+            {{ kwargs(endpoint, include_client = False) }}
+            client = await self._get_client(),
+        )
+
+    {% if parsed_responses %}
+    async def {{f_name}}(
+        self,
+        {{ arguments(endpoint, include_client=False) | indent(4) }}
+    ) -> Optional[{{ return_string }}]:
+        {{ docstring(endpoint, return_string) | indent(4) }}
+
+        from . import {{ f_name }} as _endpoint
+        return await _endpoint.asyncio(
+            {{ kwargs(endpoint, include_client = False) }}
+            client = await self._get_client(),
+        )
+    {% endif %}
+    {% endfor %}

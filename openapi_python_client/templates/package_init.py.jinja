@@ -1,7 +1,10 @@
 """ {{ package_description }} """
-from .client import AuthenticatedClient, Client
+from .client import Client, AuthenticatedClient
+from .api import Api, AsyncApi
 
 __all__ = (
-    "AuthenticatedClient",
     "Client",
+    "AuthenticatedClient",
+    "Api",
+    "AsyncApi",
 )

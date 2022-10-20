@@ -1,1 +1,38 @@
 """ Contains methods for accessing the API """
+
+from functools import cached_property
+from typing import Awaitable, Callable, Union
+import attr
+
+from ..client import Client
+{% for tag in endpoint_collections_by_tag.keys() %}
+from . import {{ tag }} as tag_{{ tag }}
+{% endfor %}
+
+@attr.s(auto_attribs=True)
+class Api: 
+    _client: Union[Client, Callable[[], Client]]
+
+    {% for tag in endpoint_collections_by_tag.keys() %}
+    @cached_property
+    def {{ tag }}(self) -> tag_{{ tag }}.Endpoints:
+        """ Group of endpoints tagged with {{ tag }} """
+        return tag_{{ tag }}.Endpoints(self._client)
+    {% endfor %}
+
+@attr.s(auto_attribs=True)
+class AsyncApi:
+    _client: Union[Client, Callable[[], Client], Callable[[], Awaitable[Client]]]
+
+    {% for tag in endpoint_collections_by_tag.keys() %}
+    @cached_property
+    def {{ tag }}(self) -> tag_{{ tag }}.Endpoints:
+        """ Group of endpoints tagged with {{ tag }} """
+        return tag_{{ tag }}.AsyncEndpoints(self._client)
+    {% endfor %}
+
+
+__all__ = (
+    "Api",
+    "AsyncApi",
+)
