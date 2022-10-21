@@ -57,7 +57,7 @@ class TestParameterFromData:
     def test_parameters_without_schema_are_ignored(self):
         from openapi_python_client.parser.properties import Parameters
         from openapi_python_client.parser.properties.schemas import parameter_from_data
-        from openapi_python_client.schema import ParameterLocation, Schema
+        from openapi_python_client.schema import ParameterLocation
 
         param = Parameter(name="a_schemaless_param", param_in=ParameterLocation.QUERY)
         parameters = Parameters()

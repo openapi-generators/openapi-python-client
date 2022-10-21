@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
-from openapi_python_client import Config
 from openapi_python_client.parser.errors import GeneratorError, ParseError
 
 runner = CliRunner()
@@ -149,7 +148,7 @@ class TestGenerate:
     def test_generate_encoding_errors(self, _create_new_client):
         path = "cool/path"
         file_encoding = "error-file-encoding"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import app
 
         result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={file_encoding}"])
 
@@ -286,7 +285,7 @@ class TestUpdate:
     def test_update_encoding_errors(self, _update_existing_client):
         path = "cool/path"
         file_encoding = "error-file-encoding"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import app
 
         result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
 
