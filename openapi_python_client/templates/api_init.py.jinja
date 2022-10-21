@@ -10,7 +10,7 @@ from . import {{ tag }} as tag_{{ tag }}
 {% endfor %}
 
 @attr.s(auto_attribs=True)
-class Api: 
+class SyncApi: 
     _client: Union[Client, Callable[[], Client]]
 
     {% for tag in endpoint_collections_by_tag.keys() %}
@@ -26,7 +26,7 @@ class AsyncApi:
 
     {% for tag in endpoint_collections_by_tag.keys() %}
     @cached_property
-    def {{ tag }}(self) -> tag_{{ tag }}.Endpoints:
+    def {{ tag }}(self) -> tag_{{ tag }}.AsyncEndpoints:
         """ Group of endpoints tagged with {{ tag }} """
         return tag_{{ tag }}.AsyncEndpoints(self._client)
     {% endfor %}
