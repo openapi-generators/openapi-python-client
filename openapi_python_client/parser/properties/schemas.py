@@ -199,7 +199,7 @@ def parameter_from_reference(
         parameters: `Parameters` up until now.
 
     Returns:
-        Either the updated `schemas` input or a `PropertyError` if something went wrong.
+        Either the updated `schemas` input or a `ParameterError` if something went wrong.
 
     See Also:
         - https://swagger.io/docs/specification/using-ref/
