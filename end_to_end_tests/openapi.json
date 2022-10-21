@@ -1776,6 +1776,21 @@
           }
         }
       },
+      "AllOfHasPropertiesButNoType": {
+        "title": "AllOfHasPropertiesButNoType",
+        "properties": {
+          "a_sub_property": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "type_enum": {
+            "type": "integer",
+            "enum": [0, 1]
+          }
+        }
+      },
       "model_reference_doesnt_match": {
         "title": "ModelName",
         "type": "object"

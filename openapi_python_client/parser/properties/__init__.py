@@ -646,7 +646,7 @@ def _property_from_data(
         return build_list_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
-    if data.type == oai.DataType.OBJECT or data.allOf:
+    if data.type == oai.DataType.OBJECT or data.allOf or (data.type is None and data.properties):
         return build_model_property(
             data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
         )
