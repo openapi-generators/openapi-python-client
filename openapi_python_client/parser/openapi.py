@@ -21,10 +21,11 @@ from .properties import (
     Property,
     Schemas,
     build_parameters,
+    build_request_bodies,
     build_schemas,
     property_from_data,
 )
-from .properties.schemas import parameter_from_reference
+from .properties.schemas import RequestBodies, parameter_from_reference
 from .responses import Response, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
@@ -45,7 +46,12 @@ class EndpointCollection:
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, config: Config
+        *,
+        data: Dict[str, oai.PathItem],
+        schemas: Schemas,
+        parameters: Parameters,
+        request_bodies: RequestBodies,
+        config: Config,
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
@@ -66,6 +72,7 @@ class EndpointCollection:
                     tag=tag,
                     schemas=schemas,
                     parameters=parameters,
+                    request_bodies=request_bodies,
                     config=config,
                 )
                 # Add `PathItem` parameters
@@ -192,15 +199,27 @@ class Endpoint:
         endpoint: "Endpoint",
         data: oai.Operation,
         schemas: Schemas,
+        request_bodies: RequestBodies,
         config: Config,
     ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
         """Adds form or JSON body to Endpoint if included in data"""
         endpoint = deepcopy(endpoint)
-        if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
+        if data.requestBody is None:
             return endpoint, schemas
-
+        if isinstance(data.requestBody, oai.Reference):
+            request_body = request_bodies.bodies_by_reference.get(data.requestBody.ref, None)
+            if request_body is None:
+                return (
+                    ParseError(
+                        header=f"Cannot resolve request body reference {data.requestBody.ref}",
+                        data=data.requestBody,
+                    ),
+                    schemas,
+                )
+        else:
+            request_body = data.requestBody
         form_body, schemas = Endpoint.parse_request_form_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=request_body, schemas=schemas, parent_name=endpoint.name, config=config
         )
 
         if isinstance(form_body, ParseError):
@@ -214,7 +233,7 @@ class Endpoint:
             )
 
         json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=request_body, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(json_body, ParseError):
             return (
@@ -227,7 +246,7 @@ class Endpoint:
             )
 
         multipart_body, schemas = Endpoint.parse_multipart_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=request_body, schemas=schemas, parent_name=endpoint.name, config=config
         )
         if isinstance(multipart_body, ParseError):
             return (
@@ -467,6 +486,7 @@ class Endpoint:
         tag: str,
         schemas: Schemas,
         parameters: Parameters,
+        request_bodies: RequestBodies,
         config: Config,
     ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
@@ -492,7 +512,9 @@ class Endpoint:
         if isinstance(result, ParseError):
             return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
-        result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
+        result, schemas = Endpoint._add_body(
+            endpoint=result, data=data, schemas=schemas, request_bodies=request_bodies, config=config
+        )
 
         return result, schemas, parameters
 
@@ -547,12 +569,15 @@ class GeneratorData:
             return GeneratorError(header="Failed to parse OpenAPI document", detail=detail)
         schemas = Schemas()
         parameters = Parameters()
+        request_bodies = RequestBodies()
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         if openapi.components and openapi.components.parameters:
             parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
+        if openapi.components and openapi.components.requestBodies:
+            request_bodies = build_request_bodies(components=openapi.components.requestBodies)
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, parameters=parameters, config=config
+            data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
         )
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))

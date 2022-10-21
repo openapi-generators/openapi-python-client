@@ -8,6 +8,7 @@ __all__ = [
     "Schemas",
     "build_schemas",
     "build_parameters",
+    "build_request_bodies",
     "property_from_data",
 ]
 
@@ -19,6 +20,7 @@ import attr
 from ... import Config
 from ... import schema as oai
 from ... import utils
+from ...schema import Reference, RequestBody
 from ..errors import ParameterError, ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
@@ -27,6 +29,7 @@ from .property import Property
 from .schemas import (
     Class,
     Parameters,
+    RequestBodies,
     Schemas,
     parse_reference_path,
     update_parameters_with_data,
@@ -776,3 +779,15 @@ def build_parameters(
 
     parameters.errors.extend(errors)
     return parameters
+
+
+def build_request_bodies(*, components: Dict[str, Union[RequestBody, Reference]]):
+
+    direct_entries = {
+        f"#/components/requestBodies/{name}": body for name, body in components.items() if isinstance(body, RequestBody)
+    }
+    result = RequestBodies(bodies_by_reference=direct_entries)
+    ref_entries: Dict[str, Reference] = {name: body for name, body in components.items() if isinstance(body, Reference)}
+    for name, ref in ref_entries.items():
+        result.errors.append(ParseError(detail=f"Unimplemented support for reference request body: {name}"))
+    return result

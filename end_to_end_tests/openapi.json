@@ -242,6 +242,29 @@
         }
       }
     },
+    "/tests/post_form_data_ref_body": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Post form data (ref request body)",
+        "description": "Post form data (ref request body)",
+        "operationId": "post_form_data_ref",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AFormBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/tests/post_form_data_inline": {
       "post": {
         "tags": [
@@ -756,7 +779,9 @@
     },
     "/responses/unions/simple_before_complex": {
       "post": {
-        "tags": ["responses"],
+        "tags": [
+          "responses"
+        ],
         "description": "Regression test for #603",
         "responses": {
           "200": {
@@ -765,12 +790,18 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["a"],
+                  "required": [
+                    "a"
+                  ],
                   "properties": {
                     "a": {
                       "oneOf": [
-                        {"type": "string"},
-                        {"type": "object"}
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object"
+                        }
                       ]
                     }
                   }
@@ -877,20 +908,20 @@
       },
       "parameters": [
         {
-            "name": "param",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "param",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+          "name": "param",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
+        },
+        {
+          "name": "param",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
       ]
     },
     "/same-name-multiple-locations/{param}": {
@@ -939,7 +970,9 @@
     },
     "/tag_with_number": {
       "get": {
-        "tags": ["1"],
+        "tags": [
+          "1"
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1163,9 +1196,15 @@
           {
             "$ref": "#/components/parameters/integer-param"
           },
-          {"$ref": "#/components/parameters/header-param"},
-          {"$ref": "#/components/parameters/cookie-param"},
-          {"$ref": "#/components/parameters/path-param"}
+          {
+            "$ref": "#/components/parameters/header-param"
+          },
+          {
+            "$ref": "#/components/parameters/cookie-param"
+          },
+          {
+            "$ref": "#/components/parameters/path-param"
+          }
         ],
         "responses": {
           "200": {
@@ -1477,7 +1516,11 @@
       },
       "Body_upload_file_tests_upload_post": {
         "title": "Body_upload_file_tests_upload_post",
-        "required": ["some_file", "some_object", "some_nullable_object"],
+        "required": [
+          "some_file",
+          "some_object",
+          "some_nullable_object"
+        ],
         "type": "object",
         "properties": {
           "some_file": {
@@ -1519,7 +1562,10 @@
           "some_object": {
             "title": "Some Object",
             "type": "object",
-            "required": ["num", "text"],
+            "required": [
+              "num",
+              "text"
+            ],
             "properties": {
               "num": {
                 "type": "number"
@@ -1532,7 +1578,9 @@
           "some_optional_object": {
             "title": "Some Optional Object",
             "type": "object",
-            "required": ["foo"],
+            "required": [
+              "foo"
+            ],
             "properties": {
               "foo": {
                 "type": "string"
@@ -1755,7 +1803,10 @@
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0, 1]
+            "enum": [
+              0,
+              1
+            ]
           }
         }
       },
@@ -1768,11 +1819,15 @@
           },
           "type": {
             "type": "string",
-            "enum": ["submodel"]
+            "enum": [
+              "submodel"
+            ]
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0]
+            "enum": [
+              0
+            ]
           }
         }
       },
@@ -1915,7 +1970,7 @@
           }
         }
       },
-      "ModelWithDateTimeProperty" : {
+      "ModelWithDateTimeProperty": {
         "type": "object",
         "properties": {
           "datetime": {
@@ -2093,10 +2148,10 @@
         "type": "string",
         "format": "byte"
       },
-      "import":  {
+      "import": {
         "type": "object"
       },
-      "None":  {
+      "None": {
         "type": "object"
       },
       "model.reference.with.Periods": {
@@ -2165,6 +2220,18 @@
         "required": true,
         "schema": {
           "type": "string"
+        }
+      }
+    },
+    "requestBodies": {
+      "AFormBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "$ref": "#/components/schemas/AFormData"
+            }
+          }
         }
       }
     }

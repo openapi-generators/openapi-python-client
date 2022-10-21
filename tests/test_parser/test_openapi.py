@@ -7,7 +7,7 @@ import openapi_python_client.schema as oai
 from openapi_python_client import Config, GeneratorError
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
-from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
+from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas, RequestBodies
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
 
@@ -18,6 +18,7 @@ class TestGeneratorData:
 
         build_schemas = mocker.patch(f"{MODULE_NAME}.build_schemas")
         build_parameters = mocker.patch(f"{MODULE_NAME}.build_parameters")
+        build_request_bodies = mocker.patch(f"{MODULE_NAME}.build_request_bodies")
         EndpointCollection = mocker.patch(f"{MODULE_NAME}.EndpointCollection")
         schemas = mocker.MagicMock()
         schemas.classes_by_name = {
@@ -48,6 +49,7 @@ class TestGeneratorData:
             data=openapi.paths,
             schemas=build_schemas.return_value,
             parameters=build_parameters.return_value,
+            request_bodies=build_request_bodies.return_value,
             config=config,
         )
         assert generator_data.title == openapi.info.title
@@ -279,8 +281,13 @@ class TestEndpoint:
         parse_request_form_body = mocker.patch.object(Endpoint, "parse_request_form_body")
         endpoint = self.make_endpoint()
         schemas = Schemas()
-
-        Endpoint._add_body(endpoint=endpoint, data=oai.Operation.construct(), schemas=schemas, config=MagicMock())
+        Endpoint._add_body(
+            endpoint=endpoint,
+            data=oai.Operation.construct(),
+            schemas=schemas,
+            request_bodies=RequestBodies(),
+            config=MagicMock(),
+        )
 
         parse_request_form_body.assert_not_called()
 
@@ -299,6 +306,7 @@ class TestEndpoint:
             endpoint=endpoint,
             data=oai.Operation.construct(requestBody=request_body),
             schemas=schemas,
+            request_bodies=(RequestBodies()),
             config=MagicMock(),
         )
 
@@ -328,6 +336,7 @@ class TestEndpoint:
                 )
             ),
             schemas=schemas,
+            request_bodies=RequestBodies(),
             config=Config(),
         )
 
@@ -356,6 +365,7 @@ class TestEndpoint:
             endpoint=endpoint,
             data=oai.Operation.construct(requestBody=request_body),
             schemas=schemas,
+            request_bodies=RequestBodies(),
             config=MagicMock(),
         )
 
@@ -406,6 +416,7 @@ class TestEndpoint:
             endpoint=endpoint,
             data=oai.Operation.construct(requestBody=request_body),
             schemas=initial_schemas,
+            request_bodies=RequestBodies(),
             config=config,
         )
 
@@ -984,6 +995,7 @@ class TestEndpoint:
             tag="default",
             schemas=initial_schemas,
             parameters=parameters,
+            request_bodies=RequestBodies(),
             config=config,
         )
 
@@ -1019,6 +1031,7 @@ class TestEndpoint:
             tag="default",
             schemas=initial_schemas,
             parameters=initial_parameters,
+            request_bodies=RequestBodies(),
             config=config,
         )
 
@@ -1051,6 +1064,7 @@ class TestEndpoint:
         )
         initial_schemas = mocker.MagicMock()
         initial_parameters = mocker.MagicMock()
+        request_bodies = RequestBodies()
         config = MagicMock()
 
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
@@ -1062,6 +1076,7 @@ class TestEndpoint:
             tag="default",
             schemas=initial_schemas,
             parameters=initial_parameters,
+            request_bodies=request_bodies,
             config=config,
         )
 
@@ -1086,7 +1101,11 @@ class TestEndpoint:
             endpoint=param_endpoint, data=data.responses, schemas=param_schemas, config=config
         )
         _add_body.assert_called_once_with(
-            endpoint=response_endpoint, data=data, schemas=response_schemas, config=config
+            endpoint=response_endpoint,
+            data=data,
+            schemas=response_schemas,
+            request_bodies=request_bodies,
+            config=config,
         )
 
     def test_from_data_no_operation_id(self, mocker):
@@ -1111,9 +1130,17 @@ class TestEndpoint:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
         config = MagicMock()
         parameters = mocker.MagicMock()
+        request_bodies = mocker.MagicMock()
 
         endpoint, return_schemas, return_params = Endpoint.from_data(
-            data=data, path=path, method=method, tag="default", schemas=schemas, parameters=parameters, config=config
+            data=data,
+            path=path,
+            method=method,
+            tag="default",
+            schemas=schemas,
+            parameters=parameters,
+            request_bodies=request_bodies,
+            config=config,
         )
 
         assert (endpoint, return_schemas) == _add_body.return_value
@@ -1140,7 +1167,11 @@ class TestEndpoint:
             config=config,
         )
         _add_body.assert_called_once_with(
-            endpoint=_add_responses.return_value[0], data=data, schemas=_add_responses.return_value[1], config=config
+            endpoint=_add_responses.return_value[0],
+            data=data,
+            schemas=_add_responses.return_value[1],
+            request_bodies=request_bodies,
+            config=config,
         )
 
     def test_from_data_no_security(self, mocker):
@@ -1164,10 +1195,18 @@ class TestEndpoint:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
+        request_bodies = mocker.MagicMock()
         config = MagicMock()
 
         Endpoint.from_data(
-            data=data, path=path, method=method, tag="a", schemas=schemas, parameters=parameters, config=config
+            data=data,
+            path=path,
+            method=method,
+            tag="a",
+            schemas=schemas,
+            parameters=parameters,
+            request_bodies=request_bodies,
+            config=config,
         )
 
         add_parameters.assert_called_once_with(
@@ -1192,7 +1231,11 @@ class TestEndpoint:
             config=config,
         )
         _add_body.assert_called_once_with(
-            endpoint=_add_responses.return_value[0], data=data, schemas=_add_responses.return_value[1], config=config
+            endpoint=_add_responses.return_value[0],
+            data=data,
+            schemas=_add_responses.return_value[1],
+            request_bodies=request_bodies,
+            config=config,
         )
 
     @pytest.mark.parametrize(
@@ -1261,9 +1304,12 @@ class TestEndpointCollection:
         )
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
+        request_bodies = mocker.MagicMock()
         config = MagicMock()
 
-        result = EndpointCollection.from_data(data=data, schemas=schemas, parameters=parameters, config=config)
+        result = EndpointCollection.from_data(
+            data=data, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
+        )
 
         endpoint_from_data.assert_has_calls(
             [
@@ -1274,6 +1320,7 @@ class TestEndpointCollection:
                     tag="default",
                     schemas=schemas,
                     parameters=parameters,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
                 mocker.call(
@@ -1283,6 +1330,7 @@ class TestEndpointCollection:
                     tag="tag_2",
                     schemas=schemas_1,
                     parameters=parameters_1,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
                 mocker.call(
@@ -1292,6 +1340,7 @@ class TestEndpointCollection:
                     tag="default",
                     schemas=schemas_2,
                     parameters=parameters_2,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
             ],
@@ -1328,6 +1377,7 @@ class TestEndpointCollection:
             data=data,
             schemas=Schemas(),
             parameters=Parameters(),
+            request_bodies=RequestBodies(),
             config=Config(),
         )
         collection: EndpointCollection = collections["default"]
@@ -1349,6 +1399,7 @@ class TestEndpointCollection:
         parameters_1 = mocker.MagicMock()
         parameters_2 = mocker.MagicMock()
         parameters_3 = mocker.MagicMock()
+        request_bodies = mocker.MagicMock()
         endpoint_from_data = mocker.patch.object(
             Endpoint,
             "from_data",
@@ -1363,7 +1414,11 @@ class TestEndpointCollection:
         config = MagicMock()
 
         result, result_schemas, result_parameters = EndpointCollection.from_data(
-            data=data, schemas=schemas, config=config, parameters=parameters
+            data=data,
+            schemas=schemas,
+            config=config,
+            parameters=parameters,
+            request_bodies=request_bodies,
         )
 
         endpoint_from_data.assert_has_calls(
@@ -1375,6 +1430,7 @@ class TestEndpointCollection:
                     tag="default",
                     schemas=schemas,
                     parameters=parameters,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
                 mocker.call(
@@ -1384,6 +1440,7 @@ class TestEndpointCollection:
                     tag="tag_2",
                     schemas=schemas_1,
                     parameters=parameters_1,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
                 mocker.call(
@@ -1393,6 +1450,7 @@ class TestEndpointCollection:
                     tag="default",
                     schemas=schemas_2,
                     parameters=parameters_2,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
             ],
@@ -1434,9 +1492,12 @@ class TestEndpointCollection:
         )
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
+        request_bodies = mocker.MagicMock()
         config = MagicMock()
 
-        result = EndpointCollection.from_data(data=data, schemas=schemas, parameters=parameters, config=config)
+        result = EndpointCollection.from_data(
+            data=data, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
+        )
 
         endpoint_from_data.assert_has_calls(
             [
@@ -1447,6 +1508,7 @@ class TestEndpointCollection:
                     tag="default",
                     schemas=schemas,
                     parameters=parameters,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
                 mocker.call(
@@ -1456,6 +1518,7 @@ class TestEndpointCollection:
                     tag="amf_subscription_info_document",
                     schemas=schemas_1,
                     parameters=parameters_1,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
                 mocker.call(
@@ -1465,6 +1528,7 @@ class TestEndpointCollection:
                     tag="tag3_abc",
                     schemas=schemas_2,
                     parameters=parameters_2,
+                    request_bodies=request_bodies,
                     config=config,
                 ),
             ],

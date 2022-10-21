@@ -16,6 +16,7 @@ import attr
 
 from ... import Config
 from ... import schema as oai
+from ...schema import RequestBody
 from ...schema.openapi_schema_pydantic import Parameter
 from ...utils import ClassName, PythonIdentifier
 from ..errors import ParameterError, ParseError, PropertyError
@@ -126,6 +127,14 @@ class Parameters:
     errors: List[ParseError] = attr.ib(factory=list)
 
 
+@attr.s(auto_attribs=True, frozen=True)
+class RequestBodies:
+    """Structure for containing all defined, shareable, and reusable request bodies"""
+
+    bodies_by_reference: Dict[str, RequestBody] = attr.ib(factory=dict)
+    errors: List[ParseError] = attr.ib(factory=list)
+
+
 def parameter_from_data(
     *,
     name: str,
@@ -199,7 +208,7 @@ def parameter_from_reference(
         parameters: `Parameters` up until now.
 
     Returns:
-        Either the updated `schemas` input or a `PropertyError` if something went wrong.
+        Either the updated `schemas` input or a `ParameterError` if something went wrong.
 
     See Also:
         - https://swagger.io/docs/specification/using-ref/

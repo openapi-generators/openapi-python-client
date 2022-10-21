@@ -16,6 +16,7 @@ from . import (
     octet_stream_tests_octet_stream_get,
     post_form_data,
     post_form_data_inline,
+    post_form_data_ref,
     post_tests_json_body_string,
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
@@ -67,6 +68,13 @@ class TestsEndpoints:
         Post form data
         """
         return post_form_data
+
+    @classmethod
+    def post_form_data_ref(cls) -> types.ModuleType:
+        """
+        Post form data (ref request body)
+        """
+        return post_form_data_ref
 
     @classmethod
     def post_form_data_inline(cls) -> types.ModuleType:

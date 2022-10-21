@@ -338,7 +338,7 @@ class TestPropertyFromData:
         }
 
     def test_property_from_data_null_enum(self, enum_property_factory, none_property_factory):
-        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         data = Schema(title="AnEnumWithOnlyNull", enum=[None], nullable=False, default=None)
@@ -459,7 +459,7 @@ class TestPropertyFromData:
         assert prop == PropertyError(data=data, detail="x is an invalid default for enum MyEnum")
 
     def test_property_from_data_ref_model(self, model_property_factory):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
 
         name = "new_name"
         required = False
@@ -646,7 +646,7 @@ class TestPropertyFromData:
         )
 
     def test_property_from_data_union_of_one_element(self, mocker, model_property_factory):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
         name = "new_name"
         required = False
