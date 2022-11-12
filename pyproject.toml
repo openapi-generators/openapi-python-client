@@ -19,7 +19,7 @@ packages = [
 include = ["CHANGELOG.md", "openapi_python_client/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.7.2"
 jinja2 = "^3.0.0"
 typer = "^0.6 || ^0.7.0"
 colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
@@ -49,7 +49,7 @@ python-multipart = "*"
 types-PyYAML = "^6.0.3"
 types-certifi = "^2020.0.0"
 types-python-dateutil = "^2.0.0"
-pylint = "^2.9.6"
+pylint = ">=2.15.5"
 
 [tool.taskipy.tasks]
 check = """
