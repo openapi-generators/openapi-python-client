@@ -5,53 +5,53 @@ import attr
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.model_name import ModelName
+    from ..models.model_with_circular_ref_a import ModelWithCircularRefA
 
 
-T = TypeVar("T", bound="ModelWithPropertyRef")
+T = TypeVar("T", bound="ModelWithCircularRefB")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithPropertyRef:
+class ModelWithCircularRefB:
     """
     Attributes:
-        inner (Union[Unset, ModelName]):
+        circular (Union[Unset, ModelWithCircularRefA]):
     """
 
-    inner: Union[Unset, "ModelName"] = UNSET
+    circular: Union[Unset, "ModelWithCircularRefA"] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        inner: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.inner, Unset):
-            inner = self.inner.to_dict()
+        circular: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.circular, Unset):
+            circular = self.circular.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if inner is not UNSET:
-            field_dict["inner"] = inner
+        if circular is not UNSET:
+            field_dict["circular"] = circular
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.model_name import ModelName
+        from ..models.model_with_circular_ref_a import ModelWithCircularRefA
 
         d = src_dict.copy()
-        _inner = d.pop("inner", UNSET)
-        inner: Union[Unset, ModelName]
-        if isinstance(_inner, Unset):
-            inner = UNSET
+        _circular = d.pop("circular", UNSET)
+        circular: Union[Unset, ModelWithCircularRefA]
+        if isinstance(_circular, Unset):
+            circular = UNSET
         else:
-            inner = ModelName.from_dict(_inner)
+            circular = ModelWithCircularRefA.from_dict(_circular)
 
-        model_with_property_ref = cls(
-            inner=inner,
+        model_with_circular_ref_b = cls(
+            circular=circular,
         )
 
-        model_with_property_ref.additional_properties = d
-        return model_with_property_ref
+        model_with_circular_ref_b.additional_properties = d
+        return model_with_circular_ref_b
 
     @property
     def additional_keys(self) -> List[str]:

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
+from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO, TYPE_CHECKING
 
 {% if model.additional_properties %}
 from typing import List
@@ -16,9 +16,16 @@ from ..types import UNSET, Unset
 {{ relative }}
 {% endfor %}
 
+{% for lazy_import in model.lazy_imports %}
+{% if loop.first %}
+if TYPE_CHECKING:
+{% endif %}
+  {{ lazy_import }}
+{% endfor %}
+
 
 {% if model.additional_properties %}
-{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
+{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(quoted=not model.additional_properties.is_base_type) %}
 {% endif %}
 
 {% set class_name = model.class_info.name %}
@@ -113,6 +120,9 @@ return field_dict
 {% endmacro %}
 
     def to_dict(self) -> Dict[str, Any]:
+    {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
@@ -122,6 +132,9 @@ return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -146,6 +159,12 @@ return field_dict
 {% if model.additional_properties %}
     {% if model.additional_properties.template %}{# Can be a bool instead of an object #}
         {% import "property_templates/" + model.additional_properties.template as prop_template %}
+
+{% if model.additional_properties.lazy_imports %}
+    {% for lazy_import in model.additional_properties.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
+{% endif %}
     {% else %}
         {% set prop_template = None %}
     {% endif %}
