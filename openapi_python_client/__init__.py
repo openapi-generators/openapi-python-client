@@ -104,6 +104,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
             package_version=self.version,
             project_name=self.project_name,
             project_dir=self.project_dir,
+            openapi=self.openapi,
+            endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
         )
         self.errors: List[GeneratorError] = []
 
@@ -264,18 +266,13 @@ class Project:  # pylint: disable=too-many-instance-attributes
         client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate endpoints
-        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")
-        api_init_path.write_text(
-            api_init_template.render(
-                endpoint_collections_by_tag=endpoint_collections_by_tag,
-            ),
-            encoding=self.file_encoding,
-        )
+        api_init_path.write_text(api_init_template.render(), encoding=self.file_encoding)
 
+        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         endpoint_template = self.env.get_template(
             "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
         )
