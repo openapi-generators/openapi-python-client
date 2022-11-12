@@ -2,8 +2,10 @@ from typing import Any, Callable, Dict
 
 import pytest
 
+from openapi_python_client import schema as oai
 from openapi_python_client.parser.properties import (
     AnyProperty,
+    BooleanProperty,
     DateProperty,
     DateTimeProperty,
     EnumProperty,
@@ -34,12 +36,14 @@ def model_property_factory() -> Callable[..., ModelProperty]:
         kwargs = {
             "description": "",
             "class_info": Class(name="MyClass", module_name="my_module"),
-            "required_properties": [],
-            "optional_properties": [],
-            "relative_imports": set(),
-            "additional_properties": False,
+            "data": oai.Schema.construct(),
+            "roots": set(),
+            "required_properties": None,
+            "optional_properties": None,
+            "relative_imports": None,
+            "lazy_imports": None,
+            "additional_properties": None,
             "python_name": "",
-            "description": "",
             "example": "",
             **kwargs,
         }
@@ -141,6 +145,21 @@ def none_property_factory() -> Callable[..., NoneProperty]:
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         return NoneProperty(**kwargs)
+
+    return _factory
+
+
+@pytest.fixture
+def boolean_property_factory() -> Callable[..., BooleanProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+
+    You can pass the same params into this as the StringProperty constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        return BooleanProperty(**kwargs)
 
     return _factory
 

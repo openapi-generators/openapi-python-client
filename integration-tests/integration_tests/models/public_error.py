@@ -1,9 +1,12 @@
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
-from ..models.problem import Problem
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.problem import Problem
+
 
 T = TypeVar("T", bound="PublicError")
 
@@ -14,13 +17,13 @@ class PublicError:
     Attributes:
         errors (Union[Unset, List[str]]):
         extra_parameters (Union[Unset, List[str]]):
-        invalid_parameters (Union[Unset, List[Problem]]):
+        invalid_parameters (Union[Unset, List['Problem']]):
         missing_parameters (Union[Unset, List[str]]):
     """
 
     errors: Union[Unset, List[str]] = UNSET
     extra_parameters: Union[Unset, List[str]] = UNSET
-    invalid_parameters: Union[Unset, List[Problem]] = UNSET
+    invalid_parameters: Union[Unset, List["Problem"]] = UNSET
     missing_parameters: Union[Unset, List[str]] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
@@ -61,6 +64,8 @@ class PublicError:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.problem import Problem
+
         d = src_dict.copy()
         errors = cast(List[str], d.pop("errors", UNSET))
 

@@ -99,6 +99,9 @@ def generate_operation_id(*, path: str, method: str) -> str:
     return f"{method}_{clean_path}"
 
 
+models_relative_prefix: str = "..."
+
+
 # pylint: disable=too-many-instance-attributes
 @dataclass
 class Endpoint:
@@ -239,15 +242,19 @@ class Endpoint:
                 schemas,
             )
 
+        # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
         if form_body is not None:
             endpoint.form_body = form_body
-            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.form_body.get_lazy_imports(prefix=models_relative_prefix))
         if multipart_body is not None:
             endpoint.multipart_body = multipart_body
-            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.multipart_body.get_lazy_imports(prefix=models_relative_prefix))
         if json_body is not None:
             endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.json_body.get_lazy_imports(prefix=models_relative_prefix))
         return endpoint, schemas
 
     @staticmethod
@@ -287,7 +294,10 @@ class Endpoint:
                     )
                 )
                 continue
-            endpoint.relative_imports |= response.prop.get_imports(prefix="...")
+
+            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+            endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
+            endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
             endpoint.responses.append(response)
         return endpoint, schemas
 
@@ -424,7 +434,9 @@ class Endpoint:
                 # There is no NULL for query params, so nullable and not required are the same.
                 prop = attr.evolve(prop, required=False, nullable=True)
 
-            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
+            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+            endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
             endpoint.used_python_identifiers.add(prop.python_name)
             parameters_by_location[param.param_in][prop.name] = prop
 
@@ -498,11 +510,11 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string()
+            return self.responses[0].prop.get_type_string(quoted=False)
         return f"Union[{', '.join(types)}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:
