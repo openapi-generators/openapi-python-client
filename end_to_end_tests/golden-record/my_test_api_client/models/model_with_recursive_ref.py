@@ -1,57 +1,51 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
 
-if TYPE_CHECKING:
-    from ..models.model_name import ModelName
-
-
-T = TypeVar("T", bound="ModelWithPropertyRef")
+T = TypeVar("T", bound="ModelWithRecursiveRef")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithPropertyRef:
+class ModelWithRecursiveRef:
     """
     Attributes:
-        inner (Union[Unset, ModelName]):
+        recursive (Union[Unset, ModelWithRecursiveRef]):
     """
 
-    inner: Union[Unset, "ModelName"] = UNSET
+    recursive: Union[Unset, "ModelWithRecursiveRef"] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        inner: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.inner, Unset):
-            inner = self.inner.to_dict()
+        recursive: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.recursive, Unset):
+            recursive = self.recursive.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if inner is not UNSET:
-            field_dict["inner"] = inner
+        if recursive is not UNSET:
+            field_dict["recursive"] = recursive
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.model_name import ModelName
-
         d = src_dict.copy()
-        _inner = d.pop("inner", UNSET)
-        inner: Union[Unset, ModelName]
-        if isinstance(_inner, Unset):
-            inner = UNSET
+        _recursive = d.pop("recursive", UNSET)
+        recursive: Union[Unset, ModelWithRecursiveRef]
+        if isinstance(_recursive, Unset):
+            recursive = UNSET
         else:
-            inner = ModelName.from_dict(_inner)
+            recursive = ModelWithRecursiveRef.from_dict(_recursive)
 
-        model_with_property_ref = cls(
-            inner=inner,
+        model_with_recursive_ref = cls(
+            recursive=recursive,
         )
 
-        model_with_property_ref.additional_properties = d
-        return model_with_property_ref
+        model_with_recursive_ref.additional_properties = d
+        return model_with_recursive_ref
 
     @property
     def additional_keys(self) -> List[str]:

@@ -9,7 +9,7 @@ __all__ = [
     "parameter_from_data",
 ]
 
-from typing import TYPE_CHECKING, Dict, List, NewType, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, List, NewType, Set, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import attr
@@ -26,10 +26,10 @@ else:
     Property = "Property"  # pylint: disable=invalid-name
 
 
-_ReferencePath = NewType("_ReferencePath", str)
+ReferencePath = NewType("ReferencePath", str)
 
 
-def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]:
+def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
     """
     Takes a raw string provided in a `$ref` and turns it into a validated `_ReferencePath` or a `ParseError` if
     validation fails.
@@ -40,7 +40,7 @@ def parse_reference_path(ref_path_raw: str) -> Union[_ReferencePath, ParseError]
     parsed = urlparse(ref_path_raw)
     if parsed.scheme or parsed.path:
         return ParseError(detail=f"Remote references such as {ref_path_raw} are not supported yet.")
-    return cast(_ReferencePath, parsed.fragment)
+    return cast(ReferencePath, parsed.fragment)
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -73,13 +73,24 @@ class Class:
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
-    classes_by_reference: Dict[_ReferencePath, Property] = attr.ib(factory=dict)
+    classes_by_reference: Dict[ReferencePath, Property] = attr.ib(factory=dict)
+    dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = attr.ib(factory=dict)
     classes_by_name: Dict[ClassName, Property] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
 
+    def add_dependencies(self, ref_path: ReferencePath, roots: Set[Union[ReferencePath, ClassName]]) -> None:
+        """Record new dependencies on the given ReferencePath
+
+        Args:
+            ref_path: The ReferencePath being referenced
+            roots: A set of identifiers for the objects dependent on the object corresponding to `ref_path`
+        """
+        self.dependencies.setdefault(ref_path, set())
+        self.dependencies[ref_path].update(roots)
+
 
 def update_schemas_with_data(
-    *, ref_path: _ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
+    *, ref_path: ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Union[Schemas, PropertyError]:
     """
     Update a `Schemas` using some new reference.
@@ -100,7 +111,15 @@ def update_schemas_with_data(
 
     prop: Union[PropertyError, Property]
     prop, schemas = property_from_data(
-        data=data, name=ref_path, schemas=schemas, required=True, parent_name="", config=config
+        data=data,
+        name=ref_path,
+        schemas=schemas,
+        required=True,
+        parent_name="",
+        config=config,
+        # Don't process ModelProperty properties because schemas are still being created
+        process_properties=False,
+        roots={ref_path},
     )
 
     if isinstance(prop, PropertyError):
@@ -108,8 +127,7 @@ def update_schemas_with_data(
         prop.header = f"Unable to parse schema {ref_path}"
         if isinstance(prop.data, oai.Reference) and prop.data.ref.endswith(ref_path):  # pragma: nocover
             prop.detail += (
-                "\n\nRecursive and circular references are not supported. "
-                "See https://github.com/openapi-generators/openapi-python-client/issues/466"
+                "\n\nRecursive and circular references are not supported directly in an array schema's 'items' section"
             )
         return prop
 
@@ -121,7 +139,7 @@ def update_schemas_with_data(
 class Parameters:
     """Structure for containing all defined, shareable, and reusable parameters"""
 
-    classes_by_reference: Dict[_ReferencePath, Parameter] = attr.ib(factory=dict)
+    classes_by_reference: Dict[ReferencePath, Parameter] = attr.ib(factory=dict)
     classes_by_name: Dict[ClassName, Parameter] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
 
@@ -154,7 +172,7 @@ def parameter_from_data(
 
 
 def update_parameters_with_data(
-    *, ref_path: _ReferencePath, data: oai.Parameter, parameters: Parameters
+    *, ref_path: ReferencePath, data: oai.Parameter, parameters: Parameters
 ) -> Union[Parameters, ParameterError]:
     """
     Update a `Parameters` using some new reference.
