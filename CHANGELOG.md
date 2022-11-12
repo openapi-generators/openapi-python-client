@@ -13,6 +13,22 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.12.0
+
+### Breaking Changes
+
+- Change the `Response.status_code` type to the `HTTPStatus` enum [#665]
+
+### Features
+
+- Add `endpoint_collections_by_tag` and `openapi` to the templating globals [#689]. Thanks @paulo-raca!
+- Support for recursive and circular references using lazy imports [#670, #338, #466]. Thanks @mtovt!
+- Include `__all__` in generated `__init__.py` files [#676, #631, #540, #675]. Thanks @EltonChou!
+
+### Fixes
+
+- If data.type is None but has data.properties, assume type is object [#691, #674]. Thanks @ahuang11!
+
 ## 0.11.6
 
 ### Features
