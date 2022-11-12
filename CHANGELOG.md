@@ -28,7 +28,7 @@ The 0.x prefix used in versions for this project is to indicate that breaking ch
 ### Features
 
 - Add `endpoint_collections_by_tag` and `openapi` to the templating globals [#689]. Thanks @paulo-raca!
-- Support for recursive and circular references using lazy imports [#670, #338, #466]. Thanks @mtovt!
+- Support for recursive and circular references using lazy imports [#670, #338, #466]. Thanks @maz808 & @mtovt!
 - Include `__all__` in generated `__init__.py` files [#676, #631, #540, #675]. Thanks @EltonChou!
 
 ### Fixes
