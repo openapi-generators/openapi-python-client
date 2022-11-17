@@ -1327,6 +1327,10 @@
             "title": "Leading Digit",
             "type": "string"
           },
+          "_leading_underscore": {
+            "title": "Leading Underscore",
+            "type": "string"
+          },
           "required_nullable": {
             "title": "Required AND Nullable",
             "type": "string",
