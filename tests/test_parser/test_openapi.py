@@ -8,6 +8,7 @@ from openapi_python_client import Config, GeneratorError
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
+from openapi_python_client.schema import ParameterLocation
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
 
