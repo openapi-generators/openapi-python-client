@@ -27,6 +27,7 @@ class Config(BaseModel):
     project_name_override: Optional[str]
     package_name_override: Optional[str]
     package_version_override: Optional[str]
+    protected_dirs: Optional[List[str]]
     post_hooks: List[str] = [
         "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
         "isort .",

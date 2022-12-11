@@ -157,5 +157,15 @@ post_hooks:
    - "black ."
 ```
 
+### protected_dirs
+
+Specify directories to preserve when updating the client.
+
+```yaml
+protected_dirs:
+   - "util"
+   - "cli" 
+```
+
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
