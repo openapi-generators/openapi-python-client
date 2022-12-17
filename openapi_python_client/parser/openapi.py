@@ -176,8 +176,12 @@ class Endpoint:
         *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
         """Return json_body"""
-        body_content = body.content
-        json_body = body_content.get("application/json")
+        json_body = None
+        for content_type, schema in body.content.items():
+            if content_type == "application/json" or content_type.endswith("+json"):
+                json_body = schema
+                break
+
         if json_body is not None and json_body.media_type_schema is not None:
             return property_from_data(
                 name="json_body",
