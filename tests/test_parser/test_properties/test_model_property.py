@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -200,6 +201,46 @@ class TestBuildModelProperty:
 
         assert new_schemas == schemas
         assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
+
+    @pytest.mark.parametrize(
+        "name, title, parent_name, use_title_prefixing, expected",
+        ids=(
+            "basic name only",
+            "title override",
+            "name with parent",
+            "name with parent and title prefixing disabled",
+            "title with parent",
+            "title with parent and title prefixing disabled",
+        ),
+        argvalues=(
+            ("prop", None, None, True, "Prop"),
+            ("prop", "MyModel", None, True, "MyModel"),
+            ("prop", None, "parent", True, "ParentProp"),
+            ("prop", None, "parent", False, "ParentProp"),
+            ("prop", "MyModel", "parent", True, "ParentMyModel"),
+            ("prop", "MyModel", "parent", False, "MyModel"),
+        ),
+    )
+    def test_model_naming(
+        self, name: str, title: Optional[str], parent_name: Optional[str], use_title_prefixing: bool, expected: str
+    ):
+        from openapi_python_client.parser.properties import Schemas, build_model_property
+
+        data = oai.Schema(
+            title=title,
+            properties={},
+        )
+        result = build_model_property(
+            data=data,
+            name=name,
+            schemas=Schemas(),
+            required=True,
+            parent_name=parent_name,
+            config=Config(use_path_prefixes_for_title_model_names=use_title_prefixing),
+            roots={"root"},
+            process_properties=True,
+        )[0]
+        assert result.class_info.name == expected
 
     def test_model_bad_properties(self):
         from openapi_python_client.parser.properties import Schemas, build_model_property

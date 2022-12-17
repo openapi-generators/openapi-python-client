@@ -391,9 +391,14 @@ def build_model_property(
         roots: Set of strings that identify schema objects on which the new ModelProperty will depend
         process_properties: Determines whether the new ModelProperty will be initialized with property data
     """
-    class_string = data.title or name
-    if parent_name:
-        class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_string)}"
+    if not config.use_path_prefixes_for_title_model_names and data.title:
+        class_string = data.title
+    else:
+        title = data.title or name
+        if parent_name:
+            class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(title)}"
+        else:
+            class_string = title
     class_info = Class.from_string(string=class_string, config=config)
     model_roots = {*roots, class_info.name}
     required_properties: Optional[List[Property]] = None

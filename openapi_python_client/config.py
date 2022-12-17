@@ -27,6 +27,7 @@ class Config(BaseModel):
     project_name_override: Optional[str]
     package_name_override: Optional[str]
     package_version_override: Optional[str]
+    use_path_prefixes_for_title_model_names: bool = True
     post_hooks: List[str] = [
         "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
         "isort .",
