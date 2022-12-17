@@ -135,7 +135,7 @@ def generate(
     try:
         codecs.getencoder(file_encoding)
     except LookupError as err:
-        typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
+        typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from err
 
     config = _process_config(config_path)
@@ -178,7 +178,7 @@ def update(
     try:
         codecs.getencoder(file_encoding)
     except LookupError as err:
-        typer.secho("Unknown encoding : {}".format(file_encoding), fg=typer.colors.RED)
+        typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from err
 
     config = _process_config(config_path)

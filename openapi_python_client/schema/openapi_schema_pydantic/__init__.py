@@ -36,8 +36,11 @@ __all__ = [
     "ServerVariable",
     "Tag",
     "XML",
+    "Callback",
 ]
 
+
+from .callback import Callback
 from .components import Components
 from .contact import Contact
 from .discriminator import Discriminator

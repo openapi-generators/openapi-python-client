@@ -1,7 +1,8 @@
 from typing import Dict, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
+from .callback import Callback
 from .example import Example
 from .header import Header
 from .link import Link
@@ -32,8 +33,10 @@ class Components(BaseModel):
     headers: Optional[Dict[str, Union[Header, Reference]]] = None
     securitySchemes: Optional[Dict[str, Union[SecurityScheme, Reference]]] = None
     links: Optional[Dict[str, Union[Link, Reference]]] = None
+    callbacks: Optional[Dict[str, Union[Callback, Reference]]] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

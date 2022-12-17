@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel
+from pydantic import BaseModel, Extra
 
 from .contact import Contact
 from .license import License
@@ -19,12 +19,13 @@ class Info(BaseModel):
 
     title: str
     description: Optional[str] = None
-    termsOfService: Optional[AnyUrl] = None
+    termsOfService: Optional[str] = None
     contact: Optional[Contact] = None
     license: Optional[License] = None
     version: str
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {

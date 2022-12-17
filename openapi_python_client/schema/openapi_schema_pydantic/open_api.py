@@ -2,7 +2,7 @@
 import sys
 from typing import List, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 from .components import Components
 from .external_documentation import ExternalDocumentation
@@ -34,3 +34,6 @@ class OpenAPI(BaseModel):
     tags: Optional[List[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
     openapi: 'Union[Literal["3.0.0"], Literal["3.0.1"], Literal["3.0.2"], Literal["3.0.3"]]'
+
+    class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow

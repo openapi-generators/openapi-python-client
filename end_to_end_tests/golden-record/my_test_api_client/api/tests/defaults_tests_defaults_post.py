@@ -1,5 +1,6 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union
+from http import HTTPStatus
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 from dateutil.parser import isoparse
@@ -23,28 +24,46 @@ def _get_kwargs(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
-    headers: Dict[str, Any] = client.get_headers()
+    headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
+    params: Dict[str, Any] = {}
+    params["string_prop"] = string_prop
+
     json_date_prop = date_prop.isoformat()
+    params["date_prop"] = json_date_prop
+
+    params["float_prop"] = float_prop
+
+    params["int_prop"] = int_prop
+
+    params["boolean_prop"] = boolean_prop
+
     json_list_prop = []
     for list_prop_item_data in list_prop:
         list_prop_item = list_prop_item_data.value
 
         json_list_prop.append(list_prop_item)
 
+    params["list_prop"] = json_list_prop
+
+    json_union_prop: Union[float, str]
+
     json_union_prop = union_prop
+
+    params["union_prop"] = json_union_prop
 
     json_union_prop_with_ref: Union[None, Unset, float, str]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
     elif union_prop_with_ref is None:
         json_union_prop_with_ref = None
+
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
@@ -53,28 +72,24 @@ def _get_kwargs(
     else:
         json_union_prop_with_ref = union_prop_with_ref
 
+    params["union_prop_with_ref"] = json_union_prop_with_ref
+
     json_enum_prop = enum_prop.value
+
+    params["enum_prop"] = json_enum_prop
 
     json_model_prop = model_prop.to_dict()
 
+    params.update(json_model_prop)
+
     json_required_model_prop = required_model_prop.to_dict()
 
-    params: Dict[str, Any] = {
-        "string_prop": string_prop,
-        "date_prop": json_date_prop,
-        "float_prop": float_prop,
-        "int_prop": int_prop,
-        "boolean_prop": boolean_prop,
-        "list_prop": json_list_prop,
-        "union_prop": json_union_prop,
-        "union_prop_with_ref": json_union_prop_with_ref,
-        "enum_prop": json_enum_prop,
-    }
-    params.update(json_model_prop)
     params.update(json_required_model_prop)
+
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     return {
+        "method": "post",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -84,11 +99,10 @@ def _get_kwargs(
 
 
 def _parse_response(*, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
-    if response.status_code == 200:
-        response_200 = response.json()
-
+    if response.status_code == HTTPStatus.OK:
+        response_200 = cast(Any, response.json())
         return response_200
-    if response.status_code == 422:
+    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
@@ -97,7 +111,7 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[Any, HTTPVali
 
 def _build_response(*, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(response=response),
@@ -116,8 +130,8 @@ def sync_detailed(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -153,7 +167,7 @@ def sync_detailed(
         required_model_prop=required_model_prop,
     )
 
-    response = httpx.post(
+    response = httpx.request(
         verify=client.verify_ssl,
         **kwargs,
     )
@@ -173,8 +187,8 @@ def sync(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -223,8 +237,8 @@ async def asyncio_detailed(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -261,7 +275,7 @@ async def asyncio_detailed(
     )
 
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.post(**kwargs)
+        response = await _client.request(**kwargs)
 
     return _build_response(response=response)
 
@@ -278,8 +292,8 @@ async def asyncio(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Defaults
 

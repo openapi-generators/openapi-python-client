@@ -73,7 +73,13 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
         else:
             loader = package_loader
-        self.env: Environment = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
+        self.env: Environment = Environment(
+            loader=loader,
+            trim_blocks=True,
+            lstrip_blocks=True,
+            extensions=["jinja2.ext.loopcontrols"],
+            keep_trailing_newline=True,
+        )
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
         self.project_dir: Path = Path.cwd()
@@ -98,6 +104,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
             package_version=self.version,
             project_name=self.project_name,
             project_dir=self.project_dir,
+            openapi=self.openapi,
+            endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
         )
         self.errors: List[GeneratorError] = []
 
@@ -123,7 +131,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         """Update an existing project"""
 
         if not self.package_dir.is_dir():
-            raise FileNotFoundError()
+            return [GeneratorError(detail=f"Directory {self.package_dir} not found")]
         print(f"Updating {self.package_name}")
         shutil.rmtree(self.package_dir)
         self._create_package()
@@ -227,12 +235,14 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_dir.mkdir()
         models_init = models_dir / "__init__.py"
         imports = []
+        alls = []
 
         model_template = self.env.get_template("model.py.jinja")
         for model in self.openapi.models:
             module_path = models_dir / f"{model.class_info.module_name}.py"
             module_path.write_text(model_template.render(model=model), encoding=self.file_encoding)
             imports.append(import_string_from_class(model.class_info))
+            alls.append(model.class_info.name)
 
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
@@ -244,9 +254,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
             else:
                 module_path.write_text(str_enum_template.render(enum=enum), encoding=self.file_encoding)
             imports.append(import_string_from_class(enum.class_info))
+            alls.append(enum.class_info.name)
 
         models_init_template = self.env.get_template("models_init.py.jinja")
-        models_init.write_text(models_init_template.render(imports=imports), encoding=self.file_encoding)
+        models_init.write_text(models_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
     def _build_api(self) -> None:
         # Generate Client
@@ -255,19 +266,16 @@ class Project:  # pylint: disable=too-many-instance-attributes
         client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate endpoints
-        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")
-        api_init_path.write_text(
-            api_init_template.render(
-                endpoint_collections_by_tag=endpoint_collections_by_tag,
-            ),
-            encoding=self.file_encoding,
-        )
+        api_init_path.write_text(api_init_template.render(), encoding=self.file_encoding)
 
-        endpoint_template = self.env.get_template("endpoint_module.py.jinja")
+        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
+        endpoint_template = self.env.get_template(
+            "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
+        )
         for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
@@ -281,7 +289,12 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
-                module_path.write_text(endpoint_template.render(endpoint=endpoint), encoding=self.file_encoding)
+                module_path.write_text(
+                    endpoint_template.render(
+                        endpoint=endpoint,
+                    ),
+                    encoding=self.file_encoding,
+                )
 
 
 def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
@@ -368,12 +381,12 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
         try:
             return json.loads(data.decode())
         except ValueError as err:
-            return GeneratorError(header="Invalid JSON from provided source: {}".format(str(err)))
+            return GeneratorError(header=f"Invalid JSON from provided source: {err}")
     else:
         try:
             return yaml.safe_load(data)
         except yaml.YAMLError as err:
-            return GeneratorError(header="Invalid YAML from provided source: {}".format(str(err)))
+            return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
 def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:

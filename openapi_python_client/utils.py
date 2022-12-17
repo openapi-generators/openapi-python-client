@@ -3,7 +3,7 @@ import re
 from keyword import iskeyword
 from typing import Any, List
 
-DELIMITERS = " _-"
+DELIMITERS = r"\. _-"
 
 
 class PythonIdentifier(str):
@@ -48,7 +48,7 @@ def split_words(value: str) -> List[str]:
     return re.findall(rf"[^{DELIMITERS}]+", value)
 
 
-RESERVED_WORDS = (set(dir(builtins)) | {"self", "true", "false"}) - {"type", "id"}
+RESERVED_WORDS = (set(dir(builtins)) | {"self", "true", "false", "datetime"}) - {"type", "id"}
 
 
 def fix_reserved_words(value: str) -> str:

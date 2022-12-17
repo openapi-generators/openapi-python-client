@@ -3,26 +3,36 @@ __all__ = [
     "Class",
     "EnumProperty",
     "ModelProperty",
+    "Parameters",
     "Property",
     "Schemas",
     "build_schemas",
+    "build_parameters",
     "property_from_data",
 ]
 
 from itertools import chain
-from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
 import attr
 
 from ... import Config
 from ... import schema as oai
 from ... import utils
-from ..errors import ParseError, PropertyError, ValidationError
+from ..errors import ParameterError, ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
-from .model_property import ModelProperty, build_model_property
+from .model_property import ModelProperty, build_model_property, process_model
 from .property import Property
-from .schemas import Class, Schemas, parse_reference_path, update_schemas_with_data
+from .schemas import (
+    Class,
+    Parameters,
+    ReferencePath,
+    Schemas,
+    parse_reference_path,
+    update_parameters_with_data,
+    update_schemas_with_data,
+)
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -31,7 +41,6 @@ class AnyProperty(Property):
 
     _type_string: ClassVar[str] = "Any"
     _json_type_string: ClassVar[str] = "Any"
-    template: ClassVar[Optional[str]] = "any_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -50,6 +59,12 @@ class StringProperty(Property):
     pattern: Optional[str] = None
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -124,6 +139,13 @@ class FloatProperty(Property):
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+    template: ClassVar[str] = "float_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -132,6 +154,13 @@ class IntProperty(Property):
 
     _type_string: ClassVar[str] = "int"
     _json_type_string: ClassVar[str] = "int"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+    template: ClassVar[str] = "int_property.py.jinja"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -140,6 +169,13 @@ class BooleanProperty(Property):
 
     _type_string: ClassVar[str] = "bool"
     _json_type_string: ClassVar[str] = "bool"
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+    template: ClassVar[str] = "boolean_property.py.jinja"
 
 
 InnerProp = TypeVar("InnerProp", bound=Property)
@@ -152,11 +188,12 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.py.jinja"
 
-    def get_base_type_string(self) -> str:
-        return f"List[{self.inner_property.get_type_string()}]"
+    # pylint: disable=unused-argument
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
+        return f"List[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
 
-    def get_base_json_type_string(self) -> str:
-        return f"List[{self.inner_property.get_type_string(json=True)}]"
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+        return f"List[{self.inner_property.get_type_string(json=True, quoted=not self.inner_property.is_base_type)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -175,6 +212,11 @@ class ListProperty(Property, Generic[InnerProp]):
         imports.add("from typing import cast, List")
         return imports
 
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        lazy_imports = super().get_lazy_imports(prefix=prefix)
+        lazy_imports.update(self.inner_property.get_lazy_imports(prefix=prefix))
+        return lazy_imports
+
 
 @attr.s(auto_attribs=True, frozen=True)
 class UnionProperty(Property):
@@ -182,15 +224,11 @@ class UnionProperty(Property):
 
     inner_properties: List[Property]
     template: ClassVar[str] = "union_property.py.jinja"
-    has_properties_without_templates: bool = attr.ib(init=False)
-
-    def __attrs_post_init__(self) -> None:
-        object.__setattr__(
-            self, "has_properties_without_templates", any(prop.template is None for prop in self.inner_properties)
-        )
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
-        return {p.get_type_string(no_optional=True, json=json) for p in self.inner_properties}
+        return {
+            p.get_type_string(no_optional=True, json=json, quoted=not p.is_base_type) for p in self.inner_properties
+        }
 
     @staticmethod
     def _get_type_string_from_inner_type_strings(inner_types: Set[str]) -> str:
@@ -198,10 +236,11 @@ class UnionProperty(Property):
             return inner_types.pop()
         return f"Union[{', '.join(sorted(inner_types))}]"
 
-    def get_base_type_string(self) -> str:
+    # pylint: disable=unused-argument
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
-    def get_base_json_type_string(self) -> str:
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
     def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> Set[str]:
@@ -226,7 +265,13 @@ class UnionProperty(Property):
             type_strings.add("Unset")
         return type_strings
 
-    def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
+    def get_type_string(
+        self,
+        no_optional: bool = False,
+        json: bool = False,
+        *,
+        quoted: bool = False,
+    ) -> str:
         """
         Get a string representation of type that should be used when declaring this property.
         This implementation differs slightly from `Property.get_type_string` in order to collapse
@@ -249,13 +294,11 @@ class UnionProperty(Property):
         imports.add("from typing import cast, Union")
         return imports
 
-    def inner_properties_with_template(self) -> Iterator[Property]:
-        """
-        Get all the properties that make up this `Union`.
-
-        Called by the union property macros to aid in construction / deserialization.
-        """
-        return (prop for prop in self.inner_properties if prop.template)
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        lazy_imports = super().get_lazy_imports(prefix=prefix)
+        for inner_prop in self.inner_properties:
+            lazy_imports.update(inner_prop.get_lazy_imports(prefix=prefix))
+        return lazy_imports
 
 
 def _string_based_property(
@@ -441,6 +484,7 @@ def build_union_property(
             constructed `UnionProperty` or a `PropertyError` describing what went wrong.
     """
     sub_properties: List[Property] = []
+
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type_{i}",
@@ -471,7 +515,15 @@ def build_union_property(
 
 
 def build_list_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
+    *,
+    data: oai.Schema,
+    name: str,
+    required: bool,
+    schemas: Schemas,
+    parent_name: str,
+    config: Config,
+    process_properties: bool,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[ListProperty[Any], PropertyError], Schemas]:
     """
     Build a ListProperty the right way, use this instead of the normal constructor.
@@ -491,7 +543,14 @@ def build_list_property(
     if data.items is None:
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
-        name=f"{name}_item", required=True, data=data.items, schemas=schemas, parent_name=parent_name, config=config
+        name=f"{name}_item",
+        required=True,
+        data=data.items,
+        schemas=schemas,
+        parent_name=parent_name,
+        config=config,
+        process_properties=process_properties,
+        roots=roots,
     )
     if isinstance(inner_prop, PropertyError):
         inner_prop.header = f'invalid data in items of array named "{name}"'
@@ -519,6 +578,7 @@ def _property_from_ref(
     data: oai.Reference,
     schemas: Schemas,
     config: Config,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     ref_path = parse_reference_path(data.ref)
     if isinstance(ref_path, ParseError):
@@ -541,6 +601,7 @@ def _property_from_ref(
                 return default, schemas
             prop = attr.evolve(prop, default=default)
 
+    schemas.add_dependencies(ref_path=ref_path, roots=roots)
     return prop, schemas
 
 
@@ -552,17 +613,21 @@ def _property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    process_properties: bool,
+    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """Generate a Property from the OpenAPI dictionary representation of it"""
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
-        return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas, config=config)
+        return _property_from_ref(
+            name=name, required=required, parent=None, data=data, schemas=schemas, config=config, roots=roots
+        )
 
+    sub_data: List[Union[oai.Schema, oai.Reference]] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
-    sub_data = (data.allOf or []) + data.anyOf + data.oneOf
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
         return _property_from_ref(
-            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config
+            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config, roots=roots
         )
 
     if data.enum:
@@ -622,11 +687,25 @@ def _property_from_data(
         )
     if data.type == oai.DataType.ARRAY:
         return build_list_property(
-            data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
+            process_properties=process_properties,
+            roots=roots,
         )
-    if data.type == oai.DataType.OBJECT or data.allOf:
+    if data.type == oai.DataType.OBJECT or data.allOf or (data.type is None and data.properties):
         return build_model_property(
-            data=data, name=name, schemas=schemas, required=required, parent_name=parent_name, config=config
+            data=data,
+            name=name,
+            schemas=schemas,
+            required=required,
+            parent_name=parent_name,
+            config=config,
+            process_properties=process_properties,
+            roots=roots,
         )
     return (
         AnyProperty(
@@ -650,6 +729,8 @@ def property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    process_properties: bool = True,
+    roots: Set[Union[ReferencePath, utils.ClassName]] = None,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
     Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a
@@ -669,23 +750,33 @@ def property_from_data(
             of duplication.
         config: Contains the parsed config that the user provided to tweak generation settings. Needed to apply class
             name overrides for generated classes.
-
+        process_properties: If the new property is a ModelProperty, determines whether it will be initialized with
+            property data
+        roots: The set of `ReferencePath`s and `ClassName`s to remove from the schemas if a child reference becomes
+            invalid
     Returns:
         A tuple containing either the parsed Property or a PropertyError (if something went wrong) and the updated
         Schemas (including any new classes that should be generated).
     """
+    roots = roots or set()
     try:
         return _property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name=parent_name, config=config
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
+            process_properties=process_properties,
+            roots=roots,
         )
     except ValidationError:
         return PropertyError(detail="Failed to validate default value", data=data), schemas
 
 
-def build_schemas(
+def _create_schemas(
     *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
 ) -> Schemas:
-    """Get a list of Schemas from an OpenAPI dict"""
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
     errors: List[PropertyError] = []
@@ -715,3 +806,110 @@ def build_schemas(
 
     schemas.errors.extend(errors)
     return schemas
+
+
+def _propogate_removal(*, root: Union[ReferencePath, utils.ClassName], schemas: Schemas, error: PropertyError) -> None:
+    if isinstance(root, utils.ClassName):
+        schemas.classes_by_name.pop(root, None)
+        return
+    if root in schemas.classes_by_reference:
+        error.detail = error.detail or ""
+        error.detail += f"\n{root}"
+        del schemas.classes_by_reference[root]
+        for child in schemas.dependencies.get(root, set()):
+            _propogate_removal(root=child, schemas=schemas, error=error)
+
+
+def _process_model_errors(
+    model_errors: List[Tuple[ModelProperty, PropertyError]], *, schemas: Schemas
+) -> List[PropertyError]:
+    for model, error in model_errors:
+        error.detail = error.detail or ""
+        error.detail += "\n\nFailure to process schema has resulted in the removal of:"
+        for root in model.roots:
+            _propogate_removal(root=root, schemas=schemas, error=error)
+    return [error for _, error in model_errors]
+
+
+def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
+    to_process = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
+    still_making_progress = True
+    final_model_errors: List[Tuple[ModelProperty, PropertyError]] = []
+    latest_model_errors: List[Tuple[ModelProperty, PropertyError]] = []
+
+    # Models which refer to other models in their allOf must be processed after their referenced models
+    while still_making_progress:
+        still_making_progress = False
+        # Only accumulate errors from the last round, since we might fix some along the way
+        latest_model_errors = []
+        next_round = []
+        for model_prop in to_process:
+            schemas_or_err = process_model(model_prop, schemas=schemas, config=config)
+            if isinstance(schemas_or_err, PropertyError):
+                schemas_or_err.header = f"\nUnable to process schema {model_prop.name}:"
+                if isinstance(schemas_or_err.data, oai.Reference) and schemas_or_err.data.ref.endswith(
+                    f"/{model_prop.class_info.name}"
+                ):
+                    schemas_or_err.detail = schemas_or_err.detail or ""
+                    schemas_or_err.detail += "\n\nRecursive allOf reference found"
+                    final_model_errors.append((model_prop, schemas_or_err))
+                    continue
+                latest_model_errors.append((model_prop, schemas_or_err))
+                next_round.append(model_prop)
+                continue
+            schemas = schemas_or_err
+            still_making_progress = True
+        to_process = (prop for prop in next_round)
+
+    final_model_errors.extend(latest_model_errors)
+    errors = _process_model_errors(final_model_errors, schemas=schemas)
+    schemas.errors.extend(errors)
+    return schemas
+
+
+def build_schemas(
+    *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
+) -> Schemas:
+    """Get a list of Schemas from an OpenAPI dict"""
+    schemas = _create_schemas(components=components, schemas=schemas, config=config)
+    schemas = _process_models(schemas=schemas, config=config)
+    return schemas
+
+
+def build_parameters(
+    *,
+    components: Dict[str, Union[oai.Reference, oai.Parameter]],
+    parameters: Parameters,
+) -> Parameters:
+    """Get a list of Parameters from an OpenAPI dict"""
+    to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Parameter]]] = []
+    if components is not None:
+        to_process = components.items()
+    still_making_progress = True
+    errors: List[ParameterError] = []
+
+    # References could have forward References so keep going as long as we are making progress
+    while still_making_progress:
+        still_making_progress = False
+        errors = []
+        next_round = []
+        # Only accumulate errors from the last round, since we might fix some along the way
+        for name, data in to_process:
+            if isinstance(data, oai.Reference):
+                parameters.errors.append(ParameterError(data=data, detail="Reference parameters are not supported."))
+                continue
+            ref_path = parse_reference_path(f"#/components/parameters/{name}")
+            if isinstance(ref_path, ParseError):
+                parameters.errors.append(ParameterError(detail=ref_path.detail, data=data))
+                continue
+            parameters_or_err = update_parameters_with_data(ref_path=ref_path, data=data, parameters=parameters)
+            if isinstance(parameters_or_err, ParameterError):
+                next_round.append((name, data))
+                errors.append(parameters_or_err)
+                continue
+            parameters = parameters_or_err
+            still_making_progress = True
+        to_process = next_round
+
+    parameters.errors.extend(errors)
+    return parameters

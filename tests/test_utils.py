@@ -47,6 +47,7 @@ class TestClassName:
         ("Response200Okay", ["Response", "200", "Okay"]),
         ("S3Config", ["S3", "Config"]),
         ("s3config", ["s3config"]),
+        ("fully.qualified.Name", ["fully", "qualified", "Name"]),
     ],
 )
 def test_split_words(before, after):
@@ -83,8 +84,8 @@ def test_kebab_case():
     assert utils.kebab_case("keep_alive") == "keep-alive"
 
 
-def test__sanitize():
-    assert utils.sanitize("something*~with lots_- of weird things}=") == "somethingwith lots_- of weird things"
+def test_sanitize():
+    assert utils.sanitize("some.thing*~with lots_- of weird things}=") == "some.thingwith lots_- of weird things"
 
 
 def test_no_string_escapes():

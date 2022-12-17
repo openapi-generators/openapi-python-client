@@ -1,9 +1,13 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
+from .callback import Callback
 from .external_documentation import ExternalDocumentation
 from .parameter import Parameter
+
+# Required to update forward ref after object creation, as this is not imported yet
+from .path_item import PathItem  # pylint: disable=unused-import
 from .reference import Reference
 from .request_body import RequestBody
 from .responses import Responses
@@ -27,11 +31,14 @@ class Operation(BaseModel):
     parameters: Optional[List[Union[Parameter, Reference]]] = None
     requestBody: Optional[Union[RequestBody, Reference]] = None
     responses: Responses
+    callbacks: Optional[Dict[str, Callback]] = None
+
     deprecated: bool = False
     security: Optional[List[SecurityRequirement]] = None
     servers: Optional[List[Server]] = None
 
     class Config:  # pylint: disable=missing-class-docstring
+        extra = Extra.allow
         schema_extra = {
             "examples": [
                 {
@@ -75,3 +82,7 @@ class Operation(BaseModel):
                 }
             ]
         }
+
+
+# PathItem in Callback uses Operation, so we need to update forward refs due to circular dependency
+Operation.update_forward_refs()

@@ -217,7 +217,7 @@
         "tags": [
           "tests"
         ],
-        "summary": "Post from data",
+        "summary": "Post form data",
         "description": "Post form data",
         "operationId": "post_form_data",
         "requestBody": {
@@ -225,6 +225,47 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/AFormData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/post_form_data_inline": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Post form data (inline schema)",
+        "description": "Post form data (inline schema)",
+        "operationId": "post_form_data_inline",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "an_optional_field": {
+                    "type": "string"
+                  },
+                  "a_required_field": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "a_required_field"
+                ]
               }
             }
           },
@@ -250,17 +291,7 @@
         "summary": "Upload File",
         "description": "Upload a file ",
         "operationId": "upload_file_tests_upload_post",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Keep-Alive",
-              "type": "boolean"
-            },
-            "name": "keep-alive",
-            "in": "header"
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -301,17 +332,7 @@
         "summary": "Upload multiple files",
         "description": "Upload several files in the same request",
         "operationId": "upload_multiple_files_tests_upload_post",
-        "parameters": [
-          {
-            "required": false,
-            "schema": {
-              "title": "Keep-Alive",
-              "type": "boolean"
-            },
-            "name": "keep-alive",
-            "in": "header"
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -733,6 +754,33 @@
         }
       }
     },
+    "/responses/unions/simple_before_complex": {
+      "post": {
+        "tags": ["responses"],
+        "description": "Regression test for #603",
+        "responses": {
+          "200": {
+            "description": "A union with simple types before complex ones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["a"],
+                  "properties": {
+                    "a": {
+                      "oneOf": [
+                        {"type": "string"},
+                        {"type": "object"}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/token_with_cookie": {
       "get": {
         "tags": [
@@ -997,7 +1045,84 @@
             "in": "query"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/location/header/types": {
+      "description": "Test the valid types to send in headers.",
+      "get": {
+        "tags": [
+          "location"
+        ],
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "Boolean-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "name": "String-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "name": "Number-Header",
+            "in": "header"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "name": "Integer-Header",
+            "in": "header"
+          },
+          {
+            "in": "header",
+            "name": "Int-Enum-Header",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          {
+            "in": "header",
+            "name": "String-Enum-Header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one",
+                "two",
+                "three"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/naming/keywords": {
@@ -1018,7 +1143,91 @@
             "in": "query"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/parameter-references/{path_param}": {
+      "get": {
+        "tags": [
+          "parameter-references"
+        ],
+        "summary": "Test different types of parameter references",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/string-param"
+          },
+          {
+            "$ref": "#/components/parameters/integer-param"
+          },
+          {"$ref": "#/components/parameters/header-param"},
+          {"$ref": "#/components/parameters/cookie-param"},
+          {"$ref": "#/components/parameters/path-param"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/tests/callback": {
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Path with callback",
+        "description": "Try sending a request related to a callback",
+        "operationId": "callback_test",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/yang-data+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "callbacks": {
+          "event": {
+            "callback": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "Success"
+                  },
+                  "503": {
+                    "description": "Unavailable"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1285,6 +1494,16 @@
             "title": "Some String",
             "type": "string",
             "default": "some_default_string"
+          },
+          "a_datetime": {
+            "title": "A Datetime",
+            "type": "string",
+            "format": "date-time"
+          },
+          "a_date": {
+            "title": "A Date",
+            "type": "string",
+            "format": "date"
           },
           "some_number": {
             "title": "Some Number",
@@ -1557,6 +1776,21 @@
           }
         }
       },
+      "AllOfHasPropertiesButNoType": {
+        "title": "AllOfHasPropertiesButNoType",
+        "properties": {
+          "a_sub_property": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "type_enum": {
+            "type": "integer",
+            "enum": [0, 1]
+          }
+        }
+      },
       "model_reference_doesnt_match": {
         "title": "ModelName",
         "type": "object"
@@ -1693,6 +1927,15 @@
           },
           "bytestream_property_ref": {
             "$ref": "#/components/schemas/AByteStream"
+          }
+        }
+      },
+      "ModelWithDateTimeProperty" : {
+        "type": "object",
+        "properties": {
+          "datetime": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -1870,6 +2113,176 @@
       },
       "None":  {
         "type": "object"
+      },
+      "model.reference.with.Periods": {
+        "type": "object",
+        "description": "A Model with periods in its reference"
+      },
+      "ModelWithRecursiveRef": {
+        "type": "object",
+        "properties": {
+          "recursive": {
+            "$ref": "#/components/schemas/ModelWithRecursiveRef"
+          }
+        }
+      },
+      "ModelWithCircularRefA": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithCircularRefB"
+          }
+        }
+      },
+      "ModelWithCircularRefB": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithCircularRefA"
+          }
+        }
+      },
+      "ModelWithRecursiveRefInAdditionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ModelWithRecursiveRefInAdditionalProperties"
+        }
+      },
+      "ModelWithCircularRefInAdditionalPropertiesA": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesB"
+        }
+      },
+      "ModelWithCircularRefInAdditionalPropertiesB": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesA"
+        }
+      },
+      "AnArrayWithARecursiveRefInItemsObject": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "recursive": {
+              "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObject"
+            }
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectA": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "circular": {
+              "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectB"
+            }
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectB": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "circular": {
+              "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectA"
+            }
+          }
+        }
+      },
+      "AnArrayWithARecursiveRefInItemsObjectAdditionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObjectAdditionalProperties"
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB"
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "integer-param": {
+        "name": "integer param",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "string-param": {
+        "name": "string param",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "object-param": {
+        "name": "object param",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "number": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "header-param": {
+        "name": "header param",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "cookie-param": {
+        "name": "cookie param",
+        "in": "cookie",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "path-param": {
+        "name": "path_param",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
       }
     }
   }

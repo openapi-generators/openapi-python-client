@@ -10,13 +10,13 @@ jobs:
   test:
     strategy:
       matrix:
-        python: [ "3.7", "3.8", "3.9", "3.10" ]
+        python: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
@@ -25,7 +25,7 @@ jobs:
         run: echo "::set-output name=python_version::$(python --version)"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
@@ -49,9 +49,6 @@ jobs:
       - name: Run isort
         run: poetry run isort . --check
 
-      - name: Run flake8
-        run: poetry run flake8 openapi_python_client
-
       - name: Run safety
         run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
 
@@ -70,6 +67,59 @@ jobs:
         shell: bash
         run: poetry run coverage xml
 
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      openapi-test-server:
+        image: ghcr.io/openapi-generators/openapi-test-server:0.0.1
+        ports:
+          - "3000:3000"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Get Python Version
+        id: get_python_version
+        run: echo "::set-output name=python_version::$(python --version)"
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          python -m venv .venv
+          poetry run python -m pip install --upgrade pip
+          poetry install
+      - name: Regenerate Integration Client
+        run: |
+          poetry run openapi-python-client update --url http://localhost:3000/openapi.json --config integration-tests-config.yaml
+      - name: Check for any file changes
+        run: python .github/check_for_changes.py
+      - name: Cache Generated Client Dependencies
+        uses: actions/cache@v3
+        with:
+          path: integration-tests/.venv
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies
+      - name: Install Integration Dependencies
+        run: |
+          cd integration-tests
+          python -m venv .venv
+          poetry run python -m pip install --upgrade pip
+          poetry install
+      - name: Run Tests
+        run: |
+          cd integration-tests
+          poetry run pytest
