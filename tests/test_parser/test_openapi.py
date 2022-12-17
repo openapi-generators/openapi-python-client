@@ -246,13 +246,14 @@ class TestEndpoint:
 
         assert prop is None
 
-    def test_parse_request_json_body(self, mocker):
+    @pytest.mark.parametrize(
+        "content_type", ("application/json", "application/vnd.api+json", "application/yang-data+json")
+    )
+    def test_parse_request_json_body(self, mocker, content_type):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         schema = mocker.MagicMock()
-        body = oai.RequestBody.construct(
-            content={"application/json": oai.MediaType.construct(media_type_schema=schema)}
-        )
+        body = oai.RequestBody.construct(content={content_type: oai.MediaType.construct(media_type_schema=schema)})
         property_from_data = mocker.patch(f"{MODULE_NAME}.property_from_data")
         schemas = Schemas()
         config = MagicMock()
