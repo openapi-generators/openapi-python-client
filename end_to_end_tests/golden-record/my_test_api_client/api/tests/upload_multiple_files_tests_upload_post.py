@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
@@ -34,10 +35,10 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_200 = None
         return response_200
-    if response.status_code == 422:
+    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
@@ -49,7 +50,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Uni
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),

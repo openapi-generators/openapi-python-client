@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
@@ -44,7 +45,7 @@ def _get_kwargs(
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        {% if endpoint.form_body_class %}
+        {% if endpoint.form_body %}
         "data": form_data.to_dict(),
         {% elif endpoint.multipart_body %}
         "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
@@ -59,7 +60,7 @@ def _get_kwargs(
 
 def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
-    if response.status_code == {{ response.status_code }}:
+    if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
         {{ prop_template.construct(response.prop, response.source) | indent(8) }}
@@ -78,7 +79,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ return_string }}]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),

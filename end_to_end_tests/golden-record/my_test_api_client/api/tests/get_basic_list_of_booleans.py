@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional, cast
 
 import httpx
@@ -25,7 +26,7 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: Client, response: httpx.Response) -> Optional[List[bool]]:
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_200 = cast(List[bool], response.json())
 
         return response_200
@@ -37,7 +38,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Lis
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[List[bool]]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),

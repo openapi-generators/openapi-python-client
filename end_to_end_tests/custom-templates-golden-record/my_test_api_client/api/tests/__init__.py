@@ -3,6 +3,7 @@
 import types
 
 from . import (
+    callback_test,
     defaults_tests_defaults_post,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
@@ -14,6 +15,7 @@ from . import (
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
     post_form_data,
+    post_form_data_inline,
     post_tests_json_body_string,
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
@@ -65,6 +67,13 @@ class TestsEndpoints:
         Post form data
         """
         return post_form_data
+
+    @classmethod
+    def post_form_data_inline(cls) -> types.ModuleType:
+        """
+        Post form data (inline schema)
+        """
+        return post_form_data_inline
 
     @classmethod
     def upload_file_tests_upload_post(cls) -> types.ModuleType:
@@ -142,3 +151,10 @@ class TestsEndpoints:
         Test optional cookie parameters
         """
         return token_with_cookie_auth_token_with_cookie_get
+
+    @classmethod
+    def callback_test(cls) -> types.ModuleType:
+        """
+        Try sending a request related to a callback
+        """
+        return callback_test

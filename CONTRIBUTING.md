@@ -9,7 +9,7 @@
 ## Setting up a Dev Environment
 
 1. Make sure you have [Poetry](https://python-poetry.org/) installed and up to date.
-2. Make sure you have a supported Python version (e.g. 3.8) installed and accessible to Poetry (e.g. with [pyenv](https://github.com/pyenv/pyenv).
+2. Make sure you have a supported Python version (e.g. 3.8) installed and accessible to Poetry (e.g. with [pyenv](https://github.com/pyenv/pyenv)).
 3. Use `poetry install` in the project directory to create a virtual environment with the relevant dependencies.
 4. Enter a `poetry shell` to make running commands easier.
 
@@ -32,7 +32,7 @@
 
 ## Creating a Pull Request
 
-Once you've written the code and run the checks, the next step is to create a pull request against the `main` branch of this repository. This repository uses [conventional commits] squashed on each PR, then uses [Dobby] to auto-generate CHANGELOG.md entries for release. So the title of your PR should be in the format of a conventional commit written in plain english as it will end up in the CHANGELOG. Some example PR titles:
+Once you've written the code and run the checks, the next step is to create a pull request against the `main` branch of this repository. This repository uses [conventional commits] squashed on each PR, then uses [Knope] to auto-generate CHANGELOG.md entries for release. So the title of your PR should be in the format of a conventional commit written in plain english as it will end up in the CHANGELOG. Some example PR titles:
 
 - feat: Support for `allOf` in OpenAPI documents (closes #123).
 - refactor!: Removed support for Python 3.5
@@ -45,4 +45,4 @@ Once your PR is created, a series of automated checks should run. If any of them
 As soon as possible, your PR will be reviewed. If there are any changes requested there will likely be a bit of back and forth. Once this process is done, your changes will be merged into main and included in the next release. If you need your changes available on PyPI by a certain time, please mention it in the PR, and we'll do our best to accommodate.
 
 [Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/
-[Dobby]: https://triaxtec.github.io/dobby/introduction.html
+[Knope]: https://knope-dev.github.io/knope/

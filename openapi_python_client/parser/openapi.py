@@ -2,6 +2,7 @@ import re
 from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
+from http import HTTPStatus
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import attr
@@ -12,7 +13,18 @@ from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier
 from .errors import GeneratorError, ParseError, PropertyError
-from .properties import Class, EnumProperty, ModelProperty, Property, Schemas, build_schemas, property_from_data
+from .properties import (
+    Class,
+    EnumProperty,
+    ModelProperty,
+    Parameters,
+    Property,
+    Schemas,
+    build_parameters,
+    build_schemas,
+    property_from_data,
+)
+from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
@@ -33,8 +45,8 @@ class EndpointCollection:
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, config: Config
-    ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas]:
+        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, config: Config
+    ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
 
@@ -47,13 +59,19 @@ class EndpointCollection:
                     continue
                 tag = utils.PythonIdentifier(value=(operation.tags or ["default"])[0], prefix="tag")
                 collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
-                endpoint, schemas = Endpoint.from_data(
-                    data=operation, path=path, method=method, tag=tag, schemas=schemas, config=config
+                endpoint, schemas, parameters = Endpoint.from_data(
+                    data=operation,
+                    path=path,
+                    method=method,
+                    tag=tag,
+                    schemas=schemas,
+                    parameters=parameters,
+                    config=config,
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
-                    endpoint, schemas = Endpoint.add_parameters(
-                        endpoint=endpoint, data=path_data, schemas=schemas, config=config
+                    endpoint, schemas, parameters = Endpoint.add_parameters(
+                        endpoint=endpoint, data=path_data, schemas=schemas, parameters=parameters, config=config
                     )
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
@@ -68,7 +86,7 @@ class EndpointCollection:
                     collection.parse_errors.append(error)
                 collection.endpoints.append(endpoint)
 
-        return endpoints_by_tag, schemas
+        return endpoints_by_tag, schemas, parameters
 
 
 def generate_operation_id(*, path: str, method: str) -> str:
@@ -79,6 +97,9 @@ def generate_operation_id(*, path: str, method: str) -> str:
     if clean_path.endswith("_"):
         clean_path = clean_path[:-1]
     return f"{method}_{clean_path}"
+
+
+models_relative_prefix: str = "..."
 
 
 # pylint: disable=too-many-instance-attributes
@@ -101,20 +122,32 @@ class Endpoint:
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
-    form_body_class: Optional[Class] = None
+    form_body: Optional[Property] = None
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
-    def parse_request_form_body(*, body: oai.RequestBody, config: Config) -> Optional[Class]:
-        """Return form_body_reference"""
+    def parse_request_form_body(
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
+        """Return form_body and updated schemas"""
         body_content = body.content
         form_body = body_content.get("application/x-www-form-urlencoded")
-        if form_body is not None and isinstance(form_body.media_type_schema, oai.Reference):
-            return Class.from_string(string=form_body.media_type_schema.ref, config=config)
-        return None
+        if form_body is not None and form_body.media_type_schema is not None:
+            prop, schemas = property_from_data(
+                name="data",
+                required=True,
+                data=form_body.media_type_schema,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
+            if isinstance(prop, ModelProperty):
+                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
+            return prop, schemas
+        return None, schemas
 
     @staticmethod
     def parse_multipart_body(
@@ -143,8 +176,12 @@ class Endpoint:
         *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
         """Return json_body"""
-        body_content = body.content
-        json_body = body_content.get("application/json")
+        json_body = None
+        for content_type, schema in body.content.items():
+            if content_type == "application/json" or content_type.endswith("+json"):
+                json_body = schema
+                break
+
         if json_body is not None and json_body.media_type_schema is not None:
             return property_from_data(
                 name="json_body",
@@ -169,7 +206,20 @@ class Endpoint:
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
             return endpoint, schemas
 
-        endpoint.form_body_class = Endpoint.parse_request_form_body(body=data.requestBody, config=config)
+        form_body, schemas = Endpoint.parse_request_form_body(
+            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+        )
+
+        if isinstance(form_body, ParseError):
+            return (
+                ParseError(
+                    header=f"Cannot parse form body of endpoint {endpoint.name}",
+                    detail=form_body.detail,
+                    data=form_body.data,
+                ),
+                schemas,
+            )
+
         json_body, schemas = Endpoint.parse_request_json_body(
             body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
         )
@@ -196,14 +246,19 @@ class Endpoint:
                 schemas,
             )
 
-        if endpoint.form_body_class:
-            endpoint.relative_imports.add(import_string_from_class(endpoint.form_body_class, prefix="...models"))
+        # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+        if form_body is not None:
+            endpoint.form_body = form_body
+            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.form_body.get_lazy_imports(prefix=models_relative_prefix))
         if multipart_body is not None:
             endpoint.multipart_body = multipart_body
-            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.multipart_body.get_lazy_imports(prefix=models_relative_prefix))
         if json_body is not None:
             endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.json_body.get_lazy_imports(prefix=models_relative_prefix))
         return endpoint, schemas
 
     @staticmethod
@@ -213,15 +268,16 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
 
-            status_code: int
+            status_code: HTTPStatus
             try:
-                status_code = int(code)
+                status_code = HTTPStatus(int(code))
             except ValueError:
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Invalid response status code {code} (not a number), "
-                            f"response will be ommitted from generated client"
+                            f"Invalid response status code {code} (not a valid HTTP "
+                            f"status code), response will be ommitted from generated "
+                            f"client"
                         )
                     )
                 )
@@ -231,25 +287,34 @@ class Endpoint:
                 status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name, config=config
             )
             if isinstance(response, ParseError):
+                detail_suffix = "" if response.detail is None else f" ({response.detail})"
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Cannot parse response for status code {status_code}, "
+                            f"Cannot parse response for status code {status_code}{detail_suffix}, "
                             f"response will be ommitted from generated client"
                         ),
                         data=response.data,
                     )
                 )
                 continue
-            endpoint.relative_imports |= response.prop.get_imports(prefix="...")
+
+            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+            endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
+            endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
             endpoint.responses.append(response)
         return endpoint, schemas
 
     # pylint: disable=too-many-return-statements
     @staticmethod
     def add_parameters(
-        *, endpoint: "Endpoint", data: Union[oai.Operation, oai.PathItem], schemas: Schemas, config: Config
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
+        *,
+        endpoint: "Endpoint",
+        data: Union[oai.Operation, oai.PathItem],
+        schemas: Schemas,
+        parameters: Parameters,
+        config: Config,
+    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Process the defined `parameters` for an Endpoint.
 
         Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
@@ -259,21 +324,25 @@ class Endpoint:
             endpoint: The endpoint to add parameters to.
             data: The Operation or PathItem to add parameters from.
             schemas: The cumulative Schemas of processing so far which should contain details for any references.
+            parameters: The cumulative Parameters of processing so far which should contain details for any references.
             config: User-provided config for overrides within parameters.
 
         Returns:
-            `(result, schemas)` where `result` is either an updated Endpoint containing the parameters or a ParseError
-                describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any new enums
-                or classes.
+            `(result, schemas, parameters)` where `result` is either an updated Endpoint containing the parameters or a
+            ParseError describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any
+            new enums or classes. `parameters` is an updated version of the `parameters` input, adding new parameters.
 
         See Also:
             - https://swagger.io/docs/specification/describing-parameters/
             - https://swagger.io/docs/specification/paths-and-operations/
         """
+        # pylint: disable=too-many-branches, too-many-locals
+        # There isn't much value in breaking down this function further other than to satisfy the linter.
+
+        if data.parameters is None:
+            return endpoint, schemas, parameters
 
         endpoint = deepcopy(endpoint)
-        if data.parameters is None:
-            return endpoint, schemas
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
         parameters_by_location = {
@@ -284,17 +353,30 @@ class Endpoint:
         }
 
         for param in data.parameters:
-            if isinstance(param, oai.Reference) or param.param_schema is None:
+            # Obtain the parameter from the reference or just the parameter itself
+            param_or_error = parameter_from_reference(param=param, parameters=parameters)
+            if isinstance(param_or_error, ParseError):
+                return param_or_error, schemas, parameters
+            param = param_or_error
+
+            if param.param_schema is None:
                 continue
 
             unique_param = (param.name, param.param_in)
             if unique_param in unique_parameters:
-                duplication_detail = (
-                    "Parameters MUST NOT contain duplicates. "
-                    "A unique parameter is defined by a combination of a name and location. "
-                    f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                return (
+                    ParseError(
+                        data=data,
+                        detail=(
+                            "Parameters MUST NOT contain duplicates. "
+                            "A unique parameter is defined by a combination of a name and location. "
+                            f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                        ),
+                    ),
+                    schemas,
+                    parameters,
                 )
-                return ParseError(data=data, detail=duplication_detail), schemas
+
             unique_parameters.add(unique_param)
 
             prop, new_schemas = property_from_data(
@@ -305,13 +387,21 @@ class Endpoint:
                 parent_name=endpoint.name,
                 config=config,
             )
+
             if isinstance(prop, ParseError):
-                return ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data), schemas
+                return (
+                    ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data),
+                    schemas,
+                    parameters,
+                )
+
+            schemas = new_schemas
+
             location_error = prop.validate_location(param.param_in)
             if location_error is not None:
                 location_error.data = param
-                return location_error, schemas
-            schemas = new_schemas
+                return location_error, schemas, parameters
+
             if prop.name in parameters_by_location[param.param_in]:
                 # This parameter was defined in the Operation, so ignore the PathItem definition
                 continue
@@ -331,6 +421,7 @@ class Endpoint:
                             data=data,
                         ),
                         schemas,
+                        parameters,
                     )
                 endpoint.used_python_identifiers.add(existing_prop.python_name)
                 prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
@@ -341,16 +432,19 @@ class Endpoint:
                         detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
                     ),
                     schemas,
+                    parameters,
                 )
             if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
                 # There is no NULL for query params, so nullable and not required are the same.
                 prop = attr.evolve(prop, required=False, nullable=True)
 
-            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
+            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+            endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
             endpoint.used_python_identifiers.add(prop.python_name)
             parameters_by_location[param.param_in][prop.name] = prop
 
-        return endpoint, schemas
+        return endpoint, schemas, parameters
 
     @staticmethod
     def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
@@ -382,8 +476,15 @@ class Endpoint:
 
     @staticmethod
     def from_data(
-        *, data: oai.Operation, path: str, method: str, tag: str, schemas: Schemas, config: Config
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas]:
+        *,
+        data: oai.Operation,
+        path: str,
+        method: str,
+        tag: str,
+        schemas: Schemas,
+        parameters: Parameters,
+        config: Config,
+    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
 
         if data.operationId is None:
@@ -401,21 +502,23 @@ class Endpoint:
             tag=tag,
         )
 
-        result, schemas = Endpoint.add_parameters(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        result, schemas, parameters = Endpoint.add_parameters(
+            endpoint=endpoint, data=data, schemas=schemas, parameters=parameters, config=config
+        )
         if isinstance(result, ParseError):
-            return result, schemas
+            return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
         result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
 
-        return result, schemas
+        return result, schemas, parameters
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string()
+            return self.responses[0].prop.get_type_string(quoted=False)
         return f"Union[{', '.join(types)}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:
@@ -459,10 +562,13 @@ class GeneratorData:
                 )
             return GeneratorError(header="Failed to parse OpenAPI document", detail=detail)
         schemas = Schemas()
+        parameters = Parameters()
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
-        endpoint_collections_by_tag, schemas = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, config=config
+        if openapi.components and openapi.components.parameters:
+            parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
+        endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
+            data=openapi.paths, schemas=schemas, parameters=parameters, config=config
         )
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
@@ -474,6 +580,6 @@ class GeneratorData:
             version=openapi.info.version,
             endpoint_collections_by_tag=endpoint_collections_by_tag,
             models=models,
-            errors=schemas.errors,
+            errors=schemas.errors + parameters.errors,
             enums=enums,
         )

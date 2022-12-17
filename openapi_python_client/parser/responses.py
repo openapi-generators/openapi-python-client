@@ -1,5 +1,6 @@
 __all__ = ["Response", "response_from_data"]
 
+from http import HTTPStatus
 from typing import Optional, Tuple, Union
 
 import attr
@@ -15,20 +16,27 @@ from .properties import AnyProperty, Property, Schemas, property_from_data
 class Response:
     """Describes a single response for an endpoint"""
 
-    status_code: int
+    status_code: HTTPStatus
     prop: Property
     source: str
 
 
-_SOURCE_BY_CONTENT_TYPE = {
-    "application/json": "response.json()",
-    "application/vnd.api+json": "response.json()",
-    "application/octet-stream": "response.content",
-    "text/html": "response.text",
-}
+def _source_by_content_type(content_type: str) -> Optional[str]:
+    known_content_types = {
+        "application/json": "response.json()",
+        "application/octet-stream": "response.content",
+        "text/html": "response.text",
+    }
+    source = known_content_types.get(content_type)
+    if source is None and content_type.endswith("+json"):
+        # Implements https://www.rfc-editor.org/rfc/rfc6838#section-4.2.8 for the +json suffix
+        source = "response.json()"
+    return source
 
 
-def empty_response(*, status_code: int, response_name: str, config: Config, description: Optional[str]) -> Response:
+def empty_response(
+    *, status_code: HTTPStatus, response_name: str, config: Config, description: Optional[str]
+) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
         status_code=status_code,
@@ -46,7 +54,12 @@ def empty_response(*, status_code: int, response_name: str, config: Config, desc
 
 
 def response_from_data(
-    *, status_code: int, data: Union[oai.Response, oai.Reference], schemas: Schemas, parent_name: str, config: Config
+    *,
+    status_code: HTTPStatus,
+    data: Union[oai.Response, oai.Reference],
+    schemas: Schemas,
+    parent_name: str,
+    config: Config,
 ) -> Tuple[Union[Response, ParseError], Schemas]:
     """Generate a Response from the OpenAPI dictionary representation of it"""
 
@@ -67,8 +80,8 @@ def response_from_data(
         )
 
     for content_type, media_type in content.items():
-        if content_type in _SOURCE_BY_CONTENT_TYPE:
-            source = _SOURCE_BY_CONTENT_TYPE[content_type]
+        source = _source_by_content_type(content_type)
+        if source is not None:
             schema_data = media_type.media_type_schema
             break
     else:

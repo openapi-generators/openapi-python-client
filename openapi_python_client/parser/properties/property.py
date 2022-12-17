@@ -1,6 +1,6 @@
 __all__ = ["Property"]
 
-from typing import ClassVar, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
 import attr
 
@@ -8,6 +8,11 @@ from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .model_property import ModelProperty
+else:
+    ModelProperty = "ModelProperty"  # pylint: disable=invalid-name
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -60,15 +65,21 @@ class Property:
         """
         object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
 
-    def get_base_type_string(self) -> str:
-        """Get the string describing the Python type of this property."""
-        return self._type_string
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
+        """Get the string describing the Python type of this property. Base types no require quoting."""
+        return f'"{self._type_string}"' if not self.is_base_type and quoted else self._type_string
 
-    def get_base_json_type_string(self) -> str:
-        """Get the string describing the JSON type of this property."""
-        return self._json_type_string
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+        """Get the string describing the JSON type of this property. Base types no require quoting."""
+        return f'"{self._json_type_string}"' if not self.is_base_type and quoted else self._json_type_string
 
-    def get_type_string(self, no_optional: bool = False, json: bool = False) -> str:
+    def get_type_string(
+        self,
+        no_optional: bool = False,
+        json: bool = False,
+        *,
+        quoted: bool = False,
+    ) -> str:
         """
         Get a string representation of type that should be used when declaring this property
 
@@ -77,9 +88,9 @@ class Property:
             json: True if the type refers to the property after JSON serialization
         """
         if json:
-            type_string = self.get_base_json_type_string()
+            type_string = self.get_base_json_type_string(quoted=quoted)
         else:
-            type_string = self.get_base_type_string()
+            type_string = self.get_base_type_string(quoted=quoted)
 
         if no_optional or (self.required and not self.nullable):
             return type_string
@@ -92,7 +103,7 @@ class Property:
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
-        return self.get_type_string(no_optional=True)
+        return self.get_type_string(no_optional=True, quoted=False)
 
     # noinspection PyUnusedLocal
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -111,6 +122,16 @@ class Property:
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 
+    # pylint: disable=unused-argument
+    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+        """Get a set of lazy import strings that should be included when this property is used somewhere
+
+        Args:
+            prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
+            back to the root of the generated client.
+        """
+        return set()
+
     def to_string(self) -> str:
         """How this should be declared in a dataclass"""
         default: Optional[str]
@@ -122,8 +143,8 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string()} = {default}"
-        return f"{self.python_name}: {self.get_type_string()}"
+            return f"{self.python_name}: {self.get_type_string(quoted=True)} = {default}"
+        return f"{self.python_name}: {self.get_type_string(quoted=True)}"
 
     def to_docstring(self) -> str:
         """Returns property docstring"""
@@ -133,3 +154,14 @@ class Property:
         if self.example:
             doc += f" Example: {self.example}."
         return doc
+
+    @property
+    def is_base_type(self) -> bool:
+        """Base types, represented by any other of `Property` than `ModelProperty` should not be quoted."""
+        from . import ListProperty, ModelProperty, UnionProperty
+
+        return self.__class__.__name__ not in {
+            ModelProperty.__name__,
+            ListProperty.__name__,
+            UnionProperty.__name__,
+        }

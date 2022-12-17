@@ -1,4 +1,5 @@
 import datetime
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
@@ -23,8 +24,8 @@ def _get_kwargs(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Dict[str, Any]:
     url = "{}/tests/defaults".format(client.base_url)
 
@@ -50,6 +51,8 @@ def _get_kwargs(
         json_list_prop.append(list_prop_item)
 
     params["list_prop"] = json_list_prop
+
+    json_union_prop: Union[float, str]
 
     json_union_prop = union_prop
 
@@ -96,10 +99,10 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_200 = None
         return response_200
-    if response.status_code == 422:
+    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
@@ -111,7 +114,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Uni
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
     return Response(
-        status_code=response.status_code,
+        status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -130,8 +133,8 @@ def sync_detailed(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -187,8 +190,8 @@ def sync(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -237,8 +240,8 @@ async def asyncio_detailed(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Defaults
 
@@ -292,8 +295,8 @@ async def asyncio(
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
     enum_prop: AnEnum,
-    model_prop: ModelWithUnionProperty,
-    required_model_prop: ModelWithUnionProperty,
+    model_prop: "ModelWithUnionProperty",
+    required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Defaults
 

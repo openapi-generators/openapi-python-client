@@ -4,6 +4,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast
 
 import attr
 
+from ... import schema as oai
 from ... import utils
 from .property import Property
 from .schemas import Class
@@ -22,10 +23,18 @@ class EnumProperty(Property):
 
     template: ClassVar[str] = "enum_property.py.jinja"
 
-    def get_base_type_string(self) -> str:
+    _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.PATH,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
+
+    # pylint: disable=unused-argument
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self.class_info.name
 
-    def get_base_json_type_string(self) -> str:
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
         return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> Set[str]:
