@@ -6,13 +6,26 @@ import attr
 
 @attr.s(auto_attribs=True)
 class Client:
-    """A class for keeping track of data related to the API"""
+    """A class for keeping track of data related to the API
+
+    Attributes:
+        base_url: The base URL for the API, all requests are made to a relative path to this URL
+        cookies: A dictionary of cookies to be sent with every request
+        headers: A dictionary of headers to be sent with every request
+        timeout: The maximum amount of a time in seconds a request can take. API functions will raise
+            httpx.TimeoutException if this is exceeded.
+        verify_ssl: Whether or not to verify the SSL certificate of the API server. This should be True in production,
+            but can be set to False for testing purposes.
+        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
+            status code that was not documented in the source OpenAPI document.
+    """
 
     base_url: str
     cookies: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     headers: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     timeout: float = attr.ib(5.0, kw_only=True)
     verify_ssl: Union[str, bool, ssl.SSLContext] = attr.ib(True, kw_only=True)
+    raise_on_unexpected_status: bool = attr.ib(False, kw_only=True)
 
     def get_headers(self) -> Dict[str, str]:
         """Get headers to be used in all endpoints"""
