@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 from dateutil.parser import isoparse
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
 from ...models.model_with_union_property import ModelWithUnionProperty
@@ -108,7 +108,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Uni
 
         return response_422
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -151,6 +151,10 @@ def sync_detailed(
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -209,6 +213,10 @@ def sync(
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
 
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
     Returns:
         Response[Union[Any, HTTPValidationError]]
     """
@@ -258,6 +266,10 @@ async def asyncio_detailed(
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]
@@ -313,6 +325,10 @@ async def asyncio(
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[Any, HTTPValidationError]]

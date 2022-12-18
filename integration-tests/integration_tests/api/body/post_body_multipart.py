@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...models.post_body_multipart_multipart_data import PostBodyMultipartMultipartData
 from ...models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from ...models.public_error import PublicError
@@ -45,7 +45,7 @@ def _parse_response(
 
         return response_400
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -69,6 +69,10 @@ def sync_detailed(
     """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[PostBodyMultipartResponse200, PublicError]]
@@ -96,6 +100,10 @@ def sync(
     Args:
         multipart_data (PostBodyMultipartMultipartData):
 
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
     Returns:
         Response[Union[PostBodyMultipartResponse200, PublicError]]
     """
@@ -114,6 +122,10 @@ async def asyncio_detailed(
     """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[PostBodyMultipartResponse200, PublicError]]
@@ -138,6 +150,10 @@ async def asyncio(
     """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[PostBodyMultipartResponse200, PublicError]]

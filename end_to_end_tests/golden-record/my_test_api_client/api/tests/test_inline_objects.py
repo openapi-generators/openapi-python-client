@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional
 
 import httpx
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
@@ -38,7 +38,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Tes
 
         return response_200
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -61,6 +61,10 @@ def sync_detailed(
 
     Args:
         json_body (TestInlineObjectsJsonBody):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[TestInlineObjectsResponse200]
@@ -89,6 +93,10 @@ def sync(
     Args:
         json_body (TestInlineObjectsJsonBody):
 
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
     Returns:
         Response[TestInlineObjectsResponse200]
     """
@@ -108,6 +116,10 @@ async def asyncio_detailed(
 
     Args:
         json_body (TestInlineObjectsJsonBody):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[TestInlineObjectsResponse200]
@@ -133,6 +145,10 @@ async def asyncio(
 
     Args:
         json_body (TestInlineObjectsJsonBody):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[TestInlineObjectsResponse200]

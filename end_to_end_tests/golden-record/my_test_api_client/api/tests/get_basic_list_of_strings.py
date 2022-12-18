@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional, cast
 
 import httpx
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...types import Response
 
 
@@ -32,7 +32,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Lis
 
         return response_200
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -53,6 +53,10 @@ def sync_detailed(
     """Get Basic List Of Strings
 
      Get a list of strings
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[List[str]]
@@ -78,6 +82,10 @@ def sync(
 
      Get a list of strings
 
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
     Returns:
         Response[List[str]]
     """
@@ -94,6 +102,10 @@ async def asyncio_detailed(
     """Get Basic List Of Strings
 
      Get a list of strings
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[List[str]]
@@ -116,6 +128,10 @@ async def asyncio(
     """Get Basic List Of Strings
 
      Get a list of strings
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[List[str]]

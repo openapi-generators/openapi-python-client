@@ -4,8 +4,8 @@ from typing import Any, Dict, Optional
 
 import httpx
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...types import File, Response
 
 
@@ -33,7 +33,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Fil
 
         return response_200
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -52,6 +52,10 @@ def sync_detailed(
     client: Client,
 ) -> Response[File]:
     """Octet Stream
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[File]
@@ -75,6 +79,10 @@ def sync(
 ) -> Optional[File]:
     """Octet Stream
 
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
     Returns:
         Response[File]
     """
@@ -89,6 +97,10 @@ async def asyncio_detailed(
     client: Client,
 ) -> Response[File]:
     """Octet Stream
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[File]
@@ -109,6 +121,10 @@ async def asyncio(
     client: Client,
 ) -> Optional[File]:
     """Octet Stream
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[File]

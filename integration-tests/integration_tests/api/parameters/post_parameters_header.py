@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...models.post_parameters_header_response_200 import PostParametersHeaderResponse200
 from ...models.public_error import PublicError
 from ...types import Response
@@ -52,7 +52,7 @@ def _parse_response(
 
         return response_400
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -82,6 +82,10 @@ def sync_detailed(
         string_header (str):
         number_header (float):
         integer_header (int):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[PostParametersHeaderResponse200, PublicError]]
@@ -118,6 +122,10 @@ def sync(
         number_header (float):
         integer_header (int):
 
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
     Returns:
         Response[Union[PostParametersHeaderResponse200, PublicError]]
     """
@@ -145,6 +153,10 @@ async def asyncio_detailed(
         string_header (str):
         number_header (float):
         integer_header (int):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[PostParametersHeaderResponse200, PublicError]]
@@ -178,6 +190,10 @@ async def asyncio(
         string_header (str):
         number_header (float):
         integer_header (int):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Union[PostParametersHeaderResponse200, PublicError]]

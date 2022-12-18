@@ -10,11 +10,11 @@ class Client:
         base_url: The base URL for the API, all requests are made to a relative path to this URL
         cookies: A dictionary of cookies to be sent with every request
         headers: A dictionary of headers to be sent with every request
-        timeout: The maximum amount of a time a request can take. API functions will raise httpx.TimeoutException if
-            this is exceeded.
+        timeout: The maximum amount of a time in seconds a request can take. API functions will raise
+            httpx.TimeoutException if this is exceeded.
         verify_ssl: Whether or not to verify the SSL certificate of the API server. This should be True in production,
             but can be set to False for testing purposes.
-        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatusException if the API returns a
+        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
             status code that was not documented in the source OpenAPI document.
     """
 

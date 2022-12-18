@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional
 
 import httpx
 
+from ... import errors
 from ...client import Client
-from ...errors import UnexpectedStatusException
 from ...types import UNSET, Response
 
 
@@ -48,7 +48,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         response_200 = None
         return response_200
     if client.raise_on_unexpected_status:
-        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
@@ -79,6 +79,10 @@ def sync_detailed(
         integer_param (int):
         header_param (str):
         cookie_param (str):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Any]
@@ -118,6 +122,10 @@ async def asyncio_detailed(
         integer_param (int):
         header_param (str):
         cookie_param (str):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
         Response[Any]
