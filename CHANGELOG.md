@@ -13,6 +13,14 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.12.3
+
+### Features
+
+- Add `raise_on_unexpected_status` flag to generated `Client` [#593]. Thanks @JamesHinshelwood, @ramnes, @gwenshap, @theFong!
+- add `use_path_prefixes_for_title_model_names` config option for simpler model names [#559, #560]. Thanks @rtaycher!
+- Support any content type ending in `+json` [#706, #709]. Thanks @XioNoX and @mtovt!
+
 ## 0.12.2
 
 ### Fixes
