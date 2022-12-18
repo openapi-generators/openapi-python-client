@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 import httpx
 
 from ...client import Client
+from ...errors import UnexpectedStatusException
 from ...types import File, Response
 
 
@@ -32,7 +33,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Fil
 
         return response_200
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 

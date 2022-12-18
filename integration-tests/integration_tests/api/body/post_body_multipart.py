@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ...client import Client
+from ...errors import UnexpectedStatusException
 from ...models.post_body_multipart_multipart_data import PostBodyMultipartMultipartData
 from ...models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from ...models.public_error import PublicError
@@ -44,7 +45,7 @@ def _parse_response(
 
         return response_400
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 

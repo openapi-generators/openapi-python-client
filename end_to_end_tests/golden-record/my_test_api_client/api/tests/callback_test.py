@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ...client import Client
+from ...errors import UnexpectedStatusException
 from ...models.a_model import AModel
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
@@ -40,7 +41,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Uni
 
         return response_422
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 

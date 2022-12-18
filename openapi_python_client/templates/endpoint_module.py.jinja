@@ -5,6 +5,7 @@ import httpx
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
+from ...errors import UnexpectedStatusException
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -72,7 +73,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         return {{ response.prop.python_name }}
     {% endfor %}
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 

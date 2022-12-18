@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 import httpx
 
 from ...client import Client
+from ...errors import UnexpectedStatusException
 from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
@@ -37,7 +38,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Tes
 
         return response_200
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 

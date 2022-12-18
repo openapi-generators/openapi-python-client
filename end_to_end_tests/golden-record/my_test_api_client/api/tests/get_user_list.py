@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ...client import Client
+from ...errors import UnexpectedStatusException
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
@@ -90,7 +91,7 @@ def _parse_response(
 
         return response_423
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 

@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ...client import Client
+from ...errors import UnexpectedStatusException
 from ...models.get_location_header_types_int_enum_header import GetLocationHeaderTypesIntEnumHeader
 from ...models.get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
 from ...types import UNSET, Response, Unset
@@ -56,7 +57,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         response_200 = None
         return response_200
     if client.raise_on_unexpected_status:
-        raise Exception(f"Unexpected status code: {response.status_code}")
+        raise UnexpectedStatusException(f"Unexpected status code: {response.status_code}")
     else:
         return None
 
