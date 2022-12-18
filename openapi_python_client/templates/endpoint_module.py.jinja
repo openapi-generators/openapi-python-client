@@ -65,8 +65,6 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         {% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
         {{ prop_template.construct(response.prop, response.source) | indent(8) }}
-        {% elif response.prop.get_type_string() == "Any" %}
-        {{ response.prop.python_name }} = None
         {% else %}
         {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}

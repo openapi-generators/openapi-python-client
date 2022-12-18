@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 import httpx
 
@@ -31,10 +31,10 @@ def _get_kwargs(
 
 def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
     if response.status_code == HTTPStatus.OK:
-        response_200 = None
+        response_200 = cast(Any, response.json())
         return response_200
     if response.status_code == HTTPStatus.UNAUTHORIZED:
-        response_401 = None
+        response_401 = cast(Any, None)
         return response_401
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
