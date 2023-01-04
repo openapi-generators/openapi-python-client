@@ -19,6 +19,10 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     try:
         if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
             raise TypeError()
+        {% if property.discriminator and inner_template.check_discriminator %}
+        if not {{ inner_template.check_discriminator("data", property.discriminator.propertyName, property.get_discriminator_value(inner_property)) }}:
+            raise TypeError()
+        {% endif %}
         {{ inner_template.construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
         return {{ inner_property.python_name }}
     except: # noqa: E722
@@ -26,6 +30,10 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     {% else  %}{# Don't do try/except for the last one nor any properties with no type checking #}
     {% if inner_template.check_type_for_construct %}
     if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
+        raise TypeError()
+    {% endif %}
+    {% if property.discriminator and inner_template.check_discriminator %}
+    if not {{ inner_template.check_discriminator("data", property.discriminator.propertyName, property.get_discriminator_value(inner_property)) }}:
         raise TypeError()
     {% endif %}
     {{ inner_template.construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
