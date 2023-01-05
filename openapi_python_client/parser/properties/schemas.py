@@ -166,6 +166,7 @@ def parameter_from_data(
         style=data.style,
         param_schema=data.param_schema,
         param_in=data.param_in,
+        description=data.description,
     )
     parameters = attr.evolve(parameters, classes_by_name={**parameters.classes_by_name, name: new_param})
     return new_param, parameters
