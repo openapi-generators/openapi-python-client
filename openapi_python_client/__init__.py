@@ -311,7 +311,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Union[Project, GeneratorError]:
-    data_dict = _get_document(url=url, path=path)
+    data_dict = _get_document(url=url, path=path, timeout=config.http_timeout)
     if isinstance(data_dict, GeneratorError):
         return data_dict
     openapi = GeneratorData.from_dict(data_dict, config=config)
@@ -395,14 +395,14 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
-def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
+def _get_document(*, url: Optional[str], path: Optional[Path], timeout: int) -> Union[Dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
     content_type: Optional[str]
     if url is not None and path is not None:
         return GeneratorError(header="Provide URL or Path, not both.")
     if url is not None:
         try:
-            response = httpx.get(url)
+            response = httpx.get(url, timeout=timeout)
             yaml_bytes = response.content
             if "content-type" in response.headers:
                 content_type = response.headers["content-type"].split(";")[0]
