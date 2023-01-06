@@ -1204,7 +1204,7 @@
           "422": {
             "description": "Validation Error",
             "content": {
-              "application/json": {
+              "application/yang-data+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }

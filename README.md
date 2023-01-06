@@ -159,5 +159,13 @@ post_hooks:
    - "black ."
 ```
 
+### use_path_prefixes_for_title_model_names
+
+By default, `openapi-python-client` generates class names which include the full path to the schema, including any parent-types. This can result in very long class names like `MyRouteSomeClassAnotherClassResponse`—which is very unique and unlikely to cause conflicts with future API additions, but also super verbose.
+
+If you are carefully curating your `title` properties already to ensure no duplicate class names, you can turn off this prefixing feature by setting `use_path_prefixes_for_title_model_names` to `false` in your config file. This will use the `title` property of any object that has it set _without_ prefixing.
+
+If this option results in conflicts, you will need to manually override class names instead via the `class_overrides` option.
+
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
