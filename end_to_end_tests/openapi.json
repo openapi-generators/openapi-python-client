@@ -1204,7 +1204,7 @@
           "422": {
             "description": "Validation Error",
             "content": {
-              "application/json": {
+              "application/yang-data+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
@@ -1325,6 +1325,10 @@
           },
           "1_leading_digit": {
             "title": "Leading Digit",
+            "type": "string"
+          },
+          "_leading_underscore": {
+            "title": "Leading Underscore",
             "type": "string"
           },
           "required_nullable": {
@@ -1776,6 +1780,21 @@
           }
         }
       },
+      "AllOfHasPropertiesButNoType": {
+        "title": "AllOfHasPropertiesButNoType",
+        "properties": {
+          "a_sub_property": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "type_enum": {
+            "type": "integer",
+            "enum": [0, 1]
+          }
+        }
+      },
       "model_reference_doesnt_match": {
         "title": "ModelName",
         "type": "object"
@@ -2102,6 +2121,108 @@
       "model.reference.with.Periods": {
         "type": "object",
         "description": "A Model with periods in its reference"
+      },
+      "ModelWithRecursiveRef": {
+        "type": "object",
+        "properties": {
+          "recursive": {
+            "$ref": "#/components/schemas/ModelWithRecursiveRef"
+          }
+        }
+      },
+      "ModelWithCircularRefA": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithCircularRefB"
+          }
+        }
+      },
+      "ModelWithCircularRefB": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithCircularRefA"
+          }
+        }
+      },
+      "ModelWithRecursiveRefInAdditionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ModelWithRecursiveRefInAdditionalProperties"
+        }
+      },
+      "ModelWithCircularRefInAdditionalPropertiesA": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesB"
+        }
+      },
+      "ModelWithCircularRefInAdditionalPropertiesB": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesA"
+        }
+      },
+      "AnArrayWithARecursiveRefInItemsObject": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "recursive": {
+              "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObject"
+            }
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectA": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "circular": {
+              "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectB"
+            }
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectB": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "circular": {
+              "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectA"
+            }
+          }
+        }
+      },
+      "AnArrayWithARecursiveRefInItemsObjectAdditionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObjectAdditionalProperties"
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB"
+          }
+        }
+      },
+      "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA"
+          }
+        }
       }
     },
     "parameters": {

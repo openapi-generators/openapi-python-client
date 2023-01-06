@@ -21,12 +21,17 @@ class Response:
     source: str
 
 
-_SOURCE_BY_CONTENT_TYPE = {
-    "application/json": "response.json()",
-    "application/vnd.api+json": "response.json()",
-    "application/octet-stream": "response.content",
-    "text/html": "response.text",
-}
+def _source_by_content_type(content_type: str) -> Optional[str]:
+    known_content_types = {
+        "application/json": "response.json()",
+        "application/octet-stream": "response.content",
+        "text/html": "response.text",
+    }
+    source = known_content_types.get(content_type)
+    if source is None and content_type.endswith("+json"):
+        # Implements https://www.rfc-editor.org/rfc/rfc6838#section-4.2.8 for the +json suffix
+        source = "response.json()"
+    return source
 
 
 def empty_response(
@@ -75,8 +80,8 @@ def response_from_data(
         )
 
     for content_type, media_type in content.items():
-        if content_type in _SOURCE_BY_CONTENT_TYPE:
-            source = _SOURCE_BY_CONTENT_TYPE[content_type]
+        source = _source_by_content_type(content_type)
+        if source is not None:
             schema_data = media_type.media_type_schema
             break
     else:

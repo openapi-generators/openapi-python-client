@@ -1,10 +1,13 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+    from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+
 
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 
@@ -13,12 +16,14 @@ T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 class ModelWithUnionPropertyInlined:
     """
     Attributes:
-        fruit (Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset]):
+        fruit (Union['ModelWithUnionPropertyInlinedFruitType0', 'ModelWithUnionPropertyInlinedFruitType1', Unset]):
     """
 
-    fruit: Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset] = UNSET
+    fruit: Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
+        from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+
         fruit: Union[Dict[str, Any], Unset]
         if isinstance(self.fruit, Unset):
             fruit = UNSET
@@ -42,11 +47,14 @@ class ModelWithUnionPropertyInlined:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+        from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+
         d = src_dict.copy()
 
         def _parse_fruit(
             data: object,
-        ) -> Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset]:
+        ) -> Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset]:
             if isinstance(data, Unset):
                 return data
             try:

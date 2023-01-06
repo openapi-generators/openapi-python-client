@@ -5,6 +5,7 @@ import httpx
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
+from ... import errors
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -58,32 +59,32 @@ def _get_kwargs(
     }
 
 
-{% if parsed_responses %}
-def _parse_response(*, response: httpx.Response) -> Optional[{{ return_string }}]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
-    if response.status_code == {{ response.status_code }}:
-        {% import "property_templates/" + response.prop.template as prop_template %}
+    if response.status_code == HTTPStatus.{{ response.status_code.name }}:
+        {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
         {{ prop_template.construct(response.prop, response.source) | indent(8) }}
         {% else %}
         {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}
         return {{ response.prop.python_name }}
+        {% else %}
+        return None
+        {% endif %}
     {% endfor %}
-    return None
-{% endif %}
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+    else:
+        return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[{{ return_string }}]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ return_string }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        {% if parsed_responses %}
-        parsed=_parse_response(response=response),
-        {% else %}
-        parsed=None,
-        {% endif %}
+        parsed=_parse_response(client=client, response=response),
     )
 
 
@@ -101,7 +102,7 @@ def sync_detailed(
         **kwargs,
     )
 
-    return _build_response(response=response)
+    return _build_response(client=client, response=response)
 
 {% if parsed_responses %}
 def sync(
@@ -128,7 +129,7 @@ async def asyncio_detailed(
             **kwargs
         )
 
-    return _build_response(response=response)
+    return _build_response(client=client, response=response)
 
 {% if parsed_responses %}
 async def asyncio(
