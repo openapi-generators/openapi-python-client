@@ -155,9 +155,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
             return
         try:
-            subprocess.run(
-                cmd, cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
-            )
+            cwd = self.package_dir if self.meta == MetaType.NONE else self.project_dir
+            subprocess.run(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         except CalledProcessError as err:
             self.errors.append(
                 GeneratorError(
