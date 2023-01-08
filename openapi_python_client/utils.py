@@ -12,7 +12,7 @@ class PythonIdentifier(str):
     def __new__(cls, value: str, prefix: str) -> "PythonIdentifier":
         new_value = fix_reserved_words(snake_case(sanitize(value)))
 
-        if not new_value.isidentifier():
+        if not new_value.isidentifier() or value.startswith("_"):
             new_value = f"{prefix}{new_value}"
         return str.__new__(cls, new_value)
 

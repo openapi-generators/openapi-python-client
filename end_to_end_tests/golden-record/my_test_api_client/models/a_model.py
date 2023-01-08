@@ -35,6 +35,7 @@ class AModel:
         a_nullable_date (Optional[datetime.date]):
         a_not_required_date (Union[Unset, datetime.date]):
         attr_1_leading_digit (Union[Unset, str]):
+        attr_leading_underscore (Union[Unset, str]):
         required_nullable (Optional[str]):
         not_required_nullable (Union[Unset, None, str]):
         not_required_not_nullable (Union[Unset, str]):
@@ -62,6 +63,7 @@ class AModel:
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
+    attr_leading_underscore: Union[Unset, str] = UNSET
     not_required_nullable: Union[Unset, None, str] = UNSET
     not_required_not_nullable: Union[Unset, str] = UNSET
     not_required_one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", Unset] = UNSET
@@ -123,6 +125,7 @@ class AModel:
             a_not_required_date = self.a_not_required_date.isoformat()
 
         attr_1_leading_digit = self.attr_1_leading_digit
+        attr_leading_underscore = self.attr_leading_underscore
         required_nullable = self.required_nullable
         not_required_nullable = self.not_required_nullable
         not_required_not_nullable = self.not_required_not_nullable
@@ -207,6 +210,8 @@ class AModel:
             field_dict["a_not_required_date"] = a_not_required_date
         if attr_1_leading_digit is not UNSET:
             field_dict["1_leading_digit"] = attr_1_leading_digit
+        if attr_leading_underscore is not UNSET:
+            field_dict["_leading_underscore"] = attr_leading_underscore
         if not_required_nullable is not UNSET:
             field_dict["not_required_nullable"] = not_required_nullable
         if not_required_not_nullable is not UNSET:
@@ -312,6 +317,8 @@ class AModel:
             a_not_required_date = isoparse(_a_not_required_date).date()
 
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
+
+        attr_leading_underscore = d.pop("_leading_underscore", UNSET)
 
         required_nullable = d.pop("required_nullable")
 
@@ -447,6 +454,7 @@ class AModel:
             a_nullable_date=a_nullable_date,
             a_not_required_date=a_not_required_date,
             attr_1_leading_digit=attr_1_leading_digit,
+            attr_leading_underscore=attr_leading_underscore,
             required_nullable=required_nullable,
             not_required_nullable=not_required_nullable,
             not_required_not_nullable=not_required_not_nullable,
