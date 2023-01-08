@@ -222,9 +222,9 @@ class ListProperty(Property, Generic[InnerProp]):
 class UnionProperty(Property):
     """A property representing a Union (anyOf) of other properties"""
 
-    discriminator: Optional[oai.openapi_schema_pydantic.Discriminator]
-
     inner_properties: List[Property]
+    discriminator: Optional[oai.openapi_schema_pydantic.Discriminator] = None
+
     template: ClassVar[str] = "union_property.py.jinja"
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
