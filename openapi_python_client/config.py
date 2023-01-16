@@ -34,6 +34,7 @@ class Config(BaseModel):
         "black .",
     ]
     field_prefix: str = "field_"
+    http_timeout: int = 5
 
     @staticmethod
     def load_from_path(path: Path) -> "Config":

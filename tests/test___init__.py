@@ -7,6 +7,8 @@ from pytest_mock import MockFixture
 
 from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
+default_http_timeout = Config.schema()["properties"]["http_timeout"]["default"]
+
 
 def test__get_project_for_url_or_path(mocker):
     data_dict = mocker.MagicMock()
@@ -17,12 +19,13 @@ def test__get_project_for_url_or_path(mocker):
     url = mocker.MagicMock()
     path = mocker.MagicMock()
     config = mocker.MagicMock()
+    config.http_timeout = default_http_timeout
 
     from openapi_python_client import MetaType, _get_project_for_url_or_path
 
     project = _get_project_for_url_or_path(url=url, path=path, meta=MetaType.POETRY, config=config)
 
-    _get_document.assert_called_once_with(url=url, path=path)
+    _get_document.assert_called_once_with(url=url, path=path, timeout=default_http_timeout)
     from_dict.assert_called_once_with(data_dict, config=config)
     _Project.assert_called_once_with(
         openapi=openapi, custom_template_path=None, meta=MetaType.POETRY, file_encoding="utf-8", config=config
@@ -39,12 +42,13 @@ def test__get_project_for_url_or_path_generator_error(mocker):
     url = mocker.MagicMock()
     path = mocker.MagicMock()
     config = mocker.MagicMock()
+    config.http_timeout = default_http_timeout
 
     from openapi_python_client import MetaType, _get_project_for_url_or_path
 
     project = _get_project_for_url_or_path(url=url, path=path, meta=MetaType.POETRY, config=config)
 
-    _get_document.assert_called_once_with(url=url, path=path)
+    _get_document.assert_called_once_with(url=url, path=path, timeout=default_http_timeout)
     from_dict.assert_called_once_with(data_dict, config=config)
     _Project.assert_not_called()
     assert project == error
@@ -62,7 +66,7 @@ def test__get_project_for_url_or_path_document_error(mocker):
 
     project = _get_project_for_url_or_path(url=url, path=path, meta=MetaType.POETRY, config=Config())
 
-    _get_document.assert_called_once_with(url=url, path=path)
+    _get_document.assert_called_once_with(url=url, path=path, timeout=default_http_timeout)
     from_dict.assert_not_called()
     assert project == error
 
@@ -153,7 +157,7 @@ class TestGetJson:
 
         from openapi_python_client import _get_document
 
-        result = _get_document(url=None, path=None)
+        result = _get_document(url=None, path=None, timeout=default_http_timeout)
 
         assert result == GeneratorError(header="No URL or Path provided")
         get.assert_not_called()
@@ -167,7 +171,7 @@ class TestGetJson:
 
         from openapi_python_client import _get_document
 
-        result = _get_document(url=mocker.MagicMock(), path=mocker.MagicMock())
+        result = _get_document(url=mocker.MagicMock(), path=mocker.MagicMock(), timeout=default_http_timeout)
 
         assert result == GeneratorError(header="Provide URL or Path, not both.")
         get.assert_not_called()
@@ -182,10 +186,10 @@ class TestGetJson:
         from openapi_python_client import _get_document
 
         url = mocker.MagicMock()
-        result = _get_document(url=url, path=None)
+        result = _get_document(url=url, path=None, timeout=default_http_timeout)
 
         assert result == GeneratorError(header="Could not get OpenAPI document from provided URL")
-        get.assert_called_once_with(url)
+        get.assert_called_once_with(url, timeout=default_http_timeout)
         _Path.assert_not_called()
         loads.assert_not_called()
 
@@ -197,9 +201,9 @@ class TestGetJson:
         from openapi_python_client import _get_document
 
         url = "test"
-        _get_document(url=url, path=None)
+        _get_document(url=url, path=None, timeout=default_http_timeout)
 
-        get.assert_called_once_with(url)
+        get.assert_called_once_with(url, timeout=default_http_timeout)
         _Path.assert_not_called()
         loads.assert_called_once_with(get().content)
 
@@ -211,7 +215,7 @@ class TestGetJson:
 
         from openapi_python_client import _get_document
 
-        _get_document(url=None, path=path)
+        _get_document(url=None, path=path, timeout=default_http_timeout)
 
         get.assert_not_called()
         loads.assert_called_once_with(b"some test data")
@@ -222,7 +226,7 @@ class TestGetJson:
 
         path = tmp_path / "test.yaml"
         path.write_text("'")
-        result = _get_document(url=None, path=path)
+        result = _get_document(url=None, path=path, timeout=default_http_timeout)
 
         get.assert_not_called()
         assert isinstance(result, GeneratorError)
@@ -241,7 +245,7 @@ class TestGetJson:
         from openapi_python_client import _get_document
 
         url = mocker.MagicMock()
-        result = _get_document(url=url, path=None)
+        result = _get_document(url=url, path=None, timeout=default_http_timeout)
 
         get.assert_called_once()
         json_loads.assert_called_once_with(FakeResponse.content.decode())
@@ -258,7 +262,7 @@ class TestGetJson:
         from openapi_python_client import _get_document
 
         url = mocker.MagicMock()
-        result = _get_document(url=url, path=None)
+        result = _get_document(url=url, path=None, timeout=default_http_timeout)
 
         get.assert_called_once()
         assert result == GeneratorError(
