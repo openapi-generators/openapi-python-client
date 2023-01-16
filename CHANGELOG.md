@@ -13,6 +13,12 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.13.1
+
+### Features
+
+- Add `http_timeout` config to set timeout getting document via `--url` [#718]. Thanks @Kircheneer!
+
 ## 0.13.0
 
 ### Breaking Changes
