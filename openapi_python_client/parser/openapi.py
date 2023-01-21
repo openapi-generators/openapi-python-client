@@ -109,6 +109,7 @@ class Endpoint:
     Describes a single endpoint on the server
     """
 
+    data: oai.Operation
     path: str
     method: str
     description: Optional[str]
@@ -506,6 +507,7 @@ class Endpoint:
             name=name,
             requires_security=bool(data.security),
             tag=tag,
+            data=data,
         )
 
         result, schemas, parameters = Endpoint.add_parameters(
