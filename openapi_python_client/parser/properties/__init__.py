@@ -595,6 +595,8 @@ def _property_from_ref(
     )
     if parent:
         prop = attr.evolve(prop, nullable=parent.nullable)
+        if parent.description:
+            prop = attr.evolve(prop, description=parent.description)
         if isinstance(prop, EnumProperty):
             default = get_enum_default(prop, parent)
             if isinstance(default, PropertyError):
