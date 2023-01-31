@@ -56,6 +56,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         config: Config,
         custom_template_path: Optional[Path] = None,
         file_encoding: str = "utf-8",
+        output_path: Optional[Path] = None,
     ) -> None:
         self.openapi: GeneratorData = openapi
         self.meta: MetaType = meta
@@ -82,7 +83,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         )
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
-        self.project_dir: Path = Path.cwd()
+        self.project_dir: Path = Path.cwd() if output_path is None else Path(output_path).absolute()
         if meta != MetaType.NONE:
             self.project_dir /= self.project_name
 
@@ -309,6 +310,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
+    output_path: Optional[Path] = None,
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path, timeout=config.http_timeout)
     if isinstance(data_dict, GeneratorError):
@@ -322,6 +324,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
         meta=meta,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path
     )
 
 
@@ -333,6 +336,7 @@ def create_new_client(
     config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
+    output_path: Optional[Path] = None,
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -347,6 +351,7 @@ def create_new_client(
         meta=meta,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path
     )
     if isinstance(project, GeneratorError):
         return [project]
@@ -361,6 +366,7 @@ def update_existing_client(
     config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
+    output_path: Optional[Path] = None,
 ) -> Sequence[GeneratorError]:
     """
     Update an existing client library
@@ -375,6 +381,7 @@ def update_existing_client(
         meta=meta,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path
     )
     if isinstance(project, GeneratorError):
         return [project]
