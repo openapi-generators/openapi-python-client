@@ -19,6 +19,7 @@ class Response:
     status_code: HTTPStatus
     prop: Property
     source: str
+    data: object
 
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
@@ -107,4 +108,4 @@ def response_from_data(
     if isinstance(prop, PropertyError):
         return prop, schemas
 
-    return Response(status_code=status_code, prop=prop, source=source), schemas
+    return Response(status_code=status_code, prop=prop, source=source, data=data), schemas
