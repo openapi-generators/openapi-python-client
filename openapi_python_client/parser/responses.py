@@ -98,7 +98,7 @@ def response_from_data(
             schemas,
         )
 
-    response_type_val = schema_data['x-response-type'] if 'x-response-type' in schema_data else ResponseType.AUTO.value
+    response_type_val = data.__dict__['x-response-type'] if 'x-response-type' in data.__dict__ else ResponseType.AUTO.value
     if response_type_val not in ResponseType._value2member_map_:
         return ParseError(data=data, detail=f"Unsupported x-response-type: {response_type}"), schemas
     response_type = ResponseType(response_type_val)
