@@ -68,13 +68,13 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         {% else %}
         {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}
-        {% if response.failed_response %}
+        {% if response.failed_status %}
         if client.raise_on_failed_status:
             raise errors.FailedStatus(f"Failed status code: {response.status_code}", {{ response.prop.python_name }})
         {% endif %}
         return {{ response.prop.python_name }}
         {% else %}
-        {% if response.failed_response %}
+        {% if response.failed_status %}
         if client.raise_on_failed_status:
             raise errors.FailedStatus(f"Failed status code: {response.status_code}")
         {% endif %}

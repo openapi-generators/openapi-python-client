@@ -19,7 +19,7 @@ class Response:
     status_code: HTTPStatus
     prop: Property
     source: str
-    failed_response: bool
+    failed_status: bool
     data: object
 
 
@@ -51,7 +51,7 @@ def empty_response(
             description=description,
             example=None,
         ),
-        failed_response=status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES,
+        failed_status=status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES,
         source="None",
     )
 
@@ -103,9 +103,9 @@ def response_from_data(
         return ParseError(data=data, detail=f"Unsupported x-response-type: {response_type}"), schemas
     response_type = ResponseType(response_type_val)
     if response_type == ResponseType.AUTO:
-        failed_response = status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES
+        failed_status = status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES
     else:
-        failed_response = response_type == ResponseType.FAILED
+        failed_status = response_type == ResponseType.FAILED
 
     prop, schemas = property_from_data(
         name=response_name,
@@ -119,4 +119,4 @@ def response_from_data(
     if isinstance(prop, PropertyError):
         return prop, schemas
 
-    return Response(status_code=status_code, prop=prop, source=source, failed_response=failed_response, data=data), schemas
+    return Response(status_code=status_code, prop=prop, source=source, failed_status=failed_status, data=data), schemas
