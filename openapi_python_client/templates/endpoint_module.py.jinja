@@ -121,6 +121,15 @@ def sync(
     return sync_detailed(
         {{ kwargs(endpoint) }}
     ).parsed
+
+{% if endpoint.data['x-focus-path'] %}
+async def sync_focused(
+    {{ arguments(endpoint) | indent(4) }}
+):
+    return sync(
+        {{ kwargs(endpoint) }}
+    ){{ endpoint.data['x-focus-path'] }}
+{% endif %}
 {% endif %}
 
 async def asyncio_detailed(
@@ -148,5 +157,14 @@ async def asyncio(
     return (await asyncio_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
+
+{% if endpoint.data['x-focus-path'] %}
+async def asyncio_focused(
+    {{ arguments(endpoint) | indent(4) }}
+):
+    return (await asyncio(
+        {{ kwargs(endpoint) }}
+    )){{ endpoint.data['x-focus-path'] }}
+{% endif %}
 {% endif %}
 
