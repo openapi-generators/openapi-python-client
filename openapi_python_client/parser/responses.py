@@ -105,7 +105,7 @@ def response_from_data(
     if response_type == ResponseType.AUTO:
         failed_status = status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES
     else:
-        failed_status = response_type == ResponseType.FAILED
+        failed_status = response_type == ResponseType.FAILURE
 
     prop, schemas = property_from_data(
         name=response_name,

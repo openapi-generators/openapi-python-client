@@ -38,7 +38,7 @@ from .schemas import (
 
 class ResponseType(Enum):
     AUTO    = 'auto'     # Automatically decide whether a response is a failed or success response - every response within the rance [200, 300) will be considered success, others as failed
-    FAILED  = 'failed'   # Explicitly specified failed response
+    FAILURE = 'failure'  # Explicitly specified failed response
     SUCCESS = 'success'  # Explicitly specified success response
 
 
