@@ -161,6 +161,7 @@ Args:
 {% endif %}
 Raises:
     errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+    errors.FailedStatus: If the server returns a failed status code and Client.raise_on_failed_status is True.
     httpx.TimeoutException: If the request takes longer than Client.timeout.
 
 Returns:

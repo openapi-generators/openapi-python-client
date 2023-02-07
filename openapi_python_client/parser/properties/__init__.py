@@ -13,6 +13,7 @@ __all__ = [
 
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
+from enum import Enum
 
 import attr
 
@@ -33,6 +34,12 @@ from .schemas import (
     update_parameters_with_data,
     update_schemas_with_data,
 )
+
+
+class ResponseType(Enum):
+    AUTO    = 'auto'     # Automatically decide whether a response is a failed or success response - every response within the rance [200, 300) will be considered success, others as failed
+    FAILED  = 'failed'   # Explicitly specified failed response
+    SUCCESS = 'success'  # Explicitly specified success response
 
 
 @attr.s(auto_attribs=True, frozen=True)
