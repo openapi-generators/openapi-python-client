@@ -55,6 +55,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         meta: MetaType,
         config: Config,
         custom_template_path: Optional[Path] = None,
+        utility_functions_template_path: Optional[Path] = None,
         file_encoding: str = "utf-8",
         output_path: Optional[Path] = None,
     ) -> None:
@@ -74,8 +75,24 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
         else:
             loader = package_loader
+        if utility_functions_template_path is not None:
+            utility_functions_loader = ChoiceLoader(
+                [
+                    FileSystemLoader(str(utility_functions_template_path)),
+                    loader
+                ]
+            )
+        else:
+            utility_functions_loader = loader
         self.env: Environment = Environment(
             loader=loader,
+            trim_blocks=True,
+            lstrip_blocks=True,
+            extensions=["jinja2.ext.loopcontrols"],
+            keep_trailing_newline=True,
+        )
+        self.utility_functions_env: Environment = Environment(
+            loader=utility_functions_loader,
             trim_blocks=True,
             lstrip_blocks=True,
             extensions=["jinja2.ext.loopcontrols"],
@@ -295,7 +312,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
-                utility_functions_template = self.env.get_template(endpoint.utility_functions_template) if endpoint.utility_functions_template else None
+                utility_functions_template = self.utility_functions_env.get_template(endpoint.utility_functions_template) if endpoint.utility_functions_template else None
                 module_path.write_text(
                     endpoint_template.render(
                         endpoint=endpoint,
@@ -311,6 +328,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     meta: MetaType,
     config: Config,
     custom_template_path: Optional[Path] = None,
+    utility_functions_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
     output_path: Optional[Path] = None,
 ) -> Union[Project, GeneratorError]:
@@ -323,6 +341,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     return Project(
         openapi=openapi,
         custom_template_path=custom_template_path,
+        utility_functions_template_path=utility_functions_template_path,
         meta=meta,
         file_encoding=file_encoding,
         config=config,
@@ -337,6 +356,7 @@ def create_new_client(
     meta: MetaType,
     config: Config,
     custom_template_path: Optional[Path] = None,
+    utility_functions_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
     output_path: Optional[Path] = None,
 ) -> Sequence[GeneratorError]:
@@ -350,6 +370,7 @@ def create_new_client(
         url=url,
         path=path,
         custom_template_path=custom_template_path,
+        utility_functions_template_path=utility_functions_template_path,
         meta=meta,
         file_encoding=file_encoding,
         config=config,
@@ -367,6 +388,7 @@ def update_existing_client(
     meta: MetaType,
     config: Config,
     custom_template_path: Optional[Path] = None,
+    utility_functions_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
     output_path: Optional[Path] = None,
 ) -> Sequence[GeneratorError]:
@@ -380,6 +402,7 @@ def update_existing_client(
         url=url,
         path=path,
         custom_template_path=custom_template_path,
+        utility_functions_template_path=utility_functions_template_path,
         meta=meta,
         file_encoding=file_encoding,
         config=config,
