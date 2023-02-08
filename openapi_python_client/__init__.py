@@ -282,12 +282,12 @@ class Project:  # pylint: disable=too-many-instance-attributes
         endpoint_template = self.env.get_template(
             "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
         )
+        endpoint_init_template = self.env.get_template("endpoint_init.py.jinja")
         for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
             tag_dir.mkdir()
 
             endpoint_init_path = tag_dir / "__init__.py"
-            endpoint_init_template = self.env.get_template("endpoint_init.py.jinja")
             endpoint_init_path.write_text(
                 endpoint_init_template.render(endpoint_collection=collection),
                 encoding=self.file_encoding,
@@ -295,9 +295,11 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
+                utility_functions_template = self.env.get_template(endpoint.utility_functions_template) if endpoint.utility_functions_template else None
                 module_path.write_text(
                     endpoint_template.render(
                         endpoint=endpoint,
+                        utility_functions_code=utility_functions_template.render(endpoint=endpoint) if utility_functions_template else ''
                     ),
                     encoding=self.file_encoding,
                 )

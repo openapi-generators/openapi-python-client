@@ -17,6 +17,8 @@ from ... import errors
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
+{{ utility_functions_code }}
+
 def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Dict[str, Any]:
@@ -167,4 +169,3 @@ async def asyncio_focused(
     )){{ endpoint.data['x-focus-path'] }}
 {% endif %}
 {% endif %}
-

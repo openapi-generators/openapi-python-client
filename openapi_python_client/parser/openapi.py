@@ -116,6 +116,7 @@ class Endpoint:
     name: str
     requires_security: bool
     tag: str
+    utility_functions_template: str
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: Dict[str, Property] = field(default_factory=dict)
@@ -507,6 +508,7 @@ class Endpoint:
             name=name,
             requires_security=bool(data.security),
             tag=tag,
+            utility_functions_template=data.__dict__.get('x-utility-functions-template'),
             data=data,
         )
 
