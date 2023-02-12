@@ -46,6 +46,7 @@ def _get_kwargs(
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
+        "follow_redirects": client.follow_redirects,
         {% if endpoint.form_body %}
         "data": form_data.to_dict(),
         {% elif endpoint.multipart_body %}
