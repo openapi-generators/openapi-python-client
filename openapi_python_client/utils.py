@@ -77,10 +77,19 @@ def fix_reserved_words(value: str) -> str:
     return value
 
 
+def case_insensitive_snake_case(value: str) -> str:
+    """Converts to snake_case, but preserves capitalization of acronyms"""
+    words = split_words(sanitize(value))
+    value = "_".join(words)
+
+    return value
+
+
 def snake_case(value: str) -> str:
     """Converts to snake_case"""
-    words = split_words(sanitize(value))
-    return "_".join(words).lower()
+    value = case_insensitive_snake_case(value).lower()
+
+    return value
 
 
 def pascal_case(value: str) -> str:
