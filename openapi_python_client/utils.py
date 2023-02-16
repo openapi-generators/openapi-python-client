@@ -1,5 +1,6 @@
 import builtins
 import re
+from email.message import Message
 from keyword import iskeyword
 from typing import Any, List
 
@@ -94,3 +95,15 @@ def remove_string_escapes(value: str) -> str:
         - https://github.com/openapi-generators/openapi-python-client/security/advisories/GHSA-9x4c-63pf-525f
     """
     return value.replace('"', r"\"")
+
+
+def get_content_type(content_type: str) -> str:
+    """
+    Given a string representing a conten type with optional parameters, returns the content type only
+    """
+    message = Message()
+    message.add_header("Content-Type", content_type)
+
+    content_type = message.get_content_type()
+
+    return content_type

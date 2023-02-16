@@ -247,7 +247,13 @@ class TestEndpoint:
         assert prop is None
 
     @pytest.mark.parametrize(
-        "content_type", ("application/json", "application/vnd.api+json", "application/yang-data+json")
+        "content_type",
+        (
+            "application/json",
+            "application/vnd.api+json",
+            "application/yang-data+json",
+            "application/json;charset=utf-8",
+        ),
     )
     def test_parse_request_json_body(self, mocker, content_type):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
