@@ -12,6 +12,7 @@ from .. import schema as oai
 from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier
+from ..schema.openapi_schema_pydantic.security_requirement import SecurityRequirement
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
     Class,
@@ -45,7 +46,7 @@ class EndpointCollection:
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, config: Config
+        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, default_security: SecurityRequirement, config: Config
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
@@ -67,6 +68,7 @@ class EndpointCollection:
                     schemas=schemas,
                     parameters=parameters,
                     config=config,
+                    default_security=default_security
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
@@ -492,6 +494,7 @@ class Endpoint:
         schemas: Schemas,
         parameters: Parameters,
         config: Config,
+        default_security: SecurityRequirement,
     ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
 
@@ -500,13 +503,17 @@ class Endpoint:
         else:
             name = data.operationId
 
+        requires_security = bool(data.security)
+        if data.security is None:
+            requires_security = bool(default_security)
+
         endpoint = Endpoint(
             path=path,
             method=method,
             summary=utils.remove_string_escapes(data.summary) if data.summary else "",
             description=utils.remove_string_escapes(data.description) if data.description else "",
             name=name,
-            requires_security=bool(data.security),
+            requires_security=requires_security,
             tag=tag,
             utility_functions_template=data.__dict__.get('x-utility-functions-template'),
             data=data,
@@ -578,7 +585,7 @@ class GeneratorData:
         if openapi.components and openapi.components.parameters:
             parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, parameters=parameters, config=config
+            data=openapi.paths, schemas=schemas, parameters=parameters, default_security=openapi.security, config=config
         )
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
