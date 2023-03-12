@@ -3,5 +3,13 @@
     "config:base",
     ":semanticCommitTypeAll(chore)"
   ],
-  "rangeStrategy": "widen"
+  "rangeStrategy": "widen",
+  "regexManagers": [
+    {
+      "fileMatch": ["/release.*\\.yml"],
+      "matchStrings": ["knope.*\\s*with:\\s*version:\\s*(?<currentValue>.*?)$"],
+      "depNameTemplate": "knope",
+      "datasourceTemplate": "crate"
+    }
+  ]
 }
