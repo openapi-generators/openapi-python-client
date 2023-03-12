@@ -16,14 +16,5 @@
       "datasourceTemplate": "crate",
       "versioningTemplate": "semver"
     }
-  ],
-  "packageRules": [
-    {
-      "packagePatterns": [
-        "^knope$"
-      ],
-      "groupName": "knope",
-      "rangeStrategy": "pin"
-    }
   ]
 }
