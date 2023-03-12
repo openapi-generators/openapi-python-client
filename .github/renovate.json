@@ -6,7 +6,7 @@
   "rangeStrategy": "widen",
   "regexManagers": [
     {
-      "fileMatch": ["release.*.yml"],
+      "fileMatch": ["/release.*\\.yml"],
       "matchStrings": ["knope.*\\s*with:\\s*version:\\s*(?<currentValue>.*?)$"],
       "depNameTemplate": "knope",
       "datasourceTemplate": "crate"
