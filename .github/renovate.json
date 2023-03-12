@@ -7,7 +7,7 @@
   "regexManagers": [
     {
       "fileMatch": ["/release.*\\.yml"],
-      "matchStrings": ["knope.*\\s*with:\\s*version:\\s*(?<currentValue>.*?)$"],
+      "matchStrings": ["knope.*\\s*with:\\s*version:\\s*(?<currentValue>.*?)"],
       "depNameTemplate": "knope",
       "datasourceTemplate": "crate"
     }
