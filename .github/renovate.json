@@ -6,10 +6,23 @@
   "rangeStrategy": "widen",
   "regexManagers": [
     {
-      "fileMatch": ["release.*\\.yml"],
-      "matchStrings": ["version:\\s*(?<currentValue>.*)"],
+      "fileMatch": [
+        "release.*\\.yml"
+      ],
+      "matchStrings": [
+        "version:\\s*(?<currentValue>.*)"
+      ],
       "depNameTemplate": "knope",
       "datasourceTemplate": "crate"
+    }
+  ],
+  "packageRules": [
+    {
+      "packagePatterns": [
+        "^knope$"
+      ],
+      "groupName": "knope",
+      "rangeStrategy": "pin"
     }
   ]
 }
