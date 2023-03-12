@@ -13,7 +13,8 @@
         "version:\\s*(?<currentValue>.*)"
       ],
       "depNameTemplate": "knope",
-      "datasourceTemplate": "crate"
+      "datasourceTemplate": "crate",
+      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
