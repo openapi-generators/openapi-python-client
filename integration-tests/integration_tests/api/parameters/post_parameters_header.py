@@ -50,11 +50,16 @@ def _parse_response(
     if response.status_code == HTTPStatus.BAD_REQUEST:
         response_400 = PublicError.from_dict(response.json())
 
+        if client.raise_on_error_status:
+            raise errors.ExpectedErrorStatus(f"Failed status code: {response.status_code}")
         return response_400
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+    if response.status_code >= 400:
+        if client.raise_on_unexpected_status or client.raise_on_error_status:
+            raise errors.UnexpectedErrorStatus(f"Unexpected status code: {response.status_code}")
     else:
-        return None
+        if client.raise_on_unexpected_status:
+            raise errors.UnexpectedSuccessStatus(f"Unexpected status code: {response.status_code}")
+    return None
 
 
 def _build_response(
@@ -84,6 +89,7 @@ def sync_detailed(
         integer_header (int):
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -123,6 +129,7 @@ def sync(
         integer_header (int):
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -155,6 +162,7 @@ async def asyncio_detailed(
         integer_header (int):
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -192,6 +200,7 @@ async def asyncio(
         integer_header (int):
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 

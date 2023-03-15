@@ -2,9 +2,29 @@
 
 
 class UnexpectedStatus(Exception):
-    """Raised by api functions when the response status an undocumented status and Client.raise_on_unexpected_status is True"""
-
-    ...
+    """Raised by api functions when the response status is undocumented and Client.raise_on_unexpected_status is True"""
 
 
-__all__ = ["UnexpectedStatus"]
+class ErrorStatus(Exception):
+    """Raised by api functions when the response status marks an error"""
+
+
+class ExpectedErrorStatus(ErrorStatus):
+    pass
+
+
+class UnexpectedErrorStatus(ErrorStatus, UnexpectedStatus):
+    pass
+
+
+class UnexpectedSuccessStatus(UnexpectedStatus):
+    pass
+
+
+__all__ = [
+    "ErrorStatus",
+    "ExpectedErrorStatus",
+    "UnexpectedErrorStatus",
+    "UnexpectedStatus",
+    "UnexpectedSuccessStatus",
+]

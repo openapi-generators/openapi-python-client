@@ -16,8 +16,10 @@ class Client:
             httpx.TimeoutException if this is exceeded.
         verify_ssl: Whether or not to verify the SSL certificate of the API server. This should be True in production,
             but can be set to False for testing purposes.
-        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
-            status code that was not documented in the source OpenAPI document.
+        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a status code
+            that was not documented in the source OpenAPI document. Can be combined with `raise_on_error_status`.
+        raise_on_error_status: Whether or not to raise an errors.ErrorStatus on all status codes >= 400, regardless of
+            whether they are expected or not. Can be combined with `raise_on_unexpected_status`.
     """
 
     base_url: str
@@ -26,6 +28,7 @@ class Client:
     timeout: float = attr.ib(5.0, kw_only=True)
     verify_ssl: Union[str, bool, ssl.SSLContext] = attr.ib(True, kw_only=True)
     raise_on_unexpected_status: bool = attr.ib(False, kw_only=True)
+    raise_on_error_status: bool = attr.ib(False, kw_only=True)
 
     def get_headers(self) -> Dict[str, str]:
         """Get headers to be used in all endpoints"""

@@ -44,11 +44,16 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Uni
     if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         response_422 = HTTPValidationError.from_dict(response.json())
 
+        if client.raise_on_error_status:
+            raise errors.ExpectedErrorStatus(f"Failed status code: {response.status_code}")
         return response_422
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+    if response.status_code >= 400:
+        if client.raise_on_unexpected_status or client.raise_on_error_status:
+            raise errors.UnexpectedErrorStatus(f"Unexpected status code: {response.status_code}")
     else:
-        return None
+        if client.raise_on_unexpected_status:
+            raise errors.UnexpectedSuccessStatus(f"Unexpected status code: {response.status_code}")
+    return None
 
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
@@ -71,6 +76,7 @@ def sync_detailed(
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -102,6 +108,7 @@ def sync(
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -126,6 +133,7 @@ async def asyncio_detailed(
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -155,6 +163,7 @@ async def asyncio(
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 

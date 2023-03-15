@@ -29,10 +29,13 @@ def _get_kwargs(
 def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
     if response.status_code == HTTPStatus.OK:
         return None
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+    if response.status_code >= 400:
+        if client.raise_on_unexpected_status or client.raise_on_error_status:
+            raise errors.UnexpectedErrorStatus(f"Unexpected status code: {response.status_code}")
     else:
-        return None
+        if client.raise_on_unexpected_status:
+            raise errors.UnexpectedSuccessStatus(f"Unexpected status code: {response.status_code}")
+    return None
 
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
@@ -50,6 +53,7 @@ def sync_detailed(
 ) -> Response[Any]:
     """
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
@@ -75,6 +79,7 @@ async def asyncio_detailed(
 ) -> Response[Any]:
     """
     Raises:
+        errors.ErrorStatus: If the server returns an error status code and Client.raise_on_error_status is True.
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
