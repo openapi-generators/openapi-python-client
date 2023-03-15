@@ -128,7 +128,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[PostParametersHeaderResponse200, PublicError]]
+        Union[PostParametersHeaderResponse200, PublicError]
     """
 
     return sync_detailed(
@@ -197,7 +197,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[PostParametersHeaderResponse200, PublicError]]
+        Union[PostParametersHeaderResponse200, PublicError]
     """
 
     return (

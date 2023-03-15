@@ -101,7 +101,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, str]]
+        Union[HTTPValidationError, str]
     """
 
     return sync_detailed(
@@ -154,7 +154,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, str]]
+        Union[HTTPValidationError, str]
     """
 
     return (
