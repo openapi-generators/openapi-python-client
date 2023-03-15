@@ -9,7 +9,7 @@ T = TypeVar("T", bound="AFormData")
 
 @attr.s(auto_attribs=True)
 class AFormData:
-    """
+    r"""
     Attributes:
         an_required_field (str):
         an_optional_field (Union[Unset, str]):

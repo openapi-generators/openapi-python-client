@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ModelWithRecursiveRef")
 
 @attr.s(auto_attribs=True)
 class ModelWithRecursiveRef:
-    """
+    r"""
     Attributes:
         recursive (Union[Unset, ModelWithRecursiveRef]):
     """

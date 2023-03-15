@@ -15,7 +15,7 @@ T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
 
 @attr.s(auto_attribs=True)
 class ModelWithPrimitiveAdditionalProperties:
-    """
+    r"""
     Attributes:
         a_date_holder (Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]):
     """

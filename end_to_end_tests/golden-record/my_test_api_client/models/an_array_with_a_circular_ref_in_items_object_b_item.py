@@ -13,7 +13,7 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectBItem")
 
 @attr.s(auto_attribs=True)
 class AnArrayWithACircularRefInItemsObjectBItem:
-    """
+    r"""
     Attributes:
         circular (Union[Unset, List['AnArrayWithACircularRefInItemsObjectAItem']]):
     """

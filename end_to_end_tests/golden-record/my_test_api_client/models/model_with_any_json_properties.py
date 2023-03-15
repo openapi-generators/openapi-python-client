@@ -13,7 +13,7 @@ T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 
 @attr.s(auto_attribs=True)
 class ModelWithAnyJsonProperties:
-    """ """
+    r""" """
 
     additional_properties: Dict[
         str, Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]

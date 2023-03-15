@@ -7,7 +7,7 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeOptionalObject")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostSomeOptionalObject:
-    """
+    r"""
     Attributes:
         foo (str):
     """

@@ -56,7 +56,7 @@ def sync_detailed(
     client: Client,
     common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
-    """
+    r"""
     Args:
         common (Union[Unset, None, str]):
 
@@ -86,7 +86,7 @@ async def asyncio_detailed(
     client: Client,
     common: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
-    """
+    r"""
     Args:
         common (Union[Unset, None, str]):
 

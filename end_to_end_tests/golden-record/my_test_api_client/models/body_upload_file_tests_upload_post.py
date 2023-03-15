@@ -27,7 +27,7 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPost:
-    """
+    r"""
     Attributes:
         some_file (File):
         some_object (BodyUploadFileTestsUploadPostSomeObject):

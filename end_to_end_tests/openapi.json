@@ -2223,6 +2223,10 @@
             "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA"
           }
         }
+      },
+      "ModelWithBackslashInDescription": {
+        "type": "object",
+        "description": "Description with special character: \\"
       }
     },
     "parameters": {

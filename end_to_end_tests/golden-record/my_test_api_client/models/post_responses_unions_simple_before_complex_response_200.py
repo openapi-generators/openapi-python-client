@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200")
 
 @attr.s(auto_attribs=True)
 class PostResponsesUnionsSimpleBeforeComplexResponse200:
-    """
+    r"""
     Attributes:
         a (Union['PostResponsesUnionsSimpleBeforeComplexResponse200AType1', str]):
     """

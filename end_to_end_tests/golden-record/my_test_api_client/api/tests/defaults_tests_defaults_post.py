@@ -137,7 +137,7 @@ def sync_detailed(
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Defaults
+    r"""Defaults
 
     Args:
         string_prop (str):  Default: 'the default string'.
@@ -198,7 +198,7 @@ def sync(
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Defaults
+    r"""Defaults
 
     Args:
         string_prop (str):  Default: 'the default string'.
@@ -252,7 +252,7 @@ async def asyncio_detailed(
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Defaults
+    r"""Defaults
 
     Args:
         string_prop (str):  Default: 'the default string'.
@@ -311,7 +311,7 @@ async def asyncio(
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Defaults
+    r"""Defaults
 
     Args:
         string_prop (str):  Default: 'the default string'.

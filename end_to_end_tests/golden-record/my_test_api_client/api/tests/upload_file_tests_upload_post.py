@@ -60,7 +60,7 @@ def sync_detailed(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Upload File
+    r"""Upload File
 
      Upload a file
 
@@ -93,7 +93,7 @@ def sync(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Upload File
+    r"""Upload File
 
      Upload a file
 
@@ -119,7 +119,7 @@ async def asyncio_detailed(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Upload File
+    r"""Upload File
 
      Upload a file
 
@@ -150,7 +150,7 @@ async def asyncio(
     client: Client,
     multipart_data: BodyUploadFileTestsUploadPost,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Upload File
+    r"""Upload File
 
      Upload a file
 

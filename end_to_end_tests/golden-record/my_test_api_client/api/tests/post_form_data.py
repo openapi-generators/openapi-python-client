@@ -52,7 +52,7 @@ def sync_detailed(
     client: Client,
     form_data: AFormData,
 ) -> Response[Any]:
-    """Post form data
+    r"""Post form data
 
      Post form data
 
@@ -82,7 +82,7 @@ async def asyncio_detailed(
     client: Client,
     form_data: AFormData,
 ) -> Response[Any]:
-    """Post form data
+    r"""Post form data
 
      Post form data
 

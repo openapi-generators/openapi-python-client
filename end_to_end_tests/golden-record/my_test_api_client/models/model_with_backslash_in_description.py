@@ -2,12 +2,14 @@ from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-T = TypeVar("T", bound="Import")
+T = TypeVar("T", bound="ModelWithBackslashInDescription")
 
 
 @attr.s(auto_attribs=True)
-class Import:
-    r""" """
+class ModelWithBackslashInDescription:
+    r"""Description with special character: \
+
+    """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
@@ -22,10 +24,10 @@ class Import:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        import_ = cls()
+        model_with_backslash_in_description = cls()
 
-        import_.additional_properties = d
-        return import_
+        model_with_backslash_in_description.additional_properties = d
+        return model_with_backslash_in_description
 
     @property
     def additional_keys(self) -> List[str]:

@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ModelWithRecursiveRefInAdditionalProperties")
 
 @attr.s(auto_attribs=True)
 class ModelWithRecursiveRefInAdditionalProperties:
-    """ """
+    r""" """
 
     additional_properties: Dict[str, "ModelWithRecursiveRefInAdditionalProperties"] = attr.ib(init=False, factory=dict)
 

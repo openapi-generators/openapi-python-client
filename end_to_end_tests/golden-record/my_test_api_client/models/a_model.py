@@ -19,7 +19,7 @@ T = TypeVar("T", bound="AModel")
 
 @attr.s(auto_attribs=True)
 class AModel:
-    """A Model for testing all the ways custom objects can be used
+    r"""A Model for testing all the ways custom objects can be used
 
     Attributes:
         an_enum_value (AnEnum): For testing Enums in all the ways they can be used

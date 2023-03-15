@@ -15,7 +15,7 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlined")
 
 @attr.s(auto_attribs=True)
 class ModelWithAdditionalPropertiesInlined:
-    """
+    r"""
     Attributes:
         a_number (Union[Unset, float]):
     """

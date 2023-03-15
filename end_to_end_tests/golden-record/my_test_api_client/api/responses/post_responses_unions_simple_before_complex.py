@@ -57,7 +57,7 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200]:
-    """Regression test for #603
+    r"""Regression test for #603
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -83,7 +83,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[PostResponsesUnionsSimpleBeforeComplexResponse200]:
-    """Regression test for #603
+    r"""Regression test for #603
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -102,7 +102,7 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200]:
-    """Regression test for #603
+    r"""Regression test for #603
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -126,7 +126,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[PostResponsesUnionsSimpleBeforeComplexResponse200]:
-    """Regression test for #603
+    r"""Regression test for #603
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

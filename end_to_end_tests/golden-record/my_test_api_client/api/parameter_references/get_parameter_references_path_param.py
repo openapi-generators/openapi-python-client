@@ -70,7 +70,7 @@ def sync_detailed(
     header_param: str,
     cookie_param: str,
 ) -> Response[Any]:
-    """Test different types of parameter references
+    r"""Test different types of parameter references
 
     Args:
         path_param (str):
@@ -113,7 +113,7 @@ async def asyncio_detailed(
     header_param: str,
     cookie_param: str,
 ) -> Response[Any]:
-    """Test different types of parameter references
+    r"""Test different types of parameter references
 
     Args:
         path_param (str):

@@ -10,7 +10,7 @@ T = TypeVar("T", bound="AllOfHasPropertiesButNoType")
 
 @attr.s(auto_attribs=True)
 class AllOfHasPropertiesButNoType:
-    """
+    r"""
     Attributes:
         a_sub_property (Union[Unset, str]):
         type (Union[Unset, str]):

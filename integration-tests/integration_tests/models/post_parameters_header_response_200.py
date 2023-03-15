@@ -7,7 +7,7 @@ T = TypeVar("T", bound="PostParametersHeaderResponse200")
 
 @attr.s(auto_attribs=True)
 class PostParametersHeaderResponse200:
-    """
+    r"""
     Attributes:
         boolean (bool): Echo of the 'Boolean-Header' input parameter from the header.
         string (str): Echo of the 'String-Header' input parameter from the header.

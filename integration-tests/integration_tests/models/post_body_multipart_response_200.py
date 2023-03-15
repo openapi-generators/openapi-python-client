@@ -7,7 +7,7 @@ T = TypeVar("T", bound="PostBodyMultipartResponse200")
 
 @attr.s(auto_attribs=True)
 class PostBodyMultipartResponse200:
-    """
+    r"""
     Attributes:
         a_string (str): Echo of the 'a_string' input parameter from the form.
         file_data (str): Echo of content of the 'file' input parameter from the form.

@@ -11,7 +11,7 @@ T = TypeVar("T", bound="ModelWithDateTimeProperty")
 
 @attr.s(auto_attribs=True)
 class ModelWithDateTimeProperty:
-    """
+    r"""
     Attributes:
         datetime_ (Union[Unset, datetime.datetime]):
     """

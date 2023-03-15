@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ModelReferenceWithPeriods")
 
 @attr.s(auto_attribs=True)
 class ModelReferenceWithPeriods:
-    """A Model with periods in its reference"""
+    r"""A Model with periods in its reference"""
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

@@ -63,7 +63,7 @@ def sync_detailed(
     client: Client,
     multipart_data: List[File],
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Upload multiple files
+    r"""Upload multiple files
 
      Upload several files in the same request
 
@@ -96,7 +96,7 @@ def sync(
     client: Client,
     multipart_data: List[File],
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Upload multiple files
+    r"""Upload multiple files
 
      Upload several files in the same request
 
@@ -122,7 +122,7 @@ async def asyncio_detailed(
     client: Client,
     multipart_data: List[File],
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Upload multiple files
+    r"""Upload multiple files
 
      Upload several files in the same request
 
@@ -153,7 +153,7 @@ async def asyncio(
     client: Client,
     multipart_data: List[File],
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Upload multiple files
+    r"""Upload multiple files
 
      Upload several files in the same request
 
