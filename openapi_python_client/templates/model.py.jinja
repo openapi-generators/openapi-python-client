@@ -35,7 +35,7 @@ T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ class_name }}:
-    """{% if model.title %}{{ model.title | wordwrap(116) }}
+    r"""{% if model.title %}{{ model.title | wordwrap(116) }}
 
     {% endif -%}
     {%- if model.description %}{{ model.description | wordwrap(116) }}
