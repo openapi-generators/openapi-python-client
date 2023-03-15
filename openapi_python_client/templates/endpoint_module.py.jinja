@@ -68,15 +68,26 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         {% else %}
         {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
         {% endif %}
+        {% if response.status_code >= 400 %}
+        if client.raise_on_error_status:
+            raise errors.ExpectedErrorStatus(f"Failed status code: {response.status_code}")
+        {% endif %}
         return {{ response.prop.python_name }}
         {% else %}
+        {% if response.status_code >= 400 %}
+        if client.raise_on_error_status:
+            raise errors.ExpectedErrorStatus(f"Failed status code: {response.status_code}")
+        {% endif %}
         return None
         {% endif %}
     {% endfor %}
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+    if response.status_code >= 400:
+        if client.raise_on_unexpected_status or client.raise_on_error_status:
+            raise errors.UnexpectedErrorStatus(f"Unexpected status code: {response.status_code}")
     else:
-        return None
+        if client.raise_on_unexpected_status:
+            raise errors.UnexpectedSuccessStatus(f"Unexpected status code: {response.status_code}")
+    return None
 
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ return_string }}]:
