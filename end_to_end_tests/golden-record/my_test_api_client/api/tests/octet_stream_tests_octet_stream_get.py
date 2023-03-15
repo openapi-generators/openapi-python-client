@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from io import BytesIO
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Union
 
 import httpx
 
@@ -28,7 +28,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[File]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Union[File, None]:
     if response.status_code == HTTPStatus.OK:
         response_200 = File(payload=BytesIO(response.content))
 
@@ -39,7 +39,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Fil
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[File]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[File, None]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -51,7 +51,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Fil
 def sync_detailed(
     *,
     client: Client,
-) -> Response[File]:
+) -> Response[Union[File, None]]:
     """Octet Stream
 
     Raises:
@@ -59,7 +59,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[File]
+        Response[Union[File, None]]
     """
 
     kwargs = _get_kwargs(
@@ -77,7 +77,7 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-) -> Optional[File]:
+) -> Union[File, None]:
     """Octet Stream
 
     Raises:
@@ -85,7 +85,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        File
+        Union[File, None]
     """
 
     return sync_detailed(
@@ -96,7 +96,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-) -> Response[File]:
+) -> Response[Union[File, None]]:
     """Octet Stream
 
     Raises:
@@ -104,7 +104,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[File]
+        Response[Union[File, None]]
     """
 
     kwargs = _get_kwargs(
@@ -120,7 +120,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-) -> Optional[File]:
+) -> Union[File, None]:
     """Octet Stream
 
     Raises:
@@ -128,7 +128,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        File
+        Union[File, None]
     """
 
     return (

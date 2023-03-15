@@ -516,12 +516,12 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
-        if len(types) == 0:
-            return "Any"
+        types = {response.prop.get_type_string(quoted=False) for response in self.responses}
+        # We can always return None if client.raise_on_unexpected_status is unset
+        types.add("None")
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string(quoted=False)
-        return f"Union[{', '.join(types)}]"
+            return next(iter(types))
+        return f"Union[{', '.join(sorted(types))}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:
         """Iterate through all the parameters of this endpoint"""

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import httpx
 
@@ -33,7 +33,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[None]:
+def _parse_response(*, client: Client, response: httpx.Response) -> None:
     if response.status_code == HTTPStatus.OK:
         return None
     if client.raise_on_unexpected_status:

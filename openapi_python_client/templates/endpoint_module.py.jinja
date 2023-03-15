@@ -60,7 +60,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ return_string }}]:
+def _parse_response(*, client: Client, response: httpx.Response) -> {{ return_string }}:
     {% for response in endpoint.responses %}
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
@@ -113,7 +113,7 @@ def sync_detailed(
 {% if parsed_responses %}
 def sync(
     {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+) -> {{ return_string }}:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return sync_detailed(
@@ -140,7 +140,7 @@ async def asyncio_detailed(
 {% if parsed_responses %}
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+) -> {{ return_string }}:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return (await asyncio_detailed(

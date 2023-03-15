@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Union, cast
 
 import httpx
 
@@ -27,7 +27,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[List[int]]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Union[List[int], None]:
     if response.status_code == HTTPStatus.OK:
         response_200 = cast(List[int], response.json())
 
@@ -38,7 +38,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Lis
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[List[int]]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[List[int], None]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -50,7 +50,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Lis
 def sync_detailed(
     *,
     client: Client,
-) -> Response[List[int]]:
+) -> Response[Union[List[int], None]]:
     """Get Basic List Of Integers
 
      Get a list of integers
@@ -60,7 +60,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[List[int]]
+        Response[Union[List[int], None]]
     """
 
     kwargs = _get_kwargs(
@@ -78,7 +78,7 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-) -> Optional[List[int]]:
+) -> Union[List[int], None]:
     """Get Basic List Of Integers
 
      Get a list of integers
@@ -88,7 +88,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        List[int]
+        Union[List[int], None]
     """
 
     return sync_detailed(
@@ -99,7 +99,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-) -> Response[List[int]]:
+) -> Response[Union[List[int], None]]:
     """Get Basic List Of Integers
 
      Get a list of integers
@@ -109,7 +109,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[List[int]]
+        Response[Union[List[int], None]]
     """
 
     kwargs = _get_kwargs(
@@ -125,7 +125,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-) -> Optional[List[int]]:
+) -> Union[List[int], None]:
     """Get Basic List Of Integers
 
      Get a list of integers
@@ -135,7 +135,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        List[int]
+        Union[List[int], None]
     """
 
     return (

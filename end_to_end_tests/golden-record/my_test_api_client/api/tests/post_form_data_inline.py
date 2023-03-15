@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Union
 
 import httpx
 
@@ -30,7 +30,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Union[Any, None]:
     if response.status_code == HTTPStatus.OK:
         response_200 = response.json()
         return response_200
@@ -40,7 +40,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, None]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -53,7 +53,7 @@ def sync_detailed(
     *,
     client: Client,
     form_data: PostFormDataInlineData,
-) -> Response[Any]:
+) -> Response[Union[Any, None]]:
     """Post form data (inline schema)
 
      Post form data (inline schema)
@@ -63,7 +63,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Union[Any, None]]
     """
 
     kwargs = _get_kwargs(
@@ -83,7 +83,7 @@ def sync(
     *,
     client: Client,
     form_data: PostFormDataInlineData,
-) -> Optional[Any]:
+) -> Union[Any, None]:
     """Post form data (inline schema)
 
      Post form data (inline schema)
@@ -93,7 +93,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Union[Any, None]
     """
 
     return sync_detailed(
@@ -106,7 +106,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     form_data: PostFormDataInlineData,
-) -> Response[Any]:
+) -> Response[Union[Any, None]]:
     """Post form data (inline schema)
 
      Post form data (inline schema)
@@ -116,7 +116,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Union[Any, None]]
     """
 
     kwargs = _get_kwargs(
@@ -134,7 +134,7 @@ async def asyncio(
     *,
     client: Client,
     form_data: PostFormDataInlineData,
-) -> Optional[Any]:
+) -> Union[Any, None]:
     """Post form data (inline schema)
 
      Post form data (inline schema)
@@ -144,7 +144,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Union[Any, None]
     """
 
     return (
