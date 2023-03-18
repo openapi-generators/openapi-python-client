@@ -13,7 +13,7 @@ T = TypeVar("T", bound="ModelWithCircularRefA")
 
 @attr.s(auto_attribs=True)
 class ModelWithCircularRefA:
-    r"""
+    """
     Attributes:
         circular (Union[Unset, ModelWithCircularRefB]):
     """

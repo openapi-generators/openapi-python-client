@@ -50,7 +50,7 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[List[str]]:
-    r"""Get Basic List Of Strings
+    """Get Basic List Of Strings
 
      Get a list of strings
 
@@ -78,7 +78,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[str]]:
-    r"""Get Basic List Of Strings
+    """Get Basic List Of Strings
 
      Get a list of strings
 
@@ -99,7 +99,7 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[List[str]]:
-    r"""Get Basic List Of Strings
+    """Get Basic List Of Strings
 
      Get a list of strings
 
@@ -125,7 +125,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[str]]:
-    r"""Get Basic List Of Strings
+    """Get Basic List Of Strings
 
      Get a list of strings
 

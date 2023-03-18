@@ -60,7 +60,7 @@ def sync_detailed(
     client: Client,
     json_body: AModel,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    r"""Path with callback
+    """Path with callback
 
      Try sending a request related to a callback
 
@@ -93,7 +93,7 @@ def sync(
     client: Client,
     json_body: AModel,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    r"""Path with callback
+    """Path with callback
 
      Try sending a request related to a callback
 
@@ -119,7 +119,7 @@ async def asyncio_detailed(
     client: Client,
     json_body: AModel,
 ) -> Response[Union[Any, HTTPValidationError]]:
-    r"""Path with callback
+    """Path with callback
 
      Try sending a request related to a callback
 
@@ -150,7 +150,7 @@ async def asyncio(
     client: Client,
     json_body: AModel,
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    r"""Path with callback
+    """Path with callback
 
      Try sending a request related to a callback
 

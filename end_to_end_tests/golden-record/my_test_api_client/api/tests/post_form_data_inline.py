@@ -52,7 +52,7 @@ def sync_detailed(
     client: Client,
     form_data: PostFormDataInlineData,
 ) -> Response[Any]:
-    r"""Post form data (inline schema)
+    """Post form data (inline schema)
 
      Post form data (inline schema)
 
@@ -82,7 +82,7 @@ async def asyncio_detailed(
     client: Client,
     form_data: PostFormDataInlineData,
 ) -> Response[Any]:
-    r"""Post form data (inline schema)
+    """Post form data (inline schema)
 
      Post form data (inline schema)
 

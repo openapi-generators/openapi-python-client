@@ -56,7 +56,7 @@ def sync_detailed(
     client: Client,
     import_: str,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         import_ (str):
 
@@ -86,7 +86,7 @@ async def asyncio_detailed(
     client: Client,
     import_: str,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         import_ (str):
 

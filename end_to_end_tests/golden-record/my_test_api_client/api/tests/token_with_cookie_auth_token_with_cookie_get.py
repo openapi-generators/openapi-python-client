@@ -54,7 +54,7 @@ def sync_detailed(
     client: Client,
     my_token: str,
 ) -> Response[Any]:
-    r"""TOKEN_WITH_COOKIE
+    """TOKEN_WITH_COOKIE
 
      Test optional cookie parameters
 
@@ -87,7 +87,7 @@ async def asyncio_detailed(
     client: Client,
     my_token: str,
 ) -> Response[Any]:
-    r"""TOKEN_WITH_COOKIE
+    """TOKEN_WITH_COOKIE
 
      Test optional cookie parameters
 

@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
 
 @attr.s(auto_attribs=True)
 class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
-    r"""
+    """
     Attributes:
         extra_props_prop (Union[Unset, str]):
     """

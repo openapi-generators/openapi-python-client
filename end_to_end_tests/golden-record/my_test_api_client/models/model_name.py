@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ModelName")
 
 @attr.s(auto_attribs=True)
 class ModelName:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

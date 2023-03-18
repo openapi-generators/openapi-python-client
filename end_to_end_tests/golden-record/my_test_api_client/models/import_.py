@@ -7,7 +7,7 @@ T = TypeVar("T", bound="Import")
 
 @attr.s(auto_attribs=True)
 class Import:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

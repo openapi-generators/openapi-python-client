@@ -48,7 +48,7 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[Any]:
-    r"""No Response
+    """No Response
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -74,7 +74,7 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[Any]:
-    r"""No Response
+    """No Response
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

@@ -80,7 +80,7 @@ def sync_detailed(
     int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
     string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         boolean_header (Union[Unset, bool]):
         string_header (Union[Unset, str]):
@@ -125,7 +125,7 @@ async def asyncio_detailed(
     int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
     string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         boolean_header (Union[Unset, bool]):
         string_header (Union[Unset, str]):

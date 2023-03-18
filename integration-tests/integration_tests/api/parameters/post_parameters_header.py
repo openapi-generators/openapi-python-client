@@ -76,7 +76,7 @@ def sync_detailed(
     number_header: float,
     integer_header: int,
 ) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
-    r"""
+    """
     Args:
         boolean_header (bool):
         string_header (str):
@@ -115,7 +115,7 @@ def sync(
     number_header: float,
     integer_header: int,
 ) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
-    r"""
+    """
     Args:
         boolean_header (bool):
         string_header (str):
@@ -147,7 +147,7 @@ async def asyncio_detailed(
     number_header: float,
     integer_header: int,
 ) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
-    r"""
+    """
     Args:
         boolean_header (bool):
         string_header (str):
@@ -184,7 +184,7 @@ async def asyncio(
     number_header: float,
     integer_header: int,
 ) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
-    r"""
+    """
     Args:
         boolean_header (bool):
         string_header (str):

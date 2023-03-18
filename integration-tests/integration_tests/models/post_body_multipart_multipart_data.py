@@ -10,7 +10,7 @@ T = TypeVar("T", bound="PostBodyMultipartMultipartData")
 
 @attr.s(auto_attribs=True)
 class PostBodyMultipartMultipartData:
-    r"""
+    """
     Attributes:
         a_string (str):
         file (File): For the sake of this test, include a file name and content type. The payload should also be valid

@@ -9,7 +9,7 @@ T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectItem")
 
 @attr.s(auto_attribs=True)
 class AnArrayWithARecursiveRefInItemsObjectItem:
-    r"""
+    """
     Attributes:
         recursive (Union[Unset, List['AnArrayWithARecursiveRefInItemsObjectItem']]):
     """

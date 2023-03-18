@@ -13,7 +13,7 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalProperties
 
 @attr.s(auto_attribs=True)
 class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]] = attr.ib(
         init=False, factory=dict

@@ -7,7 +7,7 @@ T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectAdditionalPropertie
 
 @attr.s(auto_attribs=True)
 class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = attr.ib(
         init=False, factory=dict

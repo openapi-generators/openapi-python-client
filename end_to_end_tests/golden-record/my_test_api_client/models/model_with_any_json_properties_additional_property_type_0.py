@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ModelWithAnyJsonPropertiesAdditionalPropertyType0")
 
 @attr.s(auto_attribs=True)
 class ModelWithAnyJsonPropertiesAdditionalPropertyType0:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, str] = attr.ib(init=False, factory=dict)
 

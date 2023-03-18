@@ -10,7 +10,7 @@ T = TypeVar("T", bound="AllOfSubModel")
 
 @attr.s(auto_attribs=True)
 class AllOfSubModel:
-    r"""
+    """
     Attributes:
         a_sub_property (Union[Unset, str]):
         type (Union[Unset, str]):

@@ -58,7 +58,7 @@ def sync_detailed(
     client: Client,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         param_path (str):
         param_query (Union[Unset, None, str]):
@@ -91,7 +91,7 @@ async def asyncio_detailed(
     client: Client,
     param_query: Union[Unset, None, str] = UNSET,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         param_path (str):
         param_query (Union[Unset, None, str]):

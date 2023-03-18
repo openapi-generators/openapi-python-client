@@ -66,7 +66,7 @@ def sync_detailed(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Response[Union[PostBodyMultipartResponse200, PublicError]]:
-    r"""
+    """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
 
@@ -96,7 +96,7 @@ def sync(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Optional[Union[PostBodyMultipartResponse200, PublicError]]:
-    r"""
+    """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
 
@@ -119,7 +119,7 @@ async def asyncio_detailed(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Response[Union[PostBodyMultipartResponse200, PublicError]]:
-    r"""
+    """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
 
@@ -147,7 +147,7 @@ async def asyncio(
     client: Client,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Optional[Union[PostBodyMultipartResponse200, PublicError]]:
-    r"""
+    """
     Args:
         multipart_data (PostBodyMultipartMultipartData):
 

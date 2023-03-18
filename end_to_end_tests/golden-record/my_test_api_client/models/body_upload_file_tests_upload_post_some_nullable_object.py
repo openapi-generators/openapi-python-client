@@ -9,7 +9,7 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeNullableObject")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostSomeNullableObject:
-    r"""
+    """
     Attributes:
         bar (Union[Unset, str]):
     """

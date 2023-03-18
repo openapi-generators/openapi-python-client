@@ -13,7 +13,7 @@ T = TypeVar("T", bound="AModelWithPropertiesReferenceThatAreNotObject")
 
 @attr.s(auto_attribs=True)
 class AModelWithPropertiesReferenceThatAreNotObject:
-    r"""
+    """
     Attributes:
         enum_properties_ref (List[AnEnum]):
         str_properties_ref (List[str]):

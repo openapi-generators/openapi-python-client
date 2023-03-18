@@ -7,7 +7,7 @@ T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200AType1"
 
 @attr.s(auto_attribs=True)
 class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

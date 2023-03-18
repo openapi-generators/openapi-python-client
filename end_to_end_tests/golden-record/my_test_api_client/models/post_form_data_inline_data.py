@@ -9,7 +9,7 @@ T = TypeVar("T", bound="PostFormDataInlineData")
 
 @attr.s(auto_attribs=True)
 class PostFormDataInlineData:
-    r"""
+    """
     Attributes:
         a_required_field (str):
         an_optional_field (Union[Unset, str]):

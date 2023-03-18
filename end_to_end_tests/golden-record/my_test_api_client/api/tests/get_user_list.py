@@ -115,7 +115,7 @@ def sync_detailed(
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List["AModel"]]]:
-    r"""Get List
+    """Get List
 
      Get a list of things
 
@@ -157,7 +157,7 @@ def sync(
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
-    r"""Get List
+    """Get List
 
      Get a list of things
 
@@ -192,7 +192,7 @@ async def asyncio_detailed(
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List["AModel"]]]:
-    r"""Get List
+    """Get List
 
      Get a list of things
 
@@ -232,7 +232,7 @@ async def asyncio(
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
-    r"""Get List
+    """Get List
 
      Get a list of things
 

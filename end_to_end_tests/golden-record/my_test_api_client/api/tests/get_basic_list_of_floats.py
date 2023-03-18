@@ -50,7 +50,7 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[List[float]]:
-    r"""Get Basic List Of Floats
+    """Get Basic List Of Floats
 
      Get a list of floats
 
@@ -78,7 +78,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[List[float]]:
-    r"""Get Basic List Of Floats
+    """Get Basic List Of Floats
 
      Get a list of floats
 
@@ -99,7 +99,7 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[List[float]]:
-    r"""Get Basic List Of Floats
+    """Get Basic List Of Floats
 
      Get a list of floats
 
@@ -125,7 +125,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[List[float]]:
-    r"""Get Basic List Of Floats
+    """Get Basic List Of Floats
 
      Get a list of floats
 

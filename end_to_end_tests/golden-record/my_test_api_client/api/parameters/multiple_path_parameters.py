@@ -58,7 +58,7 @@ def sync_detailed(
     *,
     client: Client,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         param4 (str):
         param2 (int):
@@ -97,7 +97,7 @@ async def asyncio_detailed(
     *,
     client: Client,
 ) -> Response[Any]:
-    r"""
+    """
     Args:
         param4 (str):
         param2 (int):

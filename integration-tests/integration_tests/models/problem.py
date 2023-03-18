@@ -9,7 +9,7 @@ T = TypeVar("T", bound="Problem")
 
 @attr.s(auto_attribs=True)
 class Problem:
-    r"""
+    """
     Attributes:
         parameter_name (Union[Unset, str]):
         description (Union[Unset, str]):

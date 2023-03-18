@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ValidationError")
 
 @attr.s(auto_attribs=True)
 class ValidationError:
-    r"""
+    """
     Attributes:
         loc (List[str]):
         msg (str):

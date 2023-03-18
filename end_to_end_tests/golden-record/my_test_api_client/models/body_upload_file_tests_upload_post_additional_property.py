@@ -9,7 +9,7 @@ T = TypeVar("T", bound="BodyUploadFileTestsUploadPostAdditionalProperty")
 
 @attr.s(auto_attribs=True)
 class BodyUploadFileTestsUploadPostAdditionalProperty:
-    r"""
+    """
     Attributes:
         foo (Union[Unset, str]):
     """

@@ -11,7 +11,7 @@ T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesB")
 
 @attr.s(auto_attribs=True)
 class ModelWithCircularRefInAdditionalPropertiesB:
-    r""" """
+    """ """
 
     additional_properties: Dict[str, "ModelWithCircularRefInAdditionalPropertiesA"] = attr.ib(init=False, factory=dict)
 
