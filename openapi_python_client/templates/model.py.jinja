@@ -60,7 +60,7 @@ T = TypeVar("T", bound="{{ class_name }}")
 
 @attr.s(auto_attribs=True)
 class {{ class_name }}:
-    {{ safe_docstring(class_docstring_content(model)) }}
+    {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
 
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}

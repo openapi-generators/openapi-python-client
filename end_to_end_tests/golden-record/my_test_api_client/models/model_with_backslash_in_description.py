@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ModelWithBackslashInDescription")
 class ModelWithBackslashInDescription:
     r""" Description with special character: \
 
- """
+     """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
