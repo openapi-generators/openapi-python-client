@@ -2,9 +2,6 @@ name: Release
 
 on: workflow_dispatch
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -12,7 +9,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
@@ -27,7 +24,7 @@ jobs:
       - name: Bump Version & Create GitHub Release
         run: knope release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Install Poetry
         run: pip install --upgrade poetry
       - name: Push to PyPI
