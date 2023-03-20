@@ -9,7 +9,7 @@ from .. import Config
 from .. import schema as oai
 from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
-from .properties import AnyProperty, Property, Schemas, property_from_data
+from .properties import ResponseType, AnyProperty, Property, Schemas, property_from_data
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -19,6 +19,8 @@ class Response:
     status_code: HTTPStatus
     prop: Property
     source: str
+    failed_status: bool
+    data: object
 
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
@@ -49,6 +51,7 @@ def empty_response(
             description=description,
             example=None,
         ),
+        failed_status=status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES,
         source="None",
     )
 
@@ -95,6 +98,15 @@ def response_from_data(
             schemas,
         )
 
+    response_type_val = data.__dict__['x-response-type'] if 'x-response-type' in data.__dict__ else ResponseType.AUTO.value
+    if response_type_val not in ResponseType._value2member_map_:
+        return ParseError(data=data, detail=f"Unsupported x-response-type: {response_type}"), schemas
+    response_type = ResponseType(response_type_val)
+    if response_type == ResponseType.AUTO:
+        failed_status = status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES
+    else:
+        failed_status = response_type == ResponseType.FAILURE
+
     prop, schemas = property_from_data(
         name=response_name,
         required=True,
@@ -107,4 +119,4 @@ def response_from_data(
     if isinstance(prop, PropertyError):
         return prop, schemas
 
-    return Response(status_code=status_code, prop=prop, source=source), schemas
+    return Response(status_code=status_code, prop=prop, source=source, failed_status=failed_status, data=data), schemas

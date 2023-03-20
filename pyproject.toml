@@ -34,6 +34,7 @@ httpx = ">=0.15.4,<0.24.0"
 autoflake = "^1.4 || ^2.0.0"
 typing-extensions = { version = "*", python = "<3.8" }
 PyYAML = "^6.0"
+attr = "^0.3.2"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"

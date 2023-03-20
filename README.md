@@ -84,11 +84,12 @@ For a full example you can look at the `end_to_end_tests` directory which has an
 ## OpenAPI features supported
 
 1. All HTTP Methods
-1. JSON and form bodies, path and query parameters
-1. File uploads with multipart/form-data bodies
-1. float, string, int, date, datetime, string enums, and custom schemas or lists containing any of those
-1. html/text or application/json responses containing any of the previous types
-1. Bearer token security
+2. JSON and form bodies, path and query parameters
+3. File uploads with multipart/form-data bodies
+4. float, string, int, date, datetime, string enums, and custom schemas or lists containing any of those
+5. html/text or application/json responses containing any of the previous types
+6. Bearer token security
+7. Default security definition
 
 ## Configuration
 

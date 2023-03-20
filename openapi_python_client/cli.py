@@ -103,6 +103,14 @@ custom_template_path_options = {
     "resolve_path": True,
 }
 
+utility_functions_template_path_options = {
+    "help": "A path to a directory containing utility functions template(s)",
+    "file_okay": False,
+    "dir_okay": True,
+    "readable": True,
+    "resolve_path": True,
+}
+
 _meta_option = typer.Option(
     MetaType.POETRY,
     help="The type of metadata you want to generate.",
@@ -117,9 +125,11 @@ def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    utility_functions_template_path: Optional[pathlib.Path] = typer.Option(None, **utility_functions_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    output_path: Optional[pathlib.Path] = typer.Option(None, help="Set a path to store the api client"),
     fail_on_warning: bool = False,
 ) -> None:
     """Generate a new OpenAPI Client library"""
@@ -144,8 +154,10 @@ def generate(
         path=path,
         meta=meta,
         custom_template_path=custom_template_path,
+        utility_functions_template_path=utility_functions_template_path,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path,
     )
     handle_errors(errors, fail_on_warning)
 
@@ -156,9 +168,11 @@ def update(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    utility_functions_template_path: Optional[pathlib.Path] = typer.Option(None, **utility_functions_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    output_path: Optional[pathlib.Path] = typer.Option(None, help="Set a path to store the api client"),
     fail_on_warning: bool = False,
 ) -> None:
     """Update an existing OpenAPI Client library
@@ -189,5 +203,6 @@ def update(
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path,
     )
     handle_errors(errors, fail_on_warning)

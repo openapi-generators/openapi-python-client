@@ -4,4 +4,10 @@ class UnexpectedStatus(Exception):
     """ Raised by api functions when the response status an undocumented status and Client.raise_on_unexpected_status is True """
     ...
 
-__all__ = ["UnexpectedStatus"]
+
+class FailedStatus(Exception):
+    """ Raised by api functions when the response status is a failed status and Client.raise_on_failed_status is True """
+    error: object = None
+
+
+__all__ = ["UnexpectedStatus", "FailedStatus"]
