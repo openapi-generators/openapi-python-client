@@ -7,6 +7,6 @@ class UnexpectedStatus(Exception):
         self.status_code = status_code
         self.content = content
 
-        super().__init__(f"Unexpected status: {status_code}")
+        super().__init__(f"Unexpected status code: {status_code}")
 
 __all__ = ["UnexpectedStatus"]
