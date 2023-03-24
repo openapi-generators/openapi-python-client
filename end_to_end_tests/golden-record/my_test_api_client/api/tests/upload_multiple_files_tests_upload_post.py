@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 import httpx
 
@@ -36,7 +36,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Union[Any, HTTPValidationError, None]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Any:
     if response.status_code == HTTPStatus.OK:
         response_200 = response.json()
         return response_200
@@ -50,7 +50,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Union[Any, H
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, HTTPValidationError, None]]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -63,7 +63,7 @@ def sync_detailed(
     *,
     client: Client,
     multipart_data: List[File],
-) -> Response[Union[Any, HTTPValidationError, None]]:
+) -> Response[Any]:
     """Upload multiple files
 
      Upload several files in the same request
@@ -76,7 +76,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError, None]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -96,7 +96,7 @@ def sync(
     *,
     client: Client,
     multipart_data: List[File],
-) -> Union[Any, HTTPValidationError, None]:
+) -> Any:
     """Upload multiple files
 
      Upload several files in the same request
@@ -109,7 +109,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError, None]
+        Any
     """
 
     return sync_detailed(
@@ -122,7 +122,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     multipart_data: List[File],
-) -> Response[Union[Any, HTTPValidationError, None]]:
+) -> Response[Any]:
     """Upload multiple files
 
      Upload several files in the same request
@@ -135,7 +135,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError, None]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -153,7 +153,7 @@ async def asyncio(
     *,
     client: Client,
     multipart_data: List[File],
-) -> Union[Any, HTTPValidationError, None]:
+) -> Any:
     """Upload multiple files
 
      Upload several files in the same request
@@ -166,7 +166,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError, None]
+        Any
     """
 
     return (

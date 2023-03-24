@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import httpx
 
@@ -27,7 +27,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Union[Any, None]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Any:
     if response.status_code == HTTPStatus.OK:
         response_200 = response.json()
         return response_200
@@ -37,7 +37,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Union[Any, N
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, None]]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -49,7 +49,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Uni
 def sync_detailed(
     *,
     client: Client,
-) -> Response[Union[Any, None]]:
+) -> Response[Any]:
     """Unsupported Content
 
     Raises:
@@ -57,7 +57,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, None]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -75,7 +75,7 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-) -> Union[Any, None]:
+) -> Any:
     """Unsupported Content
 
     Raises:
@@ -83,7 +83,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, None]
+        Any
     """
 
     return sync_detailed(
@@ -94,7 +94,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-) -> Response[Union[Any, None]]:
+) -> Response[Any]:
     """Unsupported Content
 
     Raises:
@@ -102,7 +102,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, None]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -118,7 +118,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-) -> Union[Any, None]:
+) -> Any:
     """Unsupported Content
 
     Raises:
@@ -126,7 +126,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, None]
+        Any
     """
 
     return (

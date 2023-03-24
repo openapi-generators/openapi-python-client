@@ -521,6 +521,8 @@ class Endpoint:
         types.add("None")
         if len(types) == 1:
             return next(iter(types))
+        if "Any" in types:
+            return "Any"  # Any includes all other types
         return f"Union[{', '.join(sorted(types))}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:
