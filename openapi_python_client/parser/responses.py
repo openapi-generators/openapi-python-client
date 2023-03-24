@@ -9,7 +9,7 @@ from .. import Config
 from .. import schema as oai
 from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
-from .properties import AnyProperty, Property, Schemas, property_from_data
+from .properties import NoneProperty, Property, Schemas, property_from_data
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -40,7 +40,7 @@ def empty_response(
     """Return an untyped response, for when no response type is defined"""
     return Response(
         status_code=status_code,
-        prop=AnyProperty(
+        prop=NoneProperty(
             name=response_name,
             default=None,
             nullable=False,

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, cast
 
 import httpx
 
@@ -30,18 +30,20 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Union[Any, None]]:
     if response.status_code == HTTPStatus.OK:
-        return None
+        response_200 = cast(Any, response.json())
+        return response_200
     if response.status_code == HTTPStatus.UNAUTHORIZED:
-        return None
+        response_401 = cast(None, None)
+        return response_401
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, None]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -54,7 +56,7 @@ def sync_detailed(
     *,
     client: Client,
     my_token: str,
-) -> Response[Any]:
+) -> Response[Union[Any, None]]:
     """TOKEN_WITH_COOKIE
 
      Test optional cookie parameters
@@ -67,7 +69,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Union[Any, None]]
     """
 
     kwargs = _get_kwargs(
@@ -83,11 +85,11 @@ def sync_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio_detailed(
+def sync(
     *,
     client: Client,
     my_token: str,
-) -> Response[Any]:
+) -> Optional[Union[Any, None]]:
     """TOKEN_WITH_COOKIE
 
      Test optional cookie parameters
@@ -100,7 +102,33 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Union[Any, None]]
+    """
+
+    return sync_detailed(
+        client=client,
+        my_token=my_token,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: Client,
+    my_token: str,
+) -> Response[Union[Any, None]]:
+    """TOKEN_WITH_COOKIE
+
+     Test optional cookie parameters
+
+    Args:
+        my_token (str):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Union[Any, None]]
     """
 
     kwargs = _get_kwargs(
@@ -112,3 +140,31 @@ async def asyncio_detailed(
         response = await _client.request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: Client,
+    my_token: str,
+) -> Optional[Union[Any, None]]:
+    """TOKEN_WITH_COOKIE
+
+     Test optional cookie parameters
+
+    Args:
+        my_token (str):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Union[Any, None]]
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            my_token=my_token,
+        )
+    ).parsed

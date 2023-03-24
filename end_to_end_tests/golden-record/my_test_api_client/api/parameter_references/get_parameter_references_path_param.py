@@ -46,7 +46,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Optional[None]:
     if response.status_code == HTTPStatus.OK:
         return None
     if client.raise_on_unexpected_status:
@@ -55,7 +55,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[None]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -72,7 +72,7 @@ def sync_detailed(
     integer_param: Union[Unset, None, int] = 0,
     header_param: Union[Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
-) -> Response[Any]:
+) -> Response[None]:
     """Test different types of parameter references
 
     Args:
@@ -87,7 +87,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
@@ -115,7 +115,7 @@ async def asyncio_detailed(
     integer_param: Union[Unset, None, int] = 0,
     header_param: Union[Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
-) -> Response[Any]:
+) -> Response[None]:
     """Test different types of parameter references
 
     Args:
@@ -130,7 +130,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
