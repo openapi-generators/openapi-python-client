@@ -15,7 +15,7 @@ from ... import errors
     arguments, client, kwargs, parse_response, docstring %}
 
 {% set return_string = endpoint.response_type() %}
-{% set parsed_responses = (endpoint.responses | length > 0) and return_string not in ("Any", "None") %}
+{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
 
 def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
