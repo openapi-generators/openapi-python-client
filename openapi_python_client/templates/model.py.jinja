@@ -31,11 +31,12 @@ if TYPE_CHECKING:
 {% set class_name = model.class_info.name %}
 {% set module_name = model.class_info.module_name %}
 
+{% from "helpers.jinja" import safe_docstring %}
+
 T = TypeVar("T", bound="{{ class_name }}")
 
-@attr.s(auto_attribs=True)
-class {{ class_name }}:
-    """{% if model.title %}{{ model.title | wordwrap(116) }}
+{% macro class_docstring_content(model) %}
+    {% if model.title %}{{ model.title | wordwrap(116) }}
 
     {% endif -%}
     {%- if model.description %}{{ model.description | wordwrap(116) }}
@@ -55,7 +56,11 @@ class {{ class_name }}:
     {% for property in model.required_properties + model.optional_properties %}
         {{ property.to_docstring() | wordwrap(112) | indent(12) }}
     {% endfor %}{% endif %}
-    """
+{% endmacro %}
+
+@attr.s(auto_attribs=True)
+class {{ class_name }}:
+    {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
 
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}

@@ -16,6 +16,7 @@ class Client:
             but can be set to False for testing purposes.
         raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
             status code that was not documented in the source OpenAPI document.
+        follow_redirects: Whether or not to follow redirects. Default value is False.
     """
 
     base_url: str
@@ -24,6 +25,7 @@ class Client:
     timeout: float = attr.ib(5.0, kw_only=True)
     verify_ssl: Union[str, bool, ssl.SSLContext] = attr.ib(True, kw_only=True)
     raise_on_unexpected_status: bool = attr.ib(False, kw_only=True)
+    follow_redirects: bool = attr.ib(False, kw_only=True)
 
     def get_headers(self) -> Dict[str, str]:
         """ Get headers to be used in all endpoints """

@@ -5,6 +5,7 @@ import types
 from . import (
     callback_test,
     defaults_tests_defaults_post,
+    description_with_backslash,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
     get_basic_list_of_integers,
@@ -158,3 +159,10 @@ class TestsEndpoints:
         Try sending a request related to a callback
         """
         return callback_test
+
+    @classmethod
+    def description_with_backslash(cls) -> types.ModuleType:
+        """
+            Test description with \
+        """
+        return description_with_backslash

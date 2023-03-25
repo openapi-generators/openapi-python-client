@@ -47,6 +47,7 @@ from .model_with_additional_properties_inlined_additional_property import (
 from .model_with_additional_properties_refed import ModelWithAdditionalPropertiesRefed
 from .model_with_any_json_properties import ModelWithAnyJsonProperties
 from .model_with_any_json_properties_additional_property_type_0 import ModelWithAnyJsonPropertiesAdditionalPropertyType0
+from .model_with_backslash_in_description import ModelWithBackslashInDescription
 from .model_with_circular_ref_a import ModelWithCircularRefA
 from .model_with_circular_ref_b import ModelWithCircularRefB
 from .model_with_circular_ref_in_additional_properties_a import ModelWithCircularRefInAdditionalPropertiesA
@@ -111,6 +112,7 @@ __all__ = (
     "ModelWithAdditionalPropertiesRefed",
     "ModelWithAnyJsonProperties",
     "ModelWithAnyJsonPropertiesAdditionalPropertyType0",
+    "ModelWithBackslashInDescription",
     "ModelWithCircularRefA",
     "ModelWithCircularRefB",
     "ModelWithCircularRefInAdditionalPropertiesA",
