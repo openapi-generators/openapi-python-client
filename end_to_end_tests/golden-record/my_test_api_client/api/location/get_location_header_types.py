@@ -67,7 +67,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Non
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(client=client, response=response),  # type: ignore[func-returns-value]
     )
 
 
