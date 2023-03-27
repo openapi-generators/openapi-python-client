@@ -20,6 +20,21 @@ class Response:
     prop: Property
     source: str
 
+    def get_typed_source(self) -> str:
+        """Get Python statement that parses the response and returns the correct type.
+
+        This might include a type cast if necessary (e.g. if we parse JSON
+        that can only be a string according to the OpenAPI schema)
+        """
+        if self.source == self.prop.get_type_string():
+            # No cast needed e.g. for `None` and `None`.
+            return self.source
+        if self.source == "response.json()" and self.prop.get_type_string() == "Any":
+            # response.json() is often used for untyped responses and already has
+            # the `Any` return type annotation.
+            return self.source
+        return f"cast({self.prop.get_type_string()}, {self.source})"
+
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
     known_content_types = {
