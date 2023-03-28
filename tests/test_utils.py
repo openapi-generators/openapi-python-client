@@ -121,3 +121,16 @@ def test__fix_reserved_words(reserved_word: str, expected: str):
 )
 def test_pascalcase(before, after):
     assert utils.pascal_case(before) == after
+
+
+@pytest.mark.parametrize(
+    "content_type, expected",
+    [
+        pytest.param("application/json", "application/json"),
+        pytest.param("application/vnd.api+json", "application/vnd.api+json"),
+        pytest.param("application/json;charset=utf-8", "application/json"),
+        pytest.param("application/vnd.api+json;charset=utf-8", "application/vnd.api+json"),
+    ],
+)
+def test_get_content_type(content_type: str, expected: str) -> None:
+    assert utils.get_content_type(content_type) == expected

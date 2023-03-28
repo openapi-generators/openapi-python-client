@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from .. import schema as oai
 from .. import utils
 from ..config import Config
-from ..utils import PythonIdentifier
+from ..utils import PythonIdentifier, get_content_type
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
     Class,
@@ -178,6 +178,8 @@ class Endpoint:
         """Return json_body"""
         json_body = None
         for content_type, schema in body.content.items():
+            content_type = get_content_type(content_type)
+
             if content_type == "application/json" or content_type.endswith("+json"):
                 json_body = schema
                 break
