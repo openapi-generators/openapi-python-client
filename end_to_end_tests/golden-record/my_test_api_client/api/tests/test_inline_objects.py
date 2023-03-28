@@ -99,7 +99,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[TestInlineObjectsResponse200]
+        TestInlineObjectsResponse200
     """
 
     return sync_detailed(
@@ -152,7 +152,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[TestInlineObjectsResponse200]
+        TestInlineObjectsResponse200
     """
 
     return (
