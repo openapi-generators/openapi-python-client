@@ -99,7 +99,7 @@ def remove_string_escapes(value: str) -> str:
 
 def get_content_type(content_type: str) -> str:
     """
-    Given a string representing a conten type with optional parameters, returns the content type only
+    Given a string representing a content type with optional parameters, returns the content type only
     """
     message = Message()
     message.add_header("Content-Type", content_type)
