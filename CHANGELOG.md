@@ -13,6 +13,18 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.13.3
+
+### Features
+
+- Extend the UnexpectedStatus exception to include the response's content (#729)
+- Added support of follow HTTP redirects (#724). Thanks @expobrain & @emann!
+
+### Fixes
+
+- Parsing endpoint content types with semicolon separator (#727). Thanks @expobrain!
+- Remove Response[] from docstring of non-detailed functions (#741). Thanks @robertschweizer!
+
 ## 0.13.2
 
 ### Features
