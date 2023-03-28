@@ -1229,6 +1229,21 @@
           }
         }
       }
+    },
+    "/tests/description-with-backslash": {
+      "get": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Test description with \\",
+        "description": "Test description with \\",
+        "operationId": "description_with_backslash",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2223,6 +2238,10 @@
             "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA"
           }
         }
+      },
+      "ModelWithBackslashInDescription": {
+        "type": "object",
+        "description": "Description with special character: \\"
       }
     },
     "parameters": {

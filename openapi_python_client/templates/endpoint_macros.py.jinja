@@ -1,4 +1,5 @@
 {% from "property_templates/helpers.jinja" import guarded_statement %}
+{% from "helpers.jinja" import safe_docstring %}
 
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters %}
@@ -140,8 +141,8 @@ json_body=json_body,
 {% endfor %}
 {% endmacro %}
 
-{% macro docstring(endpoint, return_string) %}
-"""{% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
+{% macro docstring_content(endpoint, return_string, is_detailed) %}
+{% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
 
 {% endif -%}
 {%- if endpoint.description %} {{ endpoint.description | wordwrap(100) }}
@@ -164,6 +165,13 @@ Raises:
     httpx.TimeoutException: If the request takes longer than Client.timeout.
 
 Returns:
+{% if is_detailed %}
     Response[{{ return_string }}]
-"""
+{% else %}
+    {{ return_string }}
+{% endif %}
+{% endmacro %}
+
+{% macro docstring(endpoint, return_string, is_detailed) %}
+{{ safe_docstring(docstring_content(endpoint, return_string, is_detailed)) }}
 {% endmacro %}

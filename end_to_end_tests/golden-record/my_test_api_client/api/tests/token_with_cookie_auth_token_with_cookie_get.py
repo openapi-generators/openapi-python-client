@@ -26,6 +26,7 @@ def _get_kwargs(
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
+        "follow_redirects": client.follow_redirects,
     }
 
 
@@ -35,7 +36,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         return None
     if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
         return None
 

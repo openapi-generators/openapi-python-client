@@ -46,6 +46,7 @@ def _get_kwargs(
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
+        "follow_redirects": client.follow_redirects,
         {% if endpoint.form_body %}
         "data": form_data.to_dict(),
         {% elif endpoint.multipart_body %}
@@ -74,7 +75,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         {% endif %}
     {% endfor %}
     if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
+        raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
         return None
 
@@ -91,7 +92,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ 
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
-    {{ docstring(endpoint, return_string) | indent(4) }}
+    {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
@@ -108,7 +109,7 @@ def sync_detailed(
 def sync(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    {{ docstring(endpoint, return_string) | indent(4) }}
+    {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return sync_detailed(
         {{ kwargs(endpoint) }}
@@ -118,7 +119,7 @@ def sync(
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
-    {{ docstring(endpoint, return_string) | indent(4) }}
+    {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
         {{ kwargs(endpoint) }}
@@ -135,10 +136,9 @@ async def asyncio_detailed(
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Optional[{{ return_string }}]:
-    {{ docstring(endpoint, return_string) | indent(4) }}
+    {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return (await asyncio_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
 {% endif %}
-

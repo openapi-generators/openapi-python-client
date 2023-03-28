@@ -2,9 +2,6 @@ name: Release
 
 on: workflow_dispatch
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -23,11 +20,11 @@ jobs:
       - name: Install Knope
         uses: knope-dev/action@v1
         with:
-          version: 0.7.1
+          version: 0.7.2
       - name: Bump Version & Create GitHub Release
         run: knope release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Install Poetry
         run: pip install --upgrade poetry
       - name: Push to PyPI
