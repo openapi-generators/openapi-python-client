@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, cast
 
 import httpx
 
@@ -27,40 +27,39 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Union[List[str], None]:
+def _parse_response(*, response: httpx.Response) -> List[str]:
     if response.status_code == HTTPStatus.OK:
         response_200 = cast(List[str], response.json())
 
         return response_200
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    response.raise_for_status()
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[List[str], None]]:
+def _build_response(*, response: httpx.Response) -> Response[List[str]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(response=response),
     )
 
 
 def sync_detailed(
     *,
     client: Client,
-) -> Response[Union[List[str], None]]:
+) -> Response[List[str]]:
     """Get Basic List Of Strings
 
      Get a list of strings
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[List[str], None]]
+        Response[List[str]]
     """
 
     kwargs = _get_kwargs(
@@ -72,23 +71,24 @@ def sync_detailed(
         **kwargs,
     )
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 def sync(
     *,
     client: Client,
-) -> Union[List[str], None]:
+) -> List[str]:
     """Get Basic List Of Strings
 
      Get a list of strings
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[List[str], None]
+        List[str]
     """
 
     return sync_detailed(
@@ -99,17 +99,18 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-) -> Response[Union[List[str], None]]:
+) -> Response[List[str]]:
     """Get Basic List Of Strings
 
      Get a list of strings
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[List[str], None]]
+        Response[List[str]]
     """
 
     kwargs = _get_kwargs(
@@ -119,23 +120,24 @@ async def asyncio_detailed(
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.request(**kwargs)
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 async def asyncio(
     *,
     client: Client,
-) -> Union[List[str], None]:
+) -> List[str]:
     """Get Basic List Of Strings
 
      Get a list of strings
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[List[str], None]
+        List[str]
     """
 
     return (

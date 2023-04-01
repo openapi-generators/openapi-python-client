@@ -170,3 +170,24 @@ By default, the timeout for retrieving the schema file via HTTP is 5 seconds. In
 
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
+
+### raise_on_error_status
+
+If true, generated endpoint functions raise exceptions on error response codes (status code >= 400).
+
+If false (the default), the parsed response content is returned in the same way both for success and error responses.
+
+Enabling this option also removes the error response types from the return type annotations. 
+
+For now, the raised exceptions do not include the parsed response content even if the response code has a schema in the OpenAPI spec.
+
+### raise_on_unexpected_status
+
+Enable this to raise exceptions on undocumented response codes in all generated API call functions. 
+
+By default, undocumented response content is parsed as `None`.
+
+Enabling this option also removes `None` from the return type annotations. 
+
+This option has identical behavior to setting `Client.raise_on_unexpected_status`, but setting it at
+client generation time results in simpler generated code and correct type annotations.

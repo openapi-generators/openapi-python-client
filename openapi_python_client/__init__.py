@@ -263,7 +263,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         # Generate Client
         client_path = self.package_dir / "client.py"
         client_template = self.env.get_template("client.py.jinja")
-        client_path.write_text(client_template.render(), encoding=self.file_encoding)
+        client_path.write_text(client_template.render(config=self.config), encoding=self.file_encoding)
 
         # Generate included Errors
         errors_path = self.package_dir / "errors.py"
@@ -295,9 +295,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             for endpoint in collection.endpoints:
                 module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
                 module_path.write_text(
-                    endpoint_template.render(
-                        endpoint=endpoint,
-                    ),
+                    endpoint_template.render(endpoint=endpoint, config=self.config),
                     encoding=self.file_encoding,
                 )
 

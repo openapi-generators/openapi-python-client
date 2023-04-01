@@ -141,7 +141,7 @@ json_body=json_body,
 {% endfor %}
 {% endmacro %}
 
-{% macro docstring_content(endpoint, return_string, is_detailed) %}
+{% macro docstring_content(endpoint, return_string, config, is_detailed) %}
 {% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
 
 {% endif -%}
@@ -161,7 +161,14 @@ Args:
 
 {% endif %}
 Raises:
+{% if config.raise_on_error_status %}
+    httpx.HTTPStatusError: If the server returns an error status code.
+{% endif %}
+{% if config.raise_on_unexpected_status %}
+    errors.UnexpectedStatus: If the server returns an undocumented status code.
+{% else %}
     errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+{% endif %}
     httpx.TimeoutException: If the request takes longer than Client.timeout.
 
 Returns:
@@ -172,6 +179,6 @@ Returns:
 {% endif %}
 {% endmacro %}
 
-{% macro docstring(endpoint, return_string, is_detailed) %}
-{{ safe_docstring(docstring_content(endpoint, return_string, is_detailed)) }}
+{% macro docstring(endpoint, return_string, config, is_detailed) %}
+{{ safe_docstring(docstring_content(endpoint, return_string, config, is_detailed)) }}
 {% endmacro %}

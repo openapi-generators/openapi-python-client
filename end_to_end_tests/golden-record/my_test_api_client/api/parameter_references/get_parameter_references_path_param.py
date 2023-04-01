@@ -46,21 +46,19 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> None:
+def _parse_response(*, response: httpx.Response) -> None:
     if response.status_code == HTTPStatus.OK:
         return None
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    response.raise_for_status()
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[None]:
+def _build_response(*, response: httpx.Response) -> Response[None]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),  # type: ignore[func-returns-value]
+        parsed=_parse_response(response=response),  # type: ignore[func-returns-value]
     )
 
 
@@ -83,7 +81,8 @@ def sync_detailed(
         cookie_param (Union[Unset, str]):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -104,7 +103,7 @@ def sync_detailed(
         **kwargs,
     )
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 async def asyncio_detailed(
@@ -126,7 +125,8 @@ async def asyncio_detailed(
         cookie_param (Union[Unset, str]):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -145,4 +145,4 @@ async def asyncio_detailed(
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.request(**kwargs)
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)

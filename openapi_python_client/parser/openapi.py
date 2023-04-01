@@ -514,11 +514,18 @@ class Endpoint:
 
         return result, schemas, parameters
 
-    def response_type(self) -> str:
+    def response_type(self, include_errors: bool, include_unexpected: bool) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = {response.prop.get_type_string(quoted=False) for response in self.responses}
-        # We can always return None if client.raise_on_unexpected_status is unset
-        types.add("None")
+        responses = self.responses
+        if not include_errors:
+            responses = [resp for resp in responses if resp.status_code < 400]
+
+        types = {response.prop.get_type_string(quoted=False) for response in responses}
+        if include_unexpected:
+            types.add("None")
+
+        if not types:
+            return "None"  # Function cannot complete without raising exception
         if len(types) == 1:
             return next(iter(types))
         if "Any" in types:

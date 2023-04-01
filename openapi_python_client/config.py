@@ -35,6 +35,8 @@ class Config(BaseModel):
     ]
     field_prefix: str = "field_"
     http_timeout: int = 5
+    raise_on_error_status: bool = False
+    raise_on_unexpected_status: bool = False
 
     @staticmethod
     def load_from_path(path: Path) -> "Config":

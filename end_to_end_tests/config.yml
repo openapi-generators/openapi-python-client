@@ -9,3 +9,5 @@ class_overrides:
     class_name: AnEnumValue
     module_name: an_enum_value
 field_prefix: attr_
+raise_on_error_status: True
+raise_on_unexpected_status: True

@@ -1204,21 +1204,31 @@ class TestEndpoint:
         )
 
     @pytest.mark.parametrize(
-        "response_types, expected",
+        "response_types, response_statuses, include_errors, include_unexpected, expected_type",
         (
-            ([], "None"),
-            (["Something"], "Union[None, Something]"),
-            (["First", "Second", "Second"], "Union[First, None, Second]"),
+            ([], [], True, True, "None"),
+            (["Something"], [400], True, True, "Union[None, Something]"),
+            (["Something"], [400], True, False, "Something"),
+            (["Something"], [400], False, True, "None"),
+            (["Something"], [400], False, False, "None"),
+            (["First", "Second", "Second"], [200, 400, 409], True, True, "Union[First, None, Second]"),
+            (["First", "Second", "Second"], [200, 400, 409], True, False, "Union[First, Second]"),
+            (["First", "Second", "Second"], [200, 400, 409], False, True, "Union[First, None]"),
+            (["First", "Second", "Second"], [200, 400, 409], False, False, "First"),
         ),
     )
-    def test_response_type(self, response_types, expected):
+    def test_response_type(self, response_types, response_statuses, include_errors, include_unexpected, expected_type):
         endpoint = self.make_endpoint()
-        for response_type in response_types:
+        for response_type, status_code in zip(response_types, response_statuses):
             mock_response = MagicMock()
             mock_response.prop.get_type_string.return_value = response_type
+            mock_response.status_code = status_code
             endpoint.responses.append(mock_response)
 
-        assert endpoint.response_type() == expected
+        assert (
+            endpoint.response_type(include_errors=include_errors, include_unexpected=include_unexpected)
+            == expected_type
+        )
 
 
 class TestImportStringFromReference:
