@@ -36,7 +36,6 @@ class TestModelProperty:
         ],
     )
     def test_get_type_string(self, no_optional, nullable, required, json, expected, model_property_factory, quoted):
-
         prop = model_property_factory(
             required=required,
             nullable=nullable,
@@ -73,7 +72,6 @@ class TestModelProperty:
         ],
     )
     def test_get_base_type_string(self, quoted, expected, model_property_factory):
-
         m = model_property_factory()
         assert m.get_base_type_string(quoted=quoted) == expected
 
