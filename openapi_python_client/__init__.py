@@ -4,8 +4,8 @@ import json
 import mimetypes
 import shutil
 import subprocess
-import sys
 from enum import Enum
+from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Sequence, Union
@@ -20,11 +20,6 @@ from openapi_python_client import utils
 from .config import Config
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
-
-if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
-    from importlib_metadata import version
-else:
-    from importlib.metadata import version  # type: ignore
 
 __version__ = version(__package__)
 

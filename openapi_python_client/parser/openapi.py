@@ -269,7 +269,6 @@ class Endpoint:
     ) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-
             status_code: HTTPStatus
             try:
                 status_code = HTTPStatus(int(code))

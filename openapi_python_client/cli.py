@@ -21,7 +21,6 @@ def _version_callback(value: bool) -> None:
 
 
 def _process_config(path: Optional[pathlib.Path]) -> Config:
-
     if not path:
         return Config()
 
