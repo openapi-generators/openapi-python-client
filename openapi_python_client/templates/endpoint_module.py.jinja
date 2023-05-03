@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast, Iterator
+import dlt
 
 import httpx
 
@@ -60,7 +61,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ return_string }}]:
+def _parse_response(*, client: Client, response: httpx.Response) -> {{ return_string }}:
     {% for response in endpoint.responses %}
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
@@ -74,10 +75,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         return None
         {% endif %}
     {% endfor %}
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ return_string }}]:
@@ -116,29 +114,10 @@ def sync(
     ).parsed
 {% endif %}
 
-async def asyncio_detailed(
-    {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}]:
-    {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
-
-    kwargs = _get_kwargs(
-        {{ kwargs(endpoint) }}
-    )
-
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(
-            **kwargs
-        )
-
-    return _build_response(client=client, response=response)
 
 {% if parsed_responses %}
-async def asyncio(
-    {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+@dlt.resource
+def {{ endpoint_identifier }}({{ arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
-
-    return (await asyncio_detailed(
-        {{ kwargs(endpoint) }}
-    )).parsed
+    yield sync_detailed({{ kwargs(endpoint) }}).parsed
 {% endif %}

@@ -111,13 +111,11 @@ class Project:  # pylint: disable=too-many-instance-attributes
             print(f"Generating {self.package_name}")
         else:
             print(f"Generating {self.project_name}")
-            try:
-                self.project_dir.mkdir()
-            except FileExistsError:
-                return [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
+            self.project_dir.mkdir()
         self._create_package()
         self._build_metadata()
         self._build_models()
+        self._build_security()
         self._build_api()
         self._run_post_hooks()
         return self._get_errors()
@@ -131,6 +129,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         shutil.rmtree(self.package_dir)
         self._create_package()
         self._build_models()
+        self._build_security()
         self._build_api()
         self._run_post_hooks()
         return self._get_errors()
@@ -288,13 +287,21 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
 
             for endpoint in collection.endpoints:
-                module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
+                if endpoint.method != "get":  # Only generate GET endpoints
+                    continue
+                normalized_name = utils.PythonIdentifier(endpoint.name, self.config.field_prefix)
+                module_path = tag_dir / f"{normalized_name}.py"
                 module_path.write_text(
-                    endpoint_template.render(
-                        endpoint=endpoint,
-                    ),
+                    endpoint_template.render(endpoint=endpoint, endpoint_identifier=normalized_name),
                     encoding=self.file_encoding,
                 )
+
+    def _build_security(self) -> None:
+        template = self.env.get_template("security.py.jinja")
+
+        module_path = self.package_dir / "security.py"
+
+        module_path.write_text(template.render(security_schemes=self.openapi.security_schemas.values()))
 
 
 def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments

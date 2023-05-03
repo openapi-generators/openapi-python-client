@@ -32,6 +32,7 @@ python-dateutil = "^2.8.1"
 httpx = ">=0.15.4,<0.25.0"
 autoflake = "^1.4 || ^2.0.0"
 PyYAML = "^6.0"
+dlt = "^0.2.5"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
@@ -127,6 +128,7 @@ disallow_any_generics = true
 disallow_untyped_defs = true
 warn_redundant_casts = true
 strict_equality = true
+show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = [

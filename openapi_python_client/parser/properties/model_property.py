@@ -125,7 +125,7 @@ def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
 
 
 def _types_are_subset(first: EnumProperty, second: Property) -> bool:
-    from . import IntProperty, StringProperty
+    from .types import IntProperty, StringProperty
 
     if first.value_type == int and isinstance(second, IntProperty):
         return True
