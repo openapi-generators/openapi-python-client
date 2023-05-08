@@ -13,7 +13,7 @@ from ... import errors
 {% endfor %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
-    arguments, client, kwargs, parse_response, docstring %}
+    arguments, kwargs, parse_response, docstring %}
 
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
@@ -22,22 +22,21 @@ def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Dict[str, Any]:
     url = "{}{{ endpoint.path }}".format(
-        client.base_url
+        base_url
         {%- for parameter in endpoint.path_parameters.values() -%}
         ,{{parameter.name}}={{parameter.python_name}}
         {%- endfor -%}
     )
 
-    base_params = dict(
-        params = {},
-        headers = {},
-        cookies = {}
-    )
+    base_params = dict(cookies={}, headers={}, params={})
     {% if endpoint.credentials_parameter %}
     base_params.update(credentials.to_http_params())
     {% endif %}
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    headers = base_params['headers']
+
+    cookies = base_params['cookies']
+
+    params = base_params['params']
 
     {{ header_params(endpoint) | indent(4) }}
 
@@ -54,8 +53,6 @@ def _get_kwargs(
         "url": url,
         "headers": headers,
         "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
         {% if endpoint.form_body %}
         "data": form_data.to_dict(),
         {% elif endpoint.multipart_body %}
@@ -63,13 +60,11 @@ def _get_kwargs(
         {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
         {% endif %}
-        {% if endpoint.query_parameters %}
         "params": params,
-        {% endif %}
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> {{ return_string }}:
+def _parse_response(response: httpx.Response) -> {{ return_string }}:
     {% for response in endpoint.responses %}
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
@@ -86,12 +81,12 @@ def _parse_response(*, client: Client, response: httpx.Response) -> {{ return_st
     raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ return_string }}]:
+def _build_response(response: httpx.Response) -> Response[{{ return_string }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(response),
     )
 
 
@@ -104,12 +99,9 @@ def sync_detailed(
         {{ kwargs(endpoint) }}
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
-        **kwargs,
-    )
+    response = httpx.request(**kwargs)
 
-    return _build_response(client=client, response=response)
+    return _build_response(response)
 
 {% if parsed_responses %}
 def sync(

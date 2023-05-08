@@ -221,6 +221,7 @@ class Endpoint:
     def _add_security(
         *, endpoint: "Endpoint", data: oai.Operation, security_schemes: Dict[str, SecurityProperty], config: Config
     ) -> "Endpoint":
+        endpoint = deepcopy(endpoint)
         security = data.security or []
 
         # TODO: Remove dupe matching schemes from constructor, only do this here
@@ -500,7 +501,9 @@ class Endpoint:
             return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
         result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
-        result = Endpoint._add_security(endpoint=endpoint, data=data, security_schemes=security_schemes, config=config)
+        if isinstance(result, ParseError):
+            return result, schemas, parameters
+        result = Endpoint._add_security(endpoint=result, data=data, security_schemes=security_schemes, config=config)
 
         return result, schemas, parameters
 
