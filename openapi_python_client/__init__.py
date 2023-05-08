@@ -297,11 +297,28 @@ class Project:  # pylint: disable=too-many-instance-attributes
                 )
 
     def _build_security(self) -> None:
-        template = self.env.get_template("security.py.jinja")
+        # Generate models
+        schemes_dir = self.package_dir / "security"
+        schemes_dir.mkdir()
+        schemes_init = schemes_dir / "__init__.py"
+        imports = []
+        alls = []
 
-        module_path = self.package_dir / "security.py"
+        scheme_template = self.env.get_template("security_scheme.py.jinja")
+        for scheme in self.openapi.security_schemes.values():
+            module_path = schemes_dir / f"{scheme.class_info.module_name}.py"
+            module_path.write_text(scheme_template.render(scheme=scheme), encoding=self.file_encoding)
+            imports.append(import_string_from_class(scheme.class_info))
+            alls.append(scheme.class_info.name)
 
-        module_path.write_text(template.render(security_schemes=self.openapi.security_schemas.values()))
+        schemes_init_template = self.env.get_template("security_schemes_init.py.jinja")
+        schemes_init.write_text(schemes_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
+
+        # template = self.env.get_template("security.py.jinja")
+
+        # module_path = self.package_dir / "security.py"
+
+        # module_path.write_text(template.render(security_schemes=self.openapi.security_schemes.values()))
 
 
 def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments

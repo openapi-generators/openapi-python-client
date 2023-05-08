@@ -9,22 +9,13 @@ import attr
 
 from .. import schema as oai
 from ..schema.openapi_schema_pydantic.security_requirement import SecurityRequirement
-from .security_schemes import SecurityScheme
 from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier, get_content_type
 from .errors import ParseError, PropertyError
-from .properties import (
-    Class,
-    ModelProperty,
-    Parameters,
-    Property,
-    Schemas,
-    property_from_data,
-)
+from .properties import Class, ModelProperty, Parameters, Property, Schemas, property_from_data, SecurityProperty
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
-from ..schema.openapi_schema_pydantic.security_scheme import SecurityScheme
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
@@ -63,7 +54,7 @@ class Endpoint:
     security: List[SecurityRequirement]
     tag: str
     summary: Optional[str] = ""
-    security_schemes: Dict[str, SecurityScheme] = field(default_factory=dict)
+    security_schemes: Dict[str, SecurityProperty] = field(default_factory=dict)
     """Security schemes matching this endpoint's security requirements"""
 
     relative_imports: Set[str] = field(default_factory=set)
@@ -435,7 +426,7 @@ class Endpoint:
         tag: str,
         schemas: Schemas,
         parameters: Parameters,
-        security_schemes: Dict[str, SecurityScheme],
+        security_schemes: Dict[str, SecurityProperty],
         config: Config,
     ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""

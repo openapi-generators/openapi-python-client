@@ -2,10 +2,9 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 from .. import schema as oai
-from .security_schemes import SecurityScheme
 from .. import utils
 from ..config import Config
-from .properties import Parameters, Schemas
+from .properties import Parameters, Schemas, SecurityProperty
 from .endpoints import Endpoint
 from .errors import ParseError
 
@@ -24,7 +23,7 @@ class EndpointCollection:
         data: Dict[str, oai.PathItem],
         schemas: Schemas,
         parameters: Parameters,
-        security_schemes: Dict[str, SecurityScheme],
+        security_schemes: Dict[str, SecurityProperty],
         config: Config,
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""

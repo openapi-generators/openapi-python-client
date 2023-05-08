@@ -11,6 +11,7 @@ __all__ = [
     "property_from_data",
     "ListProperty",
     "IntProperty",
+    "SecurityProperty",
 ]
 
 from typing import Dict, Iterable, List, Tuple, Union
@@ -34,6 +35,7 @@ from .schemas import (
 )
 from .build import property_from_data
 from .types import AnyProperty, IntProperty
+from .security_property import SecurityProperty
 
 
 def _create_schemas(

@@ -15,8 +15,10 @@ from .properties import (
     Schemas,
     build_parameters,
     build_schemas,
+    SecurityProperty,
 )
 from .endpoint_collection import EndpointCollection
+from .properties import property_from_data
 
 
 @dataclass
@@ -30,7 +32,7 @@ class GeneratorData:
     errors: List[ParseError]
     endpoint_collections_by_tag: Dict[utils.PythonIdentifier, EndpointCollection]
     enums: Iterator[EnumProperty]
-    security_schemas: Dict[str, SecurityScheme]
+    security_schemes: Dict[str, SecurityProperty]
     openapi: oai.OpenAPI
 
     @staticmethod
@@ -43,10 +45,16 @@ class GeneratorData:
             security_schemes_raw = openapi.components.securitySchemes
         else:
             security_schemes_raw = {}
-        security_schemes = {
-            key: SecurityScheme(
-                scheme=value, name=key, class_name=utils.ClassName(key + "Credentials", config.field_prefix)
-            )
+        # security_schemes = {
+        #     key: SecurityScheme(
+        #         scheme=value, name=key, class_name=utils.ClassName(key + "Credentials", config.field_prefix)
+        #     )
+        #     for key, value in security_schemes_raw.items()
+        # }
+        security_schemes = {  # TODO: property_from_data is tuple (result, error)
+            key: property_from_data(
+                name=key, required=True, data=value, schemas=schemas, parent_name="", config=config
+            )[0]
             for key, value in security_schemes_raw.items()
         }
         if openapi.components and openapi.components.schemas:
@@ -68,6 +76,6 @@ class GeneratorData:
             models=models,
             errors=schemas.errors + parameters.errors,
             enums=enums,
-            security_schemas=security_schemes,
+            security_schemes=security_schemes,
             openapi=openapi,
         )

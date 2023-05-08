@@ -12,6 +12,7 @@ __all__ = [
     "Response",
     "Responses",
     "Schema",
+    "SecurityScheme",
 ]
 
 
@@ -27,5 +28,6 @@ from .openapi_schema_pydantic import (
     Response,
     Responses,
     Schema,
+    SecurityScheme,
 )
 from .parameter_location import ParameterLocation

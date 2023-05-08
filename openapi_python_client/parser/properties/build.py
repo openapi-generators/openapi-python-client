@@ -13,6 +13,7 @@ from .property import Property
 from .schemas import ReferencePath, Schemas, parse_reference_path
 from .enum_property import get_enum_default, build_enum_property
 from .union_property import build_union_property
+from .security_property import build_security_property
 from .types import (
     AnyProperty,
     StringProperty,
@@ -65,7 +66,7 @@ def _property_from_ref(
 def _property_from_data(
     name: str,
     required: bool,
-    data: Union[oai.Reference, oai.Schema],
+    data: Union[oai.Reference, oai.Schema, oai.SecurityScheme],
     schemas: Schemas,
     parent_name: str,
     config: Config,
@@ -79,6 +80,8 @@ def _property_from_data(
             name=name, required=required, parent=None, data=data, schemas=schemas, config=config, roots=roots
         )
 
+    if isinstance(data, oai.SecurityScheme):
+        return build_security_property(data=data, name=name, schemas=schemas, required=required, config=config)
     sub_data: List[Union[oai.Schema, oai.Reference]] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
@@ -229,7 +232,7 @@ def property_from_data(
     *,
     name: str,
     required: bool,
-    data: Union[oai.Reference, oai.Schema],
+    data: Union[oai.Reference, oai.Schema, oai.SecurityScheme],
     schemas: Schemas,
     parent_name: str,
     config: Config,

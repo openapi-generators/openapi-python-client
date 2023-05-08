@@ -20,7 +20,6 @@ class SecurityProperty(Property):
     class_info: Class
     data: SecurityScheme
     description: str
-    roots: Set[Union[ReferencePath, utils.ClassName]]
     required_properties: Optional[List[Property]]
     optional_properties: Optional[List[Property]]
     relative_imports: Optional[Set[str]]
@@ -370,7 +369,6 @@ def build_security_property(
     schemas: Schemas,
     required: bool,
     config: Config,
-    roots: Set[Union[ReferencePath, utils.ClassName]],
 ) -> Tuple[Union[SecurityProperty, PropertyError], Schemas]:
     """
     A single SecurityProperty from its OAI data
@@ -381,7 +379,6 @@ def build_security_property(
             Used to infer the type name if a `title` property is not available.
         schemas: Existing Schemas which have already been processed (to check name conflicts)
         required: Whether or not this property is required by the parent (affects typing)
-        parent_name: The name of the property that this property is inside of (affects class naming)
         config: Config data for this run of the generator, used to modifying names
         roots: Set of strings that identify schema objects on which the new ModelProperty will depend
     """
@@ -389,7 +386,6 @@ def build_security_property(
     title = data.name or data.type
     class_string = title
     class_info = Class.from_string(string=class_string, config=config)
-    model_roots = {*roots, class_info.name}
     required_properties: Optional[List[Property]] = None
     optional_properties: Optional[List[Property]] = None
     relative_imports: Optional[Set[str]] = None
@@ -398,7 +394,6 @@ def build_security_property(
     prop = SecurityProperty(
         class_info=class_info,
         data=data,
-        roots=model_roots,
         required_properties=required_properties,
         optional_properties=optional_properties,
         relative_imports=relative_imports,

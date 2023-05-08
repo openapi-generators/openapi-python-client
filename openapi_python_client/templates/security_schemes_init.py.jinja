@@ -1,0 +1,11 @@
+{% for import in imports | sort %}
+{{ import }}
+{% endfor %}
+
+{% if imports %}
+__all__ = (
+    {% for all in alls | sort %}
+    "{{ all }}",
+    {% endfor %}
+)
+{% endif %}
