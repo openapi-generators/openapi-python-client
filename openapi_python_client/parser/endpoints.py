@@ -206,6 +206,21 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
+    def _add_security(
+        *, endpoint: "Endpoint", data: oai.Operation, security_schemes: Dict[str, SecurityProperty], config: Config
+    ) -> "Endpoint":
+        security = data.security or []
+
+        # TODO: Remove dupe matching schemes from constructor, only do this here
+        for item in security:
+            key = next(iter(item.keys()))
+            scheme = security_schemes[key]
+
+            endpoint.relative_imports.update(scheme.get_imports(prefix=security_relative_prefix))
+            endpoint.relative_imports.update(scheme.get_lazy_imports(prefix=security_relative_prefix))
+        return endpoint
+
+    @staticmethod
     def _add_responses(
         *, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas, config: Config
     ) -> Tuple["Endpoint", Schemas]:
@@ -462,6 +477,7 @@ class Endpoint:
             return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
         result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
+        result = Endpoint._add_security(endpoint=endpoint, data=data, security_schemes=security_schemes, config=config)
 
         return result, schemas, parameters
 

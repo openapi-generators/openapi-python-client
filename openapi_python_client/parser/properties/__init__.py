@@ -44,6 +44,7 @@ def _create_schemas(
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
     errors: List[PropertyError] = []
+    breakpoint()
 
     # References could have forward References so keep going as long as we are making progress
     while still_making_progress:
