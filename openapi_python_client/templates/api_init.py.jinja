@@ -1,1 +1,7 @@
 """ Contains methods for accessing the API """
+
+{% for collection in endpoint_collections.values() %}
+{% for import_string in collection.imports_with_tag_prefix %}
+{{ import_string }}
+{% endfor %}
+{% endfor %}

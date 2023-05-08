@@ -1,0 +1,35 @@
+from typing import Iterator
+
+from dlt.extract.source import DltResource
+
+{# Import all resources #}
+{% for collection in endpoint_collections.values() %}
+{% for import_string in collection.imports_from_root %}
+{{ import_string }}
+{% endfor %}
+{% endfor %}
+
+{% for import_string  in imports %}
+{{ import_string }}
+{% endfor %}
+
+import dlt
+
+@dlt.source
+def {{ source_name }}(
+        {% if credentials %}
+        {{ credentials.to_string('dlt.config.value') }}
+        {% endif %},        
+        base_url: str = dlt.config.value,
+) -> Iterator[DltResource]:
+    {% for collection in endpoint_collections.values() %}
+    {% for endpoint in collection.endpoints %}
+    yield {{ endpoint.python_name }}(
+        {% if credentials %}
+        {{ credentials.python_name }} = {{ credentials.python_name }},
+        {% endif %}
+        base_url=base_url
+    )
+    {% endfor %}
+    {% endfor %}
+    pass

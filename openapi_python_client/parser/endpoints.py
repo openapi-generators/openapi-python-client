@@ -63,6 +63,7 @@ class Endpoint:
     requires_security: bool
     security: List[SecurityRequirement]
     tag: str
+    python_name: PythonIdentifier
     summary: Optional[str] = ""
     security_schemes: Dict[str, SecurityProperty] = field(default_factory=dict)
     """Security schemes matching this endpoint's security requirements"""
@@ -492,6 +493,7 @@ class Endpoint:
             security=security,
             security_schemes=security_schemes,
             tag=tag,
+            python_name=PythonIdentifier(name, prefix=config.field_prefix),
         )
 
         result, schemas, parameters = Endpoint.add_parameters(

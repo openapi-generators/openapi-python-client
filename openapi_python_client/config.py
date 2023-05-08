@@ -35,6 +35,7 @@ class Config(BaseModel):
     ]
     field_prefix: str = "field_"
     http_timeout: int = 5
+    include_methods: List[str] = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
     @staticmethod
     def load_from_path(path: Path) -> "Config":

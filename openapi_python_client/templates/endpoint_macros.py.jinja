@@ -78,11 +78,6 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
-base_url: str,
-{# Security #}
-{% if endpoint.credentials_parameter %}
-{{ endpoint.credentials_parameter.to_string() }},
-{% endif %}
 {# path parameters #}
 {% for parameter in endpoint.path_parameters.values() %}
 {{ parameter.to_string() }},
@@ -110,6 +105,11 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {% for parameter in endpoint.cookie_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
+base_url: str = dlt.config.value,
+{# Security #}
+{% if endpoint.credentials_parameter %}
+{{ endpoint.credentials_parameter.to_string('dlt.secrets.value') }},
+{% endif %}    
 {% endmacro %}
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 from .. import schema as oai
 from .. import utils
@@ -17,6 +17,23 @@ class EndpointCollection:
     endpoints: List["Endpoint"] = field(default_factory=list)
     parse_errors: List[ParseError] = field(default_factory=list)
 
+    def endpoints_by_method(self, method: str) -> List[Endpoint]:
+        return [e for e in self.endpoints if e.method == method]
+
+    @property
+    def relative_imports(self) -> Set[str]:
+        """Relative import strings for all resources in this tag package"""
+        return {f"from .{endpoint.python_name} import {endpoint.python_name}" for endpoint in self.endpoints}
+
+    @property
+    def imports_with_tag_prefix(self) -> Set[str]:
+        """Relative imports in the form of `from .[tag] import [endpoint_name]`"""
+        return {f"from .{self.tag} import {endpoint.python_name}" for endpoint in self.endpoints}
+
+    @property
+    def imports_from_root(self) -> Set[str]:
+        return {f"from .api import {endpoint.python_name}" for endpoint in self.endpoints}
+
     @staticmethod
     def from_data(
         *,
@@ -29,7 +46,7 @@ class EndpointCollection:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
 
-        methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+        methods = config.include_methods
 
         for path, path_data in data.items():
             for method in methods:

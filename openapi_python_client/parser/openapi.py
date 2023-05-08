@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Iterator, List, Optional, Union
+from itertools import chain
 
 from .. import schema as oai
 
@@ -16,8 +17,11 @@ from .properties import (
     build_parameters,
     build_schemas,
     SecurityProperty,
+    CredentialsProperty,
+    build_credentials_property,
 )
 from .endpoint_collection import EndpointCollection
+from .endpoints import Endpoint
 from .properties import property_from_data
 
 
@@ -33,7 +37,21 @@ class GeneratorData:
     endpoint_collections_by_tag: Dict[utils.PythonIdentifier, EndpointCollection]
     enums: Iterator[EnumProperty]
     security_schemes: Dict[str, SecurityProperty]
+    credentials: CredentialsProperty
     openapi: oai.OpenAPI
+
+    @property
+    def all_endpoints(self) -> List[Endpoint]:
+        """List of all endpoints in the spec"""
+        return list(
+            chain.from_iterable(collection.endpoints for collection in self.endpoint_collections_by_tag.values())
+        )
+
+    @property
+    def all_credentials(self) -> CredentialsProperty:
+        return build_credentials_property(
+            name="credentials", security_properties=list(self.security_schemes.values()), config=self.config
+        )
 
     @staticmethod
     def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
@@ -57,6 +75,9 @@ class GeneratorData:
             )[0]
             for key, value in security_schemes_raw.items()
         }
+        credentials = build_credentials_property(  # Property for all credentials
+            name="credentials", security_properties=list(security_schemes.values()), config=config
+        )
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         if openapi.components and openapi.components.parameters:
@@ -78,4 +99,5 @@ class GeneratorData:
             enums=enums,
             security_schemes=security_schemes,
             openapi=openapi,
+            credentials=credentials,
         )

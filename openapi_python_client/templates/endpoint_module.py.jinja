@@ -117,7 +117,7 @@ def sync(
 
 {% if parsed_responses %}
 @dlt.resource
-def {{ endpoint_identifier }}({{ arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
+def {{ endpoint.python_name }}({{ arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
     yield sync_detailed({{ kwargs(endpoint) }}).parsed
 {% endif %}

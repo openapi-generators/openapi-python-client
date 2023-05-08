@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-from typing import ClassVar, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import ClassVar, List, NamedTuple, Optional, Set, Tuple, Union, Any
 from itertools import chain
 
 import attr
@@ -63,6 +63,18 @@ class CredentialsProperty(Property):
             return props[0].get_type_string()
         type_strings = ", ".join(p.get_type_string() for p in props)
         return f"Union[{type_strings}]"
+
+    @property
+    def is_populated(self) -> bool:
+        return bool(self.security_properties)
+
+    def to_string(self, default: Any = None, keyword: bool = True) -> str:
+        pref = f"{self.python_name}: {self.get_type_string(quoted=True)}"
+        if not keyword:
+            return pref
+
+        default = default or self.default
+        return pref + f" = {default}"
 
 
 def build_credentials_property(

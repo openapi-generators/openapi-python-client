@@ -106,7 +106,6 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
-
         if self.meta == MetaType.NONE:
             print(f"Generating {self.package_name}")
         else:
@@ -117,6 +116,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._build_models()
         self._build_security()
         self._build_api()
+        self._build_source()
         self._run_post_hooks()
         return self._get_errors()
 
@@ -267,9 +267,6 @@ class Project:  # pylint: disable=too-many-instance-attributes
         # Generate endpoints
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
-        api_init_path = api_dir / "__init__.py"
-        api_init_template = self.env.get_template("api_init.py.jinja")
-        api_init_path.write_text(api_init_template.render(), encoding=self.file_encoding)
 
         endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         endpoint_template = self.env.get_template(
@@ -287,17 +284,20 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
 
             for endpoint in collection.endpoints:
-                if endpoint.method != "get":  # Only generate GET endpoints
-                    continue
-                normalized_name = utils.PythonIdentifier(endpoint.name, self.config.field_prefix)
-                module_path = tag_dir / f"{normalized_name}.py"
+                module_path = tag_dir / f"{endpoint.python_name}.py"
                 module_path.write_text(
-                    endpoint_template.render(endpoint=endpoint, endpoint_identifier=normalized_name),
+                    endpoint_template.render(endpoint=endpoint),
                     encoding=self.file_encoding,
                 )
 
+        # Generate API init
+        api_init_path = api_dir / "__init__.py"
+        api_init_template = self.env.get_template("api_init.py.jinja")
+        api_init_path.write_text(
+            api_init_template.render(endpoint_collections=endpoint_collections_by_tag), encoding=self.file_encoding
+        )
+
     def _build_security(self) -> None:
-        # Generate models
         schemes_dir = self.package_dir / "security"
         schemes_dir.mkdir()
         schemes_init = schemes_dir / "__init__.py"
@@ -314,11 +314,23 @@ class Project:  # pylint: disable=too-many-instance-attributes
         schemes_init_template = self.env.get_template("security_schemes_init.py.jinja")
         schemes_init.write_text(schemes_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
-        # template = self.env.get_template("security.py.jinja")
+    def _build_source(self) -> None:
+        source_dir = self.package_dir
+        module_path = self.package_dir / "source.py"
 
-        # module_path = self.package_dir / "security.py"
-
-        # module_path.write_text(template.render(security_schemes=self.openapi.security_schemes.values()))
+        template = self.env.get_template("source.py.jinja")
+        imports = self.openapi.credentials.get_imports(prefix=".") | self.openapi.credentials.get_lazy_imports(
+            prefix="."
+        )
+        module_path.write_text(
+            template.render(
+                source_name=self.package_name,
+                endpoint_collections=self.openapi.endpoint_collections_by_tag,
+                imports=imports,
+                credentials=self.openapi.credentials if self.openapi.credentials.is_populated else None,
+            ),
+            encoding=self.file_encoding,
+        )
 
 
 def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
