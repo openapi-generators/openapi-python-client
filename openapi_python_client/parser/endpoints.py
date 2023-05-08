@@ -13,7 +13,17 @@ from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier, get_content_type
 from .errors import ParseError, PropertyError
-from .properties import Class, ModelProperty, Parameters, Property, Schemas, property_from_data, SecurityProperty
+from .properties import (
+    Class,
+    ModelProperty,
+    Parameters,
+    Property,
+    Schemas,
+    property_from_data,
+    SecurityProperty,
+    CredentialsProperty,
+    build_credentials_property,
+)
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
@@ -62,6 +72,8 @@ class Endpoint:
     path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
+    security_parameters: Dict[str, SecurityProperty] = field(default_factory=dict)
+    credentials_parameter: Optional[CredentialsProperty] = None
     responses: List[Response] = field(default_factory=list)
     form_body: Optional[Property] = None
     json_body: Optional[Property] = None
@@ -212,12 +224,23 @@ class Endpoint:
         security = data.security or []
 
         # TODO: Remove dupe matching schemes from constructor, only do this here
+        matching_schemes = {}
         for item in security:
             key = next(iter(item.keys()))
             scheme = security_schemes[key]
 
-            endpoint.relative_imports.update(scheme.get_imports(prefix=security_relative_prefix))
-            endpoint.relative_imports.update(scheme.get_lazy_imports(prefix=security_relative_prefix))
+            # endpoint.relative_imports.update(scheme.get_imports(prefix=security_relative_prefix))
+            # endpoint.relative_imports.update(scheme.get_lazy_imports(prefix=security_relative_prefix))
+            matching_schemes[key] = scheme
+        endpoint.security_parameters = matching_schemes
+        if not endpoint.security_parameters:
+            return endpoint
+        credentials = build_credentials_property(
+            name="credentials", security_properties=list(endpoint.security_parameters.values()), config=config
+        )
+        endpoint.relative_imports.update(credentials.get_imports(prefix=security_relative_prefix))
+        endpoint.relative_imports.update(credentials.get_lazy_imports(prefix=security_relative_prefix))
+        endpoint.credentials_parameter = credentials
         return endpoint
 
     @staticmethod

@@ -28,6 +28,14 @@ def _get_kwargs(
         {%- endfor -%}
     )
 
+    base_params = dict(
+        params = {},
+        headers = {},
+        cookies = {}
+    )
+    {% if endpoint.credentials_parameter %}
+    base_params.update(credentials.to_http_params())
+    {% endif %}
     headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 

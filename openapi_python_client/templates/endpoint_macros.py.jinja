@@ -79,11 +79,14 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
+{# Security #}
+{% if endpoint.credentials_parameter %}
+{{ endpoint.credentials_parameter.to_string() }},
+{% endif %}
 {# path parameters #}
 {% for parameter in endpoint.path_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
-*,
 {# Proper client based on whether or not the endpoint requires authentication #}
 {% if endpoint.requires_security %}
 client: AuthenticatedClient,
