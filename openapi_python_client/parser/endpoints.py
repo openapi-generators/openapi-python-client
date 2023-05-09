@@ -433,6 +433,7 @@ class Endpoint:
     def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
         """
         Sorts the path parameters of an `endpoint` so that they match the order declared in `endpoint.path`.
+        Sorts the query parameters so required params come first.
 
         Args:
             endpoint: The endpoint to sort the parameters of.
@@ -455,6 +456,9 @@ class Endpoint:
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
+        endpoint.query_parameters = dict(
+            sorted(endpoint.query_parameters.items(), key=lambda item: item[1].required, reverse=True)
+        )
         return endpoint
 
     @staticmethod

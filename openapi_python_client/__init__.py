@@ -255,9 +255,9 @@ class Project:  # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-locals
     def _build_api(self) -> None:
         # Generate Client
-        client_path = self.package_dir / "client.py"
-        client_template = self.env.get_template("client.py.jinja")
-        client_path.write_text(client_template.render(), encoding=self.file_encoding)
+        # client_path = self.package_dir / "client.py"
+        # client_template = self.env.get_template("client.py.jinja")
+        # client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
         # Generate included Errors
         errors_path = self.package_dir / "errors.py"
@@ -301,6 +301,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         schemes_dir = self.package_dir / "security"
         schemes_dir.mkdir()
         schemes_init = schemes_dir / "__init__.py"
+        schemes_base = schemes_dir / "_base.py"
         imports = []
         alls = []
 
@@ -314,8 +315,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
         schemes_init_template = self.env.get_template("security_schemes_init.py.jinja")
         schemes_init.write_text(schemes_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
+        schemes_base_template = self.env.get_template("security_schemes_base.py.jinja")
+        schemes_base.write_text(schemes_base_template.render(), encoding=self.file_encoding)
+
     def _build_source(self) -> None:
-        source_dir = self.package_dir
         module_path = self.package_dir / "source.py"
 
         template = self.env.get_template("source.py.jinja")

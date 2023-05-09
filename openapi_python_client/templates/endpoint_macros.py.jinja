@@ -162,7 +162,6 @@ Args:
 {% endif %}
 Raises:
     errors.UnexpectedStatus: If the server returns an undocumented status code.
-    httpx.TimeoutException: If the request takes longer than Client.timeout.
 
 Returns:
 {% if is_detailed %}

@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Union, cast, Iterator
 import dlt
 
-import httpx
+from dlt.sources.helpers import requests
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
@@ -28,7 +28,7 @@ def _get_kwargs(
         {%- endfor -%}
     )
 
-    base_params = dict(cookies={}, headers={}, params={})
+    base_params: Dict[str, Any] = dict(cookies={}, headers={}, params={})
     {% if endpoint.credentials_parameter %}
     base_params.update(credentials.to_http_params())
     {% endif %}
@@ -64,7 +64,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(response: httpx.Response) -> {{ return_string }}:
+def _parse_response(response: requests.Response) -> {{ return_string }}:
     {% for response in endpoint.responses %}
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
@@ -81,7 +81,7 @@ def _parse_response(response: httpx.Response) -> {{ return_string }}:
     raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(response: httpx.Response) -> Response[{{ return_string }}]:
+def _build_response(response: requests.Response) -> Response[{{ return_string }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -99,7 +99,7 @@ def sync_detailed(
         {{ kwargs(endpoint) }}
     )
 
-    response = httpx.request(**kwargs)
+    response = requests.request(**kwargs)
 
     return _build_response(response)
 

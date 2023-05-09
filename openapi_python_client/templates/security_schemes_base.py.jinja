@@ -1,5 +1,6 @@
-from typing import Literal, TypedDict, Dict
 from base64 import b64encode
+
+from typing import Literal, TypedDict, Dict, Any, Tuple
 
 from dlt.common.configuration.specs.base_configuration import BaseConfiguration, configspec
 
@@ -11,7 +12,7 @@ class CredentialsHttpParams(TypedDict):
 
 
 @configspec
-class ApiKeyCredentialsBase(BaseConfiguration):
+class _ApiKeyCredentialsBase(BaseConfiguration):
     type: Literal["apiKey"] = "apiKey"
     location: Literal["header", "cookie", "param"]  # Alias for scheme "in" field
     name: str
@@ -22,9 +23,14 @@ class ApiKeyCredentialsBase(BaseConfiguration):
         result[self.location + "s"][self.name] = self.api_key  # type: ignore
         return result
 
+    def parse_native_representation(self, native_value: str) -> None:
+        if not isinstance(native_value, str):
+            raise ValueError("Api Key value must be a string")
+        self.api_key = native_value
+
 
 @configspec
-class HttpBasicCredentialsBase(BaseConfiguration):
+class _HttpBasicCredentialsBase(BaseConfiguration):
     type: Literal["http"] = "http"
     scheme: Literal["basic"] = "basic"
     username: str
@@ -34,9 +40,15 @@ class HttpBasicCredentialsBase(BaseConfiguration):
         encoded = b64encode(f"{self.username}:{self.password}".encode()).decode()
         return dict(cookies={}, headers={"Authorization": "Basic " + encoded}, params={})
 
+    def parse_native_representation(self, native_value: Tuple[str, str]) -> None:
+        username, password = native_value
+        if not isinstance(username, str) or not isinstance(password, str):
+            raise ValueError("Value must be a tuple of ('username', 'password')")
+        self.username, self.password = username, password
+
 
 @configspec
-class HttpBearerCredentialsBase(BaseConfiguration):
+class _HttpBearerCredentialsBase(BaseConfiguration):
     type: Literal["http"] = "http"
     scheme: Literal["bearer"] = "bearer"
     token: str
@@ -44,12 +56,22 @@ class HttpBearerCredentialsBase(BaseConfiguration):
     def to_http_params(self) -> CredentialsHttpParams:
         return dict(cookies={}, headers={"Authorization": "Bearer " + self.token}, params={})
 
+    def parse_native_representation(self, native_value: str) -> None:
+        if not isinstance(native_value, str):
+            raise ValueError("Http bearer value must be a string")
+        self.token = native_value
+
 
 @configspec
-class OAuth2CredentialsBase(BaseConfiguration):
+class _OAuth2CredentialsBase(BaseConfiguration):
     # TODO: Separate class for flows (implcit, authorization_code, client_credentials, etc)
     type: Literal["oauth2"] = "oauth2"
     access_token: str
 
     def to_http_params(self) -> CredentialsHttpParams:
         return dict(cookies={}, headers={"Authorization": "Bearer " + self.access_token}, params={})
+
+    def parse_native_representation(self, native_value: str) -> None:
+        if not isinstance(native_value, str):
+            raise ValueError("OAuth2 access token value must be a string")
+        self.access_token = native_value

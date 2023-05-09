@@ -383,7 +383,7 @@ def build_security_property(
         roots: Set of strings that identify schema objects on which the new ModelProperty will depend
     """
 
-    title = data.name or data.type
+    title = data.name or name or data.type
     class_string = title
     class_info = Class.from_string(string=class_string, config=config)
     required_properties: Optional[List[Property]] = None

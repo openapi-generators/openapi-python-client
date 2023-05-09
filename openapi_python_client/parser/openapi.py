@@ -47,12 +47,6 @@ class GeneratorData:
             chain.from_iterable(collection.endpoints for collection in self.endpoint_collections_by_tag.values())
         )
 
-    @property
-    def all_credentials(self) -> CredentialsProperty:
-        return build_credentials_property(
-            name="credentials", security_properties=list(self.security_schemes.values()), config=self.config
-        )
-
     @staticmethod
     def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
         """Create an OpenAPI from dict"""
