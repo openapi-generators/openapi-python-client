@@ -4,6 +4,8 @@ import attr
 
 from ... import schema as oai
 from .property import Property
+from .list_property import ListProperty
+from .none_property import NoneProperty
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -12,14 +14,6 @@ class AnyProperty(Property):
 
     _type_string: ClassVar[str] = "Any"
     _json_type_string: ClassVar[str] = "Any"
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class NoneProperty(Property):
-    """A property that can only be None"""
-
-    _type_string: ClassVar[str] = "None"
-    _json_type_string: ClassVar[str] = "None"
 
 
 @attr.s(auto_attribs=True, frozen=True)

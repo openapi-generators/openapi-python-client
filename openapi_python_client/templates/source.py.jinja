@@ -18,14 +18,14 @@ import dlt
 @dlt.source
 def {{ source_name }}(
         {% if credentials %}
-        {{ credentials.to_string('dlt.config.value') }}
-        {% endif %},        
+        {{ credentials.to_string('dlt.config.value') }},
+        {% endif %}
         base_url: str = dlt.config.value,
 ) -> Iterator[DltResource]:
     {% for collection in endpoint_collections.values() %}
     {% for endpoint in collection.endpoints %}
     yield {{ endpoint.python_name }}(
-        {% if credentials %}
+        {% if credentials and endpoint.credentials_parameter %}
         {{ credentials.python_name }} = {{ credentials.python_name }},
         {% endif %}
         base_url=base_url

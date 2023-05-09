@@ -26,6 +26,7 @@ from .properties import (
 )
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
+from ..dlt_schemas import create_dlt_schemas
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
@@ -286,6 +287,7 @@ class Endpoint:
             endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
             endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
             endpoint.responses.append(response)
+            # dlt_schema = create_dlt_schemas(response.prop)
         return endpoint, schemas
 
     # pylint: disable=too-many-return-statements
