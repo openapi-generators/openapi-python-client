@@ -1,0 +1,11 @@
+import dlt
+
+from {{ package_name}}.source import {{ source_name }}
+
+
+if __name__ == "__main__":
+    pipeline = dlt.pipeline(pipeline_name="{{ source_name}}", destination='duckdb')
+    source = {{ source_name }}()
+    pipeline.run(source)
+
+

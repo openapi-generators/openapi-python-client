@@ -435,7 +435,7 @@ def build_model_property(
         default=None,
         nullable=data.nullable,
         required=required,
-        name=name,
+        name=title,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         example=data.example,
     )

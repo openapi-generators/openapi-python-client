@@ -20,13 +20,18 @@ types_map = {
 
 
 def create_dlt_schemas(model: ModelProperty):
+    # TODO
     columns: TTableSchemaColumns = dict()
     new_schema: TTableSchema = dict(name=model.name, description=model.description, columns=columns)
     tables = []
     for prop in model.required_properties + model.optional_properties:
         if isinstance(prop, ModelProperty):
             py_type = dict
-        py_type = types_map[prop.__class__]
+        else:
+            py_type = types_map[prop.__class__]
 
-        columns[prop.name] = dict(name=prop.name, data_type=prop.get_type_string(no_optional=True))
-        pass
+        dlt_type = py_type_to_sc_type(py_type)
+
+        columns[prop.name] = dict(
+            name=prop.name, data_type=dlt_type, nullable=not prop.required, description=prop.description
+        )

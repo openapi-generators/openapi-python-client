@@ -117,6 +117,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._build_security()
         self._build_api()
         self._build_source()
+        self._build_pipeline()
         self._run_post_hooks()
         return self._get_errors()
 
@@ -333,6 +334,14 @@ class Project:  # pylint: disable=too-many-instance-attributes
                 credentials=self.openapi.credentials if self.openapi.credentials.is_populated else None,
             ),
             encoding=self.file_encoding,
+        )
+
+    def _build_pipeline(self) -> None:
+        module_path = self.project_dir / "pipeline.py"
+
+        template = self.env.get_template("pipeline.py.jinja")
+        module_path.write_text(
+            template.render(package_name=self.package_name, source_name=self.package_name), encoding=self.file_encoding
         )
 
 
