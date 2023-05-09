@@ -15,7 +15,8 @@ from ... import errors
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
     arguments, kwargs, parse_response, docstring %}
 
-{% set return_string = endpoint.response_type() %}
+{# {% set return_string = endpoint.response_type() %} #}
+{% set return_string = "Any" %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
 def _get_kwargs(
@@ -75,7 +76,7 @@ def _parse_response(response: requests.Response) -> {{ return_string }}:
         {% endif %}
         return {{ response.prop.python_name }}
         {% else %}
-        return None
+        return response.json()
         {% endif %}
     {% endfor %}
     raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -115,9 +116,7 @@ def sync(
 {% endif %}
 
 
-{% if parsed_responses %}
 @dlt.resource
 def {{ endpoint.python_name }}({{ arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
     yield sync_detailed({{ kwargs(endpoint) }}).parsed
-{% endif %}
