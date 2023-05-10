@@ -1,9 +1,9 @@
 {% from "helpers.jinja" import safe_docstring %}
 
 {{ safe_docstring(package_description) }}
-from .client import AuthenticatedClient, Client
+from .wrapper import Sync{{ openapi.title | pascalcase }}Client, {{ openapi.title | pascalcase }}Client
 
 __all__ = (
-    "AuthenticatedClient",
-    "Client",
+    "Sync{{ openapi.title | pascalcase }}Client",
+    "{{ openapi.title | pascalcase }}Client"
 )

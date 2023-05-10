@@ -253,6 +253,16 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_init_template = self.env.get_template("models_init.py.jinja")
         models_init.write_text(models_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
+        # Generate wrapper
+        wrapper = self.package_dir / "wrapper.py"
+        wrapper_template = self.env.get_template("wrapper.py.jinja")
+        wrapper.write_text(
+            wrapper_template.render(
+                imports=imports,
+                alls=alls,
+            )
+        )
+
     # pylint: disable=too-many-locals
     def _build_api(self) -> None:
         # Generate Client

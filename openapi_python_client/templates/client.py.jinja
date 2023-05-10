@@ -1,5 +1,7 @@
 import ssl
-from typing import Dict, Union
+import os
+from typing import Dict, Union, Optional
+
 import attr
 
 @attr.s(auto_attribs=True)
@@ -19,13 +21,21 @@ class Client:
         follow_redirects: Whether or not to follow redirects. Default value is False.
     """
 
-    base_url: str
+    base_url: Optional[str] = attr.ib(None, kw_only=True)
     cookies: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     headers: Dict[str, str] = attr.ib(factory=dict, kw_only=True)
     timeout: float = attr.ib(5.0, kw_only=True)
     verify_ssl: Union[str, bool, ssl.SSLContext] = attr.ib(True, kw_only=True)
     raise_on_unexpected_status: bool = attr.ib(False, kw_only=True)
     follow_redirects: bool = attr.ib(False, kw_only=True)
+
+    def __attrs_post_init__(self) -> None:
+        env_base_url = os.environ.get('{{ openapi.title | snakecase | upper }}_BASE_URL')
+        self.base_url = self.base_url or env_base_url
+        if self.base_url is None:
+            raise ValueError(f'"base_url" has to be set either from the '
+                             f'environment variable "{env_base_url}", or '
+                             f'passed with the "base_url" argument')
 
     def get_headers(self) -> Dict[str, str]:
         """ Get headers to be used in all endpoints """

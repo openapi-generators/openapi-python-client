@@ -1,0 +1,1 @@
+from . import {% for e in endpoint_collection.endpoints %} {{e.name | snakecase }}, {% endfor %}
