@@ -20,13 +20,6 @@ from ... import errors
 def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Dict[str, Any]:
-    url = "{}{{ endpoint.path }}".format(
-        client.base_url
-        {%- for parameter in endpoint.path_parameters.values() -%}
-        ,{{parameter.name}}={{parameter.python_name}}
-        {%- endfor -%}
-    )
-
     headers: Dict[str, str] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
@@ -39,6 +32,13 @@ def _get_kwargs(
     {{ json_body(endpoint) | indent(4) }}
 
     {{ multipart_body(endpoint) | indent(4) }}
+    
+    url = "{}{{ endpoint.path }}".format(
+        client.base_url
+        {%- for parameter in endpoint.path_parameters.values() -%}
+        ,{{parameter.name}}={{parameter.python_name}}
+        {%- endfor -%}
+    )    
 
     return {
 	    "method": "{{ endpoint.method }}",
