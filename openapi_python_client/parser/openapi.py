@@ -14,6 +14,7 @@ from ..config import Config
 from ..utils import PythonIdentifier, get_content_type
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
+    AnyProperty,
     Class,
     EnumProperty,
     ModelProperty,
@@ -346,11 +347,15 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location = {
+        parameters_by_location: Dict[str, Dict[str, Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
+            "RESERVED": {  # These can't be param names because codegen needs them as vars, the properties don't matter
+                "client": AnyProperty("client", True, False, None, PythonIdentifier("client", ""), None, None),
+                "url": AnyProperty("url", True, False, None, PythonIdentifier("url", ""), None, None),
+            },
         }
 
         for param in data.parameters:
@@ -412,7 +417,7 @@ class Endpoint:
                     continue
                 existing_prop: Property = parameters_dict[prop.name]
                 # Existing should be converted too for consistency
-                endpoint.used_python_identifiers.remove(existing_prop.python_name)
+                endpoint.used_python_identifiers.discard(existing_prop.python_name)
                 existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
 
                 if existing_prop.python_name in endpoint.used_python_identifiers:
