@@ -347,7 +347,7 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location = {
+        parameters_by_location: Dict[str, Dict[str, Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
