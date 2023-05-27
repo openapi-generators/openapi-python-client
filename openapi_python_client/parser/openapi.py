@@ -14,6 +14,7 @@ from ..config import Config
 from ..utils import PythonIdentifier, get_content_type
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
+    AnyProperty,
     Class,
     EnumProperty,
     ModelProperty,
@@ -22,7 +23,7 @@ from .properties import (
     Schemas,
     build_parameters,
     build_schemas,
-    property_from_data, NoneProperty, AnyProperty,
+    property_from_data,
 )
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
