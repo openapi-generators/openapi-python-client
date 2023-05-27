@@ -1150,6 +1150,35 @@
         }
       }
     },
+    "/naming/reserved-parameters": {
+      "description": "Ensure that parameters can't be named things that the code generator needs as variables",
+      "get": {
+        "operationId": "reserved-parameters",
+        "parameters": [
+          {
+            "name": "client",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/parameter-references/{path_param}": {
       "get": {
         "tags": [
