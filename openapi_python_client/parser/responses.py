@@ -40,6 +40,7 @@ def empty_response(
 ) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
+        data=None,
         status_code=status_code,
         prop=AnyProperty(
             name=response_name,
