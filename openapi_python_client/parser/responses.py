@@ -53,6 +53,7 @@ def empty_response(
         ),
         failed_status=status_code < HTTPStatus.OK or status_code >= HTTPStatus.MULTIPLE_CHOICES,
         source="None",
+        data=None,
     )
 
 
