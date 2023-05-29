@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-
 from typing import ClassVar, List, NamedTuple, Optional, Set, Tuple, Union
 
 import attr
 
-from ... import Config
-from ... import utils
+from ... import Config, utils
+from ...schema.openapi_schema_pydantic.security_scheme import SecurityScheme
 from ..errors import PropertyError
 from .property import Property
 from .schemas import Class, ReferencePath, Schemas
-from ...schema.openapi_schema_pydantic.security_scheme import SecurityScheme
 
 
 @attr.s(auto_attribs=True, frozen=True)

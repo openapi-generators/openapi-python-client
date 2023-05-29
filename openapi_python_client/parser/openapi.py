@@ -1,28 +1,28 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Iterator, List, Optional, Union
 from itertools import chain
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 from .. import schema as oai
-
-# from ..schema.openapi_schema_pydantic.security_scheme import SecurityScheme
-from .security_schemes import SecurityScheme
 from .. import utils
 from ..config import Config
+from .endpoint_collection import EndpointCollection
+from .endpoints import Endpoint
 from .errors import GeneratorError, ParseError
 from .properties import (
+    CredentialsProperty,
     EnumProperty,
     ModelProperty,
     Parameters,
     Schemas,
+    SecurityProperty,
+    build_credentials_property,
     build_parameters,
     build_schemas,
-    SecurityProperty,
-    CredentialsProperty,
-    build_credentials_property,
+    property_from_data,
 )
-from .endpoint_collection import EndpointCollection
-from .endpoints import Endpoint
-from .properties import property_from_data
+
+# from ..schema.openapi_schema_pydantic.security_scheme import SecurityScheme
+from .security_schemes import SecurityScheme
 
 
 @dataclass

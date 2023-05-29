@@ -1,17 +1,15 @@
 __all__ = ["EnumProperty"]
 
-from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import attr
 
-from ... import schema as oai
-from ... import utils
-from .property import Property
-from .schemas import Class
 from ... import Config
 from ... import schema as oai
+from ... import utils
 from ..errors import PropertyError
-from .schemas import Schemas
+from .property import Property
+from .schemas import Class, Schemas
 from .types import NoneProperty
 
 ValueType = Union[str, int]

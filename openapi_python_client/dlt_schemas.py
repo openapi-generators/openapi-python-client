@@ -1,12 +1,11 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
 from dlt.common.data_types import py_type_to_sc_type
-from dlt.common.schema import TTableSchema, TColumnSchema, TTableSchemaColumns
+from dlt.common.schema import TColumnSchema, TTableSchema, TTableSchemaColumns
 
-from .parser.properties.schemas import Schemas
-from .parser.properties import ModelProperty, ListProperty
+from .parser.properties import ListProperty, ModelProperty
 from .parser.properties import types as prop_types
-
+from .parser.properties.schemas import Schemas
 
 types_map = {
     prop_types.StringProperty: str,

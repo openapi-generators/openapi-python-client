@@ -1,13 +1,13 @@
-from typing import Generic, TypeVar, ClassVar, Set, Union, Tuple, Any
+from typing import Any, ClassVar, Generic, Set, Tuple, TypeVar, Union
 
 import attr
 
-from .property import Property
 from ... import schema as oai
-from .schemas import Schemas, ReferencePath
+from ... import utils
 from ...config import Config
 from ..errors import PropertyError
-from ... import utils
+from .property import Property
+from .schemas import ReferencePath, Schemas
 
 InnerProp = TypeVar("InnerProp", bound=Property)
 

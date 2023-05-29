@@ -3,9 +3,9 @@ from typing import ClassVar, Optional, Set
 import attr
 
 from ... import schema as oai
-from .property import Property
 from .list_property import ListProperty
 from .none_property import NoneProperty
+from .property import Property
 
 
 @attr.s(auto_attribs=True, frozen=True)

@@ -22,6 +22,8 @@ from ... import Config
 from ... import schema as oai
 from ... import utils
 from ..errors import ParameterError, ParseError, PropertyError
+from .build import property_from_data
+from .credentials_property import CredentialsProperty, build_credentials_property
 from .enum_property import EnumProperty
 from .list_property import ListProperty
 from .model_property import ModelProperty, process_model
@@ -35,10 +37,8 @@ from .schemas import (
     update_parameters_with_data,
     update_schemas_with_data,
 )
-from .build import property_from_data
-from .types import AnyProperty, IntProperty
 from .security_property import SecurityProperty
-from .credentials_property import CredentialsProperty, build_credentials_property
+from .types import AnyProperty, IntProperty
 
 
 def _create_schemas(

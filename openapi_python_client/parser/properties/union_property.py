@@ -1,15 +1,15 @@
-from typing import Set, List, ClassVar, Union, Tuple
 from itertools import chain
+from typing import ClassVar, List, Set, Tuple, Union
 
 import attr
 
-from .property import Property
 from ... import schema as oai
-from .schemas import Schemas
-from ..errors import PropertyError
-from ...config import Config
-from .converter import convert_chain
 from ... import utils
+from ...config import Config
+from ..errors import PropertyError
+from .converter import convert_chain
+from .property import Property
+from .schemas import Schemas
 
 
 @attr.s(auto_attribs=True, frozen=True)

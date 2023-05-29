@@ -8,25 +8,25 @@ from typing import Dict, Iterator, List, Optional, Set, Tuple, Union
 import attr
 
 from .. import schema as oai
-from ..schema.openapi_schema_pydantic.security_requirement import SecurityRequirement
 from .. import utils
 from ..config import Config
+from ..dlt_schemas import create_dlt_schemas
+from ..schema.openapi_schema_pydantic.security_requirement import SecurityRequirement
 from ..utils import PythonIdentifier, get_content_type
 from .errors import ParseError, PropertyError
 from .properties import (
     Class,
+    CredentialsProperty,
     ModelProperty,
     Parameters,
     Property,
     Schemas,
-    property_from_data,
     SecurityProperty,
-    CredentialsProperty,
     build_credentials_property,
+    property_from_data,
 )
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
-from ..dlt_schemas import create_dlt_schemas
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
@@ -513,6 +513,7 @@ class Endpoint:
             return result, schemas, parameters
         result = Endpoint._add_security(endpoint=result, data=data, security_schemes=security_schemes, config=config)
 
+        breakpoint()
         return result, schemas, parameters
 
     def response_type(self) -> str:
@@ -538,3 +539,7 @@ class Endpoint:
     def list_all_parameters(self) -> List[Property]:
         """Return a List of all the parameters of this endpoint"""
         return list(self.iter_all_parameters())
+
+    @property
+    def has_path_parameters(self) -> bool:
+        return bool(self.path_parameters)

@@ -1,17 +1,12 @@
 from __future__ import annotations
 
-
-from typing import ClassVar, List, NamedTuple, Optional, Set, Tuple, Union, Any
 from itertools import chain
+from typing import Any, List, Set
 
 import attr
 
-from ... import Config
-from ... import utils
-from ..errors import PropertyError
+from ... import Config, utils
 from .property import Property
-from .schemas import Class, ReferencePath, Schemas
-from ...schema.openapi_schema_pydantic.security_scheme import SecurityScheme
 from .security_property import SecurityProperty
 
 

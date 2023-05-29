@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 from .. import schema as oai
 from .. import utils
 from ..config import Config
-from .properties import Parameters, Schemas, SecurityProperty
 from .endpoints import Endpoint
 from .errors import ParseError
+from .properties import Parameters, Schemas, SecurityProperty
 
 
 @dataclass

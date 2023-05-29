@@ -1,4 +1,4 @@
-from typing import List, Set, Tuple, Union, Optional
+from typing import List, Optional, Set, Tuple, Union
 
 import attr
 
@@ -7,24 +7,23 @@ from ... import schema as oai
 from ... import utils
 from ..errors import ParseError, PropertyError, ValidationError
 from .converter import convert
-from .enum_property import EnumProperty
+from .enum_property import EnumProperty, build_enum_property, get_enum_default
+from .list_property import build_list_property
 from .model_property import build_model_property
 from .property import Property
 from .schemas import ReferencePath, Schemas, parse_reference_path
-from .enum_property import get_enum_default, build_enum_property
-from .union_property import build_union_property
 from .security_property import build_security_property
 from .types import (
     AnyProperty,
-    StringProperty,
-    DateTimeProperty,
-    DateProperty,
-    FileProperty,
     BooleanProperty,
+    DateProperty,
+    DateTimeProperty,
+    FileProperty,
     FloatProperty,
     IntProperty,
+    StringProperty,
 )
-from .list_property import build_list_property
+from .union_property import build_union_property
 
 
 # pylint: disable=too-many-arguments
