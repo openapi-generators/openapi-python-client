@@ -10,7 +10,6 @@ import attr
 from .. import schema as oai
 from .. import utils
 from ..config import Config
-from ..dlt_schemas import create_dlt_schemas
 from ..schema.openapi_schema_pydantic.security_requirement import SecurityRequirement
 from ..utils import PythonIdentifier, get_content_type
 from .errors import ParseError, PropertyError
@@ -24,9 +23,10 @@ from .properties import (
     SecurityProperty,
     build_credentials_property,
     property_from_data,
+    ListProperty,
 )
 from .properties.schemas import parameter_from_reference
-from .responses import Response, response_from_data
+from .responses import Response, response_from_data, DataPropertyPath
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
@@ -513,7 +513,6 @@ class Endpoint:
             return result, schemas, parameters
         result = Endpoint._add_security(endpoint=result, data=data, security_schemes=security_schemes, config=config)
 
-        breakpoint()
         return result, schemas, parameters
 
     def response_type(self) -> str:
@@ -543,3 +542,29 @@ class Endpoint:
     @property
     def has_path_parameters(self) -> bool:
         return bool(self.path_parameters)
+
+    @property
+    def list_property(self) -> Optional[DataPropertyPath]:
+        resp = self.responses[0]  # TODO: Assuming first response is data
+        return resp.list_property
+
+    @property
+    def table_name(self) -> str:
+        list_prop = self.list_property
+        if list_prop:
+            return list_prop.prop.class_info.name
+        resp = self.responses[0]
+        prop = resp.prop
+        if isinstance(prop, ModelProperty):
+            return prop.class_info.name
+        return self.name
+
+    @property
+    def data_json_path(self) -> Optional[str]:
+        list_prop = self.list_property
+        if not list_prop:
+            return ""
+        return ".".join(list_prop.path) or ""
+
+    def __hash__(self) -> int:
+        return hash(self.name)

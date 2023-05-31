@@ -23,7 +23,7 @@ def {{ source_name }}(
         base_url: str = dlt.config.value,
 ) -> Iterator[DltResource]:
     {% for collection in endpoint_collections.values() %}
-    {% for endpoint in collection.endpoints %}
+    {% for endpoint in collection.endpoints_to_render %}
     yield {{ endpoint.python_name }}(
         {% if credentials and endpoint.credentials_parameter %}
         {{ credentials.python_name }} = {{ credentials.python_name }},

@@ -2,7 +2,7 @@ import builtins
 import re
 from email.message import Message
 from keyword import iskeyword
-from typing import Any, List
+from typing import Any, List, Sequence, Dict, Iterable
 
 DELIMITERS = r"\. _-"
 
@@ -107,3 +107,14 @@ def get_content_type(content_type: str) -> str:
     content_type = message.get_content_type()
 
     return content_type
+
+
+def count_by_length(items: Iterable[Sequence[Any]]) -> Dict[int, int]:
+    """Given a list of sequences, count the number of sequences by length"""
+    result: Dict[int, int] = {}
+
+    for key in items:
+        length = len(key)
+        result[length] = result.get(length, 0) + 1
+
+    return result

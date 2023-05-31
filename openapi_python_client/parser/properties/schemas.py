@@ -22,6 +22,7 @@ from ..errors import ParameterError, ParseError, PropertyError
 
 if TYPE_CHECKING:  # pragma: no cover
     from .property import Property
+    from ..responses import Response
 else:
     Property = "Property"  # pylint: disable=invalid-name
 
@@ -77,6 +78,7 @@ class Schemas:
     dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = attr.ib(factory=dict)
     classes_by_name: Dict[ClassName, Property] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
+    responses_by_endpoint: Dict[str, List["Response"]] = attr.ib(factory=dict)
 
     def add_dependencies(self, ref_path: ReferencePath, roots: Set[Union[ReferencePath, ClassName]]) -> None:
         """Record new dependencies on the given ReferencePath

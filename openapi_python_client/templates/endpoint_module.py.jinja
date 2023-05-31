@@ -7,6 +7,7 @@ from dlt.sources.helpers import requests
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
 from ... import errors
+from ...utils import extract_nested_data
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -116,7 +117,7 @@ def sync(
 {% endif %}
 
 
-@dlt.resource
+@dlt.resource(name="{{ endpoint.table_name }}")
 def {{ endpoint.python_name }}({{ arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
-    yield sync_detailed({{ kwargs(endpoint) }}).parsed
+    yield from  extract_nested_data(sync_detailed({{ kwargs(endpoint) }}).parsed, data_json_path)

@@ -1,0 +1,12 @@
+from typing import Any, Optional, Iterator
+
+from dlt.common.jsonpath import find_values, TJsonPath
+
+
+def extract_nested_data(response_data: Any, path: Optional[TJsonPath] = None) -> Iterator[Any]:
+    """Extract nested response data from json path"""
+    if not path:
+        yield response_data
+    else:
+        for result in find_values(path, response_data):
+            yield result

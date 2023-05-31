@@ -14,7 +14,7 @@ from .property import Property
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@attr.s(auto_attribs=True)
 class ModelProperty(Property):
     """A property which refers to another Schema"""
 
@@ -237,6 +237,8 @@ def _process_properties(
             required_set.update(sub_prop.required or [])
 
     for key, value in unprocessed_props.items():
+        # if data.title == "App" and key == "config":
+        #     breakpoint()
         prop_required = key in required_set
         prop_or_error: Union[Property, PropertyError, None]
         prop_or_error, schemas = property_from_data(
@@ -439,9 +441,19 @@ def build_model_property(
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         example=data.example,
     )
-    if class_info.name in schemas.classes_by_name:
-        error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')
-        return error, schemas
+
+    existing = schemas.classes_by_name.get(class_info.name)
+    # if class_info.name == "AppConfig":
+    #     breakpoint()
+    if existing:
+        # TODO: 1. Is it ok to return the prop anyway? Just not adding it to schemas
+        # TODO: 2. We should compare the two models to ensure they have the same properties, otherwise raise the duplicate error
+        # TODO: 3. Is it possible the same schema from a nested object is hit here before a root schema? The root schema should be in schemas
+        # TODO: 4. Should maybe compare roots and choose the one with shortest path and replace in schemas
+        return prop, schemas
+
+        # error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')
+        # return error, schemas
 
     schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas

@@ -15,7 +15,7 @@ else:
     ModelProperty = "ModelProperty"  # pylint: disable=invalid-name
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@attr.s(auto_attribs=True)
 class Property:
     """
     Describes a single property for a schema

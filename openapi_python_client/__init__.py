@@ -100,7 +100,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             project_name=self.project_name,
             project_dir=self.project_dir,
             openapi=self.openapi,
-            endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
+            endpoints=self.openapi.endpoints,
         )
         self.errors: List[GeneratorError] = []
 
@@ -163,7 +163,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
     def _get_errors(self) -> List[GeneratorError]:
         errors: List[GeneratorError] = []
-        for collection in self.openapi.endpoint_collections_by_tag.values():
+        for collection in self.openapi.endpoints.endpoints_by_tag.values():
             errors.extend(collection.parse_errors)
         errors.extend(self.openapi.errors)
         errors.extend(self.errors)
@@ -184,6 +184,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
         types_template = self.env.get_template("types.py.jinja")
         types_path = self.package_dir / "types.py"
         types_path.write_text(types_template.render(), encoding=self.file_encoding)
+
+        utils_template = self.env.get_template("utils.py.jinja")
+        utils_path = self.package_dir / "utils.py"
+        utils_path.write_text(utils_template.render(), encoding=self.file_encoding)
 
     def _build_metadata(self) -> None:
         if self.meta == MetaType.NONE:
@@ -253,7 +257,6 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_init_template = self.env.get_template("models_init.py.jinja")
         models_init.write_text(models_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
-    # pylint: disable=too-many-locals
     def _build_api(self) -> None:
         # Generate Client
         # client_path = self.package_dir / "client.py"
@@ -269,7 +272,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
 
-        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
+        endpoint_collections_by_tag = self.openapi.endpoints.endpoints_by_tag
         endpoint_template = self.env.get_template(
             "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
         )
@@ -284,7 +287,13 @@ class Project:  # pylint: disable=too-many-instance-attributes
                 encoding=self.file_encoding,
             )
 
-            for endpoint in collection.endpoints:
+            for endpoint in collection.endpoints_to_render:
+                # For now only include list endpoints without path properties
+                if not endpoint.list_property:
+                    continue
+                if endpoint.has_path_parameters:
+                    continue
+                # print(endpoint.name, endpoint.list_property)
                 module_path = tag_dir / f"{endpoint.python_name}.py"
                 module_path.write_text(
                     endpoint_template.render(endpoint=endpoint),
@@ -329,7 +338,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         module_path.write_text(
             template.render(
                 source_name=self.package_name,
-                endpoint_collections=self.openapi.endpoint_collections_by_tag,
+                endpoint_collections=self.openapi.endpoints.endpoints_by_tag,
                 imports=imports,
                 credentials=self.openapi.credentials if self.openapi.credentials.is_populated else None,
             ),

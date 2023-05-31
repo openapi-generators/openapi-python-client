@@ -109,7 +109,8 @@ base_url: str = dlt.config.value,
 {# Security #}
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.to_string('dlt.secrets.value') }},
-{% endif %}    
+{% endif %}
+data_json_path: Optional[str]="{{endpoint.data_json_path}}",
 {% endmacro %}
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
