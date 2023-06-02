@@ -52,6 +52,7 @@ types-python-dateutil = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
+dlt = {version = "^0.2.9", extras = ["postgres"]}
 
 [tool.taskipy.tasks]
 check = """
