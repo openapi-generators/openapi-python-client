@@ -83,6 +83,8 @@ class Endpoint:
     errors: List[ParseError] = field(default_factory=list)
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
+    parent: Optional["Endpoint"] = None
+
     @staticmethod
     def parse_request_form_body(
         *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
@@ -566,5 +568,52 @@ class Endpoint:
             return ""
         return ".".join(list_prop.path) or ""
 
+    @property
+    def transformer(self) -> "TransformerSetting":
+        if not self.parent:
+            return None
+        if not self.parent.list_property:
+            return None
+        if not self.path_parameters:
+            return None
+        if len(self.path_parameters) > 1:
+            # TODO: Can't handle endpoints with more than 1 path param for now
+            return None
+        last_path = list(self.path_parameters.values())[-1]
+        list_prop = self.parent.list_property.prop
+        transformer_arg = None
+        id_prop = None
+        # TODO: find parent_property should recurse up to 2 levels object and be a json path
+        for prop in (list_prop.required_properties or []) + (list_prop.optional_properties or []):
+            if prop.name == last_path.name:
+                transformer_arg = prop
+                break
+            if prop.name == "id":
+                id_prop = prop
+        if id_prop and not transformer_arg:
+            transformer_arg = id_prop
+        if not transformer_arg:
+            return None
+        return TransformerSetting(self.parent, transformer_arg, last_path)
+
+    @property
+    def is_root_endpoint(self) -> bool:
+        return bool(self.list_property) and not self.has_path_parameters
+
+    @property
+    def has_json_response(self) -> bool:
+        # non-json responses are ignored by the parser, so just check for response with 2xx status
+        for response in self.responses:
+            if 200 <= response.status_code <= 299:
+                return True
+        return False
+
     def __hash__(self) -> int:
         return hash(self.name)
+
+
+@dataclass
+class TransformerSetting:
+    parent_endpoint: Endpoint
+    parent_property: Property
+    path_parameter: Property

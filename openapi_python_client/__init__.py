@@ -288,12 +288,6 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
 
             for endpoint in collection.endpoints_to_render:
-                # For now only include list endpoints without path properties
-                if not endpoint.list_property:
-                    continue
-                if endpoint.has_path_parameters:
-                    continue
-                # print(endpoint.name, endpoint.list_property)
                 module_path = tag_dir / f"{endpoint.python_name}.py"
                 module_path.write_text(
                     endpoint_template.render(endpoint=endpoint),

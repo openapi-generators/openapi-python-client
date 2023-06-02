@@ -6,7 +6,6 @@ from ..config import Config
 from .endpoint_collection import Endpoints
 from .endpoints import Endpoint
 from .errors import GeneratorError, ParseError
-from .responses import process_responses
 from .properties import (
     CredentialsProperty,
     EnumProperty,
@@ -98,8 +97,6 @@ class GeneratorData:
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
         models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
-
-        process_responses(schemas, endpoints)
 
         return GeneratorData(
             title=openapi.info.title,

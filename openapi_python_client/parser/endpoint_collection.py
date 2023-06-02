@@ -7,6 +7,7 @@ from ..config import Config
 from .endpoints import Endpoint
 from .errors import ParseError
 from .properties import Parameters, Schemas, SecurityProperty
+from .responses import process_responses
 
 
 @dataclass
@@ -22,8 +23,18 @@ class EndpointCollection:
 
     @property
     def endpoints_to_render(self) -> List[Endpoint]:
+        return [e for e in self.endpoints if e.has_json_response and (e.is_root_endpoint or e.transformer)]
         # For now only include list endpoints without path parameters
-        return [e for e in self.endpoints if e.list_property and not e.has_path_parameters]
+        # return [e for e in self.endpoints if e.list_property and not e.has_path_parameters]
+
+    @property
+    def root_endpoints(self) -> List[Endpoint]:
+        """All non-transformer endpoints"""
+        return [e for e in self.endpoints_to_render if e.is_root_endpoint]
+
+    @property
+    def transformer_endpoints(self) -> List[Endpoint]:
+        return [e for e in self.endpoints_to_render if e.transformer]
 
     @property
     def relative_imports(self) -> Set[str]:
@@ -116,6 +127,18 @@ class Endpoints:
                 return current_node["<endpoint>"]  # type: ignore
         return None
 
+    def find_nearest_list_parent(self, path: str) -> Optional[Endpoint]:
+        parts = path.strip("/").split("/")
+        while parts:
+            current_node = self.endpoints_tree
+            parts.pop()
+            for part in parts:
+                current_node = current_node[part]  # type: ignore
+            if parent_endpoint := current_node.get("<endpoint>"):
+                if parent_endpoint.list_property:  # type: ignore
+                    return parent_endpoint  # type: ignore
+        return None
+
     @staticmethod
     def from_data(
         *,
@@ -170,7 +193,15 @@ class Endpoints:
 
         tree = build_endpoint_tree(endpoints_by_name.values())
 
-        return Endpoints(endpoints_by_tag, endpoints_by_name, endpoints_tree=tree), schemas, parameters
+        ret = Endpoints(endpoints_by_tag, endpoints_by_name, endpoints_tree=tree)
+
+        process_responses(schemas, ret)
+        # TODO: Refactor
+        for endpoint in endpoints_by_name.values():
+            # endpoint.parent = ret.find_immediate_parent(endpoint.path)
+            # Set parent to the list endpoint above this endpoint
+            endpoint.parent = ret.find_nearest_list_parent(endpoint.path)
+        return ret, schemas, parameters
 
 
 def build_endpoint_tree(endpoints: Iterable[Endpoint]) -> Tree:

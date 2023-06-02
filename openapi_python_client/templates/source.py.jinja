@@ -22,9 +22,11 @@ def {{ source_name }}(
         {% endif %}
         base_url: str = dlt.config.value,
 ) -> Iterator[DltResource]:
+    # Root list endpoints
+    resources = {}
     {% for collection in endpoint_collections.values() %}
-    {% for endpoint in collection.endpoints_to_render %}
-    yield {{ endpoint.python_name }}(
+    {% for endpoint in collection.root_endpoints %}
+    resources["{{ endpoint.python_name }}"] = {{ endpoint.python_name }}(
         {% if credentials and endpoint.credentials_parameter %}
         {{ credentials.python_name }} = {{ credentials.python_name }},
         {% endif %}
@@ -32,4 +34,17 @@ def {{ source_name }}(
     )
     {% endfor %}
     {% endfor %}
-    pass
+
+    # Transformer endpoints which depend on list endpoints
+    {% for collection in endpoint_collections.values() %}
+    {% for endpoint in collection.transformer_endpoints %}
+    resources["{{ endpoint.python_name }}"] = resources["{{ endpoint.parent.python_name }}"] | {{ endpoint.python_name }}(
+        {% if credentials and endpoint.credentials_parameter %}
+        {{ credentials.python_name }} = {{ credentials.python_name }},
+        {% endif %}
+        base_url=base_url
+    )
+    {% endfor %}
+    {% endfor %}
+
+    return list(resources.values())

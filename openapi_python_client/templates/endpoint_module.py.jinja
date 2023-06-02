@@ -7,14 +7,14 @@ from dlt.sources.helpers import requests
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
 from ... import errors
-from ...utils import extract_nested_data
+from ...utils import extract_nested_data, extract_iterate_parent
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
 {% endfor %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
-    arguments, kwargs, parse_response, docstring %}
+    arguments, resource_arguments, kwargs, transformer_kwargs, parse_response, docstring %}
 
 {# {% set return_string = endpoint.response_type() %} #}
 {% set return_string = "Any" %}
@@ -51,7 +51,7 @@ def _get_kwargs(
     {{ multipart_body(endpoint) | indent(4) }}
 
     return {
-	    "method": "{{ endpoint.method }}",
+	"method": "{{ endpoint.method }}",
         "url": url,
         "headers": headers,
         "cookies": cookies,
@@ -116,8 +116,23 @@ def sync(
     ).parsed
 {% endif %}
 
-
-@dlt.resource(name="{{ endpoint.table_name }}")
-def {{ endpoint.python_name }}({{ arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
+{% if endpoint.transformer %}
+@dlt.transformer(table_name="{{ endpoint.table_name}}")
+def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
+{% else %}
+@dlt.resource(table_name="{{ endpoint.table_name }}")
+def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
+{% endif %}
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
+    {% if endpoint.transformer %}
+    for child_kwargs in extract_iterate_parent(data, parent_property_name, path_parameter_name, "{{ endpoint.path }}"):
+        yield from extract_nested_data(
+            sync_detailed(
+                {{ transformer_kwargs(endpoint) }}
+                **child_kwargs
+            ).parsed,
+            data_json_path
+        )
+    {% else %}
     yield from  extract_nested_data(sync_detailed({{ kwargs(endpoint) }}).parsed, data_json_path)
+    {% endif %}
