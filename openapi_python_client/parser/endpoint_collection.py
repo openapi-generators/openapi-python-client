@@ -190,6 +190,7 @@ class Endpoints:
                     collection.parse_errors.append(error)
                 collection.endpoints.append(endpoint)
                 endpoints_by_name[endpoint.name] = endpoint
+        endpoints_by_tag = dict(sorted(endpoints_by_tag.items(), key=lambda k: k[0]))
 
         tree = build_endpoint_tree(endpoints_by_name.values())
 

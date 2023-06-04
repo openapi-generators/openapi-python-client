@@ -76,9 +76,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
             keep_trailing_newline=True,
         )
 
-        self.project_name: str = (
-            config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-{config.project_name_suffix}"
-        )
+        project_name_base: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}"
+        self.project_name = project_name_base + config.project_name_suffix
+        self.source_name: str = project_name_base.replace("-", "_")
+        self.dataset_name: str = self.source_name + config.dataset_name_sufix
         self.project_dir: Path = Path.cwd()
         if meta != MetaType.NONE:
             self.project_dir /= self.project_name
@@ -108,6 +109,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
+        # endpoints = endpoint_selection(self.openapi.endpoints)
         if self.meta == MetaType.NONE:
             print(f"Generating {self.package_name}")
         else:
@@ -333,7 +335,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         )
         module_path.write_text(
             template.render(
-                source_name=self.package_name,
+                source_name=self.source_name,
                 endpoint_collections=self.openapi.endpoints.endpoints_by_tag,
                 imports=imports,
                 credentials=self.openapi.credentials if self.openapi.credentials.is_populated else None,
@@ -346,7 +348,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
         template = self.env.get_template("pipeline.py.jinja")
         module_path.write_text(
-            template.render(package_name=self.package_name, source_name=self.package_name), encoding=self.file_encoding
+            template.render(
+                package_name=self.package_name, source_name=self.source_name, dataset_name=self.dataset_name
+            ),
+            encoding=self.file_encoding,
         )
 
 
