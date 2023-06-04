@@ -99,7 +99,7 @@ class GeneratorData:
         models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
 
         return GeneratorData(
-            title=openapi.info.title,
+            title=openapi.info.title or config.default_openapi_title,
             description=openapi.info.description,
             version=openapi.info.version,
             endpoints=endpoints,

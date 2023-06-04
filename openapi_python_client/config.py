@@ -37,6 +37,8 @@ class Config(BaseModel):
     http_timeout: int = 5
     # include_methods: List[str] = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
     include_methods: List[str] = ["get"]
+    default_openapi_title: str = "openapi"  # Fallback title when openapi info.title is missing or empty
+    project_name_suffix: str = "pipeline"
 
     @staticmethod
     def load_from_path(path: Path) -> "Config":

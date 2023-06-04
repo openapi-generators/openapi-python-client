@@ -76,7 +76,9 @@ class Project:  # pylint: disable=too-many-instance-attributes
             keep_trailing_newline=True,
         )
 
-        self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
+        self.project_name: str = (
+            config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-{config.project_name_suffix}"
+        )
         self.project_dir: Path = Path.cwd()
         if meta != MetaType.NONE:
             self.project_dir /= self.project_name
