@@ -11,9 +11,10 @@ from pydantic import ValidationError
 from .. import schema as oai
 from .. import utils
 from ..config import Config
-from ..utils import PythonIdentifier
+from ..utils import PythonIdentifier, get_content_type
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
+    AnyProperty,
     Class,
     EnumProperty,
     ModelProperty,
@@ -111,6 +112,9 @@ def generate_operation_id(*, path: str, method: str) -> str:
     return f"{method}_{clean_path}"
 
 
+models_relative_prefix: str = "..."
+
+
 # pylint: disable=too-many-instance-attributes
 @dataclass
 class Endpoint:
@@ -185,8 +189,14 @@ class Endpoint:
         *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
         """Return json_body"""
-        body_content = body.content
-        json_body = body_content.get("application/json")
+        json_body = None
+        for content_type, schema in body.content.items():
+            content_type = get_content_type(content_type)
+
+            if content_type == "application/json" or content_type.endswith("+json"):
+                json_body = schema
+                break
+
         if json_body is not None and json_body.media_type_schema is not None:
             return property_from_data(
                 name="json_body",
@@ -251,15 +261,19 @@ class Endpoint:
                 schemas,
             )
 
+        # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
         if form_body is not None:
             endpoint.form_body = form_body
-            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.form_body.get_lazy_imports(prefix=models_relative_prefix))
         if multipart_body is not None:
             endpoint.multipart_body = multipart_body
-            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.multipart_body.get_lazy_imports(prefix=models_relative_prefix))
         if json_body is not None:
             endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix="..."))
+            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(endpoint.json_body.get_lazy_imports(prefix=models_relative_prefix))
         return endpoint, schemas
 
     @staticmethod
@@ -268,7 +282,6 @@ class Endpoint:
     ) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-
             status_code: HTTPStatus
             try:
                 status_code = HTTPStatus(int(code))
@@ -299,7 +312,10 @@ class Endpoint:
                     )
                 )
                 continue
-            endpoint.relative_imports |= response.prop.get_imports(prefix="...")
+
+            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+            endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
+            endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
             endpoint.responses.append(response)
         return endpoint, schemas
 
@@ -343,11 +359,15 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location = {
+        parameters_by_location: Dict[str, Dict[str, Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
+            "RESERVED": {  # These can't be param names because codegen needs them as vars, the properties don't matter
+                "client": AnyProperty("client", True, False, None, PythonIdentifier("client", ""), None, None),
+                "url": AnyProperty("url", True, False, None, PythonIdentifier("url", ""), None, None),
+            },
         }
 
         for param in data.parameters:
@@ -409,7 +429,7 @@ class Endpoint:
                     continue
                 existing_prop: Property = parameters_dict[prop.name]
                 # Existing should be converted too for consistency
-                endpoint.used_python_identifiers.remove(existing_prop.python_name)
+                endpoint.used_python_identifiers.discard(existing_prop.python_name)
                 existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
 
                 if existing_prop.python_name in endpoint.used_python_identifiers:
@@ -436,7 +456,9 @@ class Endpoint:
                 # There is no NULL for query params, so nullable and not required are the same.
                 prop = attr.evolve(prop, required=False, nullable=True)
 
-            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
+            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+            endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
+            endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
             endpoint.used_python_identifiers.add(prop.python_name)
             parameters_by_location[param.param_in][prop.name] = prop
 
@@ -510,11 +532,11 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string()
+            return self.responses[0].prop.get_type_string(quoted=False)
         return f"Union[{', '.join(types)}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:

@@ -13,6 +13,108 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.14.1
+
+### Fixes
+
+- Allow parameters named "client" and "url" [#758, #762, #765]. Thanks @truenicoco & @juanber84!
+
+## 0.14.0
+
+### Breaking Changes
+
+- Drop support for Python 3.7, put minimum version limit on Black (#754)
+
+### Features
+
+- Better typing (mypy) support for `Unset` (e.g., using if statements to check type) [#714, #752]. Thanks @taasan & @mcclurem! (#752)
+
+### Fixes
+
+- pyproject_no_poetry.toml.jinja template can be used to configure black and isort (closes #750) (#751)
+
+## 0.13.4
+
+### Features
+
+- support httpx 0.24 (#746)
+
+## 0.13.3
+
+### Features
+
+- Extend the UnexpectedStatus exception to include the response's content (#729)
+- Added support of follow HTTP redirects (#724). Thanks @expobrain & @emann!
+
+### Fixes
+
+- Parsing endpoint content types with semicolon separator (#727). Thanks @expobrain!
+- Remove Response[] from docstring of non-detailed functions (#741). Thanks @robertschweizer!
+
+## 0.13.2
+
+### Features
+
+- Always generate enums with sorted members (#728)
+
+### Fixes
+
+- Prevent backslashes in descriptions from breaking docstrings [#735]. Thanks @robertschweizer & @bryan-hunt! (#735)
+- Respect `required` field in parameters included with `$ref` (#737)
+
+## 0.13.1
+
+### Features
+
+- Add `http_timeout` config to set timeout getting document via `--url` [#718]. Thanks @Kircheneer!
+
+## 0.13.0
+
+### Breaking Changes
+
+- run `post_hooks` in package directory instead of current directory if meta=none [#696, #697]. Thanks @brenmous and @wallagib!
+- Treat leading underscore as a sign of invalid identifier [#703]. Thanks @maxkomarychev!
+
+### Fixes
+
+- generated docstring for `Client.get_headers` function [#713]. Thanks @rtaycher!
+
+## 0.12.3
+
+### Features
+
+- Add `raise_on_unexpected_status` flag to generated `Client` [#593]. Thanks @JamesHinshelwood, @ramnes, @gwenshap, @theFong!
+- add `use_path_prefixes_for_title_model_names` config option for simpler model names [#559, #560]. Thanks @rtaycher!
+- Support any content type ending in `+json` [#706, #709]. Thanks @XioNoX and @mtovt!
+
+## 0.12.2
+
+### Fixes
+
+- Support Python 3.11.0 (#701)
+
+## 0.12.1
+
+### Fixes
+
+- Version bump due to PyPI error
+
+## 0.12.0
+
+### Breaking Changes
+
+- Change the `Response.status_code` type to the `HTTPStatus` enum [#665]
+
+### Features
+
+- Add `endpoint_collections_by_tag` and `openapi` to the templating globals [#689]. Thanks @paulo-raca!
+- Support for recursive and circular references using lazy imports [#670, #338, #466]. Thanks @maz808 & @mtovt!
+- Include `__all__` in generated `__init__.py` files [#676, #631, #540, #675]. Thanks @EltonChou!
+
+### Fixes
+
+- If data.type is None but has data.properties, assume type is object [#691, #674]. Thanks @ahuang11!
+
 ## 0.11.6
 
 ### Features

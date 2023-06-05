@@ -4,8 +4,8 @@ import json
 import mimetypes
 import shutil
 import subprocess
-import sys
 from enum import Enum
+from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Sequence, Union
@@ -20,11 +20,6 @@ from openapi_python_client import utils
 from .config import Config
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
-
-if sys.version_info.minor < 8:  # version did not exist before 3.8, need to use a backport
-    from importlib_metadata import version
-else:
-    from importlib.metadata import version  # type: ignore
 
 __version__ = version(__package__)
 
@@ -104,6 +99,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
             package_version=self.version,
             project_name=self.project_name,
             project_dir=self.project_dir,
+            openapi=self.openapi,
+            endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
         )
         self.errors: List[GeneratorError] = []
 
@@ -153,9 +150,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
             )
             return
         try:
-            subprocess.run(
-                cmd, cwd=self.project_dir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
-            )
+            cwd = self.package_dir if self.meta == MetaType.NONE else self.project_dir
+            subprocess.run(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         except CalledProcessError as err:
             self.errors.append(
                 GeneratorError(
@@ -257,25 +253,26 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_init_template = self.env.get_template("models_init.py.jinja")
         models_init.write_text(models_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
+    # pylint: disable=too-many-locals
     def _build_api(self) -> None:
         # Generate Client
         client_path = self.package_dir / "client.py"
         client_template = self.env.get_template("client.py.jinja")
         client_path.write_text(client_template.render(), encoding=self.file_encoding)
 
+        # Generate included Errors
+        errors_path = self.package_dir / "errors.py"
+        errors_template = self.env.get_template("errors.py.jinja")
+        errors_path.write_text(errors_template.render(), encoding=self.file_encoding)
+
         # Generate endpoints
-        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")
-        api_init_path.write_text(
-            api_init_template.render(
-                endpoint_collections_by_tag=endpoint_collections_by_tag,
-            ),
-            encoding=self.file_encoding,
-        )
+        api_init_path.write_text(api_init_template.render(), encoding=self.file_encoding)
 
+        endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         endpoint_template = self.env.get_template(
             "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
         )
@@ -308,7 +305,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
 ) -> Union[Project, GeneratorError]:
-    data_dict = _get_document(url=url, path=path)
+    data_dict = _get_document(url=url, path=path, timeout=config.http_timeout)
     if isinstance(data_dict, GeneratorError):
         return data_dict
     openapi = GeneratorData.from_dict(data_dict, config=config)
@@ -392,14 +389,14 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
-def _get_document(*, url: Optional[str], path: Optional[Path]) -> Union[Dict[str, Any], GeneratorError]:
+def _get_document(*, url: Optional[str], path: Optional[Path], timeout: int) -> Union[Dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
     content_type: Optional[str]
     if url is not None and path is not None:
         return GeneratorError(header="Provide URL or Path, not both.")
     if url is not None:
         try:
-            response = httpx.get(url)
+            response = httpx.get(url, timeout=timeout)
             yaml_bytes = response.content
             if "content-type" in response.headers:
                 content_type = response.headers["content-type"].split(";")[0]

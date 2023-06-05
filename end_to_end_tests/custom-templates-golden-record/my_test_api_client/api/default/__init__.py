@@ -2,7 +2,7 @@
 
 import types
 
-from . import get_common_parameters, post_common_parameters
+from . import get_common_parameters, post_common_parameters, reserved_parameters
 
 
 class DefaultEndpoints:
@@ -13,3 +13,7 @@ class DefaultEndpoints:
     @classmethod
     def post_common_parameters(cls) -> types.ModuleType:
         return post_common_parameters
+
+    @classmethod
+    def reserved_parameters(cls) -> types.ModuleType:
+        return reserved_parameters

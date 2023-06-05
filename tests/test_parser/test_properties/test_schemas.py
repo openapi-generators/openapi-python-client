@@ -48,9 +48,7 @@ class TestParameterFromData:
 
         ref = Reference.construct(ref="#/components/parameters/a_param")
         parameters = Parameters()
-        param_or_error, new_parameters = parameter_from_data(
-            name="a_param", required=True, data=ref, parameters=parameters
-        )
+        param_or_error, new_parameters = parameter_from_data(name="a_param", data=ref, parameters=parameters)
         assert param_or_error == ParameterError("Unable to resolve another reference")
         assert new_parameters == parameters
 
@@ -61,9 +59,7 @@ class TestParameterFromData:
 
         param = Parameter(name="a_schemaless_param", param_in=ParameterLocation.QUERY)
         parameters = Parameters()
-        param_or_error, new_parameters = parameter_from_data(
-            name=param.name, required=param.required, data=param, parameters=parameters
-        )
+        param_or_error, new_parameters = parameter_from_data(name=param.name, data=param, parameters=parameters)
         assert param_or_error == ParameterError("Parameter has no schema")
         assert new_parameters == parameters
 
@@ -74,9 +70,7 @@ class TestParameterFromData:
 
         param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
         parameters = Parameters()
-        param_or_error, new_parameters = parameter_from_data(
-            name=param.name, required=param.required, data=param, parameters=parameters
-        )
+        param_or_error, new_parameters = parameter_from_data(name=param.name, data=param, parameters=parameters)
         assert param_or_error == param
         assert new_parameters.classes_by_name[param.name] == param
 

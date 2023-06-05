@@ -30,10 +30,11 @@ class EnumProperty(Property):
         oai.ParameterLocation.HEADER,
     }
 
-    def get_base_type_string(self) -> str:
+    # pylint: disable=unused-argument
+    def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self.class_info.name
 
-    def get_base_json_type_string(self) -> str:
+    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
         return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> Set[str]:
