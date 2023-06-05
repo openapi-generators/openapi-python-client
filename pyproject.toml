@@ -34,6 +34,7 @@ autoflake = "^1.4 || ^2.0.0"
 PyYAML = "^6.0"
 dlt = {extras = ["duckdb"], version = "^0.2.6"}
 requests = "^2.30.0"
+questionary = "^1.10.0"
 
 [tool.poetry.scripts]
 openapi-python-client = "openapi_python_client.cli:app"

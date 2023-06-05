@@ -17,13 +17,22 @@ class EndpointCollection:
     tag: str
     endpoints: List["Endpoint"] = field(default_factory=list)
     parse_errors: List[ParseError] = field(default_factory=list)
+    names_to_render: Optional[Set[str]] = None
+
+    def set_names_to_render(self, names: Set[str]) -> None:
+        self.names_to_render = names
 
     def endpoints_by_method(self, method: str) -> List[Endpoint]:
         return [e for e in self.endpoints if e.method == method]
 
     @property
     def endpoints_to_render(self) -> List[Endpoint]:
-        return [e for e in self.endpoints if e.has_json_response and (e.is_root_endpoint or e.transformer)]
+        names = self.names_to_render
+        return [
+            e
+            for e in self.endpoints
+            if (names is None or e.name in names) and e.has_json_response and (e.is_root_endpoint or e.transformer)
+        ]
         # For now only include list endpoints without path parameters
         # return [e for e in self.endpoints if e.list_property and not e.has_path_parameters]
 
@@ -138,6 +147,11 @@ class Endpoints:
                 if parent_endpoint.list_property:  # type: ignore
                     return parent_endpoint  # type: ignore
         return None
+
+    def set_names_to_render(self, names: Set[str]) -> None:
+        """Limit all collections to given endpoint names"""
+        for collection in self.endpoints_by_tag.values():
+            collection.set_names_to_render(names)
 
     @staticmethod
     def from_data(

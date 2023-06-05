@@ -8,6 +8,7 @@ import typer
 from openapi_python_client import MetaType
 from openapi_python_client.config import Config
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
+from openapi_python_client.cli_endpoint_selection import questionary_endpoint_selection
 
 app = typer.Typer()
 
@@ -145,6 +146,7 @@ def generate(
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
+        endpoint_filter=questionary_endpoint_selection,
     )
     handle_errors(errors, fail_on_warning)
 

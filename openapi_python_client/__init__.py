@@ -20,6 +20,7 @@ from openapi_python_client import utils
 from .config import Config
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
+from .typing import TEndpointFilter
 
 __version__ = version(__package__)
 
@@ -51,6 +52,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         config: Config,
         custom_template_path: Optional[Path] = None,
         file_encoding: str = "utf-8",
+        endpoint_filter: Optional[TEndpointFilter] = None,
     ) -> None:
         self.openapi: GeneratorData = openapi
         self.meta: MetaType = meta
@@ -84,7 +86,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         if meta != MetaType.NONE:
             self.project_dir /= self.project_name
 
-        self.package_name: str = config.package_name_override or self.project_name.replace("-", "_")
+        self.package_name: str = config.package_name_override or self.source_name
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description: str = utils.remove_string_escapes(
             f"A client library for accessing {self.openapi.title}"
@@ -106,9 +108,13 @@ class Project:  # pylint: disable=too-many-instance-attributes
             endpoints=self.openapi.endpoints,
         )
         self.errors: List[GeneratorError] = []
+        self.endpoint_filter = endpoint_filter
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
+        if self.endpoint_filter:
+            endpoint_names = self.endpoint_filter(self.openapi.endpoints)
+            self.openapi.endpoints.set_names_to_render(endpoint_names)
         # endpoints = endpoint_selection(self.openapi.endpoints)
         if self.meta == MetaType.NONE:
             print(f"Generating {self.package_name}")
@@ -117,6 +123,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             self.project_dir.mkdir()
         self._create_package()
         self._build_metadata()
+        self._build_dlt_config()
         self._build_models()
         self._build_security()
         self._build_api()
@@ -192,6 +199,22 @@ class Project:  # pylint: disable=too-many-instance-attributes
         utils_template = self.env.get_template("utils.py.jinja")
         utils_path = self.package_dir / "utils.py"
         utils_path.write_text(utils_template.render(), encoding=self.file_encoding)
+
+    def _build_dlt_config(self) -> None:
+        config_dir = self.project_dir / ".dlt"
+        config_dir.mkdir()
+
+        first_server = self.openapi.openapi.servers[0]
+        other_servers = self.openapi.openapi.servers[1:]
+
+        config_template = self.env.get_template("dlt_config.toml.jinja")
+        config_path = config_dir / "config.toml"
+        config_path.write_text(
+            config_template.render(
+                first_server=first_server, other_servers=other_servers, source_name=self.source_name
+            ),
+            encoding=self.file_encoding,
+        )
 
     def _build_metadata(self) -> None:
         if self.meta == MetaType.NONE:
@@ -281,6 +304,9 @@ class Project:  # pylint: disable=too-many-instance-attributes
             "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
         )
         for tag, collection in endpoint_collections_by_tag.items():
+            if not collection.endpoints_to_render:
+                # Don't create dir for empty tag
+                continue
             tag_dir = api_dir / tag
             tag_dir.mkdir()
 
@@ -362,6 +388,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
+    endpoint_filter: Optional[TEndpointFilter] = None,
 ) -> Union[Project, GeneratorError]:
     data_dict = _get_document(url=url, path=path, timeout=config.http_timeout)
     if isinstance(data_dict, GeneratorError):
@@ -375,6 +402,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
         meta=meta,
         file_encoding=file_encoding,
         config=config,
+        endpoint_filter=endpoint_filter,
     )
 
 
@@ -386,6 +414,7 @@ def create_new_client(
     config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
+    endpoint_filter: Optional[TEndpointFilter] = None,
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -400,6 +429,7 @@ def create_new_client(
         meta=meta,
         file_encoding=file_encoding,
         config=config,
+        endpoint_filter=endpoint_filter,
     )
     if isinstance(project, GeneratorError):
         return [project]

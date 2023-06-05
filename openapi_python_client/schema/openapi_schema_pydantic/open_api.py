@@ -21,7 +21,7 @@ class OpenAPI(BaseModel):
     """
 
     info: Info
-    servers: List[Server] = [Server(url="/")]
+    servers: List[Server] = [Server(url="https://myapi.example.com", description="Replace with real API URL")]
     paths: Paths
     components: Optional[Components] = None
     security: Optional[List[SecurityRequirement]] = None

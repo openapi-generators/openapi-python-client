@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import List
 
 from dlt.extract.source import DltResource
 
@@ -15,13 +15,15 @@ from dlt.extract.source import DltResource
 
 import dlt
 
+__source_name__ = "{{ source_name }}"
+
 @dlt.source
 def {{ source_name }}(
         {% if credentials %}
         {{ credentials.to_string('dlt.config.value') }},
         {% endif %}
         base_url: str = dlt.config.value,
-) -> Iterator[DltResource]:
+) -> List[DltResource]:
     # Root list endpoints
     resources = {}
     {% for collection in endpoint_collections.values() %}

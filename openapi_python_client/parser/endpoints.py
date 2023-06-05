@@ -23,7 +23,6 @@ from .properties import (
     SecurityProperty,
     build_credentials_property,
     property_from_data,
-    ListProperty,
 )
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data, DataPropertyPath
