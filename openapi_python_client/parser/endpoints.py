@@ -83,6 +83,7 @@ class Endpoint:
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     parent: Optional["Endpoint"] = None
+    rank = 0  # How many other endpoints root models are referenced
 
     @staticmethod
     def parse_request_form_body(
@@ -598,6 +599,18 @@ class Endpoint:
     @property
     def is_root_endpoint(self) -> bool:
         return bool(self.list_property) and not self.has_path_parameters
+
+    @property
+    def root_model(self) -> Optional[ModelProperty]:
+        if self.list_property:
+            if isinstance(self.list_property.prop, ModelProperty):
+                return self.list_property.prop
+        if not self.has_json_response:
+            return None
+        resp = self.responses[0]
+        if isinstance(resp.prop, ModelProperty):
+            return resp.prop
+        return None
 
     @property
     def has_json_response(self) -> bool:

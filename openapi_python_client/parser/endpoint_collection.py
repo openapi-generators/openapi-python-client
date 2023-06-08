@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple, Union, Iterable
+from itertools import chain
 
 from .. import schema as oai
 from .. import utils
@@ -152,6 +153,16 @@ class Endpoints:
         """Limit all collections to given endpoint names"""
         for collection in self.endpoints_by_tag.values():
             collection.set_names_to_render(names)
+
+    @property
+    def all_endpoints_to_render(self) -> List[Endpoint]:
+        return list(
+            sorted(
+                chain.from_iterable(collection.endpoints_to_render for collection in self.endpoints_by_tag.values()),
+                key=lambda e: e.rank,
+                reverse=True,
+            )
+        )
 
     @staticmethod
     def from_data(

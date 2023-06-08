@@ -70,7 +70,7 @@ class Class:
         return Class(name=class_name, module_name=module_name)
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@attr.s(auto_attribs=True)
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 

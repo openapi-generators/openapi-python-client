@@ -8,13 +8,18 @@ from .parser.endpoint_collection import Endpoints, Endpoint
 def questionary_endpoint_selection(endpoints: Endpoints) -> Set[str]:
     """Endpoint selection with questionary. Returns a Set of endpoint names"""
     choices: List[questionary.Choice] = []
-    for tag, collection in endpoints.endpoints_by_tag.items():
-        if not collection.endpoints_to_render:
-            continue
-        choices.append(questionary.Separator(f"\n{tag} endpoints:\n"))
-        for endpoint in collection.endpoints_to_render:
-            text = [("bold", str(endpoint.python_name))]  # , ("italic fg:ansigray", f" {endpoint.path}")]
-            choices.append(questionary.Choice(text, endpoint))
+    for endpoint in endpoints.all_endpoints_to_render:
+        # for tag, collection in endpoints.endpoints_by_tag.items():
+        #     if not collection.endpoints_to_render:
+        #         continue
+        #     choices.append(questionary.Separator(f"\n{tag} endpoints:\n"))
+        # for endpoint in collection.endpoints_to_render:
+        # text = [("bold", str(endpoint.python_name))]  # , ("italic fg:ansigray", f" {endpoint.path}")]
+        text = [
+            ("bold", str(endpoint.python_name)),
+            ("italic", f" {endpoint.path}"),
+        ]
+        choices.append(questionary.Choice(text, endpoint))
     selected_endpoints: List[Endpoint] = questionary.checkbox(
         "Which resources would you like to generate?", choices
     ).ask()
