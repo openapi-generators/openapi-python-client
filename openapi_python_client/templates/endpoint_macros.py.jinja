@@ -230,15 +230,9 @@ Args:
     {% endfor %}
 
 {% endif %}
-Raises:
-    errors.UnexpectedStatus: If the server returns an undocumented status code.
 
 Returns:
-{% if is_detailed %}
-    Response[{{ return_string }}]
-{% else %}
-    {{ return_string }}
-{% endif %}
+    Iterator of '{{ endpoint.table_name }}' items
 {% endmacro %}
 
 {% macro docstring(endpoint, return_string, is_detailed) %}

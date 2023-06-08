@@ -66,55 +66,14 @@ def _get_kwargs(
     }
 
 
-def _parse_response(response: requests.Response) -> {{ return_string }}:
-    {% for response in endpoint.responses %}
-    if response.status_code == HTTPStatus.{{ response.status_code.name }}:
-        {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
-        {% if prop_template.construct %}
-        {{ prop_template.construct(response.prop, response.source) | indent(8) }}
-        {% else %}
-        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
-        {% endif %}
-        return {{ response.prop.python_name }}
-        {% else %}
-        return response.json()
-        {% endif %}
-    {% endfor %}
-    raise errors.UnexpectedStatus(response.status_code, response.content)
-
-
 def _build_response(response: requests.Response) -> Response[{{ return_string }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(response),
+        parsed=response.json(),
     )
 
-
-def sync_detailed(
-    {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}]:
-    {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
-
-    kwargs = _get_kwargs(
-        {{ kwargs(endpoint) }}
-    )
-
-    response = requests.request(**kwargs)
-
-    return _build_response(response)
-
-{% if parsed_responses %}
-def sync(
-    {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
-    {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
-
-    return sync_detailed(
-        {{ kwargs(endpoint) }}
-    ).parsed
-{% endif %}
 
 {% if endpoint.transformer %}
 @dlt.transformer(table_name="{{ endpoint.table_name}}")
@@ -124,15 +83,18 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
 def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
 {% endif %}
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
+
     {% if endpoint.transformer %}
     for child_kwargs in extract_iterate_parent(data, parent_property_name, path_parameter_name, "{{ endpoint.path }}"):
-        yield from extract_nested_data(
-            sync_detailed(
-                {{ transformer_kwargs(endpoint) }}
-                **child_kwargs
-            ).parsed,
-            data_json_path
+        kwargs = _get_kwargs(
+            {{ transformer_kwargs(endpoint) }}
+            **child_kwargs
         )
+        response = _build_response(requests.request(**kwargs))
+
+        yield from extract_nested_data(response.parsed, data_json_path)
     {% else %}
-    yield from  extract_nested_data(sync_detailed({{ kwargs(endpoint) }}).parsed, data_json_path)
+    kwargs = _get_kwargs({{kwargs(endpoint)}})
+    response = _build_response(requests.request(**kwargs))
+    yield from  extract_nested_data(response.parsed, data_json_path)
     {% endif %}

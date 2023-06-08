@@ -89,7 +89,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self.package_name: str = config.package_name_override or self.source_name
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description: str = utils.remove_string_escapes(
-            f"A client library for accessing {self.openapi.title}"
+            f"A pipeline to load data from {self.openapi.title}"
         )
         self.version: str = config.package_version_override or openapi.version
 
@@ -236,6 +236,11 @@ class Project:  # pylint: disable=too-many-instance-attributes
         git_ignore_path = self.project_dir / ".gitignore"
         git_ignore_template = self.env.get_template(".gitignore.jinja")
         git_ignore_path.write_text(git_ignore_template.render(), encoding=self.file_encoding)
+
+        # requirements.txt
+        requirements_path = self.project_dir / "requirements.txt"
+        requirements_template = self.env.get_template("requirements.txt.jinja")
+        requirements_path.write_text(requirements_template.render(), encoding=self.file_encoding)
 
     def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
         template = "pyproject.toml.jinja"
