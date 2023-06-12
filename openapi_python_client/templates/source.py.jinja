@@ -17,7 +17,7 @@ import dlt
 
 __source_name__ = "{{ source_name }}"
 
-@dlt.source
+@dlt.source(name="{{package_name}}", max_table_nesting=2)
 def {{ source_name }}(
         {% if credentials %}
         {{ credentials.to_string('dlt.config.value') }},

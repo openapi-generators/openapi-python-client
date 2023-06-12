@@ -1,85 +1,123 @@
-![Run Checks](https://github.com/openapi-generators/openapi-python-client/workflows/Run%20Checks/badge.svg)
-[![codecov](https://codecov.io/gh/openapi-generators/openapi-python-client/branch/main/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-[![Generic badge](https://img.shields.io/badge/type_checked-mypy-informational.svg)](https://mypy.readthedocs.io/en/stable/introduction.html)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![PyPI version shields.io](https://img.shields.io/pypi/v/openapi-python-client.svg)](https://pypi.python.org/pypi/openapi-python-client/)
-[![Downloads](https://static.pepy.tech/personalized-badge/openapi-python-client?period=total&units=international_system&left_color=blue&right_color=green&left_text=Downloads)](https://pepy.tech/project/openapi-python-client)
+# 🚧 dlt-init-openapi demo
 
-# openapi-python-client
-
-Generate modern Python clients from OpenAPI 3.x documents.
+Generates dlt pipelines from OpenAPI 3.x documents.
 
 _This generator does not support OpenAPI 2.x FKA Swagger. If you need to use an older document, try upgrading it to
 version 3 first with one of many available converters._
 
-**This project is still in development and does not support all OpenAPI features**
 
-## Why This?
+> 🕳️ This is only a demo.
+> - will generate resources for all endpoints that return lists of objects
+> - will use a few heuristics to find list wrapped in responses
+> - will generate transformers from all endpoints that have a matching list resource (same object type returned)
+> - will use a few heuristics to find the right object id to pass to the transformer
+> - user can select endpoints using `questionary` lib in CLI
+> - endpoints that have the most central data types (tables linking to many other tables) will be listed first
+> - the structure of the code is not optimized!
+> - there's no pagination added. use our GPT-4 playground to do that
 
-This tool focuses on creating the best developer experience for Python developers by:
-
-1. Using all the latest and greatest Python features like type annotations and dataclasses.
-2. Having documentation and usage instructions specific to this one generator.
-1. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
-
-## Installation
-
-I recommend you install with [pipx](https://pipxproject.github.io/pipx/) so you don't conflict with any other packages you might have: `pipx install openapi-python-client --include-deps`.
-
-> Note the `--include-deps` option which will also make `black`, `isort`, and `autoflake` available in your path so that `openapi-python-client` can use them to clean up the generated code.
-
-**If you use `pipx run` then the post-generation hooks will not be available unless you install them manually.**
-
-You can also install with normal pip: `pip install openapi-python-client`
-
-Then, if you want tab completion: `openapi-python-client --install-completion`
+## Prior work
+This is a heavily hacked fork of [openapi-python-client](https://github.com/openapi-generators/openapi-python-client)
 
 ## Usage
-
-### Create a new client
-
-`openapi-python-client generate --url https://my.api.com/openapi.json`
-
-This will generate a new client library named based on the title in your OpenAPI spec. For example, if the title
-of your API is "My API", the expected output will be "my-api-client". If a folder already exists by that name, you'll
-get an error.
-
-If you have an `openapi.json` file available on disk, in any CLI invocation you can build off that instead by replacing `--url` with a `--path`:
-
-`openapi-python-client generate --path location/on/disk/openapi.json`
-
-### Update an existing client
-
-`openapi-python-client update --url https://my.api.com/openapi.json`
-
-> For more usage details run `openapi-python-client --help` or read [usage](usage.md)
-
-### Using custom templates
-
-This feature leverages Jinja2's [ChoiceLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.ChoiceLoader) and [FileSystemLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.FileSystemLoader). This means you do _not_ need to customize every template. Simply copy the template(s) you want to customize from [the default template directory](openapi_python_client/templates) to your own custom template directory (file names _must_ match exactly) and pass the template directory through the `custom-template-path` flag to the `generate` and `update` commands. For instance,
-
+1. You need `poetry` to install dependencies
 ```
-openapi-python-client update \
-  --url https://my.api.com/openapi.json \
-  --custom-template-path=relative/path/to/mytemplates
+poetry install
 ```
 
-_Be forewarned, this is a beta-level feature in the sense that the API exposed in the templates is undocumented and unstable._
+2. Create new `dlt` pipeline from [PokeAPI spec](https://raw.githubusercontent.com/cliffano/pokeapi-clients/main/specification/pokeapi.yml) and place it in the `pokemon-pipeline` 
+```
+dlt-init init pokemon --url https://raw.githubusercontent.com/cliffano/pokeapi-clients/main/specification/pokeapi.yml
+```
+
+3. After executing of the command, you can pick the endpoints that you want to add to your source and then load with the pipeline. The endpoints are grouped by returned data type (table) and ordered by centrality (a measure how many other tables, the given table links to):
+```
+? Which resources would you like to generate? (Use arrow keys to move, <space> to select, <a> to toggle, <i> to invert)
+ 
+PokemonSpecies endpoints:
+
+   ○ pokemon_species_list /api/v2/pokemon-species/
+ » ○ pokemon_species_read /api/v2/pokemon-species/{id}/
+ 
+EvolutionChain endpoints:
+
+   ○ evolution_chain_list /api/v2/evolution-chain/
+   ○ evolution_chain_read /api/v2/evolution-chain/{id}/
+ 
+MoveAilment endpoints:
+
+   ○ move_ailment_list /api/v2/move-ailment/
+   ○ move_ailment_read /api/v2/move-ailment/{id}/
+ 
+Move endpoints:
+
+   ○ move_list /api/v2/move/
+   ○ move_read /api/v2/move/{id}/
+ 
+Pokemon endpoints:
+
+   ○ pokemon_list /api/v2/pokemon/
+   ○ pokemon_read /api/v2/pokemon/{id}/
+```
+
+4. Pick your endpoints and press **ENTER** to generate pipeline. Now you are ready to load data.
+
+5. Enter the `pokemon-pipeline` folder and execute the `pipeline.py` script. This will load your endpoints to local `duckdb`. Below we use `enlighten` to show fancy progress bars:
+```
+cd pokemon-pipeline
+python pipeline.py
+```
+
+6. Inspect the pipeline to see what got loaded
+```
+$ dlt pipeline pokemon_pipeline info
+Found pipeline pokemon_pipeline in /home/rudolfix/.dlt/pipelines
+Synchronized state:
+_state_version: 2
+_state_engine_version: 2
+pipeline_name: pokemon_pipeline
+dataset_name: pokemon_data
+default_schema_name: pokemon
+schema_names: ['pokemon']
+destination: dlt.destinations.duckdb
+
+Local state:
+first_run: False
+_last_extracted_at: 2023-06-12T11:50:16.171872+00:00
+
+Resources in schema: pokemon
+pokemon_species_read with 8 table(s) and 0 resource state slot(s)
+
+Working dir content:
+Has 1 completed load packages with following load ids:
+1686570616.17882
+
+Pipeline has last run trace. Use 'dlt pipeline pokemon_pipeline trace' to inspect
+```
+7. Launch the streamlit app to preview the data
+```
+pip install pandas streamlit
+dlt pipeline pokemon_pipeline show
+```
 
 ## What You Get
+When you run the command above, following files will be generated:
+1. `pokemon-pipeline` a folder with all the files
+2. a folder `pokemon` with the Python module containing dlt source, resources and the Python client. 
+3. `__init__.py` in that folder with the dlt source
+4. the `pipeline.py` file that loads the resources to duckdb
+5. `.dlt` folder with the `config.toml`
 
-1. A `pyproject.toml` file with some basic metadata intended to be used with [Poetry].
-1. A `README.md` you'll most definitely need to update with your project's details
-1. A Python module named just like the auto-generated project name (e.g. "my_api_client") which contains:
-   1. A `client` module which will have both a `Client` class and an `AuthenticatedClient` class. You'll need these
-      for calling the functions in the `api` module.
-   1. An `api` module which will contain one module for each tag in your OpenAPI spec, as well as a `default` module
-      for endpoints without a tag. Each of these modules in turn contains one function for calling each endpoint.
-   1. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
+## What's next
+There's still work needed to make things useful:
+1. We will fully restructure the underlying Python client. We'll compress all the files in `pokemon/api` folder into a single, nice and extendable client.
+2. We'll allow to easily add pagination and other injections into client. GPT-4 friendly
+3. Many more heuristics to extract resources and their dependencies
+4. Integration with existing `dlt init` command 
 
-For a full example you can look at the `end_to_end_tests` directory which has an `openapi.json` file.
-"golden-record" in that same directory is the generated client from that OpenAPI document.
+
+# 🚀 openapi-python-client docs
+If you want to experiment, features below still work
 
 ## OpenAPI features supported
 
@@ -95,35 +133,10 @@ For a full example you can look at the `end_to_end_tests` directory which has an
 You can pass a YAML (or JSON) file to openapi-python-client with the `--config` option in order to change some behavior.
 The following parameters are supported:
 
-### class_overrides
-
-Used to change the name of generated model classes. This param should be a mapping of existing class name
-(usually a key in the "schemas" section of your OpenAPI document) to class_name and module_name. As an example, if the
-name of the a model in OpenAPI (and therefore the generated class name) was something like "\_PrivateInternalLongName"
-and you want the generated client's model to be called "ShortName" in a module called "short_name" you could do this:
-
-Example:
-
-```yaml
-class_overrides:
-  _PrivateInternalLongName:
-    class_name: ShortName
-    module_name: short_name
-```
-
-The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the models folder.
 
 ### project_name_override and package_name_override
 
-Used to change the name of generated client library project/package. If the project name is changed but an override for the package name
-isn't provided, the package name will be converted from the project name using the standard convention (replacing `-`'s with `_`'s).
-
-Example:
-
-```yaml
-project_name_override: my-special-project-name
-package_name_override: my_extra_special_package_name
-```
+Pass the `source` in command line to create pipeline instead!
 
 ### field_prefix
 
@@ -155,14 +168,6 @@ post_hooks:
    - "isort ."
    - "black ."
 ```
-
-### use_path_prefixes_for_title_model_names
-
-By default, `openapi-python-client` generates class names which include the full path to the schema, including any parent-types. This can result in very long class names like `MyRouteSomeClassAnotherClassResponse`—which is very unique and unlikely to cause conflicts with future API additions, but also super verbose.
-
-If you are carefully curating your `title` properties already to ensure no duplicate class names, you can turn off this prefixing feature by setting `use_path_prefixes_for_title_model_names` to `false` in your config file. This will use the `title` property of any object that has it set _without_ prefixing.
-
-If this option results in conflicts, you will need to manually override class names instead via the `class_overrides` option.
 
 ### http_timeout
 

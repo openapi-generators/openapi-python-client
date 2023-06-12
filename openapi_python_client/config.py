@@ -39,7 +39,7 @@ class Config(BaseModel):
     include_methods: List[str] = ["get"]
     default_openapi_title: str = "openapi"  # Fallback title when openapi info.title is missing or empty
     project_name_suffix: str = "-pipeline"
-    dataset_name_sufix: str = "_data"
+    dataset_name_suffix: str = "_data"
 
     @staticmethod
     def load_from_path(path: Path) -> "Config":
