@@ -80,13 +80,16 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
         project_name_base: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}"
         self.project_name = project_name_base + config.project_name_suffix
-        self.source_name: str = project_name_base.replace("-", "_")
-        self.dataset_name: str = self.source_name + config.dataset_name_sufix
-        self.project_dir: Path = Path.cwd()
-        if meta != MetaType.NONE:
-            self.project_dir /= self.project_name
-
         self.package_name: str = config.package_name_override or self.source_name
+
+        self.package_name = self.package_name.replace("-", "_")
+        self.source_name: str = self.package_name + "_source"
+        self.dataset_name: str = self.package_name + config.dataset_name_suffix
+        self.project_dir: Path = Path.cwd()
+        # if meta != MetaType.NONE:
+        self.project_dir /= self.project_name
+
+        
         self.package_dir: Path = self.project_dir / self.package_name
         self.package_description: str = utils.remove_string_escapes(
             f"A pipeline to load data from {self.openapi.title}"
@@ -181,12 +184,13 @@ class Project:  # pylint: disable=too-many-instance-attributes
         return errors
 
     def _create_package(self) -> None:
+        self.project_dir.mkdir(exist_ok=True)
         self.package_dir.mkdir()
         # Package __init__.py
-        package_init = self.package_dir / "__init__.py"
+        # package_init = self.package_dir / "__init__.py"
 
-        package_init_template = self.env.get_template("package_init.py.jinja")
-        package_init.write_text(package_init_template.render(), encoding=self.file_encoding)
+        # package_init_template = self.env.get_template("package_init.py.jinja")
+        # package_init.write_text(package_init_template.render(), encoding=self.file_encoding)
 
         if self.meta != MetaType.NONE:
             pytyped = self.package_dir / "py.typed"
@@ -358,7 +362,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         schemes_base.write_text(schemes_base_template.render(), encoding=self.file_encoding)
 
     def _build_source(self) -> None:
-        module_path = self.package_dir / "source.py"
+        module_path = self.package_dir / "__init__.py"
 
         template = self.env.get_template("source.py.jinja")
         imports = self.openapi.credentials.get_imports(prefix=".") | self.openapi.credentials.get_lazy_imports(

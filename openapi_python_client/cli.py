@@ -104,7 +104,7 @@ custom_template_path_options = {
 }
 
 _meta_option = typer.Option(
-    MetaType.POETRY,
+    MetaType.NONE,
     help="The type of metadata you want to generate.",
 )
 
@@ -113,7 +113,8 @@ CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to 
 
 # pylint: disable=too-many-arguments
 @app.command()
-def generate(
+def init(
+    source: str = typer.Argument(None, help="A name of data source for which to generate a pipeline"),
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
     path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
     custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
@@ -139,6 +140,8 @@ def generate(
         raise typer.Exit(code=1) from err
 
     config = _process_config(config_path)
+    config.project_name_override = source
+    config.package_name_override = source
     errors = create_new_client(
         url=url,
         path=path,
