@@ -16,6 +16,11 @@ version 3 first with one of many available converters._
 > - the structure of the code is not optimized!
 > - there's no pagination added. use our GPT-4 playground to do that
 
+<a href="https://www.loom.com/share/2806b873ba1c4e0ea382eb3b4fbaf808">
+    <p>Generating a Pokemon dlt pipeline from Open API Spec 🚀</p>
+    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/2806b873ba1c4e0ea382eb3b4fbaf808-with-play.gif">
+  </a>
+
 ## Prior work
 This is a heavily hacked fork of [openapi-python-client](https://github.com/openapi-generators/openapi-python-client)
 
@@ -23,6 +28,7 @@ This is a heavily hacked fork of [openapi-python-client](https://github.com/open
 1. You need `poetry` to install dependencies
 ```
 poetry install
+poetry shell
 ```
 
 2. Create new `dlt` pipeline from [PokeAPI spec](https://raw.githubusercontent.com/cliffano/pokeapi-clients/main/specification/pokeapi.yml) and place it in the `pokemon-pipeline` 
@@ -65,7 +71,7 @@ Pokemon endpoints:
 5. Enter the `pokemon-pipeline` folder and execute the `pipeline.py` script. This will load your endpoints to local `duckdb`. Below we use `enlighten` to show fancy progress bars:
 ```
 cd pokemon-pipeline
-python pipeline.py
+PROGRESS=enlighten python pipeline.py
 ```
 
 6. Inspect the pipeline to see what got loaded
@@ -94,8 +100,9 @@ Has 1 completed load packages with following load ids:
 
 Pipeline has last run trace. Use 'dlt pipeline pokemon_pipeline trace' to inspect
 ```
-7. Launch the streamlit app to preview the data
+7. Launch the streamlit app to preview the data (we copy a streamlit config to make it work on codespaces)
 ```
+cp -r ../.streamlit .
 pip install pandas streamlit
 dlt pipeline pokemon_pipeline show
 ```

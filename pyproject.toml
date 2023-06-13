@@ -35,6 +35,7 @@ PyYAML = "^6.0"
 dlt = {extras = ["duckdb"], version = "^0.3.0"}
 requests = "^2.30.0"
 questionary = "^1.10.0"
+enlighten = "^1.11.2"
 
 [tool.poetry.scripts]
 dlt-init = "openapi_python_client.cli:app"
