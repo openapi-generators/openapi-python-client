@@ -16,10 +16,12 @@ version 3 first with one of many available converters._
 > - the structure of the code is not optimized!
 > - there's no pagination added. use our GPT-4 playground to do that
 
+**Generating a Pokemon dlt pipeline from Open API Spec 🚀**
+
 <a href="https://www.loom.com/share/2806b873ba1c4e0ea382eb3b4fbaf808">
-    <p>Generating a Pokemon dlt pipeline from Open API Spec 🚀</p>
-    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/2806b873ba1c4e0ea382eb3b4fbaf808-with-play.gif">
+    <img style="max-width:450px;" src="https://cdn.loom.com/sessions/thumbnails/2806b873ba1c4e0ea382eb3b4fbaf808-with-play.gif">
   </a>
+  
 
 ## Prior work
 This is a heavily hacked fork of [openapi-python-client](https://github.com/openapi-generators/openapi-python-client)
