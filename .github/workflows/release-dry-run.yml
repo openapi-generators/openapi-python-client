@@ -16,5 +16,5 @@ jobs:
       - name: Install Knope
         uses: knope-dev/action@v1
         with:
-          version: 0.7.3
+          version: 0.8.0
       - run: knope release --dry-run
