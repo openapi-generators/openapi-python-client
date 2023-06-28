@@ -66,11 +66,26 @@ jobs:
 
       - name: Generate coverage report
         shell: bash
-        run: poetry run coverage xml
+        run: poetry run coverage xml -o coverage-${{ matrix.os }}-${{ matrix.python }}.xml
 
+      - name: Store coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage-${{ matrix.os }}-${{ matrix.python }}.xml
+
+  upload_coverage:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
       - uses: codecov/codecov-action@v3
         with:
-          files: ./coverage.xml
+          files: "*.xml"
 
   integration:
     name: Integration Tests
@@ -124,3 +139,5 @@ jobs:
         run: |
           cd integration-tests
           poetry run pytest
+  
+  
