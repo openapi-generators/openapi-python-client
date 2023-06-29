@@ -12,32 +12,20 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    client: Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
 ) -> Dict[str, Any]:
-    url = "{}/parameters/header".format(client.base_url)
+    url = "/parameters/header"
 
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
-    headers["Boolean-Header"] = "true" if boolean_header else "false"
-
-    headers["String-Header"] = string_header
-
-    headers["Number-Header"] = str(number_header)
-
-    headers["Integer-Header"] = str(integer_header)
+    headers: Dict[str, Any] = {"Boolean-Header": "true" if boolean_header else "false", "String-Header": string_header,
+                               "Number-Header": str(number_header), "Integer-Header": str(integer_header)}
 
     return {
         "method": "post",
         "url": url,
         "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
     }
 
 
@@ -93,15 +81,13 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         boolean_header=boolean_header,
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -164,15 +150,13 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         boolean_header=boolean_header,
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
