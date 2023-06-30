@@ -106,7 +106,14 @@ class Client:
     def get_async_client(self) -> httpx.AsyncClient:
         """Get the underlying httpx.AsyncClient, constructing a new one if not previously set"""
         if self._async_client is None:
-            self._async_client = httpx.AsyncClient(base_url=self._base_url, cookies=self._cookies, headers=self._headers, timeout=self._timeout, verify=self._verify_ssl, follow_redirects=self._follow_redirects)
+            self._async_client = httpx.AsyncClient(
+                base_url=self._base_url,
+                cookies=self._cookies,
+                headers=self._headers,
+                timeout=self._timeout,
+                verify=self._verify_ssl,
+                follow_redirects=self._follow_redirects,
+            )
         return self._async_client
 
     async def __aenter__(self) -> "Client":

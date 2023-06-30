@@ -40,6 +40,7 @@ def test(client: Client) -> None:
     assert content.file_data.encode() == payload
     assert content.description == description
 
+
 def test_context_manager(client: Client) -> None:
     a_string = "a test string"
     payload = b"some file content"
@@ -128,6 +129,7 @@ async def test_async(client: Client) -> None:
     assert content.file_content_type == mime_type
     assert content.file_data.encode() == payload
     assert content.description == description
+
 
 @pytest.mark.asyncio
 async def test_async_context_manager(client: Client) -> None:
