@@ -1,8 +1,8 @@
 import ssl
-from typing import Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
-from attrs import define, field, evolve
 import httpx
+from attrs import define, evolve, field
 
 
 @define
@@ -17,7 +17,7 @@ class Client:
 
         ``headers``: A dictionary of headers to be sent with every request
 
-        ``timeout``: The maximum amount of a time in seconds a request can take. API functions will raise
+        ``timeout``: The maximum amount of a time a request can take. API functions will raise
         httpx.TimeoutException if this is exceeded.
 
         ``verify_ssl``: Whether or not to verify the SSL certificate of the API server. This should be True in production,
@@ -35,7 +35,7 @@ class Client:
     _base_url: str
     _cookies: Dict[str, str] = field(factory=dict, kw_only=True)
     _headers: Dict[str, str] = field(factory=dict, kw_only=True)
-    _timeout: float = field(default=5.0, kw_only=True)
+    _timeout: Optional[httpx.Timeout] = field(default=None, kw_only=True)
     _verify_ssl: Union[str, bool, ssl.SSLContext] = field(default=True, kw_only=True)
     _follow_redirects: bool = field(default=False, kw_only=True)
     _client: Optional[httpx.Client] = field(default=None, init=False)
@@ -57,7 +57,7 @@ class Client:
             self._async_client.cookies.update(cookies)
         return evolve(self, cookies={**self._cookies, **cookies})
 
-    def with_timeout(self, timeout: float) -> "Client":
+    def with_timeout(self, timeout: httpx.Timeout) -> "Client":
         """Get a new client matching this one with a new timeout (in seconds)"""
         if self._client is not None:
             self._client.timeout = timeout
@@ -91,7 +91,7 @@ class Client:
         self.get_client().__enter__()
         return self
 
-    def __exit__(self, *args, **kwargs) -> None:
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
         """Exit a context manager for self.client (see httpx docs)"""
         self.get_client().__exit__(*args, **kwargs)
 
@@ -121,7 +121,7 @@ class Client:
         await self.get_async_client().__aenter__()
         return self
 
-    async def __aexit__(self, *args, **kwargs) -> None:
+    async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
         """Exit a context manager for self.async_client (see httpx docs)"""
         await self.get_async_client().__aexit__(*args, **kwargs)
 
@@ -159,7 +159,7 @@ class AuthenticatedClient:
     auth_header_name: str = "Authorization"
     _cookies: Dict[str, str] = field(factory=dict, kw_only=True)
     _headers: Dict[str, str] = field(factory=dict, kw_only=True)
-    _timeout: float = field(default=5.0, kw_only=True)
+    _timeout: httpx.Timeout = field(default=None, kw_only=True)
     _verify_ssl: Union[str, bool, ssl.SSLContext] = field(default=True, kw_only=True)
     _follow_redirects: bool = field(default=False, kw_only=True)
     _client: Optional[httpx.Client] = field(default=None, init=False)
@@ -181,7 +181,7 @@ class AuthenticatedClient:
             self._async_client.cookies.update(cookies)
         return evolve(self, cookies={**self._cookies, **cookies})
 
-    def with_timeout(self, timeout: float) -> "AuthenticatedClient":
+    def with_timeout(self, timeout: httpx.Timeout) -> "AuthenticatedClient":
         """Get a new client matching this one with a new timeout (in seconds)"""
         if self._client is not None:
             self._client.timeout = timeout
@@ -212,10 +212,14 @@ class AuthenticatedClient:
             )
         return self._client
 
-    def __enter__(self) -> "Client":
+    def __enter__(self) -> "AuthenticatedClient":
         """Enter a context manager for self.client—you cannot enter twice (see httpx docs)"""
-        with self.get_client():
-            yield self
+        self.get_client().__enter__()
+        return self
+
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
+        """Exit a context manager for self.client (see httpx docs)"""
+        self.get_client().__exit__(*args, **kwargs)
 
     def set_async_client(self, async_client: httpx.AsyncClient) -> "AuthenticatedClient":
         """Manually the underlying httpx.AsyncClient
@@ -240,7 +244,11 @@ class AuthenticatedClient:
             )
         return self._async_client
 
-    async def __aenter__(self) -> "Client":
+    async def __aenter__(self) -> "AuthenticatedClient":
         """Enter a context manager for self.async_client—you cannot enter twice (see httpx docs)"""
-        async with self.get_async_client():
-            yield self
+        await self.get_async_client().__aenter__()
+        return self
+
+    async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
+        """Exit a context manager for self.async_client (see httpx docs)"""
+        await self.get_async_client().__aexit__(*args, **kwargs)

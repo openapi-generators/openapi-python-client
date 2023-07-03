@@ -11,19 +11,15 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     param_path: str,
     *,
-    client: Client,
     param_query: Union[Unset, None, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
-    url = "{}/same-name-multiple-locations/{param}".format(client.base_url, param=param_path)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
+    headers = {}
     if not isinstance(param_header, Unset):
         headers["param"] = param_header
 
+    cookies = {}
     if param_cookie is not UNSET:
         cookies["param"] = param_cookie
 
@@ -34,12 +30,12 @@ def _get_kwargs(
 
     return {
         "method": "get",
-        "url": url,
+        "url": "/same-name-multiple-locations/{param}".format(
+            param=param_path,
+        ),
+        "params": params,
         "headers": headers,
         "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
-        "params": params,
     }
 
 
@@ -86,14 +82,12 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         param_path=param_path,
-        client=client,
         param_query=param_query,
         param_header=param_header,
         param_cookie=param_cookie,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -125,13 +119,11 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         param_path=param_path,
-        client=client,
         param_query=param_query,
         param_header=param_header,
         param_cookie=param_cookie,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

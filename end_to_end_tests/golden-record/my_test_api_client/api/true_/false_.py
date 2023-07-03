@@ -10,13 +10,9 @@ from ...types import UNSET, Response
 
 def _get_kwargs(
     *,
-    client: Client,
     import_: str,
 ) -> Dict[str, Any]:
-    url = "{}/naming/keywords".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    pass
 
     params: Dict[str, Any] = {}
     params["import"] = import_
@@ -25,11 +21,7 @@ def _get_kwargs(
 
     return {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/naming/keywords",
         "params": params,
     }
 
@@ -70,12 +62,10 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         import_=import_,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -100,11 +90,9 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         import_=import_,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

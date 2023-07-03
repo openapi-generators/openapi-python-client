@@ -12,13 +12,9 @@ from ...types import UNSET, Response
 
 def _get_kwargs(
     *,
-    client: Client,
     int_enum: AnIntEnum,
 ) -> Dict[str, Any]:
-    url = "{}/tests/int_enum".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    pass
 
     params: Dict[str, Any] = {}
     json_int_enum = int_enum.value
@@ -29,11 +25,7 @@ def _get_kwargs(
 
     return {
         "method": "post",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/tests/int_enum",
         "params": params,
     }
 
@@ -80,12 +72,10 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         int_enum=int_enum,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -135,12 +125,10 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         int_enum=int_enum,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 

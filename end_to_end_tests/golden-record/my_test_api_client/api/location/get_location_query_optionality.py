@@ -11,16 +11,12 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    client: Client,
     not_null_required: datetime.datetime,
     null_required: Union[Unset, None, datetime.datetime] = UNSET,
     null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
 ) -> Dict[str, Any]:
-    url = "{}/location/query/optionality".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    pass
 
     params: Dict[str, Any] = {}
     json_not_null_required = not_null_required.isoformat()
@@ -49,11 +45,7 @@ def _get_kwargs(
 
     return {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/location/query/optionality",
         "params": params,
     }
 
@@ -100,15 +92,13 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         not_null_required=not_null_required,
         null_required=null_required,
         null_not_required=null_not_required,
         not_null_not_required=not_null_not_required,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -139,14 +129,12 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         not_null_required=not_null_required,
         null_required=null_required,
         null_not_required=null_not_required,
         not_null_not_required=not_null_not_required,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

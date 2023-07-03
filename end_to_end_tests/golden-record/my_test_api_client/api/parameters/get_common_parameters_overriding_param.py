@@ -11,13 +11,9 @@ from ...types import UNSET, Response
 def _get_kwargs(
     param_path: str,
     *,
-    client: Client,
     param_query: str = "overridden_in_GET",
 ) -> Dict[str, Any]:
-    url = "{}/common_parameters_overriding/{param}".format(client.base_url, param=param_path)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    pass
 
     params: Dict[str, Any] = {}
     params["param"] = param_query
@@ -26,11 +22,9 @@ def _get_kwargs(
 
     return {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/common_parameters_overriding/{param}".format(
+            param=param_path,
+        ),
         "params": params,
     }
 
@@ -76,12 +70,10 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         param_path=param_path,
-        client=client,
         param_query=param_query,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -111,11 +103,9 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         param_path=param_path,
-        client=client,
         param_query=param_query,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

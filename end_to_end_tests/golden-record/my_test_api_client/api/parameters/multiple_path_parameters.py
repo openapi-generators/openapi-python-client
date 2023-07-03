@@ -13,23 +13,17 @@ def _get_kwargs(
     param2: int,
     param1: str,
     param3: int,
-    *,
-    client: Client,
 ) -> Dict[str, Any]:
-    url = "{}/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
-        client.base_url, param4=param4, param2=param2, param1=param1, param3=param3
-    )
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    pass
 
     return {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
+            param4=param4,
+            param2=param2,
+            param1=param1,
+            param3=param3,
+        ),
     }
 
 
@@ -79,11 +73,9 @@ def sync_detailed(
         param2=param2,
         param1=param1,
         param3=param3,
-        client=client,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -118,10 +110,8 @@ async def asyncio_detailed(
         param2=param2,
         param1=param1,
         param3=param3,
-        client=client,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

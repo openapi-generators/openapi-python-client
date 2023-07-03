@@ -12,7 +12,6 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    client: Client,
     boolean_header: Union[Unset, bool] = UNSET,
     string_header: Union[Unset, str] = UNSET,
     number_header: Union[Unset, float] = UNSET,
@@ -20,11 +19,7 @@ def _get_kwargs(
     int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
     string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Dict[str, Any]:
-    url = "{}/location/header/types".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
+    headers = {}
     if not isinstance(boolean_header, Unset):
         headers["Boolean-Header"] = "true" if boolean_header else "false"
 
@@ -45,11 +40,8 @@ def _get_kwargs(
 
     return {
         "method": "get",
-        "url": url,
+        "url": "/location/header/types",
         "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
     }
 
 
@@ -99,7 +91,6 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         boolean_header=boolean_header,
         string_header=string_header,
         number_header=number_header,
@@ -108,8 +99,7 @@ def sync_detailed(
         string_enum_header=string_enum_header,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -144,7 +134,6 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         boolean_header=boolean_header,
         string_header=string_header,
         number_header=number_header,
@@ -153,7 +142,6 @@ async def asyncio_detailed(
         string_enum_header=string_enum_header,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

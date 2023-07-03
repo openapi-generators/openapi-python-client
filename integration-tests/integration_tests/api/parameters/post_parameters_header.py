@@ -17,18 +17,18 @@ def _get_kwargs(
     number_header: float,
     integer_header: int,
 ) -> Dict[str, Any]:
-    url = "/parameters/header"
+    headers = {}
+    headers["Boolean-Header"] = "true" if boolean_header else "false"
 
-    headers: Dict[str, Any] = {
-        "Boolean-Header": "true" if boolean_header else "false",
-        "String-Header": string_header,
-        "Number-Header": str(number_header),
-        "Integer-Header": str(integer_header),
-    }
+    headers["String-Header"] = string_header
+
+    headers["Number-Header"] = str(number_header)
+
+    headers["Integer-Header"] = str(integer_header)
 
     return {
         "method": "post",
-        "url": url,
+        "url": "/parameters/header",
         "headers": headers,
     }
 

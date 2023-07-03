@@ -15,7 +15,6 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    client: Client,
     string_prop: str = "the default string",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
@@ -28,10 +27,7 @@ def _get_kwargs(
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Dict[str, Any]:
-    url = "{}/tests/defaults".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    pass
 
     params: Dict[str, Any] = {}
     params["string_prop"] = string_prop
@@ -91,11 +87,7 @@ def _get_kwargs(
 
     return {
         "method": "post",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/tests/defaults",
         "params": params,
     }
 
@@ -162,7 +154,6 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         string_prop=string_prop,
         date_prop=date_prop,
         float_prop=float_prop,
@@ -176,8 +167,7 @@ def sync_detailed(
         required_model_prop=required_model_prop,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -277,7 +267,6 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         string_prop=string_prop,
         date_prop=date_prop,
         float_prop=float_prop,
@@ -291,8 +280,7 @@ async def asyncio_detailed(
         required_model_prop=required_model_prop,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 

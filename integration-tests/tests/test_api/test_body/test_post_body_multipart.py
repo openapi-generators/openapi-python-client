@@ -1,6 +1,5 @@
 from io import BytesIO
 
-import httpx
 import pytest
 
 from integration_tests.api.body import post_body_multipart

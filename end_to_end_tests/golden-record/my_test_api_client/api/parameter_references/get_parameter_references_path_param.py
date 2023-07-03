@@ -11,20 +11,16 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     path_param: str,
     *,
-    client: Client,
     string_param: Union[Unset, None, str] = UNSET,
     integer_param: Union[Unset, None, int] = 0,
     header_param: Union[Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
-    url = "{}/parameter-references/{path_param}".format(client.base_url, path_param=path_param)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
+    headers = {}
     if not isinstance(header_param, Unset):
         headers["header param"] = header_param
 
+    cookies = {}
     if cookie_param is not UNSET:
         cookies["cookie param"] = cookie_param
 
@@ -37,12 +33,12 @@ def _get_kwargs(
 
     return {
         "method": "get",
-        "url": url,
+        "url": "/parameter-references/{path_param}".format(
+            path_param=path_param,
+        ),
+        "params": params,
         "headers": headers,
         "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
-        "params": params,
     }
 
 
@@ -92,15 +88,13 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         path_param=path_param,
-        client=client,
         string_param=string_param,
         integer_param=integer_param,
         header_param=header_param,
         cookie_param=cookie_param,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_client().request(
         **kwargs,
     )
 
@@ -135,14 +129,12 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         path_param=path_param,
-        client=client,
         string_param=string_param,
         integer_param=integer_param,
         header_param=header_param,
         cookie_param=cookie_param,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
