@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Any
 
 import pytest
 
@@ -38,6 +39,44 @@ def test(client: Client) -> None:
     assert content.file_content_type == mime_type
     assert content.file_data.encode() == payload
     assert content.description == description
+
+
+def test_custom_hooks(client: Client) -> None:
+    a_string = "a test string"
+    payload = b"some file content"
+    file_name = "cool_stuff.txt"
+    mime_type = "application/openapi-python-client"
+    description = "super descriptive thing"
+
+    httpx_client = client.get_client()
+    request_hook_called = False
+    response_hook_called = False
+
+    def log_request(*_: Any, **__: Any) -> None:
+        nonlocal request_hook_called
+        request_hook_called = True
+
+    def log_response(*_: Any, **__: Any) -> None:
+        nonlocal response_hook_called
+        response_hook_called = True
+
+    httpx_client.event_hooks = {"request": [log_request], "response": [log_response]}
+
+    post_body_multipart.sync_detailed(
+        client=client,
+        multipart_data=PostBodyMultipartMultipartData(
+            a_string=a_string,
+            file=File(
+                payload=BytesIO(payload),
+                file_name=file_name,
+                mime_type=mime_type,
+            ),
+            description=description,
+        ),
+    )
+
+    assert request_hook_called
+    assert response_hook_called
 
 
 def test_context_manager(client: Client) -> None:
