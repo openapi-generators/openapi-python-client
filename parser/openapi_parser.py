@@ -4,29 +4,47 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterator, Optional, Union
 import httpcore
+from urllib.parse import urlparse
+import logging
 
 import httpx
 import jsonschema
-import openapi_schema_pydantic
+import openapi_schema_pydantic as osp
 import yaml
 
 from parser.context import OpenapiContext
+from parser.endpoints import EndpointCollection
+from parser.ref_resolver import RefResolver
+
+
+log = logging.getLogger(__name__)
 
 
 class OpenapiParser:
     spec_raw: Dict[str, Any]
 
-    def __init__(self, spec_file: Path) -> None:
+    def __init__(self, spec_file: Union[Path, str]) -> None:
         self.spec_file = spec_file
         self.context = OpenapiContext()
 
     def load_spec_raw(self) -> Dict[str, Any]:
-        return _get_document(path=self.spec_file)
+        p = self.spec_file
+        if isinstance(p, Path):
+            return _get_document(path=p)
+        parsed = urlparse(p)
+        if parsed.scheme in ("http", "https"):
+            return _get_document(url=p)
+        return _get_document(path=Path(p))
 
     def _find_references(self, dictionary: Dict[str, Any]) -> Iterator[str]:
+        """Iterate all schema URI references in the spec ($ref fields)"""
         if isinstance(dictionary, dict):
             if "$ref" in dictionary and isinstance(dictionary["$ref"], str):
-                yield dictionary["$ref"]
+                ref = dictionary["$ref"]
+                if not ref.startswith("#/"):
+                    log.warning("$ref url %s is not supported", ref)
+                else:
+                    yield dictionary["$ref"]
             else:
                 for key, value in dictionary.items():
                     yield from self._find_references(value)
@@ -36,15 +54,25 @@ class OpenapiParser:
 
     def parse(self) -> None:
         self.spec_raw = self.load_spec_raw()
-        reference_urls = set(self._find_references(self.spec_raw))
+        self.context.spec = osp.OpenAPI.parse_obj(self.spec_raw)
 
-        resolver = jsonschema.RefResolver("", self.spec_raw)
-        resolved_refs = {}
-        for url in reference_urls:
-            key, schema = resolver.resolve(url)
-            resolved_refs[key] = openapi_schema_pydantic.Schema.parse_obj(schema)
-        self.context.schemas = resolved_refs
-        self.context.spec = openapi_schema_pydantic.OpenAPI.parse_obj(self.spec_raw)
+        self.endpoints = EndpointCollection.from_context(self.context)
+        # reference_urls = set(self._find_references(self.spec_raw))
+
+        # # Resolve all $refs in the spec using jsonschema resolver
+        # resolver = RefResolver(self.spec_raw)
+
+        # resolved_refs = {}
+        # for url in reference_urls:
+        #     section, name, schema = resolver.resolve(url)
+        #     resolved_refs[url] = schema
+
+        #     # # Resolved schemas collected
+        #     # resolved_refs[key] = openapi_schema_pydantic.Schema.parse_obj(schema)
+        # self.context.schemas = resolved_refs
+        # self.context.spec = openapi_schema_pydantic.OpenAPI.parse_obj(self.spec_raw)
+
+        # self.endpoints = EndpointCollection.from_context(self.context)
 
 
 def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Dict[str, Any]:

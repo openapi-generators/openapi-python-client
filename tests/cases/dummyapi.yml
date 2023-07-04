@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+  title: Example API
+  version: 1.0.0
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      parameters:
+        - name: limit
+          in: query
+          description: Number of users to retrieve
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      summary: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: fields
+          in: query
+          description: Comma-separated list of fields to include
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /products:
+    get:
+      summary: Get all products
+      parameters:
+        - name: category
+          in: query
+          description: Product category
+          required: true
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+  /orders:
+    get:
+      summary: Get all orders
+      parameters:
+        - name: status
+          in: query
+          description: Order status
+          schema:
+            type: string
+            enum: [pending, completed, canceled]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+
+  /customers:
+    get:
+      summary: Get all customers
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+
+  /posts:
+    get:
+      summary: Get all posts
+      parameters:
+        - name: userId
+          in: query
+          description: ID of the user whose posts to retrieve
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          description: Number of posts to retrieve
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+
+  /posts/{id}:
+    get:
+      summary: Get a post by ID
+      parameters:
+        - name: id
+          in: path
+          description: Post ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /categories:
+    get:
+      summary: Get all categories
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+  /categories/{id}:
+    get:
+      summary: Get a category by ID
+      parameters:
+        - name: id
+          in: path
+          description: Category ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+security:
+  - oauth2: []
+  - apiKey: []
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+      required:
+        - id
+        - name
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+      required:
+        - id
+        - name
+        - price
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer:
+          $ref: '#/components/schemas/Customer'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+      required:
+        - id
+        - customer
+        - products
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+      required:
+        - id
+        - title
+        - body
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+securitySchemes:
+  oauth2:
+    type: oauth2
+    flows:
+      implicit:
+        authorizationUrl: https://example.com/oauth2/authorize
+        scopes:
+          read: Grants read access
+          write: Grants write access
+  apiKey:
+    type: apiKey
+    in: header
+    name: X-API-Key

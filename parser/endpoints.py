@@ -14,16 +14,13 @@ TMethod = Literal["get", "post", "put", "patch"]
 class Response:
     status_code: str
     raw_schema: osp.Response
-    schema: Optional[osp.Schema]
+    body_schema: Optional[osp.Schema]
 
     @classmethod
     def from_reference(
         cls, status_code: str, response_ref: osp.Response | osp.Reference, context: OpenapiContext
     ) -> "Response":
-        if isinstance(response_ref, osp.Reference):
-            response = context.response_from_reference(response_ref)
-        else:
-            response = response_ref
+        response = context.response_from_reference(response_ref)
 
         result_schema: Optional[osp.Reference | osp.Schema] = None
         for content_type, media_type in response.content.items():
@@ -32,10 +29,9 @@ class Response:
                 result_schema = media_type.media_type_schema
                 break
 
-        if isinstance(result_schema, osp.Reference):
-            result_schema = context.schema_from_reference(result_schema)
+        body_schema = context.schema_from_reference(result_schema)
 
-        return cls(status_code=status_code, raw_schema=response, schema=result_schema)
+        return cls(status_code=status_code, raw_schema=response, body_schema=body_schema)
 
 
 @dataclass
@@ -56,10 +52,12 @@ class Endpoint:
         return cls(method=method, path=path, raw_schema=operation, responses=responses)
 
 
+@dataclass
 class EndpointCollection:
     endpoints: list[Endpoint]
 
-    def __init__(self, context: OpenapiContext) -> None:
+    @classmethod
+    def from_context(cls, context: OpenapiContext) -> "EndpointCollection":
         endpoints: list[Endpoint] = []
         for path, path_item in context.spec.paths.items():
             for op_name in all_operations:
@@ -67,4 +65,4 @@ class EndpointCollection:
                 if not operation:
                     continue
                 endpoints.append(Endpoint.from_operation(cast(TMethod, op_name), path, operation, context))
-        self.endpoints = endpoints
+        return EndpointCollection(endpoints=endpoints)
