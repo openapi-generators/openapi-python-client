@@ -48,7 +48,7 @@ def test_custom_hooks(client: Client) -> None:
     mime_type = "application/openapi-python-client"
     description = "super descriptive thing"
 
-    httpx_client = client.get_client()
+    httpx_client = client.get_httpx_client()
     request_hook_called = False
     response_hook_called = False
 

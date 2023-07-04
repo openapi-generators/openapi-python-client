@@ -98,7 +98,7 @@ def sync_detailed(
         {{ kwargs(endpoint, include_client=False) }}
     )
 
-    response = client.get_client().request(
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -124,7 +124,7 @@ async def asyncio_detailed(
         {{ kwargs(endpoint, include_client=False) }}
     )
 
-    response = await client.get_async_client().request(
+    response = await client.get_async_httpx_client().request(
         **kwargs
     )
 

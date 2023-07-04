@@ -84,7 +84,7 @@ from my_test_api_client import Client
 client = Client(
     base_url="https://api.example.com",
 )
-httpx_client = client.get_client()
+httpx_client = client.get_httpx_client()
 def log_request(request):
     print(f"Request event hook: {request.method} {request.url} - Waiting for response")
 
@@ -105,7 +105,7 @@ client = Client(
     base_url="https://api.example.com",
 )
 # Note that base_url needs to be re-set, as would any shared cookies, headers, etc.
-client.set_client(httpx.Client(base_url="https://api.example.com", proxies="http://localhost:8030"))
+client.set_httpx_client(httpx.Client(base_url="https://api.example.com", proxies="http://localhost:8030"))
 ```
 
 ## Building / publishing this package
