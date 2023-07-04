@@ -25,22 +25,6 @@ class Response:
     status_code: str
     description: str
 
-    # How do I structure this?
-    @classmethod
-    def from_reference(
-        cls, status_code: str, response_ref: osp.Response | osp.Reference, context: OpenapiContext
-    ) -> "Response":
-        response = context.response_from_reference(response_ref)
-
-        result_schema: Optional[osp.Reference | osp.Schema] = None
-        for content_type, media_type in response.content.items():
-            # Only json responses
-            if content_type == "application/json" or content_type.endswith("+json"):
-                result_schema = media_type.media_type_schema
-                break
-
-        return cls(status_code=status_code, raw_schema=response, root_object=body_schema)
-
 
 @dataclass
 class Parameter:

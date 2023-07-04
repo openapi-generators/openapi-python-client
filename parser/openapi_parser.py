@@ -57,22 +57,6 @@ class OpenapiParser:
         self.context.spec = osp.OpenAPI.parse_obj(self.spec_raw)
 
         self.endpoints = EndpointCollection.from_context(self.context)
-        # reference_urls = set(self._find_references(self.spec_raw))
-
-        # # Resolve all $refs in the spec using jsonschema resolver
-        # resolver = RefResolver(self.spec_raw)
-
-        # resolved_refs = {}
-        # for url in reference_urls:
-        #     section, name, schema = resolver.resolve(url)
-        #     resolved_refs[url] = schema
-
-        #     # # Resolved schemas collected
-        #     # resolved_refs[key] = openapi_schema_pydantic.Schema.parse_obj(schema)
-        # self.context.schemas = resolved_refs
-        # self.context.spec = openapi_schema_pydantic.OpenAPI.parse_obj(self.spec_raw)
-
-        # self.endpoints = EndpointCollection.from_context(self.context)
 
 
 def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Dict[str, Any]:
