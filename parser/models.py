@@ -58,6 +58,14 @@ class SchemaWrapper:
     def from_reference(
         cls, schema_ref: Union[osp.Schema, osp.Reference], context: "OpenapiContext", level: int = 0
     ) -> "SchemaWrapper":
+        """Create a Schema wrapper from openapi Schema or reference.
+        Recursively generates properties and nested allOf/anyOf/oneOf schemas up to max nesting level
+
+        Args:
+            schema_ref: The openapi schema or reference (`$ref`) object pointing to a schema
+            context: The parser context
+            level: Current recursion level. Used to prevent infinite recursion cycles.
+        """
         name, schema = context.schema_and_name_from_reference(schema_ref)
 
         all_of = _remove_nones([cls.from_reference_guarded(ref, context, level=level) for ref in schema.allOf or []])
