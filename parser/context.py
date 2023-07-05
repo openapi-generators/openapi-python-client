@@ -1,6 +1,8 @@
-from typing import Dict, Union, cast, Tuple
+from typing import Dict, Union, cast, Tuple, Optional
 
 import openapi_schema_pydantic as osp
+
+from parser.config import Config
 
 
 TComponentClass = Union[
@@ -18,12 +20,13 @@ TComponentClass = Union[
 class OpenapiContext:
     spec: osp.OpenAPI
 
-    _component_cache: Dict[str, Tuple[str, TComponentClass]]
+    _component_cache: Dict[str, TComponentClass]
 
-    def __init__(self) -> None:
+    def __init__(self, config: Config) -> None:
+        self.config = config
         self._component_cache = {}
 
-    def _component_from_reference(self, ref: osp.Reference) -> Tuple[str, TComponentClass]:
+    def _component_from_reference(self, ref: osp.Reference) -> TComponentClass:
         url = ref.ref
         if url in self._component_cache:
             return self._component_cache[url]
@@ -32,7 +35,15 @@ class OpenapiContext:
         section, name = url.split("/components/")[-1].split("/")
         obj = getattr(self.spec.components, section)[name]
         self._component_cache[url] = obj
-        return name, obj
+        return obj
+
+    def schema_and_name_from_reference(self, ref: Union[osp.Reference, osp.Schema]) -> Tuple[str, osp.Schema]:
+        name: Optional[str] = None
+        if isinstance(ref, osp.Response):
+            name = ref.ref.split("/components/")[-1].split("/")[-1]
+        schema = self.schema_from_reference(ref)
+        name = name or schema.title
+        return name, schema
 
     def response_from_reference(self, ref: osp.Reference | osp.Response) -> osp.Response:
         if isinstance(ref, osp.Response):
@@ -43,3 +54,8 @@ class OpenapiContext:
         if isinstance(ref, osp.Schema):
             return ref
         return cast(osp.Schema, self._component_from_reference(ref))
+
+    def parameter_from_reference(self, ref: Union[osp.Reference, osp.Parameter]) -> osp.Parameter:
+        if isinstance(ref, osp.Parameter):
+            return ref
+        return cast(osp.Parameter, self._component_from_reference(ref))

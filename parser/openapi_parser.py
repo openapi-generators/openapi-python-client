@@ -2,7 +2,7 @@ import json
 import mimetypes
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Union
+from typing import Any, Dict, Iterator, Optional, Union, Sequence
 import httpcore
 from urllib.parse import urlparse
 import logging
@@ -20,12 +20,17 @@ from parser.ref_resolver import RefResolver
 log = logging.getLogger(__name__)
 
 
+@dataclass
+class Config:
+    include_methods: Sequence[str] = ("get",)
+
+
 class OpenapiParser:
     spec_raw: Dict[str, Any]
 
-    def __init__(self, spec_file: Union[Path, str]) -> None:
+    def __init__(self, spec_file: Union[Path, str], config: Config = Config()) -> None:
         self.spec_file = spec_file
-        self.context = OpenapiContext()
+        self.context = OpenapiContext(config=config)
 
     def load_spec_raw(self) -> Dict[str, Any]:
         p = self.spec_file
