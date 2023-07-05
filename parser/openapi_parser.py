@@ -1,28 +1,21 @@
 import json
 import mimetypes
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Union, Sequence
+from typing import Any, Dict, Iterator, Optional, Union
 import httpcore
 from urllib.parse import urlparse
 import logging
 
 import httpx
-import jsonschema
 import openapi_schema_pydantic as osp
 import yaml
 
 from parser.context import OpenapiContext
 from parser.endpoints import EndpointCollection
-from parser.ref_resolver import RefResolver
+from parser.config import Config
 
 
 log = logging.getLogger(__name__)
-
-
-@dataclass
-class Config:
-    include_methods: Sequence[str] = ("get",)
 
 
 class OpenapiParser:

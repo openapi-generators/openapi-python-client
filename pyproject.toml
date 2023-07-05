@@ -39,7 +39,6 @@ enlighten = "^1.11.2"
 openapi3 = "^1.8.0"
 prance = "^23.6.21.0"
 openapi-spec-validator = "^0.5.7"
-jsonschema = "^4.17.3"
 openapi-schema-pydantic = "^1.2.4"
 
 [tool.poetry.scripts]
