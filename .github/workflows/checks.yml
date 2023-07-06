@@ -147,6 +147,6 @@ jobs:
         run: |
           cd integration-tests
           poetry run pytest
-          mypy . --strict
+          poetry run mypy . --strict
   
   
