@@ -93,7 +93,7 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% if endpoint.requires_security %}
 client: AuthenticatedClient,
 {% else %}
-client: Client,
+client: Union[AuthenticatedClient, Client],
 {% endif %}
 {% endif %}
 {# Form data if any #}

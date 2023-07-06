@@ -1,10 +1,10 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...types import Response
 
 
@@ -17,7 +17,7 @@ def _get_kwargs() -> Dict[str, Any]:
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[List[bool]]:
+def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[List[bool]]:
     if response.status_code == HTTPStatus.OK:
         response_200 = cast(List[bool], response.json())
 
@@ -28,7 +28,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Lis
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[List[bool]]:
+def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[List[bool]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -39,7 +39,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Lis
 
 def sync_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[List[bool]]:
     """Get Basic List Of Booleans
 
@@ -64,7 +64,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Optional[List[bool]]:
     """Get Basic List Of Booleans
 
@@ -85,7 +85,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[List[bool]]:
     """Get Basic List Of Booleans
 
@@ -108,7 +108,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Optional[List[bool]]:
     """Get Basic List Of Booleans
 

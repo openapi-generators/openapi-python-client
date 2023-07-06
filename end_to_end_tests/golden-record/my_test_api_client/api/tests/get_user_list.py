@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
@@ -64,7 +64,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: Client, response: httpx.Response
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
     if response.status_code == HTTPStatus.OK:
         response_200 = []
@@ -90,7 +90,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Client, response: httpx.Response
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Response[Union[HTTPValidationError, List["AModel"]]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -102,7 +102,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
@@ -142,7 +142,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
@@ -177,7 +177,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
@@ -215,7 +215,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
     an_enum_value_with_null: List[Optional[AnEnumWithNull]],
     an_enum_value_with_only_null: List[None],
