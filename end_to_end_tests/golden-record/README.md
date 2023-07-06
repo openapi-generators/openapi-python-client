@@ -81,10 +81,6 @@ There are more settings on the generated `Client` class which let you control mo
 ```python
 from my_test_api_client import Client
 
-client = Client(
-    base_url="https://api.example.com",
-)
-httpx_client = client.get_httpx_client()
 def log_request(request):
     print(f"Request event hook: {request.method} {request.url} - Waiting for response")
 
@@ -92,7 +88,12 @@ def log_response(response):
     request = response.request
     print(f"Response event hook: {request.method} {request.url} - Status {response.status_code}")
 
-httpx_client.event_hooks = {"request": [log_request], "response": [log_response]}
+client = Client(
+    base_url="https://api.example.com",
+    httpx_args={"event_hooks": {"request": [log_request], "response": [log_response]}},
+)
+
+# Or get the underlying httpx client to modify directly with client.get_httpx_client() or client.get_async_httpx_client()
 ```
 
 You can even set the httpx client directly, but beware that this will override any existing settings (e.g., base_url):
