@@ -44,6 +44,7 @@ class TestGeneratorData:
         build_parameters.assert_called_once_with(
             components=openapi.components.parameters,
             parameters=parameters,
+            config=config,
         )
         EndpointCollection.from_data.assert_called_once_with(
             data=openapi.paths,

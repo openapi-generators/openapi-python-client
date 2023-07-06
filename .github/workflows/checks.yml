@@ -93,7 +93,7 @@ jobs:
     strategy:
       matrix:
         httpx_version:
-          - "0.15.4"
+          - "0.20.0"
           - ""
     services:
       openapi-test-server:

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define, field
 
 if TYPE_CHECKING:
     from ..models.model_with_any_json_properties_additional_property_type_0 import (
@@ -11,13 +11,13 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 
 
-@attr.s(auto_attribs=True)
+@define
 class ModelWithAnyJsonProperties:
     """ """
 
     additional_properties: Dict[
         str, Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]
-    ] = attr.ib(init=False, factory=dict)
+    ] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         from ..models.model_with_any_json_properties_additional_property_type_0 import (

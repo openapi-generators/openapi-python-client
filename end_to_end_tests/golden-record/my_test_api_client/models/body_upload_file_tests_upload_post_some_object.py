@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define, field
 
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPostSomeObject")
 
 
-@attr.s(auto_attribs=True)
+@define
 class BodyUploadFileTestsUploadPostSomeObject:
     """
     Attributes:
@@ -15,7 +15,7 @@ class BodyUploadFileTestsUploadPostSomeObject:
 
     num: float
     text: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         num = self.num

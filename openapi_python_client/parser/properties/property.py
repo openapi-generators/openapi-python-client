@@ -2,7 +2,7 @@ __all__ = ["Property"]
 
 from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
-import attr
+from attrs import define, field
 
 from ... import Config
 from ... import schema as oai
@@ -15,7 +15,7 @@ else:
     ModelProperty = "ModelProperty"  # pylint: disable=invalid-name
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Property:
     """
     Describes a single property for a schema
@@ -40,10 +40,10 @@ class Property:
         oai.ParameterLocation.PATH,
         oai.ParameterLocation.COOKIE,
     }
-    default: Optional[str] = attr.ib()
+    default: Optional[str] = field()
     python_name: PythonIdentifier
-    description: Optional[str] = attr.ib()
-    example: Optional[str] = attr.ib()
+    description: Optional[str] = field()
+    example: Optional[str] = field()
 
     template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False

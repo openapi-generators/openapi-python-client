@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define, field
 
 if TYPE_CHECKING:
     from ..models.an_array_with_a_circular_ref_in_items_object_additional_properties_a_item import (
@@ -11,11 +11,11 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem")
 
 
-@attr.s(auto_attribs=True)
+@define
 class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
     """ """
 
-    additional_properties: Dict[str, List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]] = attr.ib(
+    additional_properties: Dict[str, List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]] = field(
         init=False, factory=dict
     )
 
