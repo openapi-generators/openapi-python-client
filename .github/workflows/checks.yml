@@ -142,7 +142,9 @@ jobs:
           poetry install
       - name: Set httpx version
         if: matrix.httpx_version != ''
-        run: poetry run pip install httpx==${{ matrix.httpx_version }}
+        run: |
+          cd integration-tests 
+          poetry run pip install httpx==${{ matrix.httpx_version }}
       - name: Run Tests
         run: |
           cd integration-tests
