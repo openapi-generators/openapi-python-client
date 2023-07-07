@@ -7,7 +7,8 @@
   "regexManagers": [
     {
       "fileMatch": [
-        "release.*\\.yml"
+        "release.*\\.yml",
+        "prerelease.yml"
       ],
       "matchStrings": [
         "version:\\s*(?<currentValue>.*)"
