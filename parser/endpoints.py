@@ -1,4 +1,4 @@
-from typing import Optional, Literal, cast, Union, List
+from typing import Optional, Literal, cast, Union, List, Dict
 
 from dataclasses import dataclass
 
@@ -9,6 +9,7 @@ from parser.paths import table_names_from_paths
 from parser.models import SchemaWrapper
 
 TMethod = Literal["get", "post", "put", "patch"]
+TParamIn = Literal["query", "header", "path", "cookie"]
 
 
 @dataclass
@@ -17,18 +18,24 @@ class Parameter:
     description: Optional[str]
     schema: SchemaWrapper
     raw_schema: osp.Parameter
+    required: bool
+    location: TParamIn
 
     @classmethod
     def from_reference(cls, param_ref: Union[osp.Reference, osp.Parameter], context: OpenapiContext) -> "Parameter":
         osp_param = context.parameter_from_reference(param_ref)
         schema = SchemaWrapper.from_reference(osp_param.param_schema, context)
         description = param_ref.description or osp_param.description or schema.description
+        location = osp_param.param_in
+        required = osp_param.required
 
         return cls(
             name=osp_param.name,
             description=description,
             raw_schema=osp_param,
             schema=schema,
+            location=cast(TParamIn, location),
+            required=required,
         )
 
 
@@ -67,6 +74,8 @@ class Endpoint:
     """Table name inferred from path"""
     raw_schema: osp.Operation
 
+    operation_id: str
+
     path_summary: Optional[str] = None
 
     """Summary applying to all methods of the path"""
@@ -74,11 +83,29 @@ class Endpoint:
     """Description applying to all methods of the path"""
 
     @property
+    def data_response(self) -> Optional[Response]:
+        if not self.responses:
+            return None
+        keys = list(self.responses.keys())
+        if len(keys) == 1:
+            return self.responses[keys[0]]
+        success_codes = [k for k in keys if k.startswith("20")]
+        if success_codes:
+            return self.responses[success_codes[0]]
+        return self.responses[keys[0]]
+
+    @property
     def table_name(self) -> str:
         # 1. Media schema ref name
         # 2. Media schema title property
         # 3. Endpoint title or path component (e.g. first part of path that's not common with all other endpoints)
         raise NotImplementedError("coming soon")
+
+    # @property
+    # def required_parametrs(self) -> List[Parameter]:
+    #     param: Parameter
+    #     return [param for param in self.parameters if param.schema.
+    #     pass
 
     @classmethod
     def from_operation(
@@ -100,6 +127,8 @@ class Endpoint:
             status_code: Response.from_reference(status_code, response_ref, context)
             for status_code, response_ref in operation.responses.items()
         }
+
+        operation_id = operation.operationId or f"{method}_{path}"
         return cls(
             method=method,
             path=path,
@@ -107,12 +136,18 @@ class Endpoint:
             responses=responses,
             parameters=parameters,
             path_table_name=path_table_name,
+            operation_id=operation_id,
         )
 
 
 @dataclass
 class EndpointCollection:
     endpoints: list[Endpoint]
+
+    @property
+    def endpoints_by_id(self) -> Dict[str, Endpoint]:
+        """Endpoints by operation ID"""
+        return {ep.operation_id: ep for ep in self.endpoints}
 
     @classmethod
     def from_context(cls, context: OpenapiContext) -> "EndpointCollection":

@@ -39,7 +39,7 @@ class OpenapiContext:
 
     def schema_and_name_from_reference(self, ref: Union[osp.Reference, osp.Schema]) -> Tuple[str, osp.Schema]:
         name: Optional[str] = None
-        if isinstance(ref, osp.Response):
+        if isinstance(ref, osp.Reference):
             name = ref.ref.split("/components/")[-1].split("/")[-1]
         schema = self.schema_from_reference(ref)
         name = name or schema.title

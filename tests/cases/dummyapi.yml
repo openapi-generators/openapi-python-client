@@ -190,6 +190,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/Category'
 
+
+  /pets:
+    get:
+      summary: Get a list of pets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+
 security:
   - oauth2: []
   - apiKey: []
@@ -246,6 +260,10 @@ components:
           type: integer
         name:
           type: string
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
 
     Post:
       type: object
@@ -271,6 +289,32 @@ components:
       required:
         - id
         - name
+
+
+    # Example using oneOf
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+        species:
+          oneOf:
+            - type: string
+              enum:
+                - cat
+                - dog
+            - type: string
+              enum:
+                - fish
+                - bird
+      oneOf:
+        - required:
+            - name
+        - required:
+            - age
+        
 
 securitySchemes:
   oauth2:
