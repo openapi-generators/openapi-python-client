@@ -13,6 +13,7 @@ import yaml
 from parser.context import OpenapiContext
 from parser.endpoints import EndpointCollection
 from parser.config import Config
+from parser.info import OpenApiInfo
 
 
 log = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ log = logging.getLogger(__name__)
 
 class OpenapiParser:
     spec_raw: Dict[str, Any]
+    info: OpenApiInfo
 
     def __init__(self, spec_file: Union[Path, str], config: Config = Config()) -> None:
         self.spec_file = spec_file
@@ -53,7 +55,7 @@ class OpenapiParser:
     def parse(self) -> None:
         self.spec_raw = self.load_spec_raw()
         self.context.spec = osp.OpenAPI.parse_obj(self.spec_raw)
-
+        self.info = OpenApiInfo.from_context(self.context)
         self.endpoints = EndpointCollection.from_context(self.context)
 
 

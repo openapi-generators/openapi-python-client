@@ -7,6 +7,7 @@ import openapi_schema_pydantic as osp
 from parser.context import OpenapiContext
 from parser.paths import table_names_from_paths
 from parser.models import SchemaWrapper
+from openapi_python_client.utils import PythonIdentifier
 
 TMethod = Literal["get", "post", "put", "patch"]
 TParamIn = Literal["query", "header", "path", "cookie"]
@@ -76,6 +77,8 @@ class Endpoint:
 
     operation_id: str
 
+    python_name: PythonIdentifier
+
     path_summary: Optional[str] = None
 
     """Summary applying to all methods of the path"""
@@ -96,16 +99,13 @@ class Endpoint:
 
     @property
     def table_name(self) -> str:
+        # TODO:
         # 1. Media schema ref name
         # 2. Media schema title property
         # 3. Endpoint title or path component (e.g. first part of path that's not common with all other endpoints)
-        raise NotImplementedError("coming soon")
-
-    # @property
-    # def required_parametrs(self) -> List[Parameter]:
-    #     param: Parameter
-    #     return [param for param in self.parameters if param.schema.
-    #     pass
+        if self.data_response:
+            return self.data_response.content_schema.name
+        return self.path_table_name
 
     @classmethod
     def from_operation(
@@ -137,12 +137,17 @@ class Endpoint:
             parameters=parameters,
             path_table_name=path_table_name,
             operation_id=operation_id,
+            python_name=PythonIdentifier(operation_id),
         )
 
 
 @dataclass
 class EndpointCollection:
     endpoints: list[Endpoint]
+
+    @property
+    def all_endpoints_to_render(self) -> List[Endpoint]:
+        return self.endpoints
 
     @property
     def endpoints_by_id(self) -> Dict[str, Endpoint]:

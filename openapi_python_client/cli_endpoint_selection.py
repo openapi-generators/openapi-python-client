@@ -2,10 +2,11 @@ from typing import List, Set
 
 import questionary
 
-from .parser.endpoint_collection import Endpoints, Endpoint
+# from .parser.endpoint_collection import Endpoints, Endpoint
+from parser.endpoints import Endpoint, EndpointCollection
 
 
-def questionary_endpoint_selection(endpoints: Endpoints) -> Set[str]:
+def questionary_endpoint_selection(endpoints: EndpointCollection) -> Set[str]:
     """Endpoint selection with questionary. Returns a Set of endpoint names"""
     choices: List[questionary.Choice] = []
     prev_table_name = ""
