@@ -1,5 +1,6 @@
 """ Generate modern Python clients from OpenAPI """
 
+import logging
 import json
 import mimetypes
 import shutil
@@ -24,6 +25,8 @@ from .config import Config
 from parser.openapi_parser import OpenapiParser
 
 # from .typing import TEndpointFilter
+
+log = logging.getLogger(__name__)
 
 __version__ = version(__package__)
 
@@ -85,7 +88,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
 
         project_name_base: str = config.project_name_override or f"{utils.kebab_case(openapi.info.title).lower()}"
         self.project_name = project_name_base + config.project_name_suffix
-        self.package_name: str = config.package_name_override or self.source_name
+        self.package_name: str = config.package_name_override or self.project_name
 
         self.package_name = self.package_name.replace("-", "_")
         self.source_name: str = self.package_name + "_source"
@@ -137,7 +140,20 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._build_api()
         # self._build_source()
         self._build_pipeline()
-        # self._run_post_hooks()
+        self._run_post_hooks()
+
+    def _run_post_hooks(self) -> None:
+        for command in self.config.post_hooks:
+            self._run_command(command)
+
+    def _run_command(self, cmd: str) -> None:
+        cmd_name = cmd.split(" ")[0]
+        command_exists = shutil.which(cmd_name)
+        if not command_exists:
+            log.warning("Skipping integration: %s is not in PATH", cmd_name)
+            return
+        cwd = self.package_dir if self.meta == MetaType.NONE else self.project_dir
+        subprocess.run(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
 
     def _create_package(self) -> None:
         self.project_dir.mkdir(exist_ok=True)
@@ -243,7 +259,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")
         api_init_path.write_text(
-            api_init_template.render(endpoint_collections=self.openapi.endpoints.all_endpoints_to_render),
+            api_init_template.render(endpoints=self.openapi.endpoints.all_endpoints_to_render),
             encoding=self.file_encoding,
         )
 
@@ -328,10 +344,10 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
 
 def create_new_client(
     *,
-    url: Optional[str],
-    path: Optional[Path],
-    meta: MetaType,
-    config: Config,
+    url: Optional[str] = None,
+    path: Optional[Path] = None,
+    meta: MetaType = MetaType.POETRY,
+    config: Config = Config(),
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
     # endpoint_filter: Optional[TEndpointFilter] = None,

@@ -1,4 +1,4 @@
-from typing import Optional, Literal, cast, Union, List, Dict
+from typing import Optional, Literal, cast, Union, List, Dict, Any
 
 from dataclasses import dataclass
 
@@ -21,6 +21,43 @@ class Parameter:
     raw_schema: osp.Parameter
     required: bool
     location: TParamIn
+    python_name: PythonIdentifier
+
+    @property
+    def template(self) -> str:
+        return self.schema.property_template
+
+    @property
+    def default(self) -> Optional[Any]:
+        return self.schema.default
+
+    @property
+    def nullable(self) -> bool:
+        return self.schema.nullable
+
+    def to_string(self) -> str:
+        type_hint = self.schema.type_hint
+        default = self.default
+        if default is None and not self.required:
+            default = "UNSET"
+        if self.required and self.nullable:
+            type_hint = f"Optional[{type_hint}]"
+        elif not self.required and self.nullable:
+            type_hint = f"Union[UNSET, None, {type_hint}]"
+        else:
+            type_hint = f"Union[UNSET, {type_hint}]"
+
+        base_string = f"{self.python_name}: {type_hint}"
+        if default is not None:
+            base_string += f" = {default}"
+        return base_string
+
+    def to_docstring(self) -> str:
+        doc = f"{self.python_name}: {self.description or ''}"
+        if self.default:
+            doc += f" Default: {self.default}."
+        # TODO: Example
+        return doc
 
     @classmethod
     def from_reference(cls, param_ref: Union[osp.Reference, osp.Parameter], context: OpenapiContext) -> "Parameter":
@@ -37,6 +74,7 @@ class Parameter:
             schema=schema,
             location=cast(TParamIn, location),
             required=required,
+            python_name=PythonIdentifier(osp_param.name, prefix=context.config.field_prefix),
         )
 
 
@@ -70,7 +108,7 @@ class Endpoint:
     method: TMethod
     responses: dict[str, Response]
     path: str
-    parameters: List[Parameter]
+    parameters: Dict[str, Parameter]
     path_table_name: str
     """Table name inferred from path"""
     raw_schema: osp.Operation
@@ -84,6 +122,26 @@ class Endpoint:
     """Summary applying to all methods of the path"""
     path_description: Optional[str] = None
     """Description applying to all methods of the path"""
+
+    @property
+    def path_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "path"}
+
+    @property
+    def query_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "query"}
+
+    @property
+    def header_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "header"}
+
+    @property
+    def cookie_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "cookie"}
+
+    @property
+    def list_all_parameters(self) -> List[Parameter]:
+        return list(self.parameters.values())
 
     @property
     def data_response(self) -> Optional[Response]:
@@ -103,8 +161,11 @@ class Endpoint:
         # 1. Media schema ref name
         # 2. Media schema title property
         # 3. Endpoint title or path component (e.g. first part of path that's not common with all other endpoints)
+        name: Optional[str] = None
         if self.data_response:
-            return self.data_response.content_schema.name
+            name = self.data_response.content_schema.name
+        if name:
+            return name
         return self.path_table_name
 
     @classmethod
@@ -122,7 +183,6 @@ class Endpoint:
         all_params.update(
             {p.name: p for p in (Parameter.from_reference(param, context) for param in operation.parameters or [])}
         )
-        parameters = list(all_params.values())
         responses = {
             status_code: Response.from_reference(status_code, response_ref, context)
             for status_code, response_ref in operation.responses.items()
@@ -134,7 +194,7 @@ class Endpoint:
             path=path,
             raw_schema=operation,
             responses=responses,
-            parameters=parameters,
+            parameters=all_params,
             path_table_name=path_table_name,
             operation_id=operation_id,
             python_name=PythonIdentifier(operation_id),
@@ -159,6 +219,7 @@ class EndpointCollection:
         endpoints: list[Endpoint] = []
         all_paths = list(context.spec.paths)
         path_table_names = table_names_from_paths(all_paths)
+        breakpoint()
         for path, path_item in context.spec.paths.items():
             path_level_params = [Parameter.from_reference(param, context) for param in path_item.parameters or []]
             for op_name in context.config.include_methods:

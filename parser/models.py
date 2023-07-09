@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 import openapi_schema_pydantic as osp
 
 from parser.types import DataType
+from openapi_python_client.parser.properties.converter import convert
 
 
 if TYPE_CHECKING:
@@ -47,11 +48,25 @@ class SchemaWrapper:
 
     types: List[TSchemaType]
     nullable: bool
+    default: Optional[Any]
+    """Default value of the schema (optional)"""
 
     array_item: Optional["SchemaWrapper"] = None
     all_of: List["SchemaWrapper"] = field(default_factory=list)
     any_of: List["SchemaWrapper"] = field(default_factory=list)
     one_of: List["SchemaWrapper"] = field(default_factory=list)
+
+    @property
+    def property_template(self) -> str:
+        if self.is_union:
+            return "union_property.py.jinja"
+        elif self.types == ["integer"]:
+            return "int_property.py.jinja"
+        elif self.types == ["float"]:
+            return "float_property.py.jinja"
+        elif self.types == ["boolean"]:
+            return "boolean_property.py.jinja"
+        return "any_property.py.jinja"
 
     @property
     def union_schemas(self) -> List["SchemaWrapper"]:
@@ -150,6 +165,11 @@ class SchemaWrapper:
             # TODO: Fallback on string. Should warn
             schema_types = ["string"]
 
+        default = schema.default
+        # Only do string escaping, other types can go as-is
+        if isinstance(default, str):
+            default = convert("str", default)
+
         return cls(
             schema=schema,
             name=name,
@@ -162,6 +182,7 @@ class SchemaWrapper:
             types=cast(List[TSchemaType], schema_types),
             nullable=nullable,
             array_item=array_item,
+            default=default,
         )
 
 

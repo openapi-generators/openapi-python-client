@@ -222,7 +222,7 @@ json_body=json_body,
 {# Leave extra space so that Args or Returns isn't at the top #}
 
 {% endif %}
-{% set all_parameters = endpoint.list_all_parameters() %}
+{% set all_parameters = endpoint.list_all_parameters %}
 {% if all_parameters %}
 Args:
     {% for parameter in all_parameters %}
