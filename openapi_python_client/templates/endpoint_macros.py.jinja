@@ -52,57 +52,13 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro json_body(endpoint) %}
-{% if endpoint.json_body %}
-    {% set property = endpoint.json_body %}
-    {% set destination = "json_" + property.python_name %}
-    {% import "property_templates/" + property.template as prop_template %}
-    {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, destination) }}
-    {% else %}
-{{ destination }} = {{ property.python_name }}
-    {% endif %}
-{% endif %}
-{% endmacro %}
-
-{% macro multipart_body(endpoint) %}
-{% if endpoint.multipart_body %}
-    {% set property = endpoint.multipart_body %}
-    {% set destination = "multipart_" + property.python_name %}
-    {% import "property_templates/" + property.template as prop_template %}
-    {% if prop_template.transform_multipart %}
-{{ prop_template.transform_multipart(property, property.python_name, destination) }}
-    {% endif %}
-{% endif %}
-{% endmacro %}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
-{# path parameters #}
-{% for parameter in endpoint.path_parameters.values() %}
+{% for parameter in endpoint.required_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
-{# Form data if any #}
-{% if endpoint.form_body %}
-form_data: {{ endpoint.form_body.get_type_string() }},
-{% endif %}
-{# Multipart data if any #}
-{% if endpoint.multipart_body %}
-multipart_data: {{ endpoint.multipart_body.get_type_string() }},
-{% endif %}
-{# JSON body if any #}
-{% if endpoint.json_body %}
-json_body: {{ endpoint.json_body.get_type_string() }},
-{% endif %}
-{# query parameters #}
-{% for parameter in endpoint.query_parameters.values() %}
-{{ parameter.to_string() }},
-{% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
-{{ parameter.to_string() }},
-{% endfor %}
-{# cookie parameters #}
-{% for parameter in endpoint.cookie_parameters.values() %}
+{% for parameter in endpoint.optional_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 base_url: str = dlt.config.value,
@@ -116,31 +72,11 @@ base_url: str = dlt.config.value,
 {% if endpoint.transformer %}
 data: Any,
 {% else %}
-{% for parameter in endpoint.path_parameters.values() %}
+{% for parameter in endpoint.required_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% endif %}
-{# Form data if any #}
-{% if endpoint.form_body %}
-form_data: {{ endpoint.form_body.get_type_string() }},
-{% endif %}
-{# Multipart data if any #}
-{% if endpoint.multipart_body %}
-multipart_data: {{ endpoint.multipart_body.get_type_string() }},
-{% endif %}
-{# JSON body if any #}
-{% if endpoint.json_body %}
-json_body: {{ endpoint.json_body.get_type_string() }},
-{% endif %}
-{# query parameters #}
-{% for parameter in endpoint.query_parameters.values() %}
-{{ parameter.to_string() }},
-{% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
-{{ parameter.to_string() }},
-{% endfor %}
-{# cookie parameters #}
-{% for parameter in endpoint.cookie_parameters.values() %}
+{% for parameter in endpoint.optional_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 base_url: str = dlt.config.value,
@@ -161,27 +97,12 @@ base_url=base_url,
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
 {% endif %}
-{% for parameter in endpoint.path_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
+{% for parameter in endpoint.required_parameters.values() %}
+{{ parameter.python_name }}={{ parameter.python_name }},    
 {% endfor %}
-{% if endpoint.form_body %}
-form_data=form_data,
-{% endif %}
-{% if endpoint.multipart_body %}
-multipart_data=multipart_data,
-{% endif %}
-{% if endpoint.json_body %}
-json_body=json_body,
-{% endif %}
-{% for parameter in endpoint.query_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
-{% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
-{% endfor %}
-{% for parameter in endpoint.cookie_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
-{% endfor %}
+{% for parameter in endpoint.optional_parameters.values() %}
+{{ parameter.python_name }}={{ parameter.python_name }},    
+{% endfor %}    
 {% endmacro %}
 
 {% macro transformer_kwargs(endpoint) %}
@@ -189,23 +110,11 @@ base_url=base_url,
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
 {% endif %}
-{% if endpoint.form_body %}
-form_data=form_data,
-{% endif %}
-{% if endpoint.multipart_body %}
-multipart_data=multipart_data,
-{% endif %}
-{% if endpoint.json_body %}
-json_body=json_body,
-{% endif %}
-{% for parameter in endpoint.query_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
+{% for parameter in endpoint.required_parameters.values() %}
+{{ parameter.python_name }}={{ parameter.python_name }},    
 {% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
-{% endfor %}
-{% for parameter in endpoint.cookie_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},
+{% for parameter in endpoint.optional_parameters.values() %}
+{{ parameter.python_name }}={{ parameter.python_name }},    
 {% endfor %}
 {% endmacro %}
 

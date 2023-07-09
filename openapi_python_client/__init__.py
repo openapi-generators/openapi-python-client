@@ -153,7 +153,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
             log.warning("Skipping integration: %s is not in PATH", cmd_name)
             return
         cwd = self.package_dir if self.meta == MetaType.NONE else self.project_dir
-        subprocess.run(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        try:
+            subprocess.run(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        except CalledProcessError as err:
+            raise RuntimeError("{}failed\n{}".format(cmd_name, err.stderr.decode() or err.output.decode())) from err
 
     def _create_package(self) -> None:
         self.project_dir.mkdir(exist_ok=True)

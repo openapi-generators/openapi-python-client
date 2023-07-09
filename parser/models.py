@@ -1,4 +1,18 @@
-from typing import Literal, TYPE_CHECKING, Optional, Union, List, TypeVar, Any, Iterable, Sequence, cast, Set
+dfrom typing import (
+    Literal,
+    TYPE_CHECKING,
+    Optional,
+    Union,
+    List,
+    TypeVar,
+    Any,
+    Iterable,
+    Sequence,
+    cast,
+    Set,
+    Tuple,
+    Dict,
+)
 from itertools import chain
 
 from dataclasses import dataclass, field
@@ -17,18 +31,18 @@ TSchemaType = Literal["boolean", "object", "array", "number", "string", "integer
 
 
 @dataclass
-class Schema:
-    schema: osp.Schema
-    name: str
-    type: TSchemaType
+class DataPropertyPath:
+    """Describes a json path to a property"""
 
+    path: Tuple[str, ...]
+    prop: "SchemaWrapper"
 
-@dataclass
-class Response:
-    schema: osp.Response
-    root_object: Schema | None
-    status_code: str
-    description: str
+    @property
+    def json_path(self) -> str:
+        return ".".join(self.path)
+
+    def __str__(self) -> str:
+        return f"DataPropertyPath {self.path}: {self.prop.name}"
 
 
 @dataclass
@@ -55,6 +69,14 @@ class SchemaWrapper:
     all_of: List["SchemaWrapper"] = field(default_factory=list)
     any_of: List["SchemaWrapper"] = field(default_factory=list)
     one_of: List["SchemaWrapper"] = field(default_factory=list)
+
+    @property
+    def is_object(self) -> bool:
+        return "object" in self.types
+
+    @property
+    def is_list(self) -> bool:
+        return "array" in self.types
 
     @property
     def property_template(self) -> str:
@@ -192,6 +214,14 @@ class Property:
     required: bool
     schema: SchemaWrapper
 
+    @property
+    def is_list(self) -> bool:
+        return self.schema.is_list
+
+    @property
+    def is_object(self) -> bool:
+        return self.schema.is_object
+
     def type_hint(self) -> str:
         return self.schema.type_hint
 
@@ -215,3 +245,60 @@ T = TypeVar("T", bound=Any)
 
 def _remove_nones(seq: Iterable[Optional[T]]) -> List[T]:
     return [x for x in seq if x is not None]
+
+
+def traverse_properties(
+    property_obj: Property,
+    path: Tuple[str, ...] = (),
+    list_properties: Optional[Dict[Tuple[str, ...], Property]] = None,
+    model_properties: Optional[Dict[Tuple[str, ...], Property]] = None,
+    seen: Optional[Set[str]] = None,
+) -> Tuple[Dict[Tuple[str, ...], SchemaWrapper], Dict[Tuple[str, ...], Property]]:
+    """
+    Recursively traverse a ModelProperty or ListProperty object to generate mappings of:
+
+    a. All ListProperty objects which contain models (arrays of objects in openapi)
+    b. All ModelProperty descendents of the property
+
+    The result is a tuple of two dicts with json paths as keys and `ModelProperty` objects as values.
+
+    :param property_obj: The ModelProperty or ListProperty object to traverse.
+    :param path: The current path, used for constructing the path to each property.
+    :param list_properties: Optional. A dictionary to store the paths referencing ListProperty
+                            objects with ModelProperty as their inner property.
+    :param model_properties: Optional. A dictionary to store the paths referencing ModelProperty objects.
+    :return: A tuple containing two dictionaries, mapping jsonpaths to ModelProperty objects
+    """
+    if list_properties is None:
+        list_properties = {}
+    if model_properties is None:
+        model_properties = {}
+    if seen is None:
+        seen = set()
+
+    array_item = property_obj.schema.array_item
+
+    if property_obj.is_object:
+        # Avoid infinite self referencing call cycles
+        # if property_obj.class_info.name in seen:
+        #     return list_properties, model_properties
+
+        # seen.add(property_obj.class_info.name)
+        model_properties[path] = property_obj
+        for prop in property_obj.schema.properties:
+            # for prop in property_obj.optional_properties or []:
+            if prop.is_list or prop.is_object:
+                traverse_properties(prop, path + (prop.name,), list_properties, model_properties, seen)
+
+        # for prop in property_obj.required_properties or []:
+        #     if isinstance(prop, (ModelProperty, ListProperty)):
+        #         traverse_properties(prop, path + (prop.name,), list_properties, model_properties, seen)
+
+    elif property_obj.is_list and array_item and array_item.is_object:
+        # elif isinstance(property_obj, ListProperty) and isinstance(property_obj.inner_property, ModelProperty):
+        inner = Property("", True, array_item)
+        # inner = property_obj.inner_property
+        list_properties[path] = inner
+        traverse_properties(inner, path + ("[*]",), list_properties, model_properties, seen)
+
+    return list_properties, model_properties

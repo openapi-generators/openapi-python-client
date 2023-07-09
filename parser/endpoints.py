@@ -1,4 +1,4 @@
-from typing import Optional, Literal, cast, Union, List, Dict, Any
+from typing import Optional, Literal, cast, Union, List, Dict, Any, Iterable
 
 from dataclasses import dataclass
 
@@ -11,6 +11,7 @@ from openapi_python_client.utils import PythonIdentifier
 
 TMethod = Literal["get", "post", "put", "patch"]
 TParamIn = Literal["query", "header", "path", "cookie"]
+Tree = Dict[str, Union["Endpoint", "Tree"]]
 
 
 @dataclass
@@ -93,7 +94,7 @@ class Response:
         description = resp_ref.description or raw_schema.description
 
         content_schema: Optional[SchemaWrapper] = None
-        for content_type, media_type in raw_schema.content.items():
+        for content_type, media_type in (raw_schema.content or {}).items():
             # Look for json responses only
             if (content_type == "application/json" or content_type.endswith("+json")) and media_type.media_type_schema:
                 content_schema = SchemaWrapper.from_reference(media_type.media_type_schema, context)
@@ -144,6 +145,21 @@ class Endpoint:
         return list(self.parameters.values())
 
     @property
+    def required_parameters(self) -> Dict[str, Parameter]:
+        return {name: p for name, p in self.parameters.items() if p.required}
+
+    @property
+    def optional_parameters(self) -> Dict[str, Parameter]:
+        return {name: p for name, p in self.parameters.items() if not p.required}
+
+    def request_args_meta(self) -> Dict[str, Dict[str, str]]:
+        """Mapping of how to translate python arguments to request parameters"""
+        return {
+            str(param.python_name): {"name": param.name, "location": param.location}
+            for param in self.parameters.values()
+        }
+
+    @property
     def data_response(self) -> Optional[Response]:
         if not self.responses:
             return None
@@ -167,6 +183,10 @@ class Endpoint:
         if name:
             return name
         return self.path_table_name
+
+    @property
+    def is_transformer(self) -> bool:
+        return not not self.required_parameters
 
     @classmethod
     def from_operation(
@@ -204,6 +224,7 @@ class Endpoint:
 @dataclass
 class EndpointCollection:
     endpoints: list[Endpoint]
+    endpoint_tree: Tree
 
     @property
     def all_endpoints_to_render(self) -> List[Endpoint]:
@@ -219,7 +240,6 @@ class EndpointCollection:
         endpoints: list[Endpoint] = []
         all_paths = list(context.spec.paths)
         path_table_names = table_names_from_paths(all_paths)
-        breakpoint()
         for path, path_item in context.spec.paths.items():
             path_level_params = [Parameter.from_reference(param, context) for param in path_item.parameters or []]
             for op_name in context.config.include_methods:
@@ -231,4 +251,50 @@ class EndpointCollection:
                         cast(TMethod, op_name), path, operation, path_table_names[path], path_level_params, context
                     )
                 )
-        return EndpointCollection(endpoints=endpoints)
+        endpoint_tree = cls.build_endpoint_tree(endpoints)
+        result = cls(endpoints=endpoints, endpoint_tree=endpoint_tree)
+
+        for endpoint in endpoints:
+            result.find_nearest_list_parent(endpoint.path)
+
+    def find_immediate_parent(self, path: str) -> Optional[Endpoint]:
+        """Find the parent of the given endpoint.
+
+        Example:
+            `find_immediate_parent('/api/v2/ability/{id}') -> Endpoint<'/api/v2/ability'>`
+        """
+        parts = path.strip("/").split("/")
+        while parts:
+            current_node = self.endpoint_tree
+            parts.pop()
+            for part in parts:
+                current_node = current_node[part]  # type: ignore
+            if "<endpoint>" in current_node:
+                return current_node["<endpoint>"]  # type: ignore
+        return None
+
+    def find_nearest_list_parent(self, path: str) -> Optional[Endpoint]:
+        parts = path.strip("/").split("/")
+        while parts:
+            current_node = self.endpoint_tree
+            parts.pop()
+            for part in parts:
+                current_node = current_node[part]  # type: ignore
+            if parent_endpoint := current_node.get("<endpoint>"):
+                if parent_endpoint.list_property:  # type: ignore
+                    return parent_endpoint  # type: ignore
+        return None
+
+    @staticmethod
+    def build_endpoint_tree(endpoints: Iterable[Endpoint]) -> Tree:
+        tree: Tree = {}
+        for endpoint in endpoints:
+            path = endpoint.path
+            parts = path.strip("/").split("/")
+            current_node = tree
+            for part in parts:
+                if part not in current_node:
+                    current_node[part] = {}
+                current_node = current_node[part]  # type: ignore
+            current_node["<endpoint>"] = endpoint
+        return tree

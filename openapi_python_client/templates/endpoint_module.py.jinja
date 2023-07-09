@@ -13,7 +13,7 @@ from ...utils import extract_nested_data, extract_iterate_parent
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
     arguments, resource_arguments, kwargs, transformer_kwargs, parse_response, docstring %}
 
 {# {% set return_string = endpoint.response_type() %} #}
@@ -46,22 +46,11 @@ def _get_kwargs(
 
     {{ query_params(endpoint) | indent(4) }}
 
-    {{ json_body(endpoint) | indent(4) }}
-
-    {{ multipart_body(endpoint) | indent(4) }}
-
     return {
 	"method": "{{ endpoint.method }}",
         "url": url,
         "headers": headers,
         "cookies": cookies,
-        {% if endpoint.form_body %}
-        "data": form_data.to_dict(),
-        {% elif endpoint.multipart_body %}
-        "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
-        {% elif endpoint.json_body %}
-        "json": {{ "json_" + endpoint.json_body.python_name }},
-        {% endif %}
         "params": params,
     }
 
