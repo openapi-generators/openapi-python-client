@@ -1,27 +1,13 @@
-dfrom typing import (
-    Literal,
-    TYPE_CHECKING,
-    Optional,
-    Union,
-    List,
-    TypeVar,
-    Any,
-    Iterable,
-    Sequence,
-    cast,
-    Set,
-    Tuple,
-    Dict,
-)
+from __future__ import annotations
+from typing import Literal, TYPE_CHECKING, Optional, Union, List, TypeVar, Any, Iterable, Sequence, cast, Tuple, Dict
 from itertools import chain
-
 from dataclasses import dataclass, field
 
-import openapi_schema_pydantic as osp
+from dlt.common.utils import digest128
 
+import openapi_schema_pydantic as osp
 from parser.types import DataType
 from openapi_python_client.parser.properties.converter import convert
-
 
 if TYPE_CHECKING:
     from parser.context import OpenapiContext
@@ -65,10 +51,23 @@ class SchemaWrapper:
     default: Optional[Any]
     """Default value of the schema (optional)"""
 
+    crawled_properties: SchemaCrawler
+    hash_key: str
+
     array_item: Optional["SchemaWrapper"] = None
     all_of: List["SchemaWrapper"] = field(default_factory=list)
     any_of: List["SchemaWrapper"] = field(default_factory=list)
     one_of: List["SchemaWrapper"] = field(default_factory=list)
+
+    @property
+    def all_properties(self) -> List["Property"]:
+        props = {p.name: p for p in self.properties}
+        for child in self.any_of + self.one_of:
+            for prop in child.all_properties:
+                if prop.name in props:
+                    continue
+                props[prop.name] = prop
+        return list(props.values())
 
     @property
     def is_object(self) -> bool:
@@ -192,7 +191,8 @@ class SchemaWrapper:
         if isinstance(default, str):
             default = convert("str", default)
 
-        return cls(
+        crawler = SchemaCrawler()
+        result = cls(
             schema=schema,
             name=name,
             description=description,
@@ -205,7 +205,11 @@ class SchemaWrapper:
             nullable=nullable,
             array_item=array_item,
             default=default,
+            crawled_properties=crawler,
+            hash_key=digest128(schema.json(sort_keys=True)),
         )
+        crawler.crawl(result)
+        return result
 
 
 @dataclass
@@ -247,58 +251,51 @@ def _remove_nones(seq: Iterable[Optional[T]]) -> List[T]:
     return [x for x in seq if x is not None]
 
 
-def traverse_properties(
-    property_obj: Property,
-    path: Tuple[str, ...] = (),
-    list_properties: Optional[Dict[Tuple[str, ...], Property]] = None,
-    model_properties: Optional[Dict[Tuple[str, ...], Property]] = None,
-    seen: Optional[Set[str]] = None,
-) -> Tuple[Dict[Tuple[str, ...], SchemaWrapper], Dict[Tuple[str, ...], Property]]:
-    """
-    Recursively traverse a ModelProperty or ListProperty object to generate mappings of:
+class SchemaCrawler:
+    """Creates flattened path: schema mappings of all properties within a schema"""
 
-    a. All ListProperty objects which contain models (arrays of objects in openapi)
-    b. All ModelProperty descendents of the property
+    def __init__(self) -> None:
+        self.object_properties: Dict[Tuple[str, ...], SchemaWrapper] = {}
+        self.list_properties: Dict[Tuple[str, ...], SchemaWrapper] = {}
+        self.all_properties: Dict[Tuple[str, ...], SchemaWrapper] = {}
 
-    The result is a tuple of two dicts with json paths as keys and `ModelProperty` objects as values.
+    def find_property_by_name(self, name: str, fallback: Optional[str] = None) -> Optional[DataPropertyPath]:
+        """Find a property with the given name somewhere in the object tree.
 
-    :param property_obj: The ModelProperty or ListProperty object to traverse.
-    :param path: The current path, used for constructing the path to each property.
-    :param list_properties: Optional. A dictionary to store the paths referencing ListProperty
-                            objects with ModelProperty as their inner property.
-    :param model_properties: Optional. A dictionary to store the paths referencing ModelProperty objects.
-    :return: A tuple containing two dictionaries, mapping jsonpaths to ModelProperty objects
-    """
-    if list_properties is None:
-        list_properties = {}
-    if model_properties is None:
-        model_properties = {}
-    if seen is None:
-        seen = set()
+        Prefers paths higher up in the object over deeply nested paths.
 
-    array_item = property_obj.schema.array_item
+        Args:
+            name: The name of the property to look for
+            fallback: Optional fallback property to get when `name` is not found
 
-    if property_obj.is_object:
-        # Avoid infinite self referencing call cycles
-        # if property_obj.class_info.name in seen:
-        #     return list_properties, model_properties
+        Returns:
+            If property is found, `DataPropertyPath` object containing the corresponding schema and path tuple/json path
+        """
+        named = []
+        fallbacks = []
+        for path, prop in self.all_properties.items():
+            if name in path:
+                named.append((path, prop))
+            if fallback and fallback in path:
+                fallbacks.append((path, prop))
+        named.sort(key=lambda item: len(item[0]))
+        fallbacks.sort(key=lambda item: len(item[0]))
+        if named:
+            return DataPropertyPath(*named[0])
+        elif fallbacks:
+            return DataPropertyPath(*fallbacks[0])
+        return None
 
-        # seen.add(property_obj.class_info.name)
-        model_properties[path] = property_obj
-        for prop in property_obj.schema.properties:
-            # for prop in property_obj.optional_properties or []:
-            if prop.is_list or prop.is_object:
-                traverse_properties(prop, path + (prop.name,), list_properties, model_properties, seen)
-
-        # for prop in property_obj.required_properties or []:
-        #     if isinstance(prop, (ModelProperty, ListProperty)):
-        #         traverse_properties(prop, path + (prop.name,), list_properties, model_properties, seen)
-
-    elif property_obj.is_list and array_item and array_item.is_object:
-        # elif isinstance(property_obj, ListProperty) and isinstance(property_obj.inner_property, ModelProperty):
-        inner = Property("", True, array_item)
-        # inner = property_obj.inner_property
-        list_properties[path] = inner
-        traverse_properties(inner, path + ("[*]",), list_properties, model_properties, seen)
-
-    return list_properties, model_properties
+    def crawl(self, schema: SchemaWrapper, path: Tuple[str, ...] = ()) -> None:
+        self.all_properties[path] = schema
+        if schema.is_object:
+            self.object_properties[path] = schema
+            for prop in schema.all_properties:
+                prop_path = path + (prop.name,)
+                self.all_properties[prop_path] = prop.schema
+                if prop.is_list or prop.is_object:
+                    self.crawl(prop.schema, prop_path)
+        elif schema.is_list and schema.array_item is not None:
+            array_item = schema.array_item
+            self.list_properties[path] = array_item
+            self.crawl(array_item, path + ("[*]",))

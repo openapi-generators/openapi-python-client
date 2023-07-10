@@ -354,7 +354,7 @@ def create_new_client(
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
     # endpoint_filter: Optional[TEndpointFilter] = None,
-) -> None:
+) -> Project:
     """
     Generate the client library
 
@@ -370,7 +370,8 @@ def create_new_client(
         config=config,
         # endpoint_filter=endpoint_filter,
     )
-    return project.build()
+    project.build()
+    return project
 
 
 # def update_existing_client(

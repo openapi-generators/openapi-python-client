@@ -1,4 +1,6 @@
-from typing import Optional, Literal, cast, Union, List, Dict, Any, Iterable
+from __future__ import annotations
+
+from typing import Optional, Literal, cast, Union, List, Dict, Any, Iterable, Tuple
 
 from dataclasses import dataclass
 
@@ -6,12 +8,20 @@ import openapi_schema_pydantic as osp
 
 from parser.context import OpenapiContext
 from parser.paths import table_names_from_paths
-from parser.models import SchemaWrapper
+from parser.models import SchemaWrapper, DataPropertyPath
 from openapi_python_client.utils import PythonIdentifier
+from parser.responses import process_responses
 
 TMethod = Literal["get", "post", "put", "patch"]
 TParamIn = Literal["query", "header", "path", "cookie"]
 Tree = Dict[str, Union["Endpoint", "Tree"]]
+
+
+@dataclass
+class TransformerSetting:
+    parent_endpoint: Endpoint
+    parent_property: DataPropertyPath
+    path_parameter: Parameter
 
 
 @dataclass
@@ -85,6 +95,26 @@ class Response:
     description: str
     raw_schema: osp.Response
     content_schema: Optional[SchemaWrapper]
+    list_property: Optional[DataPropertyPath] = None
+
+    @property
+    def has_content(self) -> bool:
+        """Whether this is a no-content response"""
+        return not not self.content_schema
+
+    @property
+    def list_properties(self) -> Dict[Tuple[str, ...], SchemaWrapper]:
+        """Paths to list properties"""
+        if not self.content_schema:
+            return {}
+        return self.content_schema.crawled_properties.list_properties
+
+    @property
+    def object_properties(self) -> Dict[Tuple[str, ...], SchemaWrapper]:
+        """Paths to object properties"""
+        if not self.content_schema:
+            return {}
+        return self.content_schema.crawled_properties.object_properties
 
     @classmethod
     def from_reference(
@@ -118,11 +148,21 @@ class Endpoint:
 
     python_name: PythonIdentifier
 
-    path_summary: Optional[str] = None
+    parent: Optional["Endpoint"] = None
 
+    summary: Optional[str] = None
+    description: Optional[str] = None
+
+    path_summary: Optional[str] = None
     """Summary applying to all methods of the path"""
     path_description: Optional[str] = None
     """Description applying to all methods of the path"""
+
+    rank: int = 0
+
+    def to_docstring(self) -> str:
+        lines = [self.path_summary, self.summary, self.path_description, self.description]
+        return "\n".join(line for line in lines if line)
 
     @property
     def path_parameters(self) -> Dict[str, Parameter]:
@@ -172,6 +212,11 @@ class Endpoint:
         return self.responses[keys[0]]
 
     @property
+    def has_content(self) -> bool:
+        resp = self.data_response
+        return bool(resp) and resp.has_content
+
+    @property
     def table_name(self) -> str:
         # TODO:
         # 1. Media schema ref name
@@ -185,8 +230,39 @@ class Endpoint:
         return self.path_table_name
 
     @property
+    def list_property(self) -> Optional[DataPropertyPath]:
+        if not self.data_response:
+            return None
+        return self.data_response.list_property
+
+    @property
+    def data_json_path(self) -> str:
+        list_prop = self.list_property
+        return list_prop.json_path if list_prop else ""
+
+    @property
     def is_transformer(self) -> bool:
         return not not self.required_parameters
+
+    @property
+    def transformer(self) -> Optional[TransformerSetting]:
+        if not self.parent:
+            return None
+        if not self.parent.list_property:
+            return None
+        if not self.path_parameters:
+            return None
+        if len(self.path_parameters) > 1:
+            # TODO: Can't handle endpoints with more than 1 path param for now
+            return None
+        path_param = list(self.path_parameters.values())[-1]
+        list_object = self.parent.list_property.prop
+        transformer_arg = list_object.crawled_properties.find_property_by_name(path_param.name, fallback="id")
+        if not transformer_arg:
+            return None
+        return TransformerSetting(
+            parent_endpoint=self.parent, parent_property=transformer_arg, path_parameter=path_param
+        )
 
     @classmethod
     def from_operation(
@@ -196,6 +272,8 @@ class Endpoint:
         operation: osp.Operation,
         path_table_name: str,
         path_level_parameters: List[Parameter],
+        path_summary: Optional[str],
+        path_description: Optional[str],
         context: OpenapiContext,
     ) -> "Endpoint":
         # Merge operation params with top level params from path definition
@@ -218,6 +296,10 @@ class Endpoint:
             path_table_name=path_table_name,
             operation_id=operation_id,
             python_name=PythonIdentifier(operation_id),
+            summary=operation.summary,
+            description=operation.description,
+            path_summary=path_summary,
+            path_description=path_description,
         )
 
 
@@ -228,7 +310,7 @@ class EndpointCollection:
 
     @property
     def all_endpoints_to_render(self) -> List[Endpoint]:
-        return self.endpoints
+        return sorted([e for e in self.endpoints if e.has_content], key=lambda e: e.rank, reverse=True)
 
     @property
     def endpoints_by_id(self) -> Dict[str, Endpoint]:
@@ -248,14 +330,22 @@ class EndpointCollection:
                     continue
                 endpoints.append(
                     Endpoint.from_operation(
-                        cast(TMethod, op_name), path, operation, path_table_names[path], path_level_params, context
+                        cast(TMethod, op_name),
+                        path,
+                        operation,
+                        path_table_names[path],
+                        path_level_params,
+                        path_item.summary,
+                        path_item.description,
+                        context,
                     )
                 )
         endpoint_tree = cls.build_endpoint_tree(endpoints)
         result = cls(endpoints=endpoints, endpoint_tree=endpoint_tree)
-
-        for endpoint in endpoints:
-            result.find_nearest_list_parent(endpoint.path)
+        process_responses(result)
+        for endpoint in result.endpoints:
+            endpoint.parent = result.find_nearest_list_parent(endpoint.path)
+        return result
 
     def find_immediate_parent(self, path: str) -> Optional[Endpoint]:
         """Find the parent of the given endpoint.
@@ -279,10 +369,10 @@ class EndpointCollection:
             current_node = self.endpoint_tree
             parts.pop()
             for part in parts:
-                current_node = current_node[part]  # type: ignore
+                current_node = current_node[part]  # type: ignore[assignment]
             if parent_endpoint := current_node.get("<endpoint>"):
-                if parent_endpoint.list_property:  # type: ignore
-                    return parent_endpoint  # type: ignore
+                if cast(Endpoint, parent_endpoint).list_property:
+                    return cast(Endpoint, parent_endpoint)
         return None
 
     @staticmethod

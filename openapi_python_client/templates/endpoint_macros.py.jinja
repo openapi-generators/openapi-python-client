@@ -86,7 +86,7 @@ base_url: str = dlt.config.value,
 {% endif %}
 data_json_path: Optional[str]="{{endpoint.data_json_path}}",
 {% if endpoint.transformer %}
-parent_property_name: str="{{ endpoint.transformer.parent_property.name }}",
+parent_property_path: str="{{ endpoint.transformer.parent_property.json_path }}",
 path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 {% endif %}
 {% endmacro %}

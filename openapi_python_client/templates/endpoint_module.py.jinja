@@ -74,7 +74,7 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     {% if endpoint.transformer %}
-    for child_kwargs in extract_iterate_parent(data, parent_property_name, path_parameter_name, "{{ endpoint.path }}"):
+    for child_kwargs in extract_iterate_parent(data, parent_property_path, path_parameter_name, "{{ endpoint.path }}"):
         kwargs = _get_kwargs(
             {{ transformer_kwargs(endpoint) }}
             **child_kwargs

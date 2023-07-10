@@ -26,15 +26,15 @@ def extract_url_like_values(data: dict) -> Iterator[str]:
 
 
 def extract_iterate_parent(
-    data: TDataItems, property_name: str, path_param_name: str, endpoint_url: str
+    data: TDataItems, property_path: TJsonPath, path_param_name: str, endpoint_url: str
 ) -> Iterator[Any]:
     """Extract kwargs to use in transformer requests"""
     if not isinstance(data, list):
         data = [data]
     for item in data:
-        property_value = item.get(property_name)
-        if property_value is not None:
-            yield {path_param_name: property_value}
+        property_values = find_values(property_path, item)
+        if property_values:
+            yield {path_param_name: property_values[0]}
             continue
 
         # Try looking for a URL property which matches the endpoint URL we're dealing with
