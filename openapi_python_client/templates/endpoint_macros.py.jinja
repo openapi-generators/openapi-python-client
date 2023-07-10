@@ -122,7 +122,6 @@ path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 {% endif -%}
 {% if endpoint.parent %}
 Parent endpoint: {{ endpoint.parent.path }}
-
 {% endif %}
 
 {%- if endpoint.description %} {{ endpoint.description | wordwrap(100) }}

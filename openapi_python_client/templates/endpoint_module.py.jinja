@@ -1,3 +1,4 @@
+{% macro generate_resource(endpoint) %}
 from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Union, cast, Iterator
 import dlt
@@ -6,7 +7,7 @@ from dlt.sources.helpers import requests
 
 from ..types import UNSET, Unset
 from ..utils import extract_nested_data, extract_iterate_parent
-from ..api_helpers import fetch_json
+from ..api_helpers import fetch_json, fetch_list_items
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -31,14 +32,18 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
     params_meta = {{ endpoint.request_args_meta_str }} 
     {% if endpoint.transformer %}
     for child_kwargs in extract_iterate_parent(data, parent_property_path, path_parameter_name, "{{ endpoint.path }}"):
-        params = dict(
-            {{ transformer_kwargs(endpoint) }}
-            **child_kwargs
+        data = fetch_json(
+            base_url, endpoint_url,
+            dict(
+                {{ transformer_kwargs(endpoint) }}
+                **child_kwargs
+            ),
+            params_meta
         )
-        data = fetch_json(base_url, endpoint_url, params, params_meta)
         yield from extract_nested_data(data, data_json_path)
     {% else %}
-    params = dict({{kwargs(endpoint)}})
-    data = fetch_json(base_url, endpoint_url, params, params_meta)
-    yield from  extract_nested_data(data, data_json_path)
+    yield from fetch_list_items(
+        base_url, endpoint_url, dict({{kwargs(endpoint)}}), params_meta, data_json_path
+    )
     {% endif %}
+{% endmacro %}

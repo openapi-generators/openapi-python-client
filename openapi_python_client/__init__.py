@@ -132,8 +132,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             self.project_dir.mkdir()
         self._create_package()
         self._build_metadata()
-        # TODO: Config with servers
-        # self._build_dlt_config()
+        self._build_dlt_config()
         # self._build_models()
         # TODO: Security in parser
         # self._build_security()
@@ -182,8 +181,12 @@ class Project:  # pylint: disable=too-many-instance-attributes
         config_dir = self.project_dir / ".dlt"
         config_dir.mkdir()
 
-        first_server = self.openapi.openapi.servers[0]
-        other_servers = self.openapi.openapi.servers[1:]
+        servers = self.openapi.info.servers
+        first_server = servers[0] if servers else None
+        other_servers = servers[1:]
+        if first_server and first_server.url == "/" and not first_server.description:
+            # Remove default server
+            first_server = None
 
         config_template = self.env.get_template("dlt_config.toml.jinja")
         config_path = config_dir / "config.toml"
@@ -252,23 +255,30 @@ class Project:  # pylint: disable=too-many-instance-attributes
         api_dir = self.package_dir / "api"
         api_dir.mkdir()
 
-        endpoint_template = self.env.get_template(
-            "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
-        )
-        for endpoint in self.openapi.endpoints.all_endpoints_to_render:
-            module_path = api_dir / f"{endpoint.python_name}.py"
-            module_path.write_text(
-                endpoint_template.render(endpoint=endpoint),
-                encoding=self.file_encoding,
-            )
-
-        # Generate API init
-        api_init_path = api_dir / "__init__.py"
-        api_init_template = self.env.get_template("api_init.py.jinja")
-        api_init_path.write_text(
-            api_init_template.render(endpoints=self.openapi.endpoints.all_endpoints_to_render),
+        resources_template = self.env.get_template("resources.py.jinja")
+        resources_path = self.package_dir / "resources.py"
+        resources_path.write_text(
+            resources_template.render(endpoints=self.openapi.endpoints.all_endpoints_to_render),
             encoding=self.file_encoding,
         )
+
+        # endpoint_template = self.env.get_template(
+        #     "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
+        # )
+        # for endpoint in self.openapi.endpoints.all_endpoints_to_render:
+        #     module_path = api_dir / f"{endpoint.python_name}.py"
+        #     module_path.write_text(
+        #         endpoint_template.render(endpoint=endpoint),
+        #         encoding=self.file_encoding,
+        #     )
+
+        # # Generate API init
+        # api_init_path = api_dir / "__init__.py"
+        # api_init_template = self.env.get_template("api_init.py.jinja")
+        # api_init_path.write_text(
+        #     api_init_template.render(endpoints=self.openapi.endpoints.all_endpoints_to_render),
+        #     encoding=self.file_encoding,
+        # )
 
     def _build_security(self) -> None:
         schemes_dir = self.package_dir / "security"

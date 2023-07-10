@@ -30,7 +30,7 @@ class Config(BaseModel):
     use_path_prefixes_for_title_model_names: bool = True
     post_hooks: List[str] = [
         "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
-        "isort .",
+        "isort --float-to-top .",
         "black .",
     ]
     field_prefix: str = "field_"

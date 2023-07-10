@@ -1,12 +1,16 @@
 [sources.{{ source_name }}]
 # Base URL for the API
+{% if first_server %}
 {% if first_server.description %}
 # {{ first_server.description }}
 {% endif %}
 base_url = "{{ first_server.url }}"
+{% else %}
+base_url = "https://..."  # Replace with API base URL
+{% endif %}
 
 {% if other_servers %}
-# Other servers found in openapi spec:
+# Alternative servers found in openapi spec:
 {% endif %}
 {% for server in other_servers %}
 {% if server.description %}

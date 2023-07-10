@@ -1,11 +1,13 @@
 from urllib.parse import urljoin
 
-from typing import Dict, TypedDict, Any, List, Optional
+from typing import Dict, TypedDict, Any, List, Optional, Iterator
 
 from dlt.sources.helpers import requests
 from dlt.common import json
+from dlt.common.jsonpath import TJsonPath
 
 from .types import UNSET
+from .util import extract_nested_data
 
 
 class ParamInfo(TypedDict):
@@ -78,3 +80,14 @@ def fetch_json(
 
     response = requests.get(abs_url, params=query_params)
     return response.json()
+
+
+def fetch_list_items(
+    base_url: str,
+    endpoint_url: str,
+    parameters: Dict[str, Any],
+    parameter_map: TParameterMap,
+    data_json_path: Optional[TJsonPath] = None,
+) -> Iterator[Any]:
+    data = fetch_json(base_url, endpoint_url, parameters, parameter_map)
+    yield from extract_nested_data(data, data_json_path)

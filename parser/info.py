@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 from dataclasses import dataclass
+
+import openapi_schema_pydantic as osp
 
 from parser.context import OpenapiContext
 
@@ -11,6 +13,7 @@ class OpenApiInfo:
     summary: Optional[str]
     description: Optional[str]
     # TODO: Servers
+    servers: List[osp.Server]
 
     @classmethod
     def from_context(cls, context: OpenapiContext) -> "OpenApiInfo":
@@ -19,4 +22,7 @@ class OpenApiInfo:
         summary = info.summary
         description = info.description
         version = info.version or ""
-        return cls(title=title, summary=summary, description=description, version=version)
+
+        return cls(
+            title=title, summary=summary, description=description, version=version, servers=context.spec.servers or []
+        )
