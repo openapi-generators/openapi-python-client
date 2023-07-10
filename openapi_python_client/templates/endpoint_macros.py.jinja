@@ -108,9 +108,9 @@ path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
 {% endif %}
-{% for parameter in endpoint.required_parameters.values() %}
-{{ parameter.python_name }}={{ parameter.python_name }},    
-{% endfor %}
+{#{% for parameter in endpoint.required_parameters.values() %} #}
+{#{{ parameter.python_name }}={{ parameter.python_name }},    #]
+{#{% endfor %} #}
 {% for parameter in endpoint.optional_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},    
 {% endfor %}
