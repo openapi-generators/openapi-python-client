@@ -4,10 +4,9 @@ import dlt
 
 from dlt.sources.helpers import requests
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
-from ... import errors
-from ...utils import extract_nested_data, extract_iterate_parent
+from ..types import UNSET, Unset
+from ..utils import extract_nested_data, extract_iterate_parent
+from ..api_helpers import fetch_json
 
 {% for relative in endpoint.relative_imports %}
 {{ relative }}
@@ -20,50 +19,6 @@ from ...utils import extract_nested_data, extract_iterate_parent
 {% set return_string = "Any" %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
-def _get_kwargs(
-    {{ arguments(endpoint) | indent(4) }}
-) -> Dict[str, Any]:
-    url = "{}{{ endpoint.path }}".format(
-        base_url
-        {%- for parameter in endpoint.path_parameters.values() -%}
-        ,{{parameter.name}}={{parameter.python_name}}
-        {%- endfor -%}
-    )
-
-    base_params: Dict[str, Any] = dict(cookies={}, headers={}, params={})
-    {% if endpoint.credentials_parameter %}
-    base_params.update(credentials.to_http_params())
-    {% endif %}
-    headers = base_params['headers']
-
-    cookies = base_params['cookies']
-
-    params = base_params['params']
-
-    {{ header_params(endpoint) | indent(4) }}
-
-    {{ cookie_params(endpoint) | indent(4) }}
-
-    {{ query_params(endpoint) | indent(4) }}
-
-    return {
-	"method": "{{ endpoint.method }}",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "params": params,
-    }
-
-
-def _build_response(response: requests.Response) -> Response[{{ return_string }}]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
-        content=response.content,
-        headers=response.headers,
-        parsed=response.json(),
-    )
-
-
 {% if endpoint.transformer %}
 @dlt.transformer(table_name="{{ endpoint.table_name}}")
 def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
@@ -73,17 +28,18 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
 {% endif %}
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
+    endpoint_url = "{{ endpoint.path }}"
+    params_meta = {{ endpoint.request_args_meta_str }} 
     {% if endpoint.transformer %}
     for child_kwargs in extract_iterate_parent(data, parent_property_path, path_parameter_name, "{{ endpoint.path }}"):
-        kwargs = _get_kwargs(
+        params = dict(
             {{ transformer_kwargs(endpoint) }}
             **child_kwargs
         )
-        response = _build_response(requests.request(**kwargs))
-
-        yield from extract_nested_data(response.parsed, data_json_path)
+        data = fetch_json(base_url, endpoint_url, params, params_meta)
+        yield from extract_nested_data(data, data_json_path)
     {% else %}
-    kwargs = _get_kwargs({{kwargs(endpoint)}})
-    response = _build_response(requests.request(**kwargs))
-    yield from  extract_nested_data(response.parsed, data_json_path)
+    params = dict({{kwargs(endpoint)}})
+    data = fetch_json(base_url, endpoint_url, params, params_meta)
+    yield from  extract_nested_data(data, data_json_path)
     {% endif %}

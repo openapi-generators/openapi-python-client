@@ -93,7 +93,6 @@ path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
 {% macro kwargs(endpoint) %}
-base_url=base_url,
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
 {% endif %}
@@ -106,7 +105,6 @@ base_url=base_url,
 {% endmacro %}
 
 {% macro transformer_kwargs(endpoint) %}
-base_url=base_url,
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
 {% endif %}

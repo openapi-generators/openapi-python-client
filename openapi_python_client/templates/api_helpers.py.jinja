@@ -1,0 +1,79 @@
+from urllib.parse import urljoin
+
+from typing import Dict, TypedDict, Any, List, Optional
+
+from dlt.sources.helpers import requests
+from dlt.common import json
+
+from .types import UNSET
+
+
+class ParamInfo(TypedDict):
+    name: str
+    types: List[str]
+    explode: bool
+    style: Optional[str]
+
+
+class TParameterMap(TypedDict):
+    """
+    Mapping to get the original parameter names from resource python arguments.
+
+    Python arguments sometimes need to be escaped so may not match the original
+    query/path/header/cookie parameter.
+    """
+
+    path: Dict[str, ParamInfo]
+    query: Dict[str, ParamInfo]
+    header: Dict[str, ParamInfo]
+    cookie: Dict[str, ParamInfo]
+
+
+def build_query_param(info: ParamInfo, value: Any) -> Dict[str, Any]:
+    """Serialize the query param according to
+    https://swagger.io/docs/specification/serialization /
+    """
+    if value is None or value is UNSET:
+        return {}
+    name = info["name"]
+    style = info.get("style")
+    explode = info["explode"]
+    if isinstance(value, list):
+        serialized = [json.dumps(v) for v in value]
+        if info["explode"]:
+            return {name: serialized}  # Translates to repeated params, e.g. ?id=1&id=2&id=3
+        return {name: ",".join(serialized)}
+    elif isinstance(value, dict):
+        serialized = {key: json.dumps(v) for k, v in value.items()}
+        if explode:
+            if style == "deepObject":  # ?id[role]=admin&id[name]=Alex
+                return {f"{name}[{k}": v for k, v in serialized.items()}
+            # Assume form
+            return {k: v for k, v in serialized.items()}
+        # Unexploded form e.g. id=role,admin,name,Alex
+        return {name: ",".join([f"{k},{v}" for k, v in value.items()])}
+    # Other types sent as json strings
+    return {name: json.dumps(value)}
+
+
+def fetch_json(
+    base_url: str,
+    endpoint_url: str,
+    parameters: Dict[str, Any],
+    parameter_map: TParameterMap,
+) -> Any:
+    # Build absolute URL with path parameters
+    # TODO: Path params may need serialized, explode, etc
+    path_params = {
+        mapped_param["name"]: parameters[python_name] for python_name, mapped_param in parameter_map["path"].items()
+    }
+    abs_url = urljoin(base_url, endpoint_url).format_map(path_params)
+
+    query_params = {}
+    for python_name, param_info in parameter_map["query"].items():
+        query_params.update(build_query_param(param_info, parameters[python_name]))
+
+    # TODO: Header/cookie params
+
+    response = requests.get(abs_url, params=query_params)
+    return response.json()

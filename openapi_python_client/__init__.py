@@ -174,6 +174,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
         utils_path = self.package_dir / "utils.py"
         utils_path.write_text(utils_template.render(), encoding=self.file_encoding)
 
+        api_helpers_template = self.env.get_template("api_helpers.py.jinja")
+        api_helpers_path = self.package_dir / "utils.py"
+        api_helpers_path.write_text(api_helpers_template.render(), encoding=self.file_encoding)
+
     def _build_dlt_config(self) -> None:
         config_dir = self.project_dir / ".dlt"
         config_dir.mkdir()

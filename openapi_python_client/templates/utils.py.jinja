@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator, Optional, Dict
 from urllib import parse
 
 from dlt.common.jsonpath import TJsonPath, find_values
@@ -15,7 +15,7 @@ def extract_nested_data(response_data: Any, path: Optional[TJsonPath] = None) ->
             yield result
 
 
-def extract_url_like_values(data: dict) -> Iterator[str]:
+def extract_url_like_values(data: Dict[str, Any]) -> Iterator[str]:
     url_pattern = r"(https?://[^\s/$.?#].[^\s]*)"  # Regex pattern to match URLs
 
     for key, value in data.items():
@@ -52,7 +52,7 @@ def extract_iterate_parent(
             raise ValueError(f"Could not find id parameter {path_param_name} (endpoint {endpoint_url}) in: {item}")
 
 
-def pluck_param_from_result_url(result_url: str, endpoint_url: str):
+def pluck_param_from_result_url(result_url: str, endpoint_url: str) -> Optional[str]:
     endpoint_url = endpoint_url.rstrip("/")
     rel_url = parse.urlparse(result_url).path.rstrip("/")
     rel_parts = rel_url.split("/")

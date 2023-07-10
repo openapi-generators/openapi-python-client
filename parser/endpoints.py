@@ -8,7 +8,7 @@ import openapi_schema_pydantic as osp
 
 from parser.context import OpenapiContext
 from parser.paths import table_names_from_paths
-from parser.models import SchemaWrapper, DataPropertyPath
+from parser.models import SchemaWrapper, DataPropertyPath, TSchemaType
 from openapi_python_client.utils import PythonIdentifier
 from parser.responses import process_responses
 
@@ -33,6 +33,12 @@ class Parameter:
     required: bool
     location: TParamIn
     python_name: PythonIdentifier
+    explode: bool
+    style: Optional[str] = None
+
+    @property
+    def types(self) -> List[TSchemaType]:
+        return self.schema.types
 
     @property
     def template(self) -> str:
@@ -54,9 +60,9 @@ class Parameter:
         if self.required and self.nullable:
             type_hint = f"Optional[{type_hint}]"
         elif not self.required and self.nullable:
-            type_hint = f"Union[UNSET, None, {type_hint}]"
+            type_hint = f"Union[Unset, None, {type_hint}]"
         else:
-            type_hint = f"Union[UNSET, {type_hint}]"
+            type_hint = f"Union[Unset, {type_hint}]"
 
         base_string = f"{self.python_name}: {type_hint}"
         if default is not None:
@@ -86,6 +92,8 @@ class Parameter:
             location=cast(TParamIn, location),
             required=required,
             python_name=PythonIdentifier(osp_param.name, prefix=context.config.field_prefix),
+            explode=osp_param.explode or False,
+            style=osp_param.style,
         )
 
 
@@ -192,12 +200,23 @@ class Endpoint:
     def optional_parameters(self) -> Dict[str, Parameter]:
         return {name: p for name, p in self.parameters.items() if not p.required}
 
-    def request_args_meta(self) -> Dict[str, Dict[str, str]]:
+    @property
+    def request_args_meta(self) -> Dict[str, Dict[str, Dict[str, str]]]:
         """Mapping of how to translate python arguments to request parameters"""
-        return {
-            str(param.python_name): {"name": param.name, "location": param.location}
-            for param in self.parameters.values()
-        }
+        result: Dict[str, Any] = {"header": {}, "query": {}, "path": {}, "cookie": {}}
+        for param in self.parameters.values():
+            items = result.setdefault(param.location, {})
+            items[param.python_name] = {
+                "name": param.name,
+                "types": param.types,
+                "explode": param.explode,
+                "style": param.style,
+            }
+        return result
+
+    @property
+    def request_args_meta_str(self) -> str:
+        return repr(self.request_args_meta)
 
     @property
     def data_response(self) -> Optional[Response]:
