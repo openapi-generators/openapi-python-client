@@ -120,7 +120,10 @@ path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 {% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
 
 {% endif -%}
-{% if endpoint.parent %}Parent endpoint: {{ endpoint.parent.name }}{% endif %}
+{% if endpoint.parent %}
+Parent endpoint: {{ endpoint.parent.path }}
+
+{% endif %}
 
 {%- if endpoint.description %} {{ endpoint.description | wordwrap(100) }}
 
@@ -135,7 +138,6 @@ Args:
     {% for parameter in all_parameters %}
     {{ parameter.to_docstring() | wordwrap(90) | indent(8) }}
     {% endfor %}
-
 {% endif %}
 
 Returns:

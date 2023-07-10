@@ -203,7 +203,7 @@ class Endpoint:
     @property
     def request_args_meta(self) -> Dict[str, Dict[str, Dict[str, str]]]:
         """Mapping of how to translate python arguments to request parameters"""
-        result: Dict[str, Any] = {"header": {}, "query": {}, "path": {}, "cookie": {}}
+        result: Dict[str, Any] = {}
         for param in self.parameters.values():
             items = result.setdefault(param.location, {})
             items[param.python_name] = {

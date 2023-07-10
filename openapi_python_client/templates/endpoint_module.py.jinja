@@ -27,7 +27,6 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
 def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -> Iterator[{{ return_string}}]:
 {% endif %}
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
-
     endpoint_url = "{{ endpoint.path }}"
     params_meta = {{ endpoint.request_args_meta_str }} 
     {% if endpoint.transformer %}

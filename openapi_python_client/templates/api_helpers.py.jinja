@@ -23,10 +23,10 @@ class TParameterMap(TypedDict):
     query/path/header/cookie parameter.
     """
 
-    path: Dict[str, ParamInfo]
-    query: Dict[str, ParamInfo]
-    header: Dict[str, ParamInfo]
-    cookie: Dict[str, ParamInfo]
+    path: Optional[Dict[str, ParamInfo]]
+    query: Optional[Dict[str, ParamInfo]]
+    header: Optional[Dict[str, ParamInfo]]
+    cookie: Optional[Dict[str, ParamInfo]]
 
 
 def build_query_param(info: ParamInfo, value: Any) -> Dict[str, Any]:
@@ -39,17 +39,17 @@ def build_query_param(info: ParamInfo, value: Any) -> Dict[str, Any]:
     style = info.get("style")
     explode = info["explode"]
     if isinstance(value, list):
-        serialized = [json.dumps(v) for v in value]
+        serialized_list = [json.dumps(v) for v in value]
         if info["explode"]:
-            return {name: serialized}  # Translates to repeated params, e.g. ?id=1&id=2&id=3
-        return {name: ",".join(serialized)}
+            return {name: serialized_list}  # Translates to repeated params, e.g. ?id=1&id=2&id=3
+        return {name: ",".join(serialized_list)}
     elif isinstance(value, dict):
-        serialized = {key: json.dumps(v) for k, v in value.items()}
+        serialized_obj = {k: json.dumps(v) for k, v in value.items()}
         if explode:
             if style == "deepObject":  # ?id[role]=admin&id[name]=Alex
-                return {f"{name}[{k}": v for k, v in serialized.items()}
+                return {f"{name}[{k}": v for k, v in serialized_obj.items()}
             # Assume form
-            return {k: v for k, v in serialized.items()}
+            return {k: v for k, v in serialized_obj.items()}
         # Unexploded form e.g. id=role,admin,name,Alex
         return {name: ",".join([f"{k},{v}" for k, v in value.items()])}
     # Other types sent as json strings
@@ -65,12 +65,13 @@ def fetch_json(
     # Build absolute URL with path parameters
     # TODO: Path params may need serialized, explode, etc
     path_params = {
-        mapped_param["name"]: parameters[python_name] for python_name, mapped_param in parameter_map["path"].items()
+        mapped_param["name"]: parameters[python_name]
+        for python_name, mapped_param in parameter_map.get("path", {}).items()
     }
     abs_url = urljoin(base_url, endpoint_url).format_map(path_params)
 
     query_params = {}
-    for python_name, param_info in parameter_map["query"].items():
+    for python_name, param_info in parameter_map.get("query", {}).items():
         query_params.update(build_query_param(param_info, parameters[python_name]))
 
     # TODO: Header/cookie params
