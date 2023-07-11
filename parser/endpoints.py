@@ -11,6 +11,7 @@ from parser.paths import table_names_from_paths
 from parser.models import SchemaWrapper, DataPropertyPath, TSchemaType
 from openapi_python_client.utils import PythonIdentifier
 from parser.responses import process_responses
+from parser.credentials import CredentialsProperty
 
 TMethod = Literal["get", "post", "put", "patch"]
 TParamIn = Literal["query", "header", "path", "cookie"]
@@ -35,6 +36,12 @@ class Parameter:
     python_name: PythonIdentifier
     explode: bool
     style: Optional[str] = None
+
+    def get_imports(self) -> List[str]:
+        imports = []
+        if self.schema.is_union:
+            imports.append("from typing import Union")
+        return imports
 
     @property
     def types(self) -> List[TSchemaType]:
@@ -155,6 +162,7 @@ class Endpoint:
     operation_id: str
 
     python_name: PythonIdentifier
+    credentials: Optional[CredentialsProperty]
 
     parent: Optional["Endpoint"] = None
 
@@ -167,6 +175,15 @@ class Endpoint:
     """Description applying to all methods of the path"""
 
     rank: int = 0
+
+    def get_imports(self) -> List[str]:
+        """Get all import strings required to use this endpoint"""
+        imports = []
+        if self.credentials:
+            imports.extend(self.credentials.get_imports())
+        for param in self.parameters.values():
+            imports.extend(param.get_imports())
+        return imports
 
     def to_docstring(self) -> str:
         lines = [self.path_summary, self.summary, self.path_description, self.description]
@@ -306,6 +323,9 @@ class Endpoint:
         }
 
         operation_id = operation.operationId or f"{method}_{path}"
+
+        credentials = CredentialsProperty.from_requirements(operation.security, context) if operation.security else None
+
         return cls(
             method=method,
             path=path,
@@ -319,6 +339,7 @@ class Endpoint:
             description=operation.description,
             path_summary=path_summary,
             path_description=path_description,
+            credentials=credentials,
         )
 
 

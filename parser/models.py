@@ -218,6 +218,13 @@ class Property:
     required: bool
     schema: SchemaWrapper
 
+    def get_imports(self) -> List[str]:
+        imports = []
+        if self.schema.is_union:
+            imports.append("from typing import Union")
+        # TODO: other types
+        return imports
+
     @property
     def is_list(self) -> bool:
         return self.schema.is_list

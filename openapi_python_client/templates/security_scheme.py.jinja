@@ -1,3 +1,4 @@
+{% macro generate_security_scheme(scheme) %}
 from typing import Literal
 
 from dlt.common.configuration.specs.base_configuration import BaseConfiguration, configspec
@@ -5,21 +6,19 @@ from dlt.common.configuration.specs.base_configuration import BaseConfiguration,
 from ._base import _ApiKeyCredentialsBase, _HttpBasicCredentialsBase, _HttpBearerCredentialsBase, _OAuth2CredentialsBase
 
 
-{% if scheme.data.type == "apiKey" %}
-class {{ scheme.class_info.name }}(_ApiKeyCredentialsBase):
-    location: Literal["{{ scheme.data.security_scheme_in }}"] = "{{ scheme.data.security_scheme_in }}"
+{% if scheme.type == "apiKey" %}
+class {{ scheme.class_name }}(_ApiKeyCredentialsBase):
+    location: Literal["{{ scheme.location }}"] = "{{ scheme.location }}"
     name: Literal["{{ scheme.name }}"] = "{{ scheme.name }}"
     
-{% elif scheme.data.type == "http" and scheme.data.scheme == "basic" %}
-class {{ scheme.class_info.name }}(_HttpBasicCredentialsBase):
+{% elif scheme.type == "http" and scheme.scheme == "basic" %}
+class {{ scheme.class_name }}(_HttpBasicCredentialsBase):
     pass
-{% elif scheme.data.type == "http" and scheme.data.scheme == "bearer" %}
-class {{ scheme.class_info.name }}(_HttpBearerCredentialsBase):
+{% elif scheme.type == "http" and scheme.scheme == "bearer" %}
+class {{ scheme.class_name }}(_HttpBearerCredentialsBase):
     pass
-{% elif scheme.data.type == "oauth2" %}
-class {{ scheme.class_info.name }}(_OAuth2CredentialsBase):
+{% elif scheme.type == "oauth2" %}
+class {{ scheme.class_name }}(_OAuth2CredentialsBase):
     pass
 {% endif %}
-
-
-__all__ = ["{{ scheme.class_info.name }}"]
+{% endmacro %}

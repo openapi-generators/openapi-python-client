@@ -1,0 +1,5 @@
+{% from "security_scheme.py.jinja" import generate_security_scheme %}
+
+{% for scheme in security_schemes %}
+{{ generate_security_scheme(scheme) }}
+{% endfor %}

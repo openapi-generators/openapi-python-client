@@ -1,8 +1,10 @@
 from typing import Dict, Union, cast, Tuple, Optional
+from dataclasses import dataclass
 
 import openapi_schema_pydantic as osp
 
 from parser.config import Config
+from openapi_python_client.utils import ClassName
 
 
 TComponentClass = Union[
@@ -17,14 +19,38 @@ TComponentClass = Union[
 ]
 
 
+@dataclass
+class SecurityScheme:
+    data: osp.SecurityScheme
+    class_name: ClassName
+
+    @property
+    def type(self) -> str:
+        return self.data.type
+
+    @property
+    def scheme(self) -> str:
+        return self.data.scheme
+
+    @property
+    def name(self) -> str:
+        return self.data.name
+
+    @property
+    def location(self) -> str:
+        return self.data.security_scheme_in
+
+
 class OpenapiContext:
     spec: osp.OpenAPI
 
     _component_cache: Dict[str, TComponentClass]
+    security_schemes: Dict[str, SecurityScheme]
 
     def __init__(self, config: Config) -> None:
         self.config = config
         self._component_cache = {}
+        self.security_schemes = {}
 
     def _component_from_reference(self, ref: osp.Reference) -> TComponentClass:
         url = ref.ref
@@ -59,3 +85,10 @@ class OpenapiContext:
         if isinstance(ref, osp.Parameter):
             return ref
         return cast(osp.Parameter, self._component_from_reference(ref))
+
+    def get_security_scheme(self, name: str) -> SecurityScheme:
+        # TODO: The security scheme might be a Reference
+        if name in self.security_schemes:
+            return self.security_schemes[name]
+        scheme: osp.SecurityScheme = self.spec.components.securitySchemes[name]  # type: ignore[assignment]
+        return SecurityScheme(scheme, ClassName(name + "Credentials", self.config.field_prefix))

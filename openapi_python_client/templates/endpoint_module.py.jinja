@@ -9,8 +9,8 @@ from ..types import UNSET, Unset
 from ..utils import extract_nested_data, extract_iterate_parent
 from ..api_helpers import fetch_json, fetch_list_items
 
-{% for relative in endpoint.relative_imports %}
-{{ relative }}
+{% for imp_string in endpoint.get_imports() %}
+{{ imp_string }}
 {% endfor %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
