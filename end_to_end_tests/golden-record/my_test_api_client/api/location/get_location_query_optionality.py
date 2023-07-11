@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 import httpx
 
@@ -58,7 +58,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: Client, response: httpx.Response) -> None:
     if response.status_code == HTTPStatus.OK:
         return None
     if client.raise_on_unexpected_status:
@@ -67,12 +67,12 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[None]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(client=client, response=response),  # type: ignore[func-returns-value]
     )
 
 
@@ -83,7 +83,7 @@ def sync_detailed(
     null_required: Union[Unset, None, datetime.datetime] = UNSET,
     null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
-) -> Response[Any]:
+) -> Response[None]:
     """
     Args:
         not_null_required (datetime.datetime):
@@ -96,7 +96,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
@@ -122,7 +122,7 @@ async def asyncio_detailed(
     null_required: Union[Unset, None, datetime.datetime] = UNSET,
     null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
     not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
-) -> Response[Any]:
+) -> Response[None]:
     """
     Args:
         not_null_required (datetime.datetime):
@@ -135,7 +135,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(

@@ -15,7 +15,7 @@ from ... import errors
     arguments, client, kwargs, parse_response, docstring %}
 
 {% set return_string = endpoint.response_type() %}
-{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
+{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "None" %}
 
 def _get_kwargs(
     {{ arguments(endpoint) | indent(4) }}
@@ -60,14 +60,14 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ return_string }}]:
+def _parse_response(*, client: Client, response: httpx.Response) -> {{ return_string }}:
     {% for response in endpoint.responses %}
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
         {{ prop_template.construct(response.prop, response.source) | indent(8) }}
         {% else %}
-        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
+        {{ response.prop.python_name }} = {{ response.get_typed_source() }}
         {% endif %}
         return {{ response.prop.python_name }}
         {% else %}
@@ -85,7 +85,12 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ 
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
+        {% if parsed_responses %}
         parsed=_parse_response(client=client, response=response),
+        {% else %}
+        {# If _parse_response() returns None, mypy complains: https://github.com/python/mypy/issues/6549 #}
+        parsed=_parse_response(client=client, response=response),  # type: ignore[func-returns-value]
+        {% endif %}
     )
 
 
@@ -108,7 +113,7 @@ def sync_detailed(
 {% if parsed_responses %}
 def sync(
     {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+) -> {{ return_string }}:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return sync_detailed(
@@ -135,7 +140,7 @@ async def asyncio_detailed(
 {% if parsed_responses %}
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+) -> {{ return_string }}:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return (await asyncio_detailed(

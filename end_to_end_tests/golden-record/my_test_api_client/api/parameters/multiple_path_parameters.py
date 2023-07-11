@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import httpx
 
@@ -33,7 +33,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: Client, response: httpx.Response) -> None:
     if response.status_code == HTTPStatus.OK:
         return None
     if client.raise_on_unexpected_status:
@@ -42,12 +42,12 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[None]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(client=client, response=response),  # type: ignore[func-returns-value]
     )
 
 
@@ -58,7 +58,7 @@ def sync_detailed(
     param3: int,
     *,
     client: Client,
-) -> Response[Any]:
+) -> Response[None]:
     """
     Args:
         param4 (str):
@@ -71,7 +71,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
@@ -97,7 +97,7 @@ async def asyncio_detailed(
     param3: int,
     *,
     client: Client,
-) -> Response[Any]:
+) -> Response[None]:
     """
     Args:
         param4 (str):
@@ -110,7 +110,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(

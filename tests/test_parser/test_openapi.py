@@ -1205,7 +1205,11 @@ class TestEndpoint:
 
     @pytest.mark.parametrize(
         "response_types, expected",
-        (([], "Any"), (["Something"], "Something"), (["First", "Second", "Second"], "Union[First, Second]")),
+        (
+            ([], "None"),
+            (["Something"], "Union[None, Something]"),
+            (["First", "Second", "Second"], "Union[First, None, Second]"),
+        ),
     )
     def test_response_type(self, response_types, expected):
         endpoint = self.make_endpoint()

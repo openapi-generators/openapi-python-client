@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict
 
 import httpx
 
@@ -38,9 +38,9 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Any:
     if response.status_code == HTTPStatus.OK:
-        response_200 = cast(Any, response.json())
+        response_200 = response.json()
         return response_200
     if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         response_422 = HTTPValidationError.from_dict(response.json())
@@ -52,7 +52,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Uni
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,7 +65,7 @@ def sync_detailed(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Any]:
     """Int Enum
 
     Args:
@@ -76,7 +76,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -96,7 +96,7 @@ def sync(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Any:
     """Int Enum
 
     Args:
@@ -107,7 +107,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Any
     """
 
     return sync_detailed(
@@ -120,7 +120,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Any]:
     """Int Enum
 
     Args:
@@ -131,7 +131,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -149,7 +149,7 @@ async def asyncio(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Any:
     """Int Enum
 
     Args:
@@ -160,7 +160,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Any
     """
 
     return (

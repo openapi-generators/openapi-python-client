@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Union
 
 import httpx
 
@@ -33,7 +33,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[TestInlineObjectsResponse200]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Union[None, TestInlineObjectsResponse200]:
     if response.status_code == HTTPStatus.OK:
         response_200 = TestInlineObjectsResponse200.from_dict(response.json())
 
@@ -44,7 +44,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Tes
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[TestInlineObjectsResponse200]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[None, TestInlineObjectsResponse200]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -57,7 +57,7 @@ def sync_detailed(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Response[TestInlineObjectsResponse200]:
+) -> Response[Union[None, TestInlineObjectsResponse200]]:
     """Test Inline Objects
 
     Args:
@@ -68,7 +68,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[TestInlineObjectsResponse200]
+        Response[Union[None, TestInlineObjectsResponse200]]
     """
 
     kwargs = _get_kwargs(
@@ -88,7 +88,7 @@ def sync(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Optional[TestInlineObjectsResponse200]:
+) -> Union[None, TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
@@ -99,7 +99,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        TestInlineObjectsResponse200
+        Union[None, TestInlineObjectsResponse200]
     """
 
     return sync_detailed(
@@ -112,7 +112,7 @@ async def asyncio_detailed(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Response[TestInlineObjectsResponse200]:
+) -> Response[Union[None, TestInlineObjectsResponse200]]:
     """Test Inline Objects
 
     Args:
@@ -123,7 +123,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[TestInlineObjectsResponse200]
+        Response[Union[None, TestInlineObjectsResponse200]]
     """
 
     kwargs = _get_kwargs(
@@ -141,7 +141,7 @@ async def asyncio(
     *,
     client: Client,
     json_body: TestInlineObjectsJsonBody,
-) -> Optional[TestInlineObjectsResponse200]:
+) -> Union[None, TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
@@ -152,7 +152,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        TestInlineObjectsResponse200
+        Union[None, TestInlineObjectsResponse200]
     """
 
     return (

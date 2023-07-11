@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Union, cast
 
 import httpx
 
@@ -27,7 +27,7 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[List[str]]:
+def _parse_response(*, client: Client, response: httpx.Response) -> Union[List[str], None]:
     if response.status_code == HTTPStatus.OK:
         response_200 = cast(List[str], response.json())
 
@@ -38,7 +38,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Lis
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[List[str]]:
+def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[List[str], None]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -50,7 +50,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Lis
 def sync_detailed(
     *,
     client: Client,
-) -> Response[List[str]]:
+) -> Response[Union[List[str], None]]:
     """Get Basic List Of Strings
 
      Get a list of strings
@@ -60,7 +60,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[List[str]]
+        Response[Union[List[str], None]]
     """
 
     kwargs = _get_kwargs(
@@ -78,7 +78,7 @@ def sync_detailed(
 def sync(
     *,
     client: Client,
-) -> Optional[List[str]]:
+) -> Union[List[str], None]:
     """Get Basic List Of Strings
 
      Get a list of strings
@@ -88,7 +88,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        List[str]
+        Union[List[str], None]
     """
 
     return sync_detailed(
@@ -99,7 +99,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Client,
-) -> Response[List[str]]:
+) -> Response[Union[List[str], None]]:
     """Get Basic List Of Strings
 
      Get a list of strings
@@ -109,7 +109,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[List[str]]
+        Response[Union[List[str], None]]
     """
 
     kwargs = _get_kwargs(
@@ -125,7 +125,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Client,
-) -> Optional[List[str]]:
+) -> Union[List[str], None]:
     """Get Basic List Of Strings
 
      Get a list of strings
@@ -135,7 +135,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        List[str]
+        Union[List[str], None]
     """
 
     return (
