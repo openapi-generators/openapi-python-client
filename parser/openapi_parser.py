@@ -14,6 +14,7 @@ from parser.context import OpenapiContext
 from parser.endpoints import EndpointCollection
 from parser.config import Config
 from parser.info import OpenApiInfo
+from parser.credentials import CredentialsProperty
 
 
 log = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ log = logging.getLogger(__name__)
 class OpenapiParser:
     spec_raw: Dict[str, Any]
     info: OpenApiInfo
+    credentials: Optional[CredentialsProperty] = None
 
     def __init__(self, spec_file: Union[Path, str], config: Config = Config()) -> None:
         self.spec_file = spec_file
@@ -57,6 +59,7 @@ class OpenapiParser:
         self.context.spec = osp.OpenAPI.parse_obj(self.spec_raw)
         self.info = OpenApiInfo.from_context(self.context)
         self.endpoints = EndpointCollection.from_context(self.context)
+        self.credentials = CredentialsProperty.from_context(self.context)
 
 
 def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Dict[str, Any]:

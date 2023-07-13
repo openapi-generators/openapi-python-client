@@ -10,7 +10,6 @@ from parser.context import OpenapiContext
 from parser.paths import table_names_from_paths
 from parser.models import SchemaWrapper, DataPropertyPath, TSchemaType
 from openapi_python_client.utils import PythonIdentifier
-from openapi_python_client.typing import TEndpointFilter
 from parser.responses import process_responses
 from parser.credentials import CredentialsProperty
 
@@ -112,7 +111,8 @@ class Response:
     @property
     def has_content(self) -> bool:
         """Whether this is a no-content response"""
-        return bool(self.content_schema and self.content_schema.has_properties)
+        return bool(self.content_schema)
+        # return bool(self.content_schema and self.content_schema.has_properties)
 
     @property
     def list_properties(self) -> Dict[Tuple[str, ...], SchemaWrapper]:
@@ -257,7 +257,10 @@ class Endpoint:
         # 3. Endpoint title or path component (e.g. first part of path that's not common with all other endpoints)
         name: Optional[str] = None
         if self.data_response:
-            name = self.data_response.content_schema.name
+            if self.list_property:
+                name = self.list_property.prop.name
+            else:
+                name = self.data_response.content_schema.name
         if name:
             return name
         return self.path_table_name
@@ -348,7 +351,16 @@ class EndpointCollection:
 
     @property
     def all_endpoints_to_render(self) -> List[Endpoint]:
-        return sorted([e for e in self.endpoints if e.has_content], key=lambda e: e.rank, reverse=True)
+        # return [e for e in self.endpoints if e.has_content]
+        return sorted(
+            [
+                e
+                for e in self.endpoints
+                if (not self.names_to_render or e.python_name in self.names_to_render) and e.has_content
+            ],
+            key=lambda e: e.rank,
+            reverse=True,
+        )
 
     @property
     def endpoints_by_id(self) -> Dict[str, Endpoint]:

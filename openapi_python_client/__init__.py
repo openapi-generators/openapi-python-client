@@ -1,30 +1,21 @@
 """ Generate modern Python clients from OpenAPI """
 
 import logging
-import json
-import mimetypes
 import shutil
 import subprocess
 from enum import Enum
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Optional
 
-import httpcore
-import httpx
-import yaml
 from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 from openapi_python_client import utils
-
 from .config import Config
-
-# from .parser import GeneratorData, import_string_from_class
-# from .parser.errors import ErrorLevel, GeneratorError
 from parser.openapi_parser import OpenapiParser
-
 from .typing import TEndpointFilter
+
 
 log = logging.getLogger(__name__)
 
@@ -133,10 +124,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         self._create_package()
         self._build_metadata()
         self._build_dlt_config()
-        # self._build_models()
-        # TODO: Security in parser
         self._build_security()
-        self._build_api()
         self._build_source()
         self._build_pipeline()
         self._run_post_hooks()
@@ -240,53 +228,8 @@ class Project:  # pylint: disable=too-many-instance-attributes
             encoding=self.file_encoding,
         )
 
-    def _build_api(self) -> None:
-        # Generate Client
-        # client_path = self.package_dir / "client.py"
-        # client_template = self.env.get_template("client.py.jinja")
-        # client_path.write_text(client_template.render(), encoding=self.file_encoding)
-
-        # Generate included Errors
-        errors_path = self.package_dir / "errors.py"
-        errors_template = self.env.get_template("errors.py.jinja")
-        errors_path.write_text(errors_template.render(), encoding=self.file_encoding)
-
-        # Generate endpoints
-        api_dir = self.package_dir / "api"
-        api_dir.mkdir()
-
-        resources_template = self.env.get_template("resources.py.jinja")
-        resources_path = self.package_dir / "resources.py"
-        resources_path.write_text(
-            resources_template.render(endpoints=self.openapi.endpoints.all_endpoints_to_render),
-            encoding=self.file_encoding,
-        )
-
-        # endpoint_template = self.env.get_template(
-        #     "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
-        # )
-        # for endpoint in self.openapi.endpoints.all_endpoints_to_render:
-        #     module_path = api_dir / f"{endpoint.python_name}.py"
-        #     module_path.write_text(
-        #         endpoint_template.render(endpoint=endpoint),
-        #         encoding=self.file_encoding,
-        #     )
-
-        # # Generate API init
-        # api_init_path = api_dir / "__init__.py"
-        # api_init_template = self.env.get_template("api_init.py.jinja")
-        # api_init_path.write_text(
-        #     api_init_template.render(endpoints=self.openapi.endpoints.all_endpoints_to_render),
-        #     encoding=self.file_encoding,
-        # )
-
     def _build_security(self) -> None:
-        # schemes_dir = self.package_dir / "security"
-        # schemes_dir.mkdir()
-        # schemes_init = schemes_dir / "__init__.py"
         schemes_base = self.package_dir / "_base.py"
-        imports = []
-        alls = []
 
         scheme_template = self.env.get_template("security_schemes.py.jinja")
         module_path = self.package_dir / "credentials.py"
@@ -295,15 +238,6 @@ class Project:  # pylint: disable=too-many-instance-attributes
             encoding=self.file_encoding,
         )
 
-        # for scheme in self.openapi.context.security_schemes.values():
-        #     module_path = schemes_dir / f"{scheme.class_info.module_name}.py"
-        #     module_path.write_text(scheme_template.render(scheme=scheme), encoding=self.file_encoding)
-        #     imports.append(import_string_from_class(scheme.class_info))
-        #     alls.append(scheme.class_info.name)
-
-        # schemes_init_template = self.env.get_template("security_schemes_init.py.jinja")
-        # schemes_init.write_text(schemes_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
-
         schemes_base_template = self.env.get_template("security_schemes_base.py.jinja")
         schemes_base.write_text(schemes_base_template.render(), encoding=self.file_encoding)
 
@@ -311,17 +245,12 @@ class Project:  # pylint: disable=too-many-instance-attributes
         module_path = self.package_dir / "__init__.py"
 
         template = self.env.get_template("source.py.jinja")
-        # TODO: Credentials in new parser
-        # imports = self.openapi.credentials.get_imports(prefix=".") | self.openapi.credentials.get_lazy_imports(
-        #     prefix="."
-        # )
         module_path.write_text(
             template.render(
                 source_name=self.source_name,
                 endpoint_collection=self.openapi.endpoints,
-                imports=[],  # TODO: Credentials imports
-                # credentials=self.openapi.credentials if self.openapi.credentials.is_populated else None,
-                credentials=None,
+                imports=self.openapi.credentials.get_imports() if self.openapi.credentials else [],
+                credentials=self.openapi.credentials,
             ),
             encoding=self.file_encoding,
         )
@@ -347,14 +276,8 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     file_encoding: str = "utf-8",
     endpoint_filter: Optional[TEndpointFilter] = None,
 ) -> Project:
-    # data_dict = _get_document(url=url, path=path, timeout=config.http_timeout)
-    # if isinstance(data_dict, GeneratorError):
-    #     return data_dict
     openapi = OpenapiParser(url or path, config=config)
     openapi.parse()
-    # openapi = GeneratorData.from_dict(data_dict, config=config)
-    # if isinstance(openapi, GeneratorError):
-    #     return openapi
     return Project(
         openapi=openapi,
         custom_template_path=custom_template_path,
@@ -392,70 +315,3 @@ def create_new_client(
     )
     project.build()
     return project
-
-
-# def update_existing_client(
-#     *,
-#     url: Optional[str],
-#     path: Optional[Path],
-#     meta: MetaType,
-#     config: Config,
-#     custom_template_path: Optional[Path] = None,
-#     file_encoding: str = "utf-8",
-# ) -> None:
-#     """
-#     Update an existing client library
-
-#     Returns:
-#          A list containing any errors encountered when generating.
-#     """
-#     project = _get_project_for_url_or_path(
-#         url=url,
-#         path=path,
-#         custom_template_path=custom_template_path,
-#         meta=meta,
-#         file_encoding=file_encoding,
-#         config=config,
-#     )
-#     if isinstance(project, GeneratorError):
-#         return [project]
-#     return project.update()
-
-
-# def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
-#     if content_type == "application/json":
-#         try:
-#             return json.loads(data.decode())
-#         except ValueError as err:
-#             return GeneratorError(header=f"Invalid JSON from provided source: {err}")
-#     else:
-#         try:
-#             return yaml.safe_load(data)
-#         except yaml.YAMLError as err:
-#             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
-
-
-# def _get_document(*, url: Optional[str], path: Optional[Path], timeout: int) -> Union[Dict[str, Any], GeneratorError]:
-#     yaml_bytes: bytes
-#     content_type: Optional[str]
-#     if url is not None and path is not None:
-#         return GeneratorError(header="Provide URL or Path, not both.")
-#     if url is not None:
-#         try:
-#             response = httpx.get(url, timeout=timeout)
-#             yaml_bytes = response.content
-#             if "content-type" in response.headers:
-#                 content_type = response.headers["content-type"].split(";")[0]
-#             else:
-#                 content_type = mimetypes.guess_type(url, strict=True)[0]
-
-#         except (httpx.HTTPError, httpcore.NetworkError):
-#             return GeneratorError(header="Could not get OpenAPI document from provided URL")
-#     elif path is not None:
-#         yaml_bytes = path.read_bytes()
-#         content_type = mimetypes.guess_type(path.absolute().as_uri(), strict=True)[0]
-
-#     else:
-#         return GeneratorError(header="No URL or Path provided")
-
-#     return _load_yaml_or_json(yaml_bytes, content_type)

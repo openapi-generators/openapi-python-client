@@ -1,9 +1,8 @@
-from typing import List
+from typing import List, Optional, Set
 
 from dataclasses import dataclass
 
 import openapi_schema_pydantic as osp
-from openapi_python_client.utils import ClassName
 
 from parser.context import OpenapiContext, SecurityScheme
 
@@ -20,10 +19,13 @@ class CredentialsProperty:
             tmpl = "{}"
         return tmpl.format(", ".join(scheme.class_name for scheme in self.schemes))
 
-    def get_imports(self) -> List[str]:
+    def get_imports(self) -> Set[str]:
+        ret: Set[str] = set()
         if len(self.schemes) > 1:
-            return ["from typing import Union"]
-        return []
+            ret.add("from typing import Union")
+        for item in self.schemes:
+            ret.add(f"from .credentials import {item.class_name}")
+        return ret
 
     @classmethod
     def from_requirements(
@@ -34,6 +36,14 @@ class CredentialsProperty:
         for item in requirements:
             key = next(iter(item.keys()))
             scheme = context.get_security_scheme(key)
-            schemes.append(SecurityScheme(scheme, ClassName(key + "Credentials", context.config.field_prefix)))
+            schemes.append(scheme)
 
+        return cls(schemes)
+
+    @classmethod
+    def from_context(cls, context: OpenapiContext) -> Optional["CredentialsProperty"]:
+        """Create property from all credentials. To be used in source"""
+        schemes = list(context.security_schemes.values())
+        if not schemes:
+            return None
         return cls(schemes)

@@ -14,7 +14,7 @@ __source_name__ = "{{ source_name }}"
 @dlt.source(name="{{package_name}}", max_table_nesting=2)
 def {{ source_name }}(
         {% if credentials %}
-        {{ credentials.to_string('dlt.config.value') }},
+        credentials: {{ credentials.type_hint }} = dlt.secrets.value,
         {% endif %}
         base_url: str = dlt.config.value,
 ) -> List[DltResource]:

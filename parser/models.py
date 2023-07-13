@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 TSchemaType = Literal["boolean", "object", "array", "number", "string", "integer"]
 
+MAX_RECURSION_DEPTH = 4
+
 
 @dataclass
 class DataPropertyPath:
@@ -113,7 +115,7 @@ class SchemaWrapper:
         parent_properties: Optional[Sequence["Property"]] = None,
         level: int = 0,
     ) -> Optional["SchemaWrapper"]:
-        if level > 3:
+        if level >= MAX_RECURSION_DEPTH:
             return None
         level += 1
         return cls.from_reference(schema_ref, context, level=level)
@@ -249,7 +251,7 @@ class Property:
         context: "OpenapiContext",
         level: int = 0,
     ) -> "Property":
-        if level >= 3:
+        if level >= MAX_RECURSION_DEPTH:
             return None
         schema = SchemaWrapper.from_reference_guarded(schema_ref, context, level=level)
         return cls(name=name, required=required, schema=schema)
@@ -298,6 +300,8 @@ class SchemaCrawler:
         return None
 
     def crawl(self, schema: SchemaWrapper, path: Tuple[str, ...] = ()) -> None:
+        if schema is None:
+            breakpoint()
         self.all_properties[path] = schema
         if schema.is_object:
             self.object_properties[path] = schema

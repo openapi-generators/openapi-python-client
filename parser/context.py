@@ -91,4 +91,6 @@ class OpenapiContext:
         if name in self.security_schemes:
             return self.security_schemes[name]
         scheme: osp.SecurityScheme = self.spec.components.securitySchemes[name]  # type: ignore[assignment]
-        return SecurityScheme(scheme, ClassName(name + "Credentials", self.config.field_prefix))
+        ret = SecurityScheme(scheme, ClassName(name + "Credentials", self.config.field_prefix))
+        self.security_schemes[name] = ret
+        return ret

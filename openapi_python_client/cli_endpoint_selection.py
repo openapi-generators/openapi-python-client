@@ -31,8 +31,8 @@ def questionary_endpoint_selection(endpoints: EndpointCollection) -> Set[str]:
 
     selected_names = set()
     for ep in selected_endpoints:
-        selected_names.add(ep.name)
+        selected_names.add(str(ep.python_name))
         if ep.transformer and ep.parent:
             # TODO: Generalize traversing ancestry chain
-            selected_names.add(ep.parent.name)
+            selected_names.add(str(ep.parent.python_name))
     return selected_names
