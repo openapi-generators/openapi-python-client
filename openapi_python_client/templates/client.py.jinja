@@ -41,6 +41,7 @@ class Client:
     _cookies: Dict[str, str] = field(factory=dict, kw_only=True)
     _headers: Dict[str, str] = field(factory=dict, kw_only=True)
     _timeout: Optional[httpx.Timeout] = field(default=None, kw_only=True)
+    _retries: Optional[int] = field(default=None, kw_only=True)
     _verify_ssl: Union[str, bool, ssl.SSLContext] = field(default=True, kw_only=True)
     _follow_redirects: bool = field(default=False, kw_only=True)
     _httpx_args: Dict[str, Any] = field(factory=dict, kw_only=True)
@@ -71,6 +72,15 @@ class Client:
         if self._async_client is not None:
             self._async_client.timeout = timeout
         return evolve(self, timeout=timeout)
+
+    def with_retries(self, retries: int) -> "{{ self }}":
+        """Get a new client matching this one with a retry"""
+        transport = httpx.HTTPTransport(retries=retries)
+        if self._client is not None:
+            self._client.transport = transport
+        if self._async_client is not None:
+            self._async_client.transport = transport
+        return evolve(self, transport=transport)
 {% endmacro %}{{ builders("Client") }}
 {% macro httpx_stuff(name, custom_constructor=None) %}
     def set_httpx_client(self, client: httpx.Client) -> "{{ name }}":
