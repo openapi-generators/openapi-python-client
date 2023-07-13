@@ -1,575 +1,287 @@
-import re
-from collections import OrderedDict
-from copy import deepcopy
-from dataclasses import dataclass, field
-from http import HTTPStatus
-from typing import Dict, Iterator, List, Optional, Set, Tuple, Union
+from __future__ import annotations
 
-import attr
+from typing import Optional, Literal, cast, Union, List, Dict, Any, Iterable, Tuple, Set
 
-from .. import schema as oai
-from .. import utils
-from ..config import Config
-from ..schema.openapi_schema_pydantic.security_requirement import SecurityRequirement
-from ..utils import PythonIdentifier, get_content_type
-from .errors import ParseError, PropertyError
-from .properties import (
-    Class,
-    CredentialsProperty,
-    ModelProperty,
-    Parameters,
-    Property,
-    Schemas,
-    SecurityProperty,
-    build_credentials_property,
-    property_from_data,
-)
-from .properties.schemas import parameter_from_reference
-from .responses import Response, response_from_data, DataPropertyPath
+from dataclasses import dataclass
 
-_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
+import openapi_schema_pydantic as osp
+
+from openapi_python_client.parser.context import OpenapiContext
+from openapi_python_client.parser.paths import table_names_from_paths
+from openapi_python_client.parser.models import SchemaWrapper, DataPropertyPath, TSchemaType
+from openapi_python_client.utils import PythonIdentifier
+from openapi_python_client.parser.responses import process_responses
+from openapi_python_client.parser.credentials import CredentialsProperty
+
+TMethod = Literal["get", "post", "put", "patch"]
+TParamIn = Literal["query", "header", "path", "cookie"]
+Tree = Dict[str, Union["Endpoint", "Tree"]]
 
 
-def import_string_from_class(class_: Class, prefix: str = "") -> str:
-    """Create a string which is used to import a reference"""
-    return f"from {prefix}.{class_.module_name} import {class_.name}"
-
-
-def generate_operation_id(*, path: str, method: str) -> str:
-    """Generate an operationId from a path"""
-    clean_path = path.replace("{", "").replace("}", "").replace("/", "_")
-    if clean_path.startswith("_"):
-        clean_path = clean_path[1:]
-    if clean_path.endswith("_"):
-        clean_path = clean_path[:-1]
-    return f"{method}_{clean_path}"
-
-
-models_relative_prefix: str = "..."
-security_relative_prefix: str = "..."
-
-
-# pylint: disable=too-many-instance-attributes
 @dataclass
-class Endpoint:
-    """
-    Describes a single endpoint on the server
-    """
+class TransformerSetting:
+    parent_endpoint: Endpoint
+    parent_property: DataPropertyPath
+    path_parameter: Parameter
 
-    path: str
-    method: str
-    description: Optional[str]
+
+@dataclass
+class Parameter:
     name: str
-    requires_security: bool
-    security: List[SecurityRequirement]
-    tag: str
+    description: Optional[str]
+    schema: SchemaWrapper
+    raw_schema: osp.Parameter
+    required: bool
+    location: TParamIn
     python_name: PythonIdentifier
-    summary: Optional[str] = ""
-    security_schemes: Dict[str, SecurityProperty] = field(default_factory=dict)
-    """Security schemes matching this endpoint's security requirements"""
+    explode: bool
+    style: Optional[str] = None
 
-    relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
-    header_parameters: Dict[str, Property] = field(default_factory=dict)
-    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
-    security_parameters: Dict[str, SecurityProperty] = field(default_factory=dict)
-    credentials_parameter: Optional[CredentialsProperty] = None
-    responses: List[Response] = field(default_factory=list)
-    form_body: Optional[Property] = None
-    json_body: Optional[Property] = None
-    multipart_body: Optional[Property] = None
-    errors: List[ParseError] = field(default_factory=list)
-    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
+    def get_imports(self) -> List[str]:
+        imports = []
+        if self.schema.is_union:
+            imports.append("from typing import Union")
+        return imports
+
+    @property
+    def types(self) -> List[TSchemaType]:
+        return self.schema.types
+
+    @property
+    def template(self) -> str:
+        return self.schema.property_template
+
+    @property
+    def default(self) -> Optional[Any]:
+        return self.schema.default
+
+    @property
+    def nullable(self) -> bool:
+        return self.schema.nullable
+
+    def to_string(self) -> str:
+        type_hint = self.schema.type_hint
+        default = self.default
+        if default is None and not self.required:
+            default = "UNSET"
+        if self.nullable:
+            type_hint = f"Optional[{type_hint}]"
+
+        base_string = f"{self.python_name}: {type_hint}"
+        if default is not None:
+            base_string += f" = {default}"
+        return base_string
+
+    def to_docstring(self) -> str:
+        doc = f"{self.python_name}: {self.description or ''}"
+        if self.default:
+            doc += f" Default: {self.default}."
+        # TODO: Example
+        return doc
+
+    @classmethod
+    def from_reference(cls, param_ref: Union[osp.Reference, osp.Parameter], context: OpenapiContext) -> "Parameter":
+        osp_param = context.parameter_from_reference(param_ref)
+        schema = SchemaWrapper.from_reference(osp_param.param_schema, context)
+        description = param_ref.description or osp_param.description or schema.description
+        location = osp_param.param_in
+        required = osp_param.required
+
+        return cls(
+            name=osp_param.name,
+            description=description,
+            raw_schema=osp_param,
+            schema=schema,
+            location=cast(TParamIn, location),
+            required=required,
+            python_name=PythonIdentifier(osp_param.name, prefix=context.config.field_prefix),
+            explode=osp_param.explode or False,
+            style=osp_param.style,
+        )
+
+
+@dataclass
+class Response:
+    status_code: str
+    description: str
+    raw_schema: osp.Response
+    content_schema: Optional[SchemaWrapper]
+    list_property: Optional[DataPropertyPath] = None
+
+    @property
+    def has_content(self) -> bool:
+        """Whether this is a no-content response"""
+        return bool(self.content_schema)
+        # return bool(self.content_schema and self.content_schema.has_properties)
+
+    @property
+    def list_properties(self) -> Dict[Tuple[str, ...], SchemaWrapper]:
+        """Paths to list properties"""
+        if not self.content_schema:
+            return {}
+        return self.content_schema.crawled_properties.list_properties
+
+    @property
+    def object_properties(self) -> Dict[Tuple[str, ...], SchemaWrapper]:
+        """Paths to object properties"""
+        if not self.content_schema:
+            return {}
+        return self.content_schema.crawled_properties.object_properties
+
+    @classmethod
+    def from_reference(
+        cls, status_code: str, resp_ref: Union[osp.Reference, osp.Response], context: OpenapiContext
+    ) -> "Response":
+        raw_schema = context.response_from_reference(resp_ref)
+        description = resp_ref.description or raw_schema.description
+
+        content_schema: Optional[SchemaWrapper] = None
+        for content_type, media_type in (raw_schema.content or {}).items():
+            # Look for json responses only
+            if (content_type == "application/json" or content_type.endswith("+json")) and media_type.media_type_schema:
+                content_schema = SchemaWrapper.from_reference(media_type.media_type_schema, context)
+
+        return cls(
+            status_code=status_code, description=description, raw_schema=raw_schema, content_schema=content_schema
+        )
+
+
+@dataclass(kw_only=True)
+class Endpoint:
+    method: TMethod
+    responses: dict[str, Response]
+    path: str
+    parameters: Dict[str, Parameter]
+    path_table_name: str
+    """Table name inferred from path"""
+    raw_schema: osp.Operation
+
+    operation_id: str
+
+    python_name: PythonIdentifier
+    credentials: Optional[CredentialsProperty]
 
     parent: Optional["Endpoint"] = None
-    rank = 0  # How many other endpoints root models are referenced
 
-    @staticmethod
-    def parse_request_form_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return form_body and updated schemas"""
-        body_content = body.content
-        form_body = body_content.get("application/x-www-form-urlencoded")
-        if form_body is not None and form_body.media_type_schema is not None:
-            prop, schemas = property_from_data(
-                name="data",
-                required=True,
-                data=form_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(prop, ModelProperty):
-                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
-            return prop, schemas
-        return None, schemas
+    summary: Optional[str] = None
+    description: Optional[str] = None
 
-    @staticmethod
-    def parse_multipart_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return multipart_body"""
-        body_content = body.content
-        multipart_body = body_content.get("multipart/form-data")
-        if multipart_body is not None and multipart_body.media_type_schema is not None:
-            prop, schemas = property_from_data(
-                name="multipart_data",
-                required=True,
-                data=multipart_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(prop, ModelProperty):
-                prop = attr.evolve(prop, is_multipart_body=True)
-                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
-            return prop, schemas
-        return None, schemas
+    path_summary: Optional[str] = None
+    """Summary applying to all methods of the path"""
+    path_description: Optional[str] = None
+    """Description applying to all methods of the path"""
 
-    @staticmethod
-    def parse_request_json_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return json_body"""
-        json_body = None
-        for content_type, schema in body.content.items():
-            content_type = get_content_type(content_type)
+    rank: int = 0
 
-            if content_type == "application/json" or content_type.endswith("+json"):
-                json_body = schema
-                break
+    def get_imports(self) -> List[str]:
+        """Get all import strings required to use this endpoint"""
+        imports: List[str] = []
+        if self.credentials:
+            imports.extend(self.credentials.get_imports())
+        for param in self.parameters.values():
+            imports.extend(param.get_imports())
+        return imports
 
-        if json_body is not None and json_body.media_type_schema is not None:
-            return property_from_data(
-                name="json_body",
-                required=True,
-                data=json_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-        return None, schemas
-
-    @staticmethod
-    def _add_body(
-        *,
-        endpoint: "Endpoint",
-        data: oai.Operation,
-        schemas: Schemas,
-        config: Config,
-    ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
-        """Adds form or JSON body to Endpoint if included in data"""
-        endpoint = deepcopy(endpoint)
-        if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
-            return endpoint, schemas
-
-        form_body, schemas = Endpoint.parse_request_form_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
-        )
-
-        if isinstance(form_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse form body of endpoint {endpoint.name}",
-                    detail=form_body.detail,
-                    data=form_body.data,
-                ),
-                schemas,
-            )
-
-        json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
-        )
-        if isinstance(json_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse JSON body of endpoint {endpoint.name}",
-                    detail=json_body.detail,
-                    data=json_body.data,
-                ),
-                schemas,
-            )
-
-        multipart_body, schemas = Endpoint.parse_multipart_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
-        )
-        if isinstance(multipart_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse multipart body of endpoint {endpoint.name}",
-                    detail=multipart_body.detail,
-                    data=multipart_body.data,
-                ),
-                schemas,
-            )
-
-        # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-        if form_body is not None:
-            endpoint.form_body = form_body
-            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.form_body.get_lazy_imports(prefix=models_relative_prefix))
-        if multipart_body is not None:
-            endpoint.multipart_body = multipart_body
-            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.multipart_body.get_lazy_imports(prefix=models_relative_prefix))
-        if json_body is not None:
-            endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.json_body.get_lazy_imports(prefix=models_relative_prefix))
-
-        return endpoint, schemas
-
-    @staticmethod
-    def _add_security(
-        *, endpoint: "Endpoint", data: oai.Operation, security_schemes: Dict[str, SecurityProperty], config: Config
-    ) -> "Endpoint":
-        endpoint = deepcopy(endpoint)
-        security = data.security or []
-
-        # TODO: Remove dupe matching schemes from constructor, only do this here
-        matching_schemes = {}
-        for item in security:
-            key = next(iter(item.keys()))
-            scheme = security_schemes[key]
-
-            # endpoint.relative_imports.update(scheme.get_imports(prefix=security_relative_prefix))
-            # endpoint.relative_imports.update(scheme.get_lazy_imports(prefix=security_relative_prefix))
-            matching_schemes[key] = scheme
-        endpoint.security_parameters = matching_schemes
-        if not endpoint.security_parameters:
-            return endpoint
-        credentials = build_credentials_property(
-            name="credentials", security_properties=list(endpoint.security_parameters.values()), config=config
-        )
-        endpoint.relative_imports.update(credentials.get_imports(prefix=security_relative_prefix))
-        endpoint.relative_imports.update(credentials.get_lazy_imports(prefix=security_relative_prefix))
-        endpoint.credentials_parameter = credentials
-        return endpoint
-
-    @staticmethod
-    def _add_responses(
-        *, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas, config: Config
-    ) -> Tuple["Endpoint", Schemas]:
-        endpoint = deepcopy(endpoint)
-        for code, response_data in data.items():
-            status_code: HTTPStatus
-            try:
-                status_code = HTTPStatus(int(code))
-            except ValueError:
-                endpoint.errors.append(
-                    ParseError(
-                        detail=(
-                            f"Invalid response status code {code} (not a valid HTTP "
-                            f"status code), response will be ommitted from generated "
-                            f"client"
-                        )
-                    )
-                )
-                continue
-
-            response, schemas = response_from_data(
-                status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name, config=config
-            )
-            if isinstance(response, ParseError):
-                detail_suffix = "" if response.detail is None else f" ({response.detail})"
-                endpoint.errors.append(
-                    ParseError(
-                        detail=(
-                            f"Cannot parse response for status code {status_code}{detail_suffix}, "
-                            f"response will be ommitted from generated client"
-                        ),
-                        data=response.data,
-                    )
-                )
-                continue
-
-            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-            endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
-            endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
-            endpoint.responses.append(response)
-            # dlt_schema = create_dlt_schemas(response.prop)
-        return endpoint, schemas
-
-    # pylint: disable=too-many-return-statements
-    @staticmethod
-    def add_parameters(
-        *,
-        endpoint: "Endpoint",
-        data: Union[oai.Operation, oai.PathItem],
-        schemas: Schemas,
-        parameters: Parameters,
-        config: Config,
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
-        """Process the defined `parameters` for an Endpoint.
-
-        Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
-        parameters should therefore be added __after__ operation parameters.
-
-        Args:
-            endpoint: The endpoint to add parameters to.
-            data: The Operation or PathItem to add parameters from.
-            schemas: The cumulative Schemas of processing so far which should contain details for any references.
-            parameters: The cumulative Parameters of processing so far which should contain details for any references.
-            config: User-provided config for overrides within parameters.
-
-        Returns:
-            `(result, schemas, parameters)` where `result` is either an updated Endpoint containing the parameters or a
-            ParseError describing what went wrong. `schemas` is an updated version of the `schemas` input, adding any
-            new enums or classes. `parameters` is an updated version of the `parameters` input, adding new parameters.
-
-        See Also:
-            - https://swagger.io/docs/specification/describing-parameters/
-            - https://swagger.io/docs/specification/paths-and-operations/
-        """
-        # pylint: disable=too-many-branches, too-many-locals
-        # There isn't much value in breaking down this function further other than to satisfy the linter.
-
-        if data.parameters is None:
-            return endpoint, schemas, parameters
-
-        endpoint = deepcopy(endpoint)
-
-        unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location = {
-            oai.ParameterLocation.QUERY: endpoint.query_parameters,
-            oai.ParameterLocation.PATH: endpoint.path_parameters,
-            oai.ParameterLocation.HEADER: endpoint.header_parameters,
-            oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
-        }
-
-        for param in data.parameters:
-            # Obtain the parameter from the reference or just the parameter itself
-            param_or_error = parameter_from_reference(param=param, parameters=parameters)
-            if isinstance(param_or_error, ParseError):
-                return param_or_error, schemas, parameters
-            param = param_or_error
-
-            if param.param_schema is None:
-                continue
-
-            unique_param = (param.name, param.param_in)
-            if unique_param in unique_parameters:
-                return (
-                    ParseError(
-                        data=data,
-                        detail=(
-                            "Parameters MUST NOT contain duplicates. "
-                            "A unique parameter is defined by a combination of a name and location. "
-                            f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
-                        ),
-                    ),
-                    schemas,
-                    parameters,
-                )
-
-            unique_parameters.add(unique_param)
-
-            prop, new_schemas = property_from_data(
-                name=param.name,
-                required=param.required,
-                data=param.param_schema,
-                schemas=schemas,
-                parent_name=endpoint.name,
-                config=config,
-            )
-
-            if isinstance(prop, ParseError):
-                return (
-                    ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data),
-                    schemas,
-                    parameters,
-                )
-
-            schemas = new_schemas
-
-            location_error = prop.validate_location(param.param_in)
-            if location_error is not None:
-                location_error.data = param
-                return location_error, schemas, parameters
-
-            if prop.name in parameters_by_location[param.param_in]:
-                # This parameter was defined in the Operation, so ignore the PathItem definition
-                continue
-
-            for location, parameters_dict in parameters_by_location.items():
-                if location == param.param_in or prop.name not in parameters_dict:
-                    continue
-                existing_prop: Property = parameters_dict[prop.name]
-                # Existing should be converted too for consistency
-                endpoint.used_python_identifiers.remove(existing_prop.python_name)
-                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
-
-                if existing_prop.python_name in endpoint.used_python_identifiers:
-                    return (
-                        ParseError(
-                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
-                            data=data,
-                        ),
-                        schemas,
-                        parameters,
-                    )
-                endpoint.used_python_identifiers.add(existing_prop.python_name)
-                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
-
-            if prop.python_name in endpoint.used_python_identifiers:
-                return (
-                    ParseError(
-                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
-                    ),
-                    schemas,
-                    parameters,
-                )
-            if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
-                # There is no NULL for query params, so nullable and not required are the same.
-                prop = attr.evolve(prop, required=False, nullable=True)
-
-            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-            endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
-            endpoint.used_python_identifiers.add(prop.python_name)
-            parameters_by_location[param.param_in][prop.name] = prop
-
-        return endpoint, schemas, parameters
-
-    @staticmethod
-    def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
-        """
-        Sorts the path parameters of an `endpoint` so that they match the order declared in `endpoint.path`.
-        Sorts the query parameters so required params come first.
-
-        Args:
-            endpoint: The endpoint to sort the parameters of.
-
-        Returns:
-            Either an updated `endpoint` with sorted path parameters or a `ParseError` if something was wrong with
-                the path parameters and they could not be sorted.
-        """
-        endpoint = deepcopy(endpoint)
-        parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
-        try:
-            sorted_params = sorted(
-                endpoint.path_parameters.values(), key=lambda param: parameters_from_path.index(param.name)
-            )
-            endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
-        except ValueError:
-            pass  # We're going to catch the difference down below
-
-        if parameters_from_path != list(endpoint.path_parameters):
-            return ParseError(
-                detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
-            )
-        endpoint.query_parameters = dict(
-            sorted(endpoint.query_parameters.items(), key=lambda item: item[1].required, reverse=True)
-        )
-        return endpoint
-
-    @staticmethod
-    def from_data(
-        *,
-        data: oai.Operation,
-        path: str,
-        method: str,
-        tag: str,
-        schemas: Schemas,
-        parameters: Parameters,
-        security_schemes: Dict[str, SecurityProperty],
-        config: Config,
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
-        """Construct an endpoint from the OpenAPI data"""
-
-        if data.operationId is None:
-            name = generate_operation_id(path=path, method=method)
-        else:
-            name = data.operationId
-
-        security = data.security or []
-
-        matching_security_schemes = {}
-        for item in security:
-            key = next(iter(item.keys()))
-            matching_security_schemes[key] = security_schemes[key]
-
-        endpoint = Endpoint(
-            path=path,
-            method=method,
-            summary=utils.remove_string_escapes(data.summary) if data.summary else "",
-            description=utils.remove_string_escapes(data.description) if data.description else "",
-            name=name,
-            requires_security=bool(data.security),
-            security=security,
-            security_schemes=security_schemes,
-            tag=tag,
-            python_name=PythonIdentifier(name, prefix=config.field_prefix),
-        )
-
-        result, schemas, parameters = Endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=schemas, parameters=parameters, config=config
-        )
-        if isinstance(result, ParseError):
-            return result, schemas, parameters
-        result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
-        result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
-        if isinstance(result, ParseError):
-            return result, schemas, parameters
-        result = Endpoint._add_security(endpoint=result, data=data, security_schemes=security_schemes, config=config)
-
-        return result, schemas, parameters
-
-    def response_type(self) -> str:
-        """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
-        if len(types) == 0:
-            return "Any"
-        if len(types) == 1:
-            return self.responses[0].prop.get_type_string(quoted=False)
-        return f"Union[{', '.join(types)}]"
-
-    def iter_all_parameters(self) -> Iterator[Property]:
-        """Iterate through all the parameters of this endpoint"""
-        yield from self.path_parameters.values()
-        yield from self.query_parameters.values()
-        yield from self.header_parameters.values()
-        yield from self.cookie_parameters.values()
-        if self.multipart_body:
-            yield self.multipart_body
-        if self.json_body:
-            yield self.json_body
-
-    def list_all_parameters(self) -> List[Property]:
-        """Return a List of all the parameters of this endpoint"""
-        return list(self.iter_all_parameters())
+    def to_docstring(self) -> str:
+        lines = [self.path_summary, self.summary, self.path_description, self.description]
+        return "\n".join(line for line in lines if line)
 
     @property
-    def has_path_parameters(self) -> bool:
-        return bool(self.path_parameters)
+    def path_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "path"}
 
     @property
-    def list_property(self) -> Optional[DataPropertyPath]:
-        resp = self.responses[0]  # TODO: Assuming first response is data
-        return resp.list_property
+    def query_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "query"}
+
+    @property
+    def header_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "header"}
+
+    @property
+    def cookie_parameters(self) -> Dict[str, Parameter]:
+        return {p.name: p for p in self.parameters.values() if p.location == "cookie"}
+
+    @property
+    def list_all_parameters(self) -> List[Parameter]:
+        return list(self.parameters.values())
+
+    @property
+    def required_parameters(self) -> Dict[str, Parameter]:
+        return {name: p for name, p in self.parameters.items() if p.required}
+
+    @property
+    def optional_parameters(self) -> Dict[str, Parameter]:
+        return {name: p for name, p in self.parameters.items() if not p.required}
+
+    @property
+    def request_args_meta(self) -> Dict[str, Dict[str, Dict[str, str]]]:
+        """Mapping of how to translate python arguments to request parameters"""
+        result: Dict[str, Any] = {}
+        for param in self.parameters.values():
+            items = result.setdefault(param.location, {})
+            items[param.python_name] = {
+                "name": param.name,
+                "types": param.types,
+                "explode": param.explode,
+                "style": param.style,
+            }
+        return result
+
+    @property
+    def request_args_meta_str(self) -> str:
+        return repr(self.request_args_meta)
+
+    @property
+    def data_response(self) -> Optional[Response]:
+        if not self.responses:
+            return None
+        keys = list(self.responses.keys())
+        if len(keys) == 1:
+            return self.responses[keys[0]]
+        success_codes = [k for k in keys if k.startswith("20")]
+        if success_codes:
+            return self.responses[success_codes[0]]
+        return self.responses[keys[0]]
+
+    @property
+    def has_content(self) -> bool:
+        resp = self.data_response
+        return bool(resp) and resp.has_content
 
     @property
     def table_name(self) -> str:
-        list_prop = self.list_property
-        if list_prop:
-            return list_prop.prop.class_info.name
-        resp = self.responses[0]
-        prop = resp.prop
-        if isinstance(prop, ModelProperty):
-            return prop.class_info.name
-        return self.name
+        # TODO:
+        # 1. Media schema ref name
+        # 2. Media schema title property
+        # 3. Endpoint title or path component (e.g. first part of path that's not common with all other endpoints)
+        name: Optional[str] = None
+        if self.data_response:
+            if self.list_property:
+                name = self.list_property.prop.name
+            else:
+                name = self.data_response.content_schema.name
+        if name:
+            return name
+        return self.path_table_name
 
     @property
-    def data_json_path(self) -> Optional[str]:
-        list_prop = self.list_property
-        if not list_prop:
-            return ""
-        return ".".join(list_prop.path) or ""
+    def list_property(self) -> Optional[DataPropertyPath]:
+        if not self.data_response:
+            return None
+        return self.data_response.list_property
 
     @property
-    def transformer(self) -> "TransformerSetting":
+    def data_json_path(self) -> str:
+        list_prop = self.list_property
+        return list_prop.json_path if list_prop else ""
+
+    @property
+    def is_transformer(self) -> bool:
+        return not not self.required_parameters
+
+    @property
+    def transformer(self) -> Optional[TransformerSetting]:
         if not self.parent:
             return None
         if not self.parent.list_property:
@@ -579,53 +291,161 @@ class Endpoint:
         if len(self.path_parameters) > 1:
             # TODO: Can't handle endpoints with more than 1 path param for now
             return None
-        last_path = list(self.path_parameters.values())[-1]
-        list_prop = self.parent.list_property.prop
-        transformer_arg = None
-        id_prop = None
-        # TODO: find parent_property should recurse up to 2 levels object and be a json path
-        for prop in (list_prop.required_properties or []) + (list_prop.optional_properties or []):
-            if prop.name == last_path.name:
-                transformer_arg = prop
-                break
-            if prop.name == "id":
-                id_prop = prop
-        if id_prop and not transformer_arg:
-            transformer_arg = id_prop
+        path_param = list(self.path_parameters.values())[-1]
+        list_object = self.parent.list_property.prop
+        transformer_arg = list_object.crawled_properties.find_property_by_name(path_param.name, fallback="id")
         if not transformer_arg:
             return None
-        return TransformerSetting(self.parent, transformer_arg, last_path)
+        return TransformerSetting(
+            parent_endpoint=self.parent, parent_property=transformer_arg, path_parameter=path_param
+        )
 
-    @property
-    def is_root_endpoint(self) -> bool:
-        return bool(self.list_property) and not self.has_path_parameters
+    @classmethod
+    def from_operation(
+        cls,
+        method: TMethod,
+        path: str,
+        operation: osp.Operation,
+        path_table_name: str,
+        path_level_parameters: List[Parameter],
+        path_summary: Optional[str],
+        path_description: Optional[str],
+        context: OpenapiContext,
+    ) -> "Endpoint":
+        # Merge operation params with top level params from path definition
+        all_params = {p.name: p for p in path_level_parameters}
+        all_params.update(
+            {p.name: p for p in (Parameter.from_reference(param, context) for param in operation.parameters or [])}
+        )
+        responses = {
+            status_code: Response.from_reference(status_code, response_ref, context)
+            for status_code, response_ref in operation.responses.items()
+        }
 
-    @property
-    def root_model(self) -> Optional[ModelProperty]:
-        if self.list_property:
-            if isinstance(self.list_property.prop, ModelProperty):
-                return self.list_property.prop
-        if not self.has_json_response:
-            return None
-        resp = self.responses[0]
-        if isinstance(resp.prop, ModelProperty):
-            return resp.prop
-        return None
+        operation_id = operation.operationId or f"{method}_{path}"
 
-    @property
-    def has_json_response(self) -> bool:
-        # non-json responses are ignored by the parser, so just check for response with 2xx status
-        for response in self.responses:
-            if 200 <= response.status_code <= 299:
-                return True
-        return False
+        credentials = CredentialsProperty.from_requirements(operation.security, context) if operation.security else None
 
-    def __hash__(self) -> int:
-        return hash(self.name)
+        return cls(
+            method=method,
+            path=path,
+            raw_schema=operation,
+            responses=responses,
+            parameters=all_params,
+            path_table_name=path_table_name,
+            operation_id=operation_id,
+            python_name=PythonIdentifier(operation_id),
+            summary=operation.summary,
+            description=operation.description,
+            path_summary=path_summary,
+            path_description=path_description,
+            credentials=credentials,
+        )
 
 
 @dataclass
-class TransformerSetting:
-    parent_endpoint: Endpoint
-    parent_property: Property
-    path_parameter: Property
+class EndpointCollection:
+    endpoints: List[Endpoint]
+    endpoint_tree: Tree
+    names_to_render: Optional[Set[str]] = None
+
+    @property
+    def all_endpoints_to_render(self) -> List[Endpoint]:
+        # return [e for e in self.endpoints if e.has_content]
+        return sorted(
+            [
+                e
+                for e in self.endpoints
+                if (not self.names_to_render or e.python_name in self.names_to_render) and e.has_content
+            ],
+            key=lambda e: e.rank,
+            reverse=True,
+        )
+
+    @property
+    def endpoints_by_id(self) -> Dict[str, Endpoint]:
+        """Endpoints by operation ID"""
+        return {ep.operation_id: ep for ep in self.endpoints}
+
+    @property
+    def root_endpoints(self) -> List[Endpoint]:
+        return [e for e in self.all_endpoints_to_render if e.list_property and not e.path_parameters]
+
+    @property
+    def transformer_endpoints(self) -> List[Endpoint]:
+        return [e for e in self.all_endpoints_to_render if e.transformer]
+
+    def set_names_to_render(self, names: Set[str]) -> None:
+        self.names_to_render = names
+
+    @classmethod
+    def from_context(cls, context: OpenapiContext) -> "EndpointCollection":
+        endpoints: list[Endpoint] = []
+        all_paths = list(context.spec.paths)
+        path_table_names = table_names_from_paths(all_paths)
+        for path, path_item in context.spec.paths.items():
+            path_level_params = [Parameter.from_reference(param, context) for param in path_item.parameters or []]
+            for op_name in context.config.include_methods:
+                operation = getattr(path_item, op_name)
+                if not operation:
+                    continue
+                endpoints.append(
+                    Endpoint.from_operation(
+                        cast(TMethod, op_name),
+                        path,
+                        operation,
+                        path_table_names[path],
+                        path_level_params,
+                        path_item.summary,
+                        path_item.description,
+                        context,
+                    )
+                )
+        endpoint_tree = cls.build_endpoint_tree(endpoints)
+        result = cls(endpoints=endpoints, endpoint_tree=endpoint_tree)
+        process_responses(result)
+        for endpoint in result.endpoints:
+            endpoint.parent = result.find_nearest_list_parent(endpoint.path)
+        return result
+
+    def find_immediate_parent(self, path: str) -> Optional[Endpoint]:
+        """Find the parent of the given endpoint.
+
+        Example:
+            `find_immediate_parent('/api/v2/ability/{id}') -> Endpoint<'/api/v2/ability'>`
+        """
+        parts = path.strip("/").split("/")
+        while parts:
+            current_node = self.endpoint_tree
+            parts.pop()
+            for part in parts:
+                current_node = current_node[part]  # type: ignore
+            if "<endpoint>" in current_node:
+                return current_node["<endpoint>"]  # type: ignore
+        return None
+
+    def find_nearest_list_parent(self, path: str) -> Optional[Endpoint]:
+        parts = path.strip("/").split("/")
+        while parts:
+            current_node = self.endpoint_tree
+            parts.pop()
+            for part in parts:
+                current_node = current_node[part]  # type: ignore[assignment]
+            if parent_endpoint := current_node.get("<endpoint>"):
+                if cast(Endpoint, parent_endpoint).list_property:
+                    return cast(Endpoint, parent_endpoint)
+        return None
+
+    @staticmethod
+    def build_endpoint_tree(endpoints: Iterable[Endpoint]) -> Tree:
+        tree: Tree = {}
+        for endpoint in endpoints:
+            path = endpoint.path
+            parts = path.strip("/").split("/")
+            current_node = tree
+            for part in parts:
+                if part not in current_node:
+                    current_node[part] = {}
+                current_node = current_node[part]  # type: ignore
+            current_node["<endpoint>"] = endpoint
+        return tree

@@ -10,11 +10,11 @@ import httpx
 import openapi_schema_pydantic as osp
 import yaml
 
-from parser.context import OpenapiContext
-from parser.endpoints import EndpointCollection
-from parser.config import Config
-from parser.info import OpenApiInfo
-from parser.credentials import CredentialsProperty
+from openapi_python_client.parser.context import OpenapiContext
+from openapi_python_client.parser.endpoints import EndpointCollection
+from openapi_python_client.parser.config import Config
+from openapi_python_client.parser.info import OpenApiInfo
+from openapi_python_client.parser.credentials import CredentialsProperty
 
 
 log = logging.getLogger(__name__)

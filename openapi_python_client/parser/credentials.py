@@ -1,10 +1,9 @@
 from typing import List, Optional, Set
 
 from dataclasses import dataclass
-
 import openapi_schema_pydantic as osp
 
-from parser.context import OpenapiContext, SecurityScheme
+from openapi_python_client.parser.context import OpenapiContext, SecurityScheme
 
 
 @dataclass

@@ -13,7 +13,7 @@ from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, Pack
 
 from openapi_python_client import utils
 from .config import Config
-from parser.openapi_parser import OpenapiParser
+from .parser.openapi_parser import OpenapiParser
 from .typing import TEndpointFilter
 
 

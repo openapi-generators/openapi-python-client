@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 from dlt.common.utils import digest128
 
 import openapi_schema_pydantic as osp
-from parser.types import DataType
+from openapi_python_client.parser.types import DataType
 from openapi_python_client.parser.properties.converter import convert
 
 if TYPE_CHECKING:
-    from parser.context import OpenapiContext
+    from openapi_python_client.parser.context import OpenapiContext
 
 
 TSchemaType = Literal["boolean", "object", "array", "number", "string", "integer"]

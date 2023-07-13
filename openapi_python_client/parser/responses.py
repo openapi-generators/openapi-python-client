@@ -1,122 +1,30 @@
-__all__ = ["Response", "response_from_data"]
-
-from http import HTTPStatus
-from typing import Optional, Tuple, Union, Dict, Sequence, TYPE_CHECKING, Set
-from dataclasses import dataclass
-
-import attr
-
-from .. import Config
-from .. import schema as oai
-from ..utils import PythonIdentifier, count_by_length
-from .errors import ParseError, PropertyError
-from .properties import AnyProperty, Property, Schemas, property_from_data, ModelProperty
-from .traverse_model import traverse_properties
+from __future__ import annotations
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
-    from .endpoint_collection import Endpoints, Endpoint
+    from openapi_python_client.parser.endpoints import EndpointCollection, Endpoint, Response
+
+from openapi_python_client.parser.models import DataPropertyPath
+from openapi_python_client.utils import count_by_length
 
 
-@dataclass
-class DataPropertyPath:
-    """Describes a json path to a property"""
-
-    path: Tuple[str, ...]
-    prop: ModelProperty
-
-    def __str__(self) -> str:
-        return f"DataPropertyPath {self.path}: {self.prop.class_info.name}"
-
-
-@attr.s(auto_attribs=True)
-class Response:
-    """Describes a single response for an endpoint"""
-
-    status_code: HTTPStatus
-    prop: Property
-    source: str
-    list_properties: Dict[Tuple[str, ...], ModelProperty] = attr.ib(factory=dict)
-    """Mapping of json path to model of all array-of-object properties"""
-    model_properties: Dict[Tuple[str, ...], ModelProperty] = attr.ib(factory=dict)
-    """Mapping of json path to model of all model properties referenced in the response"""
-    list_property: Optional[DataPropertyPath] = None
-    """The most likely candidate for data list property in the response"""
-
-
-def _source_by_content_type(content_type: str) -> Optional[str]:
-    known_content_types = {
-        "application/json": "response.json()",
-        "application/octet-stream": "response.content",
-        "text/html": "response.text",
-    }
-    source = known_content_types.get(content_type)
-    if source is None and content_type.endswith("+json"):
-        # Implements https://www.rfc-editor.org/rfc/rfc6838#section-4.2.8 for the +json suffix
-        source = "response.json()"
-    return source
-
-
-def process_responses(schemas: Schemas, endpoints: "Endpoints") -> None:
+def process_responses(endpoint_collection: "EndpointCollection") -> None:
     """Process all responses in schemas"""
-    # First pass identify all list properties
-    for endpoint in endpoints.endpoints_by_name.values():
-        for response in endpoint.responses:
-            # for responses in schemas.responses_by_endpoint.values():
-            #     for response in responses:
-            lists, models = traverse_properties(response.prop)
-            response.list_properties.update(lists)
-            response.model_properties.update(models)
-
-    class_name_to_endpoints: Dict[str, Set["Endpoint"]] = {}
-
-    for endpoint in endpoints.endpoints_by_name.values():
-        for response in endpoint.responses:
-            # for endpoint_name, responses in schemas.responses_by_endpoint.items():
-            #     for response in responses:
-            for prop in response.model_properties.values():
-                items = class_name_to_endpoints.setdefault(prop.class_info.name, set())
-                items.add(endpoints.endpoints_by_name[endpoint.name])
-
-    all_endpoints = list(endpoints.endpoints_by_name.values())
+    all_endpoints = endpoint_collection.all_endpoints_to_render
+    table_ranks: Dict[str, int] = {}
     for endpoint in all_endpoints:
-        resp = endpoint.responses[0]
-        _process_response_list(resp, endpoint, endpoints, class_name_to_endpoints)
-
-    # class_name_root_counts: Dict[str, int] = {}
-    # for class_name, model in schemas.classes_by_name.items():
-    #     for endpoint in all_endpoints:
-    #         root_model = endpoint.root_model
-    #         if not root_model:
-    #             continue
-    #         root_class_name = root_model.class_info.name
-    #         if class_name != root_class_name:
-    #             continue
-    #         count = class_name_root_counts.setdefault(class_name, 0)
-    #         class_name_root_counts[class_name] = count + 1
-
-    all_root_models: Set[str] = set()
+        _process_response_list(endpoint.data_response, endpoint, endpoint_collection)
+        response = endpoint.data_response
+        unique_models = set(t.name for t in response.content_schema.crawled_properties.object_properties.values())
+        table_ranks[endpoint.table_name] = max(table_ranks.get(endpoint.table_name, 0), len(unique_models))
     for endpoint in all_endpoints:
-        root_model = endpoint.root_model
-        if root_model:
-            all_root_models.add(root_model.class_info.name)
-
-    # endpoint_counts = {key: len(value) for key, value in class_name_to_endpoints.items() if key in all_root_models}
-
-    for endpoint in all_endpoints:
-        resp = endpoint.responses[0]
-        models_referenced = set(m.class_info.name for path, m in resp.model_properties.items())
-        root_models = all_root_models.intersection(models_referenced)
-        endpoint.rank = len(root_models)
-
-    # ranks = [(endpoint.path, endpoint.rank) for endpoint in all_endpoints]
-    # ranks_sorted = sorted(ranks, key=lambda x: x[1])
+        endpoint.rank = table_ranks[endpoint.table_name]
 
 
 def _process_response_list(
     response: Response,
-    endpoint: "Endpoint",
-    endpoints: "Endpoints",
-    class_name_to_endpoints: Dict[str, Set["Endpoint"]],
+    endpoint: Endpoint,
+    endpoints: EndpointCollection,
 ) -> None:
     if not response.list_properties:
         return
@@ -137,86 +45,5 @@ def _process_response_list(
         if level_counts[levels] == 1:
             response.list_property = DataPropertyPath(path, prop)
     parent = endpoints.find_immediate_parent(endpoint.path)
-    if parent and not parent.has_path_parameters:
+    if parent and not parent.required_parameters:
         response.list_property = None
-
-
-def empty_response(
-    *, status_code: HTTPStatus, response_name: str, config: Config, description: Optional[str]
-) -> Response:
-    """Return an untyped response, for when no response type is defined"""
-    return Response(
-        status_code=status_code,
-        prop=AnyProperty(
-            name=response_name,
-            default=None,
-            nullable=False,
-            required=True,
-            python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
-            description=description,
-            example=None,
-        ),
-        source="None",
-    )
-
-
-def response_from_data(
-    *,
-    status_code: HTTPStatus,
-    data: Union[oai.Response, oai.Reference],
-    schemas: Schemas,
-    parent_name: str,
-    config: Config,
-) -> Tuple[Union[Response, ParseError], Schemas]:
-    """Generate a Response from the OpenAPI dictionary representation of it"""
-
-    response_name = f"response_{status_code}"
-    if isinstance(data, oai.Reference):
-        return (
-            empty_response(status_code=status_code, response_name=response_name, config=config, description=None),
-            schemas,
-        )
-
-    content = data.content
-    if not content:
-        return (
-            empty_response(
-                status_code=status_code, response_name=response_name, config=config, description=data.description
-            ),
-            schemas,
-        )
-
-    for content_type, media_type in content.items():
-        source = _source_by_content_type(content_type)
-        if source is not None:
-            schema_data = media_type.media_type_schema
-            break
-    else:
-        return ParseError(data=data, detail=f"Unsupported content_type {content}"), schemas
-
-    if schema_data is None:
-        return (
-            empty_response(
-                status_code=status_code, response_name=response_name, config=config, description=data.description
-            ),
-            schemas,
-        )
-
-    prop, schemas = property_from_data(
-        name=response_name,
-        required=True,
-        data=schema_data,
-        schemas=schemas,
-        parent_name=parent_name,
-        config=config,
-    )
-
-    if isinstance(prop, PropertyError):
-        return prop, schemas
-
-    resp = Response(status_code=status_code, prop=prop, source=source)
-    # current = schemas.responses_by_endpoint.get(parent_name, [])
-    # schemas = attr.evolve(
-    #     schemas, responses_by_endpoint={**schemas.responses_by_endpoint, parent_name: current + [resp]}
-    # )
-    return resp, schemas

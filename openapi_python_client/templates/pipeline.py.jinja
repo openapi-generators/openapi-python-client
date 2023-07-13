@@ -4,9 +4,13 @@ from {{ package_name}} import {{ source_name }}
 
 
 if __name__ == "__main__":
-    pipeline = dlt.pipeline(pipeline_name="{{ package_name}}_pipeline", destination='duckdb', dataset_name="{{ dataset_name }}", full_refresh=False, export_schema_path="schemas/export")
+    pipeline = dlt.pipeline(
+        pipeline_name="{{ package_name}}_pipeline",
+        destination='duckdb',
+        dataset_name="{{ dataset_name }}",
+        full_refresh=False,
+        export_schema_path="schemas/export"
+    )
     source = {{ source_name }}()
     info = pipeline.run(source)
     print(info)
-
-

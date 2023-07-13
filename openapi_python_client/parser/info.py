@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import openapi_schema_pydantic as osp
 
-from parser.context import OpenapiContext
+from openapi_python_client.parser.context import OpenapiContext
 
 
 @dataclass
