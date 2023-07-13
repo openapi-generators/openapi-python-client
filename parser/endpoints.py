@@ -64,12 +64,8 @@ class Parameter:
         default = self.default
         if default is None and not self.required:
             default = "UNSET"
-        if self.required and self.nullable:
+        if self.nullable:
             type_hint = f"Optional[{type_hint}]"
-        elif not self.required and self.nullable:
-            type_hint = f"Union[Unset, None, {type_hint}]"
-        else:
-            type_hint = f"Union[Unset, {type_hint}]"
 
         base_string = f"{self.python_name}: {type_hint}"
         if default is not None:

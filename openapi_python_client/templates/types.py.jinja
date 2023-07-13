@@ -1,6 +1,6 @@
 """ Contains some shared types for properties """
 from http import HTTPStatus
-from typing import Any, BinaryIO, Generic, MutableMapping, Optional, Tuple, TypeVar, Literal
+from typing import Any, BinaryIO, Generic, MutableMapping, Optional, Tuple, TypeVar, Literal, TYPE_CHECKING
 from dataclasses import dataclass
 
 import attr
@@ -10,8 +10,10 @@ class Unset:
     def __bool__(self) -> Literal[False]:
         return False
 
-
-UNSET: Unset = Unset()
+if TYPE_CHECKING:
+   UNSET = Any
+else:
+   UNSET: Unset = Unset()
 
 {# Used as `FileProperty._json_type_string` #}
 FileJsonType = Tuple[Optional[str], BinaryIO, Optional[str]]
