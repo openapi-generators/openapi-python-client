@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Literal, cast, Union, List, Dict, Any, Iterable, Tuple
+from typing import Optional, Literal, cast, Union, List, Dict, Any, Iterable, Tuple, Set
 
 from dataclasses import dataclass
 
@@ -10,6 +10,7 @@ from parser.context import OpenapiContext
 from parser.paths import table_names_from_paths
 from parser.models import SchemaWrapper, DataPropertyPath, TSchemaType
 from openapi_python_client.utils import PythonIdentifier
+from openapi_python_client.typing import TEndpointFilter
 from parser.responses import process_responses
 from parser.credentials import CredentialsProperty
 
@@ -111,7 +112,7 @@ class Response:
     @property
     def has_content(self) -> bool:
         """Whether this is a no-content response"""
-        return not not self.content_schema
+        return bool(self.content_schema and self.content_schema.has_properties)
 
     @property
     def list_properties(self) -> Dict[Tuple[str, ...], SchemaWrapper]:
@@ -341,8 +342,9 @@ class Endpoint:
 
 @dataclass
 class EndpointCollection:
-    endpoints: list[Endpoint]
+    endpoints: List[Endpoint]
     endpoint_tree: Tree
+    names_to_render: Optional[Set[str]] = None
 
     @property
     def all_endpoints_to_render(self) -> List[Endpoint]:
@@ -352,6 +354,17 @@ class EndpointCollection:
     def endpoints_by_id(self) -> Dict[str, Endpoint]:
         """Endpoints by operation ID"""
         return {ep.operation_id: ep for ep in self.endpoints}
+
+    @property
+    def root_endpoints(self) -> List[Endpoint]:
+        return [e for e in self.all_endpoints_to_render if e.list_property and not e.path_parameters]
+
+    @property
+    def transformer_endpoints(self) -> List[Endpoint]:
+        return [e for e in self.all_endpoints_to_render if e.transformer]
+
+    def set_names_to_render(self, names: Set[str]) -> None:
+        self.names_to_render = names
 
     @classmethod
     def from_context(cls, context: OpenapiContext) -> "EndpointCollection":

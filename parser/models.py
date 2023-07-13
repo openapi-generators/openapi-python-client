@@ -60,6 +60,10 @@ class SchemaWrapper:
     one_of: List["SchemaWrapper"] = field(default_factory=list)
 
     @property
+    def has_properties(self) -> bool:
+        return bool(self.properties or self.any_of or self.all_of)
+
+    @property
     def all_properties(self) -> List["Property"]:
         props = {p.name: p for p in self.properties}
         for child in self.any_of + self.one_of:

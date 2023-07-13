@@ -29,7 +29,7 @@ class Config(BaseModel):
     package_version_override: Optional[str] = None
     use_path_prefixes_for_title_model_names: bool = True
     post_hooks: List[str] = [
-        "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .",
+        "autoflake -i -r --remove-all-unused-imports --remove-unused-variables .",
         "isort --float-to-top .",
         "black .",
     ]

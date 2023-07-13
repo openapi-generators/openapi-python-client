@@ -1,13 +1,7 @@
+{% from "endpoint_module.py.jinja" import generate_resource %}
 from typing import List
 
 from dlt.extract.source import DltResource
-
-{# Import all resources #}
-{% for collection in endpoint_collections.values() %}
-{% for import_string in collection.imports_from_root %}
-{{ import_string }}
-{% endfor %}
-{% endfor %}
 
 {% for import_string  in imports %}
 {{ import_string }}
@@ -26,8 +20,7 @@ def {{ source_name }}(
 ) -> List[DltResource]:
     # Root list endpoints
     resources = {}
-    {% for collection in endpoint_collections.values() %}
-    {% for endpoint in collection.root_endpoints %}
+    {% for endpoint in endpoint_collection.root_endpoints %}
     resources["{{ endpoint.python_name }}"] = {{ endpoint.python_name }}(
         {% if credentials and endpoint.credentials_parameter %}
         {{ credentials.python_name }} = {{ credentials.python_name }},
@@ -35,11 +28,9 @@ def {{ source_name }}(
         base_url=base_url
     )
     {% endfor %}
-    {% endfor %}
 
     # Transformer endpoints which depend on list endpoints
-    {% for collection in endpoint_collections.values() %}
-    {% for endpoint in collection.transformer_endpoints %}
+    {% for endpoint in endpoint_collection.transformer_endpoints %}
     resources["{{ endpoint.python_name }}"] = resources["{{ endpoint.parent.python_name }}"] | {{ endpoint.python_name }}(
         {% if credentials and endpoint.credentials_parameter %}
         {{ credentials.python_name }} = {{ credentials.python_name }},
@@ -47,6 +38,10 @@ def {{ source_name }}(
         base_url=base_url
     )
     {% endfor %}
-    {% endfor %}
 
     return list(resources.values())
+
+
+{% for endpoint in endpoint_collection.all_endpoints_to_render %}
+{{ generate_resource(endpoint) }}
+{% endfor %}

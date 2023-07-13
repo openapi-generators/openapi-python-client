@@ -150,7 +150,7 @@ def init(
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
-        # endpoint_filter=questionary_endpoint_selection,
+        endpoint_filter=questionary_endpoint_selection,
     )
     # handle_errors(errors, fail_on_warning)
 

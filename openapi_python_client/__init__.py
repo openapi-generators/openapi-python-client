@@ -24,7 +24,7 @@ from .config import Config
 # from .parser.errors import ErrorLevel, GeneratorError
 from parser.openapi_parser import OpenapiParser
 
-# from .typing import TEndpointFilter
+from .typing import TEndpointFilter
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         config: Config,
         custom_template_path: Optional[Path] = None,
         file_encoding: str = "utf-8",
-        # endpoint_filter: Optional[TEndpointFilter] = None,
+        endpoint_filter: Optional[TEndpointFilter] = None,
     ) -> None:
         self.openapi = openapi
         self.meta: MetaType = meta
@@ -118,13 +118,13 @@ class Project:  # pylint: disable=too-many-instance-attributes
             endpoints=self.openapi.endpoints,
         )
         # self.errors: List[GeneratorError] = []
-        # self.endpoint_filter = endpoint_filter
+        self.endpoint_filter = endpoint_filter
 
     def build(self) -> None:
         """Create the project from templates"""
-        # if self.endpoint_filter:
-        #     endpoint_names = self.endpoint_filter(self.openapi.endpoints)
-        #     self.openapi.endpoints.set_names_to_render(endpoint_names)
+        if self.endpoint_filter:
+            endpoint_names = self.endpoint_filter(self.openapi.endpoints)
+            self.openapi.endpoints.set_names_to_render(endpoint_names)
         if self.meta == MetaType.NONE:
             print(f"Generating {self.package_name}")
         else:
@@ -137,7 +137,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         # TODO: Security in parser
         self._build_security()
         self._build_api()
-        # self._build_source()
+        self._build_source()
         self._build_pipeline()
         self._run_post_hooks()
 
@@ -174,7 +174,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         utils_path.write_text(utils_template.render(), encoding=self.file_encoding)
 
         api_helpers_template = self.env.get_template("api_helpers.py.jinja")
-        api_helpers_path = self.package_dir / "utils.py"
+        api_helpers_path = self.package_dir / "api_helpers.py"
         api_helpers_path.write_text(api_helpers_template.render(), encoding=self.file_encoding)
 
     def _build_dlt_config(self) -> None:
@@ -318,7 +318,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         module_path.write_text(
             template.render(
                 source_name=self.source_name,
-                endpoint_collections=self.openapi.endpoints.all_endpoints_to_render,
+                endpoint_collection=self.openapi.endpoints,
                 imports=[],  # TODO: Credentials imports
                 # credentials=self.openapi.credentials if self.openapi.credentials.is_populated else None,
                 credentials=None,
@@ -345,7 +345,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     config: Config,
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
-    # endpoint_filter: Optional[TEndpointFilter] = None,
+    endpoint_filter: Optional[TEndpointFilter] = None,
 ) -> Project:
     # data_dict = _get_document(url=url, path=path, timeout=config.http_timeout)
     # if isinstance(data_dict, GeneratorError):
@@ -361,7 +361,7 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
         meta=meta,
         file_encoding=file_encoding,
         config=config,
-        # endpoint_filter=endpoint_filter,
+        endpoint_filter=endpoint_filter,
     )
 
 
@@ -373,7 +373,7 @@ def create_new_client(
     config: Config = Config(),
     custom_template_path: Optional[Path] = None,
     file_encoding: str = "utf-8",
-    # endpoint_filter: Optional[TEndpointFilter] = None,
+    endpoint_filter: Optional[TEndpointFilter] = None,
 ) -> Project:
     """
     Generate the client library
@@ -388,7 +388,7 @@ def create_new_client(
         meta=meta,
         file_encoding=file_encoding,
         config=config,
-        # endpoint_filter=endpoint_filter,
+        endpoint_filter=endpoint_filter,
     )
     project.build()
     return project

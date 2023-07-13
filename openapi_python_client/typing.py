@@ -1,6 +1,7 @@
-from typing import Callable, Set
+from typing import Callable, Set, TYPE_CHECKING
 
-# from .parser.endpoint_collection import Endpoints
+if TYPE_CHECKING:
+    from parser.endpoints import EndpointCollection
 
 
-# TEndpointFilter = Callable[[Endpoints], Set[str]]
+TEndpointFilter = Callable[["EndpointCollection"], Set[str]]
