@@ -81,8 +81,8 @@ data: Any,
 {% endfor %}
 base_url: str = dlt.config.value,
 {# Security #}
-{% if endpoint.credentials_parameter %}
-{{ endpoint.credentials_parameter.to_string('dlt.secrets.value') }},
+{% if endpoint.credentials %}
+credentials: {{ endpoint.credentials.type_hint }} = dlt.secrets.value,
 {% endif %}
 data_json_path: Optional[str]="{{endpoint.data_json_path}}",
 {% if endpoint.transformer %}
@@ -93,9 +93,6 @@ path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
 {% macro kwargs(endpoint) %}
-{% if endpoint.credentials_parameter %}
-{{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
-{% endif %}
 {% for parameter in endpoint.required_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},    
 {% endfor %}
@@ -105,9 +102,6 @@ path_parameter_name: str="{{ endpoint.transformer.path_parameter.name }}",
 {% endmacro %}
 
 {% macro transformer_kwargs(endpoint) %}
-{% if endpoint.credentials_parameter %}
-{{ endpoint.credentials_parameter.python_name }}={{ endpoint.credentials_parameter.python_name }},
-{% endif %}
 {#{% for parameter in endpoint.required_parameters.values() %} #}
 {#{{ parameter.python_name }}={{ parameter.python_name }},    #]
 {#{% endfor %} #}

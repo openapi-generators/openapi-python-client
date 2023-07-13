@@ -22,8 +22,8 @@ def {{ source_name }}(
     resources = {}
     {% for endpoint in endpoint_collection.root_endpoints %}
     resources["{{ endpoint.python_name }}"] = {{ endpoint.python_name }}(
-        {% if credentials and endpoint.credentials_parameter %}
-        {{ credentials.python_name }} = {{ credentials.python_name }},
+        {% if credentials and endpoint.credentials %}
+        credentials = credentials,
         {% endif %}
         base_url=base_url
     )
@@ -32,8 +32,8 @@ def {{ source_name }}(
     # Transformer endpoints which depend on list endpoints
     {% for endpoint in endpoint_collection.transformer_endpoints %}
     resources["{{ endpoint.python_name }}"] = resources["{{ endpoint.parent.python_name }}"] | {{ endpoint.python_name }}(
-        {% if credentials and endpoint.credentials_parameter %}
-        {{ credentials.python_name }} = {{ credentials.python_name }},
+        {% if credentials and endpoint.credentials %}
+        credentials = credentials,
         {% endif %}
         base_url=base_url
     )

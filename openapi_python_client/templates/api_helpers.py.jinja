@@ -8,6 +8,7 @@ from dlt.common.jsonpath import TJsonPath
 
 from .types import UNSET
 from .utils import extract_nested_data
+from ._base import APICredentials
 
 
 class ParamInfo(TypedDict):
@@ -63,6 +64,7 @@ def fetch_json(
     endpoint_url: str,
     parameters: Dict[str, Any],
     parameter_map: TParameterMap,
+    credentials: Optional[APICredentials] = None,
 ) -> Any:
     # Build absolute URL with path parameters
     # TODO: Path params may need serialized, explode, etc
@@ -72,9 +74,15 @@ def fetch_json(
     }
     abs_url = urljoin(base_url, endpoint_url).format_map(path_params)
 
+    request_args: Dict[str, Any] = {}
+    if credentials:
+        request_args.update(credentials.to_http_params())
+
     query_params = {}
     for python_name, param_info in parameter_map.get("query", {}).items():
         query_params.update(build_query_param(param_info, parameters[python_name]))
+
+    request_args["query"].update(query_params)
 
     # TODO: Header/cookie params
 
@@ -88,6 +96,7 @@ def fetch_list_items(
     parameters: Dict[str, Any],
     parameter_map: TParameterMap,
     data_json_path: Optional[TJsonPath] = None,
+    credentials: Optional[APICredentials] = None,
 ) -> Iterator[Any]:
-    data = fetch_json(base_url, endpoint_url, parameters, parameter_map)
+    data = fetch_json(base_url, endpoint_url, parameters, parameter_map, credentials=credentials)
     yield from extract_nested_data(data, data_json_path)

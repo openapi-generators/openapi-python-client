@@ -38,12 +38,18 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
                 {{ transformer_kwargs(endpoint) }}
                 **child_kwargs
             ),
-            params_meta
+            params_meta,
+            {% if endpoint.credentials %}
+            credentials=credentials
+            {% endif %}
         )
         yield from extract_nested_data(data, data_json_path)
     {% else %}
     yield from fetch_list_items(
-        base_url, endpoint_url, dict({{kwargs(endpoint)}}), params_meta, data_json_path
+        base_url, endpoint_url, dict({{kwargs(endpoint)}}), params_meta, data_json_path,
+        {% if endpoint.credentials %}
+        credentials=credentials
+        {% endif %}
     )
     {% endif %}
 {% endmacro %}

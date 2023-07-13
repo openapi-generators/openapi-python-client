@@ -1,6 +1,6 @@
 from base64 import b64encode
 
-from typing import Literal, TypedDict, Dict, Any, Tuple
+from typing import Literal, TypedDict, Dict, Any, Tuple, Protocol
 
 from dlt.common.configuration.specs.base_configuration import BaseConfiguration, configspec
 
@@ -9,6 +9,11 @@ class CredentialsHttpParams(TypedDict):
     cookies: Dict[str, str]
     params: Dict[str, str]
     headers: Dict[str, str]
+
+
+class APICredentials(Protocol):
+    def to_http_params(self) -> CredentialsHttpParams:
+        pass
 
 
 @configspec
