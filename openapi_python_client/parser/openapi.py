@@ -518,14 +518,23 @@ class Endpoint:
 
         return result, schemas, parameters
 
-    def response_type(self) -> str:
+    def response_type(self, include_errors: bool, include_unexpected: bool) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
-        if len(types) == 0:
-            return "Any"
+        responses = self.responses
+        if not include_errors:
+            responses = [resp for resp in responses if resp.status_code < 400]
+
+        types = {response.prop.get_type_string(quoted=False) for response in responses}
+        if include_unexpected:
+            types.add("None")
+
+        if not types:
+            return "None"  # Function cannot complete without raising exception
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string(quoted=False)
-        return f"Union[{', '.join(types)}]"
+            return next(iter(types))
+        if "Any" in types:
+            return "Any"  # Any includes all other types
+        return f"Union[{', '.join(sorted(types))}]"
 
     def iter_all_parameters(self) -> Iterator[Property]:
         """Iterate through all the parameters of this endpoint"""

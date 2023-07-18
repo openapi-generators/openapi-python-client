@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from io import BytesIO
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import httpx
 
@@ -28,23 +28,21 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[File]:
+def _parse_response(*, response: httpx.Response) -> File:
     if response.status_code == HTTPStatus.OK:
         response_200 = File(payload=BytesIO(response.content))
 
         return response_200
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    response.raise_for_status()
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[File]:
+def _build_response(*, response: httpx.Response) -> Response[File]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(response=response),
     )
 
 
@@ -55,7 +53,8 @@ def sync_detailed(
     """Octet Stream
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -71,17 +70,18 @@ def sync_detailed(
         **kwargs,
     )
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 def sync(
     *,
     client: Client,
-) -> Optional[File]:
+) -> File:
     """Octet Stream
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -100,7 +100,8 @@ async def asyncio_detailed(
     """Octet Stream
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -114,17 +115,18 @@ async def asyncio_detailed(
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.request(**kwargs)
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 async def asyncio(
     *,
     client: Client,
-) -> Optional[File]:
+) -> File:
     """Octet Stream
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

@@ -1,12 +1,11 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict
 
 import httpx
 
 from ... import errors
 from ...client import Client
 from ...models.an_int_enum import AnIntEnum
-from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
 
 
@@ -38,26 +37,20 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Union[Any, HTTPValidationError]]:
+def _parse_response(*, response: httpx.Response) -> Any:
     if response.status_code == HTTPStatus.OK:
-        response_200 = cast(Any, response.json())
+        response_200 = response.json()
         return response_200
-    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
-        response_422 = HTTPValidationError.from_dict(response.json())
-
-        return response_422
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    response.raise_for_status()
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Union[Any, HTTPValidationError]]:
+def _build_response(*, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=_parse_response(response=response),
     )
 
 
@@ -65,18 +58,19 @@ def sync_detailed(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Any]:
     """Int Enum
 
     Args:
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -89,25 +83,26 @@ def sync_detailed(
         **kwargs,
     )
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 def sync(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Any:
     """Int Enum
 
     Args:
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Any
     """
 
     return sync_detailed(
@@ -120,18 +115,19 @@ async def asyncio_detailed(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Any]:
     """Int Enum
 
     Args:
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -142,25 +138,26 @@ async def asyncio_detailed(
     async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
         response = await _client.request(**kwargs)
 
-    return _build_response(client=client, response=response)
+    return _build_response(response=response)
 
 
 async def asyncio(
     *,
     client: Client,
     int_enum: AnIntEnum,
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Any:
     """Int Enum
 
     Args:
         int_enum (AnIntEnum): An enumeration.
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.HTTPStatusError: If the server returns an error status code.
+        errors.UnexpectedStatus: If the server returns an undocumented status code.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Any
     """
 
     return (

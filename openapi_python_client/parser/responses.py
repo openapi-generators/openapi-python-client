@@ -9,7 +9,7 @@ from .. import Config
 from .. import schema as oai
 from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
-from .properties import AnyProperty, Property, Schemas, property_from_data
+from .properties import NoneProperty, Property, Schemas, property_from_data
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -19,6 +19,21 @@ class Response:
     status_code: HTTPStatus
     prop: Property
     source: str
+
+    def get_typed_source(self) -> str:
+        """Get Python statement that parses the response and returns the correct type.
+
+        This might include a type cast if necessary (e.g. if we parse JSON
+        that can only be a string according to the OpenAPI schema)
+        """
+        if self.source == self.prop.get_type_string():
+            # No cast needed e.g. for `None` and `None`.
+            return self.source
+        if self.source == "response.json()" and self.prop.get_type_string() == "Any":
+            # response.json() is often used for untyped responses and already has
+            # the `Any` return type annotation.
+            return self.source
+        return f"cast({self.prop.get_type_string()}, {self.source})"
 
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
@@ -40,7 +55,7 @@ def empty_response(
     """Return an untyped response, for when no response type is defined"""
     return Response(
         status_code=status_code,
-        prop=AnyProperty(
+        prop=NoneProperty(
             name=response_name,
             default=None,
             nullable=False,

@@ -18,6 +18,8 @@ class Client:
             but can be set to False for testing purposes.
         raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
             status code that was not documented in the source OpenAPI document.
+            This can also be set in the client generation config, to get return type annotations that do
+            not include None.
         follow_redirects: Whether or not to follow redirects. Default value is False.
     """
 

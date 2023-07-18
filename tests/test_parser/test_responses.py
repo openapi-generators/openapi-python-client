@@ -7,7 +7,7 @@ from openapi_python_client.parser.properties import AnyProperty, Schemas, String
 MODULE_NAME = "openapi_python_client.parser.responses"
 
 
-def test_response_from_data_no_content(any_property_factory):
+def test_response_from_data_no_content(none_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
     response, schemas = response_from_data(
@@ -20,7 +20,7 @@ def test_response_from_data_no_content(any_property_factory):
 
     assert response == Response(
         status_code=200,
-        prop=any_property_factory(
+        prop=none_property_factory(
             name="response_200",
             default=None,
             nullable=False,
@@ -31,7 +31,7 @@ def test_response_from_data_no_content(any_property_factory):
     )
 
 
-def test_response_from_data_reference(any_property_factory):
+def test_response_from_data_reference(none_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
     response, schemas = response_from_data(
@@ -44,7 +44,7 @@ def test_response_from_data_reference(any_property_factory):
 
     assert response == Response(
         status_code=200,
-        prop=any_property_factory(
+        prop=none_property_factory(
             name="response_200",
             default=None,
             nullable=False,
@@ -65,7 +65,7 @@ def test_response_from_data_unsupported_content_type():
     assert response == ParseError(data=data, detail="Unsupported content_type {'blah': None}")
 
 
-def test_response_from_data_no_content_schema(any_property_factory):
+def test_response_from_data_no_content_schema(none_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
     data = oai.Response.construct(description="", content={"application/json": oai.MediaType.construct()})
@@ -75,7 +75,7 @@ def test_response_from_data_no_content_schema(any_property_factory):
 
     assert response == Response(
         status_code=200,
-        prop=any_property_factory(
+        prop=none_property_factory(
             name="response_200",
             default=None,
             nullable=False,
