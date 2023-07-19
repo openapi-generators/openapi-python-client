@@ -560,7 +560,6 @@ class GeneratorData:
         """Create an OpenAPI from dict"""
         try:
             openapi = oai.OpenAPI.model_validate(data)
-            print("Shouold not reach")
         except ValidationError as err:
             detail = str(err)
             if "swagger" in data:
