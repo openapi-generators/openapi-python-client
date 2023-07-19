@@ -1,9 +1,10 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
+from .header import Header  # pylint: disable=unused-import
 from .parameter import Parameter
 
 # Required to update forward ref after object creation, as this is not imported yet
@@ -36,10 +37,9 @@ class Operation(BaseModel):
     deprecated: bool = False
     security: Optional[List[SecurityRequirement]] = None
     servers: Optional[List[Server]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "tags": ["pet"],
@@ -81,8 +81,9 @@ class Operation(BaseModel):
                     "security": [{"petstore_auth": ["write:pets", "read:pets"]}],
                 }
             ]
-        }
+        },
+    )
 
 
 # PathItem in Callback uses Operation, so we need to update forward refs due to circular dependency
-Operation.update_forward_refs()
+Operation.model_rebuild()

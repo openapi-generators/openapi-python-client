@@ -81,11 +81,11 @@ class TestBuildModelProperty:
         "additional_properties_schema, expected_additional_properties",
         [
             (True, True),
-            (oai.Schema.construct(), True),
+            (oai.Schema.model_construct(), True),
             (None, True),
             (False, False),
             (
-                oai.Schema.construct(type="string"),
+                oai.Schema.model_construct(type="string"),
                 StringProperty(
                     name="AdditionalProperty",
                     required=True,
@@ -101,7 +101,7 @@ class TestBuildModelProperty:
     def test_additional_schemas(self, additional_properties_schema, expected_additional_properties):
         from openapi_python_client.parser.properties import Schemas, build_model_property
 
-        data = oai.Schema.construct(
+        data = oai.Schema.model_construct(
             additionalProperties=additional_properties_schema,
         )
 
@@ -125,11 +125,11 @@ class TestBuildModelProperty:
         nullable = False
         required = True
 
-        data = oai.Schema.construct(
+        data = oai.Schema.model_construct(
             required=["req"],
             title="MyModel",
             properties={
-                "req": oai.Schema.construct(type="string"),
+                "req": oai.Schema.model_construct(type="string"),
                 "opt": oai.Schema(type="string", format="date-time"),
             },
             description="A class called MyModel",
@@ -183,7 +183,7 @@ class TestBuildModelProperty:
     def test_model_name_conflict(self):
         from openapi_python_client.parser.properties import Schemas, build_model_property
 
-        data = oai.Schema.construct()
+        data = oai.Schema.model_construct()
         schemas = Schemas(classes_by_name={"OtherModel": None})
 
         err, new_schemas = build_model_property(
@@ -245,7 +245,7 @@ class TestBuildModelProperty:
 
         data = oai.Schema(
             properties={
-                "bad": oai.Reference.construct(ref="#/components/schema/NotExist"),
+                "bad": oai.Reference.model_construct(ref="#/components/schema/NotExist"),
             },
         )
         result = build_model_property(
@@ -289,11 +289,11 @@ class TestBuildModelProperty:
         nullable = False
         required = True
 
-        data = oai.Schema.construct(
+        data = oai.Schema.model_construct(
             required=["req"],
             title="MyModel",
             properties={
-                "req": oai.Schema.construct(type="string"),
+                "req": oai.Schema.model_construct(type="string"),
                 "opt": oai.Schema(type="string", format="date-time"),
             },
             description="A class called MyModel",
@@ -340,8 +340,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         schemas = Schemas(
             classes_by_reference={
@@ -364,7 +364,7 @@ class TestProcessProperties:
 
         data = oai.Schema(
             properties={
-                "bad": oai.Reference.construct(ref="#/components/schema/NotExist"),
+                "bad": oai.Reference.model_construct(ref="#/components/schema/NotExist"),
             },
         )
 
@@ -376,7 +376,7 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="#/components/schema/NotExist")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/components/schema/NotExist")])
 
         result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots={"root"})
 
@@ -387,7 +387,7 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         roots = {"root"}
-        data = oai.Schema(properties={"test_model_property": oai.Schema.construct(type="object")})
+        data = oai.Schema(properties={"test_model_property": oai.Schema.model_construct(type="object")})
 
         result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots=roots)
 
@@ -397,7 +397,7 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="ThisIsNotGood")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="ThisIsNotGood")])
         schemas = Schemas()
 
         result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
@@ -408,7 +408,7 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="#/First")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/First")])
         schemas = Schemas(
             classes_by_reference={
                 "/First": enum_property_factory(),
@@ -423,7 +423,7 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(allOf=[oai.Reference.construct(ref="#/Unprocessed")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/Unprocessed")])
         schemas = Schemas(
             classes_by_reference={
                 "/Unprocessed": model_property_factory(),
@@ -438,8 +438,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         schemas = Schemas(
             classes_by_reference={
@@ -460,8 +460,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property = enum_property_factory(
             values={"foo": "foo"},
@@ -483,8 +483,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property = enum_property_factory(
             required=False,
@@ -508,8 +508,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property = enum_property_factory(
             values={"foo": 1},
@@ -529,8 +529,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property = enum_property_factory(
             values={"foo": 1},
@@ -550,8 +550,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property1 = enum_property_factory(
             name="an_enum",
@@ -577,8 +577,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property1 = enum_property_factory(
             name="an_enum",
@@ -604,8 +604,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         enum_property1 = enum_property_factory(
             name="an_enum",
@@ -631,8 +631,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         prop = string_property_factory(nullable=True)
         schemas = Schemas(
@@ -662,8 +662,8 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref="#/First"), oai.Reference.construct(ref="#/Second")]
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
         )
         schemas = Schemas(
             classes_by_reference={
@@ -698,13 +698,13 @@ class TestProcessProperties:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
-        data = oai.Schema.construct(
+        data = oai.Schema.model_construct(
             allOf=[
-                oai.Schema.construct(
+                oai.Schema.model_construct(
                     required=["first"],
                     properties={
-                        "first": oai.Schema.construct(type="string"),
-                        "second": oai.Schema.construct(type="string"),
+                        "first": oai.Schema.model_construct(type="string"),
+                        "second": oai.Schema.model_construct(type="string"),
                     },
                 )
             ]

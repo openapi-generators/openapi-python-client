@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .encoding import Encoding
 from .example import Example
@@ -20,11 +20,10 @@ class MediaType(BaseModel):
     example: Optional[Any] = None
     examples: Optional[Dict[str, Union[Example, Reference]]] = None
     encoding: Optional[Dict[str, Encoding]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {
                     "schema": {"$ref": "#/components/schemas/Pet"},
@@ -52,4 +51,5 @@ class MediaType(BaseModel):
                     },
                 }
             ]
-        }
+        },
+    )

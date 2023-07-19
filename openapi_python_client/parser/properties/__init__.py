@@ -730,7 +730,7 @@ def property_from_data(
     parent_name: str,
     config: Config,
     process_properties: bool = True,
-    roots: Set[Union[ReferencePath, utils.ClassName]] = None,
+    roots: Optional[Set[Union[ReferencePath, utils.ClassName]]] = None,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
     Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .oauth_flows import OAuthFlows
 
@@ -27,11 +27,10 @@ class SecurityScheme(BaseModel):
     bearerFormat: Optional[str] = None
     flows: Optional[OAuthFlows] = None
     openIdConnectUrl: Optional[str] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {"type": "http", "scheme": "basic"},
                 {"type": "apiKey", "name": "api_key", "in": "header"},
@@ -46,4 +45,5 @@ class SecurityScheme(BaseModel):
                     },
                 },
             ]
-        }
+        },
+    )

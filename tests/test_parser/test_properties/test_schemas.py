@@ -46,7 +46,7 @@ class TestParameterFromData:
         from openapi_python_client.parser.properties import Parameters
         from openapi_python_client.parser.properties.schemas import parameter_from_data
 
-        ref = Reference.construct(ref="#/components/parameters/a_param")
+        ref = Reference.model_construct(ref="#/components/parameters/a_param")
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(name="a_param", data=ref, parameters=parameters)
         assert param_or_error == ParameterError("Unable to resolve another reference")
@@ -68,7 +68,9 @@ class TestParameterFromData:
         from openapi_python_client.parser.properties.schemas import parameter_from_data
         from openapi_python_client.schema import ParameterLocation, Schema
 
-        param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
+        param = Parameter.model_construct(
+            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
+        )
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(name=param.name, data=param, parameters=parameters)
         assert param_or_error == param
@@ -77,16 +79,16 @@ class TestParameterFromData:
 
 class TestParameterFromReference:
     def test_returns_parameter_if_parameter_provided(self):
-        param = Parameter.construct()
+        param = Parameter.model_construct()
         params = Parameters()
         param_or_error = parameter_from_reference(param=param, parameters=params)
         assert param_or_error == param
 
     def test_errors_out_if_reference_not_in_parameters(self):
-        ref = Reference.construct(ref="#/components/parameters/a_param")
+        ref = Reference.model_construct(ref="#/components/parameters/a_param")
         class_info = Class(name="a_param", module_name="module_name")
-        existing_param = Parameter.construct(name="a_param")
-        param_by_ref = Reference.construct(ref="#/components/parameters/another_param")
+        existing_param = Parameter.model_construct(name="a_param")
+        param_by_ref = Reference.model_construct(ref="#/components/parameters/another_param")
         params = Parameters(
             classes_by_name={class_info.name: existing_param}, classes_by_reference={ref.ref: existing_param}
         )
@@ -96,14 +98,14 @@ class TestParameterFromReference:
         )
 
     def test_returns_reference_from_registry(self):
-        existing_param = Parameter.construct(name="a_param")
+        existing_param = Parameter.model_construct(name="a_param")
         class_info = Class(name="MyParameter", module_name="module_name")
         params = Parameters(
             classes_by_name={class_info.name: existing_param},
             classes_by_reference={"/components/parameters/a_param": existing_param},
         )
 
-        param_by_ref = Reference.construct(ref="#/components/parameters/a_param")
+        param_by_ref = Reference.model_construct(ref="#/components/parameters/a_param")
         param_or_error = parameter_from_reference(param=param_by_ref, parameters=params)
         assert param_or_error == existing_param
 
@@ -114,11 +116,13 @@ class TestUpdateParametersFromData:
         from openapi_python_client.schema import ParameterLocation, Schema
 
         parameters = Parameters()
-        param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
+        param = Parameter.model_construct(
+            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
+        )
         parameter_from_data = mocker.patch(
             f"{MODULE_NAME}.parameter_from_data", side_effect=[(ParameterError(), parameters)]
         )
-        ref_path = Reference.construct(ref="#/components/parameters/a_param")
+        ref_path = Reference.model_construct(ref="#/components/parameters/a_param")
         new_parameters_or_error = update_parameters_with_data(ref_path=ref_path.ref, data=param, parameters=parameters)
 
         parameter_from_data.assert_called_once()
@@ -132,7 +136,9 @@ class TestUpdateParametersFromData:
         from openapi_python_client.schema import ParameterLocation, Schema
 
         parameters = Parameters()
-        param = Parameter.construct(name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.construct())
+        param = Parameter.model_construct(
+            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
+        )
         parameter_from_data = mocker.patch(f"{MODULE_NAME}.parameter_from_data", side_effect=[(param, parameters)])
         ref_path = "#/components/parameters/a_param"
         new_parameters = update_parameters_with_data(ref_path=ref_path, data=param, parameters=parameters)

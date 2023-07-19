@@ -289,7 +289,7 @@ def _get_additional_properties(
     if isinstance(schema_additional, bool):
         return schema_additional, schemas
 
-    if isinstance(schema_additional, oai.Schema) and not any(schema_additional.dict().values()):
+    if isinstance(schema_additional, oai.Schema) and not any(schema_additional.model_dump().values()):
         # An empty schema
         return True, schemas
 
