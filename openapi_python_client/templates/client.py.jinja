@@ -21,6 +21,8 @@ class Client:
         ``timeout``: The maximum amount of a time a request can take. API functions will raise
         httpx.TimeoutException if this is exceeded.
 
+        ``retries``: The maximum amount of retries for the request
+
         ``verify_ssl``: Whether or not to verify the SSL certificate of the API server. This should be True in production,
         but can be set to False for testing purposes.
 
@@ -42,6 +44,7 @@ class Client:
     _headers: Dict[str, str] = field(factory=dict, kw_only=True)
     _timeout: Optional[httpx.Timeout] = field(default=None, kw_only=True)
     _retries: Optional[int] = field(default=None, kw_only=True)
+    _transport: Optional[httpx.HTTPTransport] = field(default=None, kw_only=True)
     _verify_ssl: Union[str, bool, ssl.SSLContext] = field(default=True, kw_only=True)
     _follow_redirects: bool = field(default=False, kw_only=True)
     _httpx_args: Dict[str, Any] = field(factory=dict, kw_only=True)
@@ -75,12 +78,12 @@ class Client:
 
     def with_retries(self, retries: int) -> "{{ self }}":
         """Get a new client matching this one with a retry"""
-        transport = httpx.HTTPTransport(retries=retries)
+        self._transport = httpx.HTTPTransport(retries=retries)
         if self._client is not None:
-            self._client.transport = transport
+            self._client.transport = self._transport
         if self._async_client is not None:
-            self._async_client.transport = transport
-        return evolve(self, transport=transport)
+            self._async_client.transport = self._transport
+        return evolve(self, transport=self._transport)
 {% endmacro %}{{ builders("Client") }}
 {% macro httpx_stuff(name, custom_constructor=None) %}
     def set_httpx_client(self, client: httpx.Client) -> "{{ name }}":
@@ -102,6 +105,7 @@ class Client:
                 cookies=self._cookies,
                 headers=self._headers,
                 timeout=self._timeout,
+                transport=self._transport,
                 verify=self._verify_ssl,
                 follow_redirects=self._follow_redirects,
                 **self._httpx_args,
@@ -136,6 +140,7 @@ class Client:
                 cookies=self._cookies,
                 headers=self._headers,
                 timeout=self._timeout,
+                transport=self._transport,
                 verify=self._verify_ssl,
                 follow_redirects=self._follow_redirects,
                 **self._httpx_args,
