@@ -22,10 +22,11 @@ class Response:
 
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
+    if content_type.startswith("text/"):
+        return "response.text"
     known_content_types = {
         "application/json": "response.json()",
         "application/octet-stream": "response.content",
-        "text/html": "response.text",
     }
     source = known_content_types.get(content_type)
     if source is None and content_type.endswith("+json"):
