@@ -453,7 +453,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with()
+        readme_template.render.assert_called_once_with(poetry=True)
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -486,7 +486,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with()
+        readme_template.render.assert_called_once_with(poetry=False)
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")

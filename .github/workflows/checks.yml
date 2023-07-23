@@ -90,6 +90,11 @@ jobs:
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        httpx_version:
+          - "0.20.0"
+          - ""
     services:
       openapi-test-server:
         image: ghcr.io/openapi-generators/openapi-test-server:0.0.1
@@ -135,9 +140,15 @@ jobs:
           python -m venv .venv
           poetry run python -m pip install --upgrade pip
           poetry install
+      - name: Set httpx version
+        if: matrix.httpx_version != ''
+        run: |
+          cd integration-tests 
+          poetry run pip install httpx==${{ matrix.httpx_version }}
       - name: Run Tests
         run: |
           cd integration-tests
           poetry run pytest
+          poetry run mypy . --strict
   
   

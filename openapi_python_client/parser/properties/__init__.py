@@ -14,7 +14,7 @@ __all__ = [
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
-import attr
+from attrs import define, evolve
 
 from ... import Config
 from ... import schema as oai
@@ -35,7 +35,7 @@ from .schemas import (
 )
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class AnyProperty(Property):
     """A property that can be any type (used for empty schemas)"""
 
@@ -43,7 +43,7 @@ class AnyProperty(Property):
     _json_type_string: ClassVar[str] = "Any"
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class NoneProperty(Property):
     """A property that can only be None"""
 
@@ -51,7 +51,7 @@ class NoneProperty(Property):
     _json_type_string: ClassVar[str] = "None"
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class StringProperty(Property):
     """A property of type str"""
 
@@ -67,7 +67,7 @@ class StringProperty(Property):
     }
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class DateTimeProperty(Property):
     """
     A property of type datetime.datetime
@@ -90,7 +90,7 @@ class DateTimeProperty(Property):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class DateProperty(Property):
     """A property of type datetime.date"""
 
@@ -111,7 +111,7 @@ class DateProperty(Property):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class FileProperty(Property):
     """A property used for uploading files"""
 
@@ -133,7 +133,7 @@ class FileProperty(Property):
         return imports
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class FloatProperty(Property):
     """A property of type float"""
 
@@ -148,7 +148,7 @@ class FloatProperty(Property):
     template: ClassVar[str] = "float_property.py.jinja"
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class IntProperty(Property):
     """A property of type int"""
 
@@ -163,7 +163,7 @@ class IntProperty(Property):
     template: ClassVar[str] = "int_property.py.jinja"
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class BooleanProperty(Property):
     """Property for bool"""
 
@@ -181,7 +181,7 @@ class BooleanProperty(Property):
 InnerProp = TypeVar("InnerProp", bound=Property)
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class ListProperty(Property, Generic[InnerProp]):
     """A property representing a list (array) of other properties"""
 
@@ -218,7 +218,7 @@ class ListProperty(Property, Generic[InnerProp]):
         return lazy_imports
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class UnionProperty(Property):
     """A property representing a Union (anyOf) of other properties"""
 
@@ -434,9 +434,9 @@ def build_enum_property(
     default = get_enum_default(prop, data)
     if isinstance(default, PropertyError):
         return default, schemas
-    prop = attr.evolve(prop, default=default)
+    prop = evolve(prop, default=default)
 
-    schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
+    schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas
 
 
@@ -587,19 +587,19 @@ def _property_from_ref(
     if not existing:
         return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
 
-    prop = attr.evolve(
+    prop = evolve(
         existing,
         required=required,
         name=name,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
     if parent:
-        prop = attr.evolve(prop, nullable=parent.nullable)
+        prop = evolve(prop, nullable=parent.nullable)
         if isinstance(prop, EnumProperty):
             default = get_enum_default(prop, parent)
             if isinstance(default, PropertyError):
                 return default, schemas
-            prop = attr.evolve(prop, default=default)
+            prop = evolve(prop, default=default)
 
     schemas.add_dependencies(ref_path=ref_path, roots=roots)
     return prop, schemas
@@ -730,7 +730,7 @@ def property_from_data(
     parent_name: str,
     config: Config,
     process_properties: bool = True,
-    roots: Set[Union[ReferencePath, utils.ClassName]] = None,
+    roots: Optional[Set[Union[ReferencePath, utils.ClassName]]] = None,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
     Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a
@@ -880,6 +880,7 @@ def build_parameters(
     *,
     components: Dict[str, Union[oai.Reference, oai.Parameter]],
     parameters: Parameters,
+    config: Config,
 ) -> Parameters:
     """Get a list of Parameters from an OpenAPI dict"""
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Parameter]]] = []
@@ -902,7 +903,9 @@ def build_parameters(
             if isinstance(ref_path, ParseError):
                 parameters.errors.append(ParameterError(detail=ref_path.detail, data=data))
                 continue
-            parameters_or_err = update_parameters_with_data(ref_path=ref_path, data=data, parameters=parameters)
+            parameters_or_err = update_parameters_with_data(
+                ref_path=ref_path, data=data, parameters=parameters, config=config
+            )
             if isinstance(parameters_or_err, ParameterError):
                 next_round.append((name, data))
                 errors.append(parameters_or_err)

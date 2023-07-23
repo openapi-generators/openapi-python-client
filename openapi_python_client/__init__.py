@@ -197,7 +197,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         readme = self.project_dir / "README.md"
         readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
-            readme_template.render(),
+            readme_template.render(poetry=self.meta == MetaType.POETRY),
             encoding=self.file_encoding,
         )
 

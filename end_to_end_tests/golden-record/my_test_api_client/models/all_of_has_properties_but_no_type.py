@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define, field
 
 from ..models.all_of_has_properties_but_no_type_type_enum import AllOfHasPropertiesButNoTypeTypeEnum
 from ..types import UNSET, Unset
@@ -8,7 +8,7 @@ from ..types import UNSET, Unset
 T = TypeVar("T", bound="AllOfHasPropertiesButNoType")
 
 
-@attr.s(auto_attribs=True)
+@define
 class AllOfHasPropertiesButNoType:
     """
     Attributes:
@@ -20,7 +20,7 @@ class AllOfHasPropertiesButNoType:
     a_sub_property: Union[Unset, str] = UNSET
     type: Union[Unset, str] = UNSET
     type_enum: Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_sub_property = self.a_sub_property

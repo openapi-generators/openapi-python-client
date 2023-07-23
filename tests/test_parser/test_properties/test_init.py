@@ -1380,7 +1380,8 @@ class TestBuildParameters:
         update_parameters_with_data = mocker.patch(f"{MODULE_NAME}.update_parameters_with_data")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
 
-        result = build_parameters(components=parameters, parameters=Parameters())
+        config = Config()
+        result = build_parameters(components=parameters, parameters=Parameters(), config=Config())
         # Should not even try to parse a path for the Reference
         parse_reference_path.assert_called_once_with("#/components/parameters/defined")
         update_parameters_with_data.assert_called_once_with(
@@ -1389,6 +1390,7 @@ class TestBuildParameters:
             parameters=Parameters(
                 errors=[ParameterError(detail="Reference parameters are not supported.", data=parameters["reference"])]
             ),
+            config=config,
         )
         assert result == update_parameters_with_data.return_value
 
@@ -1402,7 +1404,8 @@ class TestBuildParameters:
             f"{MODULE_NAME}.parse_reference_path", side_effect=[ParameterError(detail="some details"), "a_path"]
         )
 
-        result = build_parameters(components=parameters, parameters=Parameters())
+        config = Config()
+        result = build_parameters(components=parameters, parameters=Parameters(), config=config)
         parse_reference_path.assert_has_calls(
             [
                 call("#/components/parameters/first"),
@@ -1413,6 +1416,7 @@ class TestBuildParameters:
             ref_path="a_path",
             data=parameters["second"],
             parameters=Parameters(errors=[ParameterError(detail="some details", data=parameters["first"])]),
+            config=config,
         )
         assert result == update_parameters_with_data.return_value
 
@@ -1426,7 +1430,8 @@ class TestBuildParameters:
         )
 
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
-        result = build_parameters(components=parameters, parameters=Parameters())
+        config = Config()
+        result = build_parameters(components=parameters, parameters=Parameters(), config=config)
         parse_reference_path.assert_has_calls(
             [
                 call("#/components/parameters/first"),

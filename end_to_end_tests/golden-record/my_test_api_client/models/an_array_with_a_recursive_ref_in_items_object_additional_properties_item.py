@@ -1,15 +1,15 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define, field
 
 T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem")
 
 
-@attr.s(auto_attribs=True)
+@define
 class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     """ """
 
-    additional_properties: Dict[str, List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = attr.ib(
+    additional_properties: Dict[str, List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = field(
         init=False, factory=dict
     )
 

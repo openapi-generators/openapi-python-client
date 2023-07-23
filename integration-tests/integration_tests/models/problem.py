@@ -1,13 +1,13 @@
 from typing import Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define, field
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="Problem")
 
 
-@attr.s(auto_attribs=True)
+@define
 class Problem:
     """
     Attributes:
@@ -17,7 +17,7 @@ class Problem:
 
     parameter_name: Union[Unset, str] = UNSET
     description: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         parameter_name = self.parameter_name

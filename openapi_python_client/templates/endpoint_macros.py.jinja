@@ -3,20 +3,22 @@
 
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters %}
+headers = {}
     {% for parameter in endpoint.header_parameters.values() %}
-        {% set destination = 'headers["' +  parameter.name + '"]' %}
         {% import "property_templates/" + parameter.template as param_template %}
         {% if param_template.transform_header %}
-            {% set statement = param_template.transform_header(parameter, parameter.python_name, destination) %}
+            {% set expression = param_template.transform_header(parameter.python_name) %}
         {% else %}
-            {% set statement = destination + " = " + parameter.python_name %}
+            {% set expression = parameter.python_name %}
         {% endif %}
+        {% set statement = 'headers["' +  parameter.name + '"]' + " = " + expression %}
 {{ guarded_statement(parameter, parameter.python_name, statement) }}
     {% endfor %}
 {% endif %}
 {% endmacro %}
 
 {% macro cookie_params(endpoint) %}
+cookies = {}
 {% if endpoint.cookie_parameters %}
     {% for parameter in endpoint.cookie_parameters.values() %}
         {% if parameter.required %}
@@ -78,17 +80,21 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endmacro %}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
-{% macro arguments(endpoint) %}
+{% macro arguments(endpoint, include_client=True) %}
 {# path parameters #}
 {% for parameter in endpoint.path_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
+{% if include_client or ((endpoint.list_all_parameters() | length) > (endpoint.path_parameters | length)) %}
 *,
+{% endif %}
 {# Proper client based on whether or not the endpoint requires authentication #}
+{% if include_client %}
 {% if endpoint.requires_security %}
 client: AuthenticatedClient,
 {% else %}
-client: Client,
+client: Union[AuthenticatedClient, Client],
+{% endif %}
 {% endif %}
 {# Form data if any #}
 {% if endpoint.form_body %}
@@ -116,11 +122,13 @@ json_body: {{ endpoint.json_body.get_type_string() }},
 {% endmacro %}
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
-{% macro kwargs(endpoint) %}
+{% macro kwargs(endpoint, include_client=True) %}
 {% for parameter in endpoint.path_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
+{% if include_client %}
 client=client,
+{% endif %}
 {% if endpoint.form_body %}
 form_data=form_data,
 {% endif %}
