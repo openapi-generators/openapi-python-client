@@ -1,13 +1,13 @@
 from typing import Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define, field
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPostAdditionalProperty")
 
 
-@attr.s(auto_attribs=True)
+@define
 class BodyUploadFileTestsUploadPostAdditionalProperty:
     """
     Attributes:
@@ -15,7 +15,7 @@ class BodyUploadFileTestsUploadPostAdditionalProperty:
     """
 
     foo: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         foo = self.foo

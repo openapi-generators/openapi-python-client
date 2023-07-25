@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define, field
 
 T = TypeVar("T", bound="PostParametersHeaderResponse200")
 
 
-@attr.s(auto_attribs=True)
+@define
 class PostParametersHeaderResponse200:
     """
     Attributes:
@@ -19,7 +19,7 @@ class PostParametersHeaderResponse200:
     string: str
     number: float
     integer: int
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         boolean = self.boolean

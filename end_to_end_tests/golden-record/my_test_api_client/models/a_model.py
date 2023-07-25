@@ -1,7 +1,7 @@
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define
 from dateutil.parser import isoparse
 
 from ..models.an_all_of_enum import AnAllOfEnum
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="AModel")
 
 
-@attr.s(auto_attribs=True)
+@define
 class AModel:
     """A Model for testing all the ways custom objects can be used
 

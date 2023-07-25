@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Type, TypeVar, cast
 
-import attr
+from attrs import define
 
 T = TypeVar("T", bound="ValidationError")
 
 
-@attr.s(auto_attribs=True)
+@define
 class ValidationError:
     """
     Attributes:

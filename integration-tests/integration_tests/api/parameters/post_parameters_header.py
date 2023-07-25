@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.post_parameters_header_response_200 import PostParametersHeaderResponse200
 from ...models.public_error import PublicError
 from ...types import Response
@@ -12,17 +12,12 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    client: Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
 ) -> Dict[str, Any]:
-    url = "{}/parameters/header".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
+    headers = {}
     headers["Boolean-Header"] = "true" if boolean_header else "false"
 
     headers["String-Header"] = string_header
@@ -33,16 +28,13 @@ def _get_kwargs(
 
     return {
         "method": "post",
-        "url": url,
+        "url": "/parameters/header",
         "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
     }
 
 
 def _parse_response(
-    *, client: Client, response: httpx.Response
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
     if response.status_code == HTTPStatus.OK:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
@@ -59,7 +51,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Client, response: httpx.Response
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -71,7 +63,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     boolean_header: bool,
     string_header: str,
     number_header: float,
@@ -93,15 +85,13 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         boolean_header=boolean_header,
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -110,7 +100,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     boolean_header: bool,
     string_header: str,
     number_header: float,
@@ -142,7 +132,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     boolean_header: bool,
     string_header: str,
     number_header: float,
@@ -164,22 +154,20 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
         boolean_header=boolean_header,
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
 
 async def asyncio(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
     boolean_header: bool,
     string_header: str,
     number_header: float,

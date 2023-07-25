@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define, field
 
 from ..types import UNSET, Unset
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="PublicError")
 
 
-@attr.s(auto_attribs=True)
+@define
 class PublicError:
     """
     Attributes:
@@ -25,7 +25,7 @@ class PublicError:
     extra_parameters: Union[Unset, List[str]] = UNSET
     invalid_parameters: Union[Unset, List["Problem"]] = UNSET
     missing_parameters: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         errors: Union[Unset, List[str]] = UNSET

@@ -3,7 +3,7 @@ from __future__ import annotations
 from itertools import chain
 from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
-import attr
+from attrs import define, evolve
 
 from ... import Config
 from ... import schema as oai
@@ -14,7 +14,7 @@ from .property import Property
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class ModelProperty(Property):
     """A property which refers to another Schema"""
 
@@ -158,15 +158,15 @@ def _merge_properties(first: Property, second: Property) -> Union[Property, Prop
     err = None
 
     if first.__class__ == second.__class__:
-        first = attr.evolve(first, nullable=nullable, required=required)
-        second = attr.evolve(second, nullable=nullable, required=required)
+        first = evolve(first, nullable=nullable, required=required)
+        second = evolve(second, nullable=nullable, required=required)
         if first == second:
             return first
         err = PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
 
     enum_subset = _enum_subset(first, second)
     if enum_subset is not None:
-        return attr.evolve(enum_subset, nullable=nullable, required=required)
+        return evolve(enum_subset, nullable=nullable, required=required)
 
     return err or PropertyError(
         header="Cannot merge properties",
@@ -443,5 +443,5 @@ def build_model_property(
         error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')
         return error, schemas
 
-    schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
+    schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
     return prop, schemas

@@ -1,7 +1,7 @@
 import datetime
 from typing import Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define, field
 from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
@@ -9,7 +9,7 @@ from ..types import UNSET, Unset
 T = TypeVar("T", bound="ModelWithDateTimeProperty")
 
 
-@attr.s(auto_attribs=True)
+@define
 class ModelWithDateTimeProperty:
     """
     Attributes:
@@ -17,7 +17,7 @@ class ModelWithDateTimeProperty:
     """
 
     datetime_: Union[Unset, datetime.datetime] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         datetime_: Union[Unset, str] = UNSET

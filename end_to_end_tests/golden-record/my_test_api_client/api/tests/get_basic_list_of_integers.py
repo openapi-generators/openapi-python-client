@@ -1,33 +1,23 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...types import Response
 
 
-def _get_kwargs(
-    *,
-    client: Client,
-) -> Dict[str, Any]:
-    url = "{}/tests/basic_lists/integers".format(client.base_url)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+def _get_kwargs() -> Dict[str, Any]:
+    pass
 
     return {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/tests/basic_lists/integers",
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[List[int]]:
+def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[List[int]]:
     if response.status_code == HTTPStatus.OK:
         response_200 = cast(List[int], response.json())
 
@@ -38,7 +28,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Lis
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[List[int]]:
+def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[List[int]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -49,7 +39,7 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Lis
 
 def sync_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[List[int]]:
     """Get Basic List Of Integers
 
@@ -63,12 +53,9 @@ def sync_detailed(
         Response[List[int]]
     """
 
-    kwargs = _get_kwargs(
-        client=client,
-    )
+    kwargs = _get_kwargs()
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -77,7 +64,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Optional[List[int]]:
     """Get Basic List Of Integers
 
@@ -98,7 +85,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[List[int]]:
     """Get Basic List Of Integers
 
@@ -112,19 +99,16 @@ async def asyncio_detailed(
         Response[List[int]]
     """
 
-    kwargs = _get_kwargs(
-        client=client,
-    )
+    kwargs = _get_kwargs()
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
 
 async def asyncio(
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Optional[List[int]]:
     """Get Basic List Of Integers
 

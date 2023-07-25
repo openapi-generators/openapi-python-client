@@ -3,7 +3,7 @@ __all__ = ["Response", "response_from_data"]
 from http import HTTPStatus
 from typing import Optional, Tuple, Union
 
-import attr
+from attrs import define
 
 from .. import Config
 from .. import schema as oai
@@ -12,7 +12,7 @@ from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Response:
     """Describes a single response for an endpoint"""
 
