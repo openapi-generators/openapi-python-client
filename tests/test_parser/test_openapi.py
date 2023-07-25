@@ -79,18 +79,11 @@ class TestGeneratorData:
 
         generator_data = GeneratorData.from_dict(in_dict, config=config)
 
-        assert generator_data == GeneratorError(
-            header="Failed to parse OpenAPI document",
-            detail=(
-                "3 validation errors for OpenAPI\n"
-                "info\n"
-                "  field required (type=value_error.missing)\n"
-                "paths\n"
-                "  field required (type=value_error.missing)\n"
-                "openapi\n"
-                "  field required (type=value_error.missing)"
-            ),
-        )
+        assert isinstance(generator_data, GeneratorError)
+        assert generator_data.header == "Failed to parse OpenAPI document"
+        keywords = ["3 validation errors for OpenAPI", "info", "paths", "openapi", "Field required"]
+        assert generator_data.detail and all(keyword in generator_data.detail for keyword in keywords)
+
         Schemas.build.assert_not_called()
         Schemas.assert_not_called()
 
@@ -104,19 +97,17 @@ class TestGeneratorData:
 
         generator_data = GeneratorData.from_dict(in_dict, config=config)
 
-        assert generator_data == GeneratorError(
-            header="Failed to parse OpenAPI document",
-            detail=(
-                "You may be trying to use a Swagger document; this is not supported by this project.\n\n"
-                "3 validation errors for OpenAPI\n"
-                "info\n"
-                "  field required (type=value_error.missing)\n"
-                "paths\n"
-                "  field required (type=value_error.missing)\n"
-                "openapi\n"
-                "  field required (type=value_error.missing)"
-            ),
-        )
+        assert isinstance(generator_data, GeneratorError)
+        assert generator_data.header == "Failed to parse OpenAPI document"
+        keywords = [
+            "You may be trying to use a Swagger document; this is not supported by this project.",
+            "info",
+            "paths",
+            "openapi",
+            "Field required",
+        ]
+        assert generator_data.detail and all(keyword in generator_data.detail for keyword in keywords)
+
         Schemas.build.assert_not_called()
         Schemas.assert_not_called()
 
