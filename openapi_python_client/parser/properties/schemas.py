@@ -140,7 +140,7 @@ class Parameters:
     """Structure for containing all defined, shareable, and reusable parameters"""
 
     classes_by_reference: Dict[ReferencePath, Parameter] = attr.ib(factory=dict)
-    classes_by_name: Dict[ClassName, Parameter] = attr.ib(factory=dict)
+    classes_by_name: Dict[str, Parameter] = attr.ib(factory=dict)
     errors: List[ParseError] = attr.ib(factory=list)
 
 
@@ -167,8 +167,7 @@ def parameter_from_data(
         param_in=data.param_in,
     )
 
-    class_name = ClassName(name, "")
-    parameters = attr.evolve(parameters, classes_by_name={**parameters.classes_by_name, class_name: new_param})
+    parameters = attr.evolve(parameters, classes_by_name={**parameters.classes_by_name, name: new_param})
     return new_param, parameters
 
 
