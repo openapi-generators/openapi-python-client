@@ -67,6 +67,7 @@ def init(
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
     fail_on_warning: bool = False,
+    interactive: bool = True,
 ) -> None:
     """Generate a new OpenAPI Client library"""
     from . import create_new_client
@@ -94,5 +95,5 @@ def init(
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
-        endpoint_filter=questionary_endpoint_selection,
+        endpoint_filter=questionary_endpoint_selection if interactive else None,
     )

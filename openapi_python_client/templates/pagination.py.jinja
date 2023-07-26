@@ -1,0 +1,123 @@
+"""Standard pagination functions to cover most common pagination types.
+The arguments for these functions will be inferred from the OpenAPI spec.
+"""
+
+from typing import Optional, Dict, Any
+
+from urllib.parse import parse_qs, urlparse, urlunparse, urlencode
+
+from dlt.sources.helpers import requests
+from dlt.common.jsonpath import find_values
+
+
+def get_next_page_url_from_offset_page_number(prev_response: requests.Response, offset_param: str) -> Optional[str]:
+    """Get the next page url from the offset parameter.
+
+    This is a common pattern for pagination where the next page url is
+    the same as the current page url but with the offset parameter
+    incremented by the page size.
+
+    Args:
+        prev_response: The response from the current page.
+        offset_param: The name of the offset parameter.
+
+    Returns:
+        The next page url.
+    """
+    parsed_url = urlparse(prev_response.url)
+    query_params: Dict[str, Any] = parse_qs(parsed_url.query)
+    last_offset_raw: str = query_params.get(offset_param, None)  # type: ignore[assignment]
+    if last_offset_raw is None:
+        last_offset_raw = "0"
+    else:
+        last_offset_raw = last_offset_raw[-1]
+    try:
+        last_offset = int(last_offset_raw)
+    except ValueError:
+        last_offset = 0
+
+    offset = last_offset + 1
+    query_params[offset_param] = offset
+
+    parsed_url = parsed_url._replace(query=urlencode(query_params, doseq=True))
+    return urlunparse(parsed_url)
+
+
+def get_next_page_url_from_limit_offset(
+    prev_response: requests.Response, offset_param: str, items_json_path: str
+) -> str:
+    """Get the next page URL using the offset adding the count of items to the previous offset.
+
+    This is a common pattern for pagination where the next page url is
+
+    Args:
+        prev_response: The response from the current page.
+        offset_param: The name of the offset parameter.
+        items_json_path: The path to the items in the response json.
+
+    Returns:
+        The next page url.
+
+    """
+    parsed_url = urlparse(prev_response.url)
+    query_params: Dict[str, Any] = parse_qs(parsed_url.query)
+    last_offset_raw: str = query_params.get(offset_param, None)  # type: ignore[assignment]
+    if last_offset_raw is None:
+        last_offset_raw = "0"
+    else:
+        last_offset_raw = last_offset_raw[-1]
+    try:
+        last_offset = int(last_offset_raw)
+    except ValueError:
+        last_offset = 0
+
+    items = find_values(items_json_path, prev_response.json())
+    offset = last_offset + len(items)
+    query_params[offset_param] = offset
+
+    parsed_url = parsed_url._replace(query=urlencode(query_params, doseq=True))
+    return urlunparse(parsed_url)
+
+
+def get_next_page_url_from_link_header(prev_response: requests.Response) -> Optional[str]:
+    """Get the next page url from the link header in the response.
+
+    This is a common pattern for pagination where the next page url is
+    in the response link.
+
+    Args:
+        prev_response: The response from the current page.
+
+    Returns:
+        The next page url.
+    """
+    links = prev_response.links
+    if "next" in links:
+        return links["next"]["url"]
+    return None
+
+
+def get_next_page_url_from_cursor(
+    prev_response: requests.Response, cursor_param: str, cursor_json_path: str
+) -> Optional[str]:
+    """Get the next page url from the cursor in the response.
+
+    This is a common pattern for pagination where the next page url is
+    in the response cursor.
+
+    Args:
+        prev_response: The response from the current page.
+        cursor_param: The name of the cursor parameter.
+        cursor_json_path: The path to the cursor in the response json.
+
+    Returns:
+        The next page url.
+    """
+    cursor = find_values(cursor_json_path, prev_response.json())
+    if cursor is not None:
+        parsed_url = urlparse(prev_response.url)
+        query_params: Dict[str, Any] = parse_qs(parsed_url.query)
+        query_params[cursor_param] = cursor
+        parsed_url = parsed_url._replace(query=urlencode(query_params, doseq=True))
+        return urlunparse(parsed_url)
+    return None
