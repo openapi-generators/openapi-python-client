@@ -277,7 +277,9 @@ def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
     endpoint_filter: Optional[TEndpointFilter] = None,
 ) -> Project:
     openapi = OpenapiParser(url or path, config=config)
+    log.info("Parse spec")
     openapi.parse()
+    log.info("Parsing completed")
     return Project(
         openapi=openapi,
         custom_template_path=custom_template_path,

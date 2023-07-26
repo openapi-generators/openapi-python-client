@@ -2,9 +2,11 @@ import builtins
 import re
 from email.message import Message
 from keyword import iskeyword
-from typing import Any, List, Sequence, Dict, Iterable
+from typing import Any, List, Sequence, Dict, Iterable, TypeVar
 
 DELIMITERS = r"\. _-"
+
+T = TypeVar("T")
 
 
 class PythonIdentifier(str):
@@ -118,3 +120,7 @@ def count_by_length(items: Iterable[Sequence[Any]]) -> Dict[int, int]:
         result[length] = result.get(length, 0) + 1
 
     return result
+
+
+def unique_list(items: Sequence[T]) -> List[T]:
+    return list({k: None for k in items}.keys())

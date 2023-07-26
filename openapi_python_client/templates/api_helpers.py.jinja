@@ -82,7 +82,8 @@ def fetch_json(
     for python_name, param_info in parameter_map.get("query", {}).items():
         query_params.update(build_query_param(param_info, parameters[python_name]))
 
-    request_args["query"].update(query_params)
+    request_query = request_args.setdefault("query", {})
+    request_query.update(query_params)
 
     # TODO: Header/cookie params
 

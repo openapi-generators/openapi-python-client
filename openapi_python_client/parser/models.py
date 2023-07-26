@@ -8,6 +8,7 @@ from dlt.common.utils import digest128
 import openapi_schema_pydantic as osp
 from openapi_python_client.parser.types import DataType
 from openapi_python_client.parser.properties.converter import convert
+from openapi_python_client.utils import unique_list
 
 if TYPE_CHECKING:
     from openapi_python_client.parser.context import OpenapiContext
@@ -67,6 +68,7 @@ class SchemaWrapper:
 
     @property
     def all_properties(self) -> List["Property"]:
+        """All properties of root model and any/oneOf schemas in union"""
         props = {p.name: p for p in self.properties}
         for child in self.any_of + self.one_of:
             for prop in child.all_properties:
@@ -191,6 +193,8 @@ class SchemaWrapper:
         else:
             # TODO: Fallback on string. Should warn
             schema_types = ["string"]
+        for obj in all_of + one_of + any_of:
+            schema_types.extend(obj.types)
 
         default = schema.default
         # Only do string escaping, other types can go as-is
@@ -207,7 +211,7 @@ class SchemaWrapper:
             all_of=all_of,
             one_of=one_of,
             any_of=any_of,
-            types=cast(List[TSchemaType], schema_types),
+            types=cast(List[TSchemaType], unique_list(schema_types)),
             nullable=nullable,
             array_item=array_item,
             default=default,

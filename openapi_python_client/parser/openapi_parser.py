@@ -8,6 +8,7 @@ import logging
 
 import httpx
 import openapi_schema_pydantic as osp
+from yaml import CSafeLoader
 import yaml
 
 from openapi_python_client.parser.context import OpenapiContext
@@ -31,6 +32,7 @@ class OpenapiParser:
 
     def load_spec_raw(self) -> Dict[str, Any]:
         p = self.spec_file
+        log.info("Load spec %s", p)
         if isinstance(p, Path):
             return _get_document(path=p)
         parsed = urlparse(p)
@@ -57,8 +59,11 @@ class OpenapiParser:
     def parse(self) -> None:
         self.spec_raw = self.load_spec_raw()
         self.context.spec = osp.OpenAPI.parse_obj(self.spec_raw)
+        log.info("Pydantic parse")
         self.info = OpenApiInfo.from_context(self.context)
+        log.info("Parse endpoints")
         self.endpoints = EndpointCollection.from_context(self.context)
+        log.info("Parse credentials")
         self.credentials = CredentialsProperty.from_context(self.context)
 
 
@@ -66,7 +71,7 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Dict[str, An
     if content_type == "application/json":
         return json.loads(data.decode())
     else:
-        return yaml.safe_load(data)
+        return yaml.load(data, CSafeLoader)
 
 
 def _get_document(*, url: Optional[str] = None, path: Optional[Path] = None, timeout: int = 60) -> Dict[str, Any]:

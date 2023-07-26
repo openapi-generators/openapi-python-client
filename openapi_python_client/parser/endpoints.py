@@ -12,6 +12,7 @@ from openapi_python_client.parser.models import SchemaWrapper, DataPropertyPath,
 from openapi_python_client.utils import PythonIdentifier
 from openapi_python_client.parser.responses import process_responses
 from openapi_python_client.parser.credentials import CredentialsProperty
+from openapi_python_client.parser.pagination import Pagination
 
 TMethod = Literal["get", "post", "put", "patch"]
 TParamIn = Literal["query", "header", "path", "cookie"]
@@ -406,6 +407,8 @@ class EndpointCollection:
         process_responses(result)
         for endpoint in result.endpoints:
             endpoint.parent = result.find_nearest_list_parent(endpoint.path)
+        for endpoint in result.root_endpoints:
+            Pagination.from_endpoint(endpoint)
         return result
 
     def find_immediate_parent(self, path: str) -> Optional[Endpoint]:

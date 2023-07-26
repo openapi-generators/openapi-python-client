@@ -41,6 +41,8 @@ def _process_response_list(
 
     # If there is only one list property 1 or 2 levels down, this is the list
     for path, prop in props_first_levels:
+        if not prop.is_object:  # Only looking for object lists
+            continue
         levels = len(path)
         if level_counts[levels] == 1:
             response.list_property = DataPropertyPath(path, prop)
