@@ -10,12 +10,13 @@ from dlt.sources.helpers import requests
 from dlt.common.jsonpath import find_values
 
 
-def get_next_page_url_from_offset_page_number(prev_response: requests.Response, offset_param: str) -> Optional[str]:
+def get_next_page_url_from_offset_page_number(
+    prev_response: requests.Response, offset_param: str, **kwargs: Any
+) -> Optional[str]:
     """Get the next page url from the offset parameter.
 
-    This is a common pattern for pagination where the next page url is
-    the same as the current page url but with the offset parameter
-    incremented by the page size.
+    We get the last offset from the previous response and increment it by 1
+    to construct the new URL.
 
     Args:
         prev_response: The response from the current page.
@@ -44,11 +45,12 @@ def get_next_page_url_from_offset_page_number(prev_response: requests.Response, 
 
 
 def get_next_page_url_from_limit_offset(
-    prev_response: requests.Response, offset_param: str, items_json_path: str
+    prev_response: requests.Response, offset_param: str, items_json_path: str, **kwargs: Any
 ) -> str:
     """Get the next page URL using the offset adding the count of items to the previous offset.
 
-    This is a common pattern for pagination where the next page url is
+    We get the last offset from the previous response and increment it by the
+    number of items in the response to construct the new URL.
 
     Args:
         prev_response: The response from the current page.
@@ -79,17 +81,16 @@ def get_next_page_url_from_limit_offset(
     return urlunparse(parsed_url)
 
 
-def get_next_page_url_from_link_header(prev_response: requests.Response) -> Optional[str]:
-    """Get the next page url from the link header in the response.
+def get_next_page_url_from_link_header(prev_response: requests.Response, **kwargs: Any) -> Optional[str]:
+    """Get the next page url from the `link` header in the response.
 
-    This is a common pattern for pagination where the next page url is
-    in the response link.
+    We get the absolute next page URL from the `rel="next"` value in response's `link` header.
 
     Args:
         prev_response: The response from the current page.
 
     Returns:
-        The next page url.
+        The next page url or `None` if no next URL is found.
     """
     links = prev_response.links
     if "next" in links:
@@ -98,12 +99,12 @@ def get_next_page_url_from_link_header(prev_response: requests.Response) -> Opti
 
 
 def get_next_page_url_from_cursor(
-    prev_response: requests.Response, cursor_param: str, cursor_json_path: str
+    prev_response: requests.Response, cursor_param: str, cursor_json_path: str, **kwargs: Any
 ) -> Optional[str]:
-    """Get the next page url from the cursor in the response.
+    """Build the next page url from the cursor in the response.
 
-    This is a common pattern for pagination where the next page url is
-    in the response cursor.
+    We get the cursor value for the next page from response property at
+    the given `cursor_json_path` and use it to replace the `cursor_param` used in the previous URL.
 
     Args:
         prev_response: The response from the current page.
@@ -111,13 +112,34 @@ def get_next_page_url_from_cursor(
         cursor_json_path: The path to the cursor in the response json.
 
     Returns:
-        The next page url.
+        The next page url or `None` if cursor is nout found in response.
     """
     cursor = find_values(cursor_json_path, prev_response.json())
-    if cursor is not None:
+    if cursor:
         parsed_url = urlparse(prev_response.url)
         query_params: Dict[str, Any] = parse_qs(parsed_url.query)
-        query_params[cursor_param] = cursor
+        query_params[cursor_param] = cursor[-1]
         parsed_url = parsed_url._replace(query=urlencode(query_params, doseq=True))
         return urlunparse(parsed_url)
+    return None
+
+
+def get_next_page_url_from_json(
+    prev_response: requests.Response, next_page_json_path: str, **kwargs: Any
+) -> Optional[str]:
+    """Get the complete page url from a property in the response json.
+
+    The response may for example contain a `next_page` or similar property.
+    The exact property path is given by `next_page_json_path`.
+
+    Args:
+        prev_response: The response from the current page.
+        next_page_json_path: The path to the next page url in the response json.
+
+    Returns:
+        The next page url or `None` if no next page url is found.
+    """
+    next_page = find_values(next_page_json_path, prev_response.json())
+    if next_page:
+        return next_page[-1]
     return None
