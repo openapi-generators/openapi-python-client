@@ -25,7 +25,7 @@ class Components(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
-    schemas: Optional[Dict[str, Union[Reference, Schema]]] = None
+    schemas: Optional[Dict[str, Union[Schema, Reference]]] = None
     responses: Optional[Dict[str, Union[Response, Reference]]] = None
     parameters: Optional[Dict[str, Union[Parameter, Reference]]] = None
     examples: Optional[Dict[str, Union[Example, Reference]]] = None

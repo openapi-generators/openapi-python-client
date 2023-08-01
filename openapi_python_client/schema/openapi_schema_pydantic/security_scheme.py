@@ -22,7 +22,7 @@ class SecurityScheme(BaseModel):
     type: str
     description: Optional[str] = None
     name: Optional[str] = None
-    security_scheme_in: Optional[str] = Field(alias="in")
+    security_scheme_in: Optional[str] = Field(default=None, alias="in")
     scheme: Optional[str] = None
     bearerFormat: Optional[str] = None
     flows: Optional[OAuthFlows] = None
