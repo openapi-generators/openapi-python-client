@@ -1,6 +1,6 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Report a bug
+about: Missing OpenAPI functionality are feature requests, not bugs!
 title: ''
 labels: bug
 assignees: ''
@@ -8,20 +8,10 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+A clear and concise description of what the bug is. If this used to work, when did it stop working?
 
 **OpenAPI Spec File**
-A link to your openapi.json which produces this issue.
+A link to an OpenAPI document which produces this issue. Ideally, write a minimal reproduction only containing the problematic pieces.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. macOS 10.15.1]
