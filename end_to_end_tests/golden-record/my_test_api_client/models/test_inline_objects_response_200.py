@@ -1,13 +1,13 @@
 from typing import Any, Dict, Type, TypeVar, Union
 
-from attrs import define
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TestInlineObjectsResponse200")
 
 
-@define
+@_attrs_define
 class TestInlineObjectsResponse200:
     """
     Attributes:

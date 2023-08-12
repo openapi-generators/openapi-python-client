@@ -1,14 +1,15 @@
 from io import BytesIO
 from typing import Any, Dict, List, Type, TypeVar, Union
 
-from attrs import define, field
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 from ..types import UNSET, File, Unset
 
 T = TypeVar("T", bound="PostBodyMultipartMultipartData")
 
 
-@define
+@_attrs_define
 class PostBodyMultipartMultipartData:
     """
     Attributes:
@@ -21,7 +22,7 @@ class PostBodyMultipartMultipartData:
     a_string: str
     file: File
     description: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = field(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_string = self.a_string

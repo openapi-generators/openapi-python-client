@@ -1,17 +1,18 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-from attrs import define, field
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 from ..models.an_enum import AnEnum
 
 T = TypeVar("T", bound="ModelWithAdditionalPropertiesRefed")
 
 
-@define
+@_attrs_define
 class ModelWithAdditionalPropertiesRefed:
     """ """
 
-    additional_properties: Dict[str, AnEnum] = field(init=False, factory=dict)
+    additional_properties: Dict[str, AnEnum] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         field_dict: Dict[str, Any] = {}
