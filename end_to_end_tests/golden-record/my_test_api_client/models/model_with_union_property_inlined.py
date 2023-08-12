@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
 
-from attrs import define
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 
 
-@define
+@_attrs_define
 class ModelWithUnionPropertyInlined:
     """
     Attributes:
