@@ -18,8 +18,8 @@ class Header(Parameter):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject
     """
 
-    name: str = Field(default="", Literal=True)
-    param_in: ParameterLocation = Field(default=ParameterLocation.HEADER, Literal=True, alias="in")
+    name: str = Field(default="")
+    param_in: ParameterLocation = Field(default=ParameterLocation.HEADER, alias="in")
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,
