@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .parameter import Parameter
 from .reference import Reference
@@ -32,11 +32,10 @@ class PathItem(BaseModel):
     trace: Optional["Operation"] = None
     servers: Optional[List[Server]] = None
     parameters: Optional[List[Union[Parameter, Reference]]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {
                     "get": {
@@ -68,10 +67,11 @@ class PathItem(BaseModel):
                     ],
                 }
             ]
-        }
+        },
+    )
 
 
 # Operation uses PathItem via Callback, so we need late import and to update forward refs due to circular dependency
 from .operation import Operation  # pylint: disable=wrong-import-position unused-import
 
-PathItem.update_forward_refs()
+PathItem.model_rebuild()

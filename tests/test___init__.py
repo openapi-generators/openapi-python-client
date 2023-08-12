@@ -7,7 +7,7 @@ from pytest_mock import MockFixture
 
 from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
-default_http_timeout = Config.schema()["properties"]["http_timeout"]["default"]
+default_http_timeout = Config.model_json_schema()["properties"]["http_timeout"]["default"]
 
 
 def test__get_project_for_url_or_path(mocker):

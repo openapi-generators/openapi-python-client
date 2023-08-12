@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class XML(BaseModel):
@@ -21,12 +21,12 @@ class XML(BaseModel):
     prefix: Optional[str] = None
     attribute: bool = False
     wrapped: bool = False
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {"namespace": "http://example.com/schema/sample", "prefix": "sample"},
                 {"name": "aliens", "wrapped": True},
             ]
-        }
+        },
+    )

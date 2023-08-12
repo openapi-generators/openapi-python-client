@@ -30,7 +30,7 @@ class TestGeneratorData:
         endpoints_collections_by_tag = mocker.MagicMock()
         EndpointCollection.from_data.return_value = (endpoints_collections_by_tag, schemas, parameters)
         OpenAPI = mocker.patch(f"{MODULE_NAME}.oai.OpenAPI")
-        openapi = OpenAPI.parse_obj.return_value
+        openapi = OpenAPI.model_validate.return_value
         openapi.openapi = mocker.MagicMock(major=3)
         config = mocker.MagicMock()
         in_dict = mocker.MagicMock()
@@ -39,7 +39,7 @@ class TestGeneratorData:
 
         generator_data = GeneratorData.from_dict(in_dict, config=config)
 
-        OpenAPI.parse_obj.assert_called_once_with(in_dict)
+        OpenAPI.model_validate.assert_called_once_with(in_dict)
         build_schemas.assert_called_once_with(components=openapi.components.schemas, config=config, schemas=Schemas())
         build_parameters.assert_called_once_with(
             components=openapi.components.parameters,
@@ -80,18 +80,11 @@ class TestGeneratorData:
 
         generator_data = GeneratorData.from_dict(in_dict, config=config)
 
-        assert generator_data == GeneratorError(
-            header="Failed to parse OpenAPI document",
-            detail=(
-                "3 validation errors for OpenAPI\n"
-                "info\n"
-                "  field required (type=value_error.missing)\n"
-                "paths\n"
-                "  field required (type=value_error.missing)\n"
-                "openapi\n"
-                "  field required (type=value_error.missing)"
-            ),
-        )
+        assert isinstance(generator_data, GeneratorError)
+        assert generator_data.header == "Failed to parse OpenAPI document"
+        keywords = ["3 validation errors for OpenAPI", "info", "paths", "openapi", "Field required"]
+        assert generator_data.detail and all(keyword in generator_data.detail for keyword in keywords)
+
         Schemas.build.assert_not_called()
         Schemas.assert_not_called()
 
@@ -105,19 +98,17 @@ class TestGeneratorData:
 
         generator_data = GeneratorData.from_dict(in_dict, config=config)
 
-        assert generator_data == GeneratorError(
-            header="Failed to parse OpenAPI document",
-            detail=(
-                "You may be trying to use a Swagger document; this is not supported by this project.\n\n"
-                "3 validation errors for OpenAPI\n"
-                "info\n"
-                "  field required (type=value_error.missing)\n"
-                "paths\n"
-                "  field required (type=value_error.missing)\n"
-                "openapi\n"
-                "  field required (type=value_error.missing)"
-            ),
-        )
+        assert isinstance(generator_data, GeneratorError)
+        assert generator_data.header == "Failed to parse OpenAPI document"
+        keywords = [
+            "You may be trying to use a Swagger document; this is not supported by this project.",
+            "info",
+            "paths",
+            "openapi",
+            "Field required",
+        ]
+        assert generator_data.detail and all(keyword in generator_data.detail for keyword in keywords)
+
         Schemas.build.assert_not_called()
         Schemas.assert_not_called()
 
@@ -139,9 +130,9 @@ class TestEndpoint:
     def test_parse_request_form_body(self, mocker, model_property_factory):
         from openapi_python_client.parser.properties import Class
 
-        schema = oai.Reference.construct(ref=mocker.MagicMock())
-        body = oai.RequestBody.construct(
-            content={"application/x-www-form-urlencoded": oai.MediaType.construct(media_type_schema=schema)}
+        schema = oai.Reference.model_construct(ref=mocker.MagicMock())
+        body = oai.RequestBody.model_construct(
+            content={"application/x-www-form-urlencoded": oai.MediaType.model_construct(media_type_schema=schema)}
         )
         class_info = Class(name="class_name", module_name="module_name")
         prop_before = model_property_factory(class_info=class_info)
@@ -163,7 +154,7 @@ class TestEndpoint:
         assert result == (prop_after, schemas_after)
 
     def test_parse_request_form_body_no_data(self):
-        body = oai.RequestBody.construct(content={})
+        body = oai.RequestBody.model_construct(content={})
         config = MagicMock()
         schemas = MagicMock()
 
@@ -181,8 +172,8 @@ class TestEndpoint:
         prop_before = model_property_factory(class_info=class_info, is_multipart_body=False)
 
         schema = mocker.MagicMock()
-        body = oai.RequestBody.construct(
-            content={"multipart/form-data": oai.MediaType.construct(media_type_schema=schema)}
+        body = oai.RequestBody.model_construct(
+            content={"multipart/form-data": oai.MediaType.model_construct(media_type_schema=schema)}
         )
         schemas_before = Schemas()
         config = MagicMock()
@@ -213,8 +204,8 @@ class TestEndpoint:
         schemas_before = Schemas(classes_by_name={class_info.name: prop_before})
 
         schema = mocker.MagicMock()
-        body = oai.RequestBody.construct(
-            content={"multipart/form-data": oai.MediaType.construct(media_type_schema=schema)}
+        body = oai.RequestBody.model_construct(
+            content={"multipart/form-data": oai.MediaType.model_construct(media_type_schema=schema)}
         )
         config = MagicMock()
         property_from_data = mocker.patch(
@@ -238,7 +229,7 @@ class TestEndpoint:
     def test_parse_multipart_body_no_data(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
-        body = oai.RequestBody.construct(content={})
+        body = oai.RequestBody.model_construct(content={})
         schemas = Schemas()
 
         prop, schemas = Endpoint.parse_multipart_body(
@@ -260,7 +251,9 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         schema = mocker.MagicMock()
-        body = oai.RequestBody.construct(content={content_type: oai.MediaType.construct(media_type_schema=schema)})
+        body = oai.RequestBody.model_construct(
+            content={content_type: oai.MediaType.model_construct(media_type_schema=schema)}
+        )
         property_from_data = mocker.patch(f"{MODULE_NAME}.property_from_data")
         schemas = Schemas()
         config = MagicMock()
@@ -275,7 +268,7 @@ class TestEndpoint:
     def test_parse_request_json_body_no_data(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
-        body = oai.RequestBody.construct(content={})
+        body = oai.RequestBody.model_construct(content={})
         schemas = Schemas()
 
         result = Endpoint.parse_request_json_body(body=body, schemas=schemas, parent_name="parent", config=MagicMock())
@@ -289,7 +282,7 @@ class TestEndpoint:
         endpoint = self.make_endpoint()
         schemas = Schemas()
 
-        Endpoint._add_body(endpoint=endpoint, data=oai.Operation.construct(), schemas=schemas, config=MagicMock())
+        Endpoint._add_body(endpoint=endpoint, data=oai.Operation.model_construct(), schemas=schemas, config=MagicMock())
 
         parse_request_form_body.assert_not_called()
 
@@ -306,7 +299,7 @@ class TestEndpoint:
 
         result = Endpoint._add_body(
             endpoint=endpoint,
-            data=oai.Operation.construct(requestBody=request_body),
+            data=oai.Operation.model_construct(requestBody=request_body),
             schemas=schemas,
             config=MagicMock(),
         )
@@ -327,13 +320,15 @@ class TestEndpoint:
             errors=[ParseError(detail="existing error")],
         )
         endpoint = self.make_endpoint()
-        bad_schema = oai.Schema.construct(type=oai.DataType.ARRAY)
+        bad_schema = oai.Schema.model_construct(type=oai.DataType.ARRAY)
 
         result = Endpoint._add_body(
             endpoint=endpoint,
-            data=oai.Operation.construct(
-                requestBody=oai.RequestBody.construct(
-                    content={"application/x-www-form-urlencoded": oai.MediaType.construct(media_type_schema=bad_schema)}
+            data=oai.Operation.model_construct(
+                requestBody=oai.RequestBody.model_construct(
+                    content={
+                        "application/x-www-form-urlencoded": oai.MediaType.model_construct(media_type_schema=bad_schema)
+                    }
                 )
             ),
             schemas=schemas,
@@ -363,7 +358,7 @@ class TestEndpoint:
 
         result = Endpoint._add_body(
             endpoint=endpoint,
-            data=oai.Operation.construct(requestBody=request_body),
+            data=oai.Operation.model_construct(requestBody=request_body),
             schemas=schemas,
             config=MagicMock(),
         )
@@ -413,7 +408,7 @@ class TestEndpoint:
 
         (endpoint, response_schemas) = Endpoint._add_body(
             endpoint=endpoint,
-            data=oai.Operation.construct(requestBody=request_body),
+            data=oai.Operation.model_construct(requestBody=request_body),
             schemas=initial_schemas,
             config=config,
         )
@@ -554,7 +549,11 @@ class TestEndpoint:
 
         # Just checking there's no exception here
         assert Endpoint.add_parameters(
-            endpoint=endpoint, data=oai.Operation.construct(), schemas=schemas, parameters=parameters, config=config
+            endpoint=endpoint,
+            data=oai.Operation.model_construct(),
+            schemas=schemas,
+            parameters=parameters,
+            config=config,
         ) == (endpoint, schemas, parameters)
 
     def test_add_parameters_parse_error(self, mocker):
@@ -566,12 +565,14 @@ class TestEndpoint:
         parse_error = ParseError(data=mocker.MagicMock())
         property_schemas = mocker.MagicMock()
         mocker.patch(f"{MODULE_NAME}.property_from_data", return_value=(parse_error, property_schemas))
-        param = oai.Parameter.construct(name="test", required=True, param_schema=mocker.MagicMock(), param_in="cookie")
+        param = oai.Parameter.model_construct(
+            name="test", required=True, param_schema=mocker.MagicMock(), param_in="cookie"
+        )
         config = MagicMock()
 
         result, schemas, parameters = Endpoint.add_parameters(
             endpoint=endpoint,
-            data=oai.Operation.construct(parameters=[param]),
+            data=oai.Operation.model_construct(parameters=[param]),
             schemas=initial_schemas,
             parameters=initial_parameters,
             config=config,
@@ -599,14 +600,14 @@ class TestEndpoint:
         endpoint = self.make_endpoint()
         initial_schemas = Schemas()
         parameters = Parameters()
-        param = oai.Parameter.construct(
+        param = oai.Parameter.model_construct(
             name="test", required=True, param_schema=oai.Schema(type=data_type), param_in=oai.ParameterLocation.HEADER
         )
         config = Config()
 
         result = Endpoint.add_parameters(
             endpoint=endpoint,
-            data=oai.Operation.construct(parameters=[param]),
+            data=oai.Operation.model_construct(parameters=[param]),
             schemas=initial_schemas,
             parameters=parameters,
             config=config,
@@ -618,10 +619,10 @@ class TestEndpoint:
 
     def test__add_parameters_parse_error_on_non_required_path_param(self):
         endpoint = self.make_endpoint()
-        param = oai.Parameter.construct(
+        param = oai.Parameter.model_construct(
             name="test",
             required=False,
-            param_schema=oai.Schema.construct(type="string"),
+            param_schema=oai.Schema.model_construct(type="string"),
             param_in=oai.ParameterLocation.PATH,
         )
         schemas = Schemas()
@@ -629,7 +630,7 @@ class TestEndpoint:
 
         result = Endpoint.add_parameters(
             endpoint=endpoint,
-            data=oai.Operation.construct(parameters=[param]),
+            data=oai.Operation.model_construct(parameters=[param]),
             parameters=parameters,
             schemas=schemas,
             config=Config(),
@@ -667,17 +668,19 @@ class TestEndpoint:
         query_schema = mocker.MagicMock()
         path_schema = mocker.MagicMock()
 
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
                 ),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
                 ),
-                oai.Parameter.construct(name=path_prop.name, required=True, param_schema=path_schema, param_in="path"),
-                oai.Reference.construct(),  # Should be ignored
-                oai.Parameter.construct(),  # Should be ignored
+                oai.Parameter.model_construct(
+                    name=path_prop.name, required=True, param_schema=path_schema, param_in="path"
+                ),
+                oai.Reference.model_construct(),  # Should be ignored
+                oai.Parameter.model_construct(),  # Should be ignored
             ]
         )
         initial_schemas = mocker.MagicMock()
@@ -713,17 +716,19 @@ class TestEndpoint:
         path_schema = mocker.MagicMock()
         query_schema = mocker.MagicMock()
 
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
                 ),
-                oai.Parameter.construct(name=path_prop.name, required=True, param_schema=path_schema, param_in="path"),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
+                    name=path_prop.name, required=True, param_schema=path_schema, param_in="path"
+                ),
+                oai.Parameter.model_construct(
                     name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
                 ),
-                oai.Reference.construct(),  # Should be ignored
-                oai.Parameter.construct(),  # Should be ignored
+                oai.Reference.model_construct(),  # Should be ignored
+                oai.Parameter.model_construct(),  # Should be ignored
             ]
         )
         initial_schemas = mocker.MagicMock()
@@ -739,9 +744,9 @@ class TestEndpoint:
     def test__add_parameters_handles_invalid_references(self):
         """References are not supported as direct params yet"""
         endpoint = self.make_endpoint()
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Reference.construct(ref="blah"),
+                oai.Reference.model_construct(ref="blah"),
             ]
         )
 
@@ -756,14 +761,14 @@ class TestEndpoint:
     def test__add_parameters_resolves_references(self, mocker, param_factory):
         """References are not supported as direct params yet"""
         endpoint = self.make_endpoint()
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Reference.construct(ref="#components/parameters/blah"),
+                oai.Reference.model_construct(ref="#components/parameters/blah"),
             ]
         )
 
         parameters = mocker.MagicMock()
-        new_param = param_factory(name="blah", schema=oai.Schema.construct(nullable=False, type="string"))
+        new_param = param_factory(name="blah", schema=oai.Schema.model_construct(nullable=False, type="string"))
         parameters.classes_by_name = {
             "blah": new_param,
         }
@@ -779,9 +784,9 @@ class TestEndpoint:
     def test__add_parameters_skips_params_without_schemas(self):
         """Params without schemas are allowed per spec, but the any type doesn't make sense as a parameter"""
         endpoint = self.make_endpoint()
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="param",
                     param_in="path",
                 ),
@@ -797,24 +802,24 @@ class TestEndpoint:
 
     def test__add_parameters_same_identifier_conflict(self):
         endpoint = self.make_endpoint()
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="param",
                     param_in="path",
-                    param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
                     required=True,
                 ),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="param_path",
                     param_in="path",
-                    param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
                     required=True,
                 ),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="param",
                     param_in="query",
-                    param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
                 ),
             ]
         )
@@ -828,30 +833,30 @@ class TestEndpoint:
 
     def test__add_parameters_query_optionality(self):
         endpoint = self.make_endpoint()
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             parameters=[
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="not_null_not_required",
                     required=False,
-                    param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
                     param_in="query",
                 ),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="not_null_required",
                     required=True,
-                    param_schema=oai.Schema.construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
                     param_in="query",
                 ),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="null_not_required",
                     required=False,
-                    param_schema=oai.Schema.construct(nullable=True, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=True, type="string"),
                     param_in="query",
                 ),
-                oai.Parameter.construct(
+                oai.Parameter.model_construct(
                     name="null_required",
                     required=True,
-                    param_schema=oai.Schema.construct(nullable=True, type="string"),
+                    param_schema=oai.Schema.model_construct(nullable=True, type="string"),
                     param_in="query",
                 ),
             ]
@@ -874,10 +879,10 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
-        param = oai.Parameter.construct(
-            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="path"
+        param = oai.Parameter.model_construct(
+            name="test", required=True, param_schema=oai.Schema.model_construct(type="string"), param_in="path"
         )
-        data = oai.Operation.construct(parameters=[param, param])
+        data = oai.Operation.model_construct(parameters=[param, param])
         schemas = Schemas()
         parameters = Parameters()
         config = MagicMock()
@@ -900,11 +905,11 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
-        path_param = oai.Parameter.construct(
-            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="path"
+        path_param = oai.Parameter.model_construct(
+            name="test", required=True, param_schema=oai.Schema.model_construct(type="string"), param_in="path"
         )
-        query_param = oai.Parameter.construct(
-            name="test", required=True, param_schema=oai.Schema.construct(type="string"), param_in="query"
+        query_param = oai.Parameter.model_construct(
+            name="test", required=True, param_schema=oai.Schema.model_construct(type="string"), param_in="query"
         )
         schemas = Schemas()
         parameters = Parameters()
@@ -912,7 +917,7 @@ class TestEndpoint:
 
         result = Endpoint.add_parameters(
             endpoint=endpoint,
-            data=oai.Operation.construct(parameters=[path_param, query_param]),
+            data=oai.Operation.model_construct(parameters=[path_param, query_param]),
             schemas=schemas,
             parameters=parameters,
             config=config,
@@ -976,7 +981,7 @@ class TestEndpoint:
         add_parameters = mocker.patch.object(
             Endpoint, "add_parameters", return_value=(parse_error, return_schemas, return_parameters)
         )
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
             security={"blah": "bloo"},
@@ -1011,7 +1016,7 @@ class TestEndpoint:
         )
         response_schemas = mocker.MagicMock()
         _add_responses = mocker.patch.object(Endpoint, "_add_responses", return_value=(parse_error, response_schemas))
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
             security={"blah": "bloo"},
@@ -1052,7 +1057,7 @@ class TestEndpoint:
         body_schemas = mocker.MagicMock()
         body_endpoint = mocker.MagicMock()
         _add_body = mocker.patch.object(Endpoint, "_add_body", return_value=(body_endpoint, body_schemas))
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
             security={"blah": "bloo"},
@@ -1110,7 +1115,7 @@ class TestEndpoint:
             Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock())
         )
         _add_body = mocker.patch.object(Endpoint, "_add_body", return_value=(mocker.MagicMock(), mocker.MagicMock()))
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=None,
             security={"blah": "bloo"},
@@ -1155,7 +1160,7 @@ class TestEndpoint:
     def test_from_data_no_security(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint
 
-        data = oai.Operation.construct(
+        data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
             security=None,
@@ -1243,12 +1248,12 @@ class TestEndpointCollection:
     def test_from_data(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 
-        path_1_put = oai.Operation.construct()
-        path_1_post = oai.Operation.construct(tags=["tag_2", "tag_3"])
-        path_2_get = oai.Operation.construct()
+        path_1_put = oai.Operation.model_construct()
+        path_1_post = oai.Operation.model_construct(tags=["tag_2", "tag_3"])
+        path_2_get = oai.Operation.model_construct()
         data = {
-            "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
-            "path_2": oai.PathItem.construct(get=path_2_get),
+            "path_1": oai.PathItem.model_construct(post=path_1_post, put=path_1_put),
+            "path_2": oai.PathItem.model_construct(get=path_2_get),
         }
         endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
         endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="tag_2", relative_imports={"2"}, path="path_1")
@@ -1316,19 +1321,19 @@ class TestEndpointCollection:
 
     def test_from_data_overrides_path_item_params_with_operation_params(self):
         data = {
-            "/": oai.PathItem.construct(
+            "/": oai.PathItem.model_construct(
                 parameters=[
-                    oai.Parameter.construct(
-                        name="param", param_in="query", param_schema=oai.Schema.construct(type="string")
+                    oai.Parameter.model_construct(
+                        name="param", param_in="query", param_schema=oai.Schema.model_construct(type="string")
                     ),
                 ],
-                get=oai.Operation.construct(
+                get=oai.Operation.model_construct(
                     parameters=[
-                        oai.Parameter.construct(
-                            name="param", param_in="query", param_schema=oai.Schema.construct(type="integer")
+                        oai.Parameter.model_construct(
+                            name="param", param_in="query", param_schema=oai.Schema.model_construct(type="integer")
                         )
                     ],
-                    responses={"200": oai.Response.construct(description="blah")},
+                    responses={"200": oai.Response.model_construct(description="blah")},
                 ),
             )
         }
@@ -1345,12 +1350,12 @@ class TestEndpointCollection:
     def test_from_data_errors(self, mocker):
         from openapi_python_client.parser.openapi import ParseError
 
-        path_1_put = oai.Operation.construct()
-        path_1_post = oai.Operation.construct(tags=["tag_2", "tag_3"])
-        path_2_get = oai.Operation.construct()
+        path_1_put = oai.Operation.model_construct()
+        path_1_post = oai.Operation.model_construct(tags=["tag_2", "tag_3"])
+        path_2_get = oai.Operation.model_construct()
         data = {
-            "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
-            "path_2": oai.PathItem.construct(get=path_2_get),
+            "path_1": oai.PathItem.model_construct(post=path_1_post, put=path_1_put),
+            "path_2": oai.PathItem.model_construct(get=path_2_get),
         }
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -1414,12 +1419,12 @@ class TestEndpointCollection:
     def test_from_data_tags_snake_case_sanitizer(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 
-        path_1_put = oai.Operation.construct()
-        path_1_post = oai.Operation.construct(tags=["AMF Subscription Info (Document)", "tag_3"])
-        path_2_get = oai.Operation.construct(tags=["3. ABC"])
+        path_1_put = oai.Operation.model_construct()
+        path_1_post = oai.Operation.model_construct(tags=["AMF Subscription Info (Document)", "tag_3"])
+        path_2_get = oai.Operation.model_construct(tags=["3. ABC"])
         data = {
-            "path_1": oai.PathItem.construct(post=path_1_post, put=path_1_put),
-            "path_2": oai.PathItem.construct(get=path_2_get),
+            "path_1": oai.PathItem.model_construct(post=path_1_post, put=path_1_put),
+            "path_2": oai.PathItem.model_construct(get=path_2_get),
         }
         endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
         endpoint_2 = mocker.MagicMock(

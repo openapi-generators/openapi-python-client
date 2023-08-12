@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .media_type import MediaType
 
@@ -16,10 +16,9 @@ class RequestBody(BaseModel):
     description: Optional[str] = None
     content: Dict[str, MediaType]
     required: bool = False
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "description": "user to add to the system",
@@ -65,4 +64,5 @@ class RequestBody(BaseModel):
                     "content": {"text/plain": {"schema": {"type": "array", "items": {"type": "string"}}}},
                 },
             ]
-        }
+        },
+    )

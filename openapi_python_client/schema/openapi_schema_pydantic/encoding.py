@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .reference import Reference
 
@@ -23,10 +23,9 @@ class Encoding(BaseModel):
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "contentType": "image/png, image/jpeg",
@@ -38,4 +37,5 @@ class Encoding(BaseModel):
                     },
                 }
             ]
-        }
+        },
+    )

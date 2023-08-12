@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .server import Server
 
@@ -29,10 +29,9 @@ class Link(BaseModel):
     requestBody: Optional[Any] = None
     description: Optional[str] = None
     server: Optional[Server] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {"operationId": "getUserAddressByUUID", "parameters": {"userUuid": "$response.body#/uuid"}},
                 {
@@ -40,4 +39,5 @@ class Link(BaseModel):
                     "parameters": {"username": "$response.body#/username"},
                 },
             ]
-        }
+        },
+    )

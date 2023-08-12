@@ -26,7 +26,7 @@ colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
 shellingham = "^1.3.2"
 black = ">=23"
 isort = "^5.0.5"
-pydantic = "^1.6.1"
+pydantic = "^2.1.1"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.1"
 httpx = ">=0.20.0,<0.25.0"

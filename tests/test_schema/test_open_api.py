@@ -10,10 +10,10 @@ from openapi_python_client.schema import OpenAPI
 def test_validate_version(version, valid):
     data = {"openapi": version, "info": {"title": "test", "version": ""}, "paths": {}}
     if valid:
-        OpenAPI.parse_obj(data)
+        OpenAPI.model_validate(data)
     else:
         with pytest.raises(ValidationError):
-            OpenAPI.parse_obj(data)
+            OpenAPI.model_validate(data)
 
 
 def test_parse_with_callback():
@@ -30,7 +30,7 @@ def test_parse_with_callback():
         },
     }
 
-    open_api = OpenAPI.parse_obj(data)
+    open_api = OpenAPI.model_validate(data)
     create_endpoint = open_api.paths["/create"]
     assert "200" in create_endpoint.post.responses
     assert "200" in create_endpoint.post.callbacks["event"]["callback"].post.responses
