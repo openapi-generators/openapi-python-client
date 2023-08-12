@@ -1179,6 +1179,53 @@
         }
       }
     },
+    "/naming/property-conflict-with-import": {
+      "description": "Ensure that property names don't conflict with imports",
+      "post": {
+        "tags": ["naming"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Field": {
+                    "type": "string",
+                    "description": "A python_name of field should not interfere with attrs field"
+                  },
+                  "Define": {
+                    "type": "string",
+                    "description": "A python_name of define should not interfere with attrs define"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response that contains conflicting properties",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Field": {
+                      "type": "string",
+                      "description": "A python_name of field should not interfere with attrs field"
+                    },
+                    "Define": {
+                      "type": "string",
+                      "description": "A python_name of define should not interfere with attrs define"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/parameter-references/{path_param}": {
       "get": {
         "tags": [

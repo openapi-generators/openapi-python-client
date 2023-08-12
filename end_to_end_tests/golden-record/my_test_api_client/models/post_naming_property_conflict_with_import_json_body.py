@@ -5,41 +5,49 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ModelWithUnionPropertyInlinedFruitType1")
+T = TypeVar("T", bound="PostNamingPropertyConflictWithImportJsonBody")
 
 
 @_attrs_define
-class ModelWithUnionPropertyInlinedFruitType1:
+class PostNamingPropertyConflictWithImportJsonBody:
     """
     Attributes:
-        bananas (Union[Unset, str]):
+        field (Union[Unset, str]): A python_name of field should not interfere with attrs field
+        define (Union[Unset, str]): A python_name of define should not interfere with attrs define
     """
 
-    bananas: Union[Unset, str] = UNSET
+    field: Union[Unset, str] = UNSET
+    define: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        bananas = self.bananas
+        field = self.field
+        define = self.define
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if bananas is not UNSET:
-            field_dict["bananas"] = bananas
+        if field is not UNSET:
+            field_dict["Field"] = field
+        if define is not UNSET:
+            field_dict["Define"] = define
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        bananas = d.pop("bananas", UNSET)
+        field = d.pop("Field", UNSET)
 
-        model_with_union_property_inlined_fruit_type_1 = cls(
-            bananas=bananas,
+        define = d.pop("Define", UNSET)
+
+        post_naming_property_conflict_with_import_json_body = cls(
+            field=field,
+            define=define,
         )
 
-        model_with_union_property_inlined_fruit_type_1.additional_properties = d
-        return model_with_union_property_inlined_fruit_type_1
+        post_naming_property_conflict_with_import_json_body.additional_properties = d
+        return post_naming_property_conflict_with_import_json_body
 
     @property
     def additional_keys(self) -> List[str]:

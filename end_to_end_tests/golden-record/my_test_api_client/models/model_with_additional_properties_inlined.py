@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-from attrs import define, field
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlined")
 
 
-@define
+@_attrs_define
 class ModelWithAdditionalPropertiesInlined:
     """
     Attributes:
@@ -21,7 +22,7 @@ class ModelWithAdditionalPropertiesInlined:
     """
 
     a_number: Union[Unset, float] = UNSET
-    additional_properties: Dict[str, "ModelWithAdditionalPropertiesInlinedAdditionalProperty"] = field(
+    additional_properties: Dict[str, "ModelWithAdditionalPropertiesInlinedAdditionalProperty"] = _attrs_field(
         init=False, factory=dict
     )
 

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
-from attrs import define, field
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
     from ..models.model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
@@ -9,11 +10,13 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesA")
 
 
-@define
+@_attrs_define
 class ModelWithCircularRefInAdditionalPropertiesA:
     """ """
 
-    additional_properties: Dict[str, "ModelWithCircularRefInAdditionalPropertiesB"] = field(init=False, factory=dict)
+    additional_properties: Dict[str, "ModelWithCircularRefInAdditionalPropertiesB"] = _attrs_field(
+        init=False, factory=dict
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         pass

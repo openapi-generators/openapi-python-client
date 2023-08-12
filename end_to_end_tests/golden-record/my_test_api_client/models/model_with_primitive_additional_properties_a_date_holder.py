@@ -1,17 +1,18 @@
 import datetime
 from typing import Any, Dict, List, Type, TypeVar
 
-from attrs import define, field
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 T = TypeVar("T", bound="ModelWithPrimitiveAdditionalPropertiesADateHolder")
 
 
-@define
+@_attrs_define
 class ModelWithPrimitiveAdditionalPropertiesADateHolder:
     """ """
 
-    additional_properties: Dict[str, datetime.datetime] = field(init=False, factory=dict)
+    additional_properties: Dict[str, datetime.datetime] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         field_dict: Dict[str, Any] = {}
