@@ -59,15 +59,9 @@ class EndpointCollection:
                 if operation is None:
                     continue
 
-                tags = [
-                    utils.PythonIdentifier(value=tag, prefix="tag")
-                    for tag in operation.tags or ["default"]
-                ]
+                tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in operation.tags or ["default"]]
 
-                collections = [
-                    endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
-                    for tag in tags
-                ]
+                collections = [endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag)) for tag in tags]
 
                 endpoint, schemas, parameters = Endpoint.from_data(
                     data=operation,
@@ -86,9 +80,7 @@ class EndpointCollection:
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
-                    endpoint.header = (
-                        f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}. Endpoint will not be generated."
-                    )
+                    endpoint.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}. Endpoint will not be generated."
                     for collection in collections:
                         collection.parse_errors.append(endpoint)
                     continue
