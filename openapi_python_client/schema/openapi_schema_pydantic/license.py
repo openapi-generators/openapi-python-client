@@ -8,7 +8,7 @@ class License(BaseModel):
     License information for the exposed API.
 
     References:
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#licenseObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#licenseObject
     """
 
     name: str

@@ -8,7 +8,7 @@ class Contact(BaseModel):
     Contact information for the exposed API.
 
     See Also:
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#contactObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#contactObject
     """
 
     name: Optional[str] = None

@@ -12,7 +12,7 @@ class Tag(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/paths-and-operations/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tagObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#tagObject
     """
 
     name: str

@@ -7,7 +7,7 @@ class ExternalDocumentation(BaseModel):
     """Allows referencing an external resource for extended documentation.
 
     References:
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#externalDocumentationObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#externalDocumentationObject
     """
 
     description: Optional[str] = None

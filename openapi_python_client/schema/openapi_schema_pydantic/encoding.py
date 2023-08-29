@@ -15,7 +15,7 @@ class Encoding(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/describing-request-body/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject
     """
 
     contentType: Optional[str] = None

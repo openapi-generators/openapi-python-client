@@ -20,7 +20,7 @@ class Link(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/links/
-        - https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#linkObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#linkObject
     """
 
     operationRef: Optional[str] = None

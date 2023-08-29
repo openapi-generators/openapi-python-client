@@ -15,7 +15,7 @@ class Header(Parameter):
 
     References:
         - https://swagger.io/docs/specification/describing-parameters/#header-parameters
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#headerObject
     """
 
     name: str = Field(default="")

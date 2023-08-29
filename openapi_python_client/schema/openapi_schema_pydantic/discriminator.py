@@ -15,7 +15,7 @@ class Discriminator(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/data-models/inheritance-and-polymorphism/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminatorObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminatorObject
     """
 
     propertyName: str

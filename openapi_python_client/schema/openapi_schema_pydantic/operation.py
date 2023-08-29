@@ -21,7 +21,7 @@ class Operation(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/paths-and-operations/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operationObject
     """
 
     tags: Optional[List[str]] = None

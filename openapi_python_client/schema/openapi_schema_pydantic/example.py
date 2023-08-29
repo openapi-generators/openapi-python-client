@@ -8,7 +8,7 @@ class Example(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/adding-examples/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#exampleObject
     """
 
     summary: Optional[str] = None

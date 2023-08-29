@@ -8,7 +8,7 @@ class ServerVariable(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/api-host-and-base-path/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverVariableObject
     """
 
     enum: Optional[List[str]] = None

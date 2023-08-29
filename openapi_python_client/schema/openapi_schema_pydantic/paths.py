@@ -11,5 +11,5 @@ The Paths MAY be empty, due to [ACL constraints](#securityFiltering).
 
 References:
     - https://swagger.io/docs/specification/paths-and-operations/
-    - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathsObject
+    - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathsObject
 """

@@ -13,7 +13,7 @@ class MediaType(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/media-types/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject
     """
 
     media_type_schema: Optional[Union[Reference, Schema]] = Field(default=None, alias="schema")

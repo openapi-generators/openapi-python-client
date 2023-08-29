@@ -22,7 +22,7 @@ class Components(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/components/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#componentsObject
     """
 
     schemas: Optional[Dict[str, Union[Schema, Reference]]] = None

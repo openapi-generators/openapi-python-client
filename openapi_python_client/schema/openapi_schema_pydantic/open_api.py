@@ -19,7 +19,7 @@ class OpenAPI(BaseModel):
     """This is the root document object of the OpenAPI document.
 
     References:
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oasObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasObject
         - https://swagger.io/docs/specification/basic-structure/
     """
 
@@ -30,7 +30,7 @@ class OpenAPI(BaseModel):
     security: Optional[List[SecurityRequirement]] = None
     tags: Optional[List[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
-    openapi: Union[Literal["3.0.0"], Literal["3.0.1"], Literal["3.0.2"], Literal["3.0.3"]]
+    openapi: Union[Literal["3.0.0"], Literal["3.0.1"], Literal["3.0.2"], Literal["3.0.3"], Literal["3.1.0"]]
     model_config = ConfigDict(extra="allow")
 
 

@@ -15,7 +15,7 @@ class Response(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/describing-responses/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#responseObject
     """
 
     description: str

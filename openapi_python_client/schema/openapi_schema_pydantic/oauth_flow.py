@@ -8,7 +8,7 @@ class OAuthFlow(BaseModel):
     Configuration details for a supported OAuth Flow
 
     References:
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oauthFlowObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oauthFlowObject
         - https://swagger.io/docs/specification/authentication/oauth2/
     """
 

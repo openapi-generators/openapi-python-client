@@ -10,7 +10,7 @@ class RequestBody(BaseModel):
 
     References:
         - https://swagger.io/docs/specification/describing-request-body/
-        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject
+        - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#requestBodyObject
     """
 
     description: Optional[str] = None
