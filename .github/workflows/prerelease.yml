@@ -17,7 +17,7 @@ jobs:
           token: ${{ secrets.PAT }}
       - uses: Swatinem/rust-cache@v2
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
+        uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           git_user_signingkey: true
