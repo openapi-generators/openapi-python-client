@@ -29,7 +29,7 @@ isort = "^5.0.5"
 pydantic = "^2.1.1"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.1"
-httpx = ">=0.20.0,<0.25.0"
+httpx = ">=0.20.0,<0.26.0"
 autoflake = "^1.4 || ^2.0.0"
 PyYAML = "^6.0"
 
