@@ -20,7 +20,7 @@ jobs:
       - name: Install Knope
         uses: knope-dev/action@v1
         with:
-          version: 0.9.0
+          version: 0.11.0
       - name: Bump Version & Create GitHub Release
         run: knope release
         env:
