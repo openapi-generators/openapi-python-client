@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.2",
+  "openapi": "3.0.3",
   "info": {
     "title": "My Test API",
     "description": "An API for testing openapi-python-client",

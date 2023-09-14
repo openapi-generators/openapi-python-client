@@ -649,9 +649,9 @@ class TestEndpoint:
 
         endpoint = self.make_endpoint()
 
-        path_prop_conflicted = property_factory(name="prop_name_path", required=True, nullable=False, default=None)
-        query_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
-        path_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
+        path_prop_conflicted = property_factory(name="prop_name_path", required=True, default=None)
+        query_prop = property_factory(name="prop_name", required=True, default=None)
+        path_prop = property_factory(name="prop_name", required=True, default=None)
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -698,9 +698,9 @@ class TestEndpoint:
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
-        path_prop_conflicted = property_factory(name="prop_name_path", required=True, nullable=False, default=None)
-        path_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
-        query_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
+        path_prop_conflicted = property_factory(name="prop_name_path", required=True, default=None)
+        path_prop = property_factory(name="prop_name", required=True, default=None)
+        query_prop = property_factory(name="prop_name", required=True, default=None)
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
@@ -768,7 +768,7 @@ class TestEndpoint:
         )
 
         parameters = mocker.MagicMock()
-        new_param = param_factory(name="blah", schema=oai.Schema.model_construct(nullable=False, type="string"))
+        new_param = param_factory(name="blah", schema=oai.Schema.model_construct(type="string"))
         parameters.classes_by_name = {
             "blah": new_param,
         }
@@ -807,19 +807,19 @@ class TestEndpoint:
                 oai.Parameter.model_construct(
                     name="param",
                     param_in="path",
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     required=True,
                 ),
                 oai.Parameter.model_construct(
                     name="param_path",
                     param_in="path",
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     required=True,
                 ),
                 oai.Parameter.model_construct(
                     name="param",
                     param_in="query",
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                 ),
             ]
         )
@@ -836,27 +836,15 @@ class TestEndpoint:
         data = oai.Operation.model_construct(
             parameters=[
                 oai.Parameter.model_construct(
-                    name="not_null_not_required",
+                    name="not_required",
                     required=False,
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     param_in="query",
                 ),
                 oai.Parameter.model_construct(
-                    name="not_null_required",
+                    name="required",
                     required=True,
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
-                    param_in="query",
-                ),
-                oai.Parameter.model_construct(
-                    name="null_not_required",
-                    required=False,
-                    param_schema=oai.Schema.model_construct(nullable=True, type="string"),
-                    param_in="query",
-                ),
-                oai.Parameter.model_construct(
-                    name="null_required",
-                    required=True,
-                    param_schema=oai.Schema.model_construct(nullable=True, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     param_in="query",
                 ),
             ]
@@ -866,13 +854,11 @@ class TestEndpoint:
             endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=Config()
         )
 
-        assert len(endpoint.query_parameters) == 4, "Not all query params were added"
+        assert len(endpoint.query_parameters) == 2, "Not all query params were added"
         for param in endpoint.query_parameters.values():
-            if param.name == "not_null_required":
-                assert not param.nullable
+            if param.name == "required":
                 assert param.required
             else:
-                assert param.nullable
                 assert not param.required
 
     def test_add_parameters_duplicate_properties(self):

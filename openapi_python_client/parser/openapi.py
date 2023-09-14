@@ -353,8 +353,8 @@ class Endpoint:
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
             "RESERVED": {  # These can't be param names because codegen needs them as vars, the properties don't matter
-                "client": AnyProperty("client", True, False, None, PythonIdentifier("client", ""), None, None),
-                "url": AnyProperty("url", True, False, None, PythonIdentifier("url", ""), None, None),
+                "client": AnyProperty("client", True, None, PythonIdentifier("client", ""), None, None),
+                "url": AnyProperty("url", True, None, PythonIdentifier("url", ""), None, None),
             },
         }
 
@@ -440,9 +440,6 @@ class Endpoint:
                     schemas,
                     parameters,
                 )
-            if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
-                # There is no NULL for query params, so nullable and not required are the same.
-                prop = attr.evolve(prop, required=False, nullable=True)
 
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))

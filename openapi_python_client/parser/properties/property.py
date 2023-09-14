@@ -32,7 +32,6 @@ class Property:
 
     name: str
     required: bool
-    nullable: bool
     _type_string: ClassVar[str] = ""
     _json_type_string: ClassVar[str] = ""  # Type of the property after JSON serialization
     _allowed_locations: ClassVar[Set[oai.ParameterLocation]] = {
@@ -92,13 +91,8 @@ class Property:
         else:
             type_string = self.get_base_type_string(quoted=quoted)
 
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or self.required:
             return type_string
-        if self.required and self.nullable:
-            return f"Optional[{type_string}]"
-        if not self.required and self.nullable:
-            return f"Union[Unset, None, {type_string}]"
-
         return f"Union[Unset, {type_string}]"
 
     def get_instance_type_string(self) -> str:
@@ -115,8 +109,6 @@ class Property:
             back to the root of the generated client.
         """
         imports = set()
-        if self.nullable:
-            imports.add("from typing import Optional")
         if not self.required:
             imports.add("from typing import Union")
             imports.add(f"from {prefix}types import UNSET, Unset")

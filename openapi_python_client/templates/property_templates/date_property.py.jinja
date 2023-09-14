@@ -16,7 +16,7 @@ isoparse({{ source }}).date()
 {% set transformed = transformed + ".encode()" %}
 {% endif %}
 {% if property.required %}
-{{ destination }} = {{ transformed }} {% if property.nullable %}if {{ source }} else None {%endif%}
+{{ destination }} = {{ transformed }}
 {% else %}
 {% if declare_type %}
 {% set type_annotation = property.get_type_string(json=True) %}
@@ -26,10 +26,6 @@ isoparse({{ source }}).date()
 {{ destination }} = UNSET
 {% endif %}
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
-    {{ destination }} = {{ transformed }} if {{ source }} else None
-{% else %}
     {{ destination }} = {{ transformed }}
-{% endif %}
 {% endif %}
 {% endmacro %}

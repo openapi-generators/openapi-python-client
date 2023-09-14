@@ -23,7 +23,6 @@ def test_response_from_data_no_content(any_property_factory):
         prop=any_property_factory(
             name="response_200",
             default=None,
-            nullable=False,
             required=True,
             description="",
         ),
@@ -47,7 +46,6 @@ def test_response_from_data_reference(any_property_factory):
         prop=any_property_factory(
             name="response_200",
             default=None,
-            nullable=False,
             required=True,
         ),
         source="None",
@@ -78,7 +76,6 @@ def test_response_from_data_no_content_schema(any_property_factory):
         prop=any_property_factory(
             name="response_200",
             default=None,
-            nullable=False,
             required=True,
             description=data.description,
         ),

@@ -58,9 +58,9 @@ def _compare_directories(
         pytest.fail(failure, pytrace=False)
 
 
-def run_e2e_test(extra_args: List[str], expected_differences: Dict[Path, str]):
+def run_e2e_test(openapi_document: str, extra_args: List[str], expected_differences: Dict[Path, str]):
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi.json"
+    openapi_path = Path(__file__).parent / openapi_document
     config_path = Path(__file__).parent / "config.yml"
     gr_path = Path(__file__).parent / "golden-record"
     output_path = Path.cwd() / "my-test-api-client"
@@ -86,8 +86,12 @@ def run_e2e_test(extra_args: List[str], expected_differences: Dict[Path, str]):
     shutil.rmtree(output_path)
 
 
-def test_end_to_end():
-    run_e2e_test([], {})
+def test_end_to_end_3_0():
+    run_e2e_test("openapi_3.0.json", [], {})
+
+
+def test_end_to_end_3_1():
+    run_e2e_test("openapi_3.1.yaml", [], {})
 
 
 def test_custom_templates():
@@ -112,6 +116,7 @@ def test_custom_templates():
         expected_differences[relative_path] = expected_text
 
     run_e2e_test(
+        "openapi_3.0.json",
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates/"],
         expected_differences=expected_differences,
     )

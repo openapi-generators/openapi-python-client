@@ -266,7 +266,6 @@ def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     kwargs = {
         "name": "test",
         "required": True,
-        "nullable": False,
         "default": None,
         "description": None,
         "example": None,

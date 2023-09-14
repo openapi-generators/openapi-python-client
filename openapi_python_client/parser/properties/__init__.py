@@ -19,6 +19,7 @@ from attrs import define, evolve
 from ... import Config
 from ... import schema as oai
 from ... import utils
+from ...schema import DataType
 from ..errors import ParameterError, ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
 from .enum_property import EnumProperty
@@ -259,8 +260,6 @@ class UnionProperty(Property):
         type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
-        if self.nullable:
-            type_strings.add("None")
         if not self.required:
             type_strings.add("Unset")
         return type_strings
@@ -312,7 +311,6 @@ def _string_based_property(
             name=name,
             required=required,
             default=convert("datetime.datetime", data.default),
-            nullable=data.nullable,
             python_name=python_name,
             description=data.description,
             example=data.example,
@@ -322,7 +320,6 @@ def _string_based_property(
             name=name,
             required=required,
             default=convert("datetime.date", data.default),
-            nullable=data.nullable,
             python_name=python_name,
             description=data.description,
             example=data.example,
@@ -332,7 +329,6 @@ def _string_based_property(
             name=name,
             required=required,
             default=None,
-            nullable=data.nullable,
             python_name=python_name,
             description=data.description,
             example=data.example,
@@ -342,7 +338,6 @@ def _string_based_property(
         default=convert("str", data.default),
         required=required,
         pattern=data.pattern,
-        nullable=data.nullable,
         python_name=python_name,
         description=data.description,
         example=data.example,
@@ -356,9 +351,9 @@ def build_enum_property(
     required: bool,
     schemas: Schemas,
     enum: Union[List[Optional[str]], List[Optional[int]]],
-    parent_name: Optional[str],
+    parent_name: str,
     config: Config,
-) -> Tuple[Union[EnumProperty, NoneProperty, PropertyError], Schemas]:
+) -> Tuple[Union[EnumProperty, NoneProperty, UnionProperty, PropertyError], Schemas]:
     """
     Create an EnumProperty from schema data.
 
@@ -378,25 +373,16 @@ def build_enum_property(
     if len(enum) == 0:
         return PropertyError(detail="No values provided for Enum", data=data), schemas
 
-    class_name = data.title or name
-    if parent_name:
-        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
-    class_info = Class.from_string(string=class_name, config=config)
-
     # OpenAPI allows for null as an enum value, but it doesn't make sense with how enums are constructed in Python.
     # So instead, if null is a possible value, make the property nullable.
     # Mypy is not smart enough to know that the type is right though
     value_list: Union[List[str], List[int]] = [value for value in enum if value is not None]  # type: ignore
-    if len(value_list) < len(enum):
-        data.nullable = True
-
     # It's legal to have an enum that only contains null as a value, we don't bother constructing an enum in that case
     if len(value_list) == 0:
         return (
             NoneProperty(
                 name=name,
                 required=required,
-                nullable=False,
                 default="None",
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=None,
@@ -404,6 +390,22 @@ def build_enum_property(
             ),
             schemas,
         )
+    if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union
+        data.oneOf = [oai.Schema(type=DataType.NULL), data.model_copy(update={"enum": value_list})]
+        data.enum = None
+        return build_union_property(
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
+        )
+
+    class_name = data.title or name
+    if parent_name:
+        class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
+    class_info = Class.from_string(string=class_name, config=config)
     values = EnumProperty.values_from_list(value_list)
 
     if class_info.name in schemas.classes_by_name:
@@ -421,7 +423,6 @@ def build_enum_property(
     prop = EnumProperty(
         name=name,
         required=required,
-        nullable=data.nullable,
         class_info=class_info,
         values=values,
         value_type=value_type,
@@ -485,7 +486,12 @@ def build_union_property(
     """
     sub_properties: List[Property] = []
 
-    for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
+    type_list_data = []
+    if isinstance(data.type, list):
+        for _type in data.type:
+            type_list_data.append(data.model_copy(update={"type": _type}))
+
+    for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type_{i}",
             required=required,
@@ -505,7 +511,6 @@ def build_union_property(
             required=required,
             default=default,
             inner_properties=sub_properties,
-            nullable=data.nullable,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
@@ -561,7 +566,6 @@ def build_list_property(
             required=required,
             default=None,
             inner_property=inner_prop,
-            nullable=data.nullable,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
@@ -593,13 +597,11 @@ def _property_from_ref(
         name=name,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
-    if parent:
-        prop = evolve(prop, nullable=parent.nullable)
-        if isinstance(prop, EnumProperty):
-            default = get_enum_default(prop, parent)
-            if isinstance(default, PropertyError):
-                return default, schemas
-            prop = evolve(prop, default=default)
+    if parent and isinstance(prop, EnumProperty):
+        default = get_enum_default(prop, parent)
+        if isinstance(default, PropertyError):
+            return default, schemas
+        prop = evolve(prop, default=default)
 
     schemas.add_dependencies(ref_path=ref_path, roots=roots)
     return prop, schemas
@@ -640,7 +642,7 @@ def _property_from_data(
             parent_name=parent_name,
             config=config,
         )
-    if data.anyOf or data.oneOf:
+    if data.anyOf or data.oneOf or isinstance(data.type, list):
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
         )
@@ -652,7 +654,6 @@ def _property_from_data(
                 name=name,
                 default=convert("float", data.default),
                 required=required,
-                nullable=data.nullable,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
@@ -665,7 +666,6 @@ def _property_from_data(
                 name=name,
                 default=convert("int", data.default),
                 required=required,
-                nullable=data.nullable,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
@@ -678,7 +678,18 @@ def _property_from_data(
                 name=name,
                 required=required,
                 default=convert("bool", data.default),
-                nullable=data.nullable,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=data.description,
+                example=data.example,
+            ),
+            schemas,
+        )
+    if data.type == oai.DataType.NULL:
+        return (
+            NoneProperty(
+                name=name,
+                required=required,
+                default=None,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
@@ -711,7 +722,6 @@ def _property_from_data(
         AnyProperty(
             name=name,
             required=required,
-            nullable=False,
             default=None,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,

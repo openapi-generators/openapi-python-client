@@ -2,6 +2,7 @@ __all__ = [
     "Class",
     "Schemas",
     "Parameters",
+    "ReferencePath",
     "parse_reference_path",
     "update_schemas_with_data",
     "update_parameters_with_data",

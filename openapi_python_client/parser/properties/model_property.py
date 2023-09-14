@@ -110,13 +110,8 @@ class ModelProperty(Property):
             if type_string == self.class_info.name:
                 type_string = f"'{type_string}'"
 
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or self.required:
             return type_string
-        if self.required and self.nullable:
-            return f"Optional[{type_string}]"
-        if not self.required and self.nullable:
-            return f"Union[Unset, None, {type_string}]"
-
         return f"Union[Unset, {type_string}]"
 
 
@@ -152,21 +147,20 @@ def _enum_subset(first: Property, second: Property) -> Optional[EnumProperty]:
 
 
 def _merge_properties(first: Property, second: Property) -> Union[Property, PropertyError]:
-    nullable = first.nullable and second.nullable
     required = first.required or second.required
 
     err = None
 
     if first.__class__ == second.__class__:
-        first = evolve(first, nullable=nullable, required=required)
-        second = evolve(second, nullable=nullable, required=required)
+        first = evolve(first, required=required)
+        second = evolve(second, required=required)
         if first == second:
             return first
         err = PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
 
     enum_subset = _enum_subset(first, second)
     if enum_subset is not None:
-        return evolve(enum_subset, nullable=nullable, required=required)
+        return evolve(enum_subset, required=required)
 
     return err or PropertyError(
         header="Cannot merge properties",
@@ -256,7 +250,7 @@ def _process_properties(
     required_properties = []
     optional_properties = []
     for prop in properties.values():
-        if prop.required and not prop.nullable:
+        if prop.required:
             required_properties.append(prop)
         else:
             optional_properties.append(prop)
@@ -433,7 +427,6 @@ def build_model_property(
         additional_properties=additional_properties,
         description=data.description or "",
         default=None,
-        nullable=data.nullable,
         required=required,
         name=name,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),

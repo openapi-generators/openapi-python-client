@@ -48,15 +48,6 @@ if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
     {% set ns.has_if = true %}
 {% endif %}
-{% if property.nullable %}
-    {% if ns.has_if %}
-elif {{ source }} is None:
-    {% else %}
-if {{ source }} is None:
-        {% set ns.has_if = true %}
-    {% endif %}
-    {{ destination }} = None
-{% endif %}
 
 {% for inner_property in property.inner_properties %}
     {% import "property_templates/" + inner_property.template as inner_template %}

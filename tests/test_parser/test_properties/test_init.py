@@ -7,7 +7,14 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
 from openapi_python_client.parser.errors import ParameterError, PropertyError, ValidationError
-from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty, Property, Schemas
+from openapi_python_client.parser.properties import (
+    BooleanProperty,
+    FloatProperty,
+    IntProperty,
+    Property,
+    Schemas,
+    UnionProperty,
+)
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -17,16 +24,14 @@ class TestStringProperty:
         assert string_property_factory().is_base_type is True
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (True, False, "str"),
-            (True, True, "Optional[str]"),
-            (False, True, "Union[Unset, None, str]"),
-            (False, False, "Union[Unset, str]"),
+            (True, "str"),
+            (False, "Union[Unset, str]"),
         ),
     )
-    def test_get_type_string(self, string_property_factory, required, nullable, expected):
-        p = string_property_factory(required=required, nullable=nullable)
+    def test_get_type_string(self, string_property_factory, required, expected):
+        p = string_property_factory(required=required)
 
         assert p.get_type_string() == expected
 
@@ -36,17 +41,14 @@ class TestDateTimeProperty:
         assert date_time_property_factory().is_base_type is True
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_imports(self, date_time_property_factory, required, nullable):
-        p = date_time_property_factory(required=required, nullable=nullable)
+    def test_get_imports(self, date_time_property_factory, required):
+        p = date_time_property_factory(required=required)
 
         expected = {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -61,17 +63,14 @@ class TestDateProperty:
         assert date_property_factory().is_base_type is True
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_imports(self, date_property_factory, required, nullable):
-        p = date_property_factory(required=required, nullable=nullable)
+    def test_get_imports(self, date_property_factory, required):
+        p = date_property_factory(required=required)
 
         expected = {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -86,16 +85,13 @@ class TestFileProperty:
         assert file_property_factory().is_base_type is True
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_imports(self, file_property_factory, required, nullable):
-        p = file_property_factory(required=required, nullable=nullable)
+    def test_get_imports(self, file_property_factory, required):
+        p = file_property_factory(required=required)
 
         expected = {
             "from io import BytesIO",
             "from ...types import File, FileJsonType",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -150,33 +146,27 @@ class TestListProperty:
         assert p.get_lazy_imports(prefix="..") == {"from ..models.my_module import MyClass"}
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (True, False, "List[str]"),
-            (True, True, "Optional[List[str]]"),
-            (False, False, "Union[Unset, List[str]]"),
-            (False, True, "Union[Unset, None, List[str]]"),
+            (True, "List[str]"),
+            (False, "Union[Unset, List[str]]"),
         ),
     )
-    def test_get_type_string_base_inner(self, list_property_factory, required, nullable, expected):
-        p = list_property_factory(required=required, nullable=nullable)
+    def test_get_type_string_base_inner(self, list_property_factory, required, expected):
+        p = list_property_factory(required=required)
 
         assert p.get_type_string() == expected
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (True, False, "List['MyClass']"),
-            (True, True, "Optional[List['MyClass']]"),
-            (False, False, "Union[Unset, List['MyClass']]"),
-            (False, True, "Union[Unset, None, List['MyClass']]"),
+            (True, "List['MyClass']"),
+            (False, "Union[Unset, List['MyClass']]"),
         ),
     )
-    def test_get_type_string_model_inner(
-        self, list_property_factory, model_property_factory, required, nullable, expected
-    ):
+    def test_get_type_string_model_inner(self, list_property_factory, model_property_factory, required, expected):
         m = model_property_factory()
-        p = list_property_factory(required=required, nullable=nullable, inner_property=m)
+        p = list_property_factory(required=required, inner_property=m)
 
         assert p.get_type_string() == expected
 
@@ -204,18 +194,15 @@ class TestListProperty:
         assert p.get_base_type_string(quoted=quoted) == expected
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_type_imports(self, list_property_factory, date_time_property_factory, required, nullable):
+    def test_get_type_imports(self, list_property_factory, date_time_property_factory, required):
         inner_property = date_time_property_factory()
-        p = list_property_factory(inner_property=inner_property, required=required, nullable=nullable)
+        p = list_property_factory(inner_property=inner_property, required=required)
         expected = {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
             "from typing import cast, List",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -239,24 +226,16 @@ class TestUnionProperty:
         assert p.get_lazy_imports(prefix="..") == {"from ..models.my_module import MyClass"}
 
     @pytest.mark.parametrize(
-        "nullable,required,no_optional,json,expected",
+        "required,no_optional,json,expected",
         [
-            (False, False, False, False, "Union[Unset, datetime.datetime, str]"),
-            (False, False, True, False, "Union[datetime.datetime, str]"),
-            (False, True, False, False, "Union[datetime.datetime, str]"),
-            (False, True, True, False, "Union[datetime.datetime, str]"),
-            (True, False, False, False, "Union[None, Unset, datetime.datetime, str]"),
-            (True, False, True, False, "Union[datetime.datetime, str]"),
-            (True, True, False, False, "Union[None, datetime.datetime, str]"),
-            (True, True, True, False, "Union[datetime.datetime, str]"),
-            (False, False, False, True, "Union[Unset, str]"),
-            (False, False, True, True, "str"),
-            (False, True, False, True, "str"),
-            (False, True, True, True, "str"),
-            (True, False, False, True, "Union[None, Unset, str]"),
-            (True, False, True, True, "str"),
-            (True, True, False, True, "Union[None, str]"),
-            (True, True, True, True, "str"),
+            (False, False, False, "Union[Unset, datetime.datetime, str]"),
+            (False, True, False, "Union[datetime.datetime, str]"),
+            (True, False, False, "Union[datetime.datetime, str]"),
+            (True, True, False, "Union[datetime.datetime, str]"),
+            (False, False, True, "Union[Unset, str]"),
+            (False, True, True, "str"),
+            (True, False, True, "str"),
+            (True, True, True, "str"),
         ],
     )
     def test_get_type_string(
@@ -264,7 +243,6 @@ class TestUnionProperty:
         union_property_factory,
         date_time_property_factory,
         string_property_factory,
-        nullable,
         required,
         no_optional,
         json,
@@ -272,7 +250,6 @@ class TestUnionProperty:
     ):
         p = union_property_factory(
             required=required,
-            nullable=nullable,
             inner_properties=[date_time_property_factory(), string_property_factory()],
         )
 
@@ -316,10 +293,10 @@ class TestUnionProperty:
         assert p.get_base_json_type_string() == "str"
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_type_imports(self, union_property_factory, date_time_property_factory, required, nullable):
+    def test_get_type_imports(self, union_property_factory, date_time_property_factory, required):
         p = union_property_factory(
-            inner_properties=[date_time_property_factory()], required=required, nullable=nullable
+            inner_properties=[date_time_property_factory()],
+            required=required,
         )
         expected = {
             "import datetime",
@@ -327,8 +304,6 @@ class TestUnionProperty:
             "from dateutil.parser import isoparse",
             "from typing import cast, Union",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -343,19 +318,17 @@ class TestEnumProperty:
         assert enum_property_factory().is_base_type is True
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (False, False, "Union[Unset, {}]"),
-            (True, False, "{}"),
-            (False, True, "Union[Unset, None, {}]"),
-            (True, True, "Optional[{}]"),
+            (False, "Union[Unset, {}]"),
+            (True, "{}"),
         ),
     )
-    def test_get_type_string(self, mocker, enum_property_factory, required, nullable, expected):
+    def test_get_type_string(self, mocker, enum_property_factory, required, expected):
         fake_class = mocker.MagicMock()
         fake_class.name = "MyTestEnum"
 
-        p = enum_property_factory(class_info=fake_class, required=required, nullable=nullable)
+        p = enum_property_factory(class_info=fake_class, required=required)
 
         assert p.get_type_string() == expected.format(fake_class.name)
         assert p.get_type_string(no_optional=True) == fake_class.name
@@ -407,7 +380,7 @@ class TestPropertyFromData:
         from openapi_python_client.schema import Schema
 
         existing = enum_property_factory()
-        data = Schema(title="AnEnum", enum=["A", "B", "C"], nullable=False, default="B")
+        data = Schema(title="AnEnum", enum=["A", "B", "C"], default="B")
         name = "my_enum"
         required = True
 
@@ -436,7 +409,7 @@ class TestPropertyFromData:
         from openapi_python_client.schema import Schema
 
         existing = enum_property_factory()
-        data = Schema(title="AnEnum", enum=["A", "B", "C", None], nullable=False, default="B")
+        data = Schema(title="AnEnum", enum=["A", "B", "C", None], default="B")
         name = "my_enum"
         required = True
 
@@ -447,16 +420,15 @@ class TestPropertyFromData:
         )
 
         # None / null is removed from enum, and property is now nullable
+        assert isinstance(prop, UnionProperty), "Enums with None should be converted to UnionProperties"
         assert prop == enum_property_factory(
             name=name,
             required=required,
-            nullable=True,
             values={"A": "A", "B": "B", "C": "C"},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
         )
-        assert prop.nullable is True
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
             "AnEnum": existing,
@@ -467,7 +439,7 @@ class TestPropertyFromData:
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
-        data = Schema(title="AnEnumWithOnlyNull", enum=[None], nullable=False, default=None)
+        data = Schema(title="AnEnumWithOnlyNull", enum=[None], default=None)
         name = "my_enum"
         required = True
 
@@ -477,7 +449,7 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
-        assert prop == none_property_factory(name="my_enum", required=required, nullable=False, default="None")
+        assert prop == none_property_factory(name="my_enum", required=required, default="None")
 
     def test_property_from_data_int_enum(self, enum_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -485,8 +457,7 @@ class TestPropertyFromData:
 
         name = "my_enum"
         required = True
-        nullable = False
-        data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], nullable=nullable, default=3)
+        data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], default=3)
 
         existing = enum_property_factory()
         schemas = Schemas(classes_by_name={"AnEnum": existing})
@@ -498,7 +469,6 @@ class TestPropertyFromData:
         assert prop == enum_property_factory(
             name=name,
             required=required,
-            nullable=nullable,
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
@@ -697,7 +667,6 @@ class TestPropertyFromData:
             name=name,
             required=required,
             default=python_type(data.default),
-            nullable=False,
             python_name=name,
             description=description,
             example=example,
@@ -706,7 +675,6 @@ class TestPropertyFromData:
 
         # Test nullable values
         data.default = 0
-        data.nullable = True
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
@@ -715,7 +683,6 @@ class TestPropertyFromData:
             name=name,
             required=required,
             default=python_type(data.default),
-            nullable=True,
             python_name=name,
             description=description,
             example=example,
@@ -836,13 +803,11 @@ class TestPropertyFromData:
         name = "new_name"
         required = False
         class_name = "MyModel"
-        nullable = True
         existing_model = model_property_factory()
         schemas = Schemas(classes_by_reference={f"/{class_name}": existing_model})
 
         data = oai.Schema.model_construct(
             allOf=[oai.Reference.model_construct(ref=f"#/{class_name}")],
-            nullable=nullable,
         )
         build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
 
@@ -850,7 +815,7 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
-        assert prop == attr.evolve(existing_model, name=name, required=required, nullable=nullable, python_name=name)
+        assert prop == attr.evolve(existing_model, name=name, required=required, python_name=name)
         build_union_property.assert_not_called()
 
     def test_property_from_data_no_valid_props_in_data(self, any_property_factory):
@@ -864,7 +829,7 @@ class TestPropertyFromData:
             name=name, required=True, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
         )
 
-        assert prop == any_property_factory(name=name, required=True, nullable=False, default=None)
+        assert prop == any_property_factory(name=name, required=True, default=None)
         assert new_schemas == schemas
 
     def test_property_from_data_validation_error(self, mocker):
@@ -1025,20 +990,19 @@ class TestBuildUnionProperty:
 
 
 class TestStringBasedProperty:
-    @pytest.mark.parametrize("nullable", (True, False))
     @pytest.mark.parametrize("required", (True, False))
-    def test_no_format(self, string_property_factory, nullable, required):
+    def test_no_format(self, string_property_factory, required):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.model_construct(type="string", nullable=nullable, default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", default='"hello world"', pattern="abcdef")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=Config(), schemas=Schemas()
         )
 
         assert p == string_property_factory(
-            name=name, required=required, nullable=nullable, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
+            name=name, required=required, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
         )
 
     def test_datetime_format(self, date_time_property_factory):
@@ -1046,24 +1010,20 @@ class TestStringBasedProperty:
 
         name = "datetime_prop"
         required = True
-        data = oai.Schema.model_construct(
-            type="string", schema_format="date-time", nullable=True, default="2020-11-06T12:00:00"
-        )
+        data = oai.Schema.model_construct(type="string", schema_format="date-time", default="2020-11-06T12:00:00")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
 
-        assert p == date_time_property_factory(
-            name=name, required=required, nullable=True, default=f"isoparse('{data.default}')"
-        )
+        assert p == date_time_property_factory(name=name, required=required, default=f"isoparse('{data.default}')")
 
     def test_datetime_bad_default(self):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "datetime_prop"
         required = True
-        data = oai.Schema.model_construct(type="string", schema_format="date-time", nullable=True, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="date-time", default="a")
 
         result, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
@@ -1076,26 +1036,22 @@ class TestStringBasedProperty:
 
         name = "date_prop"
         required = True
-        nullable = True
 
-        data = oai.Schema.model_construct(type="string", schema_format="date", nullable=nullable, default="2020-11-06")
+        data = oai.Schema.model_construct(type="string", schema_format="date", default="2020-11-06")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
 
-        assert p == date_property_factory(
-            name=name, required=required, nullable=nullable, default=f"isoparse('{data.default}').date()"
-        )
+        assert p == date_property_factory(name=name, required=required, default=f"isoparse('{data.default}').date()")
 
     def test_date_format_bad_default(self):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "date_prop"
         required = True
-        nullable = True
 
-        data = oai.Schema.model_construct(type="string", schema_format="date", nullable=nullable, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="date", default="a")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
@@ -1108,27 +1064,25 @@ class TestStringBasedProperty:
 
         name = "file_prop"
         required = True
-        nullable = True
-        data = oai.Schema.model_construct(type="string", schema_format="binary", nullable=nullable, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="binary", default="a")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
-        assert p == file_property_factory(name=name, required=required, nullable=nullable)
+        assert p == file_property_factory(name=name, required=required)
 
     def test__string_based_property_unsupported_format(self, string_property_factory):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "unknown"
         required = True
-        nullable = True
-        data = oai.Schema.model_construct(type="string", schema_format="blah", nullable=nullable)
+        data = oai.Schema.model_construct(type="string", schema_format="blah")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas, config=Config(), parent_name=None
         )
 
-        assert p == string_property_factory(name=name, required=required, nullable=nullable)
+        assert p == string_property_factory(name=name, required=required)
 
 
 class TestCreateSchemas:

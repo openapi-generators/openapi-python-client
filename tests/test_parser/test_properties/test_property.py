@@ -6,34 +6,24 @@ class TestProperty:
         assert property_factory().is_base_type is True
 
     @pytest.mark.parametrize(
-        "nullable,required,no_optional,json,quoted,expected",
+        "required,no_optional,json,quoted,expected",
         [
-            (False, False, False, False, False, "Union[Unset, TestType]"),
-            (False, False, True, False, False, "TestType"),
-            (False, True, False, False, False, "TestType"),
-            (False, True, True, False, False, "TestType"),
-            (True, False, False, False, False, "Union[Unset, None, TestType]"),
-            (True, False, True, False, False, "TestType"),
-            (True, True, False, False, False, "Optional[TestType]"),
-            (True, True, True, False, False, "TestType"),
-            (False, False, False, True, False, "Union[Unset, str]"),
-            (False, False, True, True, False, "str"),
-            (False, True, False, True, False, "str"),
-            (False, True, True, True, False, "str"),
-            (True, False, False, True, False, "Union[Unset, None, str]"),
-            (True, False, False, True, True, "Union[Unset, None, str]"),
-            (True, False, True, True, False, "str"),
-            (True, True, False, True, False, "Optional[str]"),
-            (True, True, True, True, False, "str"),
-            (True, True, True, True, True, "str"),
+            (False, False, False, False, "Union[Unset, TestType]"),
+            (False, True, False, False, "TestType"),
+            (True, False, False, False, "TestType"),
+            (True, True, False, False, "TestType"),
+            (False, False, True, False, "Union[Unset, str]"),
+            (False, True, True, False, "str"),
+            (True, False, True, False, "str"),
+            (True, True, True, False, "str"),
         ],
     )
-    def test_get_type_string(self, property_factory, mocker, nullable, required, no_optional, json, expected, quoted):
+    def test_get_type_string(self, property_factory, mocker, required, no_optional, json, expected, quoted):
         from openapi_python_client.parser.properties import Property
 
         mocker.patch.object(Property, "_type_string", "TestType")
         mocker.patch.object(Property, "_json_type_string", "str")
-        p = property_factory(required=required, nullable=nullable)
+        p = property_factory(required=required)
         assert p.get_type_string(no_optional=no_optional, json=json, quoted=quoted) == expected
 
     @pytest.mark.parametrize(
@@ -56,15 +46,8 @@ class TestProperty:
         p = property_factory()
         assert p.get_imports(prefix="") == set()
 
-        p = property_factory(name="test", required=False, default=None, nullable=False)
+        p = property_factory(name="test", required=False, default=None)
         assert p.get_imports(prefix="") == {"from types import UNSET, Unset", "from typing import Union"}
-
-        p = property_factory(name="test", required=False, default=None, nullable=True)
-        assert p.get_imports(prefix="") == {
-            "from types import UNSET, Unset",
-            "from typing import Optional",
-            "from typing import Union",
-        }
 
     @pytest.mark.parametrize(
         "quoted,expected",
