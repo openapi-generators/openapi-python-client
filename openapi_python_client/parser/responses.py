@@ -5,6 +5,8 @@ from typing import Optional, Tuple, Union
 
 from attrs import define
 
+from openapi_python_client import utils
+
 from .. import Config
 from .. import schema as oai
 from ..utils import PythonIdentifier
@@ -22,6 +24,8 @@ class Response:
 
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
+    content_type = utils.get_content_type(content_type)
+
     known_content_types = {
         "application/json": "response.json()",
         "application/octet-stream": "response.content",

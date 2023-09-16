@@ -68,7 +68,9 @@ def test_response_from_data_unsupported_content_type():
 def test_response_from_data_no_content_schema(any_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
-    data = oai.Response.model_construct(description="", content={"application/json": oai.MediaType.model_construct()})
+    data = oai.Response.model_construct(
+        description="", content={"application/vnd.api+json; version=2.2": oai.MediaType.model_construct()}
+    )
     response, schemas = response_from_data(
         status_code=200, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
     )
