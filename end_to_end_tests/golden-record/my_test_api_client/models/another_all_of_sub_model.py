@@ -56,14 +56,14 @@ class AnotherAllOfSubModel:
         if isinstance(_type, Unset):
             type = UNSET
         else:
-            type = AnotherAllOfSubModelType(_type)
+            type = AnotherAllOfSubModelType.from_val(_type)
 
         _type_enum = d.pop("type_enum", UNSET)
         type_enum: Union[Unset, AnotherAllOfSubModelTypeEnum]
         if isinstance(_type_enum, Unset):
             type_enum = UNSET
         else:
-            type_enum = AnotherAllOfSubModelTypeEnum(_type_enum)
+            type_enum = AnotherAllOfSubModelTypeEnum.from_val(_type_enum)
 
         another_all_of_sub_model = cls(
             another_sub_property=another_sub_property,

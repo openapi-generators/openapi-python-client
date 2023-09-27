@@ -54,7 +54,7 @@ class AllOfSubModel:
         if isinstance(_type_enum, Unset):
             type_enum = UNSET
         else:
-            type_enum = AllOfSubModelTypeEnum(_type_enum)
+            type_enum = AllOfSubModelTypeEnum.from_val(_type_enum)
 
         all_of_sub_model = cls(
             a_sub_property=a_sub_property,

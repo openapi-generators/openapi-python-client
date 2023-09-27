@@ -30,7 +30,7 @@ class ModelWithAdditionalPropertiesRefed:
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_property = AnEnum(prop_dict)
+            additional_property = AnEnum.from_val(prop_dict)
 
             additional_properties[prop_name] = additional_property
 

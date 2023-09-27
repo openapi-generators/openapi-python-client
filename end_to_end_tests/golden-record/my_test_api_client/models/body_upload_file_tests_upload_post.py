@@ -261,7 +261,7 @@ class BodyUploadFileTestsUploadPost:
         if isinstance(_some_enum, Unset):
             some_enum = UNSET
         else:
-            some_enum = DifferentEnum(_some_enum)
+            some_enum = DifferentEnum.from_val(_some_enum)
 
         body_upload_file_tests_upload_post = cls(
             some_file=some_file,

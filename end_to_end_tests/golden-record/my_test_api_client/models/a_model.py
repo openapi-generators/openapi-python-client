@@ -233,9 +233,9 @@ class AModel:
         from ..models.model_with_union_property import ModelWithUnionProperty
 
         d = src_dict.copy()
-        an_enum_value = AnEnum(d.pop("an_enum_value"))
+        an_enum_value = AnEnum.from_val(d.pop("an_enum_value"))
 
-        an_allof_enum_with_overridden_default = AnAllOfEnum(d.pop("an_allof_enum_with_overridden_default"))
+        an_allof_enum_with_overridden_default = AnAllOfEnum.from_val(d.pop("an_allof_enum_with_overridden_default"))
 
         def _parse_a_camel_date_time(data: object) -> Union[datetime.date, datetime.datetime]:
             try:
@@ -288,7 +288,7 @@ class AModel:
         if isinstance(_an_optional_allof_enum, Unset):
             an_optional_allof_enum = UNSET
         else:
-            an_optional_allof_enum = AnAllOfEnum(_an_optional_allof_enum)
+            an_optional_allof_enum = AnAllOfEnum.from_val(_an_optional_allof_enum)
 
         nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
@@ -296,7 +296,7 @@ class AModel:
             nested_list_of_enums_item = []
             _nested_list_of_enums_item = nested_list_of_enums_item_data
             for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
-                nested_list_of_enums_item_item = DifferentEnum(nested_list_of_enums_item_item_data)
+                nested_list_of_enums_item_item = DifferentEnum.from_val(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 

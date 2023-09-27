@@ -55,7 +55,7 @@ class ModelWithUnionProperty:
                 if isinstance(_a_property_type_0, Unset):
                     a_property_type_0 = UNSET
                 else:
-                    a_property_type_0 = AnEnum(_a_property_type_0)
+                    a_property_type_0 = AnEnum.from_val(_a_property_type_0)
 
                 return a_property_type_0
             except:  # noqa: E722
@@ -67,7 +67,7 @@ class ModelWithUnionProperty:
             if isinstance(_a_property_type_1, Unset):
                 a_property_type_1 = UNSET
             else:
-                a_property_type_1 = AnIntEnum(_a_property_type_1)
+                a_property_type_1 = AnIntEnum.from_val(_a_property_type_1)
 
             return a_property_type_1
 

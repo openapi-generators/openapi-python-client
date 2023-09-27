@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 
 class {{ enum.class_info.name }}(str, Enum):
     {% for key, value in enum.values|dictsort(true) %}
@@ -7,3 +8,16 @@ class {{ enum.class_info.name }}(str, Enum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+    @classmethod
+    def from_val(cls, value: Union[str, "{{ enum.class_info.name }}"]) -> "{{ enum.class_info.name }}":
+        if isinstance(value, {{ enum.class_info.name }}):
+            return value
+
+        value = value.lower()
+
+        for enum in cls:
+            if enum.value.lower() == value:
+                return enum
+
+        return {{ enum.class_info.name }}(value)

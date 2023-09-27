@@ -54,7 +54,7 @@ class AllOfHasPropertiesButNoType:
         if isinstance(_type_enum, Unset):
             type_enum = UNSET
         else:
-            type_enum = AllOfHasPropertiesButNoTypeTypeEnum(_type_enum)
+            type_enum = AllOfHasPropertiesButNoTypeTypeEnum.from_val(_type_enum)
 
         all_of_has_properties_but_no_type = cls(
             a_sub_property=a_sub_property,

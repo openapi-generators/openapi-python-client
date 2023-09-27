@@ -216,7 +216,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         enum_properties_ref = []
         _enum_properties_ref = d.pop("enum_properties_ref")
         for componentsschemas_an_other_array_of_enum_item_data in _enum_properties_ref:
-            componentsschemas_an_other_array_of_enum_item = AnEnum(componentsschemas_an_other_array_of_enum_item_data)
+            componentsschemas_an_other_array_of_enum_item = AnEnum.from_val(
+                componentsschemas_an_other_array_of_enum_item_data
+            )
 
             enum_properties_ref.append(componentsschemas_an_other_array_of_enum_item)
 
@@ -262,7 +264,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         enum_properties = []
         _enum_properties = d.pop("enum_properties")
         for componentsschemas_an_array_of_enum_item_data in _enum_properties:
-            componentsschemas_an_array_of_enum_item = AnEnum(componentsschemas_an_array_of_enum_item_data)
+            componentsschemas_an_array_of_enum_item = AnEnum.from_val(componentsschemas_an_array_of_enum_item_data)
 
             enum_properties.append(componentsschemas_an_array_of_enum_item)
 
@@ -301,7 +303,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         bytestream_properties = cast(List[str], d.pop("bytestream_properties"))
 
-        enum_property_ref = AnEnum(d.pop("enum_property_ref"))
+        enum_property_ref = AnEnum.from_val(d.pop("enum_property_ref"))
 
         str_property_ref = d.pop("str_property_ref")
 
