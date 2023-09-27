@@ -10,6 +10,7 @@ from . import (
     get_basic_list_of_floats,
     get_basic_list_of_integers,
     get_basic_list_of_strings,
+    get_tag_override,
     get_user_list,
     int_enum_tests_int_enum_post,
     json_body_tests_json_body_post,
@@ -152,6 +153,10 @@ class TestsEndpoints:
         Test optional cookie parameters
         """
         return token_with_cookie_auth_token_with_cookie_get
+
+    @classmethod
+    def get_tag_override(cls) -> types.ModuleType:
+        return get_tag_override
 
     @classmethod
     def callback_test(cls) -> types.ModuleType:
