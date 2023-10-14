@@ -26,7 +26,7 @@ def _compare_directories(
     """
     first_printable = record.relative_to(Path.cwd())
     second_printable = test_subject.relative_to(Path.cwd())
-    dc = dircmp(record, test_subject)
+    dc = dircmp(record, test_subject, ignore=[".ruff_cache"])
     missing_files = dc.left_only + dc.right_only
     if missing_files:
         pytest.fail(f"{first_printable} or {second_printable} was missing: {missing_files}", pytrace=False)
