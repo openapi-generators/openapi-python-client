@@ -30,7 +30,6 @@ class EnumProperty(Property):
         oai.ParameterLocation.HEADER,
     }
 
-    # pylint: disable=unused-argument
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self.class_info.name
 

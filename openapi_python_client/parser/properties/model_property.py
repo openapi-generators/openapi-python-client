@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import ClassVar, NamedTuple
 
 from attrs import define, evolve
 
-from ... import Config
+from ... import Config, utils
 from ... import schema as oai
-from ... import utils
 from ..errors import ParseError, PropertyError
 from .enum_property import EnumProperty
 from .property import Property
@@ -21,12 +20,12 @@ class ModelProperty(Property):
     class_info: Class
     data: oai.Schema
     description: str
-    roots: Set[Union[ReferencePath, utils.ClassName]]
-    required_properties: Optional[List[Property]]
-    optional_properties: Optional[List[Property]]
-    relative_imports: Optional[Set[str]]
-    lazy_imports: Optional[Set[str]]
-    additional_properties: Optional[Union[bool, Property]]
+    roots: set[ReferencePath | utils.ClassName]
+    required_properties: list[Property] | None
+    optional_properties: list[Property] | None
+    relative_imports: set[str] | None
+    lazy_imports: set[str] | None
+    additional_properties: bool | Property | None
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
@@ -45,7 +44,7 @@ class ModelProperty(Property):
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return f'"{self.class_info.name}"' if quoted else self.class_info.name
 
-    def get_imports(self, *, prefix: str) -> Set[str]:
+    def get_imports(self, *, prefix: str) -> set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere
 
@@ -62,7 +61,7 @@ class ModelProperty(Property):
         )
         return imports
 
-    def get_lazy_imports(self, *, prefix: str) -> Set[str]:
+    def get_lazy_imports(self, *, prefix: str) -> set[str]:
         """Get a set of lazy import strings that should be included when this property is used somewhere
 
         Args:
@@ -71,7 +70,7 @@ class ModelProperty(Property):
         """
         return {f"from {prefix}{self.self_import}"}
 
-    def set_relative_imports(self, relative_imports: Set[str]) -> None:
+    def set_relative_imports(self, relative_imports: set[str]) -> None:
         """Set the relative imports set for this ModelProperty, filtering out self imports
 
         Args:
@@ -79,7 +78,7 @@ class ModelProperty(Property):
         """
         object.__setattr__(self, "relative_imports", {ri for ri in relative_imports if self.self_import not in ri})
 
-    def set_lazy_imports(self, lazy_imports: Set[str]) -> None:
+    def set_lazy_imports(self, lazy_imports: set[str]) -> None:
         """Set the lazy imports set for this ModelProperty, filtering out self imports
 
         Args:
@@ -129,24 +128,24 @@ def _types_are_subset(first: EnumProperty, second: Property) -> bool:
     return False
 
 
-def _enum_subset(first: Property, second: Property) -> Optional[EnumProperty]:
+def _enum_subset(first: Property, second: Property) -> EnumProperty | None:
     """Return the EnumProperty that is the subset of the other, if possible."""
 
     if isinstance(first, EnumProperty):
         if isinstance(second, EnumProperty):
             if _values_are_subset(first, second):
                 return first
-            if _values_are_subset(second, first):  # pylint: disable=arguments-out-of-order
+            if _values_are_subset(second, first):
                 return second
             return None
         return first if _types_are_subset(first, second) else None
-    # pylint: disable=arguments-out-of-order
+
     if isinstance(second, EnumProperty) and _types_are_subset(second, first):
         return second
     return None
 
 
-def _merge_properties(first: Property, second: Property) -> Union[Property, PropertyError]:
+def _merge_properties(first: Property, second: Property) -> Property | PropertyError:
     required = first.required or second.required
 
     err = None
@@ -169,30 +168,29 @@ def _merge_properties(first: Property, second: Property) -> Union[Property, Prop
 
 
 class _PropertyData(NamedTuple):
-    optional_props: List[Property]
-    required_props: List[Property]
-    relative_imports: Set[str]
-    lazy_imports: Set[str]
+    optional_props: list[Property]
+    required_props: list[Property]
+    relative_imports: set[str]
+    lazy_imports: set[str]
     schemas: Schemas
 
 
-# pylint: disable=too-many-locals,too-many-branches,too-many-return-statements
-def _process_properties(
+def _process_properties(  # noqa: PLR0912, PLR0911
     *,
     data: oai.Schema,
     schemas: Schemas,
     class_name: utils.ClassName,
     config: Config,
-    roots: Set[Union[ReferencePath, utils.ClassName]],
-) -> Union[_PropertyData, PropertyError]:
+    roots: set[ReferencePath | utils.ClassName],
+) -> _PropertyData | PropertyError:
     from . import property_from_data
 
-    properties: Dict[str, Property] = {}
-    relative_imports: Set[str] = set()
-    lazy_imports: Set[str] = set()
+    properties: dict[str, Property] = {}
+    relative_imports: set[str] = set()
+    lazy_imports: set[str] = set()
     required_set = set(data.required or [])
 
-    def _add_if_no_conflict(new_prop: Property) -> Optional[PropertyError]:
+    def _add_if_no_conflict(new_prop: Property) -> PropertyError | None:
         nonlocal properties
 
         existing = properties.get(new_prop.name)
@@ -232,7 +230,7 @@ def _process_properties(
 
     for key, value in unprocessed_props.items():
         prop_required = key in required_set
-        prop_or_error: Union[Property, PropertyError, None]
+        prop_or_error: Property | (PropertyError | None)
         prop_or_error, schemas = property_from_data(
             name=key,
             required=prop_required,
@@ -269,12 +267,12 @@ def _process_properties(
 
 def _get_additional_properties(
     *,
-    schema_additional: Union[None, bool, oai.Reference, oai.Schema],
+    schema_additional: None | (bool | (oai.Reference | oai.Schema)),
     schemas: Schemas,
     class_name: utils.ClassName,
     config: Config,
-    roots: Set[Union[ReferencePath, utils.ClassName]],
-) -> Tuple[Union[bool, Property, PropertyError], Schemas]:
+    roots: set[ReferencePath | utils.ClassName],
+) -> tuple[bool | (Property | PropertyError), Schemas]:
     from . import property_from_data
 
     if schema_additional is None:
@@ -305,8 +303,8 @@ def _process_property_data(
     schemas: Schemas,
     class_info: Class,
     config: Config,
-    roots: Set[Union[ReferencePath, utils.ClassName]],
-) -> Tuple[Union[Tuple[_PropertyData, Union[bool, Property]], PropertyError], Schemas]:
+    roots: set[ReferencePath | utils.ClassName],
+) -> tuple[tuple[_PropertyData, bool | Property] | PropertyError, Schemas]:
     property_data = _process_properties(
         data=data, schemas=schemas, class_name=class_info.name, config=config, roots=roots
     )
@@ -330,7 +328,7 @@ def _process_property_data(
     return (property_data, additional_properties), schemas
 
 
-def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config) -> Union[Schemas, PropertyError]:
+def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config) -> Schemas | PropertyError:
     """Populate a ModelProperty instance's property data
     Args:
         model_prop: The ModelProperty to build property data for
@@ -359,18 +357,17 @@ def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config
     return schemas
 
 
-# pylint: disable=too-many-locals
 def build_model_property(
     *,
     data: oai.Schema,
     name: str,
     schemas: Schemas,
     required: bool,
-    parent_name: Optional[str],
+    parent_name: str | None,
     config: Config,
     process_properties: bool,
-    roots: Set[Union[ReferencePath, utils.ClassName]],
-) -> Tuple[Union[ModelProperty, PropertyError], Schemas]:
+    roots: set[ReferencePath | utils.ClassName],
+) -> tuple[ModelProperty | PropertyError, Schemas]:
     """
     A single ModelProperty from its OAI data
 
@@ -395,11 +392,11 @@ def build_model_property(
             class_string = title
     class_info = Class.from_string(string=class_string, config=config)
     model_roots = {*roots, class_info.name}
-    required_properties: Optional[List[Property]] = None
-    optional_properties: Optional[List[Property]] = None
-    relative_imports: Optional[Set[str]] = None
-    lazy_imports: Optional[Set[str]] = None
-    additional_properties: Optional[Union[bool, Property]] = None
+    required_properties: list[Property] | None = None
+    optional_properties: list[Property] | None = None
+    relative_imports: set[str] | None = None
+    lazy_imports: set[str] | None = None
+    additional_properties: bool | Property | None = None
     if process_properties:
         data_or_err, schemas = _process_property_data(
             data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots

@@ -14,8 +14,6 @@ def _get_kwargs(
     *,
     multipart_data: BodyUploadFileTestsUploadPost,
 ) -> Dict[str, Any]:
-    pass
-
     multipart_multipart_data = multipart_data.to_multipart()
 
     return {

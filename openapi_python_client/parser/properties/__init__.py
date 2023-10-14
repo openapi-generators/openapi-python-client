@@ -16,9 +16,8 @@ from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, Set, 
 
 from attrs import define, evolve
 
-from ... import Config
+from ... import Config, utils
 from ... import schema as oai
-from ... import utils
 from ...schema import DataType
 from ..errors import ParameterError, ParseError, PropertyError, ValidationError
 from .converter import convert, convert_chain
@@ -189,7 +188,6 @@ class ListProperty(Property, Generic[InnerProp]):
     inner_property: InnerProp
     template: ClassVar[str] = "list_property.py.jinja"
 
-    # pylint: disable=unused-argument
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return f"List[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
 
@@ -237,7 +235,6 @@ class UnionProperty(Property):
             return inner_types.pop()
         return f"Union[{', '.join(sorted(inner_types))}]"
 
-    # pylint: disable=unused-argument
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
@@ -574,7 +571,6 @@ def build_list_property(
     )
 
 
-# pylint: disable=too-many-arguments
 def _property_from_ref(
     name: str,
     required: bool,
@@ -607,8 +603,7 @@ def _property_from_ref(
     return prop, schemas
 
 
-# pylint: disable=too-many-arguments,too-many-return-statements
-def _property_from_data(
+def _property_from_data(  # noqa: PLR0911
     name: str,
     required: bool,
     data: Union[oai.Reference, oai.Schema],

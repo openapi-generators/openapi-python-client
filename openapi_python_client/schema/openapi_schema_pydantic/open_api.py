@@ -1,4 +1,3 @@
-# pylint: disable=W0611
 from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator
@@ -8,7 +7,7 @@ from .external_documentation import ExternalDocumentation
 from .info import Info
 
 # Required to update forward ref after object creation
-from .path_item import PathItem
+from .path_item import PathItem  # noqa: F401
 from .paths import Paths
 from .security_requirement import SecurityRequirement
 from .server import Server

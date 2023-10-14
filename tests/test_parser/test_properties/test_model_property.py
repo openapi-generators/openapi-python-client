@@ -740,7 +740,6 @@ class TestProcessModel:
 
 def test_set_relative_imports(model_property_factory):
     from openapi_python_client.parser.properties import Class
-    from openapi_python_client.parser.properties.model_property import ModelProperty
 
     class_info = Class("ClassName", module_name="module_name")
     relative_imports = {"from typing import List", f"from ..models.{class_info.module_name} import {class_info.name}"}

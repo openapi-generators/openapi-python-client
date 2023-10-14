@@ -72,6 +72,6 @@ class PathItem(BaseModel):
 
 
 # Operation uses PathItem via Callback, so we need late import and to update forward refs due to circular dependency
-from .operation import Operation  # pylint: disable=wrong-import-position unused-import
+from .operation import Operation  # noqa: E402
 
 PathItem.model_rebuild()

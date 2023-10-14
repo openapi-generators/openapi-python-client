@@ -12,7 +12,7 @@ from ..errors import ParseError
 if TYPE_CHECKING:  # pragma: no cover
     from .model_property import ModelProperty
 else:
-    ModelProperty = "ModelProperty"  # pylint: disable=invalid-name
+    ModelProperty = "ModelProperty"
 
 
 @define
@@ -114,7 +114,6 @@ class Property:
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 
-    # pylint: disable=unused-argument
     def get_lazy_imports(self, *, prefix: str) -> Set[str]:
         """Get a set of lazy import strings that should be included when this property is used somewhere
 

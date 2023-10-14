@@ -27,7 +27,7 @@ This tool focuses on creating the best developer experience for Python developer
 
 I recommend you install with [pipx](https://pipxproject.github.io/pipx/) so you don't conflict with any other packages you might have: `pipx install openapi-python-client --include-deps`.
 
-> Note the `--include-deps` option which will also make `black`, `isort`, and `autoflake` available in your path so that `openapi-python-client` can use them to clean up the generated code.
+> Note the `--include-deps` option which will also make `black` and `ruff` available in your path so that `openapi-python-client` can use them to clean up the generated code.
 
 **If you use `pipx run` then the post-generation hooks will not be available unless you install them manually.**
 
@@ -151,8 +151,7 @@ In the config file, there's an easy way to tell `openapi-python-client` to run a
 
 ```yaml
 post_hooks:
-   - "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports ."
-   - "isort ."
+   - "ruff check . --fix"
    - "black ."
 ```
 

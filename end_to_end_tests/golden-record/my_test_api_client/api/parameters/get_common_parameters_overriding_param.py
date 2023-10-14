@@ -13,8 +13,6 @@ def _get_kwargs(
     *,
     param_query: str = "overridden_in_GET",
 ) -> Dict[str, Any]:
-    pass
-
     params: Dict[str, Any] = {}
     params["param"] = param_query
 

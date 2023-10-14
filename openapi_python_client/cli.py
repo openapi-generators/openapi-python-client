@@ -31,7 +31,8 @@ def _process_config(path: Optional[pathlib.Path]) -> Config:
 
 
 # noinspection PyUnusedLocal
-# pylint: disable=unused-argument
+
+
 @app.callback(name="openapi-python-client")
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
@@ -110,7 +111,6 @@ _meta_option = typer.Option(
 CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to use")
 
 
-# pylint: disable=too-many-arguments
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
@@ -149,7 +149,6 @@ def generate(
     handle_errors(errors, fail_on_warning)
 
 
-# pylint: disable=too-many-arguments
 @app.command()
 def update(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),

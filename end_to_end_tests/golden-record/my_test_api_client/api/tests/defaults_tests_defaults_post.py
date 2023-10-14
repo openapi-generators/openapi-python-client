@@ -27,8 +27,6 @@ def _get_kwargs(
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Dict[str, Any]:
-    pass
-
     params: Dict[str, Any] = {}
     params["string_prop"] = string_prop
 

@@ -15,8 +15,6 @@ def _get_kwargs(
     *,
     multipart_data: PostBodyMultipartMultipartData,
 ) -> Dict[str, Any]:
-    pass
-
     multipart_multipart_data = multipart_data.to_multipart()
 
     return {

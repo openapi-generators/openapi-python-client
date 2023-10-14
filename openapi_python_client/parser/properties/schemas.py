@@ -24,7 +24,7 @@ from ..errors import ParameterError, ParseError, PropertyError
 if TYPE_CHECKING:  # pragma: no cover
     from .property import Property
 else:
-    Property = "Property"  # pylint: disable=invalid-name
+    Property = "Property"
 
 
 ReferencePath = NewType("ReferencePath", str)

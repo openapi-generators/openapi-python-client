@@ -13,8 +13,6 @@ def _get_kwargs(
     *,
     multipart_data: List[File],
 ) -> Dict[str, Any]:
-    pass
-
     multipart_multipart_data = []
     for multipart_data_item_data in multipart_data:
         multipart_data_item = multipart_data_item_data.to_tuple()
