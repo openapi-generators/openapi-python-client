@@ -8,7 +8,6 @@ from openapi_python_client import Config, GeneratorError
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
-from openapi_python_client.schema import ParameterLocation
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
 
@@ -449,7 +448,8 @@ class TestEndpoint:
 
         assert response.errors == [
             ParseError(
-                detail=f"Invalid response status code {response_status_code} (not a valid HTTP status code), response will be ommitted from generated client"
+                detail=f"Invalid response status code {response_status_code} (not a valid HTTP status code), "
+                "response will be ommitted from generated client"
             )
         ]
         response_from_data.assert_not_called()
@@ -479,12 +479,12 @@ class TestEndpoint:
         )
         assert response.errors == [
             ParseError(
-                detail=f"Cannot parse response for status code 200 (some problem), "
+                detail="Cannot parse response for status code 200 (some problem), "
                 "response will be ommitted from generated client",
                 data=parse_error.data,
             ),
             ParseError(
-                detail=f"Cannot parse response for status code 404 (some problem), "
+                detail="Cannot parse response for status code 404 (some problem), "
                 "response will be ommitted from generated client",
                 data=parse_error.data,
             ),
@@ -704,7 +704,7 @@ class TestEndpoint:
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
-        property_from_data = mocker.patch(
+        mocker.patch(
             f"{MODULE_NAME}.property_from_data",
             side_effect=[
                 (path_prop_conflicted, schemas_1),
@@ -866,7 +866,7 @@ class TestEndpoint:
             endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=Config()
         )
 
-        assert len(endpoint.query_parameters) == 4, "Not all query params were added"
+        assert len(endpoint.query_parameters) == 4, "Not all query params were added"  # noqa: PLR2004
         for param in endpoint.query_parameters.values():
             if param.name == "not_null_required":
                 assert not param.nullable
@@ -978,9 +978,7 @@ class TestEndpoint:
         parse_error = ParseError(data=mocker.MagicMock())
         return_schemas = mocker.MagicMock()
         return_parameters = mocker.MagicMock()
-        add_parameters = mocker.patch.object(
-            Endpoint, "add_parameters", return_value=(parse_error, return_schemas, return_parameters)
-        )
+        mocker.patch.object(Endpoint, "add_parameters", return_value=(parse_error, return_schemas, return_parameters))
         data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
@@ -1011,7 +1009,7 @@ class TestEndpoint:
         parse_error = ParseError(data=mocker.MagicMock())
         param_schemas = mocker.MagicMock()
         return_parameters = mocker.MagicMock()
-        add_parameters = mocker.patch.object(
+        mocker.patch.object(
             Endpoint, "add_parameters", return_value=(mocker.MagicMock(), param_schemas, return_parameters)
         )
         response_schemas = mocker.MagicMock()

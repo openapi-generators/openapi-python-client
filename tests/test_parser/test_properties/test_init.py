@@ -464,7 +464,7 @@ class TestPropertyFromData:
         }
 
     def test_property_from_data_null_enum(self, enum_property_factory, none_property_factory):
-        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         data = Schema(title="AnEnumWithOnlyNull", enum=[None], nullable=False, default=None)
@@ -589,7 +589,7 @@ class TestPropertyFromData:
         assert prop == PropertyError(data=data, detail="x is an invalid default for enum MyEnum")
 
     def test_property_from_data_ref_model(self, model_property_factory):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
 
         name = "new_name"
         required = False
@@ -831,7 +831,7 @@ class TestPropertyFromData:
         )
 
     def test_property_from_data_union_of_one_element(self, mocker, model_property_factory):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
         name = "new_name"
         required = False
@@ -1202,7 +1202,7 @@ class TestCreateSchemas:
                 call("#/components/schemas/first"),
             ]
         )
-        assert update_schemas_with_data.call_count == 3
+        assert update_schemas_with_data.call_count == 3  # noqa: PLR2004
         assert result.errors == [PropertyError()]
 
 
@@ -1443,7 +1443,7 @@ class TestBuildParameters:
                 call("#/components/parameters/first"),
             ]
         )
-        assert update_parameters_with_data.call_count == 3
+        assert update_parameters_with_data.call_count == 3  # noqa: PLR2004
         assert result.errors == [ParameterError()]
 
 
@@ -1456,11 +1456,17 @@ def test_build_enum_property_conflict():
     _, schemas = build_enum_property(
         data=data, name="Existing", required=True, schemas=schemas, enum=["a"], parent_name=None, config=Config()
     )
-    err, schemas = build_enum_property(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["a", "b"], parent_name=None, config=Config()
+    err, new_schemas = build_enum_property(
+        data=data,
+        name="Existing",
+        required=True,
+        schemas=schemas,
+        enum=["a", "b"],
+        parent_name=None,
+        config=Config(),
     )
 
-    assert schemas == schemas
+    assert schemas == new_schemas
     assert err == PropertyError(detail="Found conflicting enums named Existing with incompatible values.", data=data)
 
 
@@ -1470,11 +1476,11 @@ def test_build_enum_property_no_values():
     data = oai.Schema()
     schemas = Schemas()
 
-    err, schemas = build_enum_property(
+    err, new_schemas = build_enum_property(
         data=data, name="Existing", required=True, schemas=schemas, enum=[], parent_name=None, config=Config()
     )
 
-    assert schemas == schemas
+    assert schemas == new_schemas
     assert err == PropertyError(detail="No values provided for Enum", data=data)
 
 
@@ -1484,11 +1490,11 @@ def test_build_enum_property_bad_default():
     data = oai.Schema(default="B")
     schemas = Schemas()
 
-    err, schemas = build_enum_property(
+    err, new_schemas = build_enum_property(
         data=data, name="Existing", required=True, schemas=schemas, enum=["A"], parent_name=None, config=Config()
     )
 
-    assert schemas == schemas
+    assert schemas == new_schemas
     assert err == PropertyError(detail="B is an invalid default for enum Existing", data=data)
 
 

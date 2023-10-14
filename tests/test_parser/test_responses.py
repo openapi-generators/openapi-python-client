@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError, PropertyError
-from openapi_python_client.parser.properties import AnyProperty, Schemas, StringProperty
+from openapi_python_client.parser.properties import Schemas
 
 MODULE_NAME = "openapi_python_client.parser.responses"
 

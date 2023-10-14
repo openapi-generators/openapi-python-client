@@ -12,8 +12,6 @@ def _get_kwargs(
     *,
     common: Union[Unset, None, str] = UNSET,
 ) -> Dict[str, Any]:
-    pass
-
     params: Dict[str, Any] = {}
     params["common"] = common
 

@@ -12,8 +12,6 @@ def _get_kwargs(
     *,
     import_: str,
 ) -> Dict[str, Any]:
-    pass
-
     params: Dict[str, Any] = {}
     params["import"] = import_
 

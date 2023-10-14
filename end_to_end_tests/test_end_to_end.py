@@ -1,8 +1,7 @@
-import os
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import pytest
 from typer.testing import CliRunner
