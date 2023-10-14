@@ -12,8 +12,6 @@ from ...types import Response
 def _get_kwargs(
     form_data: AFormData,
 ) -> Dict[str, Any]:
-    pass
-
     return {
         "method": "post",
         "url": "/tests/post_form_data",

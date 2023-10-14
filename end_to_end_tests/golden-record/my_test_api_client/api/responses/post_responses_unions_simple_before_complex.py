@@ -12,8 +12,6 @@ from ...types import Response
 
 
 def _get_kwargs() -> Dict[str, Any]:
-    pass
-
     return {
         "method": "post",
         "url": "/responses/unions/simple_before_complex",

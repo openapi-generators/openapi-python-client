@@ -235,7 +235,7 @@ class TestGetJson:
     def test__get_document_json(self, mocker):
         class FakeResponse:
             content = b'{\n\t"foo": "bar"}'
-            headers = {"content-type": "application/json; encoding=utf8"}
+            headers = {"content-type": "application/json; encoding=utf8"}  # noqa: RUF012
 
         get = mocker.patch("httpx.get", return_value=FakeResponse())
         yaml_loads = mocker.patch("yaml.safe_load")
@@ -255,7 +255,7 @@ class TestGetJson:
     def test__get_document_bad_json(self, mocker):
         class FakeResponse:
             content = b'{"foo"}'
-            headers = {"content-type": "application/json; encoding=utf8"}
+            headers = {"content-type": "application/json; encoding=utf8"}  # noqa: RUF012
 
         get = mocker.patch("httpx.get", return_value=FakeResponse())
 
@@ -625,6 +625,6 @@ def test_custom_templates(mocker):
         config=Config(),
     )
     assert isinstance(project.env.loader, jinja2.ChoiceLoader)
-    assert len(project.env.loader.loaders) == 2
+    assert len(project.env.loader.loaders) == 2  # noqa: PLR2004
     assert isinstance(project.env.loader.loaders[0], jinja2.FileSystemLoader)
     assert isinstance(project.env.loader.loaders[1], jinja2.PackageLoader)

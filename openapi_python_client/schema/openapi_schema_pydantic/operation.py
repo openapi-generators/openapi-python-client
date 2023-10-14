@@ -4,11 +4,11 @@ from pydantic import BaseModel, ConfigDict
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
-from .header import Header  # pylint: disable=unused-import
+from .header import Header  # noqa: F401
 from .parameter import Parameter
 
 # Required to update forward ref after object creation, as this is not imported yet
-from .path_item import PathItem  # pylint: disable=unused-import
+from .path_item import PathItem  # noqa: F401
 from .reference import Reference
 from .request_body import RequestBody
 from .responses import Responses

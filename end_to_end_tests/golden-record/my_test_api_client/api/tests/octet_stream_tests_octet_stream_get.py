@@ -10,8 +10,6 @@ from ...types import File, Response
 
 
 def _get_kwargs() -> Dict[str, Any]:
-    pass
-
     return {
         "method": "get",
         "url": "/tests/octet_stream",

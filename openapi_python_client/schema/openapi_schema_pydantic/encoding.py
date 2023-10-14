@@ -7,7 +7,7 @@ from .reference import Reference
 if TYPE_CHECKING:  # pragma: no cover
     from .header import Header
 else:
-    Header = "Header"  # pylint: disable=invalid-name
+    Header = "Header"
 
 
 class Encoding(BaseModel):

@@ -11,7 +11,7 @@ jobs:
   test:
     strategy:
       matrix:
-        python: [ "3.8", "3.9", "3.10", "3.11" ]
+        python: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -48,17 +48,14 @@ jobs:
       - name: Run Black
         run: poetry run black . --check
 
-      - name: Run isort
-        run: poetry run isort . --check
-
       - name: Run safety
         run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
 
       - name: Run mypy
         run: poetry run mypy --show-error-codes openapi_python_client
 
-      - name: Run pylint
-        run: poetry run pylint openapi_python_client
+      - name: Run Ruff
+        run: poetry run ruff check .
 
       - name: Run pytest
         run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
@@ -106,7 +103,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.8"
       - name: Get Python Version
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
