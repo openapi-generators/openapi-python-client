@@ -9,14 +9,19 @@ from ... import Config, utils
 from ... import schema as oai
 from ..errors import ParseError, PropertyError
 from .enum_property import EnumProperty
-from .property import Property
+from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
 @define
-class ModelProperty(Property):
+class ModelProperty(PropertyProtocol):
     """A property which refers to another Schema"""
 
+    name: str
+    required: bool
+    default: Value | None
+    python_name: utils.PythonIdentifier
+    example: str | None
     class_info: Class
     data: oai.Schema
     description: str
@@ -31,6 +36,10 @@ class ModelProperty(Property):
     template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
     is_multipart_body: bool = False
+
+    @classmethod
+    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+        return None
 
     def __attrs_post_init__(self) -> None:
         if self.relative_imports:
@@ -112,6 +121,9 @@ class ModelProperty(Property):
         if no_optional or self.required:
             return type_string
         return f"Union[Unset, {type_string}]"
+
+
+from .property import Property  # noqa: E402
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -240,7 +252,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
             config=config,
             roots=roots,
         )
-        if isinstance(prop_or_error, Property):
+        if not isinstance(prop_or_error, PropertyError):
             prop_or_error = _add_if_no_conflict(prop_or_error)
         if isinstance(prop_or_error, PropertyError):
             return prop_or_error
@@ -319,11 +331,13 @@ def _process_property_data(
         config=config,
         roots=roots,
     )
-    if isinstance(additional_properties, Property):
+    if isinstance(additional_properties, PropertyError):
+        return additional_properties, schemas
+    elif isinstance(additional_properties, bool):
+        pass
+    else:
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
         property_data.lazy_imports.update(additional_properties.get_lazy_imports(prefix=".."))
-    elif isinstance(additional_properties, PropertyError):
-        return additional_properties, schemas
 
     return (property_data, additional_properties), schemas
 

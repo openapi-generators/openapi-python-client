@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Union
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -12,6 +12,8 @@ from .paths import Paths
 from .security_requirement import SecurityRequirement
 from .server import Server
 from .tag import Tag
+
+NUM_SEMVER_PARTS = 3
 
 
 class OpenAPI(BaseModel):
@@ -37,7 +39,7 @@ class OpenAPI(BaseModel):
     def check_openapi_version(cls, value: str) -> str:
         """Validates that the declared OpenAPI version is a supported one"""
         parts = value.split(".")
-        if len(parts) != 3:
+        if len(parts) != NUM_SEMVER_PARTS:
             raise ValueError(f"Invalid OpenAPI version {value}")
         if parts[0] != "3":
             raise ValueError(f"Only OpenAPI versions 3.* are supported, got {value}")

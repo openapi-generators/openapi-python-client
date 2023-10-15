@@ -643,15 +643,15 @@ class TestEndpoint:
         with pytest.raises(pydantic.ValidationError):
             oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
 
-    def test__add_parameters_with_location_postfix_conflict1(self, mocker, property_factory):
+    def test__add_parameters_with_location_postfix_conflict1(self, mocker, any_property_factory):
         """Checks when the PythonIdentifier of new parameter already used."""
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
 
-        path_prop_conflicted = property_factory(name="prop_name_path", required=True, default=None)
-        query_prop = property_factory(name="prop_name", required=True, default=None)
-        path_prop = property_factory(name="prop_name", required=True, default=None)
+        path_prop_conflicted = any_property_factory(name="prop_name_path", required=True, default=None)
+        query_prop = any_property_factory(name="prop_name", required=True, default=None)
+        path_prop = any_property_factory(name="prop_name", required=True, default=None)
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -693,14 +693,14 @@ class TestEndpoint:
         assert isinstance(result, ParseError)
         assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 
-    def test__add_parameters_with_location_postfix_conflict2(self, mocker, property_factory):
+    def test__add_parameters_with_location_postfix_conflict2(self, mocker, any_property_factory):
         """Checks when an existing parameter has a conflicting PythonIdentifier after renaming."""
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
-        path_prop_conflicted = property_factory(name="prop_name_path", required=True, default=None)
-        path_prop = property_factory(name="prop_name", required=True, default=None)
-        query_prop = property_factory(name="prop_name", required=True, default=None)
+        path_prop_conflicted = any_property_factory(name="prop_name_path", required=True, default=None)
+        path_prop = any_property_factory(name="prop_name", required=True, default=None)
+        query_prop = any_property_factory(name="prop_name", required=True, default=None)
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()

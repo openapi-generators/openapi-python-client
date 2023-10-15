@@ -104,10 +104,10 @@ def test_response_from_data_property_error(mocker):
     )
 
 
-def test_response_from_data_property(mocker, property_factory):
+def test_response_from_data_property(mocker, any_property_factory):
     from openapi_python_client.parser import responses
 
-    prop = property_factory()
+    prop = any_property_factory()
     property_from_data = mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     data = oai.Response.model_construct(
         description="", content={"application/json": oai.MediaType.model_construct(media_type_schema="something")}

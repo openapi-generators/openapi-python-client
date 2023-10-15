@@ -14,7 +14,6 @@ from openapi_python_client.parser.properties import (
     ListProperty,
     ModelProperty,
     NoneProperty,
-    Property,
     StringProperty,
     UnionProperty,
 )
@@ -70,21 +69,6 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
             **kwargs,
         }
         return EnumProperty(**kwargs)
-
-    return _factory
-
-
-@pytest.fixture
-def property_factory() -> Callable[..., Property]:
-    """
-    This fixture surfaces in the test as a function which manufactures Properties with defaults.
-
-    You can pass the same params into this as the Property constructor to override defaults.
-    """
-
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return Property(**kwargs)
 
     return _factory
 

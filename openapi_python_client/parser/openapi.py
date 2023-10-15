@@ -307,7 +307,7 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def add_parameters(  # noqa: PLR0911, PLR0912
+    def add_parameters(  # noqa: PLR0911
         *,
         endpoint: "Endpoint",
         data: Union[oai.Operation, oai.PathItem],
