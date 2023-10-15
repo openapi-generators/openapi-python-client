@@ -89,6 +89,7 @@ class PropertyProtocol(Protocol):
         no_optional: bool = False,
         json: bool = False,
         *,
+        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -97,6 +98,7 @@ class PropertyProtocol(Protocol):
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
             json: True if the type refers to the property after JSON serialization
+            multipart: True if the type should be used in a multipart request
             quoted: True if the type should be wrapped in quotes (if not a base type)
         """
         if json:

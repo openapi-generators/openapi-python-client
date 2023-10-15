@@ -95,9 +95,10 @@ class UnionProperty(PropertyProtocol):
                 return value_or_error
         return value_or_error
 
-    def _get_inner_type_strings(self, json: bool = False) -> set[str]:
+    def _get_inner_type_strings(self, json: bool, multipart: bool) -> set[str]:
         return {
-            p.get_type_string(no_optional=True, json=json, quoted=not p.is_base_type) for p in self.inner_properties
+            p.get_type_string(no_optional=True, json=json, multipart=multipart, quoted=not p.is_base_type)
+            for p in self.inner_properties
         }
 
     @staticmethod
@@ -107,12 +108,12 @@ class UnionProperty(PropertyProtocol):
         return f"Union[{', '.join(sorted(inner_types))}]"
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
-        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False, multipart=False))
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
-        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True, multipart=False))
 
-    def get_type_strings_in_union(self, no_optional: bool = False, json: bool = False) -> set[str]:
+    def get_type_strings_in_union(self, *, no_optional: bool = False, json: bool, multipart: bool) -> set[str]:
         """
         Get the set of all the types that should appear within the `Union` representing this property.
 
@@ -121,11 +122,12 @@ class UnionProperty(PropertyProtocol):
         Args:
             no_optional: Do not include `None` or `Unset` in this set.
             json: If True, this returns the JSON types, not the Python types, of this property.
+            multipart: If True, this returns the multipart types, not the Python types, of this property.
 
         Returns:
             A set of strings containing the types that should appear within `Union`.
         """
-        type_strings = self._get_inner_type_strings(json=json)
+        type_strings = self._get_inner_type_strings(json=json, multipart=multipart)
         if no_optional:
             return type_strings
         if not self.required:
@@ -137,6 +139,7 @@ class UnionProperty(PropertyProtocol):
         no_optional: bool = False,
         json: bool = False,
         *,
+        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -144,7 +147,7 @@ class UnionProperty(PropertyProtocol):
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
+        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json, multipart=multipart)
         return self._get_type_string_from_inner_type_strings(type_strings_in_union)
 
     def get_imports(self, *, prefix: str) -> set[str]:

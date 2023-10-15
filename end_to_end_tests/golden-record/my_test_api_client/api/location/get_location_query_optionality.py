@@ -12,30 +12,42 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     not_null_required: datetime.datetime,
-    null_required: Union[Unset, None, datetime.datetime] = UNSET,
-    null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
-    not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
+    null_required: Union[None, datetime.datetime],
+    null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
+    not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     json_not_null_required = not_null_required.isoformat()
 
     params["not_null_required"] = json_not_null_required
 
-    json_null_required: Union[Unset, None, str] = UNSET
-    if not isinstance(null_required, Unset):
-        json_null_required = null_required.isoformat() if null_required else None
+    json_null_required: Union[None, str]
+
+    if isinstance(null_required, datetime.datetime):
+        json_null_required = null_required.isoformat()
+
+    else:
+        json_null_required = null_required
 
     params["null_required"] = json_null_required
 
-    json_null_not_required: Union[Unset, None, str] = UNSET
-    if not isinstance(null_not_required, Unset):
-        json_null_not_required = null_not_required.isoformat() if null_not_required else None
+    json_null_not_required: Union[None, Unset, str]
+    if isinstance(null_not_required, Unset):
+        json_null_not_required = UNSET
+
+    elif isinstance(null_not_required, datetime.datetime):
+        json_null_not_required = UNSET
+        if not isinstance(null_not_required, Unset):
+            json_null_not_required = null_not_required.isoformat()
+
+    else:
+        json_null_not_required = null_not_required
 
     params["null_not_required"] = json_null_not_required
 
-    json_not_null_not_required: Union[Unset, None, str] = UNSET
+    json_not_null_not_required: Union[Unset, str] = UNSET
     if not isinstance(not_null_not_required, Unset):
-        json_not_null_not_required = not_null_not_required.isoformat() if not_null_not_required else None
+        json_not_null_not_required = not_null_not_required.isoformat()
 
     params["not_null_not_required"] = json_not_null_not_required
 
@@ -70,16 +82,16 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     not_null_required: datetime.datetime,
-    null_required: Union[Unset, None, datetime.datetime] = UNSET,
-    null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
-    not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
+    null_required: Union[None, datetime.datetime],
+    null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
+    not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
 ) -> Response[Any]:
     """
     Args:
         not_null_required (datetime.datetime):
-        null_required (Union[Unset, None, datetime.datetime]):
-        null_not_required (Union[Unset, None, datetime.datetime]):
-        not_null_not_required (Union[Unset, None, datetime.datetime]):
+        null_required (Union[None, datetime.datetime]):
+        null_not_required (Union[None, Unset, datetime.datetime]):
+        not_null_not_required (Union[Unset, datetime.datetime]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -107,16 +119,16 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     not_null_required: datetime.datetime,
-    null_required: Union[Unset, None, datetime.datetime] = UNSET,
-    null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
-    not_null_not_required: Union[Unset, None, datetime.datetime] = UNSET,
+    null_required: Union[None, datetime.datetime],
+    null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
+    not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
 ) -> Response[Any]:
     """
     Args:
         not_null_required (datetime.datetime):
-        null_required (Union[Unset, None, datetime.datetime]):
-        null_not_required (Union[Unset, None, datetime.datetime]):
-        not_null_not_required (Union[Unset, None, datetime.datetime]):
+        null_required (Union[None, datetime.datetime]):
+        null_not_required (Union[None, Unset, datetime.datetime]):
+        not_null_not_required (Union[Unset, datetime.datetime]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

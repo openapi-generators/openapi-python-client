@@ -11,8 +11,8 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     path_param: str,
     *,
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
     header_param: Union[Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
@@ -64,8 +64,8 @@ def sync_detailed(
     path_param: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
     header_param: Union[Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
@@ -73,8 +73,8 @@ def sync_detailed(
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):
         header_param (Union[Unset, str]):
         cookie_param (Union[Unset, str]):
 
@@ -105,8 +105,8 @@ async def asyncio_detailed(
     path_param: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
     header_param: Union[Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
@@ -114,8 +114,8 @@ async def asyncio_detailed(
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):
         header_param (Union[Unset, str]):
         cookie_param (Union[Unset, str]):
 

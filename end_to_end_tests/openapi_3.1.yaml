@@ -1425,11 +1425,11 @@ info:
           "title": "A Nullable Date",
           "anyOf": [
             {
-              "type": "null"
-            },
-            {
               "type": "string",
               "format": "date"
+            },
+            {
+              "type": "null"
             }
           ]
         },
@@ -1534,12 +1534,12 @@ info:
           ]
         },
         "nullable_model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            },
+          "oneOf": [
             {
               "type": "null"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
             }
           ]
         },
@@ -1551,12 +1551,12 @@ info:
           ]
         },
         "not_required_nullable_model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            },
+          "oneOf": [
             {
               "type": "null"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
             }
           ]
         }
@@ -1683,19 +1683,12 @@ info:
         },
         "some_nullable_object": {
           "title": "Some Nullable Object",
-          "oneOf": [
-            {
-              "type": "object",
-              "properties": {
-                "bar": {
-                  "type": "string"
-                }
-              }
-            },
-            {
-              "type": "null"
+          "type": [ "object", "null" ],
+          "properties": {
+            "bar": {
+              "type": "string"
             }
-          ]
+          }
         },
         "some_enum": {
           "$ref": "#/components/schemas/DifferentEnum"

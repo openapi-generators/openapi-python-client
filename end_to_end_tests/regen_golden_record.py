@@ -12,7 +12,7 @@ from openapi_python_client.cli import app
 
 def regen_golden_record():
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi.json"
+    openapi_path = Path(__file__).parent / "openapi_3.0.json"
 
     gr_path = Path(__file__).parent / "golden-record"
     output_path = Path.cwd() / "my-test-api-client"
@@ -32,7 +32,7 @@ def regen_golden_record():
 
 def regen_custom_template_golden_record():
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi.json"
+    openapi_path = Path(__file__).parent / "openapi_3.0.json"
     tpl_dir = Path(__file__).parent / "test_custom_templates"
 
     gr_path = Path(__file__).parent / "golden-record"

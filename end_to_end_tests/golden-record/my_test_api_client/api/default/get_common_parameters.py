@@ -10,7 +10,7 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    common: Union[Unset, None, str] = UNSET,
+    common: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     params["common"] = common
@@ -45,11 +45,11 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    common: Union[Unset, None, str] = UNSET,
+    common: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """
     Args:
-        common (Union[Unset, None, str]):
+        common (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -73,11 +73,11 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    common: Union[Unset, None, str] = UNSET,
+    common: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """
     Args:
-        common (Union[Unset, None, str]):
+        common (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

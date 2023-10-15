@@ -22,7 +22,7 @@ def _get_kwargs(
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -31,6 +31,7 @@ def _get_kwargs(
     params["string_prop"] = string_prop
 
     json_date_prop = date_prop.isoformat()
+
     params["date_prop"] = json_date_prop
 
     params["float_prop"] = float_prop
@@ -53,11 +54,9 @@ def _get_kwargs(
 
     params["union_prop"] = json_union_prop
 
-    json_union_prop_with_ref: Union[None, Unset, float, str]
+    json_union_prop_with_ref: Union[Unset, float, str]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
-    elif union_prop_with_ref is None:
-        json_union_prop_with_ref = None
 
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
@@ -127,7 +126,7 @@ def sync_detailed(
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -142,7 +141,7 @@ def sync_detailed(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -186,7 +185,7 @@ def sync(
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -201,7 +200,7 @@ def sync(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -240,7 +239,7 @@ async def asyncio_detailed(
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -255,7 +254,7 @@ async def asyncio_detailed(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -297,7 +296,7 @@ async def asyncio(
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -312,7 +311,7 @@ async def asyncio(
         boolean_prop (bool):
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):

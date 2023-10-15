@@ -155,6 +155,9 @@ class Schema(BaseModel):
             self.oneOf.append(Schema(type=DataType.NULL))
         elif len(self.anyOf) > 0:
             self.anyOf.append(Schema(type=DataType.NULL))
+        elif len(self.allOf) > 0:  # Nullable allOf is basically oneOf[null, allOf]
+            self.oneOf = [Schema(type=DataType.NULL), Schema(allOf=self.allOf)]
+            self.allOf = []
         return self
 
 

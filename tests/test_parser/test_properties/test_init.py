@@ -787,6 +787,24 @@ class TestPropertyFromData:
         assert isinstance(response, UnionProperty)
         assert len(response.inner_properties) == 2  # noqa: PLR2004
 
+    def test_property_from_data_list_of_types(self):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        name = "union_prop"
+        required = True
+        data = oai.Schema(
+            type=[DataType.NUMBER, DataType.NULL],
+        )
+        schemas = Schemas()
+        config = Config()
+
+        response = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+        )[0]
+
+        assert isinstance(response, UnionProperty)
+        assert len(response.inner_properties) == 2  # noqa: PLR2004
+
     def test_property_from_data_union_of_one_element(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 

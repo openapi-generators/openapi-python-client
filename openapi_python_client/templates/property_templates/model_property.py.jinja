@@ -14,7 +14,7 @@
 {% set transformed = source + "." + transform_method + "()" %}
 {% if multipart %}
     {% set transformed = "(None, json.dumps(" + transformed + ").encode(), 'application/json')" %}
-    {% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
+    {% set type_string = property.get_type_string(multipart=True) %}
 {% else %}
     {% set type_string = property.get_type_string(json=True) %}
 {% endif %}
