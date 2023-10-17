@@ -10,7 +10,7 @@ jobs:
     if: github.head_ref == 'release' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT }}
