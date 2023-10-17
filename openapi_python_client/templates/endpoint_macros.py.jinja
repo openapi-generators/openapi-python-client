@@ -18,8 +18,8 @@ headers = {}
 {% endmacro %}
 
 {% macro cookie_params(endpoint) %}
-cookies = {}
 {% if endpoint.cookie_parameters %}
+cookies = {}
     {% for parameter in endpoint.cookie_parameters.values() %}
         {% if parameter.required %}
 cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
