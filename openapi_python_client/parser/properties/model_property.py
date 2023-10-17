@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import ClassVar, NamedTuple
+from typing import ClassVar, NamedTuple, Optional
 
 from attrs import define, evolve
 
@@ -367,6 +367,7 @@ def build_model_property(
     *,
     data: oai.Schema,
     name: str,
+    description: Optional[str],
     schemas: Schemas,
     required: bool,
     parent_name: str | None,
@@ -428,7 +429,7 @@ def build_model_property(
         relative_imports=relative_imports,
         lazy_imports=lazy_imports,
         additional_properties=additional_properties,
-        description=data.description or "",
+        description=description or data.description or "",
         default=None,
         nullable=data.nullable,
         required=required,

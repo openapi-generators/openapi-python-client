@@ -299,7 +299,7 @@ class UnionProperty(Property):
 
 
 def _string_based_property(
-    name: str, required: bool, data: oai.Schema, config: Config
+    name: str, description: Optional[str], required: bool, data: oai.Schema, config: Config
 ) -> Union[StringProperty, DateProperty, DateTimeProperty, FileProperty]:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
@@ -311,7 +311,7 @@ def _string_based_property(
             default=convert("datetime.datetime", data.default),
             nullable=data.nullable,
             python_name=python_name,
-            description=data.description,
+            description=description or data.description,
             example=data.example,
         )
     if string_format == "date":
@@ -321,7 +321,7 @@ def _string_based_property(
             default=convert("datetime.date", data.default),
             nullable=data.nullable,
             python_name=python_name,
-            description=data.description,
+            description=description or data.description,
             example=data.example,
         )
     if string_format == "binary":
@@ -330,7 +330,7 @@ def _string_based_property(
             required=required,
             default=None,
             nullable=data.nullable,
-            python_name=python_name,
+            python_name=description or python_name,
             description=data.description,
             example=data.example,
         )
@@ -341,7 +341,7 @@ def _string_based_property(
         pattern=data.pattern,
         nullable=data.nullable,
         python_name=python_name,
-        description=data.description,
+        description=description or data.description,
         example=data.example,
     )
 
@@ -463,7 +463,14 @@ def get_enum_default(prop: EnumProperty, data: oai.Schema) -> Union[Optional[str
 
 
 def build_union_property(
-    *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
+    *,
+    data: oai.Schema,
+    name: str,
+    description: Optional[str],
+    required: bool,
+    schemas: Schemas,
+    parent_name: str,
+    config: Config,
 ) -> Tuple[Union[UnionProperty, PropertyError], Schemas]:
     """
     Create a `UnionProperty` the right way.
@@ -485,6 +492,7 @@ def build_union_property(
     for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf)):
         sub_prop, schemas = property_from_data(
             name=f"{name}_type_{i}",
+            description=description,
             required=required,
             data=sub_prop_data,
             schemas=schemas,
@@ -504,7 +512,7 @@ def build_union_property(
             inner_properties=sub_properties,
             nullable=data.nullable,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-            description=data.description,
+            description=description or data.description,
             example=data.example,
         ),
         schemas,
@@ -515,6 +523,7 @@ def build_list_property(
     *,
     data: oai.Schema,
     name: str,
+    description: Optional[str],
     required: bool,
     schemas: Schemas,
     parent_name: str,
@@ -541,6 +550,7 @@ def build_list_property(
         return PropertyError(data=data, detail="type array must have items defined"), schemas
     inner_prop, schemas = property_from_data(
         name=f"{name}_item",
+        description=description,
         required=True,
         data=data.items,
         schemas=schemas,
@@ -560,7 +570,7 @@ def build_list_property(
             inner_property=inner_prop,
             nullable=data.nullable,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-            description=data.description,
+            description=description or data.description,
             example=data.example,
         ),
         schemas,
@@ -569,6 +579,7 @@ def build_list_property(
 
 def _property_from_ref(
     name: str,
+    description: Optional[str],
     required: bool,
     parent: Union[oai.Schema, None],
     data: oai.Reference,
@@ -589,6 +600,8 @@ def _property_from_ref(
         name=name,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
     )
+    if description:
+        prop = evolve(prop, description=description)
     if parent:
         prop = evolve(prop, nullable=parent.nullable)
         if isinstance(prop, EnumProperty):
@@ -603,6 +616,7 @@ def _property_from_ref(
 
 def _property_from_data(  # noqa: PLR0911
     name: str,
+    description: Optional[str],
     required: bool,
     data: Union[oai.Reference, oai.Schema],
     schemas: Schemas,
@@ -615,14 +629,28 @@ def _property_from_data(  # noqa: PLR0911
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return _property_from_ref(
-            name=name, required=required, parent=None, data=data, schemas=schemas, config=config, roots=roots
+            name=name,
+            description=description,
+            required=required,
+            parent=None,
+            data=data,
+            schemas=schemas,
+            config=config,
+            roots=roots,
         )
 
     sub_data: List[Union[oai.Schema, oai.Reference]] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
         return _property_from_ref(
-            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config, roots=roots
+            name=name,
+            description=description,
+            required=required,
+            parent=data,
+            data=sub_data[0],
+            schemas=schemas,
+            config=config,
+            roots=roots,
         )
 
     if data.enum:
@@ -637,10 +665,19 @@ def _property_from_data(  # noqa: PLR0911
         )
     if data.anyOf or data.oneOf:
         return build_union_property(
-            data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
+            data=data,
+            name=name,
+            description=description,
+            required=required,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
         )
     if data.type == oai.DataType.STRING:
-        return _string_based_property(name=name, required=required, data=data, config=config), schemas
+        return (
+            _string_based_property(name=name, description=description, required=required, data=data, config=config),
+            schemas,
+        )
     if data.type == oai.DataType.NUMBER:
         return (
             FloatProperty(
@@ -649,7 +686,7 @@ def _property_from_data(  # noqa: PLR0911
                 required=required,
                 nullable=data.nullable,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-                description=data.description,
+                description=description or data.description,
                 example=data.example,
             ),
             schemas,
@@ -662,7 +699,7 @@ def _property_from_data(  # noqa: PLR0911
                 required=required,
                 nullable=data.nullable,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-                description=data.description,
+                description=description or data.description,
                 example=data.example,
             ),
             schemas,
@@ -675,7 +712,7 @@ def _property_from_data(  # noqa: PLR0911
                 default=convert("bool", data.default),
                 nullable=data.nullable,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-                description=data.description,
+                description=description or data.description,
                 example=data.example,
             ),
             schemas,
@@ -684,6 +721,7 @@ def _property_from_data(  # noqa: PLR0911
         return build_list_property(
             data=data,
             name=name,
+            description=description,
             required=required,
             schemas=schemas,
             parent_name=parent_name,
@@ -695,6 +733,7 @@ def _property_from_data(  # noqa: PLR0911
         return build_model_property(
             data=data,
             name=name,
+            description=description,
             schemas=schemas,
             required=required,
             parent_name=parent_name,
@@ -709,7 +748,7 @@ def _property_from_data(  # noqa: PLR0911
             nullable=False,
             default=None,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-            description=data.description,
+            description=description or data.description,
             example=data.example,
         ),
         schemas,
@@ -726,6 +765,7 @@ def property_from_data(
     config: Config,
     process_properties: bool = True,
     roots: Optional[Set[Union[ReferencePath, utils.ClassName]]] = None,
+    description: Optional[str] = None,
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
     Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a
@@ -757,6 +797,7 @@ def property_from_data(
     try:
         return _property_from_data(
             name=name,
+            description=description,
             required=required,
             data=data,
             schemas=schemas,
