@@ -30,7 +30,7 @@ attrs = ">=21.3.0"
 python-dateutil = "^2.8.1"
 httpx = ">=0.20.0,<0.26.0"
 PyYAML = "^6.0"
-ruff = "^0.0.292"
+ruff = "^0.1.0"
 typing-extensions = "^4.8.0"
 
 [tool.poetry.scripts]
