@@ -384,6 +384,7 @@ class Endpoint:
 
             prop, new_schemas = property_from_data(
                 name=param.name,
+                description=param.description,
                 required=param.required,
                 data=param.param_schema,
                 schemas=schemas,
