@@ -69,10 +69,19 @@ def response_from_data(
 
     response_name = f"response_{status_code}"
     if isinstance(data, oai.Reference):
-        return (
-            empty_response(status_code=status_code, response_name=response_name, config=config, description=None),
-            schemas,
+        prop, schemas = property_from_data(
+            name=response_name,
+            required=True,
+            data=data,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
         )
+
+        if isinstance(prop, PropertyError):
+            return prop, schemas
+
+        return Response(status_code=status_code, prop=prop, source=None), schemas
 
     content = data.content
     if not content:

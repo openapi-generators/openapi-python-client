@@ -568,7 +568,12 @@ class GeneratorData:
         schemas = Schemas()
         parameters = Parameters()
         if openapi.components and openapi.components.schemas:
-            schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
+            schemas = build_schemas(
+                input_schemas=openapi.components.schemas,
+                input_responses=openapi.components.responses,
+                schemas=schemas,
+                config=config,
+            )
         if openapi.components and openapi.components.parameters:
             parameters = build_parameters(
                 components=openapi.components.parameters, parameters=parameters, config=config

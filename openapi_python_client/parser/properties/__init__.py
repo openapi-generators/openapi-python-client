@@ -811,9 +811,12 @@ def property_from_data(
 
 
 def _create_schemas(
-    *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
+    *,
+    input_schemas: Dict[str, Union[oai.Reference, oai.Schema]],
+    schemas: Schemas,
+    config: Config,
 ) -> Schemas:
-    to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
+    to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = input_schemas.items()
     still_making_progress = True
     errors: List[PropertyError] = []
 
@@ -841,6 +844,32 @@ def _create_schemas(
         to_process = next_round
 
     schemas.errors.extend(errors)
+    return schemas
+
+
+def _process_responses(
+    *,
+    input_responses: Dict[str, oai.Response],
+    schemas: Schemas,
+    config: Config,
+) -> Schemas:
+    for name, data in input_responses.items():
+        if not isinstance(data, oai.Response):
+            schemas.errors.append(PropertyError(data=data, detail="Only reference schemas are supported."))
+            continue
+
+        schema_ref_path = parse_reference_path(f"#/components/schemas/{name}")
+        if isinstance(schema_ref_path, ParseError):
+            schemas.errors.append(PropertyError(detail=schema_ref_path.detail, data=data))
+            continue
+        response_ref_path = parse_reference_path(f"#/components/responses/{name}")
+        if isinstance(response_ref_path, ParseError):
+            schemas.errors.append(PropertyError(detail=response_ref_path.detail, data=data))
+            continue
+
+        prop = schemas.classes_by_reference.get(schema_ref_path)
+        if prop:
+            schemas = evolve(schemas, classes_by_reference={response_ref_path: prop, **schemas.classes_by_reference})
     return schemas
 
 
@@ -904,10 +933,15 @@ def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
 
 
 def build_schemas(
-    *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
+    *,
+    input_schemas: Dict[str, Union[oai.Reference, oai.Schema]],
+    input_responses: Dict[str, Union[oai.Reference, oai.Schema]],
+    schemas: Schemas,
+    config: Config,
 ) -> Schemas:
     """Get a list of Schemas from an OpenAPI dict"""
-    schemas = _create_schemas(components=components, schemas=schemas, config=config)
+    schemas = _create_schemas(input_schemas=input_schemas, schemas=schemas, config=config)
+    schemas = _process_responses(input_responses=input_responses, schemas=schemas, config=config)
     schemas = _process_models(schemas=schemas, config=config)
     return schemas
 
