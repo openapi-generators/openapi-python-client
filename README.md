@@ -21,7 +21,11 @@ This tool focuses on creating the best developer experience for Python developer
 
 1. Using all the latest and greatest Python features like type annotations and dataclasses.
 2. Having documentation and usage instructions specific to this one generator.
-1. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
+3. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
+
+## Sponsors
+
+<a href="https://www.devmark.ai/fern/?utm_source=openapi-python-client&utm_loc=readme&utm_type=logo" target="_blank" title="Fern | SDKs and API docs"><img src="https://raw.githubusercontent.com/openapi-generators/openapi-python-client/main/.github/sponsors/fern.png"></a>
 
 ## Installation
 
