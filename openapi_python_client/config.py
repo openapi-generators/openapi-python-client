@@ -30,7 +30,7 @@ class Config(BaseModel):
     use_path_prefixes_for_title_model_names: bool = True
     post_hooks: List[str] = [
         "ruff check --fix .",
-        "black .",
+        "ruff format .",
     ]
     field_prefix: str = "field_"
     http_timeout: int = 5

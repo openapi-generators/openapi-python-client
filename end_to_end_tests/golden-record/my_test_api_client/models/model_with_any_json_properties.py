@@ -53,7 +53,7 @@ class ModelWithAnyJsonProperties:
         for prop_name, prop_dict in d.items():
 
             def _parse_additional_property(
-                data: object,
+                data: object
             ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
                 try:
                     if not isinstance(data, dict):
