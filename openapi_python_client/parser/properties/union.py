@@ -8,7 +8,7 @@ from attr import define, evolve
 from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
-from ..errors import PropertyError
+from ..errors import PropertyError, ParseError
 from .protocol import PropertyProtocol, Value
 from .schemas import Schemas
 
@@ -169,3 +169,12 @@ class UnionProperty(PropertyProtocol):
         for inner_prop in self.inner_properties:
             lazy_imports.update(inner_prop.get_lazy_imports(prefix=prefix))
         return lazy_imports
+
+    def validate_location(self, location: oai.ParameterLocation) -> ParseError | None:
+        """Returns an error if this type of property is not allowed in the given location"""
+        for inner_prop in self.inner_properties:
+            if inner_prop.validate_location(location) is not None:
+                return ParseError(detail=f"{self.get_type_string()} is not allowed in {location}")
+        if location == oai.ParameterLocation.PATH and not self.required:
+            return ParseError(detail="Path parameter must be required")
+        return None

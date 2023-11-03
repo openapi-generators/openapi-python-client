@@ -13,7 +13,7 @@ def _get_kwargs(
     *,
     string_param: Union[Unset, str] = UNSET,
     integer_param: Union[Unset, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     headers = {}
@@ -66,7 +66,7 @@ def sync_detailed(
     client: Union[AuthenticatedClient, Client],
     string_param: Union[Unset, str] = UNSET,
     integer_param: Union[Unset, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
@@ -75,7 +75,7 @@ def sync_detailed(
         path_param (str):
         string_param (Union[Unset, str]):
         integer_param (Union[Unset, int]):
-        header_param (Union[Unset, str]):
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:
@@ -107,7 +107,7 @@ async def asyncio_detailed(
     client: Union[AuthenticatedClient, Client],
     string_param: Union[Unset, str] = UNSET,
     integer_param: Union[Unset, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
@@ -116,7 +116,7 @@ async def asyncio_detailed(
         path_param (str):
         string_param (Union[Unset, str]):
         integer_param (Union[Unset, int]):
-        header_param (Union[Unset, str]):
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:

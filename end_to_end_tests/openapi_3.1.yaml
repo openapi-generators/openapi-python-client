@@ -2420,7 +2420,10 @@ info:
       "in": "header",
       "required": false,
       "schema": {
-        "type": "string"
+        oneOf: [
+          type: "string",
+          type: "null",
+        ]
       }
     },
     "cookie-param": {

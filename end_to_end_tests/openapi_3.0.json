@@ -2364,7 +2364,8 @@
         "in": "header",
         "required": false,
         "schema": {
-          "type": "string"
+          "type": "string",
+          "nullable": true
         }
       },
       "cookie-param": {

@@ -4,9 +4,10 @@ from typing import ClassVar
 
 from attr import define
 
-from ...utils import PythonIdentifier
-from ..errors import PropertyError
 from .protocol import PropertyProtocol, Value
+from ..errors import PropertyError
+from ... import schema as oai
+from ...utils import PythonIdentifier
 
 
 @define
@@ -20,6 +21,11 @@ class NoneProperty(PropertyProtocol):
     description: str | None
     example: str | None
 
+    _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
+        oai.ParameterLocation.QUERY,
+        oai.ParameterLocation.COOKIE,
+        oai.ParameterLocation.HEADER,
+    }
     _type_string: ClassVar[str] = "None"
     _json_type_string: ClassVar[str] = "None"
 
