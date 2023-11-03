@@ -15,7 +15,7 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -76,7 +76,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Download coverage reports
         uses: actions/download-artifact@v3
         with:
@@ -99,7 +99,7 @@ jobs:
         ports:
           - "3000:3000"
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

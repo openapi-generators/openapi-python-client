@@ -6,12 +6,12 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Knope
         uses: knope-dev/action@v2.0.0
         with:
-          version: 0.12.0
+          version: 0.13.0
       - run: knope prepare-release --dry-run
