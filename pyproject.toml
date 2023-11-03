@@ -24,13 +24,12 @@ jinja2 = "^3.0.0"
 typer = ">0.6, <0.10"
 colorama = {version = "^0.4.3", markers = "sys_platform == 'win32'"}
 shellingham = "^1.3.2"
-black = ">=23"
 pydantic = "^2.1.1"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.1"
 httpx = ">=0.20.0,<0.26.0"
 PyYAML = "^6.0"
-ruff = "^0.1.0"
+ruff = "^0.1.2"
 typing-extensions = "^4.8.0"
 
 [tool.poetry.scripts]
@@ -51,7 +50,7 @@ types-python-dateutil = "^2.0.0"
 [tool.taskipy.tasks]
 check = """
 ruff check --fix . \
- && black .\
+ && ruff format .\
  && poetry export -f requirements.txt | poetry run safety check --bare --stdin\
  && mypy openapi_python_client\
  && TASKIPY=true pytest --cov openapi_python_client tests --cov-report=term-missing --basetemp=tests/tmp\
@@ -72,28 +71,17 @@ openapi-python-client update --url https://raw.githubusercontent.com/openapi-gen
 && mypy integration-tests --strict
 """
 
-[tool.black]
-line-length = 120
-target_version = ['py38', 'py39', 'py310', 'py311']
-exclude = '''
-(
-  /(
-    | \.git
-    | \.venv
-    | env
-    | \.mypy_cache
-    | openapi_python_client/templates
-    | tests/test_templates
-    | end_to_end_tests/test_custom_templates
-    | end_to_end_tests/golden-record-custom
-  )/
-)
-'''
-
 [tool.ruff]
 select = ["E", "F", "I", "UP", "B", "PL", "RUF"]
 line-length = 120
-exclude = ["tests/test_templates/test_property_templates/test_date_property/*", "end_to_end_tests/*"]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".venv",
+    "openapi_python_client/templates/*",
+    "end_to_end_tests/*",
+    "tests/test_templates/*",
+]
 ignore = ["E501", "PLR0913"]
 
 [tool.ruff.per-file-ignores]
