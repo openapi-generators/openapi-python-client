@@ -27,9 +27,7 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem:
             for (
                 componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_b_item_data
             ) in prop:
-                componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_b_item = (
-                    componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_b_item_data.to_dict()
-                )
+                componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_b_item = componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_b_item_data.to_dict()
 
                 field_dict[prop_name].append(
                     componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_b_item

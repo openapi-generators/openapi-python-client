@@ -45,8 +45,8 @@ jobs:
       - name: Install Dependencies
         run: poetry install
 
-      - name: Run Black
-        run: poetry run black . --check
+      - name: Check formatting
+        run: poetry run ruff format . --check
 
       - name: Run safety
         run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
@@ -54,7 +54,7 @@ jobs:
       - name: Run mypy
         run: poetry run mypy --show-error-codes openapi_python_client
 
-      - name: Run Ruff
+      - name: Lint
         run: poetry run ruff check .
 
       - name: Run pytest
