@@ -8,7 +8,7 @@ from attr import define, evolve
 from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
-from ..errors import PropertyError, ParseError
+from ..errors import ParseError, PropertyError
 from .protocol import PropertyProtocol, Value
 from .schemas import Schemas
 

@@ -4,10 +4,10 @@ from typing import ClassVar
 
 from attr import define
 
-from .protocol import PropertyProtocol, Value
-from ..errors import PropertyError
 from ... import schema as oai
 from ...utils import PythonIdentifier
+from ..errors import PropertyError
+from .protocol import PropertyProtocol, Value
 
 
 @define
