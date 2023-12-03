@@ -55,6 +55,6 @@ class NoneProperty(PropertyProtocol):
     def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
         if isinstance(value, str):
             if value != "None":
-                return PropertyError(f"Value {value} is not valid, onlly None is allowed")
+                return PropertyError(f"Value {value} is not valid, only None is allowed")
             return Value(value)
         return value

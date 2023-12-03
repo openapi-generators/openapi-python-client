@@ -578,7 +578,10 @@ class TestEndpoint:
             config=config,
         )
         assert (result, schemas, parameters) == (
-            ParseError(data=parse_error.data, detail=f"cannot parse parameter of endpoint {endpoint.name}"),
+            ParseError(
+                data=parse_error.data,
+                detail=f"cannot parse parameter of endpoint {endpoint.name}: {parse_error.detail}",
+            ),
             initial_schemas,
             initial_parameters,
         )

@@ -6,6 +6,7 @@ from typing_extensions import TypeAlias
 
 from .any import AnyProperty
 from .boolean import BooleanProperty
+from .const import ConstProperty
 from .date import DateProperty
 from .datetime import DateTimeProperty
 from .enum_property import EnumProperty
@@ -21,6 +22,7 @@ from .union import UnionProperty
 Property: TypeAlias = Union[
     AnyProperty,
     BooleanProperty,
+    ConstProperty,
     DateProperty,
     DateTimeProperty,
     EnumProperty,
