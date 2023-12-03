@@ -20,7 +20,7 @@ pytest = "^7.0.0"
 mypy = "*"
 
 [tool.poetry.group.dev.dependencies]
-pytest-asyncio = "^0.21.0"
+pytest-asyncio = "^0.21.0 || ^0.23.0"
 
 [build-system]
 requires = ["poetry>=1.0"]
