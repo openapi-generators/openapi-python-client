@@ -22,6 +22,7 @@ from ... import schema as oai
 from ..errors import ParameterError, ParseError, PropertyError
 from .any import AnyProperty
 from .boolean import BooleanProperty
+from .const import ConstProperty
 from .date import DateProperty
 from .datetime import DateTimeProperty
 from .enum_property import EnumProperty
@@ -180,6 +181,18 @@ def property_from_data(  # noqa: PLR0911
             schemas=schemas,
             parent_name=parent_name,
             config=config,
+        )
+    if data.const is not None:
+        return (
+            ConstProperty.build(
+                name=name,
+                required=required,
+                default=data.default,
+                const=data.const,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=data.description,
+            ),
+            schemas,
         )
     if data.type == oai.DataType.STRING:
         return (

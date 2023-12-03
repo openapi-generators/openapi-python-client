@@ -6,13 +6,40 @@ info:
 paths:
   "/const/{path}":
     post:
-      tags: ["const"]
+      tags: [ "const" ]
       parameters:
-        - required: true
+        - in: "path"
+          required: true
           schema:
             const: "this goes in the path"
           name: "path"
-          in: "path"
+        - in: "query"
+          required: true
+          schema:
+            const: "this always goes in the query"
+          name: "required query"
+        - in: "query"
+          schema:
+            const: "this sometimes goes in the query"
+          name: "optional query"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                required:
+                  const: "this always goes in the body"
+                optional:
+                  const: "this sometimes goes in the body"
+                nullable:
+                  oneOf:
+                    - type: "null"
+                    - const: "this or null goes in the body"
+              required:
+                - required
+                - nullable
       responses:
         "200":
           description: "Successful Response"
