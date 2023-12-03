@@ -36,6 +36,7 @@ class Schema(BaseModel):
     minProperties: Optional[int] = Field(default=None, ge=0)
     required: Optional[List[str]] = Field(default=None, min_length=1)
     enum: Union[None, List[Optional[StrictInt]], List[Optional[StrictStr]]] = Field(default=None, min_length=1)
+    const: Union[None, StrictStr, StrictInt] = None
     type: Union[DataType, List[DataType], None] = Field(default=None)
     allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
@@ -71,10 +72,16 @@ class Schema(BaseModel):
                     },
                 },
                 {"type": "object", "additionalProperties": {"type": "string"}},
-                {"type": "object", "additionalProperties": {"$ref": "#/components/schemas/ComplexModel"}},
                 {
                     "type": "object",
-                    "properties": {"id": {"type": "integer", "format": "int64"}, "name": {"type": "string"}},
+                    "additionalProperties": {"$ref": "#/components/schemas/ComplexModel"},
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "format": "int64"},
+                        "name": {"type": "string"},
+                    },
                     "required": ["name"],
                     "example": {"name": "Puma", "id": 1},
                 },
@@ -89,13 +96,20 @@ class Schema(BaseModel):
                 {
                     "allOf": [
                         {"$ref": "#/components/schemas/ErrorModel"},
-                        {"type": "object", "required": ["rootCause"], "properties": {"rootCause": {"type": "string"}}},
+                        {
+                            "type": "object",
+                            "required": ["rootCause"],
+                            "properties": {"rootCause": {"type": "string"}},
+                        },
                     ]
                 },
                 {
                     "type": "object",
                     "discriminator": {"propertyName": "petType"},
-                    "properties": {"name": {"type": "string"}, "petType": {"type": "string"}},
+                    "properties": {
+                        "name": {"type": "string"},
+                        "petType": {"type": "string"},
+                    },
                     "required": ["name", "petType"],
                 },
                 {
@@ -110,7 +124,12 @@ class Schema(BaseModel):
                                     "type": "string",
                                     "description": "The measured skill for hunting",
                                     "default": "lazy",
-                                    "enum": ["clueless", "lazy", "adventurous", "aggressive"],
+                                    "enum": [
+                                        "clueless",
+                                        "lazy",
+                                        "adventurous",
+                                        "aggressive",
+                                    ],
                                 }
                             },
                             "required": ["huntingSkill"],

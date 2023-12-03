@@ -1,0 +1,22 @@
+openapi: "3.1.0"
+info:
+  title: "Test 3.1 Features"
+  description: "Test new OpenAPI 3.1 features"
+  version: "0.1.0"
+paths:
+  "/const/{path}":
+    post:
+      tags: ["const"]
+      parameters:
+        - required: true
+          schema:
+            const: "this goes in the path"
+          name: "path"
+          in: "path"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                const: "Why have a fixed response? I dunno"

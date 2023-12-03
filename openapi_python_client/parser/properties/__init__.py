@@ -103,7 +103,10 @@ def _property_from_ref(
         return PropertyError(data=data, detail=ref_path.detail), schemas
     existing = schemas.classes_by_reference.get(ref_path)
     if not existing:
-        return PropertyError(data=data, detail="Could not find reference in parsed models or enums"), schemas
+        return (
+            PropertyError(data=data, detail="Could not find reference in parsed models or enums"),
+            schemas,
+        )
 
     default = existing.convert_value(parent.default) if parent is not None else None
     if isinstance(default, PropertyError):
@@ -115,7 +118,7 @@ def _property_from_ref(
         required=required,
         name=name,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-        default=default,
+        default=default,  # type: ignore # mypy can't tell that default comes from the same class...
     )
 
     schemas.add_dependencies(ref_path=ref_path, roots=roots)
@@ -137,14 +140,26 @@ def property_from_data(  # noqa: PLR0911
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return _property_from_ref(
-            name=name, required=required, parent=None, data=data, schemas=schemas, config=config, roots=roots
+            name=name,
+            required=required,
+            parent=None,
+            data=data,
+            schemas=schemas,
+            config=config,
+            roots=roots,
         )
 
     sub_data: list[oai.Schema | oai.Reference] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
         return _property_from_ref(
-            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config, roots=roots
+            name=name,
+            required=required,
+            parent=data,
+            data=sub_data[0],
+            schemas=schemas,
+            config=config,
+            roots=roots,
         )
 
     if data.enum:
@@ -159,10 +174,18 @@ def property_from_data(  # noqa: PLR0911
         )
     if data.anyOf or data.oneOf or isinstance(data.type, list):
         return UnionProperty.build(
-            data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
+            data=data,
+            name=name,
+            required=required,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
         )
     if data.type == oai.DataType.STRING:
-        return _string_based_property(name=name, required=required, data=data, config=config), schemas
+        return (
+            _string_based_property(name=name, required=required, data=data, config=config),
+            schemas,
+        )
     if data.type == oai.DataType.NUMBER:
         return (
             FloatProperty.build(
@@ -246,7 +269,12 @@ def property_from_data(  # noqa: PLR0911
     )
 
 
-def _create_schemas(*, components: dict[str, oai.Reference | oai.Schema], schemas: Schemas, config: Config) -> Schemas:
+def _create_schemas(
+    *,
+    components: dict[str, oai.Reference | oai.Schema],
+    schemas: Schemas,
+    config: Config,
+) -> Schemas:
     to_process: Iterable[tuple[str, oai.Reference | oai.Schema]] = components.items()
     still_making_progress = True
     errors: list[PropertyError] = []
@@ -337,7 +365,12 @@ def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
     return schemas
 
 
-def build_schemas(*, components: dict[str, oai.Reference | oai.Schema], schemas: Schemas, config: Config) -> Schemas:
+def build_schemas(
+    *,
+    components: dict[str, oai.Reference | oai.Schema],
+    schemas: Schemas,
+    config: Config,
+) -> Schemas:
     """Get a list of Schemas from an OpenAPI dict"""
     schemas = _create_schemas(components=components, schemas=schemas, config=config)
     schemas = _process_models(schemas=schemas, config=config)
