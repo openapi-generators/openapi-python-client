@@ -81,9 +81,7 @@ def snake_case(value: str) -> str:
 def pascal_case(value: str) -> str:
     """Converts to PascalCase"""
     words = split_words(sanitize(value))
-    capitalized_words = (
-        word.capitalize() if not word.isupper() else word for word in words
-    )
+    capitalized_words = (word.capitalize() if not word.isupper() else word for word in words)
     return "".join(capitalized_words)
 
 
