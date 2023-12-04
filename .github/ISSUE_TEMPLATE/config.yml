@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: GitHub Discussions
     url: https://github.com/openapi-generators/openapi-python-client/discussions
-    about: Please ask and answer questions here.
+    about: Request features and improvements here!
   - name: Discord
     url: https://discord.gg/JaqVvBgwYw
     about: Less structured, more casual chat.

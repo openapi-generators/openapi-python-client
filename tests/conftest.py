@@ -36,7 +36,7 @@ def model_property_factory() -> Callable[..., ModelProperty]:
         kwargs = {
             "description": "",
             "class_info": Class(name="MyClass", module_name="my_module"),
-            "data": oai.Schema.construct(),
+            "data": oai.Schema.model_construct(),
             "roots": set(),
             "required_properties": None,
             "optional_properties": None,

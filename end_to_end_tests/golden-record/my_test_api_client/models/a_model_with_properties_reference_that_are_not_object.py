@@ -2,7 +2,8 @@ import datetime
 from io import BytesIO
 from typing import Any, Dict, List, Type, TypeVar, cast
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 from ..models.an_enum import AnEnum
@@ -11,7 +12,7 @@ from ..types import File
 T = TypeVar("T", bound="AModelWithPropertiesReferenceThatAreNotObject")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class AModelWithPropertiesReferenceThatAreNotObject:
     """
     Attributes:
@@ -77,7 +78,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     double_property_ref: float
     file_property_ref: File
     bytestream_property_ref: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         enum_properties_ref = []

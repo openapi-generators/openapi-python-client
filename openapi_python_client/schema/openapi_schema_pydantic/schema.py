@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Extra, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 
 from ..data_type import DataType
 from .discriminator import Discriminator
@@ -34,8 +34,8 @@ class Schema(BaseModel):
     uniqueItems: Optional[bool] = None
     maxProperties: Optional[int] = Field(default=None, ge=0)
     minProperties: Optional[int] = Field(default=None, ge=0)
-    required: Optional[List[str]] = Field(default=None, min_items=1)
-    enum: Union[None, List[Optional[StrictInt]], List[Optional[StrictStr]]] = Field(default=None, min_items=1)
+    required: Optional[List[str]] = Field(default=None, min_length=1)
+    enum: Union[None, List[Optional[StrictInt]], List[Optional[StrictStr]]] = Field(default=None, min_length=1)
     type: Optional[DataType] = Field(default=None)
     allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
@@ -55,11 +55,10 @@ class Schema(BaseModel):
     externalDocs: Optional[ExternalDocumentation] = None
     example: Optional[Any] = None
     deprecated: Optional[bool] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {"type": "string", "format": "email"},
                 {
@@ -139,7 +138,8 @@ class Schema(BaseModel):
                     ],
                 },
             ]
-        }
+        },
+    )
 
 
-Schema.update_forward_refs()
+Schema.model_rebuild()

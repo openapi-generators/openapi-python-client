@@ -40,7 +40,7 @@ TEMPLATE_FILTERS = {
 }
 
 
-class Project:  # pylint: disable=too-many-instance-attributes
+class Project:
     """Represents a Python project (the top level file-tree) to generate"""
 
     def __init__(
@@ -151,7 +151,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
             return
         try:
             cwd = self.package_dir if self.meta == MetaType.NONE else self.project_dir
-            subprocess.run(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, check=True)
         except CalledProcessError as err:
             self.errors.append(
                 GeneratorError(
@@ -197,7 +197,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
         readme = self.project_dir / "README.md"
         readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
-            readme_template.render(),
+            readme_template.render(poetry=self.meta == MetaType.POETRY),
             encoding=self.file_encoding,
         )
 
@@ -253,7 +253,6 @@ class Project:  # pylint: disable=too-many-instance-attributes
         models_init_template = self.env.get_template("models_init.py.jinja")
         models_init.write_text(models_init_template.render(imports=imports, alls=alls), encoding=self.file_encoding)
 
-    # pylint: disable=too-many-locals
     def _build_api(self) -> None:
         # Generate Client
         client_path = self.package_dir / "client.py"
@@ -297,7 +296,7 @@ class Project:  # pylint: disable=too-many-instance-attributes
                 )
 
 
-def _get_project_for_url_or_path(  # pylint: disable=too-many-arguments
+def _get_project_for_url_or_path(
     url: Optional[str],
     path: Optional[Path],
     meta: MetaType,

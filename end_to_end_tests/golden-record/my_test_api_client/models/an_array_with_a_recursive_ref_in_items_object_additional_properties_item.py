@@ -1,26 +1,25 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     """ """
 
-    additional_properties: Dict[str, List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = attr.ib(
-        init=False, factory=dict
-    )
+    additional_properties: Dict[
+        str, List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]
+    ] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = []
             for componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item_data in prop:
-                componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item = (
-                    componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item_data.to_dict()
-                )
+                componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item = componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item_data.to_dict()
 
                 field_dict[prop_name].append(
                     componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item

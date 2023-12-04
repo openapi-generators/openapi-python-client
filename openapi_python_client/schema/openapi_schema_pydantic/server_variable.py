@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class ServerVariable(BaseModel):
@@ -14,6 +14,4 @@ class ServerVariable(BaseModel):
     enum: Optional[List[str]] = None
     default: str
     description: Optional[str] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")

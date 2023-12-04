@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .contact import Contact
 from .license import License
@@ -23,10 +23,9 @@ class Info(BaseModel):
     contact: Optional[Contact] = None
     license: Optional[License] = None
     version: str
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "title": "Sample Pet Store App",
@@ -41,4 +40,5 @@ class Info(BaseModel):
                     "version": "1.0.1",
                 }
             ]
-        }
+        },
+    )

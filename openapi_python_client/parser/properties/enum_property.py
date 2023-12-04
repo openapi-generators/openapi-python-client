@@ -2,7 +2,7 @@ __all__ = ["EnumProperty"]
 
 from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast
 
-import attr
+from attrs import define, field
 
 from ... import schema as oai
 from ... import utils
@@ -12,14 +12,14 @@ from .schemas import Class
 ValueType = Union[str, int]
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class EnumProperty(Property):
     """A property that should use an enum"""
 
     values: Dict[str, ValueType]
     class_info: Class
     value_type: Type[ValueType]
-    default: Optional[Any] = attr.ib()
+    default: Optional[Any] = field()
 
     template: ClassVar[str] = "enum_property.py.jinja"
 
@@ -30,7 +30,6 @@ class EnumProperty(Property):
         oai.ParameterLocation.HEADER,
     }
 
-    # pylint: disable=unused-argument
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self.class_info.name
 

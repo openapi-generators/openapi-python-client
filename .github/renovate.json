@@ -4,6 +4,7 @@
     ":semanticCommitTypeAll(chore)"
   ],
   "rangeStrategy": "widen",
+  "lockFileMaintenance": { "enabled": true, "automerge": true },
   "regexManagers": [
     {
       "fileMatch": [

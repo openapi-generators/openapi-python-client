@@ -7,7 +7,7 @@ from pytest_mock import MockFixture
 
 from openapi_python_client import Config, ErrorLevel, GeneratorError, Project
 
-default_http_timeout = Config.schema()["properties"]["http_timeout"]["default"]
+default_http_timeout = Config.model_json_schema()["properties"]["http_timeout"]["default"]
 
 
 def test__get_project_for_url_or_path(mocker):
@@ -235,7 +235,7 @@ class TestGetJson:
     def test__get_document_json(self, mocker):
         class FakeResponse:
             content = b'{\n\t"foo": "bar"}'
-            headers = {"content-type": "application/json; encoding=utf8"}
+            headers = {"content-type": "application/json; encoding=utf8"}  # noqa: RUF012
 
         get = mocker.patch("httpx.get", return_value=FakeResponse())
         yaml_loads = mocker.patch("yaml.safe_load")
@@ -255,7 +255,7 @@ class TestGetJson:
     def test__get_document_bad_json(self, mocker):
         class FakeResponse:
             content = b'{"foo"}'
-            headers = {"content-type": "application/json; encoding=utf8"}
+            headers = {"content-type": "application/json; encoding=utf8"}  # noqa: RUF012
 
         get = mocker.patch("httpx.get", return_value=FakeResponse())
 
@@ -453,7 +453,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with()
+        readme_template.render.assert_called_once_with(poetry=True)
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -486,7 +486,7 @@ class TestProject:
         project._build_metadata()
 
         project.env.get_template.assert_has_calls([mocker.call("README.md.jinja"), mocker.call(".gitignore.jinja")])
-        readme_template.render.assert_called_once_with()
+        readme_template.render.assert_called_once_with(poetry=False)
         readme_path.write_text.assert_called_once_with(readme_template.render(), encoding="utf-8")
         git_ignore_template.render.assert_called_once()
         git_ignore_path.write_text.assert_called_once_with(git_ignore_template.render(), encoding="utf-8")
@@ -625,6 +625,6 @@ def test_custom_templates(mocker):
         config=Config(),
     )
     assert isinstance(project.env.loader, jinja2.ChoiceLoader)
-    assert len(project.env.loader.loaders) == 2
+    assert len(project.env.loader.loaders) == 2  # noqa: PLR2004
     assert isinstance(project.env.loader.loaders[0], jinja2.FileSystemLoader)
     assert isinstance(project.env.loader.loaders[1], jinja2.PackageLoader)

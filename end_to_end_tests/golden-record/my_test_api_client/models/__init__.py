@@ -64,6 +64,8 @@ from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionProper
 from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from .none import None_
 from .post_form_data_inline_data import PostFormDataInlineData
+from .post_naming_property_conflict_with_import_json_body import PostNamingPropertyConflictWithImportJsonBody
+from .post_naming_property_conflict_with_import_response_200 import PostNamingPropertyConflictWithImportResponse200
 from .post_responses_unions_simple_before_complex_response_200 import PostResponsesUnionsSimpleBeforeComplexResponse200
 from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
@@ -129,6 +131,8 @@ __all__ = (
     "ModelWithUnionPropertyInlinedFruitType1",
     "None_",
     "PostFormDataInlineData",
+    "PostNamingPropertyConflictWithImportJsonBody",
+    "PostNamingPropertyConflictWithImportResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
     "TestInlineObjectsJsonBody",

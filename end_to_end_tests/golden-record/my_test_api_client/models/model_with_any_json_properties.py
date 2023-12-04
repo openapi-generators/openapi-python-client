@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
     from ..models.model_with_any_json_properties_additional_property_type_0 import (
@@ -11,13 +12,13 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ModelWithAnyJsonProperties:
     """ """
 
     additional_properties: Dict[
         str, Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]
-    ] = attr.ib(init=False, factory=dict)
+    ] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         from ..models.model_with_any_json_properties_additional_property_type_0 import (
@@ -52,7 +53,7 @@ class ModelWithAnyJsonProperties:
         for prop_name, prop_dict in d.items():
 
             def _parse_additional_property(
-                data: object,
+                data: object
             ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
                 try:
                     if not isinstance(data, dict):

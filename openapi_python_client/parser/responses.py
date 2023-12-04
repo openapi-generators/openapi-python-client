@@ -3,7 +3,9 @@ __all__ = ["Response", "response_from_data"]
 from http import HTTPStatus
 from typing import Optional, Tuple, Union
 
-import attr
+from attrs import define
+
+from openapi_python_client import utils
 
 from .. import Config
 from .. import schema as oai
@@ -12,7 +14,7 @@ from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Response:
     """Describes a single response for an endpoint"""
 
@@ -22,8 +24,11 @@ class Response:
 
 
 def _source_by_content_type(content_type: str) -> Optional[str]:
+    content_type = utils.get_content_type(content_type)
+
     if content_type.startswith("text/"):
         return "response.text"
+
     known_content_types = {
         "application/json": "response.json()",
         "application/octet-stream": "response.content",

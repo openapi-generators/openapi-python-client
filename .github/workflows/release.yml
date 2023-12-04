@@ -1,31 +1,28 @@
 name: Release
 
-on: workflow_dispatch
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 jobs:
   release:
+    if: github.head_ref == 'release' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT }}
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_push_gpgsign: false
       - name: Install Knope
-        uses: knope-dev/action@v1
+        uses: knope-dev/action@v2.0.0
         with:
-          version: 0.8.0
-      - name: Bump Version & Create GitHub Release
-        run: knope release
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          version: 0.13.2
       - name: Install Poetry
         run: pip install --upgrade poetry
       - name: Push to PyPI
         run: poetry publish --build -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+      - name: Create GitHub Release
+        run: knope release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}

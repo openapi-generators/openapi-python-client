@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .server_variable import ServerVariable
 
@@ -16,10 +16,9 @@ class Server(BaseModel):
     url: str
     description: Optional[str] = None
     variables: Optional[Dict[str, ServerVariable]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {"url": "https://development.gigantic-server.com/v1", "description": "Development server"},
                 {
@@ -36,4 +35,5 @@ class Server(BaseModel):
                     },
                 },
             ]
-        }
+        },
+    )

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ModelWithUnionPropertyInlined:
     """
     Attributes:
@@ -53,7 +53,7 @@ class ModelWithUnionPropertyInlined:
         d = src_dict.copy()
 
         def _parse_fruit(
-            data: object,
+            data: object
         ) -> Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset]:
             if isinstance(data, Unset):
                 return data

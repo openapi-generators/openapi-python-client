@@ -1,6 +1,6 @@
 from typing import Any, Dict, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
 from ..models.an_enum import AnEnum
 from ..models.an_int_enum import AnIntEnum
@@ -9,7 +9,7 @@ from ..types import UNSET, Unset
 T = TypeVar("T", bound="ModelWithUnionProperty")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ModelWithUnionProperty:
     """
     Attributes:

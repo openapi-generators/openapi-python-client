@@ -2,7 +2,6 @@
 [![codecov](https://codecov.io/gh/openapi-generators/openapi-python-client/branch/main/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 [![Generic badge](https://img.shields.io/badge/type_checked-mypy-informational.svg)](https://mypy.readthedocs.io/en/stable/introduction.html)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/openapi-python-client.svg)](https://pypi.python.org/pypi/openapi-python-client/)
 [![Downloads](https://static.pepy.tech/personalized-badge/openapi-python-client?period=total&units=international_system&left_color=blue&right_color=green&left_text=Downloads)](https://pepy.tech/project/openapi-python-client)
 
@@ -21,13 +20,17 @@ This tool focuses on creating the best developer experience for Python developer
 
 1. Using all the latest and greatest Python features like type annotations and dataclasses.
 2. Having documentation and usage instructions specific to this one generator.
-1. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
+3. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
+
+## Sponsors
+
+<a href="https://www.devmark.ai/fern/?utm_source=openapi-python-client&utm_loc=readme&utm_type=logo" target="_blank" title="Fern | SDKs and API docs"><img src="https://raw.githubusercontent.com/openapi-generators/openapi-python-client/main/.github/sponsors/fern.png"></a>
 
 ## Installation
 
 I recommend you install with [pipx](https://pipxproject.github.io/pipx/) so you don't conflict with any other packages you might have: `pipx install openapi-python-client --include-deps`.
 
-> Note the `--include-deps` option which will also make `black`, `isort`, and `autoflake` available in your path so that `openapi-python-client` can use them to clean up the generated code.
+> Note the `--include-deps` option which will also make `black` and `ruff` available in your path so that `openapi-python-client` can use them to clean up the generated code.
 
 **If you use `pipx run` then the post-generation hooks will not be available unless you install them manually.**
 
@@ -151,9 +154,8 @@ In the config file, there's an easy way to tell `openapi-python-client` to run a
 
 ```yaml
 post_hooks:
-   - "autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports ."
-   - "isort ."
-   - "black ."
+   - "ruff check . --fix"
+   - "ruff format ."
 ```
 
 ### use_path_prefixes_for_title_model_names

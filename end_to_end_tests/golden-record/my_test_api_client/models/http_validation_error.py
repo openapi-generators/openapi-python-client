@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="HTTPValidationError")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class HTTPValidationError:
     """
     Attributes:

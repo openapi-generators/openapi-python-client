@@ -1,3 +1,3 @@
-{% macro transform_header(property, source, destination) %}
-{{ destination }} = str({{ source }})
+{% macro transform_header(source) %}
+str({{ source }})
 {% endmacro %}

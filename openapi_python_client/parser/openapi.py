@@ -103,7 +103,6 @@ def generate_operation_id(*, path: str, method: str) -> str:
 models_relative_prefix: str = "..."
 
 
-# pylint: disable=too-many-instance-attributes
 @dataclass
 class Endpoint:
     """
@@ -179,7 +178,7 @@ class Endpoint:
         """Return json_body"""
         json_body = None
         for content_type, schema in body.content.items():
-            content_type = get_content_type(content_type)
+            content_type = get_content_type(content_type)  # noqa: PLW2901
 
             if content_type == "application/json" or content_type.endswith("+json"):
                 json_body = schema
@@ -307,9 +306,8 @@ class Endpoint:
             endpoint.responses.append(response)
         return endpoint, schemas
 
-    # pylint: disable=too-many-return-statements
     @staticmethod
-    def add_parameters(
+    def add_parameters(  # noqa: PLR0911, PLR0912
         *,
         endpoint: "Endpoint",
         data: Union[oai.Operation, oai.PathItem],
@@ -338,7 +336,6 @@ class Endpoint:
             - https://swagger.io/docs/specification/describing-parameters/
             - https://swagger.io/docs/specification/paths-and-operations/
         """
-        # pylint: disable=too-many-branches, too-many-locals
         # There isn't much value in breaking down this function further other than to satisfy the linter.
 
         if data.parameters is None:
@@ -363,7 +360,7 @@ class Endpoint:
             param_or_error = parameter_from_reference(param=param, parameters=parameters)
             if isinstance(param_or_error, ParseError):
                 return param_or_error, schemas, parameters
-            param = param_or_error
+            param = param_or_error  # noqa: PLW2901
 
             if param.param_schema is None:
                 continue
@@ -559,7 +556,7 @@ class GeneratorData:
     def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
         """Create an OpenAPI from dict"""
         try:
-            openapi = oai.OpenAPI.parse_obj(data)
+            openapi = oai.OpenAPI.model_validate(data)
         except ValidationError as err:
             detail = str(err)
             if "swagger" in data:
@@ -572,7 +569,9 @@ class GeneratorData:
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         if openapi.components and openapi.components.parameters:
-            parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
+            parameters = build_parameters(
+                components=openapi.components.parameters, parameters=parameters, config=config
+            )
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
             data=openapi.paths, schemas=schemas, parameters=parameters, config=config
         )
