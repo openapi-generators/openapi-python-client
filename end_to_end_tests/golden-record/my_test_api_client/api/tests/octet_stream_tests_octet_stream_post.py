@@ -19,7 +19,7 @@ def _get_kwargs(
     return {
         "method": "post",
         "url": "/tests/octet_stream",
-        "content": binary_body,
+        "content": binary_body.payload,
         "headers": headers,
     }
 
