@@ -18,18 +18,8 @@ from ... import errors
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
 def _get_kwargs(
-    {{ arguments(endpoint) | indent(4) }}
+    {{ arguments(endpoint, include_client=False) | indent(4) }}
 ) -> Dict[str, Any]:
-    url = "{}{{ endpoint.path }}".format(
-        client.base_url
-        {%- for parameter in endpoint.path_parameters.values() -%}
-        ,{{parameter.name}}={{parameter.python_name}}
-        {%- endfor -%}
-    )
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
     {{ header_params(endpoint) | indent(4) }}
 
     {{ cookie_params(endpoint) | indent(4) }}
@@ -41,33 +31,45 @@ def _get_kwargs(
     {{ multipart_body(endpoint) | indent(4) }}
 
     return {
-	    "method": "{{ endpoint.method }}",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
-        {% if endpoint.form_body %}
+        "method": "{{ endpoint.method }}",
+    {% if endpoint.path_parameters %}
+        "url": "{{ endpoint.path }}".format(
+        {%- for parameter in endpoint.path_parameters.values() -%}
+            {{parameter.name}}={{parameter.python_name}},
+        {%- endfor -%}
+        ),
+    {% else %}
+        "url": "{{ endpoint.path }}",
+    {% endif %}
+    {% if endpoint.form_body %}
         "data": form_data.to_dict(),
-        {% elif endpoint.multipart_body %}
+    {% elif endpoint.multipart_body %}
         "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
-        {% elif endpoint.json_body %}
+    {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
-        {% endif %}
-        {% if endpoint.query_parameters %}
+    {% endif %}
+    {% if endpoint.query_parameters %}
         "params": params,
-        {% endif %}
+    {% endif %}
+    {% if endpoint.header_parameters %}
+        "headers": headers,
+    {% endif %}
+    {% if endpoint.cookie_parameters %}
+        "cookies": cookies,
+    {% endif %}
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ return_string }}]:
+def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[{{ return_string }}]:
     {% for response in endpoint.responses %}
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
-        {{ prop_template.construct(response.prop, response.source) | indent(8) }}
+        {{ prop_template.construct(response.prop, response.source.attribute) | indent(8) }}
+        {% elif response.source.return_type == response.prop.get_type_string()  %}
+        {{ response.prop.python_name }} = {{ response.source.attribute }}
         {% else %}
-        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
+        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source.attribute }})
         {% endif %}
         return {{ response.prop.python_name }}
         {% else %}
@@ -80,7 +82,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[{{ 
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[{{ return_string }}]:
+def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[{{ return_string }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -95,11 +97,10 @@ def sync_detailed(
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
-        {{ kwargs(endpoint) }}
+        {{ kwargs(endpoint, include_client=False) }}
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -122,13 +123,12 @@ async def asyncio_detailed(
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
-        {{ kwargs(endpoint) }}
+        {{ kwargs(endpoint, include_client=False) }}
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(
-            **kwargs
-        )
+    response = await client.get_async_httpx_client().request(
+        **kwargs
+    )
 
     return _build_response(client=client, response=response)
 

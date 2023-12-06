@@ -13,6 +13,122 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.15.2 (2023-09-16)
+
+### Features
+
+#### support httpx 0.25 (#854)
+
+#### Support content-type with attributes (#655, #809, #858). Thanks @sherbang!
+
+## 0.15.1 (2023-08-12)
+
+### Features
+
+#### Upgrade internal Pydantic use to v2. Thanks @KristinnVikar! (#779)
+
+### Fixes
+
+#### Naming conflicts when properties are named "field" or "define" (#781, #793). Thanks @david-dotorigin
+
+## 0.15.0 (2023-07-23)
+
+### Breaking Changes
+
+#### Minimum httpx version raised to 0.20
+
+Some features of generated clients already failed at runtime when using httpx < 0.20, but now the minimum version is enforced at generation time.
+
+#### Connections from clients no longer automatically close (PR [#775](https://github.com/openapi-generators/openapi-python-client/pull/775))
+
+`Client` and `AuthenticatedClient` now reuse an internal [`httpx.Client`](https://www.python-httpx.org/advanced/#client-instances) (or `AsyncClient`)—keeping connections open between requests. This will improve performance overall, but may cause resource leaking if clients are not closed properly. The new clients are intended to be used via context managers—though for compatibility they don't _have_ to be used with context managers. If not using a context manager, connections will probably leak. Note that once a client is closed (by leaving the context manager), it can no longer be used—and attempting to do so will raise an exception.
+
+APIs should now be called like:
+
+```python
+with client as client:
+    my_api.sync(client)
+    another_api.sync(client)
+# client is closed here and can no longer be used
+```
+
+Generated READMEs reflect the new syntax, but READMEs for existing generated clients should be updated manually. See [this diff](https://github.com/openapi-generators/openapi-python-client/pull/775/files#diff-62b50316369f84439d58f4981c37538f5b619d344393cb659080dadbda328547) for inspiration.
+
+#### Generated clients and models now use the newer attrs `@define` and `field` APIs
+
+See [the attrs docs](https://www.attrs.org/en/stable/names.html#attrs-tng) for more information on how these may affect you.
+
+#### Removed public attributes for `Client` and `AuthenticatedClient`
+
+The following attributes have been removed from `Client` and `AuthenticatedClient`:
+
+- `base_url`—this can now only be set via the initializer
+- `cookies`—set at initialization or use `.with_cookies()`
+- `headers`—set at initialization or use `.with_headers()`
+- `timeout`—set at initialization or use `.with_timeout()`
+- `verify_ssl`—this can now only be set via the initializer
+- `follow_redirects`—this can now only be set via the initializer
+
+#### The `timeout` param and `with_timeout` now take an `httpx.Timeout` instead of a float
+
+#### `AuthenticatedClient` no longer inherits from `Client`
+
+The API of `AuthenticatedClient` is still a superset of `Client`, but the two classes no longer share a common base class.
+
+### Features
+
+#### Allow customizing the underlying `httpx` clients
+
+There are many use-cases where customizing the underlying `httpx` client directly is necessary. Some examples are:
+
+- [Event hooks](https://www.python-httpx.org/advanced/#event-hooks)
+- [Proxies](https://www.python-httpx.org/advanced/#http-proxying)
+- [Custom authentication](https://www.python-httpx.org/advanced/#customizing-authentication)
+- [Retries](https://www.python-httpx.org/advanced/#usage_1)
+
+The new `Client` and `AuthenticatedClient` classes come with several methods to customize underlying clients. You can pass arbitrary arguments to `httpx.Client` or `httpx.AsyncClient` when they are constructed:
+
+```python
+client = Client(base_url="https://api.example.com", httpx_args={"proxies": {"https://": "https://proxy.example.com"}})
+```
+
+**The underlying clients are constructed lazily, only when needed. `httpx_args` are stored internally in a dictionary until the first request is made.**
+
+You can force immediate construction of an underlying client in order to edit it directly:
+
+```python
+import httpx
+from my_api import Client
+
+client = Client(base_url="https://api.example.com")
+sync_client: httpx.Client = client.get_httpx_client()
+sync_client.timeout = 10
+async_client = client.get_async_httpx_client()
+async_client.timeout = 15
+```
+
+You can also completely override the underlying clients:
+
+```python
+import httpx
+from my_api import Client
+
+client = Client(base_url="https://api.example.com")
+# The params you put in here ^ are discarded when you call set_httpx_client or set_async_httpx_client
+sync_client = httpx.Client(base_url="https://api.example.com", timeout=10)
+client.set_httpx_client(sync_client)
+async_client = httpx.AsyncClient(base_url="https://api.example.com", timeout=15)
+client.set_async_httpx_client(async_client)
+```
+
+#### Clients now reuse connections between requests
+
+This happens every time you use the same `Client` or `AuthenticatedClient` instance for multiple requests, however it is best to use a context manager (e.g., `with client as client:`) to ensure the client is closed properly.
+
+### Fixes
+
+#### Stop showing Poetry instructions in generated READMEs when not appropriate
+
 ## 0.14.1
 
 ### Fixes

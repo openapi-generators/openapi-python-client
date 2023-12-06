@@ -5,7 +5,8 @@ from typing import List
 
 {% endif %}
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 {% if model.is_multipart_body %}
 import json
 {% endif %}
@@ -58,7 +59,7 @@ T = TypeVar("T", bound="{{ class_name }}")
     {% endfor %}{% endif %}
 {% endmacro %}
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class {{ class_name }}:
     {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
 
@@ -73,7 +74,7 @@ class {{ class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
 {% macro _to_dict(multipart=False) %}

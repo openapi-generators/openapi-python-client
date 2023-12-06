@@ -1,10 +1,10 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...types import Response
 
 
@@ -13,27 +13,19 @@ def _get_kwargs(
     param2: int,
     param1: str,
     param3: int,
-    *,
-    client: Client,
 ) -> Dict[str, Any]:
-    url = "{}/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
-        client.base_url, param4=param4, param2=param2, param1=param1, param3=param3
-    )
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
     return {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
+            param4=param4,
+            param2=param2,
+            param1=param1,
+            param3=param3,
+        ),
     }
 
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
     if response.status_code == HTTPStatus.OK:
         return None
     if client.raise_on_unexpected_status:
@@ -42,7 +34,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -57,7 +49,7 @@ def sync_detailed(
     param1: str,
     param3: int,
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[Any]:
     """
     Args:
@@ -79,11 +71,9 @@ def sync_detailed(
         param2=param2,
         param1=param1,
         param3=param3,
-        client=client,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -96,7 +86,7 @@ async def asyncio_detailed(
     param1: str,
     param3: int,
     *,
-    client: Client,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[Any]:
     """
     Args:
@@ -118,10 +108,8 @@ async def asyncio_detailed(
         param2=param2,
         param1=param1,
         param3=param3,
-        client=client,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

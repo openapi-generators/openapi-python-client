@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
-from openapi_python_client import Config
 from openapi_python_client.parser.errors import GeneratorError, ParseError
 
 runner = CliRunner()
@@ -63,7 +62,7 @@ def test_bad_config(mocker, _create_new_client):
 
     result = runner.invoke(app, ["generate", f"--config={config_path}", f"--path={path}"])
 
-    assert result.exit_code == 2
+    assert result.exit_code == 2  # noqa: PLR2004
     assert "Unable to parse config" in result.stdout
     load_config.assert_called_once_with(path=Path(config_path))
     _create_new_client.assert_not_called()
@@ -149,12 +148,12 @@ class TestGenerate:
     def test_generate_encoding_errors(self, _create_new_client):
         path = "cool/path"
         file_encoding = "error-file-encoding"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import app
 
         result = runner.invoke(app, ["generate", f"--path={path}", f"--file-encoding={file_encoding}"])
 
         assert result.exit_code == 1
-        assert result.output == "Unknown encoding : {}\n".format(file_encoding)
+        assert result.output == f"Unknown encoding : {file_encoding}\n"
 
     def test_generate_handle_errors(self, _create_new_client):
         _create_new_client.return_value = [GeneratorError(detail="this is a message")]
@@ -286,9 +285,9 @@ class TestUpdate:
     def test_update_encoding_errors(self, _update_existing_client):
         path = "cool/path"
         file_encoding = "error-file-encoding"
-        from openapi_python_client.cli import MetaType, app
+        from openapi_python_client.cli import app
 
         result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
 
         assert result.exit_code == 1
-        assert result.output == "Unknown encoding : {}\n".format(file_encoding)
+        assert result.output == f"Unknown encoding : {file_encoding}\n"

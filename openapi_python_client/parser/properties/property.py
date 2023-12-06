@@ -2,7 +2,7 @@ __all__ = ["Property"]
 
 from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
-import attr
+from attrs import define, field
 
 from ... import Config
 from ... import schema as oai
@@ -12,10 +12,10 @@ from ..errors import ParseError
 if TYPE_CHECKING:  # pragma: no cover
     from .model_property import ModelProperty
 else:
-    ModelProperty = "ModelProperty"  # pylint: disable=invalid-name
+    ModelProperty = "ModelProperty"
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Property:
     """
     Describes a single property for a schema
@@ -40,10 +40,10 @@ class Property:
         oai.ParameterLocation.PATH,
         oai.ParameterLocation.COOKIE,
     }
-    default: Optional[str] = attr.ib()
+    default: Optional[str] = field()
     python_name: PythonIdentifier
-    description: Optional[str] = attr.ib()
-    example: Optional[str] = attr.ib()
+    description: Optional[str] = field()
+    example: Optional[str] = field()
 
     template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False
@@ -122,7 +122,6 @@ class Property:
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 
-    # pylint: disable=unused-argument
     def get_lazy_imports(self, *, prefix: str) -> Set[str]:
         """Get a set of lazy import strings that should be included when this property is used somewhere
 

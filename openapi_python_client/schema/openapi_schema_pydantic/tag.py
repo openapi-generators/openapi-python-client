@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .external_documentation import ExternalDocumentation
 
@@ -18,7 +18,6 @@ class Tag(BaseModel):
     name: str
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {"examples": [{"name": "pet", "description": "Pets operations"}]}
+    model_config = ConfigDict(
+        extra="allow", json_schema_extra={"examples": [{"name": "pet", "description": "Pets operations"}]}
+    )

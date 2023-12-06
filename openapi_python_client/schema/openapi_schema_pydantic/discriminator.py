@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class Discriminator(BaseModel):
@@ -20,10 +20,9 @@ class Discriminator(BaseModel):
 
     propertyName: str
     mapping: Optional[Dict[str, str]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "propertyName": "petType",
@@ -33,4 +32,5 @@ class Discriminator(BaseModel):
                     },
                 }
             ]
-        }
+        },
+    )

@@ -4,10 +4,12 @@
     ":semanticCommitTypeAll(chore)"
   ],
   "rangeStrategy": "widen",
+  "lockFileMaintenance": { "enabled": true, "automerge": true },
   "regexManagers": [
     {
       "fileMatch": [
-        "release.*\\.yml"
+        "release.*\\.yml",
+        "prerelease.yml"
       ],
       "matchStrings": [
         "version:\\s*(?<currentValue>.*)"

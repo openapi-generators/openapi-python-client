@@ -464,7 +464,7 @@ class TestPropertyFromData:
         }
 
     def test_property_from_data_null_enum(self, enum_property_factory, none_property_factory):
-        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         data = Schema(title="AnEnumWithOnlyNull", enum=[None], nullable=False, default=None)
@@ -486,7 +486,7 @@ class TestPropertyFromData:
         name = "my_enum"
         required = True
         nullable = False
-        data = Schema.construct(title="anEnum", enum=[1, 2, 3], nullable=nullable, default=3)
+        data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], nullable=nullable, default=3)
 
         existing = enum_property_factory()
         schemas = Schemas(classes_by_name={"AnEnum": existing})
@@ -514,7 +514,7 @@ class TestPropertyFromData:
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
 
         name = "some_enum"
-        data = oai.Reference.construct(ref="#/components/schemas/MyEnum")
+        data = oai.Reference.model_construct(ref="#/components/schemas/MyEnum")
         existing_enum = enum_property_factory(
             name="an_enum",
             required=False,
@@ -540,7 +540,9 @@ class TestPropertyFromData:
 
         name = "some_enum"
         required = False
-        data = oai.Schema.construct(default="b", allOf=[oai.Reference.construct(ref="#/components/schemas/MyEnum")])
+        data = oai.Schema.model_construct(
+            default="b", allOf=[oai.Reference.model_construct(ref="#/components/schemas/MyEnum")]
+        )
         existing_enum = enum_property_factory(
             name="an_enum",
             default="MyEnum.A",
@@ -567,7 +569,9 @@ class TestPropertyFromData:
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
 
         name = "some_enum"
-        data = oai.Schema.construct(default="x", allOf=[oai.Reference.construct(ref="#/components/schemas/MyEnum")])
+        data = oai.Schema.model_construct(
+            default="x", allOf=[oai.Reference.model_construct(ref="#/components/schemas/MyEnum")]
+        )
         existing_enum = enum_property_factory(
             name="an_enum",
             default="MyEnum.A",
@@ -585,12 +589,12 @@ class TestPropertyFromData:
         assert prop == PropertyError(data=data, detail="x is an invalid default for enum MyEnum")
 
     def test_property_from_data_ref_model(self, model_property_factory):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
 
         name = "new_name"
         required = False
         class_name = "MyModel"
-        data = oai.Reference.construct(ref=f"#/components/schemas/{class_name}")
+        data = oai.Reference.model_construct(ref=f"#/components/schemas/{class_name}")
         class_info = Class(name=class_name, module_name="my_model")
 
         existing_model = model_property_factory(
@@ -613,7 +617,7 @@ class TestPropertyFromData:
     def test_property_from_data_ref_not_found(self, mocker):
         from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
 
-        data = oai.Reference.construct(ref="a/b/c")
+        data = oai.Reference.model_construct(ref="a/b/c")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
         schemas = Schemas()
 
@@ -633,7 +637,7 @@ class TestPropertyFromData:
         name = "new_name"
         required = False
         ref_path = "/components/schemas/RefName"
-        data = oai.Reference.construct(ref=f"#{ref_path}")
+        data = oai.Reference.model_construct(ref=f"#{ref_path}")
         roots = {"new_root"}
 
         existing_property = property_factory(name="old_name")
@@ -653,7 +657,7 @@ class TestPropertyFromData:
 
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Reference.construct(ref=mocker.MagicMock())
+        data = oai.Reference.model_construct(ref=mocker.MagicMock())
         parse_reference_path = mocker.patch(
             f"{MODULE_NAME}.parse_reference_path", return_value=PropertyError(detail="bad stuff")
         )
@@ -682,7 +686,7 @@ class TestPropertyFromData:
         required = True
         description = "a description"
         example = "an example"
-        data = oai.Schema.construct(type=openapi_type, default=1, description=description, example=example)
+        data = oai.Schema.model_construct(type=openapi_type, default=1, description=description, example=example)
         schemas = Schemas()
 
         p, new_schemas = property_from_data(
@@ -806,7 +810,7 @@ class TestPropertyFromData:
 
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema.construct(
+        data = oai.Schema.model_construct(
             anyOf=[{"type": "number", "default": "0.0"}],
             oneOf=[
                 {"type": "integer", "default": "0"},
@@ -827,7 +831,7 @@ class TestPropertyFromData:
         )
 
     def test_property_from_data_union_of_one_element(self, mocker, model_property_factory):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, property_from_data
+        from openapi_python_client.parser.properties import Schemas, property_from_data
 
         name = "new_name"
         required = False
@@ -836,8 +840,8 @@ class TestPropertyFromData:
         existing_model = model_property_factory()
         schemas = Schemas(classes_by_reference={f"/{class_name}": existing_model})
 
-        data = oai.Schema.construct(
-            allOf=[oai.Reference.construct(ref=f"#/{class_name}")],
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref=f"#/{class_name}")],
             nullable=nullable,
         )
         build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
@@ -884,7 +888,7 @@ class TestBuildListProperty:
 
         name = mocker.MagicMock()
         required = mocker.MagicMock()
-        data = oai.Schema.construct(type="array")
+        data = oai.Schema.model_construct(type="array")
         property_from_data = mocker.patch.object(properties, "property_from_data")
         schemas = properties.Schemas()
 
@@ -1008,7 +1012,7 @@ class TestBuildUnionProperty:
     def test_build_union_property_invalid_property(self, mocker):
         name = "bad_union"
         required = mocker.MagicMock()
-        reference = oai.Reference.construct(ref="#/components/schema/NotExist")
+        reference = oai.Reference.model_construct(ref="#/components/schema/NotExist")
         data = oai.Schema(anyOf=[reference])
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
 
@@ -1027,7 +1031,7 @@ class TestStringBasedProperty:
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.construct(type="string", nullable=nullable, default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", nullable=nullable, default='"hello world"', pattern="abcdef")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=Config(), schemas=Schemas()
@@ -1042,7 +1046,7 @@ class TestStringBasedProperty:
 
         name = "datetime_prop"
         required = True
-        data = oai.Schema.construct(
+        data = oai.Schema.model_construct(
             type="string", schema_format="date-time", nullable=True, default="2020-11-06T12:00:00"
         )
 
@@ -1059,7 +1063,7 @@ class TestStringBasedProperty:
 
         name = "datetime_prop"
         required = True
-        data = oai.Schema.construct(type="string", schema_format="date-time", nullable=True, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="date-time", nullable=True, default="a")
 
         result, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
@@ -1074,7 +1078,7 @@ class TestStringBasedProperty:
         required = True
         nullable = True
 
-        data = oai.Schema.construct(type="string", schema_format="date", nullable=nullable, default="2020-11-06")
+        data = oai.Schema.model_construct(type="string", schema_format="date", nullable=nullable, default="2020-11-06")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
@@ -1091,7 +1095,7 @@ class TestStringBasedProperty:
         required = True
         nullable = True
 
-        data = oai.Schema.construct(type="string", schema_format="date", nullable=nullable, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="date", nullable=nullable, default="a")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
@@ -1105,7 +1109,7 @@ class TestStringBasedProperty:
         name = "file_prop"
         required = True
         nullable = True
-        data = oai.Schema.construct(type="string", schema_format="binary", nullable=nullable, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="binary", nullable=nullable, default="a")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
@@ -1118,7 +1122,7 @@ class TestStringBasedProperty:
         name = "unknown"
         required = True
         nullable = True
-        data = oai.Schema.construct(type="string", schema_format="blah", nullable=nullable)
+        data = oai.Schema.model_construct(type="string", schema_format="blah", nullable=nullable)
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas, config=Config(), parent_name=None
@@ -1132,7 +1136,7 @@ class TestCreateSchemas:
         from openapi_python_client.parser.properties import Schemas, _create_schemas
         from openapi_python_client.schema import Reference, Schema
 
-        components = {"a_ref": Reference.construct(), "a_schema": Schema.construct()}
+        components = {"a_ref": Reference.model_construct(), "a_schema": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
         config = Config()
@@ -1155,7 +1159,7 @@ class TestCreateSchemas:
         from openapi_python_client.parser.properties import Schemas, _create_schemas
         from openapi_python_client.schema import Schema
 
-        components = {"first": Schema.construct(), "second": Schema.construct()}
+        components = {"first": Schema.model_construct(), "second": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
         parse_reference_path = mocker.patch(
             f"{MODULE_NAME}.parse_reference_path", side_effect=[PropertyError(detail="some details"), "a_path"]
@@ -1182,7 +1186,7 @@ class TestCreateSchemas:
         from openapi_python_client.parser.properties import Schemas, _create_schemas
         from openapi_python_client.schema import Schema
 
-        components = {"first": Schema.construct(), "second": Schema.construct()}
+        components = {"first": Schema.model_construct(), "second": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(
             f"{MODULE_NAME}.update_schemas_with_data", side_effect=[PropertyError(), Schemas(), PropertyError()]
         )
@@ -1198,7 +1202,7 @@ class TestCreateSchemas:
                 call("#/components/schemas/first"),
             ]
         )
-        assert update_schemas_with_data.call_count == 3
+        assert update_schemas_with_data.call_count == 3  # noqa: PLR2004
         assert result.errors == [PropertyError()]
 
 
@@ -1244,7 +1248,7 @@ class TestProcessModels:
                 "second": model_property_factory(),
             }
         )
-        recursion_error = PropertyError(data=Reference.construct(ref=f"#/{class_name}"))
+        recursion_error = PropertyError(data=Reference.model_construct(ref=f"#/{class_name}"))
         process_model = mocker.patch(f"{MODULE_NAME}.process_model", side_effect=[recursion_error, Schemas()])
         process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
         config = Config()
@@ -1380,7 +1384,8 @@ class TestBuildParameters:
         update_parameters_with_data = mocker.patch(f"{MODULE_NAME}.update_parameters_with_data")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
 
-        result = build_parameters(components=parameters, parameters=Parameters())
+        config = Config()
+        result = build_parameters(components=parameters, parameters=Parameters(), config=Config())
         # Should not even try to parse a path for the Reference
         parse_reference_path.assert_called_once_with("#/components/parameters/defined")
         update_parameters_with_data.assert_called_once_with(
@@ -1389,6 +1394,7 @@ class TestBuildParameters:
             parameters=Parameters(
                 errors=[ParameterError(detail="Reference parameters are not supported.", data=parameters["reference"])]
             ),
+            config=config,
         )
         assert result == update_parameters_with_data.return_value
 
@@ -1396,13 +1402,14 @@ class TestBuildParameters:
         from openapi_python_client.parser.properties import Parameters, build_parameters
         from openapi_python_client.schema import Parameter
 
-        parameters = {"first": Parameter.construct(), "second": Parameter.construct()}
+        parameters = {"first": Parameter.model_construct(), "second": Parameter.model_construct()}
         update_parameters_with_data = mocker.patch(f"{MODULE_NAME}.update_parameters_with_data")
         parse_reference_path = mocker.patch(
             f"{MODULE_NAME}.parse_reference_path", side_effect=[ParameterError(detail="some details"), "a_path"]
         )
 
-        result = build_parameters(components=parameters, parameters=Parameters())
+        config = Config()
+        result = build_parameters(components=parameters, parameters=Parameters(), config=config)
         parse_reference_path.assert_has_calls(
             [
                 call("#/components/parameters/first"),
@@ -1413,6 +1420,7 @@ class TestBuildParameters:
             ref_path="a_path",
             data=parameters["second"],
             parameters=Parameters(errors=[ParameterError(detail="some details", data=parameters["first"])]),
+            config=config,
         )
         assert result == update_parameters_with_data.return_value
 
@@ -1420,13 +1428,14 @@ class TestBuildParameters:
         from openapi_python_client.parser.properties import Parameters, build_parameters
         from openapi_python_client.schema import Parameter
 
-        parameters = {"first": Parameter.construct(), "second": Parameter.construct()}
+        parameters = {"first": Parameter.model_construct(), "second": Parameter.model_construct()}
         update_parameters_with_data = mocker.patch(
             f"{MODULE_NAME}.update_parameters_with_data", side_effect=[ParameterError(), Parameters(), ParameterError()]
         )
 
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
-        result = build_parameters(components=parameters, parameters=Parameters())
+        config = Config()
+        result = build_parameters(components=parameters, parameters=Parameters(), config=config)
         parse_reference_path.assert_has_calls(
             [
                 call("#/components/parameters/first"),
@@ -1434,7 +1443,7 @@ class TestBuildParameters:
                 call("#/components/parameters/first"),
             ]
         )
-        assert update_parameters_with_data.call_count == 3
+        assert update_parameters_with_data.call_count == 3  # noqa: PLR2004
         assert result.errors == [ParameterError()]
 
 
@@ -1447,11 +1456,17 @@ def test_build_enum_property_conflict():
     _, schemas = build_enum_property(
         data=data, name="Existing", required=True, schemas=schemas, enum=["a"], parent_name=None, config=Config()
     )
-    err, schemas = build_enum_property(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["a", "b"], parent_name=None, config=Config()
+    err, new_schemas = build_enum_property(
+        data=data,
+        name="Existing",
+        required=True,
+        schemas=schemas,
+        enum=["a", "b"],
+        parent_name=None,
+        config=Config(),
     )
 
-    assert schemas == schemas
+    assert schemas == new_schemas
     assert err == PropertyError(detail="Found conflicting enums named Existing with incompatible values.", data=data)
 
 
@@ -1461,11 +1476,11 @@ def test_build_enum_property_no_values():
     data = oai.Schema()
     schemas = Schemas()
 
-    err, schemas = build_enum_property(
+    err, new_schemas = build_enum_property(
         data=data, name="Existing", required=True, schemas=schemas, enum=[], parent_name=None, config=Config()
     )
 
-    assert schemas == schemas
+    assert schemas == new_schemas
     assert err == PropertyError(detail="No values provided for Enum", data=data)
 
 
@@ -1475,11 +1490,11 @@ def test_build_enum_property_bad_default():
     data = oai.Schema(default="B")
     schemas = Schemas()
 
-    err, schemas = build_enum_property(
+    err, new_schemas = build_enum_property(
         data=data, name="Existing", required=True, schemas=schemas, enum=["A"], parent_name=None, config=Config()
     )
 
-    assert schemas == schemas
+    assert schemas == new_schemas
     assert err == PropertyError(detail="B is an invalid default for enum Existing", data=data)
 
 
@@ -1490,7 +1505,7 @@ def test_build_schemas(mocker):
     create_schemas = mocker.patch(f"{MODULE_NAME}._create_schemas")
     process_models = mocker.patch(f"{MODULE_NAME}._process_models")
 
-    components = {"a_ref": Reference.construct(), "a_schema": Schema.construct()}
+    components = {"a_ref": Reference.model_construct(), "a_schema": Schema.model_construct()}
     schemas = Schemas()
     config = Config()
 

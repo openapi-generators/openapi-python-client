@@ -3,7 +3,8 @@ import json
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 from ..models.different_enum import DifferentEnum
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class BodyUploadFileTestsUploadPost:
     """
     Attributes:
@@ -53,7 +54,7 @@ class BodyUploadFileTestsUploadPost:
     some_array: Union[Unset, List[float]] = UNSET
     some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
-    additional_properties: Dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = attr.ib(
+    additional_properties: Dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
         init=False, factory=dict
     )
 
