@@ -48,7 +48,7 @@ def _get_kwargs(
     {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
     {% elif endpoint.binary_body %}
-        "content": {{ endpoint.binary_body.python_name }},
+        "content": {{ endpoint.binary_body.python_name }}.payload,
     {% endif %}
     {% if endpoint.query_parameters %}
         "params": params,
