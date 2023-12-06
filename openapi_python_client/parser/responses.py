@@ -1,7 +1,7 @@
 __all__ = ["Response", "response_from_data"]
 
 from http import HTTPStatus
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, TypedDict, Union
 
 from attrs import define
 
@@ -14,32 +14,53 @@ from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
 
 
+class _ResponseSource(TypedDict):
+    """What data should be pulled from the httpx Response object"""
+
+    attribute: str
+    return_type: str
+
+
+JSON_SOURCE = _ResponseSource(attribute="response.json()", return_type="Any")
+BYTES_SOURCE = _ResponseSource(attribute="response.content", return_type="bytes")
+TEXT_SOURCE = _ResponseSource(attribute="response.text", return_type="str")
+NONE_SOURCE = _ResponseSource(attribute="None", return_type="None")
+
+
 @define
 class Response:
     """Describes a single response for an endpoint"""
 
     status_code: HTTPStatus
     prop: Property
-    source: str
+    source: _ResponseSource
 
 
-def _source_by_content_type(content_type: str) -> Optional[str]:
-    content_type = utils.get_content_type(content_type)
+def _source_by_content_type(content_type: str) -> Optional[_ResponseSource]:
+    parsed_content_type = utils.get_content_type(content_type)
+    if parsed_content_type is None:
+        return None
+
+    if parsed_content_type.startswith("text/"):
+        return TEXT_SOURCE
 
     known_content_types = {
-        "application/json": "response.json()",
-        "application/octet-stream": "response.content",
-        "text/html": "response.text",
+        "application/json": JSON_SOURCE,
+        "application/octet-stream": BYTES_SOURCE,
     }
-    source = known_content_types.get(content_type)
-    if source is None and content_type.endswith("+json"):
+    source = known_content_types.get(parsed_content_type)
+    if source is None and parsed_content_type.endswith("+json"):
         # Implements https://www.rfc-editor.org/rfc/rfc6838#section-4.2.8 for the +json suffix
-        source = "response.json()"
+        source = JSON_SOURCE
     return source
 
 
 def empty_response(
-    *, status_code: HTTPStatus, response_name: str, config: Config, description: Optional[str]
+    *,
+    status_code: HTTPStatus,
+    response_name: str,
+    config: Config,
+    description: Optional[str],
 ) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
@@ -53,7 +74,7 @@ def empty_response(
             description=description,
             example=None,
         ),
-        source="None",
+        source=NONE_SOURCE,
     )
 
 
@@ -70,7 +91,12 @@ def response_from_data(
     response_name = f"response_{status_code}"
     if isinstance(data, oai.Reference):
         return (
-            empty_response(status_code=status_code, response_name=response_name, config=config, description=None),
+            empty_response(
+                status_code=status_code,
+                response_name=response_name,
+                config=config,
+                description=None,
+            ),
             schemas,
         )
 
@@ -78,7 +104,10 @@ def response_from_data(
     if not content:
         return (
             empty_response(
-                status_code=status_code, response_name=response_name, config=config, description=data.description
+                status_code=status_code,
+                response_name=response_name,
+                config=config,
+                description=data.description,
             ),
             schemas,
         )
@@ -89,12 +118,18 @@ def response_from_data(
             schema_data = media_type.media_type_schema
             break
     else:
-        return ParseError(data=data, detail=f"Unsupported content_type {content}"), schemas
+        return (
+            ParseError(data=data, detail=f"Unsupported content_type {content}"),
+            schemas,
+        )
 
     if schema_data is None:
         return (
             empty_response(
-                status_code=status_code, response_name=response_name, config=config, description=data.description
+                status_code=status_code,
+                response_name=response_name,
+                config=config,
+                description=data.description,
             ),
             schemas,
         )

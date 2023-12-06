@@ -781,6 +781,27 @@
         }
       }
     },
+    "/responses/text": {
+      "post": {
+        "tags": [
+          "responses"
+        ],
+        "summary": "Text Response",
+        "operationId": "text_response",
+        "responses": {
+          "200": {
+            "description": "Text response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/token_with_cookie": {
       "get": {
         "tags": [

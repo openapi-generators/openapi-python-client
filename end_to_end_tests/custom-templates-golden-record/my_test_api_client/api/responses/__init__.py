@@ -2,7 +2,7 @@
 
 import types
 
-from . import post_responses_unions_simple_before_complex
+from . import post_responses_unions_simple_before_complex, text_response
 
 
 class ResponsesEndpoints:
@@ -12,3 +12,10 @@ class ResponsesEndpoints:
         Regression test for #603
         """
         return post_responses_unions_simple_before_complex
+
+    @classmethod
+    def text_response(cls) -> types.ModuleType:
+        """
+        Text Response
+        """
+        return text_response

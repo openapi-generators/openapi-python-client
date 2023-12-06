@@ -46,7 +46,11 @@ class EndpointCollection:
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, config: Config
+        *,
+        data: Dict[str, oai.PathItem],
+        schemas: Schemas,
+        parameters: Parameters,
+        config: Config,
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
         endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
@@ -72,7 +76,11 @@ class EndpointCollection:
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
                     endpoint, schemas, parameters = Endpoint.add_parameters(
-                        endpoint=endpoint, data=path_data, schemas=schemas, parameters=parameters, config=config
+                        endpoint=endpoint,
+                        data=path_data,
+                        schemas=schemas,
+                        parameters=parameters,
+                        config=config,
                     )
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
@@ -145,7 +153,13 @@ class Endpoint:
                 config=config,
             )
             if isinstance(prop, ModelProperty):
-                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
+                schemas = attr.evolve(
+                    schemas,
+                    classes_by_name={
+                        **schemas.classes_by_name,
+                        prop.class_info.name: prop,
+                    },
+                )
             return prop, schemas
         return None, schemas
 
@@ -167,7 +181,13 @@ class Endpoint:
             )
             if isinstance(prop, ModelProperty):
                 prop = attr.evolve(prop, is_multipart_body=True)
-                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
+                schemas = attr.evolve(
+                    schemas,
+                    classes_by_name={
+                        **schemas.classes_by_name,
+                        prop.class_info.name: prop,
+                    },
+                )
             return prop, schemas
         return None, schemas
 
@@ -178,9 +198,11 @@ class Endpoint:
         """Return json_body"""
         json_body = None
         for content_type, schema in body.content.items():
-            content_type = get_content_type(content_type)  # noqa: PLW2901
+            parsed_content_type = get_content_type(content_type)
 
-            if content_type == "application/json" or content_type.endswith("+json"):
+            if parsed_content_type is not None and (
+                parsed_content_type == "application/json" or parsed_content_type.endswith("+json")
+            ):
                 json_body = schema
                 break
 
@@ -209,7 +231,10 @@ class Endpoint:
             return endpoint, schemas
 
         form_body, schemas = Endpoint.parse_request_form_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=data.requestBody,
+            schemas=schemas,
+            parent_name=endpoint.name,
+            config=config,
         )
 
         if isinstance(form_body, ParseError):
@@ -223,7 +248,10 @@ class Endpoint:
             )
 
         json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=data.requestBody,
+            schemas=schemas,
+            parent_name=endpoint.name,
+            config=config,
         )
         if isinstance(json_body, ParseError):
             return (
@@ -236,7 +264,10 @@ class Endpoint:
             )
 
         multipart_body, schemas = Endpoint.parse_multipart_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
+            body=data.requestBody,
+            schemas=schemas,
+            parent_name=endpoint.name,
+            config=config,
         )
         if isinstance(multipart_body, ParseError):
             return (
@@ -285,7 +316,11 @@ class Endpoint:
                 continue
 
             response, schemas = response_from_data(
-                status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name, config=config
+                status_code=status_code,
+                data=response_data,
+                schemas=schemas,
+                parent_name=endpoint.name,
+                config=config,
             )
             if isinstance(response, ParseError):
                 detail_suffix = "" if response.detail is None else f" ({response.detail})"
@@ -350,7 +385,15 @@ class Endpoint:
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
             "RESERVED": {  # These can't be param names because codegen needs them as vars, the properties don't matter
-                "client": AnyProperty("client", True, False, None, PythonIdentifier("client", ""), None, None),
+                "client": AnyProperty(
+                    "client",
+                    True,
+                    False,
+                    None,
+                    PythonIdentifier("client", ""),
+                    None,
+                    None,
+                ),
                 "url": AnyProperty("url", True, False, None, PythonIdentifier("url", ""), None, None),
             },
         }
@@ -393,7 +436,10 @@ class Endpoint:
 
             if isinstance(prop, ParseError):
                 return (
-                    ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data),
+                    ParseError(
+                        detail=f"cannot parse parameter of endpoint {endpoint.name}",
+                        data=prop.data,
+                    ),
                     schemas,
                     parameters,
                 )
@@ -432,7 +478,8 @@ class Endpoint:
             if prop.python_name in endpoint.used_python_identifiers:
                 return (
                     ParseError(
-                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
+                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected",
+                        data=data,
                     ),
                     schemas,
                     parameters,
@@ -465,7 +512,8 @@ class Endpoint:
         parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
         try:
             sorted_params = sorted(
-                endpoint.path_parameters.values(), key=lambda param: parameters_from_path.index(param.name)
+                endpoint.path_parameters.values(),
+                key=lambda param: parameters_from_path.index(param.name),
             )
             endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
         except ValueError:
@@ -506,7 +554,11 @@ class Endpoint:
         )
 
         result, schemas, parameters = Endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=schemas, parameters=parameters, config=config
+            endpoint=endpoint,
+            data=data,
+            schemas=schemas,
+            parameters=parameters,
+            config=config,
         )
         if isinstance(result, ParseError):
             return result, schemas, parameters
@@ -570,7 +622,9 @@ class GeneratorData:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         if openapi.components and openapi.components.parameters:
             parameters = build_parameters(
-                components=openapi.components.parameters, parameters=parameters, config=config
+                components=openapi.components.parameters,
+                parameters=parameters,
+                config=config,
             )
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
             data=openapi.paths, schemas=schemas, parameters=parameters, config=config
