@@ -242,7 +242,7 @@ class Endpoint:
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
             return endpoint, schemas
 
-        request_body_parsers: list[tuple[str, RequestBodyParser]] = [
+        request_body_parsers: List[Tuple[str, RequestBodyParser]] = [
             ("form_body", Endpoint.parse_request_form_body),
             ("json_body", Endpoint.parse_request_json_body),
             ("binary_body", Endpoint.parse_request_binary_body),
@@ -253,12 +253,12 @@ class Endpoint:
             body, schemas = parser(body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config)
 
             if isinstance(body, ParseError):
+                property_type = property_name
+                if property_type.endswith('_body'):
+                    property_type = property_type[:-5]
                 return (
                     ParseError(
-                        header=(
-                            f"Cannot parse {property_name.removesuffix('_body')} request body of endpoint"
-                            f" {endpoint.name}"
-                        ),
+                        header=f"Cannot parse {property_type} request body of endpoint {endpoint.name}",
                         detail=body.detail,
                         data=body.data,
                     ),
