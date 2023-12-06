@@ -305,7 +305,7 @@ class TestEndpoint:
 
         assert result == (
             ParseError(
-                header=f"Cannot parse JSON body of endpoint {endpoint.name}",
+                header=f"Cannot parse json request body of endpoint {endpoint.name}",
                 detail=parse_error.detail,
                 data=parse_error.data,
             ),
@@ -337,7 +337,7 @@ class TestEndpoint:
         assert result == (
             ParseError(
                 detail="type array must have items defined",
-                header="Cannot parse form body of endpoint name",
+                header="Cannot parse form request body of endpoint name",
                 data=bad_schema,
             ),
             schemas,
@@ -364,7 +364,7 @@ class TestEndpoint:
 
         assert result == (
             ParseError(
-                header=f"Cannot parse multipart body of endpoint {endpoint.name}",
+                header=f"Cannot parse multipart request body of endpoint {endpoint.name}",
                 detail=parse_error.detail,
                 data=parse_error.data,
             ),
