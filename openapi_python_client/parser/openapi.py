@@ -254,7 +254,7 @@ class Endpoint:
 
             if isinstance(body, ParseError):
                 property_type = property_name
-                if property_type.endswith('_body'):
+                if property_type.endswith("_body"):
                     property_type = property_type[:-5]
                 return (
                     ParseError(
