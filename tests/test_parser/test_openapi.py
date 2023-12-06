@@ -312,6 +312,34 @@ class TestEndpoint:
             other_schemas,
         )
 
+    def test_add_body_bad_binary_data(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        schemas = Schemas()
+        mocker.patch.object(Endpoint, "parse_request_form_body", return_value=(None, schemas))
+        mocker.patch.object(Endpoint, "parse_request_json_body", return_value=(mocker.MagicMock(), mocker.MagicMock()))
+        parse_error = ParseError(data=mocker.MagicMock(), detail=mocker.MagicMock())
+        other_schemas = mocker.MagicMock()
+        mocker.patch.object(Endpoint, "parse_request_binary_body", return_value=(parse_error, other_schemas))
+        endpoint = self.make_endpoint()
+        request_body = mocker.MagicMock()
+
+        result = Endpoint._add_body(
+            endpoint=endpoint,
+            data=oai.Operation.model_construct(requestBody=request_body),
+            schemas=schemas,
+            config=MagicMock(),
+        )
+
+        assert result == (
+            ParseError(
+                header=f"Cannot parse binary request body of endpoint {endpoint.name}",
+                detail=parse_error.detail,
+                data=parse_error.data,
+            ),
+            other_schemas,
+        )
+
     def test_add_body_bad_form_data(self, enum_property_factory):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
@@ -402,6 +430,14 @@ class TestEndpoint:
             Endpoint, "parse_request_json_body", return_value=(json_body, json_schemas)
         )
 
+        binary_body = mocker.MagicMock(autospec=Property)
+        binary_body_imports = mocker.MagicMock()
+        binary_body.get_imports.return_value = {binary_body_imports}
+        binary_schemas = mocker.MagicMock()
+        parse_request_binary_body = mocker.patch.object(
+            Endpoint, "parse_request_binary_body", return_value=(binary_body, binary_schemas)
+        )
+
         endpoint = self.make_endpoint()
         initial_schemas = mocker.MagicMock()
 
@@ -419,16 +455,27 @@ class TestEndpoint:
         parse_request_json_body.assert_called_once_with(
             body=request_body, schemas=form_schemas, parent_name="name", config=config
         )
-        parse_multipart_body.assert_called_once_with(
+        parse_request_binary_body.assert_called_once_with(
             body=request_body, schemas=json_schemas, parent_name="name", config=config
+        )
+        parse_multipart_body.assert_called_once_with(
+            body=request_body, schemas=binary_schemas, parent_name="name", config=config
         )
         form_body.get_imports.assert_called_once_with(prefix="...")
         json_body.get_imports.assert_called_once_with(prefix="...")
+        binary_body.get_imports.assert_called_once_with(prefix="...")
         multipart_body.get_imports.assert_called_once_with(prefix="...")
-        assert endpoint.relative_imports == {"import_3", form_body_imports, json_body_imports, multipart_body_imports}
+        assert endpoint.relative_imports == {
+            "import_3",
+            form_body_imports,
+            json_body_imports,
+            binary_body_imports,
+            multipart_body_imports,
+        }
         assert endpoint.json_body == json_body
         assert endpoint.form_body == form_body
         assert endpoint.multipart_body == multipart_body
+        assert endpoint.binary_body == binary_body
 
     @pytest.mark.parametrize("response_status_code", ["not_a_number", 499])
     def test__add_responses_status_code_error(self, response_status_code, mocker):

@@ -47,11 +47,13 @@ def _get_kwargs(
         "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
     {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
+    {% elif endpoint.binary_body %}
+        "content": {{ endpoint.binary_body.python_name }},
     {% endif %}
     {% if endpoint.query_parameters %}
         "params": params,
     {% endif %}
-    {% if endpoint.header_parameters %}
+    {% if endpoint.header_parameters or endpoint.binary_body %}
         "headers": headers,
     {% endif %}
     {% if endpoint.cookie_parameters %}

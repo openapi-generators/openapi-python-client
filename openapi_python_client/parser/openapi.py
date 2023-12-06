@@ -134,6 +134,7 @@ class Endpoint:
     form_body: Optional[Property] = None
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
+    binary_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
@@ -205,6 +206,30 @@ class Endpoint:
         return None, schemas
 
     @staticmethod
+    def parse_request_binary_body(
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
+        """Return binary_body"""
+        binary_body = None
+        for content_type, schema in body.content.items():
+            content_type = get_content_type(content_type)  # noqa: PLW2901
+
+            if content_type == "application/octet-stream":
+                binary_body = schema
+                break
+
+        if binary_body is not None and binary_body.media_type_schema is not None:
+            return property_from_data(
+                name="binary_body",
+                required=True,
+                data=binary_body.media_type_schema,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
+        return None, schemas
+
+    @staticmethod
     def _add_body(
         *,
         endpoint: "Endpoint",
@@ -220,6 +245,7 @@ class Endpoint:
         request_body_parsers: list[tuple[str, RequestBodyParser]] = [
             ("form_body", Endpoint.parse_request_form_body),
             ("json_body", Endpoint.parse_request_json_body),
+            ("binary_body", Endpoint.parse_request_binary_body),
             ("multipart_body", Endpoint.parse_multipart_body),
         ]
 
@@ -517,6 +543,8 @@ class Endpoint:
             yield self.multipart_body
         if self.json_body:
             yield self.json_body
+        if self.binary_body:
+            yield self.binary_body
 
     def list_all_parameters(self) -> List[Property]:
         """Return a List of all the parameters of this endpoint"""
