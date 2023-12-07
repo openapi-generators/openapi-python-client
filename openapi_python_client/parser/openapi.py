@@ -234,7 +234,7 @@ class Endpoint:
         """Return binary_body"""
         binary_body = None
         for content_type, schema in body.content.items():
-            parsed_content_type = get_content_type(content_type)  # noqa: PLW2901
+            parsed_content_type = get_content_type(content_type)
 
             if parsed_content_type == "application/octet-stream":
                 binary_body = schema
