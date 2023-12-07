@@ -13,6 +13,40 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.16.0 (2023-12-07)
+
+### Breaking Changes
+
+#### Switch from Black to Ruff for formatting
+
+`black` is no longer a runtime dependency, so if you have them set in custom `post_hooks` in a config file, you'll need to make sure they're being installed manually. [`ruff`](https://docs.astral.sh/ruff) is now installed and used by default instead.
+
+#### Use Ruff instead of isort + autoflake at runtime
+
+`isort` and `autoflake` are no longer runtime dependencies, so if you have them set in custom `post_hooks` in a config file, you'll need to make sure they're being installed manually. [`ruff`](https://docs.astral.sh/ruff) is now installed and used by default instead.
+
+### Features
+
+#### Support all `text/*` content types in responses
+
+Within an API response, any content type which starts with `text/` will now be treated the same as `text/html` already was—they will return the `response.text` attribute from the [httpx Response](https://www.python-httpx.org/api/#response).
+
+Thanks to @fdintino for the initial implementation, and thanks for the discussions from @kairntech, @rubenfiszel, and @antoneladestito.
+
+Closes #797 and #821.
+
+#### Support `application/octet-stream` request bodies
+
+Endpoints that accept `application/octet-stream` request bodies are now supported using the same `File` type as octet-stream responses.
+
+Thanks to @kgutwin for the implementation and @rtaycher for the discussion!
+
+PR #899 closes #588
+
+### Fixes
+
+#### Remove useless `pass` statements from generated code
+
 ## 0.15.2 (2023-09-16)
 
 ### Features
