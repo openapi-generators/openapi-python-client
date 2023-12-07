@@ -3,7 +3,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from http import HTTPStatus
-from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Protocol, Set, Tuple, Union
 
 import attr
 from pydantic import ValidationError
@@ -111,6 +111,15 @@ def generate_operation_id(*, path: str, method: str) -> str:
 models_relative_prefix: str = "..."
 
 
+class RequestBodyParser(Protocol):
+    __name__: str = "RequestBodyParser"
+
+    def __call__(
+        self, *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
+        ...  # pragma: no cover
+
+
 @dataclass
 class Endpoint:
     """
@@ -133,6 +142,7 @@ class Endpoint:
     form_body: Optional[Property] = None
     json_body: Optional[Property] = None
     multipart_body: Optional[Property] = None
+    binary_body: Optional[Property] = None
     errors: List[ParseError] = field(default_factory=list)
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
@@ -218,6 +228,30 @@ class Endpoint:
         return None, schemas
 
     @staticmethod
+    def parse_request_binary_body(
+        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
+        """Return binary_body"""
+        binary_body = None
+        for content_type, schema in body.content.items():
+            parsed_content_type = get_content_type(content_type)
+
+            if parsed_content_type == "application/octet-stream":
+                binary_body = schema
+                break
+
+        if binary_body is not None and binary_body.media_type_schema is not None:
+            return property_from_data(
+                name="binary_body",
+                required=True,
+                data=binary_body.media_type_schema,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
+        return None, schemas
+
+    @staticmethod
     def _add_body(
         *,
         endpoint: "Endpoint",
@@ -230,68 +264,34 @@ class Endpoint:
         if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
             return endpoint, schemas
 
-        form_body, schemas = Endpoint.parse_request_form_body(
-            body=data.requestBody,
-            schemas=schemas,
-            parent_name=endpoint.name,
-            config=config,
-        )
+        request_body_parsers: List[Tuple[str, RequestBodyParser]] = [
+            ("form_body", Endpoint.parse_request_form_body),
+            ("json_body", Endpoint.parse_request_json_body),
+            ("binary_body", Endpoint.parse_request_binary_body),
+            ("multipart_body", Endpoint.parse_multipart_body),
+        ]
 
-        if isinstance(form_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse form body of endpoint {endpoint.name}",
-                    detail=form_body.detail,
-                    data=form_body.data,
-                ),
-                schemas,
-            )
+        for property_name, parser in request_body_parsers:
+            body, schemas = parser(body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config)
 
-        json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody,
-            schemas=schemas,
-            parent_name=endpoint.name,
-            config=config,
-        )
-        if isinstance(json_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse JSON body of endpoint {endpoint.name}",
-                    detail=json_body.detail,
-                    data=json_body.data,
-                ),
-                schemas,
-            )
+            if isinstance(body, ParseError):
+                property_type = property_name
+                if property_type.endswith("_body"):
+                    property_type = property_type[:-5]
+                return (
+                    ParseError(
+                        header=f"Cannot parse {property_type} request body of endpoint {endpoint.name}",
+                        detail=body.detail,
+                        data=body.data,
+                    ),
+                    schemas,
+                )
 
-        multipart_body, schemas = Endpoint.parse_multipart_body(
-            body=data.requestBody,
-            schemas=schemas,
-            parent_name=endpoint.name,
-            config=config,
-        )
-        if isinstance(multipart_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse multipart body of endpoint {endpoint.name}",
-                    detail=multipart_body.detail,
-                    data=multipart_body.data,
-                ),
-                schemas,
-            )
+            if body is not None:
+                setattr(endpoint, property_name, body)
+                endpoint.relative_imports.update(body.get_imports(prefix=models_relative_prefix))
+                endpoint.relative_imports.update(body.get_lazy_imports(prefix=models_relative_prefix))
 
-        # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-        if form_body is not None:
-            endpoint.form_body = form_body
-            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.form_body.get_lazy_imports(prefix=models_relative_prefix))
-        if multipart_body is not None:
-            endpoint.multipart_body = multipart_body
-            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.multipart_body.get_lazy_imports(prefix=models_relative_prefix))
-        if json_body is not None:
-            endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.json_body.get_lazy_imports(prefix=models_relative_prefix))
         return endpoint, schemas
 
     @staticmethod
@@ -586,6 +586,8 @@ class Endpoint:
             yield self.multipart_body
         if self.json_body:
             yield self.json_body
+        if self.binary_body:
+            yield self.binary_body
 
     def list_all_parameters(self) -> List[Property]:
         """Return a List of all the parameters of this endpoint"""

@@ -15,6 +15,7 @@ from . import (
     json_body_tests_json_body_post,
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
+    octet_stream_tests_octet_stream_post,
     post_form_data,
     post_form_data_inline,
     post_tests_json_body_string,
@@ -117,6 +118,13 @@ class TestsEndpoints:
         Octet Stream
         """
         return octet_stream_tests_octet_stream_get
+
+    @classmethod
+    def octet_stream_tests_octet_stream_post(cls) -> types.ModuleType:
+        """
+        Binary (octet stream) request body
+        """
+        return octet_stream_tests_octet_stream_post
 
     @classmethod
     def no_response_tests_no_response_get(cls) -> types.ModuleType:
