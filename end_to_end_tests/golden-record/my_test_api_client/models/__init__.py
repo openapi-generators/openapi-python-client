@@ -63,14 +63,14 @@ from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
 from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
 from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from .none import None_
-from .post_form_data_inline_data import PostFormDataInlineData
-from .post_naming_property_conflict_with_import_json_body import PostNamingPropertyConflictWithImportJsonBody
+from .post_form_data_inline_body import PostFormDataInlineBody
+from .post_naming_property_conflict_with_import_body import PostNamingPropertyConflictWithImportBody
 from .post_naming_property_conflict_with_import_response_200 import PostNamingPropertyConflictWithImportResponse200
 from .post_responses_unions_simple_before_complex_response_200 import PostResponsesUnionsSimpleBeforeComplexResponse200
 from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
 )
-from .test_inline_objects_json_body import TestInlineObjectsJsonBody
+from .test_inline_objects_body import TestInlineObjectsBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
 from .validation_error import ValidationError
 
@@ -130,12 +130,12 @@ __all__ = (
     "ModelWithUnionPropertyInlinedFruitType0",
     "ModelWithUnionPropertyInlinedFruitType1",
     "None_",
-    "PostFormDataInlineData",
-    "PostNamingPropertyConflictWithImportJsonBody",
+    "PostFormDataInlineBody",
+    "PostNamingPropertyConflictWithImportBody",
     "PostNamingPropertyConflictWithImportResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
-    "TestInlineObjectsJsonBody",
+    "TestInlineObjectsBody",
     "TestInlineObjectsResponse200",
     "ValidationError",
 )

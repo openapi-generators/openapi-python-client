@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
@@ -30,7 +30,7 @@ class Operation(BaseModel):
     externalDocs: Optional[ExternalDocumentation] = None
     operationId: Optional[str] = None
     parameters: Optional[List[Union[Parameter, Reference]]] = None
-    requestBody: Optional[Union[RequestBody, Reference]] = None
+    request_body: Optional[Union[RequestBody, Reference]] = Field(None, alias="requestBody")
     responses: Responses
     callbacks: Optional[Dict[str, Callback]] = None
 
@@ -60,8 +60,14 @@ class Operation(BaseModel):
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "name": {"description": "Updated name of the pet", "type": "string"},
-                                        "status": {"description": "Updated status of the pet", "type": "string"},
+                                        "name": {
+                                            "description": "Updated name of the pet",
+                                            "type": "string",
+                                        },
+                                        "status": {
+                                            "description": "Updated status of the pet",
+                                            "type": "string",
+                                        },
                                     },
                                     "required": ["status"],
                                 }

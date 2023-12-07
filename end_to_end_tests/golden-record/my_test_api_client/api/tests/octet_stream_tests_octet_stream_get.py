@@ -10,10 +10,12 @@ from ...types import File, Response
 
 
 def _get_kwargs() -> Dict[str, Any]:
-    return {
+    _kwargs = {
         "method": "get",
         "url": "/tests/octet_stream",
     }
+
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[File]:

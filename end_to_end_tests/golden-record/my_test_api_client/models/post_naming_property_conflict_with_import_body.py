@@ -5,11 +5,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostNamingPropertyConflictWithImportJsonBody")
+T = TypeVar("T", bound="PostNamingPropertyConflictWithImportBody")
 
 
 @_attrs_define
-class PostNamingPropertyConflictWithImportJsonBody:
+class PostNamingPropertyConflictWithImportBody:
     """
     Attributes:
         field (Union[Unset, str]): A python_name of field should not interfere with attrs field
@@ -41,13 +41,13 @@ class PostNamingPropertyConflictWithImportJsonBody:
 
         define = d.pop("Define", UNSET)
 
-        post_naming_property_conflict_with_import_json_body = cls(
+        post_naming_property_conflict_with_import_body = cls(
             field=field,
             define=define,
         )
 
-        post_naming_property_conflict_with_import_json_body.additional_properties = d
-        return post_naming_property_conflict_with_import_json_body
+        post_naming_property_conflict_with_import_body.additional_properties = d
+        return post_naming_property_conflict_with_import_body
 
     @property
     def additional_keys(self) -> List[str]:

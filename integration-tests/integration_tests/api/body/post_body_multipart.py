@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.post_body_multipart_multipart_data import PostBodyMultipartMultipartData
+from ...models.post_body_multipart_body import PostBodyMultipartBody
 from ...models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from ...models.public_error import PublicError
 from ...types import Response
@@ -13,15 +13,22 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    multipart_data: PostBodyMultipartMultipartData,
+    body: PostBodyMultipartBody,
 ) -> Dict[str, Any]:
-    multipart_multipart_data = multipart_data.to_multipart()
+    headers = {}
 
-    return {
+    _kwargs = {
         "method": "post",
         "url": "/body/multipart",
-        "files": multipart_multipart_data,
     }
+
+    _body = body.to_multipart()
+
+    _kwargs["files"] = _body
+    headers["Content-Type"] = "multipart/form-data"
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(
@@ -55,11 +62,11 @@ def _build_response(
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: PostBodyMultipartMultipartData,
+    body: PostBodyMultipartBody,
 ) -> Response[Union[PostBodyMultipartResponse200, PublicError]]:
     """
     Args:
-        multipart_data (PostBodyMultipartMultipartData):
+        body (PostBodyMultipartBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -70,7 +77,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        multipart_data=multipart_data,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -83,11 +90,11 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: PostBodyMultipartMultipartData,
+    body: PostBodyMultipartBody,
 ) -> Optional[Union[PostBodyMultipartResponse200, PublicError]]:
     """
     Args:
-        multipart_data (PostBodyMultipartMultipartData):
+        body (PostBodyMultipartBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -99,18 +106,18 @@ def sync(
 
     return sync_detailed(
         client=client,
-        multipart_data=multipart_data,
+        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: PostBodyMultipartMultipartData,
+    body: PostBodyMultipartBody,
 ) -> Response[Union[PostBodyMultipartResponse200, PublicError]]:
     """
     Args:
-        multipart_data (PostBodyMultipartMultipartData):
+        body (PostBodyMultipartBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -121,7 +128,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        multipart_data=multipart_data,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -132,11 +139,11 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: PostBodyMultipartMultipartData,
+    body: PostBodyMultipartBody,
 ) -> Optional[Union[PostBodyMultipartResponse200, PublicError]]:
     """
     Args:
-        multipart_data (PostBodyMultipartMultipartData):
+        body (PostBodyMultipartBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -149,6 +156,6 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            multipart_data=multipart_data,
+            body=body,
         )
     ).parsed

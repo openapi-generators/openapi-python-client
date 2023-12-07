@@ -9,10 +9,12 @@ from ...types import Response
 
 
 def _get_kwargs() -> Dict[str, Any]:
-    return {
+    _kwargs = {
         "method": "get",
         "url": "/tests/no_response",
     }
+
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:

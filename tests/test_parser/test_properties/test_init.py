@@ -803,6 +803,7 @@ class TestPropertyFromData:
             config=config,
             process_properties=process_properties,
             roots=roots,
+            is_multipart_body=False,
         )
 
     def test_property_from_data_union(self, mocker):

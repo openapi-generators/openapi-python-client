@@ -31,15 +31,17 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs = {
         "method": "get",
         "url": "/parameter-references/{path_param}".format(
             path_param=path_param,
         ),
         "params": params,
-        "headers": headers,
         "cookies": cookies,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:

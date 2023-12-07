@@ -38,11 +38,13 @@ def _get_kwargs(
     if not isinstance(string_enum_header, Unset):
         headers["String-Enum-Header"] = str(string_enum_header)
 
-    return {
+    _kwargs = {
         "method": "get",
         "url": "/location/header/types",
-        "headers": headers,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:

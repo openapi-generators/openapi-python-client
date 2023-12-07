@@ -11,19 +11,26 @@ from ...types import File, Response
 
 def _get_kwargs(
     *,
-    multipart_data: List[File],
+    body: List[File],
 ) -> Dict[str, Any]:
-    multipart_multipart_data = []
-    for multipart_data_item_data in multipart_data:
-        multipart_data_item = multipart_data_item_data.to_tuple()
+    headers = {}
 
-        multipart_multipart_data.append(multipart_data_item)
-
-    return {
+    _kwargs = {
         "method": "post",
         "url": "/tests/upload/multiple",
-        "files": multipart_multipart_data,
     }
+
+    _body = []
+    for body_item_data in body:
+        body_item = body_item_data.to_tuple()
+
+        _body.append(body_item)
+
+    _kwargs["files"] = _body
+    headers["Content-Type"] = "multipart/form-data"
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(
@@ -56,14 +63,14 @@ def _build_response(
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: List[File],
+    body: List[File],
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        multipart_data (List[File]):
+        body (List[File]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -74,7 +81,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        multipart_data=multipart_data,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -87,14 +94,14 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: List[File],
+    body: List[File],
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        multipart_data (List[File]):
+        body (List[File]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -106,21 +113,21 @@ def sync(
 
     return sync_detailed(
         client=client,
-        multipart_data=multipart_data,
+        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: List[File],
+    body: List[File],
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        multipart_data (List[File]):
+        body (List[File]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -131,7 +138,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        multipart_data=multipart_data,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -142,14 +149,14 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-    multipart_data: List[File],
+    body: List[File],
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Upload multiple files
 
      Upload several files in the same request
 
     Args:
-        multipart_data (List[File]):
+        body (List[File]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -162,6 +169,6 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            multipart_data=multipart_data,
+            body=body,
         )
     ).parsed

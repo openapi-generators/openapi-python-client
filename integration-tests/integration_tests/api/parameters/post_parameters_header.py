@@ -26,11 +26,13 @@ def _get_kwargs(
 
     headers["Integer-Header"] = str(integer_header)
 
-    return {
+    _kwargs = {
         "method": "post",
         "url": "/parameters/header",
-        "headers": headers,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(

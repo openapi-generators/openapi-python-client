@@ -15,11 +15,13 @@ def _get_kwargs(
     cookies = {}
     cookies["MyToken"] = my_token
 
-    return {
+    _kwargs = {
         "method": "get",
         "url": "/auth/token_with_cookie",
         "cookies": cookies,
     }
+
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
