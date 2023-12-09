@@ -2,8 +2,9 @@
 {% from "helpers.jinja" import safe_docstring %}
 
 {% macro header_params(endpoint) %}
-{% if endpoint.header_parameters %}
+{% if endpoint.header_parameters or endpoint.binary_body %}
 headers = {}
+{% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters.values() %}
         {% import "property_templates/" + parameter.template as param_template %}
         {% if param_template.transform_header %}
@@ -14,6 +15,10 @@ headers = {}
         {% set statement = 'headers["' +  parameter.name + '"]' + " = " + expression %}
 {{ guarded_statement(parameter, parameter.python_name, statement) }}
     {% endfor %}
+{% endif %}
+{% if endpoint.binary_body %}
+headers['Content-Type'] = {{ endpoint.binary_body.python_name }}.mime_type if {{ endpoint.binary_body.python_name}}.mime_type else 'application/octet-stream'
+{% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -108,6 +113,9 @@ multipart_data: {{ endpoint.multipart_body.get_type_string() }},
 {% if endpoint.json_body %}
 json_body: {{ endpoint.json_body.get_type_string() }},
 {% endif %}
+{% if endpoint.binary_body %}
+binary_body: {{ endpoint.binary_body.get_type_string() }},
+{% endif %}
 {# query parameters #}
 {% for parameter in endpoint.query_parameters.values() %}
 {{ parameter.to_string() }},
@@ -137,6 +145,9 @@ multipart_data=multipart_data,
 {% endif %}
 {% if endpoint.json_body %}
 json_body=json_body,
+{% endif %}
+{% if endpoint.binary_body %}
+binary_body=binary_body,
 {% endif %}
 {% for parameter in endpoint.query_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},

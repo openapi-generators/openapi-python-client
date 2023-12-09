@@ -47,11 +47,13 @@ def _get_kwargs(
         "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
     {% elif endpoint.json_body %}
         "json": {{ "json_" + endpoint.json_body.python_name }},
+    {% elif endpoint.binary_body %}
+        "content": {{ endpoint.binary_body.python_name }}.payload,
     {% endif %}
     {% if endpoint.query_parameters %}
         "params": params,
     {% endif %}
-    {% if endpoint.header_parameters %}
+    {% if endpoint.header_parameters or endpoint.binary_body %}
         "headers": headers,
     {% endif %}
     {% if endpoint.cookie_parameters %}
@@ -65,9 +67,11 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
-        {{ prop_template.construct(response.prop, response.source) | indent(8) }}
+        {{ prop_template.construct(response.prop, response.source.attribute) | indent(8) }}
+        {% elif response.source.return_type == response.prop.get_type_string()  %}
+        {{ response.prop.python_name }} = {{ response.source.attribute }}
         {% else %}
-        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
+        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source.attribute }})
         {% endif %}
         return {{ response.prop.python_name }}
         {% else %}

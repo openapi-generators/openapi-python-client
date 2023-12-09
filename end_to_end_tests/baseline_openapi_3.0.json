@@ -625,6 +625,46 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Binary (octet stream) request body",
+        "operationId": "octet_stream_tests_octet_stream_post",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "description": "A file to upload",
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/tests/no_response": {
@@ -774,6 +814,27 @@
                       ]
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/text": {
+      "post": {
+        "tags": [
+          "responses"
+        ],
+        "summary": "Text Response",
+        "operationId": "text_response",
+        "responses": {
+          "200": {
+            "description": "Text response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }
