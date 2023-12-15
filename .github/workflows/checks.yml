@@ -69,7 +69,7 @@ jobs:
       - name: Store coverage report
         uses: actions/upload-artifact@v4.0.0
         with:
-          name: coverage-report
+          name: coverage-${{ matrix.os }}-${{ matrix.python }}
           path: coverage-${{ matrix.os }}-${{ matrix.python }}.xml
 
   upload_coverage:
