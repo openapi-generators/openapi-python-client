@@ -85,7 +85,7 @@ jobs:
           path: coverage-report
       - name: Combine coverage & fail if it's <100%.
         run: |
-          python -Im coverage combine --data-file coverage-report/**/*
+          find coverage-report -type f -name '.coverage' -exec coverage combine --data-file {} +
           python -Im coverage html --skip-covered --skip-empty
           
           # Report and write to summary.
