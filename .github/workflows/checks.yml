@@ -67,7 +67,7 @@ jobs:
         run: poetry run coverage xml -o coverage-${{ matrix.os }}-${{ matrix.python }}.xml
 
       - name: Store coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.0.0
         with:
           name: coverage-report
           path: coverage-${{ matrix.os }}-${{ matrix.python }}.xml
@@ -78,12 +78,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.0.0
         with:
-          name: coverage-report
-      - uses: codecov/codecov-action@v3
+          path: coverage-report
+      - uses: codecov/codecov-action@v3.1.4
         with:
-          files: "*.xml"
+          files: "coverage-report/**/*.xml"
 
   integration:
     name: Integration Tests
