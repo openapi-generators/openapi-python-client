@@ -70,20 +70,39 @@ jobs:
         uses: actions/upload-artifact@v4.0.0
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.python }}
-          path: coverage-${{ matrix.os }}-${{ matrix.python }}.xml
+          path: .coverage
 
-  upload_coverage:
+  coverage:
+    name: Combine & check coverage
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - run: python -Im pip install --upgrade coverage[toml]
       - name: Download coverage reports
         uses: actions/download-artifact@v4.0.0
         with:
           path: coverage-report
-      - uses: codecov/codecov-action@v3.1.4
+      - name: Combine coverage & fail if it's <100%.
+        run: |
+          python -Im coverage combine --data-file coverage-report/**/*
+          python -Im coverage html --skip-covered --skip-empty
+          
+          # Report and write to summary.
+          python -Im coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          
+          # Report again and fail if under 100%.
+          python -Im coverage report --fail-under=100          
+
+      - name: Upload HTML report if check failed.
+        uses: actions/upload-artifact@v4.0.0
         with:
-          files: "coverage-report/**/*.xml"
+          name: html-report
+          path: htmlcov
+        if: ${{ failure() }}
 
   integration:
     name: Integration Tests
