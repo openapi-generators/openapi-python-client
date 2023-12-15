@@ -68,7 +68,7 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     if response.status_code == HTTPStatus.{{ response.status_code.name }}:
         {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
         {% if prop_template.construct %}
-        {{ prop_template.construct(response.prop, response.source) | indent(8) }}
+        {{ prop_template.construct(response.prop, response.source.attribute) | indent(8) }}
         {% elif response.source.return_type == response.prop.get_type_string()  %}
         {{ response.prop.python_name }} = {{ response.source.attribute }}
         {% else %}
