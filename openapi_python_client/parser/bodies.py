@@ -1,4 +1,4 @@
-from enum import Enum
+import sys
 from typing import List, Tuple, Union
 
 import attr
@@ -15,12 +15,22 @@ from ..config import Config
 from ..utils import get_content_type
 from .errors import ErrorLevel, ParseError
 
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
 
-class BodyType(str, Enum):
-    JSON = "json"
-    DATA = "data"
-    FILES = "files"
-    CONTENT = "content"
+    class BodyType(StrEnum):
+        JSON = "json"
+        DATA = "data"
+        FILES = "files"
+        CONTENT = "content"
+else:
+    from enum import Enum
+
+    class BodyType(str, Enum):
+        JSON = "json"
+        DATA = "data"
+        FILES = "files"
+        CONTENT = "content"
 
 
 @attr.define
