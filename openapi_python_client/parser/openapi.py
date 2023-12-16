@@ -116,14 +116,9 @@ class RequestBodyParser(Protocol):
     __name__: str = "RequestBodyParser"
 
     def __call__(
-        self,
-        *,
-        body: oai.RequestBody,
-        schemas: Schemas,
-        parent_name: str,
-        config: Config,
+        self, *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
     ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        ...
+        ...  # pragma: no cover
 
 
 @dataclass
