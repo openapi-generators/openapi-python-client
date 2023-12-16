@@ -2,6 +2,7 @@
 
 from typing import Type
 
+from .bodies import BodiesEndpoints
 from .default import DefaultEndpoints
 from .location import LocationEndpoints
 from .naming import NamingEndpoints
@@ -14,6 +15,10 @@ from .true_ import True_Endpoints
 
 
 class MyTestApiClientApi:
+    @classmethod
+    def bodies(cls) -> Type[BodiesEndpoints]:
+        return BodiesEndpoints
+
     @classmethod
     def tests(cls) -> Type[TestsEndpoints]:
         return TestsEndpoints

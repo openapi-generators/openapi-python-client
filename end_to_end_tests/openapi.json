@@ -6,6 +6,85 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/bodies/multiple": {
+      "post": {
+        "description": "Test multiple bodies",
+        "tags": [
+          "bodies"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bodies/json-like": {
+      "post": {
+        "tags": ["bodies"],
+        "description": "A content type that works like json but isn't application/json",
+        "operationId": "json-like",
+        "requestBody": {
+          "content": {
+            "application/vnd+json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/tests/": {
       "get": {
         "tags": [
@@ -796,7 +875,9 @@
     },
     "/responses/unions/simple_before_complex": {
       "post": {
-        "tags": ["responses"],
+        "tags": [
+          "responses"
+        ],
         "description": "Regression test for #603",
         "responses": {
           "200": {
@@ -805,12 +886,18 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["a"],
+                  "required": [
+                    "a"
+                  ],
                   "properties": {
                     "a": {
                       "oneOf": [
-                        {"type": "string"},
-                        {"type": "object"}
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object"
+                        }
                       ]
                     }
                   }
@@ -938,20 +1025,20 @@
       },
       "parameters": [
         {
-            "name": "param",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "param",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+          "name": "param",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
+        },
+        {
+          "name": "param",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
       ]
     },
     "/same-name-multiple-locations/{param}": {
@@ -1000,7 +1087,9 @@
     },
     "/tag_with_number": {
       "get": {
-        "tags": ["1"],
+        "tags": [
+          "1"
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1243,7 +1332,9 @@
     "/naming/property-conflict-with-import": {
       "description": "Ensure that property names don't conflict with imports",
       "post": {
-        "tags": ["naming"],
+        "tags": [
+          "naming"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1300,9 +1391,15 @@
           {
             "$ref": "#/components/parameters/integer-param"
           },
-          {"$ref": "#/components/parameters/header-param"},
-          {"$ref": "#/components/parameters/cookie-param"},
-          {"$ref": "#/components/parameters/path-param"}
+          {
+            "$ref": "#/components/parameters/header-param"
+          },
+          {
+            "$ref": "#/components/parameters/cookie-param"
+          },
+          {
+            "$ref": "#/components/parameters/path-param"
+          }
         ],
         "responses": {
           "200": {
@@ -1633,7 +1730,11 @@
       },
       "Body_upload_file_tests_upload_post": {
         "title": "Body_upload_file_tests_upload_post",
-        "required": ["some_file", "some_object", "some_nullable_object"],
+        "required": [
+          "some_file",
+          "some_object",
+          "some_nullable_object"
+        ],
         "type": "object",
         "properties": {
           "some_file": {
@@ -1675,7 +1776,10 @@
           "some_object": {
             "title": "Some Object",
             "type": "object",
-            "required": ["num", "text"],
+            "required": [
+              "num",
+              "text"
+            ],
             "properties": {
               "num": {
                 "type": "number"
@@ -1688,7 +1792,9 @@
           "some_optional_object": {
             "title": "Some Optional Object",
             "type": "object",
-            "required": ["foo"],
+            "required": [
+              "foo"
+            ],
             "properties": {
               "foo": {
                 "type": "string"
@@ -1911,7 +2017,10 @@
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0, 1]
+            "enum": [
+              0,
+              1
+            ]
           }
         }
       },
@@ -1924,11 +2033,15 @@
           },
           "type": {
             "type": "string",
-            "enum": ["submodel"]
+            "enum": [
+              "submodel"
+            ]
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0]
+            "enum": [
+              0
+            ]
           }
         }
       },
@@ -1943,7 +2056,10 @@
           },
           "type_enum": {
             "type": "integer",
-            "enum": [0, 1]
+            "enum": [
+              0,
+              1
+            ]
           }
         }
       },
@@ -2086,7 +2202,7 @@
           }
         }
       },
-      "ModelWithDateTimeProperty" : {
+      "ModelWithDateTimeProperty": {
         "type": "object",
         "properties": {
           "datetime": {
@@ -2264,10 +2380,10 @@
         "type": "string",
         "format": "byte"
       },
-      "import":  {
+      "import": {
         "type": "object"
       },
-      "None":  {
+      "None": {
         "type": "object"
       },
       "model.reference.with.Periods": {

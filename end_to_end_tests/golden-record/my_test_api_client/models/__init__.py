@@ -37,6 +37,7 @@ from .get_location_header_types_int_enum_header import GetLocationHeaderTypesInt
 from .get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
+from .json_like_body import JsonLikeBody
 from .model_from_all_of import ModelFromAllOf
 from .model_name import ModelName
 from .model_reference_with_periods import ModelReferenceWithPeriods
@@ -63,6 +64,9 @@ from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
 from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
 from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from .none import None_
+from .post_bodies_multiple_data_body import PostBodiesMultipleDataBody
+from .post_bodies_multiple_files_body import PostBodiesMultipleFilesBody
+from .post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
 from .post_form_data_inline_body import PostFormDataInlineBody
 from .post_naming_property_conflict_with_import_body import PostNamingPropertyConflictWithImportBody
 from .post_naming_property_conflict_with_import_response_200 import PostNamingPropertyConflictWithImportResponse200
@@ -106,6 +110,7 @@ __all__ = (
     "GetLocationHeaderTypesStringEnumHeader",
     "HTTPValidationError",
     "Import",
+    "JsonLikeBody",
     "ModelFromAllOf",
     "ModelName",
     "ModelReferenceWithPeriods",
@@ -130,6 +135,9 @@ __all__ = (
     "ModelWithUnionPropertyInlinedFruitType0",
     "ModelWithUnionPropertyInlinedFruitType1",
     "None_",
+    "PostBodiesMultipleDataBody",
+    "PostBodiesMultipleFilesBody",
+    "PostBodiesMultipleJsonBody",
     "PostFormDataInlineBody",
     "PostNamingPropertyConflictWithImportBody",
     "PostNamingPropertyConflictWithImportResponse200",

@@ -46,16 +46,16 @@ def _get_kwargs(
     }
 
 {% if endpoint.bodies | length > 1 %}
-    # {{ endpoint.bodies | length }}
 {% for body in endpoint.bodies %}
-    if isinstance({{ body.prop.python_name }}, {{body.prop.get_type_string() }}):
-        {{ body_to_kwarg(body) | indent(8) }}
-        _kwargs["{{ body.body_type.value }}"] = _body
+    if isinstance(body, {{body.prop.get_type_string() }}):
+        {% set destination = "_" + body.body_type + "_body" %}
+        {{ body_to_kwarg(body, destination) | indent(8) }}
+        _kwargs["{{ body.body_type.value }}"] = {{ destination }}
         headers["Content-Type"] = "{{ body.content_type }}"
 {% endfor %}
 {% elif endpoint.bodies | length == 1 %}
 {% set body = endpoint.bodies[0] %}
-    {{ body_to_kwarg(body) | indent(4) }}
+    {{ body_to_kwarg(body, "_body") | indent(4) }}
     _kwargs["{{ body.body_type.value }}"] = _body
     headers["Content-Type"] = "{{ body.content_type }}"
 {% endif %}

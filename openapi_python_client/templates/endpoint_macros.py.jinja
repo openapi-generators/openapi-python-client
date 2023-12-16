@@ -57,21 +57,20 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro body_to_kwarg(body) %}
+{% macro body_to_kwarg(body, destination) %}
 {% if body.body_type == "data" %}
-_body = body.to_dict()
+{{ destination }} = body.to_dict()
 {% elif body.body_type == "files"%}
-{{ multipart_body(body) }}
+{{ multipart_body(body, destination) }}
 {% elif body.body_type == "json" %}
-{{ json_body(body) }}
+{{ json_body(body, destination) }}
 {% elif body.body_type == "content" %}
-_body = body.payload
+{{ destination }} = body.payload
 {% endif %}
 {% endmacro %}
 
-{% macro json_body(body) %}
+{% macro json_body(body, destination) %}
 {% set property = body.prop %}
-{% set destination = "_body" %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform %}
 {{ prop_template.transform(property, property.python_name, destination) }}
@@ -80,9 +79,8 @@ _body = body.payload
 {% endif %}
 {% endmacro %}
 
-{% macro multipart_body(body) %}
+{% macro multipart_body(body, destination) %}
 {% set property = body.prop %}
-{% set destination = "_body" %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform_multipart %}
 {{ prop_template.transform_multipart(property, property.python_name, destination) }}

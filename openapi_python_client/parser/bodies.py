@@ -84,11 +84,11 @@ def body_from_data(
             )
             continue
         prop, schemas = property_from_data(
-            name=f"{body_type}_body" if prefix_type_names else "body",
+            name="body",
             required=True,
             data=media_type_schema,
             schemas=schemas,
-            parent_name=endpoint_name,
+            parent_name=f"{endpoint_name}_{body_type}" if prefix_type_names else endpoint_name,
             config=config,
         )
         if isinstance(prop, ParseError):
