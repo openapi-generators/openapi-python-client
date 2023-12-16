@@ -53,7 +53,7 @@ class ModelWithUnionPropertyInlined:
         d = src_dict.copy()
 
         def _parse_fruit(
-            data: object
+            data: object,
         ) -> Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset]:
             if isinstance(data, Unset):
                 return data
