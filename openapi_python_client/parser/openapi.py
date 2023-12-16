@@ -403,6 +403,9 @@ class Endpoint:
             tag=tag,
         )
 
+        if isinstance(result, ParseError):
+            return result, schemas, parameters
+
         result, schemas, parameters = Endpoint.add_parameters(
             endpoint=result,
             data=data,

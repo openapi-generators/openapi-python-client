@@ -18,7 +18,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "delete",
         "url": "/common_parameters_overriding/{param}".format(
             param=param_path,

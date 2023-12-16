@@ -26,7 +26,7 @@ def _get_kwargs(
 
     {{ query_params(endpoint) | indent(4) }}
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "{{ endpoint.method }}",
         {% if endpoint.path_parameters %}
         "url": "{{ endpoint.path }}".format(

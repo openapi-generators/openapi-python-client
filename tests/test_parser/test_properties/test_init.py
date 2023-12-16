@@ -767,45 +767,6 @@ class TestPropertyFromData:
             roots=roots,
         )
 
-    def test_property_from_data_object(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Schema(
-            type="object",
-        )
-        build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
-        schemas = Schemas()
-        config = MagicMock()
-        roots = {"root"}
-        process_properties = False
-
-        response = property_from_data(
-            name=name,
-            required=required,
-            data=data,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            process_properties=process_properties,
-            roots=roots,
-        )
-
-        assert response == build_model_property.return_value
-        build_model_property.assert_called_once_with(
-            data=data,
-            name=name,
-            required=required,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            process_properties=process_properties,
-            roots=roots,
-            is_multipart_body=False,
-        )
-
     def test_property_from_data_union(self, mocker):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 

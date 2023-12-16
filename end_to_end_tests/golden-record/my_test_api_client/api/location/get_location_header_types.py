@@ -38,7 +38,7 @@ def _get_kwargs(
     if not isinstance(string_enum_header, Unset):
         headers["String-Enum-Header"] = str(string_enum_header)
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/location/header/types",
     }

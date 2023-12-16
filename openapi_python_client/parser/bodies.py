@@ -4,9 +4,10 @@ from typing import List, Tuple, Union
 import attr
 
 from openapi_python_client.parser.properties import (
+    ModelProperty,
     Property,
     Schemas,
-    property_from_data, ModelProperty,
+    property_from_data,
 )
 
 from .. import schema as oai

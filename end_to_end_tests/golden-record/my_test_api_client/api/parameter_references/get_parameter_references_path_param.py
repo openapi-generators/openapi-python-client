@@ -31,7 +31,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/parameter-references/{path_param}".format(
             path_param=path_param,

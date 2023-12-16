@@ -14,7 +14,7 @@ def _get_kwargs(
     param1: str,
     param3: int,
 ) -> Dict[str, Any]:
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
             param4=param4,

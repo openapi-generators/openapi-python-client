@@ -10,7 +10,7 @@ from ...types import File, Response
 
 
 def _get_kwargs() -> Dict[str, Any]:
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/tests/octet_stream",
     }

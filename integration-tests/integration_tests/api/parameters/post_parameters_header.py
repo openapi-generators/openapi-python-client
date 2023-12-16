@@ -26,7 +26,7 @@ def _get_kwargs(
 
     headers["Integer-Header"] = str(integer_header)
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/parameters/header",
     }

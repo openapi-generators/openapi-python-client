@@ -15,7 +15,7 @@ def _get_kwargs(
     cookies = {}
     cookies["MyToken"] = my_token
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/auth/token_with_cookie",
         "cookies": cookies,

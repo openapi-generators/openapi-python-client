@@ -18,7 +18,7 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     headers = {}
 
-    _kwargs = {
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/naming/property-conflict-with-import",
     }
