@@ -15,7 +15,7 @@ def _get_kwargs(
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     if not isinstance(param_header, Unset):
         headers["param"] = param_header
 

@@ -20,7 +20,7 @@ def _get_kwargs(
         PostBodiesMultipleFilesBody,
     ],
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
 
     _kwargs: Dict[str, Any] = {
         "method": "post",

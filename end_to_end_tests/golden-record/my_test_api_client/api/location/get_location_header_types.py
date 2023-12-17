@@ -19,7 +19,7 @@ def _get_kwargs(
     int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
     string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     if not isinstance(boolean_header, Unset):
         headers["Boolean-Header"] = "true" if boolean_header else "false"
 

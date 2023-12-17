@@ -17,7 +17,7 @@ def _get_kwargs(
     number_header: float,
     integer_header: int,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     headers["Boolean-Header"] = "true" if boolean_header else "false"
 
     headers["String-Header"] = string_header

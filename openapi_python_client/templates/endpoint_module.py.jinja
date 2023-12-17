@@ -57,7 +57,9 @@ def _get_kwargs(
 {% set body = endpoint.bodies[0] %}
     {{ body_to_kwarg(body, "_body") | indent(4) }}
     _kwargs["{{ body.body_type.value }}"] = _body
+    {% if body.content_type != "multipart/form-data" %} {# Need httpx to set the boundary automatically #}
     headers["Content-Type"] = "{{ body.content_type }}"
+    {% endif %}
 {% endif %}
 
 {% if endpoint.header_parameters or endpoint.bodies | length > 0 %}

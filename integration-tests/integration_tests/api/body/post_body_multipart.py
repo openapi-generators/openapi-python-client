@@ -15,7 +15,7 @@ def _get_kwargs(
     *,
     body: PostBodyMultipartBody,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
 
     _kwargs: Dict[str, Any] = {
         "method": "post",
@@ -25,7 +25,6 @@ def _get_kwargs(
     _body = body.to_multipart()
 
     _kwargs["files"] = _body
-    headers["Content-Type"] = "multipart/form-data"
 
     _kwargs["headers"] = headers
     return _kwargs

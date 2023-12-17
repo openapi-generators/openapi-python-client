@@ -3,7 +3,7 @@
 
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
-headers = {}
+headers: Dict[str, Any] = {}
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters.values() %}
         {% import "property_templates/" + parameter.template as param_template %}
