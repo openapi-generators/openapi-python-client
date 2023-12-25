@@ -78,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Download coverage reports
-        uses: actions/download-artifact@v4.0.0
+        uses: actions/download-artifact@v4.1.0
         with:
           path: coverage-report
       - uses: codecov/codecov-action@v3.1.4
