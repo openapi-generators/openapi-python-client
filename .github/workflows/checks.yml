@@ -69,7 +69,7 @@ jobs:
         env:
           TASKIPY: true
       
-      - run: mv .coverage .coverage.${{ matrix.os }}-${{ matrix.python }}
+      - run: mv .coverage .coverage.${{ matrix.python }}
         if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
