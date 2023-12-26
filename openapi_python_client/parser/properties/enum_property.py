@@ -1,6 +1,6 @@
 __all__ = ["EnumProperty"]
 
-from typing import Any, ClassVar, Dict, List, Optional, Set, Type, Union, cast
+from typing import Any, ClassVar, Dict, Optional, Sequence, Set, Type, Union
 
 from attrs import define, field
 
@@ -49,24 +49,30 @@ class EnumProperty(Property):
         return imports
 
     @staticmethod
-    def values_from_list(values: Union[List[str], List[int]]) -> Dict[str, ValueType]:
+    def values_from_list(
+        values: Union[Sequence[str], Sequence[int]], case_sensitive_enums: bool = False
+    ) -> Dict[str, ValueType]:
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: Dict[str, ValueType] = {}
 
-        for i, value in enumerate(values):
-            value = cast(Union[str, int], value)
+        for value in values:
             if isinstance(value, int):
                 if value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value
                 else:
                     output[f"VALUE_{value}"] = value
                 continue
-            if value and value[0].isalpha():
-                key = value.upper()
+
+            if case_sensitive_enums:
+                sanitized_key = utils.case_insensitive_snake_case(value)
             else:
-                key = f"VALUE_{i}"
-            if key in output:
-                raise ValueError(f"Duplicate key {key} in Enum")
-            sanitized_key = utils.snake_case(key).upper()
+                sanitized_key = utils.snake_case(value.lower()).upper()
+            if not value or not value[0].isalpha():
+                sanitized_key = f"LITERAL_{sanitized_key}"
+
+            if sanitized_key in output:
+                raise ValueError(f"Duplicate key {sanitized_key} in Enum")
+
             output[sanitized_key] = utils.remove_string_escapes(value)
+
         return output

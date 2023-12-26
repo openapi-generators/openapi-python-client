@@ -383,13 +383,32 @@ class TestEnumProperty:
 
         assert result == {
             "ABC": "abc",
-            "VALUE_1": "123",
+            "LITERAL_123": "123",
             "A23": "a23",
-            "VALUE_3": "1bc",
+            "LITERAL_1BC": "1bc",
             "VALUE_4": 4,
             "VALUE_NEGATIVE_3": -3,
             "A_THING_WITH_SPACES": "a Thing WIth spaces",
-            "VALUE_7": "",
+            "LITERAL_": "",
+        }
+
+    def test_values_from_list_with_case_sesitive(self):
+        from openapi_python_client.parser.properties import EnumProperty
+
+        data = ["abc", "Abc", "123", "a23", "1bc", 4, -3, "a Thing WIth spaces", ""]
+
+        result = EnumProperty.values_from_list(data, case_sensitive_enums=True)
+
+        assert result == {
+            "abc": "abc",
+            "Abc": "Abc",
+            "LITERAL_123": "123",
+            "a23": "a23",
+            "LITERAL_1bc": "1bc",
+            "VALUE_4": 4,
+            "VALUE_NEGATIVE_3": -3,
+            "a_Thing_W_Ith_spaces": "a Thing WIth spaces",
+            "LITERAL_": "",
         }
 
     def test_values_from_list_duplicate(self):
