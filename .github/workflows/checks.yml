@@ -61,12 +61,14 @@ jobs:
         run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
         env:
           TASKIPY: true
+      
+      - run: mv .coverage .coverage.${{ matrix.os }}-${{ matrix.python }}
 
       - name: Store coverage report
         uses: actions/upload-artifact@v4.0.0
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.python }}
-          path: .coverage
+          path: .coverage.${{ matrix.os }}-${{ matrix.python }}
           if-no-files-found: error
 
   coverage:
@@ -80,20 +82,19 @@ jobs:
           python-version: "3.12"
       - run: python -Im pip install --upgrade coverage[toml]
       - name: Download coverage reports
-        uses: actions/download-artifact@v4.0.0
+        uses: actions/download-artifact@v4.1.0
         with:
-          path: coverage-report
+          merge-multiple: true
+
       - name: Combine coverage & fail if it's <100%.
         run: |
           # Find all of the downloaded coverage reports and combine them
-          find coverage-report -type f -name '.coverage' -exec coverage combine --data-file {} +
+          python -Im coverage combine
           
-          # Move the combined report to the working directory
-          find coverage-report -type f -name '.coverage' -exec mv {} . \;
-          
+          # Create html report
           python -Im coverage html --skip-covered --skip-empty
           
-          # Report and write to summary.
+          # Report in Markdown and write to summary.
           python -Im coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
           
           # Report again and fail if under 100%.
