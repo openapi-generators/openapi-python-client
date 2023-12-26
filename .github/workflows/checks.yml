@@ -80,25 +80,30 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.12"
-      - run: python -Im pip install --upgrade coverage[toml]
       - name: Download coverage reports
         uses: actions/download-artifact@v4.1.0
         with:
           merge-multiple: true
 
+      - name: Create Virtual Environment
+        run: python -m venv .venv
+
       - name: Combine coverage & fail if it's <100%.
         run: |
+          # Install coverage
+          .venv/bin/pip install --upgrade coverage[toml]
+
           # Find all of the downloaded coverage reports and combine them
-          python -Im coverage combine
+          .venv/bin/python -m coverage combine
           
           # Create html report
-          python -Im coverage html --skip-covered --skip-empty
+          .venv/bin/python -m coverage html --skip-covered --skip-empty
           
           # Report in Markdown and write to summary.
-          python -Im coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          .venv/bin/python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
           
           # Report again and fail if under 100%.
-          python -Im coverage report --fail-under=100          
+          .venv/bin/python -m coverage report --fail-under=100          
 
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v4.0.0
