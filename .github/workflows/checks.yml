@@ -57,18 +57,27 @@ jobs:
       - name: Lint
         run: poetry run ruff check .
 
-      - name: Run pytest
+      - name: Run pytest without coverage
+        if: matrix.os != 'ubuntu-latest'
+        run: poetry run pytest tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
+        env:
+          TASKIPY: true
+
+      - name: Run pytest with coverage
+        if: matrix.os == 'ubuntu-latest'
         run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
         env:
           TASKIPY: true
       
       - run: mv .coverage .coverage.${{ matrix.os }}-${{ matrix.python }}
+        if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
         uses: actions/upload-artifact@v4.0.0
+        if: matrix.os == 'ubuntu-latest'
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.python }}
-          path: .coverage.${{ matrix.os }}-${{ matrix.python }}
+          name: coverage-${{ matrix.python }}
+          path: .coverage.${{ matrix.python }}
           if-no-files-found: error
 
   coverage:
