@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
@@ -36,7 +36,7 @@ class BooleanProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | None | Value,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -54,11 +54,14 @@ class BooleanProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if isinstance(value, Value) or value is None:
+            return value
         if isinstance(value, str):
-            try:
-                bool(value)
-            except ValueError:
-                return PropertyError(f"Invalid boolean value: {value}")
-            return Value(value)
-        return value
+            if value.lower() == "true":
+                return Value("True")
+            elif value.lower() == "false":
+                return Value("False")
+        if isinstance(value, bool):
+            return Value(str(value))
+        return PropertyError(f"Invalid boolean value: {value}")

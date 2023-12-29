@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
 from ...utils import PythonIdentifier
-from .protocol import PropertyProtocol, Value
+from ..errors import PropertyError
+from .protocol import PropertyProtocol
 
 
 @define
@@ -14,7 +15,7 @@ class FileProperty(PropertyProtocol):
 
     name: str
     required: bool
-    default: Value | None
+    default: None
     python_name: PythonIdentifier
     description: str | None
     example: str | None
@@ -29,24 +30,28 @@ class FileProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | Value | None,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
-    ) -> FileProperty:
+    ) -> FileProperty | PropertyError:
+        default_or_err = cls.convert_value(default)
+        if isinstance(default_or_err, PropertyError):
+            return default_or_err
+
         return cls(
             name=name,
             required=required,
-            default=cls.convert_value(default),
+            default=default_or_err,
             python_name=python_name,
             description=description,
             example=example,
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None:
-        if isinstance(value, str):
-            return Value(value)
+    def convert_value(cls, value: Any) -> None | PropertyError:
+        if value is not None:
+            return PropertyError(detail="File properties cannot have a default value")
         return value
 
     def get_imports(self, *, prefix: str) -> set[str]:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 from dateutil.parser import isoparse
@@ -30,7 +30,7 @@ class DateProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | Value | None,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -49,14 +49,16 @@ class DateProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if isinstance(value, Value) or value is None:
+            return value
         if isinstance(value, str):
             try:
                 isoparse(value).date()  # make sure it's a valid value
             except ValueError as e:
                 return PropertyError(f"Invalid date: {e}")
             return Value(f"isoparse({value!r}).date()")
-        return value
+        return PropertyError(f"Cannot convert {value} to a date")
 
     def get_imports(self, *, prefix: str) -> set[str]:
         """

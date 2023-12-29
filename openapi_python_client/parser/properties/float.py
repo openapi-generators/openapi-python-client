@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
@@ -36,7 +36,7 @@ class FloatProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | None | Value,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -55,11 +55,17 @@ class FloatProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if isinstance(value, Value) or value is None:
+            return value
         if isinstance(value, str):
             try:
-                float(value)
+                parsed = float(value)
+                return Value(str(parsed))
             except ValueError:
                 return PropertyError(f"Invalid float value: {value}")
-            return Value(value)
-        return value
+        if isinstance(value, float):
+            return Value(str(value))
+        if isinstance(value, int) and not isinstance(value, bool):
+            return Value(str(float(value)))
+        return PropertyError(f"Cannot convert {value} to a float")

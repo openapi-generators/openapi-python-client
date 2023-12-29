@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
@@ -17,7 +17,7 @@ class AnyProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | None,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -25,17 +25,17 @@ class AnyProperty(PropertyProtocol):
         return cls(
             name=name,
             required=required,
-            default=Value(default) if default is not None else None,
+            default=AnyProperty.convert_value(default),
             python_name=python_name,
             description=description,
             example=example,
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None:
-        if isinstance(value, str):
-            return Value(value)
-        return value
+    def convert_value(cls, value: Any) -> Value | None:
+        if value is None or isinstance(value, Value):
+            return value
+        return Value(str(value))
 
     name: str
     required: bool

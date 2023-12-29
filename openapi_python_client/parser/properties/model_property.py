@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import ClassVar, NamedTuple
+from typing import Any, ClassVar, NamedTuple
 
 from attrs import define, evolve
 
@@ -38,7 +38,9 @@ class ModelProperty(PropertyProtocol):
     is_multipart_body: bool = False
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if value is not None:
+            return PropertyError(detail="ModelProperty cannot have a default value")
         return None
 
     def __attrs_post_init__(self) -> None:

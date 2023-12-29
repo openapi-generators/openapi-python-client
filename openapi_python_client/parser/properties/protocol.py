@@ -3,7 +3,7 @@ from __future__ import annotations
 __all__ = ["PropertyProtocol", "Value"]
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, ClassVar, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar
 
 from ... import Config
 from ... import schema as oai
@@ -55,7 +55,7 @@ class PropertyProtocol(Protocol):
     json_is_dict: ClassVar[bool] = False
 
     @abstractmethod
-    def convert_value(self, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(self, value: Any) -> Value | None | PropertyError:
         """Convert a string value to a Value object"""
         raise NotImplementedError()
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
@@ -34,7 +34,7 @@ class NoneProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | None,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -52,9 +52,10 @@ class NoneProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if value is None or isinstance(value, Value):
+            return value
         if isinstance(value, str):
-            if value != "None":
-                return PropertyError(f"Value {value} is not valid, only None is allowed")
-            return Value(value)
-        return value
+            if value == "None":
+                return Value(value)
+        return PropertyError(f"Value {value} is not valid, only None is allowed")

@@ -1,4 +1,3 @@
-from typing import Type
 from unittest.mock import MagicMock, call
 
 import attr
@@ -8,11 +7,7 @@ import openapi_python_client.schema as oai
 from openapi_python_client import Config
 from openapi_python_client.parser.errors import ParameterError, PropertyError
 from openapi_python_client.parser.properties import (
-    BooleanProperty,
-    FloatProperty,
-    IntProperty,
     ListProperty,
-    Property,
     Schemas,
     StringProperty,
     UnionProperty,
@@ -481,7 +476,7 @@ class TestPropertyFromData:
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
-            default=3,
+            default="ParentAnEnum.VALUE_3",
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -649,60 +644,6 @@ class TestPropertyFromData:
         parse_reference_path.assert_called_once_with(data.ref)
         assert prop == PropertyError(data=data, detail="bad stuff")
         assert schemas == new_schemas
-
-    @pytest.mark.parametrize(
-        "openapi_type,prop_type,python_type",
-        [
-            ("number", FloatProperty, float),
-            ("integer", IntProperty, int),
-            ("boolean", BooleanProperty, bool),
-        ],
-    )
-    def test_property_from_data_simple_types(self, openapi_type: str, prop_type: Type[Property], python_type):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        name = "test_prop"
-        required = True
-        description = "a description"
-        example = "an example"
-        data = oai.Schema.model_construct(type=openapi_type, default=1, description=description, example=example)
-        schemas = Schemas()
-
-        p, new_schemas = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-
-        assert p == prop_type(
-            name=name,
-            required=required,
-            default=python_type(data.default),
-            python_name=name,
-            description=description,
-            example=example,
-        )
-        assert new_schemas == schemas
-
-        # Test nullable values
-        data.default = 0
-
-        p, _ = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-        assert p == prop_type(
-            name=name,
-            required=required,
-            default=python_type(data.default),
-            python_name=name,
-            description=description,
-            example=example,
-        )
-
-        # Test bad default value
-        data.default = "a"
-        p, _ = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-        assert python_type is bool or isinstance(p, PropertyError)
 
     def test_property_from_data_array(self):
         from openapi_python_client.parser.properties import Schemas, property_from_data

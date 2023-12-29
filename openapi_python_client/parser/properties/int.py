@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
@@ -36,7 +36,7 @@ class IntProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | None | Value,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -55,11 +55,17 @@ class IntProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if value is None or isinstance(value, Value):
+            return value
         if isinstance(value, str):
             try:
                 int(value)
             except ValueError:
                 return PropertyError(f"Invalid int value: {value}")
             return Value(value)
-        return value
+        if isinstance(value, int):
+            return Value(str(value))
+        if isinstance(value, float):
+            return Value(str(int(value)))
+        return PropertyError(f"Invalid int value: {value}")

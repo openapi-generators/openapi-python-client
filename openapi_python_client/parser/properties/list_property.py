@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define
 
@@ -86,7 +86,7 @@ class ListProperty(PropertyProtocol):
             schemas,
         )
 
-    def convert_value(self, value: str | Value | None) -> Value | None | PropertyError:
+    def convert_value(self, value: Any) -> Value | None | PropertyError:
         return self.inner_property.convert_value(value)
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:

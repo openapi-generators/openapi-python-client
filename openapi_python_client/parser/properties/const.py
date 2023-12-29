@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import overload
+from typing import Any
 
 from attr import define
 
@@ -27,7 +27,7 @@ class ConstProperty(PropertyProtocol):
         cls,
         *,
         const: str | int,
-        default: str | int | None,
+        default: Any,
         name: str,
         python_name: PythonIdentifier,
         required: bool,
@@ -63,36 +63,19 @@ class ConstProperty(PropertyProtocol):
         prop.default = converted_default
         return prop
 
-    def convert_value(self, value: str | Value | None | int) -> Value | None | PropertyError:
-        if value is None:
-            return None
-        value_or_error = self._convert_value(value)
-        if isinstance(value_or_error, PropertyError):
-            return value_or_error
-        if value_or_error != self.value:
-            return PropertyError(detail=f"Invalid value for const {self.name}; {value_or_error} != {self.value}")
-        return value_or_error
+    def convert_value(self, value: Any) -> Value | None | PropertyError:
+        value = self._convert_value(value)
+        if value != self.value:
+            return PropertyError(detail=f"Invalid value for const {self.name}; {value} != {self.value}")
+        return value
 
     @staticmethod
-    @overload
-    def _convert_value(value: str | int) -> Value | PropertyError:
-        ...
-
-    @staticmethod
-    @overload
-    def _convert_value(value: None) -> None:
-        ...
-
-    @staticmethod
-    def _convert_value(value: str | int | Value | None) -> Value | None | PropertyError:
-        if value is None:
-            return None
+    def _convert_value(value: Any) -> Value:
         if isinstance(value, Value):
             return value
         if isinstance(value, str):
             return StringProperty.convert_value(value)
-        if isinstance(value, int):
-            return Value(repr(value))
+        return Value(str(value))
 
     def get_type_string(
         self,

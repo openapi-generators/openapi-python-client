@@ -37,7 +37,7 @@ def test_no_values():
     assert err == PropertyError(detail="No values provided for Enum", data=data)
 
 
-def test_bad_default():
+def test_bad_default_value():
     data = oai.Schema(default="B")
     schemas = Schemas()
 
@@ -47,3 +47,15 @@ def test_bad_default():
 
     assert schemas == new_schemas
     assert err == PropertyError(detail="Value B is not valid for enum Existing", data=data)
+
+
+def test_bad_default_type():
+    data = oai.Schema(default=123)
+    schemas = Schemas()
+
+    err, new_schemas = EnumProperty.build(
+        data=data, name="Existing", required=True, schemas=schemas, enum=["A"], parent_name=None, config=Config()
+    )
+
+    assert schemas == new_schemas
+    assert isinstance(err, PropertyError)

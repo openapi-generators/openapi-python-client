@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from attr import define, evolve
 
@@ -83,8 +83,8 @@ class UnionProperty(PropertyProtocol):
         prop = evolve(prop, default=default_or_error)
         return prop, schemas
 
-    def convert_value(self, value: str | Value | None) -> Value | None | PropertyError:
-        if value is None:
+    def convert_value(self, value: Any) -> Value | None | PropertyError:
+        if value is None or isinstance(value, Value):
             return None
         value_or_error: Value | PropertyError | None = PropertyError(
             detail=f"Invalid default value for union {self.name}"

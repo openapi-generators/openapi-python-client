@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar, overload
 
 from attr import define
 
@@ -37,7 +37,7 @@ class StringProperty(PropertyProtocol):
         cls,
         name: str,
         required: bool,
-        default: str | None | Value,
+        default: Any,
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
@@ -57,7 +57,19 @@ class StringProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: str | Value | None) -> Value | None | PropertyError:
-        if isinstance(value, str):
-            return Value(repr(utils.remove_string_escapes(value)))
-        return value
+    @overload
+    def convert_value(cls, value: None) -> None:  # type: ignore[misc]
+        ...
+
+    @classmethod
+    @overload
+    def convert_value(cls, value: Any) -> Value:
+        ...
+
+    @classmethod
+    def convert_value(cls, value: Any) -> Value | None:
+        if value is None or isinstance(value, Value):
+            return value
+        if not isinstance(value, str):
+            value = str(value)
+        return Value(repr(utils.remove_string_escapes(value)))

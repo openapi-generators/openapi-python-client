@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __all__ = ["EnumProperty"]
 
-from typing import ClassVar, Union, cast
+from typing import Any, ClassVar, Union, cast
 
 from attr import evolve
 from attrs import define
@@ -144,14 +144,16 @@ class EnumProperty(PropertyProtocol):
         schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
         return prop, schemas
 
-    def convert_value(self, value: str | Value | None) -> Value | PropertyError | None:
-        if isinstance(value, str):
+    def convert_value(self, value: Any) -> Value | PropertyError | None:
+        if value is None or isinstance(value, Value):
+            return value
+        if isinstance(value, self.value_type):
             inverse_values = {v: k for k, v in self.values.items()}
             try:
                 return Value(f"{self.class_info.name}.{inverse_values[value]}")
             except KeyError:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
-        return value
+        return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self.class_info.name
