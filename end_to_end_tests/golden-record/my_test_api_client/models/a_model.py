@@ -442,7 +442,7 @@ class AModel:
         not_required_one_of_models = _parse_not_required_one_of_models(d.pop("not_required_one_of_models", UNSET))
 
         def _parse_not_required_nullable_one_of_models(
-            data: object
+            data: object,
         ) -> Union["FreeFormModel", "ModelWithUnionProperty", None, Unset, str]:
             if data is None:
                 return data
