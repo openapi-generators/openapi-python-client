@@ -65,12 +65,16 @@ class ConstProperty(PropertyProtocol):
 
     def convert_value(self, value: Any) -> Value | None | PropertyError:
         value = self._convert_value(value)
+        if value is None or isinstance(value, Value):
+            return value
         if value != self.value:
             return PropertyError(detail=f"Invalid value for const {self.name}; {value} != {self.value}")
         return value
 
     @staticmethod
-    def _convert_value(value: Any) -> Value:
+    def _convert_value(value: Any) -> Value | None:
+        if value is None or isinstance(value, Value):
+            return value
         if isinstance(value, Value):
             return value
         if isinstance(value, str):

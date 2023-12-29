@@ -74,7 +74,7 @@ def sync_detailed(
     Args:
         path_param (str):
         string_param (Union[Unset, str]):
-        integer_param (Union[Unset, int]):
+        integer_param (Union[Unset, int]):  Default: 0.
         header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
@@ -115,7 +115,7 @@ async def asyncio_detailed(
     Args:
         path_param (str):
         string_param (Union[Unset, str]):
-        integer_param (Union[Unset, int]):
+        integer_param (Union[Unset, int]):  Default: 0.
         header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 

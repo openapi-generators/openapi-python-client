@@ -138,7 +138,7 @@ def sync_detailed(
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
@@ -197,7 +197,7 @@ def sync(
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
@@ -251,7 +251,7 @@ async def asyncio_detailed(
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
@@ -308,7 +308,7 @@ async def asyncio(
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
