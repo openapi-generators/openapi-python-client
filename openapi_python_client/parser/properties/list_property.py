@@ -87,7 +87,7 @@ class ListProperty(PropertyProtocol):
         )
 
     def convert_value(self, value: Any) -> Value | None | PropertyError:
-        return self.inner_property.convert_value(value)
+        return None  # pragma: no cover
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return f"List[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
 
 from attr import define
 
@@ -45,8 +45,6 @@ class ConstProperty(PropertyProtocol):
             description: The description of this property, used for docstrings
         """
         value = cls._convert_value(const)
-        if value is None:
-            return PropertyError("Invalid const value, cannot be null")
 
         prop = cls(
             value=value,
@@ -72,6 +70,16 @@ class ConstProperty(PropertyProtocol):
         if value != self.value:
             return PropertyError(detail=f"Invalid value for const {self.name}; {value} != {self.value}")
         return value
+
+    @staticmethod
+    @overload
+    def _convert_value(value: None) -> None:  # type: ignore[misc]
+        ...
+
+    @staticmethod
+    @overload
+    def _convert_value(value: Any) -> Value:
+        ...
 
     @staticmethod
     def _convert_value(value: Any) -> Value | None:

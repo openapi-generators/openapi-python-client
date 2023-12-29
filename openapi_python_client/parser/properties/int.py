@@ -64,8 +64,6 @@ class IntProperty(PropertyProtocol):
             except ValueError:
                 return PropertyError(f"Invalid int value: {value}")
             return Value(value)
-        if isinstance(value, int):
+        if isinstance(value, int) and not isinstance(value, bool):
             return Value(str(value))
-        if isinstance(value, float):
-            return Value(str(int(value)))
         return PropertyError(f"Invalid int value: {value}")
