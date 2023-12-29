@@ -45,8 +45,8 @@ class ConstProperty(PropertyProtocol):
             description: The description of this property, used for docstrings
         """
         value = cls._convert_value(const)
-        if isinstance(value, PropertyError):
-            return value
+        if value is None:
+            return PropertyError("Invalid const value, cannot be null")
 
         prop = cls(
             value=value,
@@ -64,8 +64,10 @@ class ConstProperty(PropertyProtocol):
         return prop
 
     def convert_value(self, value: Any) -> Value | None | PropertyError:
+        if isinstance(value, Value):
+            return value
         value = self._convert_value(value)
-        if value is None or isinstance(value, Value):
+        if value is None:
             return value
         if value != self.value:
             return PropertyError(detail=f"Invalid value for const {self.name}; {value} != {self.value}")
