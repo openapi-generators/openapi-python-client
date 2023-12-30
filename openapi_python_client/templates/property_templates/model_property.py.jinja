@@ -9,6 +9,7 @@
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, dict){% endmacro %}
+{% macro check_discriminator(source, property_name, discriminator_value) %}{{ source }}["{{ property_name }}"] == "{{ discriminator_value }}"{% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False, transform_method="to_dict") %}
 {% set transformed = source + "." + transform_method + "()" %}

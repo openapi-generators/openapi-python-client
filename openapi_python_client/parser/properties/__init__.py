@@ -221,6 +221,8 @@ class UnionProperty(Property):
     """A property representing a Union (anyOf) of other properties"""
 
     inner_properties: List[Property]
+    discriminator: Optional[oai.openapi_schema_pydantic.Discriminator] = None
+
     template: ClassVar[str] = "union_property.py.jinja"
 
     def _get_inner_type_strings(self, json: bool = False) -> Set[str]:
@@ -296,6 +298,22 @@ class UnionProperty(Property):
         for inner_prop in self.inner_properties:
             lazy_imports.update(inner_prop.get_lazy_imports(prefix=prefix))
         return lazy_imports
+
+    def get_discriminator_value(self, sub_model: ModelProperty) -> str:
+        """
+        Get discriminator's property value for sub_model
+        """
+        if self.discriminator:
+            if self.discriminator.mapping:
+                for property_value, schema_path in self.discriminator.mapping.items():
+                    ref_path = parse_reference_path(schema_path)
+                    if isinstance(ref_path, ParseError):
+                        raise TypeError()
+                    if ref_path in sub_model.roots:
+                        return property_value
+            else:
+                return sub_model.get_base_type_string()
+        raise TypeError()
 
 
 def _string_based_property(
@@ -506,6 +524,7 @@ def build_union_property(
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
+            discriminator=data.discriminator,
         ),
         schemas,
     )
