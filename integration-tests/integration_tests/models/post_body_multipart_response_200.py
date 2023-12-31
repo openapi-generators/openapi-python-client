@@ -26,9 +26,13 @@ class PostBodyMultipartResponse200:
 
     def to_dict(self) -> Dict[str, Any]:
         a_string = self.a_string
+
         file_data = self.file_data
+
         description = self.description
+
         file_name = self.file_name
+
         file_content_type = self.file_content_type
 
         field_dict: Dict[str, Any] = {}

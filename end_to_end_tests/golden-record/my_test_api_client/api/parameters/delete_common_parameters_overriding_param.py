@@ -11,9 +11,10 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     param_path: str,
     *,
-    param_query: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     params["param"] = param_query
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -49,12 +50,12 @@ def sync_detailed(
     param_path: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    param_query: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """
     Args:
         param_path (str):
-        param_query (Union[Unset, None, str]):
+        param_query (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -80,12 +81,12 @@ async def asyncio_detailed(
     param_path: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    param_query: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """
     Args:
         param_path (str):
-        param_query (Union[Unset, None, str]):
+        param_query (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

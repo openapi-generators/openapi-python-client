@@ -26,7 +26,6 @@ class HTTPValidationError:
             detail = []
             for detail_item_data in self.detail:
                 detail_item = detail_item_data.to_dict()
-
                 detail.append(detail_item)
 
         field_dict: Dict[str, Any] = {}

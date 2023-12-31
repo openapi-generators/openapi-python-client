@@ -29,10 +29,15 @@ def _compare_directories(
     dc = dircmp(record, test_subject, ignore=[".ruff_cache"])
     missing_files = dc.left_only + dc.right_only
     if missing_files:
-        pytest.fail(f"{first_printable} or {second_printable} was missing: {missing_files}", pytrace=False)
+        pytest.fail(
+            f"{first_printable} or {second_printable} was missing: {missing_files}",
+            pytrace=False,
+        )
 
     expected_differences = expected_differences or {}
-    _, mismatches, errors = cmpfiles(record, test_subject, dc.common_files, shallow=False)
+    _, mismatches, errors = cmpfiles(
+        record, test_subject, dc.common_files, shallow=False
+    )
     mismatches = set(mismatches)
 
     for file_name in mismatches:
@@ -45,24 +50,40 @@ def _compare_directories(
             expected_content = (record / file_name).read_text()
 
         generated_content = (test_subject / file_name).read_text()
-        assert generated_content == expected_content, f"Unexpected output in {mismatch_file_path}"
+        assert (
+            generated_content == expected_content
+        ), f"Unexpected output in {mismatch_file_path}"
 
     for sub_path in dc.common_dirs:
         _compare_directories(
-            record / sub_path, test_subject / sub_path, expected_differences=expected_differences, depth=depth + 1
+            record / sub_path,
+            test_subject / sub_path,
+            expected_differences=expected_differences,
+            depth=depth + 1,
         )
 
     if depth == 0 and len(expected_differences.keys()) > 0:
-        failure = "\n".join([f"Expected {path} to be different but it was not" for path in expected_differences.keys()])
+        failure = "\n".join(
+            [
+                f"Expected {path} to be different but it was not"
+                for path in expected_differences.keys()
+            ]
+        )
         pytest.fail(failure, pytrace=False)
 
 
-def run_e2e_test(extra_args: List[str], expected_differences: Dict[Path, str]):
+def run_e2e_test(
+    openapi_document: str,
+    extra_args: List[str],
+    expected_differences: Dict[Path, str],
+    golden_record_path: str = "golden-record",
+    output_path: str = "my-test-api-client",
+):
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi.json"
+    openapi_path = Path(__file__).parent / openapi_document
     config_path = Path(__file__).parent / "config.yml"
-    gr_path = Path(__file__).parent / "golden-record"
-    output_path = Path.cwd() / "my-test-api-client"
+    gr_path = Path(__file__).parent / golden_record_path
+    output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
 
     args = ["generate", f"--config={config_path}", f"--path={openapi_path}"]
@@ -74,8 +95,12 @@ def run_e2e_test(extra_args: List[str], expected_differences: Dict[Path, str]):
         raise result.exception
 
     # Use absolute paths for expected differences for easier comparisons
-    expected_differences = {output_path.joinpath(key): value for key, value in expected_differences.items()}
-    _compare_directories(gr_path, output_path, expected_differences=expected_differences)
+    expected_differences = {
+        output_path.joinpath(key): value for key, value in expected_differences.items()
+    }
+    _compare_directories(
+        gr_path, output_path, expected_differences=expected_differences
+    )
 
     import mypy.api
 
@@ -85,14 +110,32 @@ def run_e2e_test(extra_args: List[str], expected_differences: Dict[Path, str]):
     shutil.rmtree(output_path)
 
 
-def test_end_to_end():
-    run_e2e_test([], {})
+def test_baseline_end_to_end_3_0():
+    run_e2e_test("baseline_openapi_3.0.json", [], {})
+
+
+def test_baseline_end_to_end_3_1():
+    run_e2e_test("baseline_openapi_3.1.yaml", [], {})
+
+
+def test_3_1_specific_features():
+    run_e2e_test(
+        "3.1_specific.openapi.yaml",
+        [],
+        {},
+        "test-3-1-golden-record",
+        "test-3-1-features-client",
+    )
 
 
 def test_custom_templates():
-    expected_differences = {}  # key: path relative to generated directory, value: expected generated content
+    expected_differences = (
+        {}
+    )  # key: path relative to generated directory, value: expected generated content
     api_dir = Path("my_test_api_client").joinpath("api")
-    golden_tpls_root_dir = Path(__file__).parent.joinpath("custom-templates-golden-record")
+    golden_tpls_root_dir = Path(__file__).parent.joinpath(
+        "custom-templates-golden-record"
+    )
 
     expected_difference_paths = [
         Path("README.md"),
@@ -100,7 +143,9 @@ def test_custom_templates():
     ]
 
     for expected_difference_path in expected_difference_paths:
-        expected_differences[expected_difference_path] = (golden_tpls_root_dir / expected_difference_path).read_text()
+        expected_differences[expected_difference_path] = (
+            golden_tpls_root_dir / expected_difference_path
+        ).read_text()
 
     # Each API module (defined by tag) has a custom __init__.py in it now.
     for endpoint_mod in golden_tpls_root_dir.joinpath(api_dir).iterdir():
@@ -111,6 +156,7 @@ def test_custom_templates():
         expected_differences[relative_path] = expected_text
 
     run_e2e_test(
+        "baseline_openapi_3.0.json",
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates/"],
         expected_differences=expected_differences,
     )

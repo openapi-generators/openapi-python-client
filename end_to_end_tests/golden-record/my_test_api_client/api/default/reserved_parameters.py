@@ -14,6 +14,7 @@ def _get_kwargs(
     url_query: str,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     params["client"] = client_query
 
     params["url"] = url_query

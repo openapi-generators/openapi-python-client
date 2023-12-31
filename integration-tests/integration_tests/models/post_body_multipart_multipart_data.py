@@ -26,6 +26,7 @@ class PostBodyMultipartMultipartData:
 
     def to_dict(self) -> Dict[str, Any]:
         a_string = self.a_string
+
         file = self.file.to_tuple()
 
         description = self.description
@@ -47,6 +48,7 @@ class PostBodyMultipartMultipartData:
         a_string = (
             self.a_string if isinstance(self.a_string, Unset) else (None, str(self.a_string).encode(), "text/plain")
         )
+
         file = self.file.to_tuple()
 
         description = (

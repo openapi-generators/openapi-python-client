@@ -3,6 +3,7 @@
 from typing import Type
 
 from .default import DefaultEndpoints
+from .defaults import DefaultsEndpoints
 from .location import LocationEndpoints
 from .naming import NamingEndpoints
 from .parameter_references import ParameterReferencesEndpoints
@@ -17,6 +18,10 @@ class MyTestApiClientApi:
     @classmethod
     def tests(cls) -> Type[TestsEndpoints]:
         return TestsEndpoints
+
+    @classmethod
+    def defaults(cls) -> Type[DefaultsEndpoints]:
+        return DefaultsEndpoints
 
     @classmethod
     def responses(cls) -> Type[ResponsesEndpoints]:

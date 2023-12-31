@@ -16,25 +16,26 @@ from ...types import UNSET, Response
 def _get_kwargs(
     *,
     an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
         an_enum_value_item = an_enum_value_item_data.value
-
         json_an_enum_value.append(an_enum_value_item)
 
     params["an_enum_value"] = json_an_enum_value
 
     json_an_enum_value_with_null = []
     for an_enum_value_with_null_item_data in an_enum_value_with_null:
-        an_enum_value_with_null_item = (
-            an_enum_value_with_null_item_data.value if an_enum_value_with_null_item_data else None
-        )
-
+        an_enum_value_with_null_item: Union[None, str]
+        if isinstance(an_enum_value_with_null_item_data, AnEnumWithNull):
+            an_enum_value_with_null_item = an_enum_value_with_null_item_data.value
+        else:
+            an_enum_value_with_null_item = an_enum_value_with_null_item_data
         json_an_enum_value_with_null.append(an_enum_value_with_null_item)
 
     params["an_enum_value_with_null"] = json_an_enum_value_with_null
@@ -44,7 +45,6 @@ def _get_kwargs(
     params["an_enum_value_with_only_null"] = json_an_enum_value_with_only_null
 
     json_some_date: str
-
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
     else:
@@ -102,7 +102,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List["AModel"]]]:
@@ -112,7 +112,7 @@ def sync_detailed(
 
     Args:
         an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (List[None]):
         some_date (Union[datetime.date, datetime.datetime]):
 
@@ -142,7 +142,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
@@ -152,7 +152,7 @@ def sync(
 
     Args:
         an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (List[None]):
         some_date (Union[datetime.date, datetime.datetime]):
 
@@ -177,7 +177,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, List["AModel"]]]:
@@ -187,7 +187,7 @@ async def asyncio_detailed(
 
     Args:
         an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (List[None]):
         some_date (Union[datetime.date, datetime.datetime]):
 
@@ -215,7 +215,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Optional[AnEnumWithNull]],
+    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: List[None],
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
@@ -225,7 +225,7 @@ async def asyncio(
 
     Args:
         an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Optional[AnEnumWithNull]]):
+        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (List[None]):
         some_date (Union[datetime.date, datetime.datetime]):
 

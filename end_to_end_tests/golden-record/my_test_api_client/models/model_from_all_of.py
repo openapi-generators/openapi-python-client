@@ -28,6 +28,7 @@ class ModelFromAllOf:
 
     def to_dict(self) -> Dict[str, Any]:
         a_sub_property = self.a_sub_property
+
         type: Union[Unset, str] = UNSET
         if not isinstance(self.type, Unset):
             type = self.type.value

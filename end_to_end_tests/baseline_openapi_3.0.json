@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.2",
+  "openapi": "3.0.3",
   "info": {
     "title": "My Test API",
     "description": "An API for testing openapi-python-client",
@@ -449,10 +449,10 @@
         }
       }
     },
-    "/tests/defaults": {
+    "/defaults": {
       "post": {
         "tags": [
-          "tests"
+          "defaults"
         ],
         "summary": "Defaults",
         "operationId": "defaults_tests_defaults_post",
@@ -465,6 +465,16 @@
               "default": "the default string"
             },
             "name": "string_prop",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "String with num default",
+              "type": "string",
+              "default": 1
+            },
+            "name": "string with num",
             "in": "query"
           },
           {
@@ -2425,7 +2435,8 @@
         "in": "header",
         "required": false,
         "schema": {
-          "type": "string"
+          "type": "string",
+          "nullable": true
         }
       },
       "cookie-param": {
