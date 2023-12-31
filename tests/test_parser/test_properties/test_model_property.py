@@ -66,7 +66,7 @@ class TestModelProperty:
         assert m.get_base_type_string(quoted=quoted) == expected
 
 
-class TestBuildModelProperty:
+class TestBuild:
     @pytest.mark.parametrize(
         "additional_properties_schema, expected_additional_properties",
         [
@@ -88,13 +88,13 @@ class TestBuildModelProperty:
         ],
     )
     def test_additional_schemas(self, additional_properties_schema, expected_additional_properties):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema.model_construct(
             additionalProperties=additional_properties_schema,
         )
 
-        model, _ = build_model_property(
+        model, _ = ModelProperty.build(
             data=data,
             name="prop",
             schemas=Schemas(),
@@ -108,7 +108,7 @@ class TestBuildModelProperty:
         assert model.additional_properties == expected_additional_properties
 
     def test_happy_path(self, model_property_factory, string_property_factory, date_time_property_factory):
-        from openapi_python_client.parser.properties import Class, Schemas, build_model_property
+        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas
 
         name = "prop"
         required = True
@@ -126,7 +126,7 @@ class TestBuildModelProperty:
         class_info = Class(name="ParentMyModel", module_name="parent_my_model")
         roots = {"root"}
 
-        model, new_schemas = build_model_property(
+        model, new_schemas = ModelProperty.build(
             data=data,
             name=name,
             schemas=schemas,
@@ -167,12 +167,12 @@ class TestBuildModelProperty:
         )
 
     def test_model_name_conflict(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema.model_construct()
         schemas = Schemas(classes_by_name={"OtherModel": None})
 
-        err, new_schemas = build_model_property(
+        err, new_schemas = ModelProperty.build(
             data=data,
             name="OtherModel",
             schemas=schemas,
@@ -208,13 +208,13 @@ class TestBuildModelProperty:
     def test_model_naming(
         self, name: str, title: Optional[str], parent_name: Optional[str], use_title_prefixing: bool, expected: str
     ):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema(
             title=title,
             properties={},
         )
-        result = build_model_property(
+        result = ModelProperty.build(
             data=data,
             name=name,
             schemas=Schemas(),
@@ -227,14 +227,14 @@ class TestBuildModelProperty:
         assert result.class_info.name == expected
 
     def test_model_bad_properties(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema(
             properties={
                 "bad": oai.Reference.model_construct(ref="#/components/schema/NotExist"),
             },
         )
-        result = build_model_property(
+        result = ModelProperty.build(
             data=data,
             name="prop",
             schemas=Schemas(),
@@ -247,7 +247,7 @@ class TestBuildModelProperty:
         assert isinstance(result, PropertyError)
 
     def test_model_bad_additional_properties(self):
-        from openapi_python_client.parser.properties import Schemas, build_model_property
+        from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         additional_properties = oai.Schema(
             type="object",
@@ -256,7 +256,7 @@ class TestBuildModelProperty:
             },
         )
         data = oai.Schema(additionalProperties=additional_properties)
-        result = build_model_property(
+        result = ModelProperty.build(
             data=data,
             name="prop",
             schemas=Schemas(),
@@ -269,7 +269,7 @@ class TestBuildModelProperty:
         assert isinstance(result, PropertyError)
 
     def test_process_properties_false(self, model_property_factory):
-        from openapi_python_client.parser.properties import Class, Schemas, build_model_property
+        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas
 
         name = "prop"
         required = True
@@ -287,7 +287,7 @@ class TestBuildModelProperty:
         roots = {"root"}
         class_info = Class(name="ParentMyModel", module_name="parent_my_model")
 
-        model, new_schemas = build_model_property(
+        model, new_schemas = ModelProperty.build(
             data=data,
             name=name,
             schemas=schemas,

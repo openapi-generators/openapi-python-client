@@ -74,19 +74,19 @@ class ConstProperty(PropertyProtocol):
     @staticmethod
     @overload
     def _convert_value(value: None) -> None:  # type: ignore[misc]
-        ...
+        ...  # pragma: no cover
 
     @staticmethod
     @overload
     def _convert_value(value: Any) -> Value:
-        ...
+        ...  # pragma: no cover
 
     @staticmethod
     def _convert_value(value: Any) -> Value | None:
         if value is None or isinstance(value, Value):
             return value
         if isinstance(value, Value):
-            return value
+            return value  # pragma: no cover
         if isinstance(value, str):
             return StringProperty.convert_value(value)
         return Value(str(value))

@@ -57,7 +57,7 @@ class PropertyProtocol(Protocol):
     @abstractmethod
     def convert_value(self, value: Any) -> Value | None | PropertyError:
         """Convert a string value to a Value object"""
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def validate_location(self, location: oai.ParameterLocation) -> ParseError | None:
         """Returns an error if this type of property is not allowed in the given location"""

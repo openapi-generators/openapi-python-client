@@ -44,8 +44,6 @@ class StringProperty(PropertyProtocol):
         pattern: str | None = None,
     ) -> StringProperty | PropertyError:
         checked_default = cls.convert_value(default)
-        if isinstance(checked_default, PropertyError):
-            return checked_default
         return cls(
             name=name,
             required=required,
@@ -59,12 +57,12 @@ class StringProperty(PropertyProtocol):
     @classmethod
     @overload
     def convert_value(cls, value: None) -> None:  # type: ignore[misc]
-        ...
+        ...  # pragma: no cover
 
     @classmethod
     @overload
     def convert_value(cls, value: Any) -> Value:
-        ...
+        ...  # pragma: no cover
 
     @classmethod
     def convert_value(cls, value: Any) -> Value | None:

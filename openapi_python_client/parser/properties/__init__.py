@@ -30,7 +30,7 @@ from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
 from .list_property import ListProperty
-from .model_property import ModelProperty, build_model_property, process_model
+from .model_property import ModelProperty, process_model
 from .none import NoneProperty
 from .property import Property
 from .schemas import (
@@ -259,7 +259,7 @@ def property_from_data(  # noqa: PLR0911
             roots=roots,
         )
     if data.type == oai.DataType.OBJECT or data.allOf or (data.type is None and data.properties):
-        return build_model_property(
+        return ModelProperty.build(
             data=data,
             name=name,
             schemas=schemas,
