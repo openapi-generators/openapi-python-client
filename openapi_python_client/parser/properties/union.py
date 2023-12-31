@@ -52,7 +52,7 @@ class UnionProperty(PropertyProtocol):
         type_list_data = []
         if isinstance(data.type, list):
             for _type in data.type:
-                type_list_data.append(data.model_copy(update={"type": _type}))
+                type_list_data.append(data.model_copy(update={"type": _type, "default": None}))
 
         for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
             sub_prop, schemas = property_from_data(

@@ -449,10 +449,10 @@
         }
       }
     },
-    "/tests/defaults": {
+    "/defaults": {
       "post": {
         "tags": [
-          "tests"
+          "defaults"
         ],
         "summary": "Defaults",
         "operationId": "defaults_tests_defaults_post",

@@ -4,7 +4,6 @@ import types
 
 from . import (
     callback_test,
-    defaults_tests_defaults_post,
     description_with_backslash,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
@@ -104,13 +103,6 @@ class TestsEndpoints:
         Json Body Which is String
         """
         return post_tests_json_body_string
-
-    @classmethod
-    def defaults_tests_defaults_post(cls) -> types.ModuleType:
-        """
-        Defaults
-        """
-        return defaults_tests_defaults_post
 
     @classmethod
     def octet_stream_tests_octet_stream_get(cls) -> types.ModuleType:

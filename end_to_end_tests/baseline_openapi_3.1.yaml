@@ -447,10 +447,10 @@ info:
       }
     }
   },
-  "/tests/defaults": {
+  "/defaults": {
     "post": {
       "tags": [
-        "tests"
+        "defaults"
       ],
       "summary": "Defaults",
       "operationId": "defaults_tests_defaults_post",
@@ -536,13 +536,9 @@ info:
           "required": true,
           "schema": {
             "title": "Union Prop",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
+            "type": [
+               "number",
+               "string"
             ],
             "default": "not a float"
           },
