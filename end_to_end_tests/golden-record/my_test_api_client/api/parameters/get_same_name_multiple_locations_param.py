@@ -24,6 +24,7 @@ def _get_kwargs(
         cookies["param"] = param_cookie
 
     params: Dict[str, Any] = {}
+
     params["param"] = param_query
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}

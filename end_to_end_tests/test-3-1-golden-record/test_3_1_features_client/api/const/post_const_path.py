@@ -17,6 +17,7 @@ def _get_kwargs(
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     params["required query"] = required_query
 
     params["optional query"] = optional_query

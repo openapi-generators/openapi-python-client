@@ -25,6 +25,7 @@ def _get_kwargs(
         cookies["cookie param"] = cookie_param
 
     params: Dict[str, Any] = {}
+
     params["string param"] = string_param
 
     params["integer param"] = integer_param

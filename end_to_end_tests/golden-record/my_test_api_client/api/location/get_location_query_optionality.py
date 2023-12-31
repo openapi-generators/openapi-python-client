@@ -17,6 +17,7 @@ def _get_kwargs(
     not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     json_not_null_required = not_null_required.isoformat()
     params["not_null_required"] = json_not_null_required
 

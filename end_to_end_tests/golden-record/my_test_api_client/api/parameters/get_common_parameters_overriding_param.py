@@ -14,6 +14,7 @@ def _get_kwargs(
     param_query: str = "overridden_in_GET",
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     params["param"] = param_query
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}

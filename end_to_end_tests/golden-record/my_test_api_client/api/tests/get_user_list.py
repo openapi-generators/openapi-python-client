@@ -21,6 +21,7 @@ def _get_kwargs(
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
         an_enum_value_item = an_enum_value_item_data.value

@@ -15,6 +15,7 @@ def _get_kwargs(
     int_enum: AnIntEnum,
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     json_int_enum = int_enum.value
     params["int_enum"] = json_int_enum
 
