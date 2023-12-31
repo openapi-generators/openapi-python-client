@@ -6,11 +6,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, File, Unset
 
-T = TypeVar("T", bound="PostBodyMultipartMultipartData")
+T = TypeVar("T", bound="PostBodyMultipartBody")
 
 
 @_attrs_define
-class PostBodyMultipartMultipartData:
+class PostBodyMultipartBody:
     """
     Attributes:
         a_string (str):
@@ -81,14 +81,14 @@ class PostBodyMultipartMultipartData:
 
         description = d.pop("description", UNSET)
 
-        post_body_multipart_multipart_data = cls(
+        post_body_multipart_body = cls(
             a_string=a_string,
             file=file,
             description=description,
         )
 
-        post_body_multipart_multipart_data.additional_properties = d
-        return post_body_multipart_multipart_data
+        post_body_multipart_body.additional_properties = d
+        return post_body_multipart_body
 
     @property
     def additional_keys(self) -> List[str]:

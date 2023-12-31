@@ -16,7 +16,7 @@ def _get_kwargs(
     header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     if not isinstance(header_param, Unset):
         headers["header param"] = header_param
 
@@ -32,15 +32,17 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/parameter-references/{path_param}".format(
             path_param=path_param,
         ),
         "params": params,
-        "headers": headers,
         "cookies": cookies,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:

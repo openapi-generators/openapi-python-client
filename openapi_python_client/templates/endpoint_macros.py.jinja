@@ -2,8 +2,8 @@
 {% from "helpers.jinja" import safe_docstring %}
 
 {% macro header_params(endpoint) %}
-{% if endpoint.header_parameters or endpoint.binary_body %}
-headers = {}
+{% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
+headers: Dict[str, Any] = {}
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters.values() %}
         {% import "property_templates/" + parameter.template as param_template %}
@@ -15,9 +15,6 @@ headers = {}
         {% set statement = 'headers["' +  parameter.name + '"]' + " = " + expression %}
 {{ guarded_statement(parameter, parameter.python_name, statement) }}
     {% endfor %}
-{% endif %}
-{% if endpoint.binary_body %}
-headers['Content-Type'] = {{ endpoint.binary_body.python_name }}.mime_type if {{ endpoint.binary_body.python_name}}.mime_type else 'application/octet-stream'
 {% endif %}
 {% endif %}
 {% endmacro %}
@@ -61,27 +58,33 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro json_body(endpoint) %}
-{% if endpoint.json_body %}
-    {% set property = endpoint.json_body %}
-    {% set destination = "json_" + property.python_name %}
-    {% import "property_templates/" + property.template as prop_template %}
-    {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, destination) }}
-    {% else %}
-{{ destination }} = {{ property.python_name }}
-    {% endif %}
+{% macro body_to_kwarg(body, destination) %}
+{% if body.body_type == "data" %}
+{{ destination }} = body.to_dict()
+{% elif body.body_type == "files"%}
+{{ multipart_body(body, destination) }}
+{% elif body.body_type == "json" %}
+{{ json_body(body, destination) }}
+{% elif body.body_type == "content" %}
+{{ destination }} = body.payload
 {% endif %}
 {% endmacro %}
 
-{% macro multipart_body(endpoint) %}
-{% if endpoint.multipart_body %}
-    {% set property = endpoint.multipart_body %}
-    {% set destination = "multipart_" + property.python_name %}
-    {% import "property_templates/" + property.template as prop_template %}
-    {% if prop_template.transform_multipart %}
+{% macro json_body(body, destination) %}
+{% set property = body.prop %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if prop_template.transform %}
+{{ prop_template.transform(property, property.python_name, destination) }}
+{% else %}
+{{ destination }} = {{ property.python_name }}
+{% endif %}
+{% endmacro %}
+
+{% macro multipart_body(body, destination) %}
+{% set property = body.prop %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if prop_template.transform_multipart %}
 {{ prop_template.transform_multipart(property, property.python_name, destination) }}
-    {% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -102,20 +105,15 @@ client: AuthenticatedClient,
 client: Union[AuthenticatedClient, Client],
 {% endif %}
 {% endif %}
-{# Form data if any #}
-{% if endpoint.form_body %}
-form_data: {{ endpoint.form_body.get_type_string() }},
-{% endif %}
-{# Multipart data if any #}
-{% if endpoint.multipart_body %}
-multipart_data: {{ endpoint.multipart_body.get_type_string() }},
-{% endif %}
-{# JSON body if any #}
-{% if endpoint.json_body %}
-json_body: {{ endpoint.json_body.get_type_string() }},
-{% endif %}
-{% if endpoint.binary_body %}
-binary_body: {{ endpoint.binary_body.get_type_string() }},
+{# Any allowed bodies #}
+{% if endpoint.bodies | length == 1 %}
+body: {{ endpoint.bodies[0].prop.get_type_string() }},
+{% elif endpoint.bodies | length > 1 %}
+body: Union[
+    {% for body in endpoint.bodies %}
+    {{ body.prop.get_type_string() }},
+    {% endfor %}
+],
 {% endif %}
 {# query parameters #}
 {% for parameter in endpoint.query_parameters.values() %}
@@ -138,17 +136,8 @@ binary_body: {{ endpoint.binary_body.get_type_string() }},
 {% if include_client %}
 client=client,
 {% endif %}
-{% if endpoint.form_body %}
-form_data=form_data,
-{% endif %}
-{% if endpoint.multipart_body %}
-multipart_data=multipart_data,
-{% endif %}
-{% if endpoint.json_body %}
-json_body=json_body,
-{% endif %}
-{% if endpoint.binary_body %}
-binary_body=binary_body,
+{% if endpoint.bodies | length > 0 %}
+body=body,
 {% endif %}
 {% for parameter in endpoint.query_parameters.values() %}
 {{ parameter.python_name }}={{ parameter.python_name }},

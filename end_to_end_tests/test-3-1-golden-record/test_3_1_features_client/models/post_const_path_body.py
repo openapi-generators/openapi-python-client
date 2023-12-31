@@ -5,11 +5,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostConstPathJsonBody")
+T = TypeVar("T", bound="PostConstPathBody")
 
 
 @_attrs_define
-class PostConstPathJsonBody:
+class PostConstPathBody:
     """
     Attributes:
         required (Literal['this always goes in the body']):
@@ -57,14 +57,14 @@ class PostConstPathJsonBody:
 
         optional = d.pop("optional", UNSET)
 
-        post_const_path_json_body = cls(
+        post_const_path_body = cls(
             required=required,
             nullable=nullable,
             optional=optional,
         )
 
-        post_const_path_json_body.additional_properties = d
-        return post_const_path_json_body
+        post_const_path_body.additional_properties = d
+        return post_const_path_body
 
     @property
     def additional_keys(self) -> List[str]:

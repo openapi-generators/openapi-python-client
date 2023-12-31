@@ -10,13 +10,23 @@ from ...types import Response
 
 
 def _get_kwargs(
-    form_data: AFormData,
+    *,
+    body: AFormData,
 ) -> Dict[str, Any]:
-    return {
+    headers: Dict[str, Any] = {}
+
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/tests/post_form_data",
-        "data": form_data.to_dict(),
     }
+
+    _body = body.to_dict()
+
+    _kwargs["data"] = _body
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
@@ -40,11 +50,14 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    form_data: AFormData,
+    body: AFormData,
 ) -> Response[Any]:
     """Post form data
 
      Post form data
+
+    Args:
+        body (AFormData):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -55,7 +68,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        form_data=form_data,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -68,11 +81,14 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    form_data: AFormData,
+    body: AFormData,
 ) -> Response[Any]:
     """Post form data
 
      Post form data
+
+    Args:
+        body (AFormData):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -83,7 +99,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        form_data=form_data,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)

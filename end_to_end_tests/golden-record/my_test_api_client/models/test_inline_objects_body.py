@@ -4,11 +4,11 @@ from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="TestInlineObjectsJsonBody")
+T = TypeVar("T", bound="TestInlineObjectsBody")
 
 
 @_attrs_define
-class TestInlineObjectsJsonBody:
+class TestInlineObjectsBody:
     """
     Attributes:
         a_property (Union[Unset, str]):
@@ -31,8 +31,8 @@ class TestInlineObjectsJsonBody:
         d = src_dict.copy()
         a_property = d.pop("a_property", UNSET)
 
-        test_inline_objects_json_body = cls(
+        test_inline_objects_body = cls(
             a_property=a_property,
         )
 
-        return test_inline_objects_json_body
+        return test_inline_objects_body

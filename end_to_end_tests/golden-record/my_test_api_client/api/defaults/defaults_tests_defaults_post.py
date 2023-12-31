@@ -77,11 +77,13 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/defaults",
         "params": params,
     }
+
+    return _kwargs
 
 
 def _parse_response(

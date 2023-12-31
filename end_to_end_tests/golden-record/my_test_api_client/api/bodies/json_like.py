@@ -5,29 +5,32 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.json_like_body import JsonLikeBody
 from ...types import Response
 
 
 def _get_kwargs(
     *,
-    my_token: str,
+    body: JsonLikeBody,
 ) -> Dict[str, Any]:
-    cookies = {}
-    cookies["MyToken"] = my_token
+    headers: Dict[str, Any] = {}
 
     _kwargs: Dict[str, Any] = {
-        "method": "get",
-        "url": "/auth/token_with_cookie",
-        "cookies": cookies,
+        "method": "post",
+        "url": "/bodies/json-like",
     }
 
+    _body = body.to_dict()
+
+    _kwargs["json"] = _body
+    headers["Content-Type"] = "application/vnd+json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
     if response.status_code == HTTPStatus.OK:
-        return None
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
         return None
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -47,14 +50,12 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    my_token: str,
+    body: JsonLikeBody,
 ) -> Response[Any]:
-    """TOKEN_WITH_COOKIE
-
-     Test optional cookie parameters
+    """A content type that works like json but isn't application/json
 
     Args:
-        my_token (str):
+        body (JsonLikeBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -65,7 +66,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        my_token=my_token,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -78,14 +79,12 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    my_token: str,
+    body: JsonLikeBody,
 ) -> Response[Any]:
-    """TOKEN_WITH_COOKIE
-
-     Test optional cookie parameters
+    """A content type that works like json but isn't application/json
 
     Args:
-        my_token (str):
+        body (JsonLikeBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -96,7 +95,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        my_token=my_token,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)

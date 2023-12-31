@@ -11,17 +11,22 @@ from ...types import File, Response
 
 def _get_kwargs(
     *,
-    binary_body: File,
+    body: File,
 ) -> Dict[str, Any]:
-    headers = {}
-    headers["Content-Type"] = binary_body.mime_type if binary_body.mime_type else "application/octet-stream"
+    headers: Dict[str, Any] = {}
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/tests/octet_stream",
-        "content": binary_body.payload,
-        "headers": headers,
     }
+
+    _body = body.payload
+
+    _kwargs["content"] = _body
+    headers["Content-Type"] = "application/octet-stream"
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(
@@ -54,12 +59,12 @@ def _build_response(
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    binary_body: File,
+    body: File,
 ) -> Response[Union[HTTPValidationError, str]]:
     """Binary (octet stream) request body
 
     Args:
-        binary_body (File): A file to upload
+        body (File): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -70,7 +75,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        binary_body=binary_body,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -83,12 +88,12 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-    binary_body: File,
+    body: File,
 ) -> Optional[Union[HTTPValidationError, str]]:
     """Binary (octet stream) request body
 
     Args:
-        binary_body (File): A file to upload
+        body (File): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -100,19 +105,19 @@ def sync(
 
     return sync_detailed(
         client=client,
-        binary_body=binary_body,
+        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    binary_body: File,
+    body: File,
 ) -> Response[Union[HTTPValidationError, str]]:
     """Binary (octet stream) request body
 
     Args:
-        binary_body (File): A file to upload
+        body (File): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -123,7 +128,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        binary_body=binary_body,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -134,12 +139,12 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-    binary_body: File,
+    body: File,
 ) -> Optional[Union[HTTPValidationError, str]]:
     """Binary (octet stream) request body
 
     Args:
-        binary_body (File): A file to upload
+        body (File): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -152,6 +157,6 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            binary_body=binary_body,
+            body=body,
         )
     ).parsed

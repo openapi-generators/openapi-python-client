@@ -5,17 +5,19 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.post_const_path_json_body import PostConstPathJsonBody
+from ...models.post_const_path_body import PostConstPathBody
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     path: Literal["this goes in the path"],
     *,
-    json_body: PostConstPathJsonBody,
+    body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
 ) -> Dict[str, Any]:
+    headers: Dict[str, Any] = {}
+
     params: Dict[str, Any] = {}
 
     params["required query"] = required_query
@@ -24,16 +26,21 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    json_json_body = json_body.to_dict()
-
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/const/{path}".format(
             path=path,
         ),
-        "json": json_json_body,
         "params": params,
     }
+
+    _body = body.to_dict()
+
+    _kwargs["json"] = _body
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(
@@ -63,7 +70,7 @@ def sync_detailed(
     path: Literal["this goes in the path"],
     *,
     client: Union[AuthenticatedClient, Client],
-    json_body: PostConstPathJsonBody,
+    body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
@@ -72,7 +79,7 @@ def sync_detailed(
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
-        json_body (PostConstPathJsonBody):
+        body (PostConstPathBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -84,7 +91,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         path=path,
-        json_body=json_body,
+        body=body,
         required_query=required_query,
         optional_query=optional_query,
     )
@@ -100,7 +107,7 @@ def sync(
     path: Literal["this goes in the path"],
     *,
     client: Union[AuthenticatedClient, Client],
-    json_body: PostConstPathJsonBody,
+    body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
 ) -> Optional[Literal["Why have a fixed response? I dunno"]]:
@@ -109,7 +116,7 @@ def sync(
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
-        json_body (PostConstPathJsonBody):
+        body (PostConstPathBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -122,7 +129,7 @@ def sync(
     return sync_detailed(
         path=path,
         client=client,
-        json_body=json_body,
+        body=body,
         required_query=required_query,
         optional_query=optional_query,
     ).parsed
@@ -132,7 +139,7 @@ async def asyncio_detailed(
     path: Literal["this goes in the path"],
     *,
     client: Union[AuthenticatedClient, Client],
-    json_body: PostConstPathJsonBody,
+    body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
@@ -141,7 +148,7 @@ async def asyncio_detailed(
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
-        json_body (PostConstPathJsonBody):
+        body (PostConstPathBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -153,7 +160,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         path=path,
-        json_body=json_body,
+        body=body,
         required_query=required_query,
         optional_query=optional_query,
     )
@@ -167,7 +174,7 @@ async def asyncio(
     path: Literal["this goes in the path"],
     *,
     client: Union[AuthenticatedClient, Client],
-    json_body: PostConstPathJsonBody,
+    body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
 ) -> Optional[Literal["Why have a fixed response? I dunno"]]:
@@ -176,7 +183,7 @@ async def asyncio(
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
-        json_body (PostConstPathJsonBody):
+        body (PostConstPathBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -190,7 +197,7 @@ async def asyncio(
         await asyncio_detailed(
             path=path,
             client=client,
-            json_body=json_body,
+            body=body,
             required_query=required_query,
             optional_query=optional_query,
         )

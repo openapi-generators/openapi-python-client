@@ -5,11 +5,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostFormDataInlineData")
+T = TypeVar("T", bound="PostFormDataInlineBody")
 
 
 @_attrs_define
-class PostFormDataInlineData:
+class PostFormDataInlineBody:
     """
     Attributes:
         a_required_field (str):
@@ -44,13 +44,13 @@ class PostFormDataInlineData:
 
         an_optional_field = d.pop("an_optional_field", UNSET)
 
-        post_form_data_inline_data = cls(
+        post_form_data_inline_body = cls(
             a_required_field=a_required_field,
             an_optional_field=an_optional_field,
         )
 
-        post_form_data_inline_data.additional_properties = d
-        return post_form_data_inline_data
+        post_form_data_inline_body.additional_properties = d
+        return post_form_data_inline_body
 
     @property
     def additional_keys(self) -> List[str]:

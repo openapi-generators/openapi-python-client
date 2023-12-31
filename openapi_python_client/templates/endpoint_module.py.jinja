@@ -11,8 +11,8 @@ from ... import errors
 {{ relative }}
 {% endfor %}
 
-{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params, json_body, multipart_body,
-    arguments, client, kwargs, parse_response, docstring %}
+{% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
+    arguments, client, kwargs, parse_response, docstring, body_to_kwarg %}
 
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
@@ -26,40 +26,46 @@ def _get_kwargs(
 
     {{ query_params(endpoint) | indent(4) }}
 
-    {{ json_body(endpoint) | indent(4) }}
-
-    {{ multipart_body(endpoint) | indent(4) }}
-
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "{{ endpoint.method }}",
-    {% if endpoint.path_parameters %}
+        {% if endpoint.path_parameters %}
         "url": "{{ endpoint.path }}".format(
         {%- for parameter in endpoint.path_parameters.values() -%}
-            {{parameter.name}}={{parameter.python_name}},
+        {{parameter.name}}={{parameter.python_name}},
         {%- endfor -%}
         ),
-    {% else %}
+        {% else %}
         "url": "{{ endpoint.path }}",
-    {% endif %}
-    {% if endpoint.form_body %}
-        "data": form_data.to_dict(),
-    {% elif endpoint.multipart_body %}
-        "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
-    {% elif endpoint.json_body %}
-        "json": {{ "json_" + endpoint.json_body.python_name }},
-    {% elif endpoint.binary_body %}
-        "content": {{ endpoint.binary_body.python_name }}.payload,
-    {% endif %}
-    {% if endpoint.query_parameters %}
+        {% endif %}
+        {% if endpoint.query_parameters %}
         "params": params,
-    {% endif %}
-    {% if endpoint.header_parameters or endpoint.binary_body %}
-        "headers": headers,
-    {% endif %}
-    {% if endpoint.cookie_parameters %}
+        {% endif %}
+        {% if endpoint.cookie_parameters %}
         "cookies": cookies,
-    {% endif %}
+        {% endif %}
     }
+
+{% if endpoint.bodies | length > 1 %}
+{% for body in endpoint.bodies %}
+    if isinstance(body, {{body.prop.get_type_string() }}):
+        {% set destination = "_" + body.body_type + "_body" %}
+        {{ body_to_kwarg(body, destination) | indent(8) }}
+        _kwargs["{{ body.body_type.value }}"] = {{ destination }}
+        headers["Content-Type"] = "{{ body.content_type }}"
+{% endfor %}
+{% elif endpoint.bodies | length == 1 %}
+{% set body = endpoint.bodies[0] %}
+    {{ body_to_kwarg(body, "_body") | indent(4) }}
+    _kwargs["{{ body.body_type.value }}"] = _body
+    {% if body.content_type != "multipart/form-data" %}{# Need httpx to set the boundary automatically #}
+    headers["Content-Type"] = "{{ body.content_type }}"
+    {% endif %}
+{% endif %}
+
+{% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
+    _kwargs["headers"] = headers
+{% endif %}
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[{{ return_string }}]:

@@ -5,13 +5,13 @@ from dataclasses import dataclass, field
 from http import HTTPStatus
 from typing import Any, Dict, Iterator, List, Optional, Protocol, Set, Tuple, Union
 
-import attr
 from pydantic import ValidationError
 
 from .. import schema as oai
 from .. import utils
 from ..config import Config
-from ..utils import PythonIdentifier, get_content_type
+from ..utils import PythonIdentifier
+from .bodies import Body, body_from_data
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
     AnyProperty,
@@ -139,160 +139,9 @@ class Endpoint:
     header_parameters: Dict[str, Property] = field(default_factory=dict)
     cookie_parameters: Dict[str, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
-    form_body: Optional[Property] = None
-    json_body: Optional[Property] = None
-    multipart_body: Optional[Property] = None
-    binary_body: Optional[Property] = None
+    bodies: List[Body] = field(default_factory=list)
     errors: List[ParseError] = field(default_factory=list)
     used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
-
-    @staticmethod
-    def parse_request_form_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return form_body and updated schemas"""
-        body_content = body.content
-        form_body = body_content.get("application/x-www-form-urlencoded")
-        if form_body is not None and form_body.media_type_schema is not None:
-            prop, schemas = property_from_data(
-                name="data",
-                required=True,
-                data=form_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(prop, ModelProperty):
-                schemas = attr.evolve(
-                    schemas,
-                    classes_by_name={
-                        **schemas.classes_by_name,
-                        prop.class_info.name: prop,
-                    },
-                )
-            return prop, schemas
-        return None, schemas
-
-    @staticmethod
-    def parse_multipart_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return multipart_body"""
-        body_content = body.content
-        multipart_body = body_content.get("multipart/form-data")
-        if multipart_body is not None and multipart_body.media_type_schema is not None:
-            prop, schemas = property_from_data(
-                name="multipart_data",
-                required=True,
-                data=multipart_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(prop, ModelProperty):
-                prop = attr.evolve(prop, is_multipart_body=True)
-                schemas = attr.evolve(
-                    schemas,
-                    classes_by_name={
-                        **schemas.classes_by_name,
-                        prop.class_info.name: prop,
-                    },
-                )
-            return prop, schemas
-        return None, schemas
-
-    @staticmethod
-    def parse_request_json_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return json_body"""
-        json_body = None
-        for content_type, schema in body.content.items():
-            parsed_content_type = get_content_type(content_type)
-
-            if parsed_content_type is not None and (
-                parsed_content_type == "application/json" or parsed_content_type.endswith("+json")
-            ):
-                json_body = schema
-                break
-
-        if json_body is not None and json_body.media_type_schema is not None:
-            return property_from_data(
-                name="json_body",
-                required=True,
-                data=json_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-        return None, schemas
-
-    @staticmethod
-    def parse_request_binary_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return binary_body"""
-        binary_body = None
-        for content_type, schema in body.content.items():
-            parsed_content_type = get_content_type(content_type)
-
-            if parsed_content_type == "application/octet-stream":
-                binary_body = schema
-                break
-
-        if binary_body is not None and binary_body.media_type_schema is not None:
-            return property_from_data(
-                name="binary_body",
-                required=True,
-                data=binary_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-        return None, schemas
-
-    @staticmethod
-    def _add_body(
-        *,
-        endpoint: "Endpoint",
-        data: oai.Operation,
-        schemas: Schemas,
-        config: Config,
-    ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
-        """Adds form or JSON body to Endpoint if included in data"""
-        endpoint = deepcopy(endpoint)
-        if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
-            return endpoint, schemas
-
-        request_body_parsers: List[Tuple[str, RequestBodyParser]] = [
-            ("form_body", Endpoint.parse_request_form_body),
-            ("json_body", Endpoint.parse_request_json_body),
-            ("binary_body", Endpoint.parse_request_binary_body),
-            ("multipart_body", Endpoint.parse_multipart_body),
-        ]
-
-        for property_name, parser in request_body_parsers:
-            body, schemas = parser(body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config)
-
-            if isinstance(body, ParseError):
-                property_type = property_name
-                if property_type.endswith("_body"):
-                    property_type = property_type[:-5]
-                return (
-                    ParseError(
-                        header=f"Cannot parse {property_type} request body of endpoint {endpoint.name}",
-                        detail=body.detail,
-                        data=body.data,
-                    ),
-                    schemas,
-                )
-
-            if body is not None:
-                setattr(endpoint, property_name, body)
-                endpoint.relative_imports.update(body.get_imports(prefix=models_relative_prefix))
-                endpoint.relative_imports.update(body.get_lazy_imports(prefix=models_relative_prefix))
-
-        return endpoint, schemas
 
     @staticmethod
     def _add_responses(
@@ -559,7 +408,28 @@ class Endpoint:
         if isinstance(result, ParseError):
             return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
-        result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
+        if isinstance(result, ParseError):
+            return result, schemas, parameters
+        bodies, schemas = body_from_data(data=data, schemas=schemas, config=config, endpoint_name=result.name)
+        body_errors = []
+        for body in bodies:
+            if isinstance(body, ParseError):
+                body_errors.append(body)
+                continue
+            result.bodies.append(body)
+            result.relative_imports.update(body.prop.get_imports(prefix=models_relative_prefix))
+            result.relative_imports.update(body.prop.get_lazy_imports(prefix=models_relative_prefix))
+        if len(result.bodies) > 0:
+            result.errors.extend(body_errors)
+        elif len(body_errors) > 0:
+            return (
+                ParseError(
+                    header="Endpoint requires a body, but none were parseable.",
+                    detail="\n".join(error.detail or "" for error in body_errors),
+                ),
+                schemas,
+                parameters,
+            )
 
         return result, schemas, parameters
 
@@ -578,12 +448,7 @@ class Endpoint:
         yield from self.query_parameters.values()
         yield from self.header_parameters.values()
         yield from self.cookie_parameters.values()
-        if self.multipart_body:
-            yield self.multipart_body
-        if self.json_body:
-            yield self.json_body
-        if self.binary_body:
-            yield self.binary_body
+        yield from (body.prop for body in self.bodies)
 
     def list_all_parameters(self) -> List[Property]:
         """Return a List of all the parameters of this endpoint"""

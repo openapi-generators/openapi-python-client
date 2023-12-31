@@ -17,7 +17,7 @@ def _get_kwargs(
     number_header: float,
     integer_header: int,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     headers["Boolean-Header"] = "true" if boolean_header else "false"
 
     headers["String-Header"] = string_header
@@ -26,11 +26,13 @@ def _get_kwargs(
 
     headers["Integer-Header"] = str(integer_header)
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "post",
         "url": "/parameters/header",
-        "headers": headers,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(

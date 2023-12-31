@@ -4,6 +4,85 @@ info:
   description: "An API for testing openapi-python-client"
   version: "0.1.0"
 "paths": {
+  "/bodies/multiple": {
+    "post": {
+      "description": "Test multiple bodies",
+      "tags": [
+        "bodies"
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "application/octet-stream": {
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
+  "/bodies/json-like": {
+    "post": {
+      "tags": [ "bodies" ],
+      "description": "A content type that works like json but isn't application/json",
+      "operationId": "json-like",
+      "requestBody": {
+        "content": {
+          "application/vnd+json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
   "/tests/": {
     "get": {
       "tags": [
@@ -537,8 +616,8 @@ info:
           "schema": {
             "title": "Union Prop",
             "type": [
-               "number",
-               "string"
+              "number",
+              "string"
             ],
             "default": "not a float"
           },

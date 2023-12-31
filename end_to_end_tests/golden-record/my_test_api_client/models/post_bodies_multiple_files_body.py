@@ -5,50 +5,54 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostNamingPropertyConflictWithImportJsonBody")
+T = TypeVar("T", bound="PostBodiesMultipleFilesBody")
 
 
 @_attrs_define
-class PostNamingPropertyConflictWithImportJsonBody:
+class PostBodiesMultipleFilesBody:
     """
     Attributes:
-        field (Union[Unset, str]): A python_name of field should not interfere with attrs field
-        define (Union[Unset, str]): A python_name of define should not interfere with attrs define
+        a (Union[Unset, str]):
     """
 
-    field: Union[Unset, str] = UNSET
-    define: Union[Unset, str] = UNSET
+    a: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        field = self.field
-
-        define = self.define
+        a = self.a
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if field is not UNSET:
-            field_dict["Field"] = field
-        if define is not UNSET:
-            field_dict["Define"] = define
+        if a is not UNSET:
+            field_dict["a"] = a
+
+        return field_dict
+
+    def to_multipart(self) -> Dict[str, Any]:
+        a = self.a if isinstance(self.a, Unset) else (None, str(self.a).encode(), "text/plain")
+
+        field_dict: Dict[str, Any] = {}
+        field_dict.update(
+            {key: (None, str(value).encode(), "text/plain") for key, value in self.additional_properties.items()}
+        )
+        field_dict.update({})
+        if a is not UNSET:
+            field_dict["a"] = a
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        field = d.pop("Field", UNSET)
+        a = d.pop("a", UNSET)
 
-        define = d.pop("Define", UNSET)
-
-        post_naming_property_conflict_with_import_json_body = cls(
-            field=field,
-            define=define,
+        post_bodies_multiple_files_body = cls(
+            a=a,
         )
 
-        post_naming_property_conflict_with_import_json_body.additional_properties = d
-        return post_naming_property_conflict_with_import_json_body
+        post_bodies_multiple_files_body.additional_properties = d
+        return post_bodies_multiple_files_body
 
     @property
     def additional_keys(self) -> List[str]:
