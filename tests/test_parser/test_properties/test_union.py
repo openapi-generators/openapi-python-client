@@ -83,7 +83,7 @@ def test_invalid_location():
 
 def test_not_required_in_path():
     data = oai.Schema(
-        type=[DataType.NUMBER, DataType.INTEGER],
+        oneOf=[oai.Schema(type=DataType.NUMBER), oai.Schema(type=DataType.INTEGER)],
     )
 
     prop, _ = UnionProperty.build(

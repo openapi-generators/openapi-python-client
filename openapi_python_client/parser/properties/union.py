@@ -175,6 +175,4 @@ class UnionProperty(PropertyProtocol):
         for inner_prop in self.inner_properties:
             if inner_prop.validate_location(location) is not None:
                 return ParseError(detail=f"{self.get_type_string()} is not allowed in {location}")
-        if location == oai.ParameterLocation.PATH and not self.required:
-            return ParseError(detail="Path parameter must be required")
         return None
