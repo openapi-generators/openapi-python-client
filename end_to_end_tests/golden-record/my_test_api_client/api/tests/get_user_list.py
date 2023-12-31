@@ -35,7 +35,6 @@ def _get_kwargs(
             an_enum_value_with_null_item = an_enum_value_with_null_item_data.value
         else:
             an_enum_value_with_null_item = an_enum_value_with_null_item_data
-
         json_an_enum_value_with_null.append(an_enum_value_with_null_item)
 
     params["an_enum_value_with_null"] = json_an_enum_value_with_null

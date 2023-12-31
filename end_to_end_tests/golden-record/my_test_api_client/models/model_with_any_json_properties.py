@@ -34,7 +34,6 @@ class ModelWithAnyJsonProperties:
 
             else:
                 field_dict[prop_name] = prop
-
         field_dict.update({})
 
         return field_dict

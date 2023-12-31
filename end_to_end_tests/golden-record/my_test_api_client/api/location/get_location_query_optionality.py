@@ -25,7 +25,6 @@ def _get_kwargs(
         json_null_required = null_required.isoformat()
     else:
         json_null_required = null_required
-
     params["null_required"] = json_null_required
 
     json_null_not_required: Union[None, Unset, str]
@@ -37,7 +36,6 @@ def _get_kwargs(
             json_null_not_required = null_not_required.isoformat()
     else:
         json_null_not_required = null_not_required
-
     params["null_not_required"] = json_null_not_required
 
     json_not_null_not_required: Union[Unset, str] = UNSET

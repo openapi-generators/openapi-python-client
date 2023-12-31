@@ -51,7 +51,6 @@ def _get_kwargs(
 
     json_union_prop: Union[float, str]
     json_union_prop = union_prop
-
     params["union_prop"] = json_union_prop
 
     json_union_prop_with_ref: Union[Unset, float, str]
@@ -64,7 +63,6 @@ def _get_kwargs(
 
     else:
         json_union_prop_with_ref = union_prop_with_ref
-
     params["union_prop_with_ref"] = json_union_prop_with_ref
 
     json_enum_prop = enum_prop.value
