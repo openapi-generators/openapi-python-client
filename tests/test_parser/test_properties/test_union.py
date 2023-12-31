@@ -1,8 +1,8 @@
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
-from openapi_python_client.parser.errors import PropertyError
+from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas, UnionProperty
-from openapi_python_client.schema import DataType
+from openapi_python_client.schema import DataType, ParameterLocation
 
 
 def test_property_from_data_union(union_property_factory, date_time_property_factory, string_property_factory):
@@ -61,3 +61,39 @@ def test_invalid_default():
     )
 
     assert isinstance(err, PropertyError)
+
+
+def test_invalid_location():
+    data = oai.Schema(
+        type=[DataType.NUMBER, DataType.NULL],
+    )
+
+    prop, _ = UnionProperty.build(
+        data=data,
+        required=True,
+        schemas=Schemas(),
+        parent_name="parent",
+        name="name",
+        config=Config(),
+    )
+
+    err = prop.validate_location(ParameterLocation.PATH)
+    assert isinstance(err, ParseError)
+
+
+def test_not_required_in_path():
+    data = oai.Schema(
+        type=[DataType.NUMBER, DataType.INTEGER],
+    )
+
+    prop, _ = UnionProperty.build(
+        data=data,
+        required=False,
+        schemas=Schemas(),
+        parent_name="parent",
+        name="name",
+        config=Config(),
+    )
+
+    err = prop.validate_location(ParameterLocation.PATH)
+    assert isinstance(err, ParseError)
