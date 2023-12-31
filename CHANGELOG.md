@@ -13,6 +13,82 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.17.0 (2023-12-31)
+
+### Breaking Changes
+
+#### Removed query parameter nullable/required special case
+
+In previous versions, setting _either_ `nullable: true` or `required: false` on a query parameter would act like both were set, resulting in a type signature like `Union[None, Unset, YourType]`. This special case has been removed, query parameters will now act like all other types of parameters.
+
+#### Renamed body types and parameters
+
+PR #900 addresses #822.
+
+Where previously there would be one body parameter per supported content type, now there is a single `body` parameter which takes a union of all the possible inputs. This correctly models the fact that only one body can be sent (and ever would be sent) in a request.
+
+For example, when calling a generated endpoint, code which used to look like this:
+
+```python
+post_body_multipart.sync_detailed(
+    client=client,
+    multipart_data=PostBodyMultipartMultipartData(),
+)
+```
+
+Will now look like this:
+
+```python
+post_body_multipart.sync_detailed(
+    client=client,
+    body=PostBodyMultipartBody(),
+)
+```
+
+Note that both the input parameter name _and_ the class name have changed. This should result in simpler code when there is only a single body type and now produces correct code when there are multiple body types.
+
+### Features
+
+#### OpenAPI 3.1 support
+
+The generator will now attempt to generate code for OpenAPI documents with versions 3.1.x (previously, it would exit immediately on seeing a version other than 3.0.x). The following specific OpenAPI 3.1 features are now supported:
+
+- `null` as a type
+- Arrays of types (e.g., `type: [string, null]`)
+- `const` (defines `Literal` types)
+
+The generator does not currently validate that the OpenAPI document is valid for a specific version of OpenAPI, so it may be possible to generate code for documents that include both removed 3.0 syntax (e.g., `nullable`) and new 3.1 syntax (e.g., `null` as a type).
+
+Thanks to everyone who helped make this possible with discussions and testing, including:
+
+- @frco9
+- @vogre
+- @naddeoa
+- @staticdev
+- @philsturgeon
+- @johnthagen
+
+#### Support multiple possible `requestBody`
+
+PR #900 addresses #822.
+
+It is now possible in some circumstances to generate valid code for OpenAPI documents which have multiple possible `requestBody` values. Previously, invalid code could have been generated with no warning (only one body could actually be sent).
+
+Only one content type per "category" is currently supported at a time. The categories are:
+
+- JSON, like `application/json`
+- Binary data, like `application/octet-stream`
+- Encoded form data, like `application/x-www-form-urlencoded`
+- Files, like `multipart/form-data`
+
+### Fixes
+
+#### Always use correct content type for requests
+
+In previous versions, a request body that was similar to a known content type would use that content type in the request. For example `application/json` would be used for `application/vnd.api+json`. This was incorrect and could result in invalid requests being sent.
+
+Now, the content type defined in the OpenAPI document will always be used.
+
 ## 0.16.1 (2023-12-23)
 
 ### Features
