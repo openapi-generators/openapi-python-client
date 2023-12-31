@@ -274,7 +274,10 @@ class TestEndpoint:
             config=config,
         )
         assert (result, schemas, parameters) == (
-            ParseError(data=parse_error.data, detail=f"cannot parse parameter of endpoint {endpoint.name}"),
+            ParseError(
+                data=parse_error.data,
+                detail=f"cannot parse parameter of endpoint {endpoint.name}: {parse_error.detail}",
+            ),
             initial_schemas,
             initial_parameters,
         )
@@ -339,15 +342,15 @@ class TestEndpoint:
         with pytest.raises(pydantic.ValidationError):
             oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
 
-    def test__add_parameters_with_location_postfix_conflict1(self, mocker, property_factory):
+    def test__add_parameters_with_location_postfix_conflict1(self, mocker, any_property_factory):
         """Checks when the PythonIdentifier of new parameter already used."""
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
 
-        path_prop_conflicted = property_factory(name="prop_name_path", required=True, nullable=False, default=None)
-        query_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
-        path_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
+        path_prop_conflicted = any_property_factory(name="prop_name_path", required=True, default=None)
+        query_prop = any_property_factory(name="prop_name", required=True, default=None)
+        path_prop = any_property_factory(name="prop_name", required=True, default=None)
 
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
@@ -389,14 +392,14 @@ class TestEndpoint:
         assert isinstance(result, ParseError)
         assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 
-    def test__add_parameters_with_location_postfix_conflict2(self, mocker, property_factory):
+    def test__add_parameters_with_location_postfix_conflict2(self, mocker, any_property_factory):
         """Checks when an existing parameter has a conflicting PythonIdentifier after renaming."""
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
-        path_prop_conflicted = property_factory(name="prop_name_path", required=True, nullable=False, default=None)
-        path_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
-        query_prop = property_factory(name="prop_name", required=True, nullable=False, default=None)
+        path_prop_conflicted = any_property_factory(name="prop_name_path", required=True, default=None)
+        path_prop = any_property_factory(name="prop_name", required=True, default=None)
+        query_prop = any_property_factory(name="prop_name", required=True, default=None)
         schemas_1 = mocker.MagicMock()
         schemas_2 = mocker.MagicMock()
         schemas_3 = mocker.MagicMock()
@@ -464,7 +467,7 @@ class TestEndpoint:
         )
 
         parameters = mocker.MagicMock()
-        new_param = param_factory(name="blah", schema=oai.Schema.model_construct(nullable=False, type="string"))
+        new_param = param_factory(name="blah", schema=oai.Schema.model_construct(type="string"))
         parameters.classes_by_name = {
             "blah": new_param,
         }
@@ -503,19 +506,19 @@ class TestEndpoint:
                 oai.Parameter.model_construct(
                     name="param",
                     param_in="path",
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     required=True,
                 ),
                 oai.Parameter.model_construct(
                     name="param_path",
                     param_in="path",
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     required=True,
                 ),
                 oai.Parameter.model_construct(
                     name="param",
                     param_in="query",
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                 ),
             ]
         )
@@ -532,27 +535,15 @@ class TestEndpoint:
         data = oai.Operation.model_construct(
             parameters=[
                 oai.Parameter.model_construct(
-                    name="not_null_not_required",
+                    name="not_required",
                     required=False,
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     param_in="query",
                 ),
                 oai.Parameter.model_construct(
-                    name="not_null_required",
+                    name="required",
                     required=True,
-                    param_schema=oai.Schema.model_construct(nullable=False, type="string"),
-                    param_in="query",
-                ),
-                oai.Parameter.model_construct(
-                    name="null_not_required",
-                    required=False,
-                    param_schema=oai.Schema.model_construct(nullable=True, type="string"),
-                    param_in="query",
-                ),
-                oai.Parameter.model_construct(
-                    name="null_required",
-                    required=True,
-                    param_schema=oai.Schema.model_construct(nullable=True, type="string"),
+                    param_schema=oai.Schema.model_construct(type="string"),
                     param_in="query",
                 ),
             ]
@@ -562,13 +553,11 @@ class TestEndpoint:
             endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=Config()
         )
 
-        assert len(endpoint.query_parameters) == 4, "Not all query params were added"  # noqa: PLR2004
+        assert len(endpoint.query_parameters) == 2, "Not all query params were added"  # noqa: PLR2004
         for param in endpoint.query_parameters.values():
-            if param.name == "not_null_required":
-                assert not param.nullable
+            if param.name == "required":
                 assert param.required
             else:
-                assert param.nullable
                 assert not param.required
 
     def test_add_parameters_duplicate_properties(self):

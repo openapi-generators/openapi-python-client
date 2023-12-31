@@ -22,6 +22,7 @@ class PostFormDataInlineBody:
 
     def to_dict(self) -> Dict[str, Any]:
         a_required_field = self.a_required_field
+
         an_optional_field = self.an_optional_field
 
         field_dict: Dict[str, Any] = {}

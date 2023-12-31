@@ -16,19 +16,23 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     params["string_prop"] = string_prop
+
+    params["string with num"] = string_with_num
 
     json_date_prop = date_prop.isoformat()
     params["date_prop"] = json_date_prop
@@ -42,23 +46,17 @@ def _get_kwargs(
     json_list_prop = []
     for list_prop_item_data in list_prop:
         list_prop_item = list_prop_item_data.value
-
         json_list_prop.append(list_prop_item)
 
     params["list_prop"] = json_list_prop
 
     json_union_prop: Union[float, str]
-
     json_union_prop = union_prop
-
     params["union_prop"] = json_union_prop
 
-    json_union_prop_with_ref: Union[None, Unset, float, str]
+    json_union_prop_with_ref: Union[Unset, float, str]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
-    elif union_prop_with_ref is None:
-        json_union_prop_with_ref = None
-
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
@@ -66,26 +64,22 @@ def _get_kwargs(
 
     else:
         json_union_prop_with_ref = union_prop_with_ref
-
     params["union_prop_with_ref"] = json_union_prop_with_ref
 
     json_enum_prop = enum_prop.value
-
     params["enum_prop"] = json_enum_prop
 
     json_model_prop = model_prop.to_dict()
-
     params.update(json_model_prop)
 
     json_required_model_prop = required_model_prop.to_dict()
-
     params.update(json_required_model_prop)
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: Dict[str, Any] = {
         "method": "post",
-        "url": "/tests/defaults",
+        "url": "/defaults",
         "params": params,
     }
 
@@ -123,13 +117,14 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -138,13 +133,14 @@ def sync_detailed(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -159,6 +155,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         string_prop=string_prop,
+        string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -182,13 +179,14 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -197,13 +195,14 @@ def sync(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -219,6 +218,7 @@ def sync(
     return sync_detailed(
         client=client,
         string_prop=string_prop,
+        string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -236,13 +236,14 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -251,13 +252,14 @@ async def asyncio_detailed(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -272,6 +274,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         string_prop=string_prop,
+        string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -293,13 +296,14 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
     union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, None, Unset, float] = 0.6,
+    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
@@ -308,13 +312,14 @@ async def asyncio(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
-        boolean_prop (bool):
+        boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, None, Unset, float]):  Default: 0.6.
+        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -331,6 +336,7 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             string_prop=string_prop,
+            string_with_num=string_with_num,
             date_prop=date_prop,
             float_prop=float_prop,
             int_prop=int_prop,

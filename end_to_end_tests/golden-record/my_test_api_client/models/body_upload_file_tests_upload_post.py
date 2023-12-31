@@ -1,7 +1,7 @@
 import datetime
 import json
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -32,6 +32,7 @@ class BodyUploadFileTestsUploadPost:
     Attributes:
         some_file (File):
         some_object (BodyUploadFileTestsUploadPostSomeObject):
+        some_nullable_object (Union['BodyUploadFileTestsUploadPostSomeNullableObject', None]):
         some_optional_file (Union[Unset, File]):
         some_string (Union[Unset, str]):  Default: 'some_default_string'.
         a_datetime (Union[Unset, datetime.datetime]):
@@ -39,13 +40,12 @@ class BodyUploadFileTestsUploadPost:
         some_number (Union[Unset, float]):
         some_array (Union[Unset, List[float]]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
-        some_nullable_object (Optional[BodyUploadFileTestsUploadPostSomeNullableObject]):
         some_enum (Union[Unset, DifferentEnum]): An enumeration.
     """
 
     some_file: File
     some_object: "BodyUploadFileTestsUploadPostSomeObject"
-    some_nullable_object: Optional["BodyUploadFileTestsUploadPostSomeNullableObject"]
+    some_nullable_object: Union["BodyUploadFileTestsUploadPostSomeNullableObject", None]
     some_optional_file: Union[Unset, File] = UNSET
     some_string: Union[Unset, str] = "some_default_string"
     a_datetime: Union[Unset, datetime.datetime] = UNSET
@@ -59,15 +59,26 @@ class BodyUploadFileTestsUploadPost:
     )
 
     def to_dict(self) -> Dict[str, Any]:
+        from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
+            BodyUploadFileTestsUploadPostSomeNullableObject,
+        )
+
         some_file = self.some_file.to_tuple()
 
         some_object = self.some_object.to_dict()
+
+        some_nullable_object: Union[Dict[str, Any], None]
+        if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
+            some_nullable_object = self.some_nullable_object.to_dict()
+        else:
+            some_nullable_object = self.some_nullable_object
 
         some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = self.some_string
+
         a_datetime: Union[Unset, str] = UNSET
         if not isinstance(self.a_datetime, Unset):
             a_datetime = self.a_datetime.isoformat()
@@ -77,6 +88,7 @@ class BodyUploadFileTestsUploadPost:
             a_date = self.a_date.isoformat()
 
         some_number = self.some_number
+
         some_array: Union[Unset, List[float]] = UNSET
         if not isinstance(self.some_array, Unset):
             some_array = self.some_array
@@ -85,8 +97,6 @@ class BodyUploadFileTestsUploadPost:
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = self.some_optional_object.to_dict()
 
-        some_nullable_object = self.some_nullable_object.to_dict() if self.some_nullable_object else None
-
         some_enum: Union[Unset, str] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = self.some_enum.value
@@ -94,7 +104,6 @@ class BodyUploadFileTestsUploadPost:
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
-
         field_dict.update(
             {
                 "some_file": some_file,
@@ -126,6 +135,12 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
 
+        some_nullable_object: Union[None, Tuple[None, bytes, str]]
+        if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
+            some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
+        else:
+            some_nullable_object = self.some_nullable_object
+
         some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
@@ -135,6 +150,7 @@ class BodyUploadFileTestsUploadPost:
             if isinstance(self.some_string, Unset)
             else (None, str(self.some_string).encode(), "text/plain")
         )
+
         a_datetime: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_datetime, Unset):
             a_datetime = self.a_datetime.isoformat().encode()
@@ -148,6 +164,7 @@ class BodyUploadFileTestsUploadPost:
             if isinstance(self.some_number, Unset)
             else (None, str(self.some_number).encode(), "text/plain")
         )
+
         some_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_array, Unset):
             _temp_some_array = self.some_array
@@ -157,12 +174,6 @@ class BodyUploadFileTestsUploadPost:
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
 
-        some_nullable_object = (
-            (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
-            if self.some_nullable_object
-            else None
-        )
-
         some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
@@ -170,7 +181,6 @@ class BodyUploadFileTestsUploadPost:
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
-
         field_dict.update(
             {
                 "some_file": some_file,
@@ -215,6 +225,21 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = BodyUploadFileTestsUploadPostSomeObject.from_dict(d.pop("some_object"))
 
+        def _parse_some_nullable_object(data: object) -> Union["BodyUploadFileTestsUploadPostSomeNullableObject", None]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                some_nullable_object_type_0 = BodyUploadFileTestsUploadPostSomeNullableObject.from_dict(data)
+
+                return some_nullable_object_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["BodyUploadFileTestsUploadPostSomeNullableObject", None], data)
+
+        some_nullable_object = _parse_some_nullable_object(d.pop("some_nullable_object"))
+
         _some_optional_file = d.pop("some_optional_file", UNSET)
         some_optional_file: Union[Unset, File]
         if isinstance(_some_optional_file, Unset):
@@ -249,13 +274,6 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_optional_object = BodyUploadFileTestsUploadPostSomeOptionalObject.from_dict(_some_optional_object)
 
-        _some_nullable_object = d.pop("some_nullable_object")
-        some_nullable_object: Optional[BodyUploadFileTestsUploadPostSomeNullableObject]
-        if _some_nullable_object is None:
-            some_nullable_object = None
-        else:
-            some_nullable_object = BodyUploadFileTestsUploadPostSomeNullableObject.from_dict(_some_nullable_object)
-
         _some_enum = d.pop("some_enum", UNSET)
         some_enum: Union[Unset, DifferentEnum]
         if isinstance(_some_enum, Unset):
@@ -266,6 +284,7 @@ class BodyUploadFileTestsUploadPost:
         body_upload_file_tests_upload_post = cls(
             some_file=some_file,
             some_object=some_object,
+            some_nullable_object=some_nullable_object,
             some_optional_file=some_optional_file,
             some_string=some_string,
             a_datetime=a_datetime,
@@ -273,7 +292,6 @@ class BodyUploadFileTestsUploadPost:
             some_number=some_number,
             some_array=some_array,
             some_optional_object=some_optional_object,
-            some_nullable_object=some_nullable_object,
             some_enum=some_enum,
         )
 

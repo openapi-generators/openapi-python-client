@@ -29,6 +29,7 @@ cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
 if {{ parameter.python_name }} is not UNSET:
     cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% endif %}
+
     {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -37,6 +38,7 @@ if {{ parameter.python_name }} is not UNSET:
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
 params: Dict[str, Any] = {}
+
 {% for property in endpoint.query_parameters.values() %}
     {% set destination = property.python_name %}
     {% import "property_templates/" + property.template as prop_template %}
@@ -49,7 +51,6 @@ params["{{ property.name }}"] = {{ destination }}
     {% else %}
 {{ guarded_statement(property, destination, "params.update(" + destination + ")") }}
     {% endif %}
-
 
 {% endfor %}
 

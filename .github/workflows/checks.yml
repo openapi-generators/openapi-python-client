@@ -57,33 +57,69 @@ jobs:
       - name: Lint
         run: poetry run ruff check .
 
-      - name: Run pytest
-        run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
+      - name: Run pytest without coverage
+        if: matrix.os != 'ubuntu-latest'
+        run: poetry run pytest tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
         env:
           TASKIPY: true
 
-      - name: Generate coverage report
-        shell: bash
-        run: poetry run coverage xml -o coverage-${{ matrix.os }}-${{ matrix.python }}.xml
+      - name: Run pytest with coverage
+        if: matrix.os == 'ubuntu-latest'
+        run: poetry run pytest --cov=openapi_python_client --cov-report=term-missing tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp
+        env:
+          TASKIPY: true
+      
+      - run: mv .coverage .coverage.${{ matrix.python }}
+        if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
         uses: actions/upload-artifact@v4.0.0
+        if: matrix.os == 'ubuntu-latest'
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.python }}
-          path: coverage-${{ matrix.os }}-${{ matrix.python }}.xml
+          name: coverage-${{ matrix.python }}
+          path: .coverage.${{ matrix.python }}
+          if-no-files-found: error
 
-  upload_coverage:
+  coverage:
+    name: Combine & check coverage
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Download coverage reports
-        uses: actions/download-artifact@v4.0.0
+        uses: actions/download-artifact@v4.1.0
         with:
-          path: coverage-report
-      - uses: codecov/codecov-action@v3.1.4
+          merge-multiple: true
+
+      - name: Create Virtual Environment
+        run: python -m venv .venv
+
+      - name: Combine coverage & fail if it's <100%.
+        run: |
+          # Install coverage
+          .venv/bin/pip install --upgrade coverage[toml]
+
+          # Find all of the downloaded coverage reports and combine them
+          .venv/bin/python -m coverage combine
+          
+          # Create html report
+          .venv/bin/python -m coverage html --skip-covered --skip-empty
+          
+          # Report in Markdown and write to summary.
+          .venv/bin/python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          
+          # Report again and fail if under 100%.
+          .venv/bin/python -m coverage report --fail-under=100          
+
+      - name: Upload HTML report if check failed.
+        uses: actions/upload-artifact@v4.0.0
         with:
-          files: "coverage-report/**/*.xml"
+          name: html-report
+          path: htmlcov
+        if: ${{ failure() }}
 
   integration:
     name: Integration Tests

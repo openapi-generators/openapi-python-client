@@ -11,9 +11,9 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     path_param: str,
     *,
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
     headers: Dict[str, Any] = {}
@@ -25,6 +25,7 @@ def _get_kwargs(
         cookies["cookie param"] = cookie_param
 
     params: Dict[str, Any] = {}
+
     params["string param"] = string_param
 
     params["integer param"] = integer_param
@@ -66,18 +67,18 @@ def sync_detailed(
     path_param: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
-        header_param (Union[Unset, str]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):  Default: 0.
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:
@@ -107,18 +108,18 @@ async def asyncio_detailed(
     path_param: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
-        header_param (Union[Unset, str]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):  Default: 0.
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:

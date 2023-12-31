@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from http import HTTPStatus
 from typing import Any, Dict, Iterator, List, Optional, Protocol, Set, Tuple, Union
 
-import attr
 from pydantic import ValidationError
 
 from .. import schema as oai
@@ -192,7 +191,7 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def add_parameters(  # noqa: PLR0911, PLR0912
+    def add_parameters(  # noqa: PLR0911
         *,
         endpoint: "Endpoint",
         data: Union[oai.Operation, oai.PathItem],
@@ -238,13 +237,12 @@ class Endpoint:
                 "client": AnyProperty(
                     "client",
                     True,
-                    False,
                     None,
                     PythonIdentifier("client", ""),
                     None,
                     None,
                 ),
-                "url": AnyProperty("url", True, False, None, PythonIdentifier("url", ""), None, None),
+                "url": AnyProperty("url", True, None, PythonIdentifier("url", ""), None, None),
             },
         }
 
@@ -287,7 +285,7 @@ class Endpoint:
             if isinstance(prop, ParseError):
                 return (
                     ParseError(
-                        detail=f"cannot parse parameter of endpoint {endpoint.name}",
+                        detail=f"cannot parse parameter of endpoint {endpoint.name}: {prop.detail}",
                         data=prop.data,
                     ),
                     schemas,
@@ -334,9 +332,6 @@ class Endpoint:
                     schemas,
                     parameters,
                 )
-            if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
-                # There is no NULL for query params, so nullable and not required are the same.
-                prop = attr.evolve(prop, required=False, nullable=True)
 
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))

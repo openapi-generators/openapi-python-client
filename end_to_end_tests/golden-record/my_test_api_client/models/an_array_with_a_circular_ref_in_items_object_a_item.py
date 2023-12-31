@@ -30,7 +30,6 @@ class AnArrayWithACircularRefInItemsObjectAItem:
                 componentsschemas_an_array_with_a_circular_ref_in_items_object_b_item = (
                     componentsschemas_an_array_with_a_circular_ref_in_items_object_b_item_data.to_dict()
                 )
-
                 circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_b_item)
 
         field_dict: Dict[str, Any] = {}

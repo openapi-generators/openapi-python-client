@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, model_validator
 
 from ..data_type import DataType
 from .discriminator import Discriminator
@@ -36,7 +36,8 @@ class Schema(BaseModel):
     minProperties: Optional[int] = Field(default=None, ge=0)
     required: Optional[List[str]] = Field(default=None, min_length=1)
     enum: Union[None, List[Optional[StrictInt]], List[Optional[StrictStr]]] = Field(default=None, min_length=1)
-    type: Optional[DataType] = Field(default=None)
+    const: Union[None, StrictStr, StrictInt] = None
+    type: Union[DataType, List[DataType], None] = Field(default=None)
     allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     anyOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
@@ -47,7 +48,7 @@ class Schema(BaseModel):
     description: Optional[str] = None
     schema_format: Optional[str] = Field(default=None, alias="format")
     default: Optional[Any] = None
-    nullable: bool = False
+    nullable: bool = Field(default=False)
     discriminator: Optional[Discriminator] = None
     readOnly: Optional[bool] = None
     writeOnly: Optional[bool] = None
@@ -71,10 +72,16 @@ class Schema(BaseModel):
                     },
                 },
                 {"type": "object", "additionalProperties": {"type": "string"}},
-                {"type": "object", "additionalProperties": {"$ref": "#/components/schemas/ComplexModel"}},
                 {
                     "type": "object",
-                    "properties": {"id": {"type": "integer", "format": "int64"}, "name": {"type": "string"}},
+                    "additionalProperties": {"$ref": "#/components/schemas/ComplexModel"},
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "format": "int64"},
+                        "name": {"type": "string"},
+                    },
                     "required": ["name"],
                     "example": {"name": "Puma", "id": 1},
                 },
@@ -89,13 +96,20 @@ class Schema(BaseModel):
                 {
                     "allOf": [
                         {"$ref": "#/components/schemas/ErrorModel"},
-                        {"type": "object", "required": ["rootCause"], "properties": {"rootCause": {"type": "string"}}},
+                        {
+                            "type": "object",
+                            "required": ["rootCause"],
+                            "properties": {"rootCause": {"type": "string"}},
+                        },
                     ]
                 },
                 {
                     "type": "object",
                     "discriminator": {"propertyName": "petType"},
-                    "properties": {"name": {"type": "string"}, "petType": {"type": "string"}},
+                    "properties": {
+                        "name": {"type": "string"},
+                        "petType": {"type": "string"},
+                    },
                     "required": ["name", "petType"],
                 },
                 {
@@ -110,7 +124,12 @@ class Schema(BaseModel):
                                     "type": "string",
                                     "description": "The measured skill for hunting",
                                     "default": "lazy",
-                                    "enum": ["clueless", "lazy", "adventurous", "aggressive"],
+                                    "enum": [
+                                        "clueless",
+                                        "lazy",
+                                        "adventurous",
+                                        "aggressive",
+                                    ],
                                 }
                             },
                             "required": ["huntingSkill"],
@@ -140,6 +159,25 @@ class Schema(BaseModel):
             ]
         },
     )
+
+    @model_validator(mode="after")
+    def handle_nullable(self) -> "Schema":
+        """Convert the old 3.0 `nullable` property into the new 3.1 style"""
+        if not self.nullable:
+            return self
+        if isinstance(self.type, str):
+            self.type = [self.type, DataType.NULL]
+        elif isinstance(self.type, list):
+            if DataType.NULL not in self.type:
+                self.type.append(DataType.NULL)
+        elif len(self.oneOf) > 0:
+            self.oneOf.append(Schema(type=DataType.NULL))
+        elif len(self.anyOf) > 0:
+            self.anyOf.append(Schema(type=DataType.NULL))
+        elif len(self.allOf) > 0:  # Nullable allOf is basically oneOf[null, allOf]
+            self.oneOf = [Schema(type=DataType.NULL), Schema(allOf=self.allOf)]
+            self.allOf = []
+        return self
 
 
 Schema.model_rebuild()
