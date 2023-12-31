@@ -49,7 +49,6 @@ def _get_kwargs(
 
     if isinstance(some_date, datetime.date):
         json_some_date = some_date.isoformat()
-
     else:
         json_some_date = some_date.isoformat()
 

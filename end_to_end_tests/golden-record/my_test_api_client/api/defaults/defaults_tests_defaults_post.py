@@ -34,7 +34,6 @@ def _get_kwargs(
     params["string with num"] = string_with_num
 
     json_date_prop = date_prop.isoformat()
-
     params["date_prop"] = json_date_prop
 
     params["float_prop"] = float_prop

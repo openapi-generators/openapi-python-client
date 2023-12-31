@@ -86,12 +86,10 @@ class AModel:
             a_camel_date_time = self.a_camel_date_time.isoformat()
 
         a_date = self.a_date.isoformat()
-
         a_nullable_date: Union[None, str]
 
         if isinstance(self.a_nullable_date, datetime.date):
             a_nullable_date = self.a_nullable_date.isoformat()
-
         else:
             a_nullable_date = self.a_nullable_date
 
