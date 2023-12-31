@@ -32,6 +32,7 @@ cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
 if {{ parameter.python_name }} is not UNSET:
     cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% endif %}
+
     {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -52,7 +53,6 @@ params["{{ property.name }}"] = {{ destination }}
     {% else %}
 {{ guarded_statement(property, destination, "params.update(" + destination + ")") }}
     {% endif %}
-
 
 {% endfor %}
 

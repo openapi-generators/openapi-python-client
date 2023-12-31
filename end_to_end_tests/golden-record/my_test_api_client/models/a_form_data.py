@@ -22,6 +22,7 @@ class AFormData:
 
     def to_dict(self) -> Dict[str, Any]:
         an_required_field = self.an_required_field
+
         an_optional_field = self.an_optional_field
 
         field_dict: Dict[str, Any] = {}

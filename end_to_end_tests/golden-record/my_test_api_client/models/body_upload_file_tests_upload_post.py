@@ -66,6 +66,7 @@ class BodyUploadFileTestsUploadPost:
         some_file = self.some_file.to_tuple()
 
         some_object = self.some_object.to_dict()
+
         some_nullable_object: Union[Dict[str, Any], None]
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = self.some_nullable_object.to_dict()
@@ -77,6 +78,7 @@ class BodyUploadFileTestsUploadPost:
             some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = self.some_string
+
         a_datetime: Union[Unset, str] = UNSET
         if not isinstance(self.a_datetime, Unset):
             a_datetime = self.a_datetime.isoformat()
@@ -86,6 +88,7 @@ class BodyUploadFileTestsUploadPost:
             a_date = self.a_date.isoformat()
 
         some_number = self.some_number
+
         some_array: Union[Unset, List[float]] = UNSET
         if not isinstance(self.some_array, Unset):
             some_array = self.some_array
@@ -93,6 +96,7 @@ class BodyUploadFileTestsUploadPost:
         some_optional_object: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = self.some_optional_object.to_dict()
+
         some_enum: Union[Unset, str] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = self.some_enum.value
@@ -130,6 +134,7 @@ class BodyUploadFileTestsUploadPost:
         some_file = self.some_file.to_tuple()
 
         some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
+
         some_nullable_object: Union[None, Tuple[None, bytes, str]]
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
@@ -145,6 +150,7 @@ class BodyUploadFileTestsUploadPost:
             if isinstance(self.some_string, Unset)
             else (None, str(self.some_string).encode(), "text/plain")
         )
+
         a_datetime: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_datetime, Unset):
             a_datetime = self.a_datetime.isoformat().encode()
@@ -158,6 +164,7 @@ class BodyUploadFileTestsUploadPost:
             if isinstance(self.some_number, Unset)
             else (None, str(self.some_number).encode(), "text/plain")
         )
+
         some_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_array, Unset):
             _temp_some_array = self.some_array
@@ -166,6 +173,7 @@ class BodyUploadFileTestsUploadPost:
         some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
+
         some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = (None, str(self.some_enum.value).encode(), "text/plain")

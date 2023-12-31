@@ -25,7 +25,9 @@ class AllOfHasPropertiesButNoType:
 
     def to_dict(self) -> Dict[str, Any]:
         a_sub_property = self.a_sub_property
+
         type = self.type
+
         type_enum: Union[Unset, int] = UNSET
         if not isinstance(self.type_enum, Unset):
             type_enum = self.type_enum.value

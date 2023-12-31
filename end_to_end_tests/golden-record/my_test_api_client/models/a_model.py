@@ -76,7 +76,9 @@ class AModel:
         from ..models.model_with_union_property import ModelWithUnionProperty
 
         an_enum_value = self.an_enum_value.value
+
         an_allof_enum_with_overridden_default = self.an_allof_enum_with_overridden_default.value
+
         a_camel_date_time: str
         if isinstance(self.a_camel_date_time, datetime.datetime):
             a_camel_date_time = self.a_camel_date_time.isoformat()
@@ -84,6 +86,7 @@ class AModel:
             a_camel_date_time = self.a_camel_date_time.isoformat()
 
         a_date = self.a_date.isoformat()
+
         a_nullable_date: Union[None, str]
         if isinstance(self.a_nullable_date, datetime.date):
             a_nullable_date = self.a_nullable_date.isoformat()
@@ -94,6 +97,7 @@ class AModel:
         required_nullable = self.required_nullable
 
         required_not_nullable = self.required_not_nullable
+
         one_of_models: Union[Any, Dict[str, Any]]
         if isinstance(self.one_of_models, FreeFormModel):
             one_of_models = self.one_of_models.to_dict()
@@ -111,6 +115,7 @@ class AModel:
             nullable_one_of_models = self.nullable_one_of_models
 
         model = self.model.to_dict()
+
         nullable_model: Union[Dict[str, Any], None]
         if isinstance(self.nullable_model, ModelWithUnionProperty):
             nullable_model = self.nullable_model.to_dict()
@@ -118,6 +123,7 @@ class AModel:
             nullable_model = self.nullable_model
 
         any_value = self.any_value
+
         an_optional_allof_enum: Union[Unset, str] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum.value
@@ -138,7 +144,9 @@ class AModel:
             a_not_required_date = self.a_not_required_date.isoformat()
 
         attr_1_leading_digit = self.attr_1_leading_digit
+
         attr_leading_underscore = self.attr_leading_underscore
+
         not_required_nullable: Union[None, Unset, str]
         if isinstance(self.not_required_nullable, Unset):
             not_required_nullable = UNSET
@@ -146,6 +154,7 @@ class AModel:
             not_required_nullable = self.not_required_nullable
 
         not_required_not_nullable = self.not_required_not_nullable
+
         not_required_one_of_models: Union[Dict[str, Any], Unset]
         if isinstance(self.not_required_one_of_models, Unset):
             not_required_one_of_models = UNSET
@@ -175,6 +184,7 @@ class AModel:
         not_required_model: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.not_required_model, Unset):
             not_required_model = self.not_required_model.to_dict()
+
         not_required_nullable_model: Union[Dict[str, Any], None, Unset]
         if isinstance(self.not_required_nullable_model, Unset):
             not_required_nullable_model = UNSET

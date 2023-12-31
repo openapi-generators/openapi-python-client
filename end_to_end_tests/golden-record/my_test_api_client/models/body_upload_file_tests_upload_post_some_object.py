@@ -20,6 +20,7 @@ class BodyUploadFileTestsUploadPostSomeObject:
 
     def to_dict(self) -> Dict[str, Any]:
         num = self.num
+
         text = self.text
 
         field_dict: Dict[str, Any] = {}

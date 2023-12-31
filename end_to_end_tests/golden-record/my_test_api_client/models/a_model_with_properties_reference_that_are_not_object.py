@@ -154,13 +154,21 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         bytestream_properties = self.bytestream_properties
 
         enum_property_ref = self.enum_property_ref.value
+
         str_property_ref = self.str_property_ref
+
         date_property_ref = self.date_property_ref.isoformat()
+
         datetime_property_ref = self.datetime_property_ref.isoformat()
+
         int32_property_ref = self.int32_property_ref
+
         int64_property_ref = self.int64_property_ref
+
         float_property_ref = self.float_property_ref
+
         double_property_ref = self.double_property_ref
+
         file_property_ref = self.file_property_ref.to_tuple()
 
         bytestream_property_ref = self.bytestream_property_ref

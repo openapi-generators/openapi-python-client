@@ -26,6 +26,7 @@ class AnotherAllOfSubModel:
 
     def to_dict(self) -> Dict[str, Any]:
         another_sub_property = self.another_sub_property
+
         type: Union[Unset, str] = UNSET
         if not isinstance(self.type, Unset):
             type = self.type.value
