@@ -468,6 +468,16 @@ info:
         {
           "required": true,
           "schema": {
+            "title": "String with num default",
+            "type": "string",
+            "default": 1
+          },
+          "name": "string with num",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
             "title": "Date Prop",
             "type": "string",
             "format": "date",

@@ -43,3 +43,20 @@ def test_build_union_property_invalid_property():
         name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=Config()
     )
     assert p == PropertyError(detail=f"Invalid property in union {name}", data=reference)
+
+def test_invalid_default():
+    data = oai.Schema(
+        type=[DataType.NUMBER, DataType.INTEGER],
+        default="a",
+    )
+
+    err, _ = UnionProperty.build(
+        data=data,
+        required=True,
+        schemas=Schemas(),
+        parent_name="parent",
+        name="name",
+        config=Config(),
+    )
+
+    assert isinstance(err, PropertyError)

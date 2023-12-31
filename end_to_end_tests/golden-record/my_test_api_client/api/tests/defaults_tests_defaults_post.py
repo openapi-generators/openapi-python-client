@@ -16,6 +16,7 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
@@ -29,6 +30,8 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     params["string_prop"] = string_prop
+
+    params["string with num"] = string_with_num
 
     json_date_prop = date_prop.isoformat()
 
@@ -120,6 +123,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
@@ -135,6 +139,7 @@ def sync_detailed(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
@@ -156,6 +161,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         string_prop=string_prop,
+        string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -179,6 +185,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
@@ -194,6 +201,7 @@ def sync(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
@@ -216,6 +224,7 @@ def sync(
     return sync_detailed(
         client=client,
         string_prop=string_prop,
+        string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -233,6 +242,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
@@ -248,6 +258,7 @@ async def asyncio_detailed(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
@@ -269,6 +280,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         string_prop=string_prop,
+        string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
         int_prop=int_prop,
@@ -290,6 +302,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     string_prop: str = "the default string",
+    string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
     int_prop: int = 7,
@@ -305,6 +318,7 @@ async def asyncio(
 
     Args:
         string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
         int_prop (int):  Default: 7.
@@ -328,6 +342,7 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             string_prop=string_prop,
+            string_with_num=string_with_num,
             date_prop=date_prop,
             float_prop=float_prop,
             int_prop=int_prop,
