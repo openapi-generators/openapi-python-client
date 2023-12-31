@@ -44,6 +44,7 @@ def test_build_union_property_invalid_property():
     )
     assert p == PropertyError(detail=f"Invalid property in union {name}", data=reference)
 
+
 def test_invalid_default():
     data = oai.Schema(
         type=[DataType.NUMBER, DataType.INTEGER],
