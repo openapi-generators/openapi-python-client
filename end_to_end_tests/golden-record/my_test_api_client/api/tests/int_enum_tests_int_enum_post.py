@@ -16,7 +16,6 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     json_int_enum = int_enum.value
-
     params["int_enum"] = json_int_enum
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}

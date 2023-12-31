@@ -76,9 +76,7 @@ class AModel:
         from ..models.model_with_union_property import ModelWithUnionProperty
 
         an_enum_value = self.an_enum_value.value
-
         an_allof_enum_with_overridden_default = self.an_allof_enum_with_overridden_default.value
-
         a_camel_date_time: str
 
         if isinstance(self.a_camel_date_time, datetime.datetime):
@@ -146,7 +144,6 @@ class AModel:
                 nested_list_of_enums_item = []
                 for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
                     nested_list_of_enums_item_item = nested_list_of_enums_item_item_data.value
-
                     nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
                 nested_list_of_enums.append(nested_list_of_enums_item)

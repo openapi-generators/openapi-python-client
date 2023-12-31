@@ -46,7 +46,6 @@ def _get_kwargs(
     json_list_prop = []
     for list_prop_item_data in list_prop:
         list_prop_item = list_prop_item_data.value
-
         json_list_prop.append(list_prop_item)
 
     params["list_prop"] = json_list_prop
@@ -72,7 +71,6 @@ def _get_kwargs(
     params["union_prop_with_ref"] = json_union_prop_with_ref
 
     json_enum_prop = enum_prop.value
-
     params["enum_prop"] = json_enum_prop
 
     json_model_prop = model_prop.to_dict()
