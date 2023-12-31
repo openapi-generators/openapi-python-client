@@ -8,6 +8,7 @@ from openapi_python_client import Config, GeneratorError
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
+from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
 
@@ -873,6 +874,49 @@ class TestEndpoint:
             schemas=add_parameters.return_value[1],
             config=config,
         )
+
+    def test_from_data_some_bad_bodies(self):
+        endpoint, _, _ = Endpoint.from_data(
+            data=oai.Operation(
+                responses={},
+                requestBody=oai.RequestBody(
+                    content={
+                        "application/json": oai.MediaType(media_type_schema=oai.Schema(type=DataType.STRING)),
+                        "not a real media type": oai.MediaType(media_type_schema=oai.Schema(type=DataType.STRING)),
+                    },
+                ),
+            ),
+            schemas=Schemas(),
+            config=Config(),
+            parameters=Parameters(),
+            tag="tag",
+            path="/",
+            method="get",
+        )
+
+        assert isinstance(endpoint, Endpoint)
+        assert len(endpoint.bodies) == 1
+        assert len(endpoint.errors) == 1
+
+    def test_from_data_all_bodies_bad(self):
+        endpoint, _, _ = Endpoint.from_data(
+            data=oai.Operation(
+                responses={},
+                requestBody=oai.RequestBody(
+                    content={
+                        "not a real media type": oai.MediaType(media_type_schema=oai.Schema(type=DataType.STRING)),
+                    },
+                ),
+            ),
+            schemas=Schemas(),
+            config=Config(),
+            parameters=Parameters(),
+            tag="tag",
+            path="/",
+            method="get",
+        )
+
+        assert isinstance(endpoint, ParseError)
 
     @pytest.mark.parametrize(
         "response_types, expected",

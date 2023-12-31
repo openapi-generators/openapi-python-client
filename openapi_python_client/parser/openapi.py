@@ -388,7 +388,7 @@ class Endpoint:
         else:
             name = data.operationId
 
-        result: Union[Endpoint, ParseError] = Endpoint(
+        endpoint = Endpoint(
             path=path,
             method=method,
             summary=utils.remove_string_escapes(data.summary) if data.summary else "",
@@ -398,11 +398,8 @@ class Endpoint:
             tag=tag,
         )
 
-        if isinstance(result, ParseError):
-            return result, schemas, parameters
-
         result, schemas, parameters = Endpoint.add_parameters(
-            endpoint=result,
+            endpoint=endpoint,
             data=data,
             schemas=schemas,
             parameters=parameters,
