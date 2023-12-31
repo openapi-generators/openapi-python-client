@@ -50,7 +50,6 @@ def _get_kwargs(
     params["list_prop"] = json_list_prop
 
     json_union_prop: Union[float, str]
-
     json_union_prop = union_prop
 
     params["union_prop"] = json_union_prop
@@ -58,7 +57,6 @@ def _get_kwargs(
     json_union_prop_with_ref: Union[Unset, float, str]
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
-
     elif isinstance(union_prop_with_ref, AnEnum):
         json_union_prop_with_ref = UNSET
         if not isinstance(union_prop_with_ref, Unset):
@@ -73,11 +71,9 @@ def _get_kwargs(
     params["enum_prop"] = json_enum_prop
 
     json_model_prop = model_prop.to_dict()
-
     params.update(json_model_prop)
 
     json_required_model_prop = required_model_prop.to_dict()
-
     params.update(json_required_model_prop)
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}

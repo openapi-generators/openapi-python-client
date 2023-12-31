@@ -27,12 +27,10 @@ class ModelWithUnionPropertyInlined:
         fruit: Union[Dict[str, Any], Unset]
         if isinstance(self.fruit, Unset):
             fruit = UNSET
-
         elif isinstance(self.fruit, ModelWithUnionPropertyInlinedFruitType0):
             fruit = UNSET
             if not isinstance(self.fruit, Unset):
                 fruit = self.fruit.to_dict()
-
         else:
             fruit = UNSET
             if not isinstance(self.fruit, Unset):

@@ -25,7 +25,6 @@ class PostConstPathJsonBody:
     def to_dict(self) -> Dict[str, Any]:
         required = self.required
         nullable: Union[Literal["this or null goes in the body"], None]
-
         nullable = self.nullable
 
         optional = self.optional

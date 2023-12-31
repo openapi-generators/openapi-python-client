@@ -18,14 +18,11 @@ def _get_kwargs(
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     json_not_null_required = not_null_required.isoformat()
-
     params["not_null_required"] = json_not_null_required
 
     json_null_required: Union[None, str]
-
     if isinstance(null_required, datetime.datetime):
         json_null_required = null_required.isoformat()
-
     else:
         json_null_required = null_required
 
@@ -34,7 +31,6 @@ def _get_kwargs(
     json_null_not_required: Union[None, Unset, str]
     if isinstance(null_not_required, Unset):
         json_null_not_required = UNSET
-
     elif isinstance(null_not_required, datetime.datetime):
         json_null_not_required = UNSET
         if not isinstance(null_not_required, Unset):

@@ -42,7 +42,6 @@ class PublicError:
             invalid_parameters = []
             for invalid_parameters_item_data in self.invalid_parameters:
                 invalid_parameters_item = invalid_parameters_item_data.to_dict()
-
                 invalid_parameters.append(invalid_parameters_item)
 
         missing_parameters: Union[Unset, List[str]] = UNSET

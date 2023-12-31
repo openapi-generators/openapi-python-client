@@ -22,7 +22,6 @@ class ModelWithUnionProperty:
         a_property: Union[Unset, int, str]
         if isinstance(self.a_property, Unset):
             a_property = UNSET
-
         elif isinstance(self.a_property, AnEnum):
             a_property = UNSET
             if not isinstance(self.a_property, Unset):

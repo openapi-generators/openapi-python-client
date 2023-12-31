@@ -20,11 +20,11 @@
 {% endif %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
-{% else %}
+{%- else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}
-{% endif %}
+{%- endif %}
 {% endmacro %}
 
 {% macro transform_multipart(property, source, destination) %}

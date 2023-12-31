@@ -48,7 +48,6 @@ if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
     {% set ns.has_if = true %}
 {% endif %}
-
 {% for inner_property in property.inner_properties %}
     {% import "property_templates/" + inner_property.template as inner_template %}
     {% if not inner_template.transform %}

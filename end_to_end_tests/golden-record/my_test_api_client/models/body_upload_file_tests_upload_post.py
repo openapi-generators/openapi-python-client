@@ -66,12 +66,9 @@ class BodyUploadFileTestsUploadPost:
         some_file = self.some_file.to_tuple()
 
         some_object = self.some_object.to_dict()
-
         some_nullable_object: Union[Dict[str, Any], None]
-
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = self.some_nullable_object.to_dict()
-
         else:
             some_nullable_object = self.some_nullable_object
 
@@ -96,7 +93,6 @@ class BodyUploadFileTestsUploadPost:
         some_optional_object: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = self.some_optional_object.to_dict()
-
         some_enum: Union[Unset, str] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = self.some_enum.value
@@ -104,7 +100,6 @@ class BodyUploadFileTestsUploadPost:
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
-
         field_dict.update(
             {
                 "some_file": some_file,
@@ -135,12 +130,9 @@ class BodyUploadFileTestsUploadPost:
         some_file = self.some_file.to_tuple()
 
         some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
-
         some_nullable_object: Union[None, Tuple[None, bytes, str]]
-
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
-
         else:
             some_nullable_object = self.some_nullable_object
 
@@ -174,7 +166,6 @@ class BodyUploadFileTestsUploadPost:
         some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
-
         some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
@@ -182,7 +173,6 @@ class BodyUploadFileTestsUploadPost:
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
-
         field_dict.update(
             {
                 "some_file": some_file,

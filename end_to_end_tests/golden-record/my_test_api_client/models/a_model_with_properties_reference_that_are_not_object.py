@@ -100,7 +100,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
             componentsschemas_an_other_array_of_date_time_item = (
                 componentsschemas_an_other_array_of_date_time_item_data.isoformat()
             )
-
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
 
         int32_properties_ref = self.int32_properties_ref
@@ -136,7 +135,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         datetime_properties = []
         for componentsschemas_an_array_of_date_time_item_data in self.datetime_properties:
             componentsschemas_an_array_of_date_time_item = componentsschemas_an_array_of_date_time_item_data.isoformat()
-
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
 
         int32_properties = self.int32_properties
@@ -159,7 +157,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         str_property_ref = self.str_property_ref
         date_property_ref = self.date_property_ref.isoformat()
         datetime_property_ref = self.datetime_property_ref.isoformat()
-
         int32_property_ref = self.int32_property_ref
         int64_property_ref = self.int64_property_ref
         float_property_ref = self.float_property_ref
