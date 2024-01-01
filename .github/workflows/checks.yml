@@ -53,13 +53,13 @@ jobs:
 
       - name: Run pytest without coverage
         if: matrix.os != 'ubuntu-latest'
-        run: pdm unit_tests
+        run: pdm test
         env:
           TASKIPY: true
 
       - name: Run pytest with coverage
         if: matrix.os == 'ubuntu-latest'
-        run: pdm unit_tests_with_coverage
+        run: pdm test_with_coverage
         env:
           TASKIPY: true
       
