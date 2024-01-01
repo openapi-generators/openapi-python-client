@@ -1,3 +1,4 @@
+.pdm-python
 __pycache__/
 build/
 dist/

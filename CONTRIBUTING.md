@@ -40,10 +40,9 @@ To request a feature:
 
 ### Setting up a Dev Environment
 
-1. Make sure you have [Poetry](https://python-poetry.org/) installed and up to date.
-2. Make sure you have a supported Python version (e.g. 3.8) installed and accessible to Poetry (e.g. with [pyenv](https://github.com/pyenv/pyenv)).
-3. Use `poetry install` in the project directory to create a virtual environment with the relevant dependencies.
-4. Enter a `poetry shell` to make running commands easier.
+1. Make sure you have [PDM](https://pdm-project.org) installed and up to date.
+2. Make sure you have a supported Python version (e.g. 3.8) installed.
+3. Use `pdm install` in the project directory to create a virtual environment with the relevant dependencies.
 
 ### Writing tests
 
@@ -57,7 +56,7 @@ If you think that some of the added code is not testable (or testing it would ad
 
 #### End-to-end tests
 
-This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end to end tests (snapshot tests). In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `poetry run task e2e`. To regenerate the snapshots, run `poetry run task regen`.
+This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end to end tests (snapshot tests). In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `pdm e2e`. To regenerate the snapshots, run `pdm regen`.
 
 There are 4 types of snapshots generated right now, you may have to update only some or all of these depending on the changes you're making. Within the `end_to_end_tets` directory:
 

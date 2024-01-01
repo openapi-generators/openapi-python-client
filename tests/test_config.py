@@ -25,8 +25,8 @@ def json_with_tabs(d):
 def test_load_from_path(tmp_path: Path, filename, dump, relative):
     yml_file = tmp_path.joinpath(filename)
     if relative:
-        if not os.getenv("TASKIPY"):
-            pytest.skip("Only test relative paths when running with `task check`")
+        if not os.getenv("TEST_RELATIVE"):
+            pytest.skip("Skipping relative path checks")
             return
         yml_file = yml_file.relative_to(Path.cwd())
     override1 = {"class_name": "ExampleClass", "module_name": "example_module"}
