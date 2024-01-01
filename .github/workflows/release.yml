@@ -9,6 +9,8 @@ jobs:
   release:
     if: github.head_ref == 'release' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4.1.1
         with:
@@ -18,10 +20,10 @@ jobs:
         uses: knope-dev/action@v2.0.0
         with:
           version: 0.13.3
-      - name: Install Poetry
-        run: pip install --upgrade poetry
+      - name: Install PDM
+        run: pip install --upgrade pdm
       - name: Push to PyPI
-        run: poetry publish --build -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+        run: pdm publish
       - name: Create GitHub Release
         run: knope release
         env:
