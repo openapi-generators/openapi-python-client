@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __all__ = ["EnumProperty"]
 
-from typing import Any, ClassVar, Union, cast
+from typing import Any, ClassVar, List, Union, cast
 
 from attr import evolve
 from attrs import define
@@ -43,7 +43,7 @@ class EnumProperty(PropertyProtocol):
     }
 
     @classmethod
-    def build(
+    def build(  # noqa: PLR0911
         cls,
         *,
         data: oai.Schema,
@@ -76,10 +76,10 @@ class EnumProperty(PropertyProtocol):
         # OpenAPI allows for null as an enum value, but it doesn't make sense with how enums are constructed in Python.
         # So instead, if null is a possible value, make the property nullable.
         # Mypy is not smart enough to know that the type is right though
-        value_list: list[str] | list[int] = [value for value in enum if value is not None]  # type: ignore
+        unchecked_value_list = [value for value in enum if value is not None]  # type: ignore
 
         # It's legal to have an enum that only contains null as a value, we don't bother constructing an enum for that
-        if len(value_list) == 0:
+        if len(unchecked_value_list) == 0:
             return (
                 NoneProperty.build(
                     name=name,
@@ -91,6 +91,19 @@ class EnumProperty(PropertyProtocol):
                 ),
                 schemas,
             )
+
+        value_types = {type(value) for value in unchecked_value_list}
+        if len(value_types) > 1:
+            return PropertyError(
+                header="Enum values must all be the same type", detail=f"Got {value_types}", data=data
+            ), schemas
+        value_type = next(iter(value_types))
+        if value_type not in (str, int):
+            return PropertyError(header=f"Unsupported enum type {value_type}", data=data), schemas
+        value_list = cast(
+            Union[List[int], List[str]], unchecked_value_list
+        )  # We checked this with all the value_types stuff
+
         if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union
             data.oneOf = [
                 oai.Schema(type=DataType.NULL),
@@ -121,8 +134,6 @@ class EnumProperty(PropertyProtocol):
                     ),
                     schemas,
                 )
-
-        value_type = type(next(iter(values.values())))
 
         prop = EnumProperty(
             name=name,
