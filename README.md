@@ -26,7 +26,7 @@ This tool focuses on creating the best developer experience for Python developer
 
 I recommend you install with [pipx](https://pipxproject.github.io/pipx/) so you don't conflict with any other packages you might have: `pipx install openapi-python-client --include-deps`.
 
-> Note the `--include-deps` option which will also make `black` and `ruff` available in your path so that `openapi-python-client` can use them to clean up the generated code.
+> Note the `--include-deps` option makes `ruff` available in your path so that `openapi-python-client` can use it to clean up the generated code.
 
 **If you use `pipx run` then the post-generation hooks will not be available unless you install them manually.**
 
@@ -52,8 +52,6 @@ If you have an `openapi.json` file available on disk, in any CLI invocation you 
 
 `openapi-python-client update --url https://my.api.com/openapi.json`
 
-> For more usage details run `openapi-python-client --help` or read [usage](usage.md)
-
 ### Using custom templates
 
 This feature leverages Jinja2's [ChoiceLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.ChoiceLoader) and [FileSystemLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.FileSystemLoader). This means you do _not_ need to customize every template. Simply copy the template(s) you want to customize from [the default template directory](openapi_python_client/templates) to your own custom template directory (file names _must_ match exactly) and pass the template directory through the `custom-template-path` flag to the `generate` and `update` commands. For instance,
@@ -68,7 +66,7 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
 
 ## What You Get
 
-1. A `pyproject.toml` file with some basic metadata intended to be used with [Poetry].
+1. A `pyproject.toml` file, optionally with [Poetry] metadata (default), [PDM] (with `--meta=pdm`), or only [Ruff] config.
 2. A `README.md` you'll most definitely need to update with your project's details
 3. A Python module named just like the auto-generated project name (e.g. "my_api_client") which contains:
    1. A `client` module which will have both a `Client` class and an `AuthenticatedClient` class. You'll need these
@@ -76,6 +74,7 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
    2. An `api` module which will contain one module for each tag in your OpenAPI spec, as well as a `default` module
       for endpoints without a tag. Each of these modules in turn contains one function for calling each endpoint.
    3. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
+4. A `setup.py` file _if_ you use `--meta=setup` (default is `--meta=poetry`)
 
 For a full example you can look at the `end_to_end_tests` directory which has `baseline_openapi_3.0.json` and `baseline_openapi_3.1.yaml` files.
 The "golden-record" in that same directory is the generated client from either of those OpenAPI documents.
@@ -137,7 +136,7 @@ package_version_override: 1.2.3
 
 ### post_hooks
 
-In the config file, there's an easy way to tell `openapi-python-client` to run additional commands after generation. Here's an example showing the default commands that will run if you don't override them in config:
+In the config file, there's an easy way to tell `openapi-python-client` to run additional commands after generation. Here's an example showing the default commands (using [Ruff]) that will run if you don't override them in config:
 
 ```yaml
 post_hooks:
@@ -159,3 +158,5 @@ By default, the timeout for retrieving the schema file via HTTP is 5 seconds. In
 
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
+[PDM]: https://pdm-project.org/latest/
+[Ruff]: https://docs.astral.sh/ruff/
