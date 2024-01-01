@@ -81,7 +81,7 @@ cmd = "pytest tests --basetemp=tests/tmp"
 cmd = "rm -r tests/tmp"
 
 [tool.pdm.scripts.test_with_coverage]
-composite = ["unit_tests --cov openapi_python_client tests --cov-report=term-missing"]
+composite = ["test --cov openapi_python_client tests --cov-report=term-missing"]
 
 [tool.pdm.scripts.regen_integration]
 shell = """
