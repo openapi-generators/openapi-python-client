@@ -85,7 +85,7 @@ composite = ["unit_tests --cov openapi_python_client tests --cov-report=term-mis
 
 [tool.pdm.scripts.regen_integration]
 shell = """
-openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests-config.yaml\
+openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests-config.yaml --meta pdm \
 && mypy integration-tests --strict
 """
 

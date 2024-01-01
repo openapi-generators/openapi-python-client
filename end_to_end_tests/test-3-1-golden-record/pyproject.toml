@@ -2,9 +2,7 @@
 name = "test-3-1-features-client"
 version = "0.1.0"
 description = "A client library for accessing Test 3.1 Features"
-
 authors = []
-
 readme = "README.md"
 packages = [
     {include = "test_3_1_features_client"},
