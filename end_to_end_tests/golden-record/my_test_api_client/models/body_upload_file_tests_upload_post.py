@@ -11,6 +11,7 @@ from ..models.different_enum import DifferentEnum
 from ..types import UNSET, File, FileJsonType, Unset
 
 if TYPE_CHECKING:
+    from ..models.a_form_data import AFormData
     from ..models.body_upload_file_tests_upload_post_additional_property import (
         BodyUploadFileTestsUploadPostAdditionalProperty,
     )
@@ -38,7 +39,7 @@ class BodyUploadFileTestsUploadPost:
         a_datetime (Union[Unset, datetime.datetime]):
         a_date (Union[Unset, datetime.date]):
         some_number (Union[Unset, float]):
-        some_array (Union[Unset, List[float]]):
+        some_array (Union[List['AFormData'], None, Unset]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
         some_enum (Union[Unset, DifferentEnum]): An enumeration.
     """
@@ -51,7 +52,7 @@ class BodyUploadFileTestsUploadPost:
     a_datetime: Union[Unset, datetime.datetime] = UNSET
     a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
-    some_array: Union[Unset, List[float]] = UNSET
+    some_array: Union[List["AFormData"], None, Unset] = UNSET
     some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
     additional_properties: Dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
@@ -89,8 +90,18 @@ class BodyUploadFileTestsUploadPost:
 
         some_number = self.some_number
 
-        some_array: Union[Unset, List[float]] = UNSET
-        if not isinstance(self.some_array, Unset):
+        some_array: Union[List[Dict[str, Any]], None, Unset]
+        if isinstance(self.some_array, Unset):
+            some_array = UNSET
+        elif isinstance(self.some_array, list):
+            some_array = UNSET
+            if not isinstance(self.some_array, Unset):
+                some_array = []
+                for some_array_type_0_item_data in self.some_array:
+                    some_array_type_0_item = some_array_type_0_item_data.to_dict()
+                    some_array.append(some_array_type_0_item)
+
+        else:
             some_array = self.some_array
 
         some_optional_object: Union[Unset, Dict[str, Any]] = UNSET
@@ -165,10 +176,20 @@ class BodyUploadFileTestsUploadPost:
             else (None, str(self.some_number).encode(), "text/plain")
         )
 
-        some_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
-        if not isinstance(self.some_array, Unset):
-            _temp_some_array = self.some_array
-            some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
+        some_array: Union[None, Tuple[None, bytes, str], Unset]
+        if isinstance(self.some_array, Unset):
+            some_array = UNSET
+        elif isinstance(self.some_array, list):
+            some_array = UNSET
+            if not isinstance(self.some_array, Unset):
+                _temp_some_array = []
+                for some_array_type_0_item_data in self.some_array:
+                    some_array_type_0_item = some_array_type_0_item_data.to_dict()
+                    _temp_some_array.append(some_array_type_0_item)
+                some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
+
+        else:
+            some_array = self.some_array
 
         some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
@@ -209,6 +230,7 @@ class BodyUploadFileTestsUploadPost:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.a_form_data import AFormData
         from ..models.body_upload_file_tests_upload_post_additional_property import (
             BodyUploadFileTestsUploadPostAdditionalProperty,
         )
@@ -265,7 +287,27 @@ class BodyUploadFileTestsUploadPost:
 
         some_number = d.pop("some_number", UNSET)
 
-        some_array = cast(List[float], d.pop("some_array", UNSET))
+        def _parse_some_array(data: object) -> Union[List["AFormData"], None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                some_array_type_0 = []
+                _some_array_type_0 = data
+                for some_array_type_0_item_data in _some_array_type_0 or []:
+                    some_array_type_0_item = AFormData.from_dict(some_array_type_0_item_data)
+
+                    some_array_type_0.append(some_array_type_0_item)
+
+                return some_array_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[List["AFormData"], None, Unset], data)
+
+        some_array = _parse_some_array(d.pop("some_array", UNSET))
 
         _some_optional_object = d.pop("some_optional_object", UNSET)
         some_optional_object: Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]

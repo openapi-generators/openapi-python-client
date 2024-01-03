@@ -1778,9 +1778,10 @@
           },
           "some_array": {
             "title": "Some Array",
+            "nullable": true,
             "type": "array",
             "items": {
-              "type": "number"
+              "$ref": "#/components/schemas/AFormData"
             }
           },
           "some_object": {

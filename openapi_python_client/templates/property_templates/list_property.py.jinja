@@ -3,6 +3,9 @@
 {% import "property_templates/" + inner_property.template as inner_template %}
 {% if inner_template.construct %}
 {% set inner_source = inner_property.python_name + "_data" %}
+{% if initial_value == "UNSET" %}
+{% set initial_value = "[]" %}
+{% endif %}
 {{ property.python_name }} = {{ initial_value }}
 _{{ property.python_name }} = {{ source }}
 {% if property.required %}
