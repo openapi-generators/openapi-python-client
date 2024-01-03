@@ -142,4 +142,3 @@ class ListProperty(PropertyProtocol):
         if no_optional or self.required:
             return type_string
         return f"Union[Unset, {type_string}]"
-    
