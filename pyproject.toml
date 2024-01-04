@@ -66,14 +66,14 @@ lint = "ruff check --fix ."
 format = "ruff format ."
 safety_check = { shell = "pdm export -o requirements.txt && safety check -r requirements.txt --bare && rm requirements.txt" }
 mypy = "mypy openapi_python_client"
-check = { composite = ["lint", "format", "safety_check", "mypy", "test_with_coverage"] }
+check = { composite = ["lint", "format", "safety_check", "mypy", "test"] }
 regen = {composite = ["regen_e2e", "regen_integration"]}
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = {composite = ["regen_e2e", "e2e"]}
 regen_e2e = "python -m end_to_end_tests.regen_golden_record"
 
 [tool.pdm.scripts.test]
-cmd = "pytest tests --basetemp=tests/tmp"
+cmd = "pytest tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp"
 [tool.pdm.scripts.test.env]
 "TEST_RELATIVE" = "true"
 
