@@ -1,4 +1,4 @@
-{% macro construct_template(construct_function, property, source, initial_value=None) %}
+{% macro construct_template(construct_function, property, source) %}
 {% if property.required %}
 {{ property.python_name }} = {{ construct_function(property, source) }}
 {% else %}{# Must be non-required #}
@@ -6,8 +6,7 @@ _{{ property.python_name }} = {{ source }}
 {{ property.python_name }}: {{ property.get_type_string() }}
     {% if not property.required %}
 if isinstance(_{{ property.python_name }},  Unset):
-    {{ property.python_name }} = {% if initial_value != None %}{{ initial_value }}{% else %}UNSET{% endif %}
-
+    {{ property.python_name }} = UNSET
     {% endif %}
 else:
     {{ property.python_name }} = {{ construct_function(property, "_" + property.python_name) }}

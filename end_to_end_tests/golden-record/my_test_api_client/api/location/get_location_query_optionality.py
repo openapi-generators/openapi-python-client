@@ -32,9 +32,7 @@ def _get_kwargs(
     if isinstance(null_not_required, Unset):
         json_null_not_required = UNSET
     elif isinstance(null_not_required, datetime.datetime):
-        json_null_not_required = UNSET
-        if not isinstance(null_not_required, Unset):
-            json_null_not_required = null_not_required.isoformat()
+        json_null_not_required = null_not_required.isoformat()
     else:
         json_null_not_required = null_not_required
     params["null_not_required"] = json_null_not_required

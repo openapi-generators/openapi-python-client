@@ -23,14 +23,9 @@ class ModelWithUnionProperty:
         if isinstance(self.a_property, Unset):
             a_property = UNSET
         elif isinstance(self.a_property, AnEnum):
-            a_property = UNSET
-            if not isinstance(self.a_property, Unset):
-                a_property = self.a_property.value
-
+            a_property = self.a_property.value
         else:
-            a_property = UNSET
-            if not isinstance(self.a_property, Unset):
-                a_property = self.a_property.value
+            a_property = self.a_property.value
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -49,24 +44,14 @@ class ModelWithUnionProperty:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                _a_property_type_0 = data
-                a_property_type_0: Union[Unset, AnEnum]
-                if isinstance(_a_property_type_0, Unset):
-                    a_property_type_0 = UNSET
-                else:
-                    a_property_type_0 = AnEnum(_a_property_type_0)
+                a_property_type_0 = AnEnum(data)
 
                 return a_property_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, int):
                 raise TypeError()
-            _a_property_type_1 = data
-            a_property_type_1: Union[Unset, AnIntEnum]
-            if isinstance(_a_property_type_1, Unset):
-                a_property_type_1 = UNSET
-            else:
-                a_property_type_1 = AnIntEnum(_a_property_type_1)
+            a_property_type_1 = AnIntEnum(data)
 
             return a_property_type_1
 
