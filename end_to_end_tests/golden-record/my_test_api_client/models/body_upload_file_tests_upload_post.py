@@ -94,12 +94,10 @@ class BodyUploadFileTestsUploadPost:
         if isinstance(self.some_array, Unset):
             some_array = UNSET
         elif isinstance(self.some_array, list):
-            some_array = UNSET
-            if not isinstance(self.some_array, Unset):
-                some_array = []
-                for some_array_type_0_item_data in self.some_array:
-                    some_array_type_0_item = some_array_type_0_item_data.to_dict()
-                    some_array.append(some_array_type_0_item)
+            some_array = []
+            for some_array_type_0_item_data in self.some_array:
+                some_array_type_0_item = some_array_type_0_item_data.to_dict()
+                some_array.append(some_array_type_0_item)
 
         else:
             some_array = self.some_array
@@ -180,13 +178,11 @@ class BodyUploadFileTestsUploadPost:
         if isinstance(self.some_array, Unset):
             some_array = UNSET
         elif isinstance(self.some_array, list):
-            some_array = UNSET
-            if not isinstance(self.some_array, Unset):
-                _temp_some_array = []
-                for some_array_type_0_item_data in self.some_array:
-                    some_array_type_0_item = some_array_type_0_item_data.to_dict()
-                    _temp_some_array.append(some_array_type_0_item)
-                some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
+            _temp_some_array = []
+            for some_array_type_0_item_data in self.some_array:
+                some_array_type_0_item = some_array_type_0_item_data.to_dict()
+                _temp_some_array.append(some_array_type_0_item)
+            some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
 
         else:
             some_array = self.some_array
@@ -297,7 +293,7 @@ class BodyUploadFileTestsUploadPost:
                     raise TypeError()
                 some_array_type_0 = []
                 _some_array_type_0 = data
-                for some_array_type_0_item_data in _some_array_type_0 or []:
+                for some_array_type_0_item_data in _some_array_type_0:
                     some_array_type_0_item = AFormData.from_dict(some_array_type_0_item_data)
 
                     some_array_type_0.append(some_array_type_0_item)

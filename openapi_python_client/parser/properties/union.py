@@ -57,7 +57,7 @@ class UnionProperty(PropertyProtocol):
         for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
             sub_prop, schemas = property_from_data(
                 name=f"{name}_type_{i}",
-                required=required,
+                required=True,
                 data=sub_prop_data,
                 schemas=schemas,
                 parent_name=parent_name,
