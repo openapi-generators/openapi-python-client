@@ -180,7 +180,6 @@ def property_from_data(  # noqa: PLR0911
             name=name,
             required=required,
             schemas=schemas,
-            enum=data.enum,
             parent_name=parent_name,
             config=config,
         )

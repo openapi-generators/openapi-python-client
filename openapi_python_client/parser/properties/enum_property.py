@@ -50,7 +50,6 @@ class EnumProperty(PropertyProtocol):
         name: str,
         required: bool,
         schemas: Schemas,
-        enum: list[str | None] | list[int | None],
         parent_name: str,
         config: Config,
     ) -> tuple[EnumProperty | NoneProperty | UnionProperty | PropertyError, Schemas]:
@@ -70,8 +69,7 @@ class EnumProperty(PropertyProtocol):
             A tuple containing either the created property or a PropertyError AND update schemas.
         """
 
-        if len(enum) == 0:
-            return PropertyError(detail="No values provided for Enum", data=data), schemas
+        enum = data.enum or []  # The outer function checks for this, but mypy doesn't know that
 
         # OpenAPI allows for null as an enum value, but it doesn't make sense with how enums are constructed in Python.
         # So instead, if null is a possible value, make the property nullable.
