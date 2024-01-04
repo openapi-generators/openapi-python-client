@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 from attr import define, evolve
 
@@ -172,7 +172,9 @@ class UnionProperty(PropertyProtocol):
 
     def validate_location(self, location: oai.ParameterLocation) -> ParseError | None:
         """Returns an error if this type of property is not allowed in the given location"""
+        from ..properties import Property
+
         for inner_prop in self.inner_properties:
-            if inner_prop.validate_location(location) is not None:
+            if evolve(cast(Property, inner_prop), required=self.required).validate_location(location) is not None:
                 return ParseError(detail=f"{self.get_type_string()} is not allowed in {location}")
         return None
