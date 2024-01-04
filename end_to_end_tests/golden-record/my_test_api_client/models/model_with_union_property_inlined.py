@@ -28,13 +28,9 @@ class ModelWithUnionPropertyInlined:
         if isinstance(self.fruit, Unset):
             fruit = UNSET
         elif isinstance(self.fruit, ModelWithUnionPropertyInlinedFruitType0):
-            fruit = UNSET
-            if not isinstance(self.fruit, Unset):
-                fruit = self.fruit.to_dict()
+            fruit = self.fruit.to_dict()
         else:
-            fruit = UNSET
-            if not isinstance(self.fruit, Unset):
-                fruit = self.fruit.to_dict()
+            fruit = self.fruit.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -58,24 +54,14 @@ class ModelWithUnionPropertyInlined:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                _fruit_type_0 = data
-                fruit_type_0: Union[Unset, ModelWithUnionPropertyInlinedFruitType0]
-                if isinstance(_fruit_type_0, Unset):
-                    fruit_type_0 = UNSET
-                else:
-                    fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(_fruit_type_0)
+                fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(data)
 
                 return fruit_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            _fruit_type_1 = data
-            fruit_type_1: Union[Unset, ModelWithUnionPropertyInlinedFruitType1]
-            if isinstance(_fruit_type_1, Unset):
-                fruit_type_1 = UNSET
-            else:
-                fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(_fruit_type_1)
+            fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(data)
 
             return fruit_type_1
 

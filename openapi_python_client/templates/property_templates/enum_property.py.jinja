@@ -4,8 +4,8 @@
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
 
-{% macro construct(property, source, initial_value=None) %}
-{{ construct_template(construct_function, property, source, initial_value=initial_value) }}
+{% macro construct(property, source) %}
+{{ construct_template(construct_function, property, source) }}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
