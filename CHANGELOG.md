@@ -13,6 +13,40 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.17.1 (2024-01-04)
+
+### Features
+
+#### Export `Unset` types from generated `types.py` (#927)
+
+#### Generate properties for some boolean enums
+
+If a schema has both `type = "boolean"` and `enum` defined, a normal boolean property will now be created. 
+Previously, the generator would error. 
+
+Note that the generate code _will not_ correctly limit the values to the enum values. To work around this, use the 
+OpenAPI 3.1 `const` instead of `enum` to generate Python `Literal` types.
+
+Thanks for reporting #922 @macmoritz!
+
+### Fixes
+
+#### Do not stop generation for invalid enum values
+
+This generator only supports `enum` values that are strings or integers. 
+Previously, this was handled at the parsing level, which would cause the generator to fail if there were any unsupported values in the document.
+Now, the generator will correctly keep going, skipping only endpoints which contained unsupported values.
+
+Thanks for reporting #922 @macmoritz!
+
+#### Fix lists within unions
+
+Fixes #756 and #928. Arrays within unions (which, as of 0.17 includes nullable arrays) would generate invalid code.
+
+Thanks @kgutwin and @diesieben07!
+
+#### Simplify type checks for non-required unions
+
 ## 0.17.0 (2023-12-31)
 
 ### Breaking Changes
