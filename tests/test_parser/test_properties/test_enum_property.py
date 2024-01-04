@@ -5,44 +5,30 @@ from openapi_python_client.parser.properties import EnumProperty, Schemas
 
 
 def test_conflict():
-    data = oai.Schema()
     schemas = Schemas()
 
     _, schemas = EnumProperty.build(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["a"], parent_name="", config=Config()
+        data=oai.Schema(enum=["a"]), name="Existing", required=True, schemas=schemas, parent_name="", config=Config()
     )
     err, new_schemas = EnumProperty.build(
-        data=data,
+        data=oai.Schema(enum=["a", "b"]),
         name="Existing",
         required=True,
         schemas=schemas,
-        enum=["a", "b"],
         parent_name="",
         config=Config(),
     )
 
     assert schemas == new_schemas
-    assert err == PropertyError(detail="Found conflicting enums named Existing with incompatible values.", data=data)
-
-
-def test_no_values():
-    data = oai.Schema()
-    schemas = Schemas()
-
-    err, new_schemas = EnumProperty.build(
-        data=data, name="Existing", required=True, schemas=schemas, enum=[], parent_name=None, config=Config()
-    )
-
-    assert schemas == new_schemas
-    assert err == PropertyError(detail="No values provided for Enum", data=data)
+    assert err.detail == "Found conflicting enums named Existing with incompatible values."
 
 
 def test_bad_default_value():
-    data = oai.Schema(default="B")
+    data = oai.Schema(default="B", enum=["A"])
     schemas = Schemas()
 
     err, new_schemas = EnumProperty.build(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["A"], parent_name=None, config=Config()
+        data=data, name="Existing", required=True, schemas=schemas, parent_name="parent", config=Config()
     )
 
     assert schemas == new_schemas
@@ -50,12 +36,34 @@ def test_bad_default_value():
 
 
 def test_bad_default_type():
-    data = oai.Schema(default=123)
+    data = oai.Schema(default=123, enum=["A"])
     schemas = Schemas()
 
     err, new_schemas = EnumProperty.build(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["A"], parent_name=None, config=Config()
+        data=data, name="Existing", required=True, schemas=schemas, parent_name="parent", config=Config()
     )
 
     assert schemas == new_schemas
+    assert isinstance(err, PropertyError)
+
+
+def test_mixed_types():
+    data = oai.Schema(enum=["A", 1])
+    schemas = Schemas()
+
+    err, _ = EnumProperty.build(
+        data=data, name="Enum", required=True, schemas=schemas, parent_name="parent", config=Config()
+    )
+
+    assert isinstance(err, PropertyError)
+
+
+def test_unsupported_type():
+    data = oai.Schema(enum=[1.4, 1.5])
+    schemas = Schemas()
+
+    err, _ = EnumProperty.build(
+        data=data, name="Enum", required=True, schemas=schemas, parent_name="parent", config=Config()
+    )
+
     assert isinstance(err, PropertyError)

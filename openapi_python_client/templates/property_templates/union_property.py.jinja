@@ -1,4 +1,4 @@
-{% macro construct(property, source, initial_value=None) %}
+{% macro construct(property, source) %}
 def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_string() }}:
     {% if "None" in property.get_type_strings_in_union(json=True, multipart=False) %}
     if data is None:
@@ -19,7 +19,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     try:
         if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
             raise TypeError()
-        {{ inner_template.construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
+        {{ inner_template.construct(inner_property, "data") | indent(8) }}
         return {{ inner_property.python_name }}
     except: # noqa: E722
         pass
@@ -28,7 +28,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
         raise TypeError()
     {% endif %}
-    {{ inner_template.construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
+    {{ inner_template.construct(inner_property, "data") | indent(4) }}
     return {{ inner_property.python_name }}
     {% endif %}
     {% endfor %}

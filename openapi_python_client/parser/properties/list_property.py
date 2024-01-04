@@ -116,3 +116,29 @@ class ListProperty(PropertyProtocol):
         lazy_imports = super().get_lazy_imports(prefix=prefix)
         lazy_imports.update(self.inner_property.get_lazy_imports(prefix=prefix))
         return lazy_imports
+
+    def get_type_string(
+        self,
+        no_optional: bool = False,
+        json: bool = False,
+        *,
+        multipart: bool = False,
+        quoted: bool = False,
+    ) -> str:
+        """
+        Get a string representation of type that should be used when declaring this property
+
+        Args:
+            no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
+            json: True if the type refers to the property after JSON serialization
+        """
+        if json:
+            type_string = self.get_base_json_type_string()
+        elif multipart:
+            type_string = "Tuple[None, bytes, str]"
+        else:
+            type_string = self.get_base_type_string()
+
+        if no_optional or self.required:
+            return type_string
+        return f"Union[Unset, {type_string}]"

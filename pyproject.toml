@@ -18,7 +18,7 @@ dependencies = [
     "typing-extensions<5.0.0,>=4.8.0",
 ]
 name = "openapi-python-client"
-version = "0.17.0"
+version = "0.17.1"
 description = "Generate modern Python clients from OpenAPI"
 keywords = [
     "OpenAPI",
