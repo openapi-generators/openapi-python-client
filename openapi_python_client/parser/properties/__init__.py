@@ -162,14 +162,24 @@ def property_from_data(  # noqa: PLR0911
             config=config,
             roots=roots,
         )
-
+    if data.type == oai.DataType.BOOLEAN:
+        return (
+            BooleanProperty.build(
+                name=name,
+                required=required,
+                default=data.default,
+                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                description=data.description,
+                example=data.example,
+            ),
+            schemas,
+        )
     if data.enum:
         return EnumProperty.build(
             data=data,
             name=name,
             required=required,
             schemas=schemas,
-            enum=data.enum,
             parent_name=parent_name,
             config=config,
         )
@@ -217,18 +227,6 @@ def property_from_data(  # noqa: PLR0911
                 name=name,
                 default=data.default,
                 required=required,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-                description=data.description,
-                example=data.example,
-            ),
-            schemas,
-        )
-    if data.type == oai.DataType.BOOLEAN:
-        return (
-            BooleanProperty.build(
-                name=name,
-                required=required,
-                default=data.default,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,

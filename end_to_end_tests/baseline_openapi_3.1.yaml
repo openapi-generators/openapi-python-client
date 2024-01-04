@@ -794,10 +794,10 @@ info:
       }
     }
   },
-  "/tests/int_enum": {
+  "/enum/int": {
     "post": {
       "tags": [
-        "tests"
+        "enums"
       ],
       "summary": "Int Enum",
       "operationId": "int_enum_tests_int_enum_post",
@@ -819,14 +819,37 @@ info:
               "schema": { }
             }
           }
-        },
-        "422": {
-          "description": "Validation Error",
+        }
+      }
+    }
+  },
+  "/enum/bool": {
+    "post": {
+      "tags": [
+        "enums"
+      ],
+      "summary": "Bool Enum",
+      "operationId": "bool_enum_tests_bool_enum_post",
+      "parameters": [
+        {
+          "required": true,
+          "schema": {
+            "type": "boolean",
+            "enum": [
+              true,
+              false
+            ]
+          },
+          "name": "bool_enum",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HTTPValidationError"
-              }
+              "schema": { }
             }
           }
         }

@@ -10,7 +10,6 @@ from . import (
     get_basic_list_of_integers,
     get_basic_list_of_strings,
     get_user_list,
-    int_enum_tests_int_enum_post,
     json_body_tests_json_body_post,
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
@@ -131,13 +130,6 @@ class TestsEndpoints:
         Unsupported Content
         """
         return unsupported_content_tests_unsupported_content_get
-
-    @classmethod
-    def int_enum_tests_int_enum_post(cls) -> types.ModuleType:
-        """
-        Int Enum
-        """
-        return int_enum_tests_int_enum_post
 
     @classmethod
     def test_inline_objects(cls) -> types.ModuleType:
