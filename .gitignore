@@ -1,8 +1,12 @@
+.pdm-python
 __pycache__/
 build/
 dist/
 *.egg-info/
 .pytest_cache/
+
+# macOS
+.DS_Store
 
 # pyenv
 .python-version
