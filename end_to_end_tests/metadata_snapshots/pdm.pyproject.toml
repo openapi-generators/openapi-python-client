@@ -1,0 +1,23 @@
+[project]
+name = "test-3-1-features-client"
+version = "0.1.0"
+description = "A client library for accessing Test 3.1 Features"
+authors = []
+readme = "README.md"
+requires-python = ">=3.8,<4.0"
+dependencies = [
+    "httpx>=0.20.0,<0.27.0",
+    "attrs>=21.3.0",
+    "python-dateutil>=2.8.0",
+]
+
+[tool.pdm]
+package-type = "library"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.ruff]
+select = ["F", "I"]
+line-length = 120

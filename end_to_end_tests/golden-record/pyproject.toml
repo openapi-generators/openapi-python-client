@@ -9,6 +9,7 @@ packages = [
 ]
 include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 
+
 [tool.poetry.dependencies]
 python = "^3.8"
 httpx = ">=0.20.0,<0.27.0"

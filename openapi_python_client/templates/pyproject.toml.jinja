@@ -16,6 +16,7 @@ packages = [
 ]
 include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
 {% endif %}
+
 {% if pdm %}
 dependencies = [
     "httpx>=0.20.0,<0.27.0",
