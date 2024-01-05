@@ -1,7 +1,7 @@
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 from typer.testing import CliRunner
@@ -13,6 +13,7 @@ def _compare_directories(
     record: Path,
     test_subject: Path,
     expected_differences: Dict[Path, str],
+    ignore: List[str] = None,
     depth=0,
 ):
     """
@@ -26,7 +27,7 @@ def _compare_directories(
     """
     first_printable = record.relative_to(Path.cwd())
     second_printable = test_subject.relative_to(Path.cwd())
-    dc = dircmp(record, test_subject, ignore=[".ruff_cache"])
+    dc = dircmp(record, test_subject, ignore=[".ruff_cache", "__pycache__"] + (ignore or []))
     missing_files = dc.left_only + dc.right_only
     if missing_files:
         pytest.fail(
@@ -59,6 +60,7 @@ def _compare_directories(
             record / sub_path,
             test_subject / sub_path,
             expected_differences=expected_differences,
+            ignore=ignore,
             depth=depth + 1,
         )
 
@@ -79,20 +81,10 @@ def run_e2e_test(
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
 ):
-    runner = CliRunner()
-    openapi_path = Path(__file__).parent / openapi_document
-    config_path = Path(__file__).parent / "config.yml"
-    gr_path = Path(__file__).parent / golden_record_path
     output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
-
-    args = ["generate", f"--config={config_path}", f"--path={openapi_path}"]
-    if extra_args:
-        args.extend(extra_args)
-    result = runner.invoke(app, args)
-
-    if result.exit_code != 0:
-        raise result.exception
+    generate(extra_args, openapi_document)
+    gr_path = Path(__file__).parent / golden_record_path
 
     # Use absolute paths for expected differences for easier comparisons
     expected_differences = {
@@ -110,6 +102,18 @@ def run_e2e_test(
     shutil.rmtree(output_path)
 
 
+def generate(extra_args: Optional[List[str]], openapi_document: str):
+    """Generate a client from an OpenAPI document and return the path to the generated code"""
+    runner = CliRunner()
+    openapi_path = Path(__file__).parent / openapi_document
+    config_path = Path(__file__).parent / "config.yml"
+    args = ["generate", f"--config={config_path}", f"--path={openapi_path}"]
+    if extra_args:
+        args.extend(extra_args)
+    result = runner.invoke(app, args)
+    if result.exit_code != 0:
+        raise result.exception
+
 def test_baseline_end_to_end_3_0():
     run_e2e_test("baseline_openapi_3.0.json", [], {})
 
@@ -126,6 +130,36 @@ def test_3_1_specific_features():
         "test-3-1-golden-record",
         "test-3-1-features-client",
     )
+
+
+@pytest.mark.parametrize(
+    "meta,generated_file,expected_file",
+    (
+        ("setup", "setup.py", "setup.py"),
+        ("pdm", "pyproject.toml", "pdm.pyproject.toml"),
+        ("poetry", "pyproject.toml", "poetry.pyproject.toml"),
+    )
+)
+def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[str]):
+    output_path = Path.cwd() / "test-3-1-features-client"
+    shutil.rmtree(output_path, ignore_errors=True)
+    generate([f"--meta={meta}"], "3.1_specific.openapi.yaml")
+
+    if generated_file and expected_file:
+        assert (output_path / generated_file).exists()
+        assert (output_path / generated_file).read_text() == (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+
+    shutil.rmtree(output_path)
+
+
+def test_no_meta():
+    output_path = Path.cwd() / "test_3_1_features_client"
+    shutil.rmtree(output_path, ignore_errors=True)
+    generate([f"--meta=none"], "3.1_specific.openapi.yaml")
+
+    assert output_path.exists()  # Has a different name than with-meta generation
+    assert (output_path / "__init__.py").exists()
+    shutil.rmtree(output_path)
 
 
 def test_custom_templates():

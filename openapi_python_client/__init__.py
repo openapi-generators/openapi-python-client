@@ -30,6 +30,7 @@ class MetaType(str, Enum):
     NONE = "none"
     POETRY = "poetry"
     SETUP = "setup"
+    PDM = "pdm"
 
 
 TEMPLATE_FILTERS = {
@@ -189,7 +190,7 @@ class Project:
         if self.meta == MetaType.NONE:
             return
 
-        self._build_pyproject_toml(use_poetry=self.meta == MetaType.POETRY)
+        self._build_pyproject_toml()
         if self.meta == MetaType.SETUP:
             self._build_setup_py()
 
@@ -206,12 +207,12 @@ class Project:
         git_ignore_template = self.env.get_template(".gitignore.jinja")
         git_ignore_path.write_text(git_ignore_template.render(), encoding=self.file_encoding)
 
-    def _build_pyproject_toml(self, *, use_poetry: bool) -> None:
+    def _build_pyproject_toml(self) -> None:
         template = "pyproject.toml.jinja"
         pyproject_template = self.env.get_template(template)
         pyproject_path = self.project_dir / "pyproject.toml"
         pyproject_path.write_text(
-            pyproject_template.render(use_poetry=use_poetry),
+            pyproject_template.render(meta=self.meta),
             encoding=self.file_encoding,
         )
 
