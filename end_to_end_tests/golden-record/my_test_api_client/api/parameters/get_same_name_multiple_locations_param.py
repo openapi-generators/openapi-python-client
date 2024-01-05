@@ -11,11 +11,11 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     param_path: str,
     *,
-    param_query: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     if not isinstance(param_header, Unset):
         headers["param"] = param_header
 
@@ -24,19 +24,22 @@ def _get_kwargs(
         cookies["param"] = param_cookie
 
     params: Dict[str, Any] = {}
+
     params["param"] = param_query
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/same-name-multiple-locations/{param}".format(
             param=param_path,
         ),
         "params": params,
-        "headers": headers,
         "cookies": cookies,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
@@ -61,14 +64,14 @@ def sync_detailed(
     param_path: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    param_query: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """
     Args:
         param_path (str):
-        param_query (Union[Unset, None, str]):
+        param_query (Union[Unset, str]):
         param_header (Union[Unset, str]):
         param_cookie (Union[Unset, str]):
 
@@ -98,14 +101,14 @@ async def asyncio_detailed(
     param_path: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    param_query: Union[Unset, None, str] = UNSET,
+    param_query: Union[Unset, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """
     Args:
         param_path (str):
-        param_query (Union[Unset, None, str]):
+        param_query (Union[Unset, str]):
         param_header (Union[Unset, str]):
         param_cookie (Union[Unset, str]):
 

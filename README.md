@@ -7,7 +7,7 @@
 
 # openapi-python-client
 
-Generate modern Python clients from OpenAPI 3.x documents.
+Generate modern Python clients from OpenAPI 3.0 and 3.1 documents.
 
 _This generator does not support OpenAPI 2.x FKA Swagger. If you need to use an older document, try upgrading it to
 version 3 first with one of many available converters._
@@ -21,10 +21,6 @@ This tool focuses on creating the best developer experience for Python developer
 1. Using all the latest and greatest Python features like type annotations and dataclasses.
 2. Having documentation and usage instructions specific to this one generator.
 3. Being written in Python with Jinja2 templates, making it easier to improve and extend for Python developers. It's also much easier to install and use if you already have Python.
-
-## Sponsors
-
-<a href="https://www.devmark.ai/fern/?utm_source=openapi-python-client&utm_loc=readme&utm_type=logo" target="_blank" title="Fern | SDKs and API docs"><img src="https://raw.githubusercontent.com/openapi-generators/openapi-python-client/main/.github/sponsors/fern.png"></a>
 
 ## Installation
 
@@ -73,25 +69,16 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
 ## What You Get
 
 1. A `pyproject.toml` file with some basic metadata intended to be used with [Poetry].
-1. A `README.md` you'll most definitely need to update with your project's details
-1. A Python module named just like the auto-generated project name (e.g. "my_api_client") which contains:
+2. A `README.md` you'll most definitely need to update with your project's details
+3. A Python module named just like the auto-generated project name (e.g. "my_api_client") which contains:
    1. A `client` module which will have both a `Client` class and an `AuthenticatedClient` class. You'll need these
       for calling the functions in the `api` module.
-   1. An `api` module which will contain one module for each tag in your OpenAPI spec, as well as a `default` module
+   2. An `api` module which will contain one module for each tag in your OpenAPI spec, as well as a `default` module
       for endpoints without a tag. Each of these modules in turn contains one function for calling each endpoint.
-   1. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
+   3. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
 
-For a full example you can look at the `end_to_end_tests` directory which has an `openapi.json` file.
-"golden-record" in that same directory is the generated client from that OpenAPI document.
-
-## OpenAPI features supported
-
-1. All HTTP Methods
-1. JSON and form bodies, path and query parameters
-1. File uploads with multipart/form-data bodies
-1. float, string, int, date, datetime, string enums, and custom schemas or lists containing any of those
-1. html/text or application/json responses containing any of the previous types
-1. Bearer token security
+For a full example you can look at the `end_to_end_tests` directory which has `baseline_openapi_3.0.json` and `baseline_openapi_3.1.yaml` files.
+The "golden-record" in that same directory is the generated client from either of those OpenAPI documents.
 
 ## Configuration
 
@@ -102,7 +89,7 @@ The following parameters are supported:
 
 Used to change the name of generated model classes. This param should be a mapping of existing class name
 (usually a key in the "schemas" section of your OpenAPI document) to class_name and module_name. As an example, if the
-name of the a model in OpenAPI (and therefore the generated class name) was something like "\_PrivateInternalLongName"
+name of a model in OpenAPI (and therefore the generated class name) was something like "_PrivateInternalLongName"
 and you want the generated client's model to be called "ShortName" in a module called "short_name" you could do this:
 
 Example:
@@ -114,7 +101,7 @@ class_overrides:
     module_name: short_name
 ```
 
-The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the models folder.
+The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the `models` folder.
 
 ### project_name_override and package_name_override
 

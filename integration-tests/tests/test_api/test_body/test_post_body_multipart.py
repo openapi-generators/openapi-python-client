@@ -5,7 +5,7 @@ import pytest
 
 from integration_tests.api.body import post_body_multipart
 from integration_tests.client import Client
-from integration_tests.models.post_body_multipart_multipart_data import PostBodyMultipartMultipartData
+from integration_tests.models.post_body_multipart_body import PostBodyMultipartBody
 from integration_tests.models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from integration_tests.types import File
 
@@ -19,7 +19,7 @@ def test(client: Client) -> None:
 
     response = post_body_multipart.sync_detailed(
         client=client,
-        multipart_data=PostBodyMultipartMultipartData(
+        body=PostBodyMultipartBody(
             a_string=a_string,
             file=File(
                 payload=BytesIO(payload),
@@ -65,7 +65,7 @@ def test_custom_hooks() -> None:
 
     post_body_multipart.sync_detailed(
         client=client,
-        multipart_data=PostBodyMultipartMultipartData(
+        body=PostBodyMultipartBody(
             a_string=a_string,
             file=File(
                 payload=BytesIO(payload),
@@ -90,7 +90,7 @@ def test_context_manager(client: Client) -> None:
     with client as client:
         post_body_multipart.sync_detailed(
             client=client,
-            multipart_data=PostBodyMultipartMultipartData(
+            body=PostBodyMultipartBody(
                 a_string=a_string,
                 file=File(
                     payload=BytesIO(payload),
@@ -102,7 +102,7 @@ def test_context_manager(client: Client) -> None:
         )
         response = post_body_multipart.sync_detailed(
             client=client,
-            multipart_data=PostBodyMultipartMultipartData(
+            body=PostBodyMultipartBody(
                 a_string=a_string,
                 file=File(
                     payload=BytesIO(payload),
@@ -116,7 +116,7 @@ def test_context_manager(client: Client) -> None:
     with pytest.raises(RuntimeError):
         post_body_multipart.sync_detailed(
             client=client,
-            multipart_data=PostBodyMultipartMultipartData(
+            body=PostBodyMultipartBody(
                 a_string=a_string,
                 file=File(
                     payload=BytesIO(payload),
@@ -148,7 +148,7 @@ async def test_async(client: Client) -> None:
 
     response = await post_body_multipart.asyncio_detailed(
         client=client,
-        multipart_data=PostBodyMultipartMultipartData(
+        body=PostBodyMultipartBody(
             a_string=a_string,
             file=File(
                 payload=BytesIO(payload),
@@ -181,7 +181,7 @@ async def test_async_context_manager(client: Client) -> None:
     async with client as client:
         await post_body_multipart.asyncio_detailed(
             client=client,
-            multipart_data=PostBodyMultipartMultipartData(
+            body=PostBodyMultipartBody(
                 a_string=a_string,
                 file=File(
                     payload=BytesIO(payload),
@@ -193,7 +193,7 @@ async def test_async_context_manager(client: Client) -> None:
         )
         response = await post_body_multipart.asyncio_detailed(
             client=client,
-            multipart_data=PostBodyMultipartMultipartData(
+            body=PostBodyMultipartBody(
                 a_string=a_string,
                 file=File(
                     payload=BytesIO(payload),
@@ -207,7 +207,7 @@ async def test_async_context_manager(client: Client) -> None:
     with pytest.raises(RuntimeError):
         await post_body_multipart.asyncio_detailed(
             client=client,
-            multipart_data=PostBodyMultipartMultipartData(
+            body=PostBodyMultipartBody(
                 a_string=a_string,
                 file=File(
                     payload=BytesIO(payload),

@@ -11,12 +11,12 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     path_param: str,
     *,
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     if not isinstance(header_param, Unset):
         headers["header param"] = header_param
 
@@ -25,21 +25,24 @@ def _get_kwargs(
         cookies["cookie param"] = cookie_param
 
     params: Dict[str, Any] = {}
+
     params["string param"] = string_param
 
     params["integer param"] = integer_param
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/parameter-references/{path_param}".format(
             path_param=path_param,
         ),
         "params": params,
-        "headers": headers,
         "cookies": cookies,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
@@ -64,18 +67,18 @@ def sync_detailed(
     path_param: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
-        header_param (Union[Unset, str]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):  Default: 0.
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:
@@ -105,18 +108,18 @@ async def asyncio_detailed(
     path_param: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
-        header_param (Union[Unset, str]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):  Default: 0.
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:

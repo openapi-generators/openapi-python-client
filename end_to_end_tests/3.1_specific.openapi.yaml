@@ -1,0 +1,49 @@
+openapi: "3.1.0"
+info:
+  title: "Test 3.1 Features"
+  description: "Test new OpenAPI 3.1 features"
+  version: "0.1.0"
+paths:
+  "/const/{path}":
+    post:
+      tags: [ "const" ]
+      parameters:
+        - in: "path"
+          required: true
+          schema:
+            const: "this goes in the path"
+          name: "path"
+        - in: "query"
+          required: true
+          schema:
+            const: "this always goes in the query"
+          name: "required query"
+        - in: "query"
+          schema:
+            const: "this sometimes goes in the query"
+          name: "optional query"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                required:
+                  const: "this always goes in the body"
+                optional:
+                  const: "this sometimes goes in the body"
+                nullable:
+                  oneOf:
+                    - type: "null"
+                    - const: "this or null goes in the body"
+              required:
+                - required
+                - nullable
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                const: "Why have a fixed response? I dunno"

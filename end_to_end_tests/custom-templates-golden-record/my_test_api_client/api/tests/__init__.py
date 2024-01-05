@@ -4,14 +4,12 @@ import types
 
 from . import (
     callback_test,
-    defaults_tests_defaults_post,
     description_with_backslash,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
     get_basic_list_of_integers,
     get_basic_list_of_strings,
     get_user_list,
-    int_enum_tests_int_enum_post,
     json_body_tests_json_body_post,
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
@@ -106,13 +104,6 @@ class TestsEndpoints:
         return post_tests_json_body_string
 
     @classmethod
-    def defaults_tests_defaults_post(cls) -> types.ModuleType:
-        """
-        Defaults
-        """
-        return defaults_tests_defaults_post
-
-    @classmethod
     def octet_stream_tests_octet_stream_get(cls) -> types.ModuleType:
         """
         Octet Stream
@@ -139,13 +130,6 @@ class TestsEndpoints:
         Unsupported Content
         """
         return unsupported_content_tests_unsupported_content_get
-
-    @classmethod
-    def int_enum_tests_int_enum_post(cls) -> types.ModuleType:
-        """
-        Int Enum
-        """
-        return int_enum_tests_int_enum_post
 
     @classmethod
     def test_inline_objects(cls) -> types.ModuleType:

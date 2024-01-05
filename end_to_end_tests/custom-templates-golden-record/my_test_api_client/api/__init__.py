@@ -2,7 +2,10 @@
 
 from typing import Type
 
+from .bodies import BodiesEndpoints
 from .default import DefaultEndpoints
+from .defaults import DefaultsEndpoints
+from .enums import EnumsEndpoints
 from .location import LocationEndpoints
 from .naming import NamingEndpoints
 from .parameter_references import ParameterReferencesEndpoints
@@ -15,8 +18,20 @@ from .true_ import True_Endpoints
 
 class MyTestApiClientApi:
     @classmethod
+    def bodies(cls) -> Type[BodiesEndpoints]:
+        return BodiesEndpoints
+
+    @classmethod
     def tests(cls) -> Type[TestsEndpoints]:
         return TestsEndpoints
+
+    @classmethod
+    def defaults(cls) -> Type[DefaultsEndpoints]:
+        return DefaultsEndpoints
+
+    @classmethod
+    def enums(cls) -> Type[EnumsEndpoints]:
+        return EnumsEndpoints
 
     @classmethod
     def responses(cls) -> Type[ResponsesEndpoints]:

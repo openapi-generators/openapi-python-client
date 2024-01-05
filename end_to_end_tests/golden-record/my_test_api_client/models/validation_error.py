@@ -22,6 +22,7 @@ class ValidationError:
         loc = self.loc
 
         msg = self.msg
+
         type = self.type
 
         field_dict: Dict[str, Any] = {}

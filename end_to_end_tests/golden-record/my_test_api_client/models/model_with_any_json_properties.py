@@ -29,13 +29,11 @@ class ModelWithAnyJsonProperties:
         for prop_name, prop in self.additional_properties.items():
             if isinstance(prop, ModelWithAnyJsonPropertiesAdditionalPropertyType0):
                 field_dict[prop_name] = prop.to_dict()
-
             elif isinstance(prop, list):
                 field_dict[prop_name] = prop
 
             else:
                 field_dict[prop_name] = prop
-
         field_dict.update({})
 
         return field_dict
@@ -53,7 +51,7 @@ class ModelWithAnyJsonProperties:
         for prop_name, prop_dict in d.items():
 
             def _parse_additional_property(
-                data: object
+                data: object,
             ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
                 try:
                     if not isinstance(data, dict):

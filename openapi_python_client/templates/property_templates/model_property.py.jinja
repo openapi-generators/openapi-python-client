@@ -4,8 +4,8 @@
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
 
-{% macro construct(property, source, initial_value=None) %}
-{{ construct_template(construct_function, property, source, initial_value=initial_value) }}
+{% macro construct(property, source) %}
+{{ construct_template(construct_function, property, source) }}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, dict){% endmacro %}
@@ -14,25 +14,17 @@
 {% set transformed = source + "." + transform_method + "()" %}
 {% if multipart %}
     {% set transformed = "(None, json.dumps(" + transformed + ").encode(), 'application/json')" %}
-    {% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
+    {% set type_string = property.get_type_string(multipart=True) %}
 {% else %}
     {% set type_string = property.get_type_string(json=True) %}
 {% endif %}
 {% if property.required %}
-{% if property.nullable %}
-{{ destination }} = {{ transformed }} if {{ source }} else None
-{% else %}
 {{ destination }} = {{ transformed }}
-{% endif %}
-{% else %}
+{%- else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
-    {{ destination }} = {{ transformed }} if {{ source }} else None
-{% else %}
     {{ destination }} = {{ transformed }}
-{% endif %}
-{% endif %}
+{%- endif %}
 {% endmacro %}
 
 {% macro transform_multipart(property, source, destination) %}

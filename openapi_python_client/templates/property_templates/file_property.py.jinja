@@ -6,26 +6,18 @@ File(
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
 
-{% macro construct(property, source, initial_value=None) %}
-{{ construct_template(construct_function, property, source, initial_value=initial_value) }}
+{% macro construct(property, source) %}
+{{ construct_template(construct_function, property, source) }}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, bytes){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% if property.required %}
-{% if property.nullable %}
-{{ destination }} = {{ source }}.to_tuple() if {{ source }} else None
-{% else %}
 {{ destination }} = {{ source }}.to_tuple()
-{% endif %}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
-    {{ destination }} = {{ source }}.to_tuple() if {{ source }} else None
-{% else %}
     {{ destination }} = {{ source }}.to_tuple()
-{% endif %}
 {% endif %}
 {% endmacro %}

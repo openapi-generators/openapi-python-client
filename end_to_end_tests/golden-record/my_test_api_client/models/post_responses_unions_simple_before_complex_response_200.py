@@ -28,10 +28,8 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
         )
 
         a: Union[Dict[str, Any], str]
-
         if isinstance(self.a, PostResponsesUnionsSimpleBeforeComplexResponse200AType1):
             a = self.a.to_dict()
-
         else:
             a = self.a
 
