@@ -34,6 +34,7 @@ class Response:
     status_code: HTTPStatus
     prop: Property
     source: _ResponseSource
+    data: Union[oai.Response, oai.Reference]  # Original data which created this response, useful for custom templates
 
 
 def _source_by_content_type(content_type: str) -> Optional[_ResponseSource]:
@@ -60,17 +61,18 @@ def empty_response(
     status_code: HTTPStatus,
     response_name: str,
     config: Config,
-    description: Optional[str],
+    data: Union[oai.Response, oai.Reference],
 ) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
+        data=data,
         status_code=status_code,
         prop=AnyProperty(
             name=response_name,
             default=None,
             required=True,
             python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
-            description=description,
+            description=data.description if isinstance(data, oai.Response) else None,
             example=None,
         ),
         source=NONE_SOURCE,
@@ -94,7 +96,7 @@ def response_from_data(
                 status_code=status_code,
                 response_name=response_name,
                 config=config,
-                description=None,
+                data=data,
             ),
             schemas,
         )
@@ -106,7 +108,7 @@ def response_from_data(
                 status_code=status_code,
                 response_name=response_name,
                 config=config,
-                description=data.description,
+                data=data,
             ),
             schemas,
         )
@@ -128,7 +130,7 @@ def response_from_data(
                 status_code=status_code,
                 response_name=response_name,
                 config=config,
-                description=data.description,
+                data=data,
             ),
             schemas,
         )
@@ -145,4 +147,4 @@ def response_from_data(
     if isinstance(prop, PropertyError):
         return prop, schemas
 
-    return Response(status_code=status_code, prop=prop, source=source), schemas
+    return Response(status_code=status_code, prop=prop, source=source, data=data), schemas
