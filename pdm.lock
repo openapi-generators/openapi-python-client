@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:60ab2ae5a39b0ce8036a10b02c9edd020a4319fc3223d7c4d4983621076c3858"
+content_hash = "sha256:95755a37ee3e6a924fa539d7bf00ac5255bb5e3649405afd078ad8a8e8c85002"
 
 [[package]]
 name = "annotated-types"
@@ -1037,12 +1037,12 @@ files = [
 
 [[package]]
 name = "types-certifi"
-version = "2020.4.0"
+version = "2021.10.8.3"
 summary = "Typing stubs for certifi"
 groups = ["dev"]
 files = [
-    {file = "types-certifi-2020.4.0.tar.gz", hash = "sha256:787d1a0c7897a1c658f8f7958ae57141b3fff13acb866e5bcd31cfb45037546f"},
-    {file = "types_certifi-2020.4.0-py3-none-any.whl", hash = "sha256:0ffdbe451d3b02f6d2cfd87bcfb2f086a4ff1fa76a35d51cfc3771e261d7a8fd"},
+    {file = "types-certifi-2021.10.8.3.tar.gz", hash = "sha256:72cf7798d165bc0b76e1c10dd1ea3097c7063c42c21d664523b928e88b554a4f"},
+    {file = "types_certifi-2021.10.8.3-py3-none-any.whl", hash = "sha256:b2d1e325e69f71f7c78e5943d410e650b4707bb0ef32e4ddf3da37f54176e88a"},
 ]
 
 [[package]]
