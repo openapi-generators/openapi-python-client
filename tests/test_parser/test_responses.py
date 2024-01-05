@@ -24,7 +24,6 @@ def test_response_from_data_no_content(any_property_factory):
         prop=any_property_factory(
             name="response_200",
             default=None,
-            nullable=False,
             required=True,
             description="",
         ),
@@ -48,7 +47,6 @@ def test_response_from_data_reference(any_property_factory):
         prop=any_property_factory(
             name="response_200",
             default=None,
-            nullable=False,
             required=True,
         ),
         source=NONE_SOURCE,
@@ -90,7 +88,6 @@ def test_response_from_data_no_content_schema(any_property_factory):
         prop=any_property_factory(
             name="response_200",
             default=None,
-            nullable=False,
             required=True,
             description=data.description,
         ),
@@ -127,10 +124,10 @@ def test_response_from_data_property_error(mocker):
     )
 
 
-def test_response_from_data_property(mocker, property_factory):
+def test_response_from_data_property(mocker, any_property_factory):
     from openapi_python_client.parser import responses
 
-    prop = property_factory()
+    prop = any_property_factory()
     property_from_data = mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     data = oai.Response.model_construct(
         description="",

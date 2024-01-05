@@ -37,7 +37,7 @@ def _process_config(path: Optional[pathlib.Path]) -> Config:
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
 ) -> None:
-    """Generate a Python client from an OpenAPI JSON document"""
+    """Generate a Python client from an OpenAPI document"""
 
 
 def _print_parser_error(err: GeneratorError, color: str) -> None:

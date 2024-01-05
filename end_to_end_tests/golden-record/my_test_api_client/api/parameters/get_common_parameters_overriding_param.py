@@ -14,17 +14,20 @@ def _get_kwargs(
     param_query: str = "overridden_in_GET",
 ) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
+
     params["param"] = param_query
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/common_parameters_overriding/{param}".format(
             param=param_path,
         ),
         "params": params,
     }
+
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:

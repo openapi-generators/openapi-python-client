@@ -13,6 +13,156 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.17.1 (2024-01-04)
+
+### Features
+
+#### Export `Unset` types from generated `types.py` (#927)
+
+#### Generate properties for some boolean enums
+
+If a schema has both `type = "boolean"` and `enum` defined, a normal boolean property will now be created. 
+Previously, the generator would error. 
+
+Note that the generate code _will not_ correctly limit the values to the enum values. To work around this, use the 
+OpenAPI 3.1 `const` instead of `enum` to generate Python `Literal` types.
+
+Thanks for reporting #922 @macmoritz!
+
+### Fixes
+
+#### Do not stop generation for invalid enum values
+
+This generator only supports `enum` values that are strings or integers. 
+Previously, this was handled at the parsing level, which would cause the generator to fail if there were any unsupported values in the document.
+Now, the generator will correctly keep going, skipping only endpoints which contained unsupported values.
+
+Thanks for reporting #922 @macmoritz!
+
+#### Fix lists within unions
+
+Fixes #756 and #928. Arrays within unions (which, as of 0.17 includes nullable arrays) would generate invalid code.
+
+Thanks @kgutwin and @diesieben07!
+
+#### Simplify type checks for non-required unions
+
+## 0.17.0 (2023-12-31)
+
+### Breaking Changes
+
+#### Removed query parameter nullable/required special case
+
+In previous versions, setting _either_ `nullable: true` or `required: false` on a query parameter would act like both were set, resulting in a type signature like `Union[None, Unset, YourType]`. This special case has been removed, query parameters will now act like all other types of parameters.
+
+#### Renamed body types and parameters
+
+PR #900 addresses #822.
+
+Where previously there would be one body parameter per supported content type, now there is a single `body` parameter which takes a union of all the possible inputs. This correctly models the fact that only one body can be sent (and ever would be sent) in a request.
+
+For example, when calling a generated endpoint, code which used to look like this:
+
+```python
+post_body_multipart.sync_detailed(
+    client=client,
+    multipart_data=PostBodyMultipartMultipartData(),
+)
+```
+
+Will now look like this:
+
+```python
+post_body_multipart.sync_detailed(
+    client=client,
+    body=PostBodyMultipartBody(),
+)
+```
+
+Note that both the input parameter name _and_ the class name have changed. This should result in simpler code when there is only a single body type and now produces correct code when there are multiple body types.
+
+### Features
+
+#### OpenAPI 3.1 support
+
+The generator will now attempt to generate code for OpenAPI documents with versions 3.1.x (previously, it would exit immediately on seeing a version other than 3.0.x). The following specific OpenAPI 3.1 features are now supported:
+
+- `null` as a type
+- Arrays of types (e.g., `type: [string, null]`)
+- `const` (defines `Literal` types)
+
+The generator does not currently validate that the OpenAPI document is valid for a specific version of OpenAPI, so it may be possible to generate code for documents that include both removed 3.0 syntax (e.g., `nullable`) and new 3.1 syntax (e.g., `null` as a type).
+
+Thanks to everyone who helped make this possible with discussions and testing, including:
+
+- @frco9
+- @vogre
+- @naddeoa
+- @staticdev
+- @philsturgeon
+- @johnthagen
+
+#### Support multiple possible `requestBody`
+
+PR #900 addresses #822.
+
+It is now possible in some circumstances to generate valid code for OpenAPI documents which have multiple possible `requestBody` values. Previously, invalid code could have been generated with no warning (only one body could actually be sent).
+
+Only one content type per "category" is currently supported at a time. The categories are:
+
+- JSON, like `application/json`
+- Binary data, like `application/octet-stream`
+- Encoded form data, like `application/x-www-form-urlencoded`
+- Files, like `multipart/form-data`
+
+### Fixes
+
+#### Always use correct content type for requests
+
+In previous versions, a request body that was similar to a known content type would use that content type in the request. For example `application/json` would be used for `application/vnd.api+json`. This was incorrect and could result in invalid requests being sent.
+
+Now, the content type defined in the OpenAPI document will always be used.
+
+## 0.16.1 (2023-12-23)
+
+### Features
+
+#### Support httpx 0.26 (#913)
+
+## 0.16.0 (2023-12-07)
+
+### Breaking Changes
+
+#### Switch from Black to Ruff for formatting
+
+`black` is no longer a runtime dependency, so if you have them set in custom `post_hooks` in a config file, you'll need to make sure they're being installed manually. [`ruff`](https://docs.astral.sh/ruff) is now installed and used by default instead.
+
+#### Use Ruff instead of isort + autoflake at runtime
+
+`isort` and `autoflake` are no longer runtime dependencies, so if you have them set in custom `post_hooks` in a config file, you'll need to make sure they're being installed manually. [`ruff`](https://docs.astral.sh/ruff) is now installed and used by default instead.
+
+### Features
+
+#### Support all `text/*` content types in responses
+
+Within an API response, any content type which starts with `text/` will now be treated the same as `text/html` already was—they will return the `response.text` attribute from the [httpx Response](https://www.python-httpx.org/api/#response).
+
+Thanks to @fdintino for the initial implementation, and thanks for the discussions from @kairntech, @rubenfiszel, and @antoneladestito.
+
+Closes #797 and #821.
+
+#### Support `application/octet-stream` request bodies
+
+Endpoints that accept `application/octet-stream` request bodies are now supported using the same `File` type as octet-stream responses.
+
+Thanks to @kgutwin for the implementation and @rtaycher for the discussion!
+
+PR #899 closes #588
+
+### Fixes
+
+#### Remove useless `pass` statements from generated code
+
 ## 0.15.2 (2023-09-16)
 
 ### Features

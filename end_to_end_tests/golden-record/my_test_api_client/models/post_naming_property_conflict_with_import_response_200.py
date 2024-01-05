@@ -22,6 +22,7 @@ class PostNamingPropertyConflictWithImportResponse200:
 
     def to_dict(self) -> Dict[str, Any]:
         field = self.field
+
         define = self.define
 
         field_dict: Dict[str, Any] = {}

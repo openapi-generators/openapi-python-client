@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import ClassVar, NamedTuple
+from typing import Any, ClassVar, NamedTuple
 
 from attrs import define, evolve
 
@@ -9,14 +9,19 @@ from ... import Config, utils
 from ... import schema as oai
 from ..errors import ParseError, PropertyError
 from .enum_property import EnumProperty
-from .property import Property
+from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
 @define
-class ModelProperty(Property):
+class ModelProperty(PropertyProtocol):
     """A property which refers to another Schema"""
 
+    name: str
+    required: bool
+    default: Value | None
+    python_name: utils.PythonIdentifier
+    example: str | None
     class_info: Class
     data: oai.Schema
     description: str
@@ -31,6 +36,95 @@ class ModelProperty(Property):
     template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
     is_multipart_body: bool = False
+
+    @classmethod
+    def build(
+        cls,
+        *,
+        data: oai.Schema,
+        name: str,
+        schemas: Schemas,
+        required: bool,
+        parent_name: str | None,
+        config: Config,
+        process_properties: bool,
+        roots: set[ReferencePath | utils.ClassName],
+    ) -> tuple[ModelProperty | PropertyError, Schemas]:
+        """
+        A single ModelProperty from its OAI data
+
+        Args:
+            data: Data of a single Schema
+            name: Name by which the schema is referenced, such as a model name.
+                Used to infer the type name if a `title` property is not available.
+            schemas: Existing Schemas which have already been processed (to check name conflicts)
+            required: Whether or not this property is required by the parent (affects typing)
+            parent_name: The name of the property that this property is inside of (affects class naming)
+            config: Config data for this run of the generator, used to modifying names
+            roots: Set of strings that identify schema objects on which the new ModelProperty will depend
+            process_properties: Determines whether the new ModelProperty will be initialized with property data
+        """
+        if not config.use_path_prefixes_for_title_model_names and data.title:
+            class_string = data.title
+        else:
+            title = data.title or name
+            if parent_name:
+                class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(title)}"
+            else:
+                class_string = title
+        class_info = Class.from_string(string=class_string, config=config)
+        model_roots = {*roots, class_info.name}
+        required_properties: list[Property] | None = None
+        optional_properties: list[Property] | None = None
+        relative_imports: set[str] | None = None
+        lazy_imports: set[str] | None = None
+        additional_properties: bool | Property | None = None
+        if process_properties:
+            data_or_err, schemas = _process_property_data(
+                data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots
+            )
+            if isinstance(data_or_err, PropertyError):
+                return data_or_err, schemas
+            property_data, additional_properties = data_or_err
+            required_properties = property_data.required_props
+            optional_properties = property_data.optional_props
+            relative_imports = property_data.relative_imports
+            lazy_imports = property_data.lazy_imports
+            for root in roots:
+                if isinstance(root, utils.ClassName):
+                    continue
+                schemas.add_dependencies(root, {class_info.name})
+
+        prop = ModelProperty(
+            class_info=class_info,
+            data=data,
+            roots=model_roots,
+            required_properties=required_properties,
+            optional_properties=optional_properties,
+            relative_imports=relative_imports,
+            lazy_imports=lazy_imports,
+            additional_properties=additional_properties,
+            description=data.description or "",
+            default=None,
+            required=required,
+            name=name,
+            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            example=data.example,
+        )
+        if class_info.name in schemas.classes_by_name:
+            error = PropertyError(
+                data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"'
+            )
+            return error, schemas
+
+        schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
+        return prop, schemas
+
+    @classmethod
+    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+        if value is not None:
+            return PropertyError(detail="ModelProperty cannot have a default value")  # pragma: no cover
+        return None
 
     def __attrs_post_init__(self) -> None:
         if self.relative_imports:
@@ -91,6 +185,7 @@ class ModelProperty(Property):
         no_optional: bool = False,
         json: bool = False,
         *,
+        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -102,6 +197,8 @@ class ModelProperty(Property):
         """
         if json:
             type_string = self.get_base_json_type_string()
+        elif multipart:
+            type_string = "Tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string()
 
@@ -109,14 +206,12 @@ class ModelProperty(Property):
             if type_string == self.class_info.name:
                 type_string = f"'{type_string}'"
 
-        if no_optional or (self.required and not self.nullable):
+        if no_optional or self.required:
             return type_string
-        if self.required and self.nullable:
-            return f"Optional[{type_string}]"
-        if not self.required and self.nullable:
-            return f"Union[Unset, None, {type_string}]"
-
         return f"Union[Unset, {type_string}]"
+
+
+from .property import Property  # noqa: E402
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -151,21 +246,20 @@ def _enum_subset(first: Property, second: Property) -> EnumProperty | None:
 
 
 def _merge_properties(first: Property, second: Property) -> Property | PropertyError:
-    nullable = first.nullable and second.nullable
     required = first.required or second.required
 
     err = None
 
     if first.__class__ == second.__class__:
-        first = evolve(first, nullable=nullable, required=required)
-        second = evolve(second, nullable=nullable, required=required)
+        first = evolve(first, required=required)
+        second = evolve(second, required=required)
         if first == second:
             return first
         err = PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
 
     enum_subset = _enum_subset(first, second)
     if enum_subset is not None:
-        return evolve(enum_subset, nullable=nullable, required=required)
+        return evolve(enum_subset, required=required)
 
     return err or PropertyError(
         header="Cannot merge properties",
@@ -246,7 +340,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
             config=config,
             roots=roots,
         )
-        if isinstance(prop_or_error, Property):
+        if not isinstance(prop_or_error, PropertyError):
             prop_or_error = _add_if_no_conflict(prop_or_error)
         if isinstance(prop_or_error, PropertyError):
             return prop_or_error
@@ -254,7 +348,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     required_properties = []
     optional_properties = []
     for prop in properties.values():
-        if prop.required and not prop.nullable:
+        if prop.required:
             required_properties.append(prop)
         else:
             optional_properties.append(prop)
@@ -325,11 +419,13 @@ def _process_property_data(
         config=config,
         roots=roots,
     )
-    if isinstance(additional_properties, Property):
+    if isinstance(additional_properties, PropertyError):
+        return additional_properties, schemas
+    elif isinstance(additional_properties, bool):
+        pass
+    else:
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
         property_data.lazy_imports.update(additional_properties.get_lazy_imports(prefix=".."))
-    elif isinstance(additional_properties, PropertyError):
-        return additional_properties, schemas
 
     return (property_data, additional_properties), schemas
 
@@ -361,84 +457,3 @@ def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config
     model_prop.set_lazy_imports(property_data.lazy_imports)
     object.__setattr__(model_prop, "additional_properties", additional_properties)
     return schemas
-
-
-def build_model_property(
-    *,
-    data: oai.Schema,
-    name: str,
-    schemas: Schemas,
-    required: bool,
-    parent_name: str | None,
-    config: Config,
-    process_properties: bool,
-    roots: set[ReferencePath | utils.ClassName],
-) -> tuple[ModelProperty | PropertyError, Schemas]:
-    """
-    A single ModelProperty from its OAI data
-
-    Args:
-        data: Data of a single Schema
-        name: Name by which the schema is referenced, such as a model name.
-            Used to infer the type name if a `title` property is not available.
-        schemas: Existing Schemas which have already been processed (to check name conflicts)
-        required: Whether or not this property is required by the parent (affects typing)
-        parent_name: The name of the property that this property is inside of (affects class naming)
-        config: Config data for this run of the generator, used to modifying names
-        roots: Set of strings that identify schema objects on which the new ModelProperty will depend
-        process_properties: Determines whether the new ModelProperty will be initialized with property data
-    """
-    if not config.use_path_prefixes_for_title_model_names and data.title:
-        class_string = data.title
-    else:
-        title = data.title or name
-        if parent_name:
-            class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(title)}"
-        else:
-            class_string = title
-    class_info = Class.from_string(string=class_string, config=config)
-    model_roots = {*roots, class_info.name}
-    required_properties: list[Property] | None = None
-    optional_properties: list[Property] | None = None
-    relative_imports: set[str] | None = None
-    lazy_imports: set[str] | None = None
-    additional_properties: bool | Property | None = None
-    if process_properties:
-        data_or_err, schemas = _process_property_data(
-            data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots
-        )
-        if isinstance(data_or_err, PropertyError):
-            return data_or_err, schemas
-        property_data, additional_properties = data_or_err
-        required_properties = property_data.required_props
-        optional_properties = property_data.optional_props
-        relative_imports = property_data.relative_imports
-        lazy_imports = property_data.lazy_imports
-        for root in roots:
-            if isinstance(root, utils.ClassName):
-                continue
-            schemas.add_dependencies(root, {class_info.name})
-
-    prop = ModelProperty(
-        class_info=class_info,
-        data=data,
-        roots=model_roots,
-        required_properties=required_properties,
-        optional_properties=optional_properties,
-        relative_imports=relative_imports,
-        lazy_imports=lazy_imports,
-        additional_properties=additional_properties,
-        description=data.description or "",
-        default=None,
-        nullable=data.nullable,
-        required=required,
-        name=name,
-        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
-        example=data.example,
-    )
-    if class_info.name in schemas.classes_by_name:
-        error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')
-        return error, schemas
-
-    schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
-    return prop, schemas

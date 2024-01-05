@@ -26,7 +26,6 @@ class AnArrayWithARecursiveRefInItemsObjectItem:
                 componentsschemas_an_array_with_a_recursive_ref_in_items_object_item = (
                     componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data.to_dict()
                 )
-
                 recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
 
         field_dict: Dict[str, Any] = {}

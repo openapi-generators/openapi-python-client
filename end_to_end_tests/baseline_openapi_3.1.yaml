@@ -1,0 +1,2616 @@
+openapi: "3.1.0"
+info:
+  title: "My Test API"
+  description: "An API for testing openapi-python-client"
+  version: "0.1.0"
+"paths": {
+  "/bodies/multiple": {
+    "post": {
+      "description": "Test multiple bodies",
+      "tags": [
+        "bodies"
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "application/octet-stream": {
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
+  "/bodies/json-like": {
+    "post": {
+      "tags": [ "bodies" ],
+      "description": "A content type that works like json but isn't application/json",
+      "operationId": "json-like",
+      "requestBody": {
+        "content": {
+          "application/vnd+json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
+  "/tests/": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Get List",
+      "description": "Get a list of things ",
+      "operationId": "getUserList",
+      "parameters": [
+        {
+          "required": true,
+          "schema": {
+            "title": "An Enum Value",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnEnum"
+            }
+          },
+          "name": "an_enum_value",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "An Enum Value With Null And String Values",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnEnumWithNull"
+            }
+          },
+          "name": "an_enum_value_with_null",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "An Enum Value With Only Null Values",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnEnumWithOnlyNull"
+            }
+          },
+          "name": "an_enum_value_with_only_null",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Some Date",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "name": "some_date",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Response Get List Tests  Get",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AModel"
+                }
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        },
+        "423": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/basic_lists/strings": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Get Basic List Of Strings",
+      "description": "Get a list of strings ",
+      "operationId": "getBasicListOfStrings",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Response Get Basic List Of Strings Tests Basic Lists Strings Get",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/basic_lists/integers": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Get Basic List Of Integers",
+      "description": "Get a list of integers ",
+      "operationId": "getBasicListOfIntegers",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Response Get Basic List Of Integers Tests Basic Lists Integers Get",
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/basic_lists/floats": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Get Basic List Of Floats",
+      "description": "Get a list of floats ",
+      "operationId": "getBasicListOfFloats",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Response Get Basic List Of Floats Tests Basic Lists Floats Get",
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/basic_lists/booleans": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Get Basic List Of Booleans",
+      "description": "Get a list of booleans ",
+      "operationId": "getBasicListOfBooleans",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Response Get Basic List Of Booleans Tests Basic Lists Booleans Get",
+                "type": "array",
+                "items": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/post_form_data": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Post form data",
+      "description": "Post form data",
+      "operationId": "post_form_data",
+      "requestBody": {
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "$ref": "#/components/schemas/AFormData"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/post_form_data_inline": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Post form data (inline schema)",
+      "description": "Post form data (inline schema)",
+      "operationId": "post_form_data_inline",
+      "requestBody": {
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "an_optional_field": {
+                  "type": "string"
+                },
+                "a_required_field": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "a_required_field"
+              ]
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/upload": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Upload File",
+      "description": "Upload a file ",
+      "operationId": "upload_file_tests_upload_post",
+      "parameters": [ ],
+      "requestBody": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Body_upload_file_tests_upload_post"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/upload/multiple": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Upload multiple files",
+      "description": "Upload several files in the same request",
+      "operationId": "upload_multiple_files_tests_upload_post",
+      "parameters": [ ],
+      "requestBody": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/json_body": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Json Body",
+      "description": "Try sending a JSON body ",
+      "operationId": "json_body_tests_json_body_post",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AModel"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/json_body/string": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Json Body Which is String",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "success",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/defaults": {
+    "post": {
+      "tags": [
+        "defaults"
+      ],
+      "summary": "Defaults",
+      "operationId": "defaults_tests_defaults_post",
+      "parameters": [
+        {
+          "required": true,
+          "schema": {
+            "title": "String Prop",
+            "type": "string",
+            "default": "the default string"
+          },
+          "name": "string_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "String with num default",
+            "type": "string",
+            "default": 1
+          },
+          "name": "string with num",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Date Prop",
+            "type": "string",
+            "format": "date",
+            "default": "1010-10-10"
+          },
+          "name": "date_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Float Prop",
+            "type": "number",
+            "default": 3.14
+          },
+          "name": "float_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Int Prop",
+            "type": "integer",
+            "default": 7
+          },
+          "name": "int_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Boolean Prop",
+            "type": "boolean",
+            "default": false
+          },
+          "name": "boolean_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "List Prop",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnEnum"
+            },
+            "default": [
+              "FIRST_VALUE",
+              "SECOND_VALUE"
+            ]
+          },
+          "name": "list_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Union Prop",
+            "type": [
+              "number",
+              "string"
+            ],
+            "default": "not a float"
+          },
+          "name": "union_prop",
+          "in": "query"
+        },
+        {
+          "required": false,
+          "schema": {
+            "title": "Union Prop With Ref",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "$ref": "#/components/schemas/AnEnum"
+              }
+            ],
+            "default": 0.6
+          },
+          "name": "union_prop_with_ref",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/AnEnum"
+          },
+          "name": "enum_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ModelWithUnionProperty"
+          },
+          "name": "model_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ModelWithUnionProperty"
+          },
+          "name": "required_model_prop",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/octet_stream": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Octet Stream",
+      "operationId": "octet_stream_tests_octet_stream_get",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Binary (octet stream) request body",
+      "operationId": "octet_stream_tests_octet_stream_post",
+      "requestBody": {
+        "content": {
+          "application/octet-stream": {
+            "schema": {
+              "description": "A file to upload",
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "success",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/no_response": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "No Response",
+      "operationId": "no_response_tests_no_response_get",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/unsupported_content": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Unsupported Content",
+      "operationId": "unsupported_content_tests_unsupported_content_get",
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            },
+            "not_real/content-type": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/enum/int": {
+    "post": {
+      "tags": [
+        "enums"
+      ],
+      "summary": "Int Enum",
+      "operationId": "int_enum_tests_int_enum_post",
+      "parameters": [
+        {
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/AnIntEnum"
+          },
+          "name": "int_enum",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/enum/bool": {
+    "post": {
+      "tags": [
+        "enums"
+      ],
+      "summary": "Bool Enum",
+      "operationId": "bool_enum_tests_bool_enum_post",
+      "parameters": [
+        {
+          "required": true,
+          "schema": {
+            "type": "boolean",
+            "enum": [
+              true,
+              false
+            ]
+          },
+          "name": "bool_enum",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/inline_objects": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Test Inline Objects",
+      "operationId": "test_inline_objects",
+      "requestBody": {
+        "description": "An inline body object",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "a_property": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Inline object response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a_property": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/responses/unions/simple_before_complex": {
+    "post": {
+      "tags": [
+        "responses"
+      ],
+      "description": "Regression test for #603",
+      "responses": {
+        "200": {
+          "description": "A union with simple types before complex ones.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "a"
+                ],
+                "properties": {
+                  "a": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/responses/text": {
+    "post": {
+      "tags": [
+        "responses"
+      ],
+      "summary": "Text Response",
+      "operationId": "text_response",
+      "responses": {
+        "200": {
+          "description": "Text response",
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/auth/token_with_cookie": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "TOKEN_WITH_COOKIE",
+      "description": "Test optional cookie parameters",
+      "operationId": "token_with_cookie_auth_token_with_cookie_get",
+      "parameters": [
+        {
+          "required": true,
+          "schema": {
+            "title": "Token",
+            "type": "string"
+          },
+          "name": "MyToken",
+          "in": "cookie"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized"
+        }
+      }
+    }
+  },
+  "/common_parameters": {
+    "parameters": [
+      {
+        "schema": {
+          "type": "string"
+        },
+        "name": "common",
+        "in": "query"
+      }
+    ],
+    "get": {
+      "responses": {
+        "200": {
+          "description": "Success"
+        }
+      }
+    },
+    "post": {
+      "responses": {
+        "200": {
+          "description": "Success"
+        }
+      }
+    }
+  },
+  "/common_parameters_overriding/{param}": {
+    "get": {
+      "description": "Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code",
+      "tags": [
+        "parameters"
+      ],
+      "parameters": [
+        {
+          "name": "param",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "description": "A parameter with the same name as another.",
+            "example": "an example string",
+            "type": "string",
+            "default": "overridden_in_GET"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    },
+    "delete": {
+      "tags": [
+        "parameters"
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    },
+    "parameters": [
+      {
+        "name": "param",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "param",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  "/same-name-multiple-locations/{param}": {
+    "description": "Test that if you have a property of the same name in multiple locations, it produces valid code",
+    "get": {
+      "tags": [
+        "parameters"
+      ],
+      "parameters": [
+        {
+          "name": "param",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "param",
+          "in": "header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "param",
+          "in": "cookie",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "param",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    }
+  },
+  "/tag_with_number": {
+    "get": {
+      "tags": [
+        "1"
+      ],
+      "responses": {
+        "200": {
+          "description": "Success"
+        }
+      }
+    }
+  },
+  "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}": {
+    "description": "Test that multiple path parameters are ordered by appearance in path",
+    "get": {
+      "tags": [
+        "parameters"
+      ],
+      "operationId": "multiple_path_parameters",
+      "parameters": [
+        {
+          "name": "param1",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "param2",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Success"
+        }
+      }
+    },
+    "parameters": [
+      {
+        "name": "param4",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "param3",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ]
+  },
+  "/location/query/optionality": {
+    "description": "Test what happens with various combinations of required and nullable in query parameters.",
+    "get": {
+      "tags": [
+        "location"
+      ],
+      "parameters": [
+        {
+          "name": "not_null_required",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "in": "query"
+        },
+        {
+          "name": "null_required",
+          "required": true,
+          "schema": {
+            type: [ "string", "null" ],
+            format: "date-time",
+          },
+          "in": "query"
+        },
+        {
+          "name": "null_not_required",
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "in": "query"
+        },
+        {
+          "name": "not_null_not_required",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    }
+  },
+  "/location/header/types": {
+    "description": "Test the valid types to send in headers.",
+    "get": {
+      "tags": [
+        "location"
+      ],
+      "parameters": [
+        {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "Boolean-Header",
+          "in": "header"
+        },
+        {
+          "required": false,
+          "schema": {
+            "type": "string"
+          },
+          "name": "String-Header",
+          "in": "header"
+        },
+        {
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "name": "Number-Header",
+          "in": "header"
+        },
+        {
+          "required": false,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "Integer-Header",
+          "in": "header"
+        },
+        {
+          "in": "header",
+          "name": "Int-Enum-Header",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          }
+        },
+        {
+          "in": "header",
+          "name": "String-Enum-Header",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "one",
+              "two",
+              "three"
+            ]
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    }
+  },
+  "/naming/keywords": {
+    "description": "Ensure that Python keywords are renamed properly.",
+    "get": {
+      "tags": [
+        "true"
+      ],
+      "operationId": "false",
+      "parameters": [
+        {
+          "name": "import",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    }
+  },
+  "/naming/reserved-parameters": {
+    "description": "Ensure that parameters can't be named things that the code generator needs as variables",
+    "get": {
+      "operationId": "reserved-parameters",
+      "parameters": [
+        {
+          "name": "client",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "url",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": ""
+        }
+      }
+    }
+  },
+  "/naming/property-conflict-with-import": {
+    "description": "Ensure that property names don't conflict with imports",
+    "post": {
+      "tags": [
+        "naming"
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Field": {
+                  "type": "string",
+                  "description": "A python_name of field should not interfere with attrs field"
+                },
+                "Define": {
+                  "type": "string",
+                  "description": "A python_name of define should not interfere with attrs define"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Response that contains conflicting properties",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Field": {
+                    "type": "string",
+                    "description": "A python_name of field should not interfere with attrs field"
+                  },
+                  "Define": {
+                    "type": "string",
+                    "description": "A python_name of define should not interfere with attrs define"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/parameter-references/{path_param}": {
+    "get": {
+      "tags": [
+        "parameter-references"
+      ],
+      "summary": "Test different types of parameter references",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/string-param"
+        },
+        {
+          "$ref": "#/components/parameters/integer-param"
+        },
+        {
+          "$ref": "#/components/parameters/header-param"
+        },
+        {
+          "$ref": "#/components/parameters/cookie-param"
+        },
+        {
+          "$ref": "#/components/parameters/path-param"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful response"
+        }
+      }
+    }
+  },
+  "/tests/callback": {
+    "post": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Path with callback",
+      "description": "Try sending a request related to a callback",
+      "operationId": "callback_test",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AModel"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": { }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/yang-data+json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "callbacks": {
+        "event": {
+          "callback": {
+            "post": {
+              "responses": {
+                "200": {
+                  "description": "Success"
+                },
+                "503": {
+                  "description": "Unavailable"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/tests/description-with-backslash": {
+    "get": {
+      "tags": [
+        "tests"
+      ],
+      "summary": "Test description with \\",
+      "description": "Test description with \\",
+      "operationId": "description_with_backslash",
+      "responses": {
+        "200": {
+          "description": "Successful response"
+        }
+      }
+    }
+  }
+}
+"components": {
+  "schemas": {
+    "AFormData": {
+      "type": "object",
+      "properties": {
+        "an_optional_field": {
+          "type": "string"
+        },
+        "an_required_field": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "an_required_field"
+      ]
+    },
+    "AModel": {
+      "title": "AModel",
+      "required": [
+        "an_enum_value",
+        "an_allof_enum_with_overridden_default",
+        "aCamelDateTime",
+        "a_date",
+        "a_nullable_date",
+        "required_nullable",
+        "required_not_nullable",
+        "model",
+        "nullable_model",
+        "one_of_models",
+        "nullable_one_of_models"
+      ],
+      "type": "object",
+      "properties": {
+        "any_value": { },
+        "an_enum_value": {
+          "$ref": "#/components/schemas/AnEnum"
+        },
+        "an_allof_enum_with_overridden_default": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/AnAllOfEnum"
+            }
+          ],
+          "default": "overridden_default"
+        },
+        "an_optional_allof_enum": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/AnAllOfEnum"
+            }
+          ]
+        },
+        "nested_list_of_enums": {
+          "title": "Nested List Of Enums",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DifferentEnum"
+            }
+          },
+          "default": [ ]
+        },
+        "aCamelDateTime": {
+          "title": "Acameldatetime",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            }
+          ]
+        },
+        "a_date": {
+          "title": "A Date",
+          "type": "string",
+          "format": "date"
+        },
+        "a_nullable_date": {
+          "title": "A Nullable Date",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "a_not_required_date": {
+          "title": "A Nullable Date",
+          "type": "string",
+          "format": "date"
+        },
+        "1_leading_digit": {
+          "title": "Leading Digit",
+          "type": "string"
+        },
+        "_leading_underscore": {
+          "title": "Leading Underscore",
+          "type": "string"
+        },
+        "required_nullable": {
+          "title": "Required AND Nullable",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "required_not_nullable": {
+          "title": "Required NOT Nullable",
+          "type": "string"
+        },
+        "not_required_nullable": {
+          "title": "NOT Required AND nullable",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "not_required_not_nullable": {
+          "title": "NOT Required AND NOT Nullable",
+          "type": "string"
+        },
+        "one_of_models": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/FreeFormModel"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            { }
+          ]
+        },
+        "nullable_one_of_models": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/FreeFormModel"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "not_required_one_of_models": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/FreeFormModel"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            }
+          ]
+        },
+        "not_required_nullable_one_of_models": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/FreeFormModel"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            }
+          ]
+        },
+        "nullable_model": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            }
+          ]
+        },
+        "not_required_model": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            }
+          ]
+        },
+        "not_required_nullable_model": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/components/schemas/ModelWithUnionProperty"
+            }
+          ]
+        }
+      },
+      "description": "A Model for testing all the ways custom objects can be used ",
+      "additionalProperties": false
+    },
+    "AnEnum": {
+      "title": "AnEnum",
+      "enum": [
+        "FIRST_VALUE",
+        "SECOND_VALUE"
+      ],
+      "description": "For testing Enums in all the ways they can be used "
+    },
+    "AnEnumWithNull": {
+      "title": "AnEnumWithNull",
+      "enum": [
+        "FIRST_VALUE",
+        "SECOND_VALUE",
+        null
+      ],
+      "description": "For testing Enums with mixed string / null values "
+    },
+    "AnEnumWithOnlyNull": {
+      "title": "AnEnumWithOnlyNull",
+      "enum": [
+        null
+      ],
+      "description": "For testing Enums with only null values "
+    },
+    "AnAllOfEnum": {
+      "title": "AnAllOfEnum",
+      "enum": [
+        "foo",
+        "bar",
+        "a_default",
+        "overridden_default"
+      ],
+      "default": "a_default"
+    },
+    "AnIntEnum": {
+      "title": "AnIntEnum",
+      "enum": [
+        -1,
+        1,
+        2
+      ],
+      "type": "integer",
+      "description": "An enumeration."
+    },
+    "Body_upload_file_tests_upload_post": {
+      "title": "Body_upload_file_tests_upload_post",
+      "required": [
+        "some_file",
+        "some_object",
+        "some_nullable_object"
+      ],
+      "type": "object",
+      "properties": {
+        "some_file": {
+          "title": "Some File",
+          "type": "string",
+          "format": "binary"
+        },
+        "some_optional_file": {
+          "title": "Some Optional File",
+          "type": "string",
+          "format": "binary"
+        },
+        "some_string": {
+          "title": "Some String",
+          "type": "string",
+          "default": "some_default_string"
+        },
+        "a_datetime": {
+          "title": "A Datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "a_date": {
+          "title": "A Date",
+          "type": "string",
+          "format": "date"
+        },
+        "some_number": {
+          "title": "Some Number",
+          "type": "number"
+        },
+        "some_array": {
+          "title": "Some Array",
+          "type": [ "array", "null" ],
+          "items": {
+            "$ref": "#/components/schemas/AFormData"
+          }
+        },
+        "some_object": {
+          "title": "Some Object",
+          "type": "object",
+          "required": [
+            "num",
+            "text"
+          ],
+          "properties": {
+            "num": {
+              "type": "number"
+            },
+            "text": {
+              "type": "string"
+            }
+          }
+        },
+        "some_optional_object": {
+          "title": "Some Optional Object",
+          "type": "object",
+          "required": [
+            "foo"
+          ],
+          "properties": {
+            "foo": {
+              "type": "string"
+            }
+          }
+        },
+        "some_nullable_object": {
+          "title": "Some Nullable Object",
+          "type": [ "object", "null" ],
+          "properties": {
+            "bar": {
+              "type": "string"
+            }
+          }
+        },
+        "some_enum": {
+          "$ref": "#/components/schemas/DifferentEnum"
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "DifferentEnum": {
+      "title": "DifferentEnum",
+      "enum": [
+        "DIFFERENT",
+        "OTHER"
+      ],
+      "description": "An enumeration."
+    },
+    "HTTPValidationError": {
+      "title": "HTTPValidationError",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ValidationError": {
+      "title": "ValidationError",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "loc": {
+          "title": "Location",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModelWithUnionProperty": {
+      "title": "ModelWithUnionProperty",
+      "type": "object",
+      "properties": {
+        "a_property": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/AnEnum"
+            },
+            {
+              "$ref": "#/components/schemas/AnIntEnum"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModelWithUnionPropertyInlined": {
+      "title": "ModelWithUnionPropertyInlined",
+      "type": "object",
+      "properties": {
+        "fruit": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "apples": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "bananas": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "FreeFormModel": {
+      "title": "FreeFormModel",
+      "type": "object"
+    },
+    "ModelWithAdditionalPropertiesInlined": {
+      "type": "object",
+      "properties": {
+        "a_number": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "extra_props_prop": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": { }
+      }
+    },
+    "ModelWithPrimitiveAdditionalProperties": {
+      "title": "ModelWithPrimitiveAdditionalProperties",
+      "type": "object",
+      "properties": {
+        "a_date_holder": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "ModelWithAdditionalPropertiesRefed": {
+      "title": "ModelWithAdditionalPropertiesRefed",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/components/schemas/AnEnum"
+      }
+    },
+    "ModelWithAnyJsonProperties": {
+      "title": "ModelWithAnyJsonProperties",
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "ModelFromAllOf": {
+      "title": "ModelFromAllOf",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/AllOfSubModel"
+        },
+        {
+          "$ref": "#/components/schemas/AnotherAllOfSubModel"
+        }
+      ]
+    },
+    "AllOfSubModel": {
+      "title": "AllOfSubModel",
+      "type": "object",
+      "properties": {
+        "a_sub_property": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "type_enum": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        }
+      }
+    },
+    "AnotherAllOfSubModel": {
+      "title": "AnotherAllOfSubModel",
+      "type": "object",
+      "properties": {
+        "another_sub_property": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "submodel"
+          ]
+        },
+        "type_enum": {
+          "type": "integer",
+          "enum": [
+            0
+          ]
+        }
+      }
+    },
+    "AllOfHasPropertiesButNoType": {
+      "title": "AllOfHasPropertiesButNoType",
+      "properties": {
+        "a_sub_property": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "type_enum": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        }
+      }
+    },
+    "model_reference_doesnt_match": {
+      "title": "ModelName",
+      "type": "object"
+    },
+    "ModelWithPropertyRef": {
+      "type": "object",
+      "properties": {
+        "inner": {
+          "$ref": "#/components/schemas/model_reference_doesnt_match"
+        }
+      }
+    },
+    "AModelWithPropertiesReferenceThatAreNotObject": {
+      "type": "object",
+      "required": [
+        "enum_properties_ref",
+        "str_properties_ref",
+        "date_properties_ref",
+        "datetime_properties_ref",
+        "int32_properties_ref",
+        "int64_properties_ref",
+        "float_properties_ref",
+        "double_properties_ref",
+        "file_properties_ref",
+        "bytestream_properties_ref",
+        "enum_properties",
+        "str_properties",
+        "date_properties",
+        "datetime_properties",
+        "int32_properties",
+        "int64_properties",
+        "float_properties",
+        "double_properties",
+        "file_properties",
+        "bytestream_properties",
+        "enum_property_ref",
+        "str_property_ref",
+        "date_property_ref",
+        "datetime_property_ref",
+        "int32_property_ref",
+        "int64_property_ref",
+        "float_property_ref",
+        "double_property_ref",
+        "file_property_ref",
+        "bytestream_property_ref"
+      ],
+      "properties": {
+        "enum_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfEnum"
+        },
+        "str_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfString"
+        },
+        "date_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfDate"
+        },
+        "datetime_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfDateTime"
+        },
+        "int32_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfInt32"
+        },
+        "int64_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfInt64"
+        },
+        "float_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfFloat"
+        },
+        "double_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfDouble"
+        },
+        "file_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfFile"
+        },
+        "bytestream_properties_ref": {
+          "$ref": "#/components/schemas/AnOtherArrayOfByteStream"
+        },
+        "enum_properties": {
+          "$ref": "#/components/schemas/AnArrayOfEnum"
+        },
+        "str_properties": {
+          "$ref": "#/components/schemas/AnArrayOfString"
+        },
+        "date_properties": {
+          "$ref": "#/components/schemas/AnArrayOfDate"
+        },
+        "datetime_properties": {
+          "$ref": "#/components/schemas/AnArrayOfDateTime"
+        },
+        "int32_properties": {
+          "$ref": "#/components/schemas/AnArrayOfInt32"
+        },
+        "int64_properties": {
+          "$ref": "#/components/schemas/AnArrayOfInt64"
+        },
+        "float_properties": {
+          "$ref": "#/components/schemas/AnArrayOfFloat"
+        },
+        "double_properties": {
+          "$ref": "#/components/schemas/AnArrayOfDouble"
+        },
+        "file_properties": {
+          "$ref": "#/components/schemas/AnArrayOfFile"
+        },
+        "bytestream_properties": {
+          "$ref": "#/components/schemas/AnArrayOfByteStream"
+        },
+        "enum_property_ref": {
+          "$ref": "#/components/schemas/AnEnum"
+        },
+        "str_property_ref": {
+          "$ref": "#/components/schemas/AString"
+        },
+        "date_property_ref": {
+          "$ref": "#/components/schemas/ADate"
+        },
+        "datetime_property_ref": {
+          "$ref": "#/components/schemas/ADateTime"
+        },
+        "int32_property_ref": {
+          "$ref": "#/components/schemas/AnInt32"
+        },
+        "int64_property_ref": {
+          "$ref": "#/components/schemas/AnInt64"
+        },
+        "float_property_ref": {
+          "$ref": "#/components/schemas/AFloat"
+        },
+        "double_property_ref": {
+          "$ref": "#/components/schemas/ADouble"
+        },
+        "file_property_ref": {
+          "$ref": "#/components/schemas/AFile"
+        },
+        "bytestream_property_ref": {
+          "$ref": "#/components/schemas/AByteStream"
+        }
+      }
+    },
+    "ModelWithDateTimeProperty": {
+      "type": "object",
+      "properties": {
+        "datetime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "AnArrayOfEnum": {
+      "type": "array",
+      "items": {
+        "title": "AnEnum",
+        "enum": [
+          "FIRST_VALUE",
+          "SECOND_VALUE"
+        ],
+        "description": "For testing Enums in all the ways they can be used "
+      }
+    },
+    "AnOtherArrayOfEnum": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AnEnum"
+      }
+    },
+    "AnArrayOfString": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "AnOtherArrayOfString": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AString"
+      }
+    },
+    "AString": {
+      "type": "string",
+      "pattern": "^helloworld.*"
+    },
+    "AnArrayOfDate": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date"
+      }
+    },
+    "AnOtherArrayOfDate": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ADate"
+      }
+    },
+    "ADate": {
+      "type": "string",
+      "format": "date"
+    },
+    "AnArrayOfDateTime": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "AnOtherArrayOfDateTime": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ADateTime"
+      }
+    },
+    "ADateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "AnArrayOfInt32": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "format": "int32"
+      }
+    },
+    "AnOtherArrayOfInt32": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AnInt32"
+      }
+    },
+    "AnInt32": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "AnArrayOfInt64": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "format": "int64"
+      }
+    },
+    "AnOtherArrayOfInt64": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AnInt64"
+      }
+    },
+    "AnInt64": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "AnArrayOfFloat": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "format": "float"
+      }
+    },
+    "AnOtherArrayOfFloat": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AFloat"
+      }
+    },
+    "AFloat": {
+      "type": "number",
+      "format": "float"
+    },
+    "AnArrayOfDouble": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "format": "float"
+      }
+    },
+    "AnOtherArrayOfDouble": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ADouble"
+      }
+    },
+    "ADouble": {
+      "type": "number",
+      "format": "double"
+    },
+    "AnArrayOfFile": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "binary"
+      }
+    },
+    "AnOtherArrayOfFile": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AFile"
+      }
+    },
+    "AFile": {
+      "type": "string",
+      "format": "binary"
+    },
+    "AnArrayOfByteStream": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "byte"
+      }
+    },
+    "AnOtherArrayOfByteStream": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/AByteStream"
+      }
+    },
+    "AByteStream": {
+      "type": "string",
+      "format": "byte"
+    },
+    "import": {
+      "type": "object"
+    },
+    "None": {
+      "type": "object"
+    },
+    "model.reference.with.Periods": {
+      "type": "object",
+      "description": "A Model with periods in its reference"
+    },
+    "ModelWithRecursiveRef": {
+      "type": "object",
+      "properties": {
+        "recursive": {
+          "$ref": "#/components/schemas/ModelWithRecursiveRef"
+        }
+      }
+    },
+    "ModelWithCircularRefA": {
+      "type": "object",
+      "properties": {
+        "circular": {
+          "$ref": "#/components/schemas/ModelWithCircularRefB"
+        }
+      }
+    },
+    "ModelWithCircularRefB": {
+      "type": "object",
+      "properties": {
+        "circular": {
+          "$ref": "#/components/schemas/ModelWithCircularRefA"
+        }
+      }
+    },
+    "ModelWithRecursiveRefInAdditionalProperties": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/components/schemas/ModelWithRecursiveRefInAdditionalProperties"
+      }
+    },
+    "ModelWithCircularRefInAdditionalPropertiesA": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesB"
+      }
+    },
+    "ModelWithCircularRefInAdditionalPropertiesB": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/components/schemas/ModelWithCircularRefInAdditionalPropertiesA"
+      }
+    },
+    "AnArrayWithARecursiveRefInItemsObject": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "recursive": {
+            "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObject"
+          }
+        }
+      }
+    },
+    "AnArrayWithACircularRefInItemsObjectA": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectB"
+          }
+        }
+      }
+    },
+    "AnArrayWithACircularRefInItemsObjectB": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectA"
+          }
+        }
+      }
+    },
+    "AnArrayWithARecursiveRefInItemsObjectAdditionalProperties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AnArrayWithARecursiveRefInItemsObjectAdditionalProperties"
+        }
+      }
+    },
+    "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB"
+        }
+      }
+    },
+    "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesB": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AnArrayWithACircularRefInItemsObjectAdditionalPropertiesA"
+        }
+      }
+    },
+    "ModelWithBackslashInDescription": {
+      "type": "object",
+      "description": "Description with special character: \\"
+    }
+  },
+  "parameters": {
+    "integer-param": {
+      "name": "integer param",
+      "in": "query",
+      "required": false,
+      "style": "form",
+      "explode": true,
+      "schema": {
+        "type": "integer",
+        "default": 0
+      }
+    },
+    "string-param": {
+      "name": "string param",
+      "in": "query",
+      "required": false,
+      "style": "form",
+      "explode": true,
+      "schema": {
+        "type": "string"
+      }
+    },
+    "object-param": {
+      "name": "object param",
+      "in": "query",
+      "required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "number": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "header-param": {
+      "name": "header param",
+      "in": "header",
+      "required": false,
+      "schema": {
+        oneOf: [
+          type: "string",
+          type: "null",
+        ]
+      }
+    },
+    "cookie-param": {
+      "name": "cookie param",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+        "type": "string"
+      }
+    },
+    "path-param": {
+      "name": "path_param",
+      "in": "path",
+      "required": true,
+      "schema": {
+        "type": "string"
+      }
+    }
+  }
+}
+

@@ -2,18 +2,17 @@
 name = "my-test-api-client"
 version = "0.1.0"
 description = "A client library for accessing My Test API"
-
 authors = []
-
 readme = "README.md"
 packages = [
     {include = "my_test_api_client"},
 ]
 include = ["CHANGELOG.md", "my_test_api_client/py.typed"]
 
+
 [tool.poetry.dependencies]
 python = "^3.8"
-httpx = ">=0.20.0,<0.26.0"
+httpx = ">=0.20.0,<0.27.0"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.0"
 

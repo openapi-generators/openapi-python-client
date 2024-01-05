@@ -84,7 +84,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         enum_properties_ref = []
         for componentsschemas_an_other_array_of_enum_item_data in self.enum_properties_ref:
             componentsschemas_an_other_array_of_enum_item = componentsschemas_an_other_array_of_enum_item_data.value
-
             enum_properties_ref.append(componentsschemas_an_other_array_of_enum_item)
 
         str_properties_ref = self.str_properties_ref
@@ -101,7 +100,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
             componentsschemas_an_other_array_of_date_time_item = (
                 componentsschemas_an_other_array_of_date_time_item_data.isoformat()
             )
-
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
 
         int32_properties_ref = self.int32_properties_ref
@@ -125,7 +123,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         enum_properties = []
         for componentsschemas_an_array_of_enum_item_data in self.enum_properties:
             componentsschemas_an_array_of_enum_item = componentsschemas_an_array_of_enum_item_data.value
-
             enum_properties.append(componentsschemas_an_array_of_enum_item)
 
         str_properties = self.str_properties
@@ -138,7 +135,6 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         datetime_properties = []
         for componentsschemas_an_array_of_date_time_item_data in self.datetime_properties:
             componentsschemas_an_array_of_date_time_item = componentsschemas_an_array_of_date_time_item_data.isoformat()
-
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
 
         int32_properties = self.int32_properties
@@ -160,13 +156,19 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         enum_property_ref = self.enum_property_ref.value
 
         str_property_ref = self.str_property_ref
+
         date_property_ref = self.date_property_ref.isoformat()
+
         datetime_property_ref = self.datetime_property_ref.isoformat()
 
         int32_property_ref = self.int32_property_ref
+
         int64_property_ref = self.int64_property_ref
+
         float_property_ref = self.float_property_ref
+
         double_property_ref = self.double_property_ref
+
         file_property_ref = self.file_property_ref.to_tuple()
 
         bytestream_property_ref = self.bytestream_property_ref

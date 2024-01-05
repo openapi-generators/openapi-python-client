@@ -1,10 +1,10 @@
-{% macro construct(property, source, initial_value=None) %}
+{% macro construct(property, source) %}
 def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_string() }}:
-    {% if "None" in property.get_type_strings_in_union(json=True) %}
+    {% if "None" in property.get_type_strings_in_union(json=True, multipart=False) %}
     if data is None:
         return data
     {% endif %}
-    {% if "Unset" in property.get_type_strings_in_union(json=True) %}
+    {% if "Unset" in property.get_type_strings_in_union(json=True, multipart=False) %}
     if isinstance(data, Unset):
         return data
     {% endif %}
@@ -19,7 +19,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     try:
         if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
             raise TypeError()
-        {{ inner_template.construct(inner_property, "data", initial_value="UNSET") | indent(8) }}
+        {{ inner_template.construct(inner_property, "data") | indent(8) }}
         return {{ inner_property.python_name }}
     except: # noqa: E722
         pass
@@ -28,7 +28,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
         raise TypeError()
     {% endif %}
-    {{ inner_template.construct(inner_property, "data", initial_value="UNSET") | indent(4) }}
+    {{ inner_template.construct(inner_property, "data") | indent(4) }}
     return {{ inner_property.python_name }}
     {% endif %}
     {% endfor %}
@@ -41,23 +41,13 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
-{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) }}{% endif %}
+{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=not multipart, multipart=multipart) }}{% endif %}
 
 {% if not property.required %}
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
     {% set ns.has_if = true %}
 {% endif %}
-{% if property.nullable %}
-    {% if ns.has_if %}
-elif {{ source }} is None:
-    {% else %}
-if {{ source }} is None:
-        {% set ns.has_if = true %}
-    {% endif %}
-    {{ destination }} = None
-{% endif %}
-
 {% for inner_property in property.inner_properties %}
     {% import "property_templates/" + inner_property.template as inner_template %}
     {% if not inner_template.transform %}
@@ -79,8 +69,7 @@ else:
 {% if ns.contains_properties_without_transform and ns.contains_modified_properties %}
 else:
     {{ destination }} = {{ source }}
-{% elif ns.contains_properties_without_transform %}
+{%- elif ns.contains_properties_without_transform %}
 {{ destination }} = {{ source }}
-{% endif %}
-
+{%- endif %}
 {% endmacro %}

@@ -87,6 +87,7 @@ class {{ class_name }}:
 {% else %}
 {{ property.python_name }} = self.{{ property.python_name }}
 {% endif %}
+
 {% endfor %}
 
 field_dict: Dict[str, Any] = {}

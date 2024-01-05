@@ -12,7 +12,7 @@ from openapi_python_client.cli import app
 
 def regen_golden_record():
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi.json"
+    openapi_path = Path(__file__).parent / "baseline_openapi_3.0.json"
 
     gr_path = Path(__file__).parent / "golden-record"
     output_path = Path.cwd() / "my-test-api-client"
@@ -21,7 +21,9 @@ def regen_golden_record():
     shutil.rmtree(gr_path, ignore_errors=True)
     shutil.rmtree(output_path, ignore_errors=True)
 
-    result = runner.invoke(app, ["generate", f"--config={config_path}", f"--path={openapi_path}"])
+    result = runner.invoke(
+        app, ["generate", f"--config={config_path}", f"--path={openapi_path}"]
+    )
 
     if result.stdout:
         print(result.stdout)
@@ -30,9 +32,48 @@ def regen_golden_record():
     output_path.rename(gr_path)
 
 
+def regen_golden_record_3_1_features():
+    runner = CliRunner()
+    openapi_path = Path(__file__).parent / "3.1_specific.openapi.yaml"
+
+    gr_path = Path(__file__).parent / "test-3-1-golden-record"
+    output_path = Path.cwd() / "test-3-1-features-client"
+
+    shutil.rmtree(gr_path, ignore_errors=True)
+    shutil.rmtree(output_path, ignore_errors=True)
+
+    result = runner.invoke(app, ["generate", f"--path={openapi_path}"])
+
+    if result.stdout:
+        print(result.stdout)
+    if result.exception:
+        raise result.exception
+    output_path.rename(gr_path)
+
+
+def regen_metadata_snapshots():
+    runner = CliRunner()
+    openapi_path = Path(__file__).parent / "3.1_specific.openapi.yaml"
+    output_path = Path.cwd() / "test-3-1-features-client"
+    snapshots_dir = Path(__file__).parent / "metadata_snapshots"
+
+    for (meta, file, rename_to) in (("setup", "setup.py", "setup.py"), ("pdm", "pyproject.toml", "pdm.pyproject.toml"), ("poetry", "pyproject.toml", "poetry.pyproject.toml")):
+        shutil.rmtree(output_path, ignore_errors=True)
+        result = runner.invoke(app, ["generate", f"--path={openapi_path}", f"--meta={meta}"])
+
+        if result.stdout:
+            print(result.stdout)
+        if result.exception:
+            raise result.exception
+
+        (output_path / file).rename(snapshots_dir / rename_to)
+
+    shutil.rmtree(output_path, ignore_errors=True)
+
+
 def regen_custom_template_golden_record():
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi.json"
+    openapi_path = Path(__file__).parent / "baseline_openapi_3.0.json"
     tpl_dir = Path(__file__).parent / "test_custom_templates"
 
     gr_path = Path(__file__).parent / "golden-record"
@@ -45,7 +86,13 @@ def regen_custom_template_golden_record():
 
     os.chdir(str(output_path.absolute()))
     result = runner.invoke(
-        app, ["generate", f"--config={config_path}", f"--path={openapi_path}", f"--custom-template-path={tpl_dir}"]
+        app,
+        [
+            "generate",
+            f"--config={config_path}",
+            f"--path={openapi_path}",
+            f"--custom-template-path={tpl_dir}",
+        ],
     )
 
     if result.stdout:
@@ -76,4 +123,6 @@ def regen_custom_template_golden_record():
 
 if __name__ == "__main__":
     regen_golden_record()
+    regen_golden_record_3_1_features()
+    regen_metadata_snapshots()
     regen_custom_template_golden_record()

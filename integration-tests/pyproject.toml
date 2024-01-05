@@ -1,31 +1,29 @@
-[tool.poetry]
+[project]
 name = "integration-tests"
 version = "0.0.1"
 description = "A client library for accessing OpenAPI Test Server"
 authors = []
 readme = "README.md"
-packages = [
-    {include = "integration_tests"},
+dependencies = [
+    "httpx>=0.20.0,<0.27.0",
+    "attrs>=21.3.0",
+    "python-dateutil>=2.8.0",
 ]
-include = ["CHANGELOG.md", "open_api_test_server_client/py.typed"]
+requires-python = ">=3.8,<4.0"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-httpx = ">=0.15.4,<0.26.0"
-attrs = ">=21.3.0"
-python-dateutil = "^2.8.0"
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.0.0"
-mypy = "*"
-
-[tool.poetry.group.dev.dependencies]
-pytest-asyncio = "*"
+[tool.pdm]
+package-type = "library"
 
 [build-system]
-requires = ["poetry>=1.0"]
-build-backend = "poetry.masonry.api"
-
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+ 
 [tool.ruff]
 select = ["F", "I"]
 line-length = 120
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest",
+    "mypy",
+]

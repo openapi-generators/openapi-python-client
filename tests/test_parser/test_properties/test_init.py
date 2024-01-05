@@ -1,4 +1,3 @@
-from typing import Type
 from unittest.mock import MagicMock, call
 
 import attr
@@ -6,8 +5,14 @@ import pytest
 
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
-from openapi_python_client.parser.errors import ParameterError, PropertyError, ValidationError
-from openapi_python_client.parser.properties import BooleanProperty, FloatProperty, IntProperty, Property, Schemas
+from openapi_python_client.parser.errors import ParameterError, PropertyError
+from openapi_python_client.parser.properties import (
+    ListProperty,
+    Schemas,
+    StringProperty,
+    UnionProperty,
+)
+from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.properties"
 
@@ -17,16 +22,14 @@ class TestStringProperty:
         assert string_property_factory().is_base_type is True
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (True, False, "str"),
-            (True, True, "Optional[str]"),
-            (False, True, "Union[Unset, None, str]"),
-            (False, False, "Union[Unset, str]"),
+            (True, "str"),
+            (False, "Union[Unset, str]"),
         ),
     )
-    def test_get_type_string(self, string_property_factory, required, nullable, expected):
-        p = string_property_factory(required=required, nullable=nullable)
+    def test_get_type_string(self, string_property_factory, required, expected):
+        p = string_property_factory(required=required)
 
         assert p.get_type_string() == expected
 
@@ -36,17 +39,14 @@ class TestDateTimeProperty:
         assert date_time_property_factory().is_base_type is True
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_imports(self, date_time_property_factory, required, nullable):
-        p = date_time_property_factory(required=required, nullable=nullable)
+    def test_get_imports(self, date_time_property_factory, required):
+        p = date_time_property_factory(required=required)
 
         expected = {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -61,17 +61,14 @@ class TestDateProperty:
         assert date_property_factory().is_base_type is True
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_imports(self, date_property_factory, required, nullable):
-        p = date_property_factory(required=required, nullable=nullable)
+    def test_get_imports(self, date_property_factory, required):
+        p = date_property_factory(required=required)
 
         expected = {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -86,16 +83,13 @@ class TestFileProperty:
         assert file_property_factory().is_base_type is True
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_imports(self, file_property_factory, required, nullable):
-        p = file_property_factory(required=required, nullable=nullable)
+    def test_get_imports(self, file_property_factory, required):
+        p = file_property_factory(required=required)
 
         expected = {
             "from io import BytesIO",
             "from ...types import File, FileJsonType",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -150,33 +144,27 @@ class TestListProperty:
         assert p.get_lazy_imports(prefix="..") == {"from ..models.my_module import MyClass"}
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (True, False, "List[str]"),
-            (True, True, "Optional[List[str]]"),
-            (False, False, "Union[Unset, List[str]]"),
-            (False, True, "Union[Unset, None, List[str]]"),
+            (True, "List[str]"),
+            (False, "Union[Unset, List[str]]"),
         ),
     )
-    def test_get_type_string_base_inner(self, list_property_factory, required, nullable, expected):
-        p = list_property_factory(required=required, nullable=nullable)
+    def test_get_type_string_base_inner(self, list_property_factory, required, expected):
+        p = list_property_factory(required=required)
 
         assert p.get_type_string() == expected
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (True, False, "List['MyClass']"),
-            (True, True, "Optional[List['MyClass']]"),
-            (False, False, "Union[Unset, List['MyClass']]"),
-            (False, True, "Union[Unset, None, List['MyClass']]"),
+            (True, "List['MyClass']"),
+            (False, "Union[Unset, List['MyClass']]"),
         ),
     )
-    def test_get_type_string_model_inner(
-        self, list_property_factory, model_property_factory, required, nullable, expected
-    ):
+    def test_get_type_string_model_inner(self, list_property_factory, model_property_factory, required, expected):
         m = model_property_factory()
-        p = list_property_factory(required=required, nullable=nullable, inner_property=m)
+        p = list_property_factory(required=required, inner_property=m)
 
         assert p.get_type_string() == expected
 
@@ -204,18 +192,15 @@ class TestListProperty:
         assert p.get_base_type_string(quoted=quoted) == expected
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_type_imports(self, list_property_factory, date_time_property_factory, required, nullable):
+    def test_get_type_imports(self, list_property_factory, date_time_property_factory, required):
         inner_property = date_time_property_factory()
-        p = list_property_factory(inner_property=inner_property, required=required, nullable=nullable)
+        p = list_property_factory(inner_property=inner_property, required=required)
         expected = {
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
             "from typing import cast, List",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -239,24 +224,16 @@ class TestUnionProperty:
         assert p.get_lazy_imports(prefix="..") == {"from ..models.my_module import MyClass"}
 
     @pytest.mark.parametrize(
-        "nullable,required,no_optional,json,expected",
+        "required,no_optional,json,expected",
         [
-            (False, False, False, False, "Union[Unset, datetime.datetime, str]"),
-            (False, False, True, False, "Union[datetime.datetime, str]"),
-            (False, True, False, False, "Union[datetime.datetime, str]"),
-            (False, True, True, False, "Union[datetime.datetime, str]"),
-            (True, False, False, False, "Union[None, Unset, datetime.datetime, str]"),
-            (True, False, True, False, "Union[datetime.datetime, str]"),
-            (True, True, False, False, "Union[None, datetime.datetime, str]"),
-            (True, True, True, False, "Union[datetime.datetime, str]"),
-            (False, False, False, True, "Union[Unset, str]"),
-            (False, False, True, True, "str"),
-            (False, True, False, True, "str"),
-            (False, True, True, True, "str"),
-            (True, False, False, True, "Union[None, Unset, str]"),
-            (True, False, True, True, "str"),
-            (True, True, False, True, "Union[None, str]"),
-            (True, True, True, True, "str"),
+            (False, False, False, "Union[Unset, datetime.datetime, str]"),
+            (False, True, False, "Union[datetime.datetime, str]"),
+            (True, False, False, "Union[datetime.datetime, str]"),
+            (True, True, False, "Union[datetime.datetime, str]"),
+            (False, False, True, "Union[Unset, str]"),
+            (False, True, True, "str"),
+            (True, False, True, "str"),
+            (True, True, True, "str"),
         ],
     )
     def test_get_type_string(
@@ -264,7 +241,6 @@ class TestUnionProperty:
         union_property_factory,
         date_time_property_factory,
         string_property_factory,
-        nullable,
         required,
         no_optional,
         json,
@@ -272,7 +248,6 @@ class TestUnionProperty:
     ):
         p = union_property_factory(
             required=required,
-            nullable=nullable,
             inner_properties=[date_time_property_factory(), string_property_factory()],
         )
 
@@ -316,10 +291,10 @@ class TestUnionProperty:
         assert p.get_base_json_type_string() == "str"
 
     @pytest.mark.parametrize("required", (True, False))
-    @pytest.mark.parametrize("nullable", (True, False))
-    def test_get_type_imports(self, union_property_factory, date_time_property_factory, required, nullable):
+    def test_get_type_imports(self, union_property_factory, date_time_property_factory, required):
         p = union_property_factory(
-            inner_properties=[date_time_property_factory()], required=required, nullable=nullable
+            inner_properties=[date_time_property_factory()],
+            required=required,
         )
         expected = {
             "import datetime",
@@ -327,8 +302,6 @@ class TestUnionProperty:
             "from dateutil.parser import isoparse",
             "from typing import cast, Union",
         }
-        if nullable:
-            expected.add("from typing import Optional")
         if not required:
             expected |= {
                 "from typing import Union",
@@ -343,19 +316,17 @@ class TestEnumProperty:
         assert enum_property_factory().is_base_type is True
 
     @pytest.mark.parametrize(
-        "required, nullable, expected",
+        "required, expected",
         (
-            (False, False, "Union[Unset, {}]"),
-            (True, False, "{}"),
-            (False, True, "Union[Unset, None, {}]"),
-            (True, True, "Optional[{}]"),
+            (False, "Union[Unset, {}]"),
+            (True, "{}"),
         ),
     )
-    def test_get_type_string(self, mocker, enum_property_factory, required, nullable, expected):
+    def test_get_type_string(self, mocker, enum_property_factory, required, expected):
         fake_class = mocker.MagicMock()
         fake_class.name = "MyTestEnum"
 
-        p = enum_property_factory(class_info=fake_class, required=required, nullable=nullable)
+        p = enum_property_factory(class_info=fake_class, required=required)
 
         assert p.get_type_string() == expected.format(fake_class.name)
         assert p.get_type_string(no_optional=True) == fake_class.name
@@ -407,7 +378,7 @@ class TestPropertyFromData:
         from openapi_python_client.schema import Schema
 
         existing = enum_property_factory()
-        data = Schema(title="AnEnum", enum=["A", "B", "C"], nullable=False, default="B")
+        data = Schema(title="AnEnum", enum=["A", "B", "C"], default="B")
         name = "my_enum"
         required = True
 
@@ -431,12 +402,14 @@ class TestPropertyFromData:
             "ParentAnEnum": prop,
         }
 
-    def test_property_from_data_str_enum_with_null(self, enum_property_factory):
+    def test_property_from_data_str_enum_with_null(
+        self, enum_property_factory, union_property_factory, none_property_factory
+    ):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         existing = enum_property_factory()
-        data = Schema(title="AnEnum", enum=["A", "B", "C", None], nullable=False, default="B")
+        data = Schema(title="AnEnum", enum=["A", "B", "C", None], default="B")
         name = "my_enum"
         required = True
 
@@ -447,27 +420,30 @@ class TestPropertyFromData:
         )
 
         # None / null is removed from enum, and property is now nullable
-        assert prop == enum_property_factory(
-            name=name,
+        assert isinstance(prop, UnionProperty), "Enums with None should be converted to UnionProperties"
+        enum_prop = enum_property_factory(
+            name="my_enum_type_1",
             required=required,
-            nullable=True,
             values={"A": "A", "B": "B", "C": "C"},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
         )
-        assert prop.nullable is True
+        none_property = none_property_factory(name="my_enum_type_0", required=required)
+        assert prop == union_property_factory(
+            name=name, default="ParentAnEnum.B", inner_properties=[none_property, enum_prop]
+        )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
             "AnEnum": existing,
-            "ParentAnEnum": prop,
+            "ParentAnEnum": enum_prop,
         }
 
     def test_property_from_data_null_enum(self, enum_property_factory, none_property_factory):
         from openapi_python_client.parser.properties import Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
-        data = Schema(title="AnEnumWithOnlyNull", enum=[None], nullable=False, default=None)
+        data = Schema(title="AnEnumWithOnlyNull", enum=[None], default=None)
         name = "my_enum"
         required = True
 
@@ -477,7 +453,7 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
-        assert prop == none_property_factory(name="my_enum", required=required, nullable=False, default="None")
+        assert prop == none_property_factory(name="my_enum", required=required, default="None")
 
     def test_property_from_data_int_enum(self, enum_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -485,8 +461,7 @@ class TestPropertyFromData:
 
         name = "my_enum"
         required = True
-        nullable = False
-        data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], nullable=nullable, default=3)
+        data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], default=3)
 
         existing = enum_property_factory()
         schemas = Schemas(classes_by_name={"AnEnum": existing})
@@ -498,7 +473,6 @@ class TestPropertyFromData:
         assert prop == enum_property_factory(
             name=name,
             required=required,
-            nullable=nullable,
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=int,
@@ -586,7 +560,7 @@ class TestPropertyFromData:
         )
 
         assert schemas == new_schemas
-        assert prop == PropertyError(data=data, detail="x is an invalid default for enum MyEnum")
+        assert prop == PropertyError(data=data, detail="Value x is not valid for enum an_enum")
 
     def test_property_from_data_ref_model(self, model_property_factory):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -631,7 +605,7 @@ class TestPropertyFromData:
         assert schemas.dependencies == {}
 
     @pytest.mark.parametrize("references_exist", (True, False))
-    def test_property_from_data_ref(self, property_factory, references_exist):
+    def test_property_from_data_ref(self, any_property_factory, references_exist):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
         name = "new_name"
@@ -640,7 +614,7 @@ class TestPropertyFromData:
         data = oai.Reference.model_construct(ref=f"#{ref_path}")
         roots = {"new_root"}
 
-        existing_property = property_factory(name="old_name")
+        existing_property = any_property_factory(name="old_name")
         references = {ref_path: {"old_root"}} if references_exist else {}
         schemas = Schemas(classes_by_reference={ref_path: existing_property}, dependencies=references)
 
@@ -648,7 +622,7 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="", config=Config(), roots=roots
         )
 
-        assert prop == property_factory(name=name, required=required)
+        assert prop == any_property_factory(name=name, required=required)
         assert schemas == new_schemas
         assert schemas.dependencies == {ref_path: {*roots, *references.get(ref_path, set())}}
 
@@ -671,78 +645,17 @@ class TestPropertyFromData:
         assert prop == PropertyError(data=data, detail="bad stuff")
         assert schemas == new_schemas
 
-    @pytest.mark.parametrize(
-        "openapi_type,prop_type,python_type",
-        [
-            ("number", FloatProperty, float),
-            ("integer", IntProperty, int),
-            ("boolean", BooleanProperty, bool),
-        ],
-    )
-    def test_property_from_data_simple_types(self, openapi_type: str, prop_type: Type[Property], python_type):
+    def test_property_from_data_array(self):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        name = "test_prop"
+        name = "a_list_prop"
         required = True
-        description = "a description"
-        example = "an example"
-        data = oai.Schema.model_construct(type=openapi_type, default=1, description=description, example=example)
-        schemas = Schemas()
-
-        p, new_schemas = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-
-        assert p == prop_type(
-            name=name,
-            required=required,
-            default=python_type(data.default),
-            nullable=False,
-            python_name=name,
-            description=description,
-            example=example,
-        )
-        assert new_schemas == schemas
-
-        # Test nullable values
-        data.default = 0
-        data.nullable = True
-
-        p, _ = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-        assert p == prop_type(
-            name=name,
-            required=required,
-            default=python_type(data.default),
-            nullable=True,
-            python_name=name,
-            description=description,
-            example=example,
-        )
-
-        # Test bad default value
-        data.default = "a"
-        p, _ = property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-        assert python_type is bool or isinstance(p, PropertyError)
-
-    def test_property_from_data_array(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
         data = oai.Schema(
-            type="array",
-            items={"type": "number", "default": "0.0"},
+            type=DataType.ARRAY,
+            items=oai.Schema(type=DataType.STRING),
         )
-        build_list_property = mocker.patch(f"{MODULE_NAME}.build_list_property")
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
         schemas = Schemas()
-        config = MagicMock()
-        roots = {"root"}
-        process_properties = False
+        config = Config()
 
         response = property_from_data(
             name=name,
@@ -751,107 +664,68 @@ class TestPropertyFromData:
             schemas=schemas,
             parent_name="parent",
             config=config,
-            roots=roots,
-            process_properties=process_properties,
-        )
+        )[0]
 
-        assert response == build_list_property.return_value
-        build_list_property.assert_called_once_with(
-            data=data,
-            name=name,
-            required=required,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            process_properties=process_properties,
-            roots=roots,
-        )
+        assert isinstance(response, ListProperty)
+        assert isinstance(response.inner_property, StringProperty)
 
-    def test_property_from_data_object(self, mocker):
+    def test_property_from_data_union(self):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
+        name = "union_prop"
+        required = True
         data = oai.Schema(
-            type="object",
-        )
-        build_model_property = mocker.patch(f"{MODULE_NAME}.build_model_property")
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
-        schemas = Schemas()
-        config = MagicMock()
-        roots = {"root"}
-        process_properties = False
-
-        response = property_from_data(
-            name=name,
-            required=required,
-            data=data,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            process_properties=process_properties,
-            roots=roots,
-        )
-
-        assert response == build_model_property.return_value
-        build_model_property.assert_called_once_with(
-            data=data,
-            name=name,
-            required=required,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            process_properties=process_properties,
-            roots=roots,
-        )
-
-    def test_property_from_data_union(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Schema.model_construct(
-            anyOf=[{"type": "number", "default": "0.0"}],
+            anyOf=[oai.Schema(type=DataType.NUMBER)],
             oneOf=[
-                {"type": "integer", "default": "0"},
+                oai.Schema(type=DataType.INTEGER),
             ],
         )
-        build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
         schemas = Schemas()
-        config = MagicMock()
+        config = Config()
 
         response = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
-        )
+        )[0]
 
-        assert response == build_union_property.return_value
-        build_union_property.assert_called_once_with(
-            data=data, name=name, required=required, schemas=schemas, parent_name="parent", config=config
-        )
+        assert isinstance(response, UnionProperty)
+        assert len(response.inner_properties) == 2  # noqa: PLR2004
 
-    def test_property_from_data_union_of_one_element(self, mocker, model_property_factory):
+    def test_property_from_data_list_of_types(self):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        name = "union_prop"
+        required = True
+        data = oai.Schema(
+            type=[DataType.NUMBER, DataType.NULL],
+        )
+        schemas = Schemas()
+        config = Config()
+
+        response = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+        )[0]
+
+        assert isinstance(response, UnionProperty)
+        assert len(response.inner_properties) == 2  # noqa: PLR2004
+
+    def test_property_from_data_union_of_one_element(self, model_property_factory):
         from openapi_python_client.parser.properties import Schemas, property_from_data
 
         name = "new_name"
         required = False
         class_name = "MyModel"
-        nullable = True
         existing_model = model_property_factory()
         schemas = Schemas(classes_by_reference={f"/{class_name}": existing_model})
 
         data = oai.Schema.model_construct(
             allOf=[oai.Reference.model_construct(ref=f"#/{class_name}")],
-            nullable=nullable,
         )
-        build_union_property = mocker.patch(f"{MODULE_NAME}.build_union_property")
 
         prop, schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=Config()
         )
 
-        assert prop == attr.evolve(existing_model, name=name, required=required, nullable=nullable, python_name=name)
-        build_union_property.assert_not_called()
+        assert prop == attr.evolve(existing_model, name=name, required=required, python_name=name)
 
     def test_property_from_data_no_valid_props_in_data(self, any_property_factory):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -864,181 +738,24 @@ class TestPropertyFromData:
             name=name, required=True, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
         )
 
-        assert prop == any_property_factory(name=name, required=True, nullable=False, default=None)
+        assert prop == any_property_factory(name=name, required=True, default=None)
         assert new_schemas == schemas
-
-    def test_property_from_data_validation_error(self, mocker):
-        from openapi_python_client.parser.errors import PropertyError
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        mocker.patch(f"{MODULE_NAME}._property_from_data").side_effect = ValidationError()
-        schemas = Schemas()
-
-        data = oai.Schema()
-        err, new_schemas = property_from_data(
-            name="blah", required=True, data=data, schemas=schemas, parent_name="parent", config=MagicMock()
-        )
-        assert err == PropertyError(detail="Failed to validate default value", data=data)
-        assert new_schemas == schemas
-
-
-class TestBuildListProperty:
-    def test_build_list_property_no_items(self, mocker):
-        from openapi_python_client.parser import properties
-
-        name = mocker.MagicMock()
-        required = mocker.MagicMock()
-        data = oai.Schema.model_construct(type="array")
-        property_from_data = mocker.patch.object(properties, "property_from_data")
-        schemas = properties.Schemas()
-
-        p, new_schemas = properties.build_list_property(
-            name=name,
-            required=required,
-            data=data,
-            schemas=schemas,
-            parent_name="parent",
-            config=MagicMock(),
-            process_properties=True,
-            roots={"root"},
-        )
-
-        assert p == PropertyError(data=data, detail="type array must have items defined")
-        assert new_schemas == schemas
-        property_from_data.assert_not_called()
-
-    def test_build_list_property_invalid_items(self, mocker):
-        from openapi_python_client.parser import properties
-
-        name = "name"
-        required = mocker.MagicMock()
-        data = oai.Schema(
-            type="array",
-            items={},
-        )
-        schemas = properties.Schemas()
-        second_schemas = properties.Schemas(errors=["error"])
-        property_from_data = mocker.patch.object(
-            properties, "property_from_data", return_value=(properties.PropertyError(data="blah"), second_schemas)
-        )
-        config = MagicMock()
-        process_properties = False
-        roots = {"root"}
-
-        p, new_schemas = properties.build_list_property(
-            name=name,
-            required=required,
-            data=data,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            roots=roots,
-            process_properties=process_properties,
-        )
-
-        assert isinstance(p, PropertyError)
-        assert p.data == "blah"
-        assert p.header.startswith(f"invalid data in items of array {name}")
-        assert new_schemas == second_schemas
-        assert schemas != new_schemas, "Schema was mutated"
-        property_from_data.assert_called_once_with(
-            name=f"{name}_item",
-            required=True,
-            data=data.items,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            process_properties=process_properties,
-            roots=roots,
-        )
-
-    def test_build_list_property(self, any_property_factory):
-        from openapi_python_client.parser import properties
-
-        name = "prop"
-        data = oai.Schema(
-            type="array",
-            items={},
-        )
-        schemas = properties.Schemas(errors=["error"])
-        config = Config()
-
-        p, new_schemas = properties.build_list_property(
-            name=name,
-            required=True,
-            data=data,
-            schemas=schemas,
-            parent_name="parent",
-            config=config,
-            roots={"root"},
-            process_properties=True,
-        )
-
-        assert isinstance(p, properties.ListProperty)
-        assert p.inner_property == any_property_factory(name=f"{name}_item")
-        assert new_schemas == schemas
-
-
-class TestBuildUnionProperty:
-    def test_property_from_data_union(
-        self, union_property_factory, date_time_property_factory, string_property_factory
-    ):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
-        name = "union_prop"
-        required = True
-        data = oai.Schema(
-            anyOf=[{"type": "string", "default": "a"}],
-            oneOf=[
-                {"type": "string", "format": "date-time"},
-            ],
-        )
-        expected = union_property_factory(
-            name=name,
-            required=required,
-            inner_properties=[
-                string_property_factory(name=f"{name}_type_0", default="'a'"),
-                date_time_property_factory(name=f"{name}_type_1"),
-            ],
-        )
-
-        p, s = property_from_data(
-            name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
-        )
-
-        assert p == expected
-        assert s == Schemas()
-
-    def test_build_union_property_invalid_property(self, mocker):
-        name = "bad_union"
-        required = mocker.MagicMock()
-        reference = oai.Reference.model_construct(ref="#/components/schema/NotExist")
-        data = oai.Schema(anyOf=[reference])
-        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=name)
-
-        from openapi_python_client.parser.properties import Schemas, build_union_property
-
-        p, s = build_union_property(
-            name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=MagicMock()
-        )
-        assert p == PropertyError(detail=f"Invalid property in union {name}", data=reference)
 
 
 class TestStringBasedProperty:
-    @pytest.mark.parametrize("nullable", (True, False))
     @pytest.mark.parametrize("required", (True, False))
-    def test_no_format(self, string_property_factory, nullable, required):
+    def test_no_format(self, string_property_factory, required):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.model_construct(type="string", nullable=nullable, default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", default='"hello world"', pattern="abcdef")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=Config(), schemas=Schemas()
         )
 
         assert p == string_property_factory(
-            name=name, required=required, nullable=nullable, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
+            name=name, required=required, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
         )
 
     def test_datetime_format(self, date_time_property_factory):
@@ -1046,89 +763,81 @@ class TestStringBasedProperty:
 
         name = "datetime_prop"
         required = True
-        data = oai.Schema.model_construct(
-            type="string", schema_format="date-time", nullable=True, default="2020-11-06T12:00:00"
-        )
+        data = oai.Schema.model_construct(type="string", schema_format="date-time", default="2020-11-06T12:00:00")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
 
-        assert p == date_time_property_factory(
-            name=name, required=required, nullable=True, default=f"isoparse('{data.default}')"
-        )
+        assert p == date_time_property_factory(name=name, required=required, default=f"isoparse('{data.default}')")
 
     def test_datetime_bad_default(self):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "datetime_prop"
         required = True
-        data = oai.Schema.model_construct(type="string", schema_format="date-time", nullable=True, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="date-time", default="a")
 
         result, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
 
-        assert result == PropertyError(detail="Failed to validate default value", data=data)
+        assert isinstance(result, PropertyError)
+        assert result.detail.startswith("Invalid datetime")
 
     def test_date_format(self, date_property_factory):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "date_prop"
         required = True
-        nullable = True
 
-        data = oai.Schema.model_construct(type="string", schema_format="date", nullable=nullable, default="2020-11-06")
+        data = oai.Schema.model_construct(type="string", schema_format="date", default="2020-11-06")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
 
-        assert p == date_property_factory(
-            name=name, required=required, nullable=nullable, default=f"isoparse('{data.default}').date()"
-        )
+        assert p == date_property_factory(name=name, required=required, default=f"isoparse('{data.default}').date()")
 
     def test_date_format_bad_default(self):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "date_prop"
         required = True
-        nullable = True
 
-        data = oai.Schema.model_construct(type="string", schema_format="date", nullable=nullable, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="date", default="a")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
 
-        assert p == PropertyError(detail="Failed to validate default value", data=data)
+        assert isinstance(p, PropertyError)
+        assert p.detail.startswith("Invalid date")
 
     def test__string_based_property_binary_format(self, file_property_factory):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "file_prop"
         required = True
-        nullable = True
-        data = oai.Schema.model_construct(type="string", schema_format="binary", nullable=nullable, default="a")
+        data = oai.Schema.model_construct(type="string", schema_format="binary", default="a")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas(), config=Config(), parent_name=None
         )
-        assert p == file_property_factory(name=name, required=required, nullable=nullable)
+        assert p == file_property_factory(name=name, required=required)
 
     def test__string_based_property_unsupported_format(self, string_property_factory):
         from openapi_python_client.parser.properties import property_from_data
 
         name = "unknown"
         required = True
-        nullable = True
-        data = oai.Schema.model_construct(type="string", schema_format="blah", nullable=nullable)
+        data = oai.Schema.model_construct(type="string", schema_format="blah")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, schemas=Schemas, config=Config(), parent_name=None
         )
 
-        assert p == string_property_factory(name=name, required=required, nullable=nullable)
+        assert p == string_property_factory(name=name, required=required)
 
 
 class TestCreateSchemas:
@@ -1207,7 +916,7 @@ class TestCreateSchemas:
 
 
 class TestProcessModels:
-    def test_retries_failing_models_while_making_progress(self, mocker, model_property_factory, property_factory):
+    def test_retries_failing_models_while_making_progress(self, mocker, model_property_factory, any_property_factory):
         from openapi_python_client.parser.properties import _process_models
 
         first_model = model_property_factory()
@@ -1215,7 +924,7 @@ class TestProcessModels:
             classes_by_name={
                 "first": first_model,
                 "second": model_property_factory(),
-                "non-model": property_factory(),
+                "non-model": any_property_factory(),
             }
         )
         process_model = mocker.patch(
@@ -1445,57 +1154,6 @@ class TestBuildParameters:
         )
         assert update_parameters_with_data.call_count == 3  # noqa: PLR2004
         assert result.errors == [ParameterError()]
-
-
-def test_build_enum_property_conflict():
-    from openapi_python_client.parser.properties import Schemas, build_enum_property
-
-    data = oai.Schema()
-    schemas = Schemas()
-
-    _, schemas = build_enum_property(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["a"], parent_name=None, config=Config()
-    )
-    err, new_schemas = build_enum_property(
-        data=data,
-        name="Existing",
-        required=True,
-        schemas=schemas,
-        enum=["a", "b"],
-        parent_name=None,
-        config=Config(),
-    )
-
-    assert schemas == new_schemas
-    assert err == PropertyError(detail="Found conflicting enums named Existing with incompatible values.", data=data)
-
-
-def test_build_enum_property_no_values():
-    from openapi_python_client.parser.properties import Schemas, build_enum_property
-
-    data = oai.Schema()
-    schemas = Schemas()
-
-    err, new_schemas = build_enum_property(
-        data=data, name="Existing", required=True, schemas=schemas, enum=[], parent_name=None, config=Config()
-    )
-
-    assert schemas == new_schemas
-    assert err == PropertyError(detail="No values provided for Enum", data=data)
-
-
-def test_build_enum_property_bad_default():
-    from openapi_python_client.parser.properties import Schemas, build_enum_property
-
-    data = oai.Schema(default="B")
-    schemas = Schemas()
-
-    err, new_schemas = build_enum_property(
-        data=data, name="Existing", required=True, schemas=schemas, enum=["A"], parent_name=None, config=Config()
-    )
-
-    assert schemas == new_schemas
-    assert err == PropertyError(detail="B is an invalid default for enum Existing", data=data)
 
 
 def test_build_schemas(mocker):

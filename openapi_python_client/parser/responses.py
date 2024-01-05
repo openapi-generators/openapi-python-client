@@ -71,7 +71,6 @@ def empty_response(
         prop=AnyProperty(
             name=response_name,
             default=None,
-            nullable=False,
             required=True,
             python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
             description=description,

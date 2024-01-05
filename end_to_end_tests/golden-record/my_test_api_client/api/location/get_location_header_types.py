@@ -19,7 +19,7 @@ def _get_kwargs(
     int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
     string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
 ) -> Dict[str, Any]:
-    headers = {}
+    headers: Dict[str, Any] = {}
     if not isinstance(boolean_header, Unset):
         headers["Boolean-Header"] = "true" if boolean_header else "false"
 
@@ -38,11 +38,13 @@ def _get_kwargs(
     if not isinstance(string_enum_header, Unset):
         headers["String-Enum-Header"] = str(string_enum_header)
 
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/location/header/types",
-        "headers": headers,
     }
+
+    _kwargs["headers"] = headers
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:

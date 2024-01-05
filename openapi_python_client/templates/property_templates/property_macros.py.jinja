@@ -1,18 +1,12 @@
-{% macro construct_template(construct_function, property, source, initial_value=None) %}
-{% if property.required and not property.nullable %}
+{% macro construct_template(construct_function, property, source) %}
+{% if property.required %}
 {{ property.python_name }} = {{ construct_function(property, source) }}
-{% else %}{# Must be nullable OR non-required #}
+{% else %}{# Must be non-required #}
 _{{ property.python_name }} = {{ source }}
 {{ property.python_name }}: {{ property.get_type_string() }}
-    {% if property.nullable %}
-if _{{ property.python_name }} is None:
-    {{ property.python_name }} = {% if initial_value != None %}{{ initial_value }}{% else %}None{% endif %}
-
-    {% endif %}
     {% if not property.required %}
-{% if property.nullable %}elif{% else %}if{% endif %} isinstance(_{{ property.python_name }},  Unset):
-    {{ property.python_name }} = {% if initial_value != None %}{{ initial_value }}{% else %}UNSET{% endif %}
-
+if isinstance(_{{ property.python_name }},  Unset):
+    {{ property.python_name }} = UNSET
     {% endif %}
 else:
     {{ property.python_name }} = {{ construct_function(property, "_" + property.python_name) }}

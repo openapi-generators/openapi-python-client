@@ -14,7 +14,7 @@ def _get_kwargs(
     param1: str,
     param3: int,
 ) -> Dict[str, Any]:
-    return {
+    _kwargs: Dict[str, Any] = {
         "method": "get",
         "url": "/multiple-path-parameters/{param4}/something/{param2}/{param1}/{param3}".format(
             param4=param4,
@@ -23,6 +23,8 @@ def _get_kwargs(
             param3=param3,
         ),
     }
+
+    return _kwargs
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
