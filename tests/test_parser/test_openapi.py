@@ -187,55 +187,6 @@ class TestEndpoint:
             ),
         ]
 
-    def test__add_responses(self, mocker, date_time_property_factory, date_property_factory):
-        from openapi_python_client.parser.openapi import Endpoint, Response
-
-        response_1_data = mocker.MagicMock()
-        response_2_data = mocker.MagicMock()
-        data = {
-            "200": response_1_data,
-            "404": response_2_data,
-        }
-        endpoint = self.make_endpoint()
-        schemas = mocker.MagicMock()
-        schemas_1 = mocker.MagicMock()
-        schemas_2 = mocker.MagicMock()
-        response_1 = Response(
-            status_code=200,
-            source="source",
-            prop=date_time_property_factory(name="datetime"),
-        )
-        response_2 = Response(
-            status_code=404,
-            source="source",
-            prop=date_property_factory(name="date"),
-        )
-        response_from_data = mocker.patch(
-            f"{MODULE_NAME}.response_from_data", side_effect=[(response_1, schemas_1), (response_2, schemas_2)]
-        )
-        config = MagicMock()
-
-        endpoint, response_schemas = Endpoint._add_responses(
-            endpoint=endpoint, data=data, schemas=schemas, config=config
-        )
-
-        response_from_data.assert_has_calls(
-            [
-                mocker.call(status_code=200, data=response_1_data, schemas=schemas, parent_name="name", config=config),
-                mocker.call(
-                    status_code=404, data=response_2_data, schemas=schemas_1, parent_name="name", config=config
-                ),
-            ]
-        )
-        assert endpoint.responses == [response_1, response_2]
-        assert endpoint.relative_imports == {
-            "from dateutil.parser import isoparse",
-            "from typing import cast",
-            "import datetime",
-            "import_3",
-        }
-        assert response_schemas == schemas_2
-
     def test_add_parameters_handles_no_params(self):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 

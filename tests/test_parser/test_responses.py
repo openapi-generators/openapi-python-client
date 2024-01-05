@@ -11,9 +11,11 @@ MODULE_NAME = "openapi_python_client.parser.responses"
 def test_response_from_data_no_content(any_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
+    data = oai.Response.model_construct(description="")
+
     response, schemas = response_from_data(
         status_code=200,
-        data=oai.Response.model_construct(description=""),
+        data=data,
         schemas=Schemas(),
         parent_name="parent",
         config=MagicMock(),
@@ -28,15 +30,18 @@ def test_response_from_data_no_content(any_property_factory):
             description="",
         ),
         source=NONE_SOURCE,
+        data=data,
     )
 
 
 def test_response_from_data_reference(any_property_factory):
     from openapi_python_client.parser.responses import Response, response_from_data
 
+    data = oai.Reference.model_construct()
+
     response, schemas = response_from_data(
         status_code=200,
-        data=oai.Reference.model_construct(),
+        data=data,
         schemas=Schemas(),
         parent_name="parent",
         config=MagicMock(),
@@ -50,6 +55,7 @@ def test_response_from_data_reference(any_property_factory):
             required=True,
         ),
         source=NONE_SOURCE,
+        data=data,
     )
 
 
@@ -92,6 +98,7 @@ def test_response_from_data_no_content_schema(any_property_factory):
             description=data.description,
         ),
         source=NONE_SOURCE,
+        data=data,
     )
 
 
@@ -147,6 +154,7 @@ def test_response_from_data_property(mocker, any_property_factory):
         status_code=400,
         prop=prop,
         source=JSON_SOURCE,
+        data=data,
     )
     property_from_data.assert_called_once_with(
         name="response_400",
