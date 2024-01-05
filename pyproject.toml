@@ -5,17 +5,17 @@ authors = [
 license = { text = "MIT" }
 requires-python = ">=3.8,<4.0"
 dependencies = [
-    "jinja2<4.0.0,>=3.0.0",
-    "typer<0.10,>0.6",
-    "colorama<1.0.0,>=0.4.3; sys_platform == \"win32\"",
-    "shellingham<2.0.0,>=1.3.2",
-    "pydantic<3.0.0,>=2.1.1",
+    "jinja2>=3.0.0,<4.0.0",
+    "typer>0.6,<0.10",
+    "colorama>=0.4.3; sys_platform == \"win32\"",
+    "shellingham>=1.3.2,<2.0.0",
+    "pydantic>=2.1.1,<3.0.0",
     "attrs>=21.3.0",
-    "python-dateutil<3.0.0,>=2.8.1",
+    "python-dateutil>=2.8.1,<3.0.0",
     "httpx>=0.20.0,<0.27.0",
-    "PyYAML<7.0,>=6.0",
-    "ruff<1.0.0,>=0.1.2",
-    "typing-extensions<5.0.0,>=4.8.0",
+    "PyYAML>=6.0,<7.0",
+    "ruff>=0.1.2,<1.0.0",
+    "typing-extensions>=4.8.0,<5.0.0",
 ]
 name = "openapi-python-client"
 version = "0.17.1"
@@ -46,7 +46,43 @@ repository = "https://github.com/openapi-generators/openapi-python-client"
 [project.scripts]
 openapi-python-client = "openapi_python_client.cli:app"
 
-[tool.pdm]
+[tool.ruff]
+select = ["E", "F", "I", "UP", "B", "PL", "RUF"]
+line-length = 120
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".venv",
+    "openapi_python_client/templates/*",
+    "end_to_end_tests/*",
+    "tests/test_templates/*",
+]
+ignore = ["E501", "PLR0913"]
+
+[tool.ruff.per-file-ignores]
+"openapi_python_client/cli.py" = ["B008"]
+
+[tool.coverage.run]
+omit = ["openapi_python_client/templates/*"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+disallow_any_generics = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "importlib_metadata",
+    "typer",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+junit_family = "xunit2"
+
+
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest",
@@ -96,42 +132,12 @@ openapi-python-client update --url https://raw.githubusercontent.com/openapi-gen
 && mypy integration-tests --strict
 """
 
-[tool.ruff]
-select = ["E", "F", "I", "UP", "B", "PL", "RUF"]
-line-length = 120
-exclude = [
-    ".git",
-    ".mypy_cache",
-    ".venv",
-    "openapi_python_client/templates/*",
-    "end_to_end_tests/*",
-    "tests/test_templates/*",
-]
-ignore = ["E501", "PLR0913"]
-
-[tool.ruff.per-file-ignores]
-"openapi_python_client/cli.py" = ["B008"]
-
-[tool.coverage.run]
-omit = ["openapi_python_client/templates/*"]
-
-[tool.mypy]
-plugins = ["pydantic.mypy"]
-disallow_any_generics = true
-disallow_untyped_defs = true
-warn_redundant_casts = true
-strict_equality = true
-
-[[tool.mypy.overrides]]
-module = [
-    "importlib_metadata",
-    "typer",
-]
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-junit_family = "xunit2"
-
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "openapi_python_client",
+]
+exclude = [".gitignore"]
