@@ -119,6 +119,7 @@ def generate(
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    output_path: Optional[pathlib.Path] = typer.Option(None, help="Set a path to store the api client"),
     fail_on_warning: bool = False,
 ) -> None:
     """Generate a new OpenAPI Client library"""
@@ -145,6 +146,7 @@ def generate(
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path,
     )
     handle_errors(errors, fail_on_warning)
 
@@ -157,6 +159,7 @@ def update(
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
     config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    output_path: Optional[pathlib.Path] = typer.Option(None, help="Set a path to store the api client"),
     fail_on_warning: bool = False,
 ) -> None:
     """Update an existing OpenAPI Client library
@@ -187,5 +190,6 @@ def update(
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
+        output_path=output_path,
     )
     handle_errors(errors, fail_on_warning)
