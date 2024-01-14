@@ -1,6 +1,6 @@
 import pytest
+from attr import evolve
 
-from openapi_python_client import Config
 from openapi_python_client.parser.errors import ParameterError
 from openapi_python_client.parser.properties import Class, Parameters
 from openapi_python_client.parser.properties.schemas import parameter_from_reference
@@ -10,11 +10,10 @@ from openapi_python_client.utils import ClassName
 MODULE_NAME = "openapi_python_client.parser.properties.schemas"
 
 
-def test_class_from_string_default_config():
-    from openapi_python_client import Config
+def test_class_from_string_default_config(config):
     from openapi_python_client.parser.properties import Class
 
-    class_ = Class.from_string(string="#/components/schemas/PingResponse", config=Config())
+    class_ = Class.from_string(string="#/components/schemas/PingResponse", config=config)
 
     assert class_.name == "PingResponse"
     assert class_.module_name == "ping_response"
@@ -29,13 +28,13 @@ def test_class_from_string_default_config():
         (None, "some_module", "MyResponse", "some_module"),
     ),
 )
-def test_class_from_string(class_override, module_override, expected_class, expected_module):
-    from openapi_python_client.config import ClassOverride, Config
+def test_class_from_string(class_override, module_override, expected_class, expected_module, config):
+    from openapi_python_client.config import ClassOverride
     from openapi_python_client.parser.properties import Class
 
     ref = "#/components/schemas/MyResponse"
-    config = Config(
-        class_overrides={"MyResponse": ClassOverride(class_name=class_override, module_name=module_override)}
+    config = evolve(
+        config, class_overrides={"MyResponse": ClassOverride(class_name=class_override, module_name=module_override)}
     )
 
     result = Class.from_string(string=ref, config=config)
@@ -44,34 +43,32 @@ def test_class_from_string(class_override, module_override, expected_class, expe
 
 
 class TestParameterFromData:
-    def test_cannot_parse_parameters_by_reference(self):
+    def test_cannot_parse_parameters_by_reference(self, config):
         from openapi_python_client.parser.properties import Parameters
         from openapi_python_client.parser.properties.schemas import parameter_from_data
 
         ref = Reference.model_construct(ref="#/components/parameters/a_param")
         parameters = Parameters()
-        config = Config()
         param_or_error, new_parameters = parameter_from_data(
             name="a_param", data=ref, parameters=parameters, config=config
         )
         assert param_or_error == ParameterError("Unable to resolve another reference")
         assert new_parameters == parameters
 
-    def test_parameters_without_schema_are_ignored(self):
+    def test_parameters_without_schema_are_ignored(self, config):
         from openapi_python_client.parser.properties import Parameters
         from openapi_python_client.parser.properties.schemas import parameter_from_data
         from openapi_python_client.schema import ParameterLocation
 
         param = Parameter(name="a_schemaless_param", param_in=ParameterLocation.QUERY)
         parameters = Parameters()
-        config = Config()
         param_or_error, new_parameters = parameter_from_data(
             name=param.name, data=param, parameters=parameters, config=config
         )
         assert param_or_error == ParameterError("Parameter has no schema")
         assert new_parameters == parameters
 
-    def test_registers_new_parameters(self):
+    def test_registers_new_parameters(self, config):
         from openapi_python_client.parser.properties import Parameters
         from openapi_python_client.parser.properties.schemas import parameter_from_data
         from openapi_python_client.schema import ParameterLocation, Schema
@@ -80,7 +77,6 @@ class TestParameterFromData:
             name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
         )
         parameters = Parameters()
-        config = Config()
         param_or_error, new_parameters = parameter_from_data(
             name=param.name, data=param, parameters=parameters, config=config
         )
@@ -122,7 +118,7 @@ class TestParameterFromReference:
 
 
 class TestUpdateParametersFromData:
-    def test_reports_parameters_with_errors(self, mocker):
+    def test_reports_parameters_with_errors(self, mocker, config):
         from openapi_python_client.parser.properties.schemas import update_parameters_with_data
         from openapi_python_client.schema import ParameterLocation, Schema
 
@@ -134,7 +130,6 @@ class TestUpdateParametersFromData:
             f"{MODULE_NAME}.parameter_from_data", side_effect=[(ParameterError(), parameters)]
         )
         ref_path = Reference.model_construct(ref="#/components/parameters/a_param")
-        config = Config()
         new_parameters_or_error = update_parameters_with_data(
             ref_path=ref_path.ref, data=param, parameters=parameters, config=config
         )
@@ -145,7 +140,7 @@ class TestUpdateParametersFromData:
             header="Unable to parse parameter #/components/parameters/a_param",
         )
 
-    def test_records_references_to_parameters(self, mocker):
+    def test_records_references_to_parameters(self, mocker, config):
         from openapi_python_client.parser.properties.schemas import update_parameters_with_data
         from openapi_python_client.schema import ParameterLocation, Schema
 
@@ -155,7 +150,6 @@ class TestUpdateParametersFromData:
         )
         parameter_from_data = mocker.patch(f"{MODULE_NAME}.parameter_from_data", side_effect=[(param, parameters)])
         ref_path = "#/components/parameters/a_param"
-        config = Config()
         new_parameters = update_parameters_with_data(
             ref_path=ref_path, data=param, parameters=parameters, config=config
         )

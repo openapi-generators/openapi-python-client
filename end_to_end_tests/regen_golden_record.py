@@ -79,12 +79,11 @@ def regen_custom_template_golden_record():
     gr_path = Path(__file__).parent / "golden-record"
     tpl_gr_path = Path(__file__).parent / "custom-templates-golden-record"
 
-    output_path = Path(tempfile.mkdtemp())
+    output_path = Path.cwd() / "my-test-api-client"
     config_path = Path(__file__).parent / "config.yml"
 
     shutil.rmtree(tpl_gr_path, ignore_errors=True)
 
-    os.chdir(str(output_path.absolute()))
     result = runner.invoke(
         app,
         [
@@ -96,9 +95,8 @@ def regen_custom_template_golden_record():
     )
 
     if result.stdout:
-        generated_output_path = output_path / "my-test-api-client"
-        for f in generated_output_path.glob("**/*"):  # nb: works for Windows and Unix
-            relative_to_generated = f.relative_to(generated_output_path)
+        for f in output_path.glob("**/*"):  # nb: works for Windows and Unix
+            relative_to_generated = f.relative_to(output_path)
             gr_file = gr_path / relative_to_generated
             if not gr_file.exists():
                 print(f"{gr_file} does not exist, ignoring")
@@ -121,8 +119,28 @@ def regen_custom_template_golden_record():
         raise result.exception
 
 
+def regen_no_meta():
+    runner = CliRunner()
+    openapi_path = Path(__file__).parent / "3.1_specific.openapi.yaml"
+
+    gr_path = Path(__file__).parent / "no-meta-golden-record"
+    output_path = Path.cwd() / "test_3_1_features_client"
+
+    shutil.rmtree(gr_path, ignore_errors=True)
+    shutil.rmtree(output_path, ignore_errors=True)
+
+    result = runner.invoke(app, ["generate", f"--path={openapi_path}", "--meta=none"])
+
+    if result.stdout:
+        print(result.stdout)
+    if result.exception:
+        raise result.exception
+    output_path.rename(gr_path)
+
+
 if __name__ == "__main__":
     regen_golden_record()
     regen_golden_record_3_1_features()
     regen_metadata_snapshots()
     regen_custom_template_golden_record()
+    regen_no_meta()

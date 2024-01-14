@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from openapi_python_client.config import Config
+from openapi_python_client.config import ConfigFile
 
 
 def json_with_tabs(d):
@@ -40,7 +40,7 @@ def test_load_from_path(tmp_path: Path, filename, dump, relative):
     }
     yml_file.write_text(dump(data))
 
-    config = Config.load_from_path(yml_file)
+    config = ConfigFile.load_from_path(yml_file)
     assert config.field_prefix == "blah"
     assert config.class_overrides["Class1"].model_dump() == override1
     assert config.class_overrides["Class2"].model_dump() == override2

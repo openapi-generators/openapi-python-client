@@ -1,11 +1,10 @@
-from openapi_python_client import Config
 from openapi_python_client import schema as oai
 from openapi_python_client.parser.bodies import body_from_data
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.properties import Schemas
 
 
-def test_errors():
+def test_errors(config):
     operation = oai.Operation(
         requestBody=oai.RequestBody(
             content={
@@ -33,7 +32,7 @@ def test_errors():
         responses={},
     )
 
-    errs, _ = body_from_data(data=operation, schemas=Schemas(), config=Config(), endpoint_name="this will not succeed")
+    errs, _ = body_from_data(data=operation, schemas=Schemas(), config=config, endpoint_name="this will not succeed")
 
     assert len(errs) == len(operation.request_body.content)
     assert all(isinstance(err, ParseError) for err in errs)

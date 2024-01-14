@@ -6,7 +6,7 @@ from typing import Optional, Sequence
 import typer
 
 from openapi_python_client import MetaType
-from openapi_python_client.config import Config
+from openapi_python_client.config import Config, ConfigFile
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
 app = typer.Typer()
@@ -20,14 +20,16 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def _process_config(path: Optional[pathlib.Path]) -> Config:
+def _process_config(path: Optional[pathlib.Path], meta_type: MetaType) -> Config:
     if not path:
-        return Config()
+        config_file = ConfigFile()
+    else:
+        try:
+            config_file = ConfigFile.load_from_path(path=path)
+        except Exception as err:
+            raise typer.BadParameter("Unable to parse config") from err
 
-    try:
-        return Config.load_from_path(path=path)
-    except Exception as err:
-        raise typer.BadParameter("Unable to parse config") from err
+    return Config.from_sources(config_file, meta_type)
 
 
 # noinspection PyUnusedLocal
@@ -137,11 +139,10 @@ def generate(
         typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from err
 
-    config = _process_config(config_path)
+    config = _process_config(config_path, meta)
     errors = create_new_client(
         url=url,
         path=path,
-        meta=meta,
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,
@@ -179,11 +180,10 @@ def update(
         typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from err
 
-    config = _process_config(config_path)
+    config = _process_config(config_path, meta)
     errors = update_existing_client(
         url=url,
         path=path,
-        meta=meta,
         custom_template_path=custom_template_path,
         file_encoding=file_encoding,
         config=config,

@@ -152,14 +152,14 @@ def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[
     shutil.rmtree(output_path)
 
 
-def test_no_meta():
-    output_path = Path.cwd() / "test_3_1_features_client"
-    shutil.rmtree(output_path, ignore_errors=True)
-    generate([f"--meta=none"], "3.1_specific.openapi.yaml")
-
-    assert output_path.exists()  # Has a different name than with-meta generation
-    assert (output_path / "__init__.py").exists()
-    shutil.rmtree(output_path)
+def test_none_meta():
+    run_e2e_test(
+        "3.1_specific.openapi.yaml",
+        ["--meta=none"],
+        {},
+        "no-meta-golden-record",
+        "test_3_1_features_client",
+    )
 
 
 def test_custom_templates():
