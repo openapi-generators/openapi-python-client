@@ -1,8 +1,7 @@
 import shutil
 from filecmp import cmpfiles, dircmp
-from os import mkdir
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import pytest
 from click.testing import Result
@@ -110,17 +109,16 @@ def generate(extra_args: Optional[List[str]], openapi_document: str) -> Result:
     _run_command("generate", extra_args, openapi_document)
 
 
-def update(extra_args: Optional[List[str]], openapi_document: str) -> Result:
-    """Generate a client from an OpenAPI document and return the path to the generated code"""
-    _run_command("update", extra_args, openapi_document)
-
-
-def _run_command(command: str, extra_args: Optional[List[str]], openapi_document: str) -> Result:
+def _run_command(command: str, extra_args: Optional[List[str]] = None, openapi_document: Optional[str] = None, url: Optional[str] = None, config_path: Optional[Path] = None) -> Result:
     """Generate a client from an OpenAPI document and return the path to the generated code"""
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / openapi_document
-    config_path = Path(__file__).parent / "config.yml"
-    args = [command, f"--config={config_path}", f"--path={openapi_path}"]
+    if openapi_document is not None:
+        openapi_path = Path(__file__).parent / openapi_document
+        source_arg = f"--path={openapi_path}"
+    else:
+        source_arg = f"--url={url}"
+    config_path = config_path or (Path(__file__).parent / "config.yml")
+    args = [command, f"--config={config_path}", source_arg]
     if extra_args:
         args.extend(extra_args)
     result = runner.invoke(app, args)
@@ -214,24 +212,6 @@ def test_custom_templates():
     )
 
 
-def test_update():
-    project_dir = Path.cwd() / "test-3-1-features-client"
-    pyproject = (Path(__file__).parent / "test-3-1-golden-record" / "pyproject.toml").read_text()
-    shutil.rmtree(project_dir, ignore_errors=True)
-    project_dir.mkdir()
-    (project_dir / "pyproject.toml").write_text(pyproject)  # for Ruff config
-    (project_dir / "custom_file.md").write_text("some content")
-    (project_dir / "test_3_1_features_client").mkdir()
-    update([], "3.1_specific.openapi.yaml")
-    assert (project_dir / "custom_file.md").exists()
-    _compare_directories(
-        project_dir / "test_3_1_features_client",
-        Path(__file__).parent / "test-3-1-golden-record" / "test_3_1_features_client",
-        expected_differences={},
-    )
-    shutil.rmtree(project_dir)
-
-
 @pytest.mark.parametrize(
     "command", ("generate", "update")
 )
@@ -292,3 +272,14 @@ def test_invalid_openapi_document(file_name, content, expected_error):
     assert result.exit_code == 1
     assert expected_error in result.stdout
     openapi_document.unlink()
+
+
+def test_update_integration_tests():
+    url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json"
+    source_path = Path(__file__).parent.parent / "integration-tests"
+    project_path = Path.cwd() / "integration-tests"
+    if source_path != project_path:  # Just in case someone runs this from root dir
+        shutil.copytree(source_path, project_path)
+    config_path = project_path / "config.yaml"
+    _run_command("update", url=url, config_path=config_path)
+    _compare_directories(source_path, project_path, expected_differences={})
