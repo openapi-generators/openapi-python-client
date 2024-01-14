@@ -2,7 +2,7 @@ import json
 import mimetypes
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import yaml
 from attr import define
@@ -68,9 +68,13 @@ class Config:
     post_hooks: List[str]
     field_prefix: str
     http_timeout: int
+    document_source: Union[Path, str]
+    file_encoding: str
 
     @staticmethod
-    def from_sources(config_file: ConfigFile, meta_type: MetaType) -> "Config":
+    def from_sources(
+        config_file: ConfigFile, meta_type: MetaType, document_source: Union[Path, str], file_encoding: str
+    ) -> "Config":
         if config_file.post_hooks is not None:
             post_hooks = config_file.post_hooks
         elif meta_type == MetaType.NONE:
@@ -94,5 +98,7 @@ class Config:
             post_hooks=post_hooks,
             field_prefix=config_file.field_prefix,
             http_timeout=config_file.http_timeout,
+            document_source=document_source,
+            file_encoding=file_encoding,
         )
         return config

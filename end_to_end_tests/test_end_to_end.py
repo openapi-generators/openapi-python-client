@@ -128,6 +128,7 @@ def _run_command(command: str, extra_args: Optional[List[str]], openapi_document
         raise Exception(result.stdout)
     return result
 
+
 def test_baseline_end_to_end_3_0():
     run_e2e_test("baseline_openapi_3.0.json", [], {})
 
@@ -161,7 +162,10 @@ def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[
 
     if generated_file and expected_file:
         assert (output_path / generated_file).exists()
-        assert (output_path / generated_file).read_text() == (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+        assert (
+            (output_path / generated_file).read_text() ==
+            (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+        )
 
     shutil.rmtree(output_path)
 
@@ -238,3 +242,53 @@ def test_bad_url(command: str):
     assert "Could not get OpenAPI document from provided URL" in result.stdout
 
 
+def test_custom_post_hooks():
+    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+    runner = CliRunner()
+    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+    config_path = Path(__file__).parent / "custom_post_hooks.config.yml"
+    result = runner.invoke(app, ["generate", f"--path={openapi_document}", f"--config={config_path}"])
+    assert result.exit_code == 1
+    assert "this should fail" in result.stdout
+    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+
+
+def test_generate_dir_already_exists():
+    project_dir = Path.cwd() / "my-test-api-client"
+    if not project_dir.exists():
+        project_dir.mkdir()
+    runner = CliRunner()
+    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
+    assert result.exit_code == 1
+    assert "Directory already exists" in result.stdout
+    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+
+
+def test_update_dir_not_found():
+    project_dir = Path.cwd() / "my-test-api-client"
+    shutil.rmtree(project_dir, ignore_errors=True)
+    runner = CliRunner()
+    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+    result = runner.invoke(app, ["update", f"--path={openapi_document}"])
+    assert result.exit_code == 1
+    assert str(project_dir) in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("file_name", "content", "expected_error"),
+    (
+        ("invalid_openapi.yaml", "not a valid openapi document", "Failed to parse OpenAPI document"),
+        ("invalid_json.json", "Invalid JSON", "Invalid JSON"),
+        ("invalid_yaml.yaml", "{", "Invalid YAML"),
+    ),
+    ids=("invalid_openapi", "invalid_json", "invalid_yaml")
+)
+def test_invalid_openapi_document(file_name, content, expected_error):
+    runner = CliRunner()
+    openapi_document = Path.cwd() / file_name
+    openapi_document.write_text(content)
+    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
+    assert result.exit_code == 1
+    assert expected_error in result.stdout
+    openapi_document.unlink()

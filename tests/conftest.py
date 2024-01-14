@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any, Callable, Dict
 
 import pytest
@@ -26,7 +27,9 @@ from openapi_python_client.schema.parameter_location import ParameterLocation
 @pytest.fixture(scope="session")
 def config() -> Config:
     """Create a default config for when it doesn't matter"""
-    return Config.from_sources(ConfigFile(), MetaType.POETRY)
+    return Config.from_sources(
+        ConfigFile(), MetaType.POETRY, document_source=Path("openapi.yaml"), file_encoding="utf-8"
+    )
 
 
 @pytest.fixture

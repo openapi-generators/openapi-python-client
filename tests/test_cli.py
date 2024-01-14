@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -146,48 +145,6 @@ class TestUpdate:
 
         assert result.exit_code == 1
         _update_existing_client.assert_not_called()
-
-    def test_update_url(self, _update_existing_client, config):
-        url = "cool.url"
-        from openapi_python_client.cli import app
-
-        result = runner.invoke(app, ["update", f"--url={url}"])
-
-        assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(
-            url=url, path=None, custom_template_path=None, file_encoding="utf-8", config=config
-        )
-
-    def test_update_path(self, _update_existing_client, config):
-        path = "cool/path"
-        from openapi_python_client.cli import app
-
-        result = runner.invoke(app, ["update", f"--path={path}"])
-
-        assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(
-            url=None,
-            path=Path(path),
-            custom_template_path=None,
-            file_encoding="utf-8",
-            config=config,
-        )
-
-    def test_update_encoding(self, _update_existing_client, config):
-        path = "cool/path"
-        file_encoding = "utf-8"
-        from openapi_python_client.cli import app
-
-        result = runner.invoke(app, ["update", f"--path={path}", f"--file-encoding={file_encoding}"])
-
-        assert result.exit_code == 0
-        _update_existing_client.assert_called_once_with(
-            url=None,
-            path=Path(path),
-            custom_template_path=None,
-            file_encoding="utf-8",
-            config=config,
-        )
 
     def test_update_encoding_errors(self, _update_existing_client):
         path = "cool/path"

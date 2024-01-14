@@ -6,18 +6,18 @@ from openapi_python_client.config import ConfigFile
 default_http_timeout = ConfigFile.model_json_schema()["properties"]["http_timeout"]["default"]
 
 
-def make_project() -> Project:
+def make_project(config: Config) -> Project:
     from unittest.mock import MagicMock
 
-    from openapi_python_client import MetaType, Project
+    from openapi_python_client import Project
 
-    return Project(openapi=MagicMock(title="My Test API"), config=Config.from_sources(ConfigFile(), MetaType.POETRY))
+    return Project(openapi=MagicMock(title="My Test API"), config=config)
 
 
 @pytest.fixture
-def project_with_dir() -> Project:
+def project_with_dir(config) -> Project:
     """Return a Project with the project dir pre-made (needed for cwd of commands). Unlinks after the test completes"""
-    project = make_project()
+    project = make_project(config)
     project.project_dir.mkdir()
 
     yield project
