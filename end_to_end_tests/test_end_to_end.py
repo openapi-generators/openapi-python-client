@@ -1,9 +1,11 @@
 import shutil
 from filecmp import cmpfiles, dircmp
+from os import mkdir
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import pytest
+from click.testing import Result
 from typer.testing import CliRunner
 
 from openapi_python_client.cli import app
@@ -80,10 +82,10 @@ def run_e2e_test(
     expected_differences: Dict[Path, str],
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
-):
+) -> Result:
     output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
-    generate(extra_args, openapi_document)
+    result = generate(extra_args, openapi_document)
     gr_path = Path(__file__).parent / golden_record_path
 
     # Use absolute paths for expected differences for easier comparisons
@@ -100,19 +102,31 @@ def run_e2e_test(
     assert status == 0, f"Type checking client failed: {out}"
 
     shutil.rmtree(output_path)
+    return result
 
 
-def generate(extra_args: Optional[List[str]], openapi_document: str):
+def generate(extra_args: Optional[List[str]], openapi_document: str) -> Result:
+    """Generate a client from an OpenAPI document and return the path to the generated code"""
+    _run_command("generate", extra_args, openapi_document)
+
+
+def update(extra_args: Optional[List[str]], openapi_document: str) -> Result:
+    """Generate a client from an OpenAPI document and return the path to the generated code"""
+    _run_command("update", extra_args, openapi_document)
+
+
+def _run_command(command: str, extra_args: Optional[List[str]], openapi_document: str) -> Result:
     """Generate a client from an OpenAPI document and return the path to the generated code"""
     runner = CliRunner()
     openapi_path = Path(__file__).parent / openapi_document
     config_path = Path(__file__).parent / "config.yml"
-    args = ["generate", f"--config={config_path}", f"--path={openapi_path}"]
+    args = [command, f"--config={config_path}", f"--path={openapi_path}"]
     if extra_args:
         args.extend(extra_args)
     result = runner.invoke(app, args)
     if result.exit_code != 0:
-        raise result.exception
+        raise Exception(result.stdout)
+    return result
 
 def test_baseline_end_to_end_3_0():
     run_e2e_test("baseline_openapi_3.0.json", [], {})
@@ -194,3 +208,33 @@ def test_custom_templates():
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates/"],
         expected_differences=expected_differences,
     )
+
+
+def test_update():
+    project_dir = Path.cwd() / "test-3-1-features-client"
+    pyproject = (Path(__file__).parent / "test-3-1-golden-record" / "pyproject.toml").read_text()
+    shutil.rmtree(project_dir, ignore_errors=True)
+    project_dir.mkdir()
+    (project_dir / "pyproject.toml").write_text(pyproject)  # for Ruff config
+    (project_dir / "custom_file.md").write_text("some content")
+    (project_dir / "test_3_1_features_client").mkdir()
+    update([], "3.1_specific.openapi.yaml")
+    assert (project_dir / "custom_file.md").exists()
+    _compare_directories(
+        project_dir / "test_3_1_features_client",
+        Path(__file__).parent / "test-3-1-golden-record" / "test_3_1_features_client",
+        expected_differences={},
+    )
+    shutil.rmtree(project_dir)
+
+
+@pytest.mark.parametrize(
+    "command", ("generate", "update")
+)
+def test_bad_url(command: str):
+    runner = CliRunner()
+    result = runner.invoke(app, [command, "--url=not_a_url"])
+    assert result.exit_code == 1
+    assert "Could not get OpenAPI document from provided URL" in result.stdout
+
+
