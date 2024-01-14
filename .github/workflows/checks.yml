@@ -16,25 +16,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.1.1
-      - name: Set up Python
-        uses: actions/setup-python@v5.0.0
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3.3
+        id: setup-pdm
         with:
           python-version: ${{ matrix.python }}
-
-      - name: Get Python Version
-        id: get_python_version
-        run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
-        shell: bash
+          cache: true
 
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: .venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
+          key: ${{ runner.os }}-${{ steps.setup-pdm.outputs.python-version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
-      - name: Install PDM
-        run: pip install pdm
+            ${{ runner.os }}-${{ steps.setup-pdm.outputs.python-version }}-dependencies
 
       - name: Install Dependencies
         run: pdm install
@@ -130,25 +125,21 @@ jobs:
           - "3000:3000"
     steps:
       - uses: actions/checkout@v4.1.1
-      - name: Set up Python
-        uses: actions/setup-python@v5.0.0
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3.3
+        id: setup-pdm
         with:
           python-version: "3.8"
-      - name: Get Python Version
-        id: get_python_version
-        run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
+          cache: true
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: .venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
+          key: ${{ runner.os }}-${{ steps.setup-pdm.outputs.python-version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
+            ${{ runner.os }}-${{ steps.setup-pdm.outputs.python-version }}-dependencies
       - name: Install dependencies
-        run: |
-          pip install pdm
-          python -m venv .venv
-          pdm install
+        run: pdm install
       - name: Regenerate Integration Client
         run: |
           pdm run openapi-python-client update --url http://localhost:3000/openapi.json --config integration-tests-config.yaml --meta pdm
