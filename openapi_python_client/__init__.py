@@ -364,7 +364,7 @@ def _get_document(*, source: Union[str, Path], timeout: int) -> Union[Dict[str, 
             yaml_bytes = response.content
             if "content-type" in response.headers:
                 content_type = response.headers["content-type"].split(";")[0]
-            else:
+            else:  # pragma: no cover
                 content_type = mimetypes.guess_type(source, strict=True)[0]
 
         except (httpx.HTTPError, httpcore.NetworkError):
