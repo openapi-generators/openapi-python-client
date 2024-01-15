@@ -1,7 +1,7 @@
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 import pytest
 from click.testing import Result
@@ -14,6 +14,7 @@ def _compare_directories(
     record: Path,
     test_subject: Path,
     expected_differences: Dict[Path, str],
+    expected_missing: Optional[Set[str]] = None,
     ignore: List[str] = None,
     depth=0,
 ):
@@ -29,7 +30,7 @@ def _compare_directories(
     first_printable = record.relative_to(Path.cwd())
     second_printable = test_subject.relative_to(Path.cwd())
     dc = dircmp(record, test_subject, ignore=[".ruff_cache", "__pycache__"] + (ignore or []))
-    missing_files = dc.left_only + dc.right_only
+    missing_files = set(dc.left_only + dc.right_only) - (expected_missing or set())
     if missing_files:
         pytest.fail(
             f"{first_printable} or {second_printable} was missing: {missing_files}",
@@ -78,21 +79,23 @@ def _compare_directories(
 def run_e2e_test(
     openapi_document: str,
     extra_args: List[str],
-    expected_differences: Dict[Path, str],
+    expected_differences: Optional[Dict[Path, str]] = None,
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
+    expected_missing: Optional[Set[str]] = None,
 ) -> Result:
     output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
     result = generate(extra_args, openapi_document)
     gr_path = Path(__file__).parent / golden_record_path
 
+    expected_differences = expected_differences or {}
     # Use absolute paths for expected differences for easier comparisons
     expected_differences = {
         output_path.joinpath(key): value for key, value in expected_differences.items()
     }
     _compare_directories(
-        gr_path, output_path, expected_differences=expected_differences
+        gr_path, output_path, expected_differences=expected_differences, expected_missing=expected_missing
     )
 
     import mypy.api
@@ -172,9 +175,9 @@ def test_none_meta():
     run_e2e_test(
         "3.1_specific.openapi.yaml",
         ["--meta=none"],
-        {},
-        "no-meta-golden-record",
-        "test_3_1_features_client",
+        golden_record_path="test-3-1-golden-record/test_3_1_features_client",
+        output_path="test_3_1_features_client",
+        expected_missing={"py.typed"},
     )
 
 

@@ -119,28 +119,8 @@ def regen_custom_template_golden_record():
         raise result.exception
 
 
-def regen_no_meta():
-    runner = CliRunner()
-    openapi_path = Path(__file__).parent / "3.1_specific.openapi.yaml"
-
-    gr_path = Path(__file__).parent / "no-meta-golden-record"
-    output_path = Path.cwd() / "test_3_1_features_client"
-
-    shutil.rmtree(gr_path, ignore_errors=True)
-    shutil.rmtree(output_path, ignore_errors=True)
-
-    result = runner.invoke(app, ["generate", f"--path={openapi_path}", "--meta=none"])
-
-    if result.stdout:
-        print(result.stdout)
-    if result.exception:
-        raise result.exception
-    output_path.rename(gr_path)
-
-
 if __name__ == "__main__":
     regen_golden_record()
     regen_golden_record_3_1_features()
     regen_metadata_snapshots()
     regen_custom_template_golden_record()
-    regen_no_meta()
