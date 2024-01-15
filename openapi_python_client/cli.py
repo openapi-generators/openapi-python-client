@@ -1,12 +1,12 @@
 import codecs
-import pathlib
+from pathlib import Path
 from pprint import pformat
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 
 import typer
 
 from openapi_python_client import MetaType
-from openapi_python_client.config import Config
+from openapi_python_client.config import Config, ConfigFile
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
 app = typer.Typer()
@@ -20,14 +20,36 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def _process_config(path: Optional[pathlib.Path]) -> Config:
-    if not path:
-        return Config()
+def _process_config(
+    *, url: Optional[str], path: Optional[Path], config_path: Optional[Path], meta_type: MetaType, file_encoding: str
+) -> Config:
+    source: Union[Path, str]
+    if url and not path:
+        source = url
+    elif path and not url:
+        source = path
+    elif url and path:
+        typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    else:
+        typer.secho("You must either provide --url or --path", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     try:
-        return Config.load_from_path(path=path)
-    except Exception as err:
-        raise typer.BadParameter("Unable to parse config") from err
+        codecs.getencoder(file_encoding)
+    except LookupError as err:
+        typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from err
+
+    if not config_path:
+        config_file = ConfigFile()
+    else:
+        try:
+            config_file = ConfigFile.load_from_path(path=config_path)
+        except Exception as err:
+            raise typer.BadParameter("Unable to parse config") from err
+
+    return Config.from_sources(config_file, meta_type, source, file_encoding)
 
 
 # noinspection PyUnusedLocal
@@ -114,36 +136,19 @@ CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to 
 @app.command()
 def generate(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
-    path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
-    custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    path: Optional[Path] = typer.Option(None, help="A path to the JSON file"),
+    custom_template_path: Optional[Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    config_path: Optional[Path] = CONFIG_OPTION,
     fail_on_warning: bool = False,
 ) -> None:
     """Generate a new OpenAPI Client library"""
     from . import create_new_client
 
-    if not url and not path:
-        typer.secho("You must either provide --url or --path", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    if url and path:
-        typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-
-    try:
-        codecs.getencoder(file_encoding)
-    except LookupError as err:
-        typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
-        raise typer.Exit(code=1) from err
-
-    config = _process_config(config_path)
+    config = _process_config(url=url, path=path, config_path=config_path, meta_type=meta, file_encoding=file_encoding)
     errors = create_new_client(
-        url=url,
-        path=path,
-        meta=meta,
         custom_template_path=custom_template_path,
-        file_encoding=file_encoding,
         config=config,
     )
     handle_errors(errors, fail_on_warning)
@@ -152,11 +157,11 @@ def generate(
 @app.command()
 def update(
     url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
-    path: Optional[pathlib.Path] = typer.Option(None, help="A path to the JSON file"),
-    custom_template_path: Optional[pathlib.Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
+    path: Optional[Path] = typer.Option(None, help="A path to the JSON file"),
+    custom_template_path: Optional[Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
     meta: MetaType = _meta_option,
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config_path: Optional[pathlib.Path] = CONFIG_OPTION,
+    config_path: Optional[Path] = CONFIG_OPTION,
     fail_on_warning: bool = False,
 ) -> None:
     """Update an existing OpenAPI Client library
@@ -166,26 +171,9 @@ def update(
     """
     from . import update_existing_client
 
-    if not url and not path:
-        typer.secho("You must either provide --url or --path", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    if url and path:
-        typer.secho("Provide either --url or --path, not both", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-
-    try:
-        codecs.getencoder(file_encoding)
-    except LookupError as err:
-        typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
-        raise typer.Exit(code=1) from err
-
-    config = _process_config(config_path)
+    config = _process_config(config_path=config_path, meta_type=meta, url=url, path=path, file_encoding=file_encoding)
     errors = update_existing_client(
-        url=url,
-        path=path,
-        meta=meta,
         custom_template_path=custom_template_path,
-        file_encoding=file_encoding,
         config=config,
     )
     handle_errors(errors, fail_on_warning)

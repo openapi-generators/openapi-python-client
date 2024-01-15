@@ -2,9 +2,9 @@ from typing import Optional
 from unittest.mock import MagicMock
 
 import pytest
+from attr._funcs import evolve
 
 import openapi_python_client.schema as oai
-from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import StringProperty
 
@@ -87,7 +87,7 @@ class TestBuild:
             ),
         ],
     )
-    def test_additional_schemas(self, additional_properties_schema, expected_additional_properties):
+    def test_additional_schemas(self, additional_properties_schema, expected_additional_properties, config):
         from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema.model_construct(
@@ -100,14 +100,14 @@ class TestBuild:
             schemas=Schemas(),
             required=True,
             parent_name="parent",
-            config=Config(),
+            config=config,
             roots={"root"},
             process_properties=True,
         )
 
         assert model.additional_properties == expected_additional_properties
 
-    def test_happy_path(self, model_property_factory, string_property_factory, date_time_property_factory):
+    def test_happy_path(self, model_property_factory, string_property_factory, date_time_property_factory, config):
         from openapi_python_client.parser.properties import Class, ModelProperty, Schemas
 
         name = "prop"
@@ -132,7 +132,7 @@ class TestBuild:
             schemas=schemas,
             required=required,
             parent_name="parent",
-            config=Config(),
+            config=config,
             roots=roots,
             process_properties=True,
         )
@@ -166,7 +166,7 @@ class TestBuild:
             additional_properties=True,
         )
 
-    def test_model_name_conflict(self):
+    def test_model_name_conflict(self, config):
         from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema.model_construct()
@@ -178,7 +178,7 @@ class TestBuild:
             schemas=schemas,
             required=True,
             parent_name=None,
-            config=Config(),
+            config=config,
             roots={"root"},
             process_properties=True,
         )
@@ -206,7 +206,13 @@ class TestBuild:
         ),
     )
     def test_model_naming(
-        self, name: str, title: Optional[str], parent_name: Optional[str], use_title_prefixing: bool, expected: str
+        self,
+        name: str,
+        title: Optional[str],
+        parent_name: Optional[str],
+        use_title_prefixing: bool,
+        expected: str,
+        config,
     ):
         from openapi_python_client.parser.properties import ModelProperty, Schemas
 
@@ -214,19 +220,20 @@ class TestBuild:
             title=title,
             properties={},
         )
+        config = evolve(config, use_path_prefixes_for_title_model_names=use_title_prefixing)
         result = ModelProperty.build(
             data=data,
             name=name,
             schemas=Schemas(),
             required=True,
             parent_name=parent_name,
-            config=Config(use_path_prefixes_for_title_model_names=use_title_prefixing),
+            config=config,
             roots={"root"},
             process_properties=True,
         )[0]
         assert result.class_info.name == expected
 
-    def test_model_bad_properties(self):
+    def test_model_bad_properties(self, config):
         from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         data = oai.Schema(
@@ -240,13 +247,13 @@ class TestBuild:
             schemas=Schemas(),
             required=True,
             parent_name="parent",
-            config=Config(),
+            config=config,
             roots={"root"},
             process_properties=True,
         )[0]
         assert isinstance(result, PropertyError)
 
-    def test_model_bad_additional_properties(self):
+    def test_model_bad_additional_properties(self, config):
         from openapi_python_client.parser.properties import ModelProperty, Schemas
 
         additional_properties = oai.Schema(
@@ -262,13 +269,13 @@ class TestBuild:
             schemas=Schemas(),
             required=True,
             parent_name="parent",
-            config=Config(),
+            config=config,
             roots={"root"},
             process_properties=True,
         )[0]
         assert isinstance(result, PropertyError)
 
-    def test_process_properties_false(self, model_property_factory):
+    def test_process_properties_false(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Class, ModelProperty, Schemas
 
         name = "prop"
@@ -293,7 +300,7 @@ class TestBuild:
             schemas=schemas,
             required=required,
             parent_name="parent",
-            config=Config(),
+            config=config,
             roots=roots,
             process_properties=False,
         )
@@ -318,7 +325,7 @@ class TestBuild:
 
 class TestProcessProperties:
     def test_conflicting_properties_different_types(
-        self, model_property_factory, string_property_factory, date_time_property_factory
+        self, model_property_factory, string_property_factory, date_time_property_factory, config
     ):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
@@ -337,11 +344,11 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_process_properties_reference_not_exist(self):
+    def test_process_properties_reference_not_exist(self, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -351,43 +358,43 @@ class TestProcessProperties:
             },
         )
 
-        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots={"root"})
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_process_properties_all_of_reference_not_exist(self):
+    def test_process_properties_all_of_reference_not_exist(self, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/components/schema/NotExist")])
 
-        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots={"root"})
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_process_properties_model_property_roots(self, model_property_factory):
+    def test_process_properties_model_property_roots(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         roots = {"root"}
         data = oai.Schema(properties={"test_model_property": oai.Schema.model_construct(type="object")})
 
-        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=Config(), roots=roots)
+        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots=roots)
 
         assert all(root in result.optional_props[0].roots for root in roots)
 
-    def test_invalid_reference(self):
+    def test_invalid_reference(self, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
         data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="ThisIsNotGood")])
         schemas = Schemas()
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_non_model_reference(self, enum_property_factory):
+    def test_non_model_reference(self, enum_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -398,11 +405,11 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_reference_not_processed(self, model_property_factory):
+    def test_reference_not_processed(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -413,11 +420,11 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_conflicting_properties_same_types(self, model_property_factory, string_property_factory):
+    def test_conflicting_properties_same_types(self, model_property_factory, string_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -435,11 +442,13 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
-    def test_allof_string_and_string_enum(self, model_property_factory, enum_property_factory, string_property_factory):
+    def test_allof_string_and_string_enum(
+        self, model_property_factory, enum_property_factory, string_property_factory, config
+    ):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -459,10 +468,12 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert result.required_props[0] == enum_property
 
-    def test_allof_string_enum_and_string(self, model_property_factory, enum_property_factory, string_property_factory):
+    def test_allof_string_enum_and_string(
+        self, model_property_factory, enum_property_factory, string_property_factory, config
+    ):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -483,10 +494,10 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert result.optional_props[0] == enum_property
 
-    def test_allof_int_and_int_enum(self, model_property_factory, enum_property_factory, int_property_factory):
+    def test_allof_int_and_int_enum(self, model_property_factory, enum_property_factory, int_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -504,10 +515,12 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert result.required_props[0] == enum_property
 
-    def test_allof_enum_incompatible_type(self, model_property_factory, enum_property_factory, int_property_factory):
+    def test_allof_enum_incompatible_type(
+        self, model_property_factory, enum_property_factory, int_property_factory, config
+    ):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -525,10 +538,10 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
 
-    def test_allof_string_enums(self, model_property_factory, enum_property_factory):
+    def test_allof_string_enums(self, model_property_factory, enum_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -552,10 +565,10 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert result.required_props[0] == enum_property1
 
-    def test_allof_int_enums(self, model_property_factory, enum_property_factory):
+    def test_allof_int_enums(self, model_property_factory, enum_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -579,10 +592,10 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert result.required_props[0] == enum_property2
 
-    def test_allof_enums_are_not_subsets(self, model_property_factory, enum_property_factory):
+    def test_allof_enums_are_not_subsets(self, model_property_factory, enum_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -606,10 +619,10 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
 
-    def test_duplicate_properties(self, model_property_factory, string_property_factory):
+    def test_duplicate_properties(self, model_property_factory, string_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _process_properties
 
@@ -624,7 +637,7 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=Config(), roots={"root"})
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert result.optional_props == [prop], "There should only be one copy of duplicate properties"
 
@@ -694,7 +707,7 @@ class TestProcessProperties:
 
 
 class TestProcessModel:
-    def test_process_model_error(self, mocker, model_property_factory):
+    def test_process_model_error(self, mocker, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import process_model
 
@@ -703,7 +716,7 @@ class TestProcessModel:
         process_property_data = mocker.patch(f"{MODULE_NAME}._process_property_data")
         process_property_data.return_value = (PropertyError(), schemas)
 
-        result = process_model(model_prop=model_prop, schemas=schemas, config=Config())
+        result = process_model(model_prop=model_prop, schemas=schemas, config=config)
 
         assert result == PropertyError()
         assert model_prop.required_properties is None
@@ -711,7 +724,7 @@ class TestProcessModel:
         assert model_prop.relative_imports is None
         assert model_prop.additional_properties is None
 
-    def test_process_model(self, mocker, model_property_factory):
+    def test_process_model(self, mocker, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import _PropertyData, process_model
 
@@ -728,7 +741,7 @@ class TestProcessModel:
         process_property_data = mocker.patch(f"{MODULE_NAME}._process_property_data")
         process_property_data.return_value = ((property_data, additional_properties), schemas)
 
-        result = process_model(model_prop=model_prop, schemas=schemas, config=Config())
+        result = process_model(model_prop=model_prop, schemas=schemas, config=config)
 
         assert result == schemas
         assert model_prop.required_properties == property_data.required_props

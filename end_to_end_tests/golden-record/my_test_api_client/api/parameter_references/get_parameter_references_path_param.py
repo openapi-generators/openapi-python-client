@@ -34,9 +34,7 @@ def _get_kwargs(
 
     _kwargs: Dict[str, Any] = {
         "method": "get",
-        "url": "/parameter-references/{path_param}".format(
-            path_param=path_param,
-        ),
+        "url": f"/parameter-references/{path_param}",
         "params": params,
         "cookies": cookies,
     }

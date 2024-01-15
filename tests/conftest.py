@@ -1,8 +1,11 @@
+from pathlib import Path
 from typing import Any, Callable, Dict
 
 import pytest
 
+from openapi_python_client import Config, MetaType
 from openapi_python_client import schema as oai
+from openapi_python_client.config import ConfigFile
 from openapi_python_client.parser.properties import (
     AnyProperty,
     BooleanProperty,
@@ -19,6 +22,14 @@ from openapi_python_client.parser.properties import (
 )
 from openapi_python_client.schema.openapi_schema_pydantic import Parameter
 from openapi_python_client.schema.parameter_location import ParameterLocation
+
+
+@pytest.fixture(scope="session")
+def config() -> Config:
+    """Create a default config for when it doesn't matter"""
+    return Config.from_sources(
+        ConfigFile(), MetaType.POETRY, document_source=Path("openapi.yaml"), file_encoding="utf-8"
+    )
 
 
 @pytest.fixture

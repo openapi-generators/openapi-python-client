@@ -79,12 +79,11 @@ def regen_custom_template_golden_record():
     gr_path = Path(__file__).parent / "golden-record"
     tpl_gr_path = Path(__file__).parent / "custom-templates-golden-record"
 
-    output_path = Path(tempfile.mkdtemp())
+    output_path = Path.cwd() / "my-test-api-client"
     config_path = Path(__file__).parent / "config.yml"
 
     shutil.rmtree(tpl_gr_path, ignore_errors=True)
 
-    os.chdir(str(output_path.absolute()))
     result = runner.invoke(
         app,
         [
@@ -96,9 +95,8 @@ def regen_custom_template_golden_record():
     )
 
     if result.stdout:
-        generated_output_path = output_path / "my-test-api-client"
-        for f in generated_output_path.glob("**/*"):  # nb: works for Windows and Unix
-            relative_to_generated = f.relative_to(generated_output_path)
+        for f in output_path.glob("**/*"):  # nb: works for Windows and Unix
+            relative_to_generated = f.relative_to(output_path)
             gr_file = gr_path / relative_to_generated
             if not gr_file.exists():
                 print(f"{gr_file} does not exist, ignoring")

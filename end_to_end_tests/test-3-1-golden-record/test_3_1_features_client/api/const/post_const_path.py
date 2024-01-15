@@ -28,9 +28,7 @@ def _get_kwargs(
 
     _kwargs: Dict[str, Any] = {
         "method": "post",
-        "url": "/const/{path}".format(
-            path=path,
-        ),
+        "url": f"/const/{path}",
         "params": params,
     }
 

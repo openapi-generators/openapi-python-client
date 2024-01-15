@@ -21,9 +21,7 @@ def _get_kwargs(
 
     _kwargs: Dict[str, Any] = {
         "method": "get",
-        "url": "/common_parameters_overriding/{param}".format(
-            param=param_path,
-        ),
+        "url": f"/common_parameters_overriding/{param_path}",
         "params": params,
     }
 

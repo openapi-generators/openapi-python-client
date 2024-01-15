@@ -1,13 +1,12 @@
 import attr
 
 import openapi_python_client.schema as oai
-from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import ListProperty
 from openapi_python_client.schema import DataType
 
 
-def test_build_list_property_no_items():
+def test_build_list_property_no_items(config):
     from openapi_python_client.parser import properties
 
     name = "list_prop"
@@ -21,7 +20,7 @@ def test_build_list_property_no_items():
         data=data,
         schemas=schemas,
         parent_name="parent",
-        config=Config(),
+        config=config,
         process_properties=True,
         roots={"root"},
     )
@@ -30,7 +29,7 @@ def test_build_list_property_no_items():
     assert new_schemas == schemas
 
 
-def test_build_list_property_invalid_items():
+def test_build_list_property_invalid_items(config):
     from openapi_python_client.parser import properties
 
     name = "name"
@@ -40,7 +39,6 @@ def test_build_list_property_invalid_items():
         items=oai.Reference(ref="doesnt exist"),
     )
     schemas = properties.Schemas(errors=["error"])
-    config = Config()
     process_properties = False
     roots = {"root"}
 
@@ -61,7 +59,7 @@ def test_build_list_property_invalid_items():
     assert new_schemas == schemas
 
 
-def test_build_list_property(any_property_factory):
+def test_build_list_property(any_property_factory, config):
     from openapi_python_client.parser import properties
 
     name = "prop"
@@ -70,7 +68,6 @@ def test_build_list_property(any_property_factory):
         items=oai.Schema(),
     )
     schemas = properties.Schemas(errors=["error"])
-    config = Config()
 
     p, new_schemas = ListProperty.build(
         name=name,
