@@ -1,9 +1,10 @@
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set
 
 import pytest
+from click.testing import Result
 from typer.testing import CliRunner
 
 from openapi_python_client.cli import app
@@ -13,6 +14,7 @@ def _compare_directories(
     record: Path,
     test_subject: Path,
     expected_differences: Dict[Path, str],
+    expected_missing: Optional[Set[str]] = None,
     ignore: List[str] = None,
     depth=0,
 ):
@@ -28,7 +30,7 @@ def _compare_directories(
     first_printable = record.relative_to(Path.cwd())
     second_printable = test_subject.relative_to(Path.cwd())
     dc = dircmp(record, test_subject, ignore=[".ruff_cache", "__pycache__"] + (ignore or []))
-    missing_files = dc.left_only + dc.right_only
+    missing_files = set(dc.left_only + dc.right_only) - (expected_missing or set())
     if missing_files:
         pytest.fail(
             f"{first_printable} or {second_printable} was missing: {missing_files}",
@@ -77,21 +79,23 @@ def _compare_directories(
 def run_e2e_test(
     openapi_document: str,
     extra_args: List[str],
-    expected_differences: Dict[Path, str],
+    expected_differences: Optional[Dict[Path, str]] = None,
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
-):
+    expected_missing: Optional[Set[str]] = None,
+) -> Result:
     output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
-    generate(extra_args, openapi_document)
+    result = generate(extra_args, openapi_document)
     gr_path = Path(__file__).parent / golden_record_path
 
+    expected_differences = expected_differences or {}
     # Use absolute paths for expected differences for easier comparisons
     expected_differences = {
         output_path.joinpath(key): value for key, value in expected_differences.items()
     }
     _compare_directories(
-        gr_path, output_path, expected_differences=expected_differences
+        gr_path, output_path, expected_differences=expected_differences, expected_missing=expected_missing
     )
 
     import mypy.api
@@ -100,19 +104,31 @@ def run_e2e_test(
     assert status == 0, f"Type checking client failed: {out}"
 
     shutil.rmtree(output_path)
+    return result
 
 
-def generate(extra_args: Optional[List[str]], openapi_document: str):
+def generate(extra_args: Optional[List[str]], openapi_document: str) -> Result:
+    """Generate a client from an OpenAPI document and return the path to the generated code"""
+    _run_command("generate", extra_args, openapi_document)
+
+
+def _run_command(command: str, extra_args: Optional[List[str]] = None, openapi_document: Optional[str] = None, url: Optional[str] = None, config_path: Optional[Path] = None) -> Result:
     """Generate a client from an OpenAPI document and return the path to the generated code"""
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / openapi_document
-    config_path = Path(__file__).parent / "config.yml"
-    args = ["generate", f"--config={config_path}", f"--path={openapi_path}"]
+    if openapi_document is not None:
+        openapi_path = Path(__file__).parent / openapi_document
+        source_arg = f"--path={openapi_path}"
+    else:
+        source_arg = f"--url={url}"
+    config_path = config_path or (Path(__file__).parent / "config.yml")
+    args = [command, f"--config={config_path}", source_arg]
     if extra_args:
         args.extend(extra_args)
     result = runner.invoke(app, args)
     if result.exit_code != 0:
-        raise result.exception
+        raise Exception(result.stdout)
+    return result
+
 
 def test_baseline_end_to_end_3_0():
     run_e2e_test("baseline_openapi_3.0.json", [], {})
@@ -147,19 +163,22 @@ def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[
 
     if generated_file and expected_file:
         assert (output_path / generated_file).exists()
-        assert (output_path / generated_file).read_text() == (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+        assert (
+            (output_path / generated_file).read_text() ==
+            (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+        )
 
     shutil.rmtree(output_path)
 
 
-def test_no_meta():
-    output_path = Path.cwd() / "test_3_1_features_client"
-    shutil.rmtree(output_path, ignore_errors=True)
-    generate([f"--meta=none"], "3.1_specific.openapi.yaml")
-
-    assert output_path.exists()  # Has a different name than with-meta generation
-    assert (output_path / "__init__.py").exists()
-    shutil.rmtree(output_path)
+def test_none_meta():
+    run_e2e_test(
+        "3.1_specific.openapi.yaml",
+        ["--meta=none"],
+        golden_record_path="test-3-1-golden-record/test_3_1_features_client",
+        output_path="test_3_1_features_client",
+        expected_missing={"py.typed"},
+    )
 
 
 def test_custom_templates():
@@ -194,3 +213,76 @@ def test_custom_templates():
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates/"],
         expected_differences=expected_differences,
     )
+
+
+@pytest.mark.parametrize(
+    "command", ("generate", "update")
+)
+def test_bad_url(command: str):
+    runner = CliRunner()
+    result = runner.invoke(app, [command, "--url=not_a_url"])
+    assert result.exit_code == 1
+    assert "Could not get OpenAPI document from provided URL" in result.stdout
+
+
+def test_custom_post_hooks():
+    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+    runner = CliRunner()
+    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+    config_path = Path(__file__).parent / "custom_post_hooks.config.yml"
+    result = runner.invoke(app, ["generate", f"--path={openapi_document}", f"--config={config_path}"])
+    assert result.exit_code == 1
+    assert "this should fail" in result.stdout
+    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+
+
+def test_generate_dir_already_exists():
+    project_dir = Path.cwd() / "my-test-api-client"
+    if not project_dir.exists():
+        project_dir.mkdir()
+    runner = CliRunner()
+    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
+    assert result.exit_code == 1
+    assert "Directory already exists" in result.stdout
+    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+
+
+def test_update_dir_not_found():
+    project_dir = Path.cwd() / "my-test-api-client"
+    shutil.rmtree(project_dir, ignore_errors=True)
+    runner = CliRunner()
+    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+    result = runner.invoke(app, ["update", f"--path={openapi_document}"])
+    assert result.exit_code == 1
+    assert str(project_dir) in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("file_name", "content", "expected_error"),
+    (
+        ("invalid_openapi.yaml", "not a valid openapi document", "Failed to parse OpenAPI document"),
+        ("invalid_json.json", "Invalid JSON", "Invalid JSON"),
+        ("invalid_yaml.yaml", "{", "Invalid YAML"),
+    ),
+    ids=("invalid_openapi", "invalid_json", "invalid_yaml")
+)
+def test_invalid_openapi_document(file_name, content, expected_error):
+    runner = CliRunner()
+    openapi_document = Path.cwd() / file_name
+    openapi_document.write_text(content)
+    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
+    assert result.exit_code == 1
+    assert expected_error in result.stdout
+    openapi_document.unlink()
+
+
+def test_update_integration_tests():
+    url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json"
+    source_path = Path(__file__).parent.parent / "integration-tests"
+    project_path = Path.cwd() / "integration-tests"
+    if source_path != project_path:  # Just in case someone runs this from root dir
+        shutil.copytree(source_path, project_path)
+    config_path = project_path / "config.yaml"
+    _run_command("update", url=url, config_path=config_path)
+    _compare_directories(source_path, project_path, expected_differences={})

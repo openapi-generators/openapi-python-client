@@ -4,7 +4,7 @@ import pydantic
 import pytest
 
 import openapi_python_client.schema as oai
-from openapi_python_client import Config, GeneratorError
+from openapi_python_client import GeneratorError
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
@@ -245,7 +245,7 @@ class TestEndpoint:
             (oai.DataType.OBJECT, False),
         ],
     )
-    def test_add_parameters_header_types(self, data_type, allowed):
+    def test_add_parameters_header_types(self, data_type, allowed, config):
         from openapi_python_client.parser.openapi import Endpoint
 
         endpoint = self.make_endpoint()
@@ -254,7 +254,6 @@ class TestEndpoint:
         param = oai.Parameter.model_construct(
             name="test", required=True, param_schema=oai.Schema(type=data_type), param_in=oai.ParameterLocation.HEADER
         )
-        config = Config()
 
         result = Endpoint.add_parameters(
             endpoint=endpoint,
@@ -268,7 +267,7 @@ class TestEndpoint:
         else:
             assert isinstance(result[0], ParseError)
 
-    def test__add_parameters_parse_error_on_non_required_path_param(self):
+    def test__add_parameters_parse_error_on_non_required_path_param(self, config):
         endpoint = self.make_endpoint()
         param = oai.Parameter.model_construct(
             name="test",
@@ -284,7 +283,7 @@ class TestEndpoint:
             data=oai.Operation.model_construct(parameters=[param]),
             parameters=parameters,
             schemas=schemas,
-            config=Config(),
+            config=config,
         )
         assert result == (ParseError(data=param, detail="Path parameter must be required"), schemas, parameters)
 
@@ -392,7 +391,7 @@ class TestEndpoint:
         assert isinstance(result, ParseError)
         assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
 
-    def test__add_parameters_handles_invalid_references(self):
+    def test__add_parameters_handles_invalid_references(self, config):
         """References are not supported as direct params yet"""
         endpoint = self.make_endpoint()
         data = oai.Operation.model_construct(
@@ -403,13 +402,13 @@ class TestEndpoint:
 
         parameters = Parameters()
         (error, _, return_parameters) = endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=Schemas(), parameters=parameters, config=Config()
+            endpoint=endpoint, data=data, schemas=Schemas(), parameters=parameters, config=config
         )
 
         assert isinstance(error, ParseError)
         assert parameters == return_parameters
 
-    def test__add_parameters_resolves_references(self, mocker, param_factory):
+    def test__add_parameters_resolves_references(self, mocker, param_factory, config):
         """References are not supported as direct params yet"""
         endpoint = self.make_endpoint()
         data = oai.Operation.model_construct(
@@ -426,13 +425,13 @@ class TestEndpoint:
         parameters.classes_by_reference = {"components/parameters/blah": new_param}
 
         (endpoint, _, return_parameters) = endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=Schemas(), parameters=parameters, config=Config()
+            endpoint=endpoint, data=data, schemas=Schemas(), parameters=parameters, config=config
         )
 
         assert isinstance(endpoint, Endpoint)
         assert parameters == return_parameters
 
-    def test__add_parameters_skips_params_without_schemas(self):
+    def test__add_parameters_skips_params_without_schemas(self, config):
         """Params without schemas are allowed per spec, but the any type doesn't make sense as a parameter"""
         endpoint = self.make_endpoint()
         data = oai.Operation.model_construct(
@@ -445,13 +444,13 @@ class TestEndpoint:
         )
 
         (endpoint, _, _) = endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=Config()
+            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=config
         )
 
         assert isinstance(endpoint, Endpoint)
         assert len(endpoint.path_parameters) == 0
 
-    def test__add_parameters_same_identifier_conflict(self):
+    def test__add_parameters_same_identifier_conflict(self, config):
         endpoint = self.make_endpoint()
         data = oai.Operation.model_construct(
             parameters=[
@@ -476,13 +475,13 @@ class TestEndpoint:
         )
 
         (err, _, _) = endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=Config()
+            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=config
         )
 
         assert isinstance(err, ParseError)
         assert "param_path" in err.detail
 
-    def test__add_parameters_query_optionality(self):
+    def test__add_parameters_query_optionality(self, config):
         endpoint = self.make_endpoint()
         data = oai.Operation.model_construct(
             parameters=[
@@ -502,7 +501,7 @@ class TestEndpoint:
         )
 
         (endpoint, _, _) = endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=Config()
+            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=config
         )
 
         assert len(endpoint.query_parameters) == 2, "Not all query params were added"  # noqa: PLR2004
@@ -512,7 +511,7 @@ class TestEndpoint:
             else:
                 assert not param.required
 
-    def test_add_parameters_duplicate_properties(self):
+    def test_add_parameters_duplicate_properties(self, config):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
@@ -522,7 +521,6 @@ class TestEndpoint:
         data = oai.Operation.model_construct(parameters=[param, param])
         schemas = Schemas()
         parameters = Parameters()
-        config = MagicMock()
 
         result = Endpoint.add_parameters(
             endpoint=endpoint, data=data, schemas=schemas, parameters=parameters, config=config
@@ -538,7 +536,7 @@ class TestEndpoint:
             parameters,
         )
 
-    def test_add_parameters_duplicate_properties_different_location(self):
+    def test_add_parameters_duplicate_properties_different_location(self, config):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 
         endpoint = self.make_endpoint()
@@ -550,7 +548,6 @@ class TestEndpoint:
         )
         schemas = Schemas()
         parameters = Parameters()
-        config = MagicMock()
 
         result = Endpoint.add_parameters(
             endpoint=endpoint,
@@ -607,7 +604,7 @@ class TestEndpoint:
         assert "Incorrect path templating" in result.detail
         assert endpoint.path in result.detail
 
-    def test_from_data_bad_params(self, mocker):
+    def test_from_data_bad_params(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint
 
         path = mocker.MagicMock()
@@ -624,7 +621,6 @@ class TestEndpoint:
         )
         initial_schemas = mocker.MagicMock()
         parameters = Parameters()
-        config = MagicMock()
 
         result = Endpoint.from_data(
             data=data,
@@ -638,7 +634,7 @@ class TestEndpoint:
 
         assert result == (parse_error, return_schemas, return_parameters)
 
-    def test_from_data_bad_responses(self, mocker):
+    def test_from_data_bad_responses(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint
 
         path = mocker.MagicMock()
@@ -659,7 +655,6 @@ class TestEndpoint:
         )
         initial_schemas = mocker.MagicMock()
         initial_parameters = mocker.MagicMock()
-        config = MagicMock()
 
         result = Endpoint.from_data(
             data=data,
@@ -673,7 +668,7 @@ class TestEndpoint:
 
         assert result == (parse_error, response_schemas, return_parameters)
 
-    def test_from_data_standard(self, mocker):
+    def test_from_data_standard(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint
 
         path = mocker.MagicMock()
@@ -697,7 +692,6 @@ class TestEndpoint:
         )
         initial_schemas = mocker.MagicMock()
         initial_parameters = mocker.MagicMock()
-        config = MagicMock()
 
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
 
@@ -730,7 +724,7 @@ class TestEndpoint:
             endpoint=param_endpoint, data=data.responses, schemas=param_schemas, config=config
         )
 
-    def test_from_data_no_operation_id(self, mocker):
+    def test_from_data_no_operation_id(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint
 
         path = "/path/with/{param}/"
@@ -749,7 +743,6 @@ class TestEndpoint:
         )
         schemas = mocker.MagicMock()
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
-        config = MagicMock()
         parameters = mocker.MagicMock()
 
         endpoint, return_schemas, return_params = Endpoint.from_data(
@@ -778,7 +771,7 @@ class TestEndpoint:
             config=config,
         )
 
-    def test_from_data_no_security(self, mocker):
+    def test_from_data_no_security(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint
 
         data = oai.Operation.model_construct(
@@ -798,7 +791,6 @@ class TestEndpoint:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
-        config = MagicMock()
 
         Endpoint.from_data(
             data=data, path=path, method=method, tag="a", schemas=schemas, parameters=parameters, config=config
@@ -826,7 +818,7 @@ class TestEndpoint:
             config=config,
         )
 
-    def test_from_data_some_bad_bodies(self):
+    def test_from_data_some_bad_bodies(self, config):
         endpoint, _, _ = Endpoint.from_data(
             data=oai.Operation(
                 responses={},
@@ -838,7 +830,7 @@ class TestEndpoint:
                 ),
             ),
             schemas=Schemas(),
-            config=Config(),
+            config=config,
             parameters=Parameters(),
             tag="tag",
             path="/",
@@ -849,7 +841,7 @@ class TestEndpoint:
         assert len(endpoint.bodies) == 1
         assert len(endpoint.errors) == 1
 
-    def test_from_data_all_bodies_bad(self):
+    def test_from_data_all_bodies_bad(self, config):
         endpoint, _, _ = Endpoint.from_data(
             data=oai.Operation(
                 responses={},
@@ -860,7 +852,7 @@ class TestEndpoint:
                 ),
             ),
             schemas=Schemas(),
-            config=Config(),
+            config=config,
             parameters=Parameters(),
             tag="tag",
             path="/",
@@ -905,7 +897,7 @@ class TestImportStringFromReference:
 
 
 class TestEndpointCollection:
-    def test_from_data(self, mocker):
+    def test_from_data(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 
         path_1_put = oai.Operation.model_construct()
@@ -935,7 +927,6 @@ class TestEndpointCollection:
         )
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
-        config = MagicMock()
 
         result = EndpointCollection.from_data(data=data, schemas=schemas, parameters=parameters, config=config)
 
@@ -979,7 +970,7 @@ class TestEndpointCollection:
             parameters_3,
         )
 
-    def test_from_data_overrides_path_item_params_with_operation_params(self):
+    def test_from_data_overrides_path_item_params_with_operation_params(self, config):
         data = {
             "/": oai.PathItem.model_construct(
                 parameters=[
@@ -1002,12 +993,12 @@ class TestEndpointCollection:
             data=data,
             schemas=Schemas(),
             parameters=Parameters(),
-            config=Config(),
+            config=config,
         )
         collection: EndpointCollection = collections["default"]
         assert isinstance(collection.endpoints[0].query_parameters["param"], IntProperty)
 
-    def test_from_data_errors(self, mocker):
+    def test_from_data_errors(self, mocker, config):
         from openapi_python_client.parser.openapi import ParseError
 
         path_1_put = oai.Operation.model_construct()
@@ -1034,7 +1025,6 @@ class TestEndpointCollection:
         )
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
-        config = MagicMock()
 
         result, result_schemas, result_parameters = EndpointCollection.from_data(
             data=data, schemas=schemas, config=config, parameters=parameters
@@ -1076,7 +1066,7 @@ class TestEndpointCollection:
         assert result["tag_2"].parse_errors[0].data == "2"
         assert result_schemas == schemas_3
 
-    def test_from_data_tags_snake_case_sanitizer(self, mocker):
+    def test_from_data_tags_snake_case_sanitizer(self, mocker, config):
         from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 
         path_1_put = oai.Operation.model_construct()
@@ -1108,7 +1098,6 @@ class TestEndpointCollection:
         )
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
-        config = MagicMock()
 
         result = EndpointCollection.from_data(data=data, schemas=schemas, parameters=parameters, config=config)
 

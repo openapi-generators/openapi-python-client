@@ -149,11 +149,6 @@ jobs:
           pip install pdm
           python -m venv .venv
           pdm install
-      - name: Regenerate Integration Client
-        run: |
-          pdm run openapi-python-client update --url http://localhost:3000/openapi.json --config integration-tests-config.yaml --meta pdm
-      - name: Check for any file changes
-        run: python .github/check_for_changes.py
       - name: Cache Generated Client Dependencies
         uses: actions/cache@v3
         with:
