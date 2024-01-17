@@ -27,7 +27,7 @@ jobs:
         shell: bash
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
@@ -138,7 +138,7 @@ jobs:
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
@@ -150,7 +150,7 @@ jobs:
           python -m venv .venv
           pdm install
       - name: Cache Generated Client Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: integration-tests/.venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/pdm.lock') }}
