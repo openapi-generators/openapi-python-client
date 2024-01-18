@@ -62,13 +62,16 @@ class EndpointCollection:
                 operation: Optional[oai.Operation] = getattr(path_data, method)
                 if operation is None:
                     continue
-                tag = utils.PythonIdentifier(value=(operation.tags or ["default"])[0], prefix="tag")
-                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
+
+                tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in operation.tags or ["default"]]
+
+                collections = [endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag)) for tag in tags]
+
                 endpoint, schemas, parameters = Endpoint.from_data(
                     data=operation,
                     path=path,
                     method=method,
-                    tag=tag,
+                    tags=tags,
                     schemas=schemas,
                     parameters=parameters,
                     config=config,
@@ -85,15 +88,16 @@ class EndpointCollection:
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
-                    endpoint.header = (
-                        f"WARNING parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
-                    )
-                    collection.parse_errors.append(endpoint)
+                    endpoint.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}. Endpoint will not be generated."
+                    for collection in collections:
+                        collection.parse_errors.append(endpoint)
                     continue
                 for error in endpoint.errors:
-                    error.header = f"WARNING parsing {method.upper()} {path} within {tag}."
-                    collection.parse_errors.append(error)
-                collection.endpoints.append(endpoint)
+                    error.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}."
+                    for collection in collections:
+                        collection.parse_errors.append(error)
+                for collection in collections:
+                    collection.endpoints.append(endpoint)
 
         return endpoints_by_tag, schemas, parameters
 
@@ -131,7 +135,7 @@ class Endpoint:
     description: Optional[str]
     name: str
     requires_security: bool
-    tag: str
+    tags: List[str]
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
     query_parameters: Dict[str, Property] = field(default_factory=dict)
@@ -376,7 +380,7 @@ class Endpoint:
         data: oai.Operation,
         path: str,
         method: str,
-        tag: str,
+        tags: List[str],
         schemas: Schemas,
         parameters: Parameters,
         config: Config,
@@ -395,7 +399,7 @@ class Endpoint:
             description=utils.remove_string_escapes(data.description) if data.description else "",
             name=name,
             requires_security=bool(data.security),
-            tag=tag,
+            tags=tags,
         )
 
         result, schemas, parameters = Endpoint.add_parameters(
