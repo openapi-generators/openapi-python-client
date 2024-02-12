@@ -2543,6 +2543,55 @@ info:
     "ModelWithBackslashInDescription": {
       "type": "object",
       "description": "Description with special character: \\"
+    },
+    "ModelWithDiscriminatedUnion": {
+      "type": "object",
+      "properties": {
+        "discriminated_union": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/ADiscriminatedUnion"
+            },
+            {
+              "type": "null"
+            }
+          ],
+        }
+      }
+    },
+    "ADiscriminatedUnion": {
+      "type": "object",
+      "discriminator": {
+        "propertyName": "modelType",
+        "mapping": {
+          "type1": "#/components/schemas/ADiscriminatedUnionType1",
+          "type2": "#/components/schemas/ADiscriminatedUnionType2"
+        }
+      },
+      "oneOf": [
+        {
+          "$ref": "#/components/schemas/ADiscriminatedUnionType1"
+        },
+        {
+          "$ref": "#/components/schemas/ADiscriminatedUnionType2"
+        }
+      ]
+    },
+    "ADiscriminatedUnionType1": {
+      "type": "object",
+      "properties": {
+        "modelType": {
+          "type": "string"
+        }
+      }
+    },
+    "ADiscriminatedUnionType2": {
+      "type": "object",
+      "properties": {
+        "modelType": {
+          "type": "string"
+        }
+      }
     }
   },
   "parameters": {

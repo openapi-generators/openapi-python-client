@@ -67,6 +67,17 @@ class UnionProperty(PropertyProtocol):
                 return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
             sub_properties.append(sub_prop)
 
+        def flatten_union_properties(sub_properties: list[PropertyProtocol]) -> list[PropertyProtocol]:
+            flattened = []
+            for sub_prop in sub_properties:
+                if isinstance(sub_prop, UnionProperty):
+                    flattened.extend(flatten_union_properties(sub_prop.inner_properties))
+                else:
+                    flattened.append(sub_prop)
+            return flattened
+
+        sub_properties = flatten_union_properties(sub_properties)
+
         prop = UnionProperty(
             name=name,
             required=required,
