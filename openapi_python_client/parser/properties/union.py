@@ -28,7 +28,14 @@ class UnionProperty(PropertyProtocol):
 
     @classmethod
     def build(
-        cls, *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
+        cls,
+        *,
+        data: oai.Schema,
+        name: str,
+        required: bool,
+        schemas: Schemas,
+        parent_name: str,
+        config: Config,
     ) -> tuple[UnionProperty | PropertyError, Schemas]:
         """
         Create a `UnionProperty` the right way.
@@ -55,8 +62,19 @@ class UnionProperty(PropertyProtocol):
                 type_list_data.append(data.model_copy(update={"type": _type, "default": None}))
 
         for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
+            # If a schema has a unique title property, we can use that to carry forward a descriptive name instead of "type_0"
+            subscript: str
+            if (
+                isinstance(sub_prop_data, oai.Schema)
+                and sub_prop_data.title is not None
+                and sub_prop_data.title != data.title
+            ):
+                subscript = sub_prop_data.title
+            else:
+                subscript = f"type_{i}"
+
             sub_prop, schemas = property_from_data(
-                name=f"{name}_type_{i}",
+                name=f"{name}_{subscript}",
                 required=True,
                 data=sub_prop_data,
                 schemas=schemas,
@@ -64,7 +82,10 @@ class UnionProperty(PropertyProtocol):
                 config=config,
             )
             if isinstance(sub_prop, PropertyError):
-                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
+                return (
+                    PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data),
+                    schemas,
+                )
             sub_properties.append(sub_prop)
 
         def flatten_union_properties(sub_properties: list[PropertyProtocol]) -> list[PropertyProtocol]:
@@ -108,7 +129,12 @@ class UnionProperty(PropertyProtocol):
 
     def _get_inner_type_strings(self, json: bool) -> set[str]:
         return {
-            p.get_type_string(no_optional=True, json=json, quoted=not p.is_base_type) for p in self.inner_properties
+            p.get_type_string(
+                no_optional=True,
+                json=json,
+                quoted=not p.is_base_type,
+            )
+            for p in self.inner_properties
         }
 
     @staticmethod

@@ -6,8 +6,8 @@ from attrs import define as _attrs_define
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-    from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+    from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
+    from ..models.model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 
 
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
@@ -17,18 +17,18 @@ T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 class ModelWithUnionPropertyInlined:
     """
     Attributes:
-        fruit (Union['ModelWithUnionPropertyInlinedFruitType0', 'ModelWithUnionPropertyInlinedFruitType1', Unset]):
+        fruit (Union['ModelWithUnionPropertyInlinedApples', 'ModelWithUnionPropertyInlinedBananas', Unset]):
     """
 
-    fruit: Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset] = UNSET
+    fruit: Union["ModelWithUnionPropertyInlinedApples", "ModelWithUnionPropertyInlinedBananas", Unset] = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+        from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
 
         fruit: Union[Unset, dict[str, Any]]
         if isinstance(self.fruit, Unset):
             fruit = UNSET
-        elif isinstance(self.fruit, ModelWithUnionPropertyInlinedFruitType0):
+        elif isinstance(self.fruit, ModelWithUnionPropertyInlinedApples):
             fruit = self.fruit.to_dict()
         else:
             fruit = self.fruit.to_dict()
@@ -43,29 +43,29 @@ class ModelWithUnionPropertyInlined:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-        from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+        from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
+        from ..models.model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 
         d = dict(src_dict)
 
         def _parse_fruit(
             data: object,
-        ) -> Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset]:
+        ) -> Union["ModelWithUnionPropertyInlinedApples", "ModelWithUnionPropertyInlinedBananas", Unset]:
             if isinstance(data, Unset):
                 return data
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(data)
+                fruit_apples = ModelWithUnionPropertyInlinedApples.from_dict(data)
 
-                return fruit_type_0
+                return fruit_apples
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(data)
+            fruit_bananas = ModelWithUnionPropertyInlinedBananas.from_dict(data)
 
-            return fruit_type_1
+            return fruit_bananas
 
         fruit = _parse_fruit(d.pop("fruit", UNSET))
 
