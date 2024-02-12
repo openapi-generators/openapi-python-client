@@ -423,7 +423,7 @@ class TestPropertyFromData:
         # None / null is removed from enum, and property is now nullable
         assert isinstance(prop, UnionProperty), "Enums with None should be converted to UnionProperties"
         enum_prop = enum_property_factory(
-            name="my_enum_type_1",
+            name="my_enum_type_AnEnum",
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
