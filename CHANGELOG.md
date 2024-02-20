@@ -13,6 +13,18 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.17.3 (2024-02-20)
+
+### Fixes
+
+#### Remove spurious field_dict.update({}) for types without properties (#969)
+
+#### Fix invalid type check for nested unions
+
+Nested union types (unions of unions) were generating `isinstance()` checks that were not valid (at least for Python 3.9).
+
+Thanks to @codebutler for PR #959 which fixes #958 and #967.
+
 ## 0.17.2 (2024-01-15)
 
 ### Features
