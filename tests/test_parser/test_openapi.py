@@ -151,6 +151,36 @@ class TestEndpoint:
         ]
         response_from_data.assert_not_called()
 
+    def test__add_responses__wildcard_response(self, mocker):
+        from openapi_python_client.parser.openapi import Endpoint, Schemas
+
+        schemas = Schemas()
+        response_1_data = mocker.MagicMock()
+        data = {
+            "2XX": response_1_data,
+        }
+        endpoint = self.make_endpoint()
+        parse_error = ParseError(data=mocker.MagicMock())
+        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
+        config = MagicMock()
+
+        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas, config=config)
+
+        response_from_data.assert_has_calls(
+            [
+                mocker.call(status_code=200, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=201, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=202, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=203, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=204, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=205, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=206, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=207, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=208, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(status_code=226, data=response_1_data, schemas=schemas, parent_name="name", config=config),
+            ]
+        )
+
     def test__add_responses_error(self, mocker):
         from openapi_python_client.parser.openapi import Endpoint, Schemas
 

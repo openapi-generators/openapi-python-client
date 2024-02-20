@@ -120,6 +120,21 @@ class RequestBodyParser(Protocol):
         ...  # pragma: no cover
 
 
+def get_status_codes_from_string(code: Union[int, str]) -> List[HTTPStatus]:
+    """Interpret HTTP status code patterns and return a list of HTTPStatus instances."""
+    if isinstance(code, str) and "XX" in code:
+        start_number = int(code[0])
+
+        start_range = start_number * 100
+        end_range = start_range + 100
+
+        return [
+            HTTPStatus(status) for status in range(start_range, end_range) if status in HTTPStatus._value2member_map_
+        ]
+
+    return [HTTPStatus(int(code))]
+
+
 @dataclass
 class Endpoint:
     """
@@ -149,9 +164,8 @@ class Endpoint:
     ) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-            status_code: HTTPStatus
             try:
-                status_code = HTTPStatus(int(code))
+                parsable_codes = get_status_codes_from_string(code)
             except ValueError:
                 endpoint.errors.append(
                     ParseError(
@@ -164,30 +178,31 @@ class Endpoint:
                 )
                 continue
 
-            response, schemas = response_from_data(
-                status_code=status_code,
-                data=response_data,
-                schemas=schemas,
-                parent_name=endpoint.name,
-                config=config,
-            )
-            if isinstance(response, ParseError):
-                detail_suffix = "" if response.detail is None else f" ({response.detail})"
-                endpoint.errors.append(
-                    ParseError(
-                        detail=(
-                            f"Cannot parse response for status code {status_code}{detail_suffix}, "
-                            f"response will be ommitted from generated client"
-                        ),
-                        data=response.data,
-                    )
+            for status_code in parsable_codes:
+                response, schemas = response_from_data(
+                    status_code=status_code,
+                    data=response_data,
+                    schemas=schemas,
+                    parent_name=endpoint.name,
+                    config=config,
                 )
-                continue
+                if isinstance(response, ParseError):
+                    detail_suffix = "" if response.detail is None else f" ({response.detail})"
+                    endpoint.errors.append(
+                        ParseError(
+                            detail=(
+                                f"Cannot parse response for status code {status_code}{detail_suffix}, "
+                                f"response will be ommitted from generated client"
+                            ),
+                            data=response.data,
+                        )
+                    )
+                    continue
 
-            # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-            endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
-            endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
-            endpoint.responses.append(response)
+                # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
+                endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
+                endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
+                endpoint.responses.append(response)
         return endpoint, schemas
 
     @staticmethod
