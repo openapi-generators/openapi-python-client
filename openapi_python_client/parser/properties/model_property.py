@@ -267,6 +267,17 @@ def _merge_properties(first: Property, second: Property) -> Property | PropertyE
     )
 
 
+def _resolve_naming_conflict(first: Property, second: Property, config: Config) -> PropertyError | None:
+    first.set_python_name(first.name, config=config, skip_snake_case=True)
+    second.set_python_name(second.name, config=config, skip_snake_case=True)
+    if first.python_name == second.python_name:
+        return PropertyError(
+            header="Conflicting property names",
+            detail=f"Properties {first.name} and {second.name} have the same python_name",
+        )
+    return None
+
+
 class _PropertyData(NamedTuple):
     optional_props: list[Property]
     required_props: list[Property]
@@ -293,13 +304,23 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     def _add_if_no_conflict(new_prop: Property) -> PropertyError | None:
         nonlocal properties
 
-        existing = properties.get(new_prop.name)
-        merged_prop_or_error = _merge_properties(existing, new_prop) if existing else new_prop
+        name_conflict = properties.get(new_prop.name)
+        merged_prop_or_error = _merge_properties(name_conflict, new_prop) if name_conflict else new_prop
         if isinstance(merged_prop_or_error, PropertyError):
             merged_prop_or_error.header = (
                 f"Found conflicting properties named {new_prop.name} when creating {class_name}"
             )
             return merged_prop_or_error
+
+        for other_prop in properties.values():
+            if other_prop.name == merged_prop_or_error.name:
+                continue  # Same property, probably just got merged
+            if other_prop.python_name != merged_prop_or_error.python_name:
+                continue
+            naming_error = _resolve_naming_conflict(merged_prop_or_error, other_prop, config)
+            if naming_error is not None:
+                return naming_error
+
         properties[merged_prop_or_error.name] = merged_prop_or_error
         return None
 

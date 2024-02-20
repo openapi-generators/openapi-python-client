@@ -12,8 +12,11 @@ DELIMITERS = r"\. _-"
 class PythonIdentifier(str):
     """A snake_case string which has been validated / transformed into a valid identifier for Python"""
 
-    def __new__(cls, value: str, prefix: str) -> PythonIdentifier:
-        new_value = fix_reserved_words(snake_case(sanitize(value)))
+    def __new__(cls, value: str, prefix: str, skip_snake_case: bool = False) -> PythonIdentifier:
+        new_value = sanitize(value)
+        if not skip_snake_case:
+            new_value = snake_case(new_value)
+        new_value = fix_reserved_words(new_value)
 
         if not new_value.isidentifier() or value.startswith("_"):
             new_value = f"{prefix}{new_value}"

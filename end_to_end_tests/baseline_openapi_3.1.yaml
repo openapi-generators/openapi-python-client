@@ -1407,6 +1407,50 @@ info:
       }
     }
   },
+  "/naming/mixed-case": {
+    "get": {
+      "tags": [ "naming" ],
+      "operationId": "mixed_case",
+      "parameters": [
+        {
+          "name": "mixed_case",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "mixedCase",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mixed_case": {
+                    "type": "string"
+                  },
+                  "mixedCase": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "/parameter-references/{path_param}": {
     "get": {
       "tags": [

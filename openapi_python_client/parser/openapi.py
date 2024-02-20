@@ -134,14 +134,13 @@ class Endpoint:
     tag: str
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
-    header_parameters: Dict[str, Property] = field(default_factory=dict)
-    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
+    query_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
+    path_parameters: "OrderedDict[PythonIdentifier, Property]" = field(default_factory=OrderedDict)
+    header_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
+    cookie_parameters: Dict[PythonIdentifier, Property] = field(default_factory=dict)
     responses: List[Response] = field(default_factory=list)
     bodies: List[Body] = field(default_factory=list)
     errors: List[ParseError] = field(default_factory=list)
-    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
     def _add_responses(
@@ -228,7 +227,7 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location: Dict[str, Dict[str, Property]] = {
+        parameters_by_location: Dict[str, Dict[PythonIdentifier, Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
@@ -303,41 +302,39 @@ class Endpoint:
                 # This parameter was defined in the Operation, so ignore the PathItem definition
                 continue
 
+            # Check for conflicting parameters
             for location, parameters_dict in parameters_by_location.items():
-                if location == param.param_in or prop.name not in parameters_dict:
+                conflicting_prop = parameters_dict.pop(prop.python_name, None)
+                if conflicting_prop is None:
                     continue
-                existing_prop: Property = parameters_dict[prop.name]
-                # Existing should be converted too for consistency
-                endpoint.used_python_identifiers.discard(existing_prop.python_name)
-                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
 
-                if existing_prop.python_name in endpoint.used_python_identifiers:
+                if location != param.param_in:  # Use the location to differentiate
+                    conflicting_prop.set_python_name(new_name=f"{conflicting_prop.python_name}_{location}", config=config)
+                    prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
+                elif conflicting_prop.name != prop.name:  # Use the name to differentiate
+                    conflicting_prop.set_python_name(new_name=conflicting_prop.name, config=config, skip_snake_case=True)
+                    prop.set_python_name(new_name=prop.name, config=config, skip_snake_case=True)
+                parameters_dict[conflicting_prop.python_name] = conflicting_prop
+
+                conflicting_name = None
+                if conflicting_prop.python_name in location:
+                    conflicting_name = conflicting_prop.python_name
+                elif prop.python_name in parameters_by_location[param.param_in]:
+                    conflicting_name = prop.python_name
+                if conflicting_name is not None:
                     return (
                         ParseError(
-                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
+                            detail=f"Parameters with same Python identifier `{conflicting_name}` detected",
                             data=data,
                         ),
                         schemas,
                         parameters,
                     )
-                endpoint.used_python_identifiers.add(existing_prop.python_name)
-                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
-
-            if prop.python_name in endpoint.used_python_identifiers:
-                return (
-                    ParseError(
-                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected",
-                        data=data,
-                    ),
-                    schemas,
-                    parameters,
-                )
 
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
             endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
-            endpoint.used_python_identifiers.add(prop.python_name)
-            parameters_by_location[param.param_in][prop.name] = prop
+            parameters_by_location[param.param_in][prop.python_name] = prop
 
         return endpoint, schemas, parameters
 
