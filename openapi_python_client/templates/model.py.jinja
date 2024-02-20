@@ -109,6 +109,7 @@ field_dict.update({
 field_dict.update(self.additional_properties)
 {% endif %}
 {% endif %}
+{% if model.required_properties | length > 0 or model.optional_properties | length > 0 %}
 field_dict.update({
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -116,6 +117,7 @@ field_dict.update({
     {% endif %}
     {% endfor %}
 })
+{% endif %}
 {% for property in model.optional_properties %}
 {% if not property.required %}
 if {{ property.python_name }} is not UNSET:

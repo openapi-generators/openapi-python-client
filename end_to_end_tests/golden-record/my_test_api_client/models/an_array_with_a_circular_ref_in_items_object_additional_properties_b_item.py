@@ -32,8 +32,6 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
                     componentsschemas_an_array_with_a_circular_ref_in_items_object_additional_properties_a_item
                 )
 
-        field_dict.update({})
-
         return field_dict
 
     @classmethod
