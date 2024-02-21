@@ -74,9 +74,9 @@ def sync_detailed(
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
-        path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        path (Literal['this goes in the path']):
         body (PostConstPathBody):
 
     Raises:
@@ -111,9 +111,9 @@ def sync(
 ) -> Optional[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
-        path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        path (Literal['this goes in the path']):
         body (PostConstPathBody):
 
     Raises:
@@ -143,9 +143,9 @@ async def asyncio_detailed(
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
-        path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        path (Literal['this goes in the path']):
         body (PostConstPathBody):
 
     Raises:
@@ -178,9 +178,9 @@ async def asyncio(
 ) -> Optional[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
-        path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
         optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        path (Literal['this goes in the path']):
         body (PostConstPathBody):
 
     Raises:

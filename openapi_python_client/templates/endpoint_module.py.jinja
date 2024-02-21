@@ -30,7 +30,7 @@ def _get_kwargs(
         "method": "{{ endpoint.method }}",
         {% if endpoint.path_parameters %}
         "url": "{{ endpoint.path }}".format(
-        {%- for parameter in endpoint.path_parameters.values() -%}
+        {%- for parameter in endpoint.path_parameters -%}
         {{parameter.name}}={{parameter.python_name}},
         {%- endfor -%}
         ),

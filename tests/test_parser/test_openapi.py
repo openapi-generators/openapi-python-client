@@ -293,104 +293,6 @@ class TestEndpoint:
         with pytest.raises(pydantic.ValidationError):
             oai.Parameter(name="test", required=True, param_schema=mocker.MagicMock(), param_in="error_location")
 
-    def test__add_parameters_with_location_postfix_conflict1(self, mocker, any_property_factory):
-        """Checks when the PythonIdentifier of new parameter already used."""
-        from openapi_python_client.parser.openapi import Endpoint
-
-        endpoint = self.make_endpoint()
-
-        path_prop_conflicted = any_property_factory(name="prop_name_path", required=True, default=None)
-        query_prop = any_property_factory(name="prop_name", required=True, default=None)
-        path_prop = any_property_factory(name="prop_name", required=True, default=None)
-
-        schemas_1 = mocker.MagicMock()
-        schemas_2 = mocker.MagicMock()
-        schemas_3 = mocker.MagicMock()
-        mocker.patch(
-            f"{MODULE_NAME}.property_from_data",
-            side_effect=[
-                (path_prop_conflicted, schemas_1),
-                (query_prop, schemas_2),
-                (path_prop, schemas_3),
-            ],
-        )
-        path_conflicted_schema = mocker.MagicMock()
-        query_schema = mocker.MagicMock()
-        path_schema = mocker.MagicMock()
-
-        data = oai.Operation.model_construct(
-            parameters=[
-                oai.Parameter.model_construct(
-                    name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
-                ),
-                oai.Parameter.model_construct(
-                    name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
-                ),
-                oai.Parameter.model_construct(
-                    name=path_prop.name, required=True, param_schema=path_schema, param_in="path"
-                ),
-                oai.Reference.model_construct(),  # Should be ignored
-                oai.Parameter.model_construct(),  # Should be ignored
-            ]
-        )
-        initial_schemas = mocker.MagicMock()
-        parameters = mocker.MagicMock()
-        config = MagicMock()
-
-        result = Endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=initial_schemas, parameters=parameters, config=config
-        )[0]
-        assert isinstance(result, ParseError)
-        assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
-
-    def test__add_parameters_with_location_postfix_conflict2(self, mocker, any_property_factory):
-        """Checks when an existing parameter has a conflicting PythonIdentifier after renaming."""
-        from openapi_python_client.parser.openapi import Endpoint
-
-        endpoint = self.make_endpoint()
-        path_prop_conflicted = any_property_factory(name="prop_name_path", required=True, default=None)
-        path_prop = any_property_factory(name="prop_name", required=True, default=None)
-        query_prop = any_property_factory(name="prop_name", required=True, default=None)
-        schemas_1 = mocker.MagicMock()
-        schemas_2 = mocker.MagicMock()
-        schemas_3 = mocker.MagicMock()
-        mocker.patch(
-            f"{MODULE_NAME}.property_from_data",
-            side_effect=[
-                (path_prop_conflicted, schemas_1),
-                (path_prop, schemas_2),
-                (query_prop, schemas_3),
-            ],
-        )
-        path_conflicted_schema = mocker.MagicMock()
-        path_schema = mocker.MagicMock()
-        query_schema = mocker.MagicMock()
-
-        data = oai.Operation.model_construct(
-            parameters=[
-                oai.Parameter.model_construct(
-                    name=path_prop_conflicted.name, required=True, param_schema=path_conflicted_schema, param_in="path"
-                ),
-                oai.Parameter.model_construct(
-                    name=path_prop.name, required=True, param_schema=path_schema, param_in="path"
-                ),
-                oai.Parameter.model_construct(
-                    name=query_prop.name, required=False, param_schema=query_schema, param_in="query"
-                ),
-                oai.Reference.model_construct(),  # Should be ignored
-                oai.Parameter.model_construct(),  # Should be ignored
-            ]
-        )
-        initial_schemas = mocker.MagicMock()
-        parameters = mocker.MagicMock()
-        config = MagicMock()
-
-        result = Endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=initial_schemas, parameters=parameters, config=config
-        )[0]
-        assert isinstance(result, ParseError)
-        assert result.detail == "Parameters with same Python identifier `prop_name_path` detected"
-
     def test__add_parameters_handles_invalid_references(self, config):
         """References are not supported as direct params yet"""
         endpoint = self.make_endpoint()
@@ -505,7 +407,7 @@ class TestEndpoint:
         )
 
         assert len(endpoint.query_parameters) == 2, "Not all query params were added"  # noqa: PLR2004
-        for param in endpoint.query_parameters.values():
+        for param in endpoint.query_parameters:
             if param.name == "required":
                 assert param.required
             else:
@@ -557,8 +459,8 @@ class TestEndpoint:
             config=config,
         )[0]
         assert isinstance(result, Endpoint)
-        assert result.path_parameters["test"].name == "test"
-        assert result.query_parameters["test"].name == "test"
+        assert result.path_parameters[0].name == "test"
+        assert result.query_parameters[0].name == "test"
 
     def test_sort_parameters(self, string_property_factory):
         from openapi_python_client.parser.openapi import Endpoint
@@ -568,10 +470,10 @@ class TestEndpoint:
 
         for i in range(1, 5):
             prop = string_property_factory(name=f"param{i}")
-            endpoint.path_parameters[prop.name] = prop
+            endpoint.path_parameters.append(prop)
 
         result = Endpoint.sort_parameters(endpoint=endpoint)
-        result_names = [name for name in result.path_parameters]
+        result_names = [param.name for param in result.path_parameters]
         expected_names = [f"param{i}" for i in (4, 2, 1, 3)]
 
         assert result_names == expected_names
@@ -582,7 +484,7 @@ class TestEndpoint:
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters/{param1}/{param2}"
         param = string_property_factory(name="param1")
-        endpoint.path_parameters[param.name] = param
+        endpoint.path_parameters.append(param)
 
         result = Endpoint.sort_parameters(endpoint=endpoint)
 
@@ -596,7 +498,7 @@ class TestEndpoint:
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters"
         param = string_property_factory(name="param1")
-        endpoint.path_parameters[param.name] = param
+        endpoint.path_parameters.append(param)
 
         result = Endpoint.sort_parameters(endpoint=endpoint)
 
@@ -996,7 +898,7 @@ class TestEndpointCollection:
             config=config,
         )
         collection: EndpointCollection = collections["default"]
-        assert isinstance(collection.endpoints[0].query_parameters["param"], IntProperty)
+        assert isinstance(collection.endpoints[0].query_parameters[0], IntProperty)
 
     def test_from_data_errors(self, mocker, config):
         from openapi_python_client.parser.openapi import ParseError
