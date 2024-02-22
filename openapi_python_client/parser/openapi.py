@@ -464,8 +464,8 @@ class Endpoint:
     def list_all_parameters(self) -> List[Property]:
         """Return a List of all the parameters of this endpoint"""
         return (
-            self.query_parameters
-            + self.path_parameters
+            self.path_parameters
+            + self.query_parameters
             + self.header_parameters
             + self.cookie_parameters
             + [body.prop for body in self.bodies]

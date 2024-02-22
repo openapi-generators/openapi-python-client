@@ -54,8 +54,8 @@ def sync_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param_query (Union[Unset, str]):
         param_path (str):
+        param_query (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -85,8 +85,8 @@ async def asyncio_detailed(
 ) -> Response[Any]:
     """
     Args:
-        param_query (Union[Unset, str]):
         param_path (str):
+        param_query (Union[Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

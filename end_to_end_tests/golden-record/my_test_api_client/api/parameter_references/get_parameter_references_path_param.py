@@ -73,9 +73,9 @@ def sync_detailed(
     """Test different types of parameter references
 
     Args:
+        path_param (str):
         string_param (Union[Unset, str]):
         integer_param (Union[Unset, int]):  Default: 0.
-        path_param (str):
         header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
@@ -114,9 +114,9 @@ async def asyncio_detailed(
     """Test different types of parameter references
 
     Args:
+        path_param (str):
         string_param (Union[Unset, str]):
         integer_param (Union[Unset, int]):  Default: 0.
-        path_param (str):
         header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 

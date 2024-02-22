@@ -55,9 +55,9 @@ def sync_detailed(
     """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
 
     Args:
+        param_path (str):
         param_query (str): A parameter with the same name as another. Default:
             'overridden_in_GET'. Example: an example string.
-        param_path (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -88,9 +88,9 @@ async def asyncio_detailed(
     """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
 
     Args:
+        param_path (str):
         param_query (str): A parameter with the same name as another. Default:
             'overridden_in_GET'. Example: an example string.
-        param_path (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
