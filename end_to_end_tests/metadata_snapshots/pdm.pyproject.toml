@@ -19,5 +19,7 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.ruff]
-select = ["F", "I", "UP"]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["F", "I", "UP"]

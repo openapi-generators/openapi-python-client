@@ -5,7 +5,7 @@
 {% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
 headers: Dict[str, Any] = {}
 {% if endpoint.header_parameters %}
-    {% for parameter in endpoint.header_parameters.values() %}
+    {% for parameter in endpoint.header_parameters %}
         {% import "property_templates/" + parameter.template as param_template %}
         {% if param_template.transform_header %}
             {% set expression = param_template.transform_header(parameter.python_name) %}
@@ -22,7 +22,7 @@ headers: Dict[str, Any] = {}
 {% macro cookie_params(endpoint) %}
 {% if endpoint.cookie_parameters %}
 cookies = {}
-    {% for parameter in endpoint.cookie_parameters.values() %}
+    {% for parameter in endpoint.cookie_parameters %}
         {% if parameter.required %}
 cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% else %}
@@ -39,7 +39,7 @@ if {{ parameter.python_name }} is not UNSET:
 {% if endpoint.query_parameters %}
 params: Dict[str, Any] = {}
 
-{% for property in endpoint.query_parameters.values() %}
+{% for property in endpoint.query_parameters %}
     {% set destination = property.python_name %}
     {% import "property_templates/" + property.template as prop_template %}
     {% if prop_template.transform %}
@@ -91,7 +91,7 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint, include_client=True) %}
 {# path parameters #}
-{% for parameter in endpoint.path_parameters.values() %}
+{% for parameter in endpoint.path_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% if include_client or ((endpoint.list_all_parameters() | length) > (endpoint.path_parameters | length)) %}
@@ -116,21 +116,21 @@ body: Union[
 ],
 {% endif %}
 {# query parameters #}
-{% for parameter in endpoint.query_parameters.values() %}
+{% for parameter in endpoint.query_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
+{% for parameter in endpoint.header_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
 {# cookie parameters #}
-{% for parameter in endpoint.cookie_parameters.values() %}
+{% for parameter in endpoint.cookie_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% endmacro %}
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
 {% macro kwargs(endpoint, include_client=True) %}
-{% for parameter in endpoint.path_parameters.values() %}
+{% for parameter in endpoint.path_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% if include_client %}
@@ -139,13 +139,13 @@ client=client,
 {% if endpoint.bodies | length > 0 %}
 body=body,
 {% endif %}
-{% for parameter in endpoint.query_parameters.values() %}
+{% for parameter in endpoint.query_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
+{% for parameter in endpoint.header_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
-{% for parameter in endpoint.cookie_parameters.values() %}
+{% for parameter in endpoint.cookie_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% endmacro %}

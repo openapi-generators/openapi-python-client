@@ -67,14 +67,18 @@ class PropertyProtocol(Protocol):
             return ParseError(detail="Path parameter must be required")
         return None
 
-    def set_python_name(self, new_name: str, config: Config) -> None:
+    def set_python_name(self, new_name: str, config: Config, skip_snake_case: bool = False) -> None:
         """Mutates this Property to set a new python_name.
 
         Required to mutate due to how Properties are stored and the difficulty of updating them in-dict.
         `new_name` will be validated before it is set, so `python_name` is not guaranteed to equal `new_name` after
         calling this.
         """
-        object.__setattr__(self, "python_name", PythonIdentifier(value=new_name, prefix=config.field_prefix))
+        object.__setattr__(
+            self,
+            "python_name",
+            PythonIdentifier(value=new_name, prefix=config.field_prefix, skip_snake_case=skip_snake_case),
+        )
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         """Get the string describing the Python type of this property. Base types no require quoting."""

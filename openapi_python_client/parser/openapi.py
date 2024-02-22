@@ -1,5 +1,4 @@
 import re
-from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from http import HTTPStatus
@@ -14,7 +13,6 @@ from ..utils import PythonIdentifier
 from .bodies import Body, body_from_data
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
-    AnyProperty,
     Class,
     EnumProperty,
     ModelProperty,
@@ -134,14 +132,13 @@ class Endpoint:
     tag: str
     summary: Optional[str] = ""
     relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
-    header_parameters: Dict[str, Property] = field(default_factory=dict)
-    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
+    query_parameters: List[Property] = field(default_factory=list)
+    path_parameters: List[Property] = field(default_factory=list)
+    header_parameters: List[Property] = field(default_factory=list)
+    cookie_parameters: List[Property] = field(default_factory=list)
     responses: List[Response] = field(default_factory=list)
     bodies: List[Body] = field(default_factory=list)
     errors: List[ParseError] = field(default_factory=list)
-    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
 
     @staticmethod
     def _add_responses(
@@ -191,7 +188,7 @@ class Endpoint:
         return endpoint, schemas
 
     @staticmethod
-    def add_parameters(  # noqa: PLR0911
+    def add_parameters(
         *,
         endpoint: "Endpoint",
         data: Union[oai.Operation, oai.PathItem],
@@ -228,22 +225,11 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
 
         unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location: Dict[str, Dict[str, Property]] = {
+        parameters_by_location: Dict[str, List[Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
-            "RESERVED": {  # These can't be param names because codegen needs them as vars, the properties don't matter
-                "client": AnyProperty(
-                    "client",
-                    True,
-                    None,
-                    PythonIdentifier("client", ""),
-                    None,
-                    None,
-                ),
-                "url": AnyProperty("url", True, None, PythonIdentifier("url", ""), None, None),
-            },
         }
 
         for param in data.parameters:
@@ -273,6 +259,12 @@ class Endpoint:
 
             unique_parameters.add(unique_param)
 
+            if any(
+                other_param for other_param in parameters_by_location[param.param_in] if other_param.name == param.name
+            ):
+                # Defined at the operation level, ignore it here
+                continue
+
             prop, new_schemas = property_from_data(
                 name=param.name,
                 required=param.required,
@@ -299,47 +291,69 @@ class Endpoint:
                 location_error.data = param
                 return location_error, schemas, parameters
 
-            if prop.name in parameters_by_location[param.param_in]:
-                # This parameter was defined in the Operation, so ignore the PathItem definition
-                continue
-
-            for location, parameters_dict in parameters_by_location.items():
-                if location == param.param_in or prop.name not in parameters_dict:
-                    continue
-                existing_prop: Property = parameters_dict[prop.name]
-                # Existing should be converted too for consistency
-                endpoint.used_python_identifiers.discard(existing_prop.python_name)
-                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
-
-                if existing_prop.python_name in endpoint.used_python_identifiers:
-                    return (
-                        ParseError(
-                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
-                            data=data,
-                        ),
-                        schemas,
-                        parameters,
-                    )
-                endpoint.used_python_identifiers.add(existing_prop.python_name)
-                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
-
-            if prop.python_name in endpoint.used_python_identifiers:
-                return (
-                    ParseError(
-                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected",
-                        data=data,
-                    ),
-                    schemas,
-                    parameters,
-                )
-
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
             endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
-            endpoint.used_python_identifiers.add(prop.python_name)
-            parameters_by_location[param.param_in][prop.name] = prop
+            parameters_by_location[param.param_in].append(prop)
 
-        return endpoint, schemas, parameters
+        return endpoint._check_parameters_for_conflicts(config=config), schemas, parameters
+
+    def _check_parameters_for_conflicts(
+        self,
+        *,
+        config: Config,
+        previously_modified_params: Optional[Set[Tuple[oai.ParameterLocation, str]]] = None,
+    ) -> Union["Endpoint", ParseError]:
+        """Check for conflicting parameters
+
+        For parameters that have the same python_name but are in different locations, append the location to the
+        python_name. For parameters that have the same name but are in the same location, use their raw name without
+        snake casing instead.
+
+        Function stops when there's a conflict that can't be resolved or all parameters are guaranteed to have a
+        unique python_name.
+        """
+        modified_params = previously_modified_params or set()
+        used_python_names: Dict[PythonIdentifier, Tuple[oai.ParameterLocation, Property]] = {}
+        reserved_names = ["client", "url"]
+        for parameter in self.iter_all_parameters():
+            location, prop = parameter
+
+            if prop.python_name in reserved_names:
+                prop.set_python_name(new_name=f"{prop.python_name}_{location}", config=config)
+                modified_params.add((location, prop.name))
+                continue
+
+            conflicting = used_python_names.pop(prop.python_name, None)
+            if conflicting is None:
+                used_python_names[prop.python_name] = parameter
+                continue
+            conflicting_location, conflicting_prop = conflicting
+            if (conflicting_location, conflicting_prop.name) in modified_params or (
+                location,
+                prop.name,
+            ) in modified_params:
+                return ParseError(
+                    detail=f"Parameters with same Python identifier {conflicting_prop.python_name} detected",
+                )
+
+            if location != conflicting_location:
+                conflicting_prop.set_python_name(
+                    new_name=f"{conflicting_prop.python_name}_{conflicting_location}", config=config
+                )
+                prop.set_python_name(new_name=f"{prop.python_name}_{location}", config=config)
+            elif conflicting_prop.name != prop.name:  # Use the name to differentiate
+                conflicting_prop.set_python_name(new_name=conflicting_prop.name, config=config, skip_snake_case=True)
+                prop.set_python_name(new_name=prop.name, config=config, skip_snake_case=True)
+
+            modified_params.add((location, conflicting_prop.name))
+            modified_params.add((conflicting_location, conflicting_prop.name))
+            used_python_names[prop.python_name] = parameter
+            used_python_names[conflicting_prop.python_name] = conflicting
+
+        if len(modified_params) > 0 and modified_params != previously_modified_params:
+            return self._check_parameters_for_conflicts(config=config, previously_modified_params=modified_params)
+        return self
 
     @staticmethod
     def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
@@ -356,15 +370,13 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
         parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
         try:
-            sorted_params = sorted(
-                endpoint.path_parameters.values(),
+            endpoint.path_parameters.sort(
                 key=lambda param: parameters_from_path.index(param.name),
             )
-            endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
         except ValueError:
             pass  # We're going to catch the difference down below
 
-        if parameters_from_path != list(endpoint.path_parameters):
+        if parameters_from_path != [param.name for param in endpoint.path_parameters]:
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
@@ -442,17 +454,22 @@ class Endpoint:
             return self.responses[0].prop.get_type_string(quoted=False)
         return f"Union[{', '.join(types)}]"
 
-    def iter_all_parameters(self) -> Iterator[Property]:
+    def iter_all_parameters(self) -> Iterator[Tuple[oai.ParameterLocation, Property]]:
         """Iterate through all the parameters of this endpoint"""
-        yield from self.path_parameters.values()
-        yield from self.query_parameters.values()
-        yield from self.header_parameters.values()
-        yield from self.cookie_parameters.values()
-        yield from (body.prop for body in self.bodies)
+        yield from ((oai.ParameterLocation.PATH, param) for param in self.path_parameters)
+        yield from ((oai.ParameterLocation.QUERY, param) for param in self.query_parameters)
+        yield from ((oai.ParameterLocation.HEADER, param) for param in self.header_parameters)
+        yield from ((oai.ParameterLocation.COOKIE, param) for param in self.cookie_parameters)
 
     def list_all_parameters(self) -> List[Property]:
         """Return a List of all the parameters of this endpoint"""
-        return list(self.iter_all_parameters())
+        return (
+            self.path_parameters
+            + self.query_parameters
+            + self.header_parameters
+            + self.cookie_parameters
+            + [body.prop for body in self.bodies]
+        )
 
 
 @dataclass
