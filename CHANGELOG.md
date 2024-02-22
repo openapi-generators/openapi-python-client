@@ -13,6 +13,76 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.18.0 (2024-02-22)
+
+### Breaking Changes
+
+#### For custom templates, changed type of endpoint parameters
+
+**This does not affect projects that are not using `--custom-template-path`**
+
+The type of these properties on `Endpoint` has been changed from `Dict[str, Property]` to `List[Property]`:
+
+- `path_parameters`
+- `query_parameters`
+- `header_parameters`
+- `cookie_parameters`
+
+If your templates are very close to the default templates, you can probably just remove `.values()` anywhere it appears.
+
+The type of `iter_all_parameters()` is also different, you probably want `list_all_parameters()` instead.
+
+#### Updated generated config for Ruff v0.2
+
+This only affects projects using the `generate` command, not the `update` command. The `pyproject.toml` file generated which configures Ruff for linting and formatting has been updated to the 0.2 syntax, which means it will no longer work with Ruff 0.1.
+
+#### Updated naming strategy for conflicting properties
+
+While fixing #922, some naming strategies were updated. These should mostly be backwards compatible, but there may be 
+some small differences in generated code. Make sure to check your diffs before pushing updates to consumers!
+
+### Features
+
+#### support httpx 0.27 (#974)
+
+### Fixes
+
+#### Allow parameters with names differing only by case
+
+If you have two parameters to an endpoint named `mixedCase` and `mixed_case`, previously, this was a conflict and the endpoint would not be generated.
+Now, the generator will skip snake-casing the parameters and use the names as-is. Note that this means if neither of the parameters _was_ snake case, neither _will be_ in the generated code.
+
+Fixes #922 reported by @macmoritz & @benedikt-bartscher.
+
+#### Fix naming conflicts with properties in models with mixed casing
+
+If you had an object with two properties, where the names differed only by case, conflicting properties would be generated in the model, which then failed the linting step (when using default config). For example, this:
+
+```yaml
+type: "object"
+properties:
+  MixedCase:
+    type: "string"
+  mixedCase:
+    type: "string"
+```
+
+Would generate a class like this:
+
+```python
+class MyModel:
+    mixed_case: str
+    mixed_case: str
+```
+
+Now, neither of the properties will be forced into snake case, and the generated code will look like this:
+
+```python
+class MyModel:
+    MixedCase: str
+    mixedCase: str
+```
+
 ## 0.17.3 (2024-02-20)
 
 ### Fixes
