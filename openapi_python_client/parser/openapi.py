@@ -26,7 +26,7 @@ from .properties import (
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
-_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
+_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
