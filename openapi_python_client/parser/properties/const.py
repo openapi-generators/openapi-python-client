@@ -78,8 +78,7 @@ class ConstProperty(PropertyProtocol):
 
     @staticmethod
     @overload
-    def _convert_value(value: Any) -> Value:
-        ...  # pragma: no cover
+    def _convert_value(value: Any) -> Value: ...  # pragma: no cover
 
     @staticmethod
     def _convert_value(value: Any) -> Value | None:

@@ -1,4 +1,4 @@
-""" Generate modern Python clients from OpenAPI """
+"""Generate modern Python clients from OpenAPI"""
 
 import json
 import mimetypes

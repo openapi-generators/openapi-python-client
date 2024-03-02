@@ -1,4 +1,4 @@
-""" Contains methods for accessing the API Endpoints """
+"""Contains methods for accessing the API Endpoints"""
 
 import types
 
