@@ -118,3 +118,17 @@ def get_content_type(content_type: str) -> str | None:
         return None
 
     return parsed_content_type
+
+
+def convert_endpoint_path(endpoint) -> str:
+    """
+    Converts parameter names within the endpoint path to their python names.
+    """
+
+    endpoint_path_python_names = endpoint.path
+    for parameter in endpoint.path_parameters:
+        endpoint_path_python_names = endpoint_path_python_names.replace(
+            f'{{{parameter.name}}}',
+            f'{{{parameter.python_name}}}'
+        )
+    return endpoint_path_python_names

@@ -27,6 +27,7 @@ TEMPLATE_FILTERS = {
     "snakecase": utils.snake_case,
     "kebabcase": utils.kebab_case,
     "pascalcase": utils.pascal_case,
+    "convert_endpoint_path": utils.convert_endpoint_path,
     "any": any,
 }
 
