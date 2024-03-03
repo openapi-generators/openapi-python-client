@@ -61,8 +61,7 @@ class StringProperty(PropertyProtocol):
 
     @classmethod
     @overload
-    def convert_value(cls, value: Any) -> Value:
-        ...  # pragma: no cover
+    def convert_value(cls, value: Any) -> Value: ...  # pragma: no cover
 
     @classmethod
     def convert_value(cls, value: Any) -> Value | None:

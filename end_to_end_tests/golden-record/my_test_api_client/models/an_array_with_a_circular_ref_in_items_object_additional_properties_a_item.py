@@ -16,9 +16,9 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalProperties
 class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem:
     """ """
 
-    additional_properties: Dict[
-        str, List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem"]
-    ] = _attrs_field(init=False, factory=dict)
+    additional_properties: Dict[str, List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem"]] = (
+        _attrs_field(init=False, factory=dict)
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         field_dict: Dict[str, Any] = {}

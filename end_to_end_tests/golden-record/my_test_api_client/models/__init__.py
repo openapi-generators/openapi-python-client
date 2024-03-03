@@ -1,4 +1,4 @@
-""" Contains all the data models used in inputs/outputs """
+"""Contains all the data models used in inputs/outputs"""
 
 from .a_discriminated_union_type_1 import ADiscriminatedUnionType1
 from .a_discriminated_union_type_2 import ADiscriminatedUnionType2

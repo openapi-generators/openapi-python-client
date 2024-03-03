@@ -1,4 +1,4 @@
-""" Contains methods for accessing the API """
+"""Contains methods for accessing the API"""
 
 from typing import Type
 
