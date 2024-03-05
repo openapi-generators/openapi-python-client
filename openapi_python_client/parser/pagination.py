@@ -53,10 +53,10 @@ class Pagination:
                 )
             )
 
-        import json
+        # import json
 
-        print(json.dumps(prompt_params, indent=2))
-        print(json.dumps(prompt_props, indent=2))
+        # print(json.dumps(prompt_params, indent=2))
+        # print(json.dumps(prompt_props, indent=2))
 
         # if offset_param:
         #     print("OFFSET PARAM", offset_param.name, offset_param.description)

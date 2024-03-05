@@ -133,6 +133,8 @@ class Response:
     def from_reference(
         cls, status_code: str, resp_ref: Union[osp.Reference, osp.Response], context: OpenapiContext
     ) -> "Response":
+        if status_code == "default":
+            status_code = "200"
         raw_schema = context.response_from_reference(resp_ref)
         description = resp_ref.description or raw_schema.description
 
@@ -319,8 +321,11 @@ class Endpoint:
             {p.name: p for p in (Parameter.from_reference(param, context) for param in operation.parameters or [])}
         )
         responses = {
-            status_code: Response.from_reference(status_code, response_ref, context)
-            for status_code, response_ref in operation.responses.items()
+            resp.status_code: resp
+            for resp in [
+                Response.from_reference(status_code, response_ref, context)
+                for status_code, response_ref in operation.responses.items()
+            ]
         }
 
         operation_id = operation.operationId or f"{method}_{path}"
