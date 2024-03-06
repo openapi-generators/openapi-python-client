@@ -280,8 +280,7 @@ class Project:
                 endpoint_path_python_names = endpoint.path
                 for parameter in endpoint.path_parameters:
                     endpoint_path_python_names = endpoint_path_python_names.replace(
-                        f'{{{parameter.name}}}',
-                        f'{{{parameter.python_name}}}'
+                        f"{{{parameter.name}}}", f"{{{parameter.python_name}}}"
                     )
                 module_path.write_text(
                     endpoint_template.render(
