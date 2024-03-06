@@ -13,6 +13,37 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.19.0 (2024-03-06)
+
+### Breaking Changes
+
+#### Update PDM metadata syntax
+
+Metadata generated for PDM will now use the new `distribution = true` syntax instead of `package-type = "library"`. 
+New packages generated with `--meta pdm` will require PDM `2.12.0` or later to build. 
+
+### Features
+
+#### Add response content to `UnexpectedStatus` exception
+
+The error message for `UnexpectedStatus` exceptions will now include the UTF-8 decoded (ignoring errors) body of the response.
+
+PR #989 implements #840. Thanks @harabat!
+
+### Fixes
+
+#### Allow hyphens in path parameters
+
+Before now, path parameters which were invalid Python identifiers were not allowed, and would fail generation with an
+"Incorrect path templating" error. In particular, this meant that path parameters with hyphens were not allowed.
+This has now been fixed!
+
+PR #986 fixed issue #976. Thanks @harabat!
+
+> [!WARNING]
+> This change may break custom templates, see [this diff](https://github.com/openapi-generators/openapi-python-client/pull/986/files#diff-0de8437b26075d8fe8454cf47d8d95d4835c7f827fa87328e03f690412be803e)
+> if you have trouble upgrading.
+
 ## 0.18.0 (2024-02-22)
 
 ### Breaking Changes
