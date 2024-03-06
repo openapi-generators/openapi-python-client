@@ -1457,6 +1457,27 @@
         }
       }
     },
+    "/naming/{hyphen-in-path}": {
+      "get": {
+        "tags": ["naming"],
+        "operationId": "hyphen_in_path",
+        "parameters": [
+          {
+            "name": "hyphen-in-path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
     "/parameter-references/{path_param}": {
       "get": {
         "tags": [
