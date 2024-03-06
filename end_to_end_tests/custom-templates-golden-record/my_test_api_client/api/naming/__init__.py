@@ -2,7 +2,7 @@
 
 import types
 
-from . import mixed_case, post_naming_property_conflict_with_import
+from . import hyphen_in_path, mixed_case, post_naming_property_conflict_with_import
 
 
 class NamingEndpoints:
@@ -13,3 +13,7 @@ class NamingEndpoints:
     @classmethod
     def mixed_case(cls) -> types.ModuleType:
         return mixed_case
+
+    @classmethod
+    def hyphen_in_path(cls) -> types.ModuleType:
+        return hyphen_in_path
