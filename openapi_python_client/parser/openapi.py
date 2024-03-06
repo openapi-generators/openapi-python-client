@@ -26,7 +26,7 @@ from .properties import (
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
-_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
+_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
@@ -379,6 +379,8 @@ class Endpoint:
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
+        for parameter in endpoint.path_parameters:
+            endpoint.path = endpoint.path.replace(f"{{{parameter.name}}}", f"{{{parameter.python_name}}}")
         return endpoint
 
     @staticmethod
