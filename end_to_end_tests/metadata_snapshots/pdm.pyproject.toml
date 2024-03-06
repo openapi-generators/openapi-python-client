@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [tool.pdm]
-package-type = "library"
+distribution = true
 
 [build-system]
 requires = ["pdm-backend"]

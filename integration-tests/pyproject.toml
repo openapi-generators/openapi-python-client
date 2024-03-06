@@ -12,7 +12,7 @@ dependencies = [
 requires-python = ">=3.8,<4.0"
 
 [tool.pdm]
-package-type = "library"
+distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
