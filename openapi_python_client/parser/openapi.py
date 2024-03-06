@@ -379,6 +379,8 @@ class Endpoint:
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
+        for parameter in endpoint.path_parameters:
+            endpoint.path = endpoint.path.replace(f"{{{parameter.name}}}", f"{{{parameter.python_name}}}")
         return endpoint
 
     @staticmethod
