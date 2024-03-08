@@ -39,6 +39,7 @@ def extract_iterate_parent(
 
         # Try looking for a URL property which matches the endpoint URL we're dealing with
         urls = extract_url_like_values(item)
+        property_value: Optional[str] = None
         for url in urls:
             property_value = pluck_param_from_result_url(url, endpoint_url)
             if not property_value:

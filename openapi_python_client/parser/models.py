@@ -275,6 +275,18 @@ class SchemaCrawler:
         self.object_properties: Dict[Tuple[str, ...], SchemaWrapper] = {}
         self.list_properties: Dict[Tuple[str, ...], SchemaWrapper] = {}
         self.all_properties: Dict[Tuple[str, ...], SchemaWrapper] = {}
+        self.required_properties: List[Tuple[str, ...]] = []  # Paths of required properties
+
+    def _is_optional(self, path: Tuple[str, ...]) -> bool:
+        """Check whether the property itself or any of its parents is nullable"""
+        check_path = list(path)
+        while check_path:
+            prop_schema = self.all_properties.get(tuple(check_path))
+            # The property is either listed in required properties in openapi, or the property accepts null as a value
+            if prop_schema and (tuple(check_path) not in self.required_properties or prop_schema.nullable):
+                return True
+            check_path.pop()
+        return False
 
     def find_property_by_name(self, name: str, fallback: Optional[str] = None) -> Optional[DataPropertyPath]:
         """Find a property with the given name somewhere in the object tree.
@@ -291,10 +303,11 @@ class SchemaCrawler:
         named = []
         fallbacks = []
         for path, prop in self.all_properties.items():
-            if name in path:
+            if name in path and not self._is_optional(path):
                 named.append((path, prop))
-            if fallback and fallback in path:
+            if fallback and fallback in path and not self._is_optional(path):
                 fallbacks.append((path, prop))
+        # Prefer the least nested path
         named.sort(key=lambda item: len(item[0]))
         fallbacks.sort(key=lambda item: len(item[0]))
         if named:
@@ -304,14 +317,14 @@ class SchemaCrawler:
         return None
 
     def crawl(self, schema: SchemaWrapper, path: Tuple[str, ...] = ()) -> None:
-        if schema is None:
-            breakpoint()
         self.all_properties[path] = schema
         if schema.is_object:
             self.object_properties[path] = schema
             for prop in schema.all_properties:
                 prop_path = path + (prop.name,)
                 self.all_properties[prop_path] = prop.schema
+                if prop.required:
+                    self.required_properties.append(prop_path)
                 if prop.is_list or prop.is_object:
                     self.crawl(prop.schema, prop_path)
         elif schema.is_list and schema.array_item is not None:
