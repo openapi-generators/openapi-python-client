@@ -7,7 +7,7 @@ from dlt.sources.helpers import requests
 
 from .types import UNSET, Unset
 from .utils import extract_nested_data, extract_iterate_parent
-from .api_helpers import fetch_json, fetch_list_items
+from .api_helpers import build_query_parameters, build_formatted_url, TParameterMap
 
 {% for imp_string in endpoint.get_imports() %}
 {{ imp_string }}
@@ -29,26 +29,39 @@ def {{ endpoint.python_name }}({{ resource_arguments(endpoint) | indent(4) }}) -
 {% endif %}
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
     endpoint_url = "{{ endpoint.path }}"
-    params_meta = {{ endpoint.request_args_meta_str }} 
+    params_meta: TParameterMap = {{ endpoint.request_args_meta_str }}
     {% if endpoint.transformer %}
+    params_dict: Dict[str, Any] = dict(
+        {{ transformer_kwargs(endpoint) }}
+    )
     for child_kwargs in extract_iterate_parent(data, parent_property_path, path_parameter_name, "{{ endpoint.path }}"):
-        data = fetch_json(
-            base_url, endpoint_url,
-            dict(
-                {{ transformer_kwargs(endpoint) }}
-                **child_kwargs
-            ),
-            params_meta,
+        formatted_url = build_formatted_url(
+            endpoint_url,
+            dict(params_dict, **child_kwargs),
+            params_meta
+        )
+        query_params = build_query_parameters(
+            dict(params_dict, **child_kwargs),
+            params_meta
+        )
+        yield from rest_client.paginate(
+            formatted_url,
+            "GET",
+            params=query_params,
             {% if endpoint.credentials %}
-            credentials=credentials
+            auth=credentials,
             {% endif %}
         )
-        yield from extract_nested_data(data, data_json_path)
     {% else %}
-    yield from fetch_list_items(
-        base_url, endpoint_url, dict({{kwargs(endpoint)}}), params_meta, data_json_path,
+    params_dict: Dict[str, Any] = dict({{ kwargs(endpoint) }})
+    formatted_url = build_formatted_url(endpoint_url, params_dict, params_meta)
+    query_params = build_query_parameters(params_dict, params_meta)
+    yield from rest_client.paginate(
+        formatted_url,
+        "GET",
+        params=query_params,
         {% if endpoint.credentials %}
-        credentials=credentials
+        auth=credentials,
         {% endif %}
     )
     {% endif %}

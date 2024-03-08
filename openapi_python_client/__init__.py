@@ -165,6 +165,10 @@ class Project:  # pylint: disable=too-many-instance-attributes
         api_helpers_path = self.package_dir / "api_helpers.py"
         api_helpers_path.write_text(api_helpers_template.render(), encoding=self.file_encoding)
 
+        # For now just copy the rest_api source into the package
+        rest_api_dir = Path(__file__).parent / "sources" / "rest_api"
+        shutil.copytree(rest_api_dir, self.package_dir / "rest_api")
+
     def _build_dlt_config(self) -> None:
         config_dir = self.project_dir / ".dlt"
         config_dir.mkdir()

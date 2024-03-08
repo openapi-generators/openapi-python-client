@@ -3,22 +3,22 @@ from typing import Literal
 
 from dlt.common.configuration.specs.base_configuration import BaseConfiguration, configspec
 
-from ._base import _ApiKeyCredentialsBase, _HttpBasicCredentialsBase, _HttpBearerCredentialsBase, _OAuth2CredentialsBase
+from .rest_api.auth import BearerTokenAuth, APIKeyAuth, HttpBasicAuth, OAuth2AuthBase
 
 
 {% if scheme.type == "apiKey" %}
-class {{ scheme.class_name }}(_ApiKeyCredentialsBase):
+class {{ scheme.class_name }}(APIKeyAuth):
     location: Literal["{{ scheme.location }}"] = "{{ scheme.location }}"
     name: Literal["{{ scheme.name }}"] = "{{ scheme.name }}"
     
 {% elif scheme.type == "http" and scheme.scheme == "basic" %}
-class {{ scheme.class_name }}(_HttpBasicCredentialsBase):
+class {{ scheme.class_name }}(HttpBasicAuth):
     pass
 {% elif scheme.type == "http" and scheme.scheme == "bearer" %}
-class {{ scheme.class_name }}(_HttpBearerCredentialsBase):
+class {{ scheme.class_name }}(BearerTokenAuth):
     pass
 {% elif scheme.type == "oauth2" %}
-class {{ scheme.class_name }}(_OAuth2CredentialsBase):
+class {{ scheme.class_name }}(OAuth2AuthBase):
     pass
 {% endif %}
 {% endmacro %}

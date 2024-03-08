@@ -37,6 +37,8 @@ requests = "^2.30.0"
 questionary = "^1.10.0"
 enlighten = "^1.11.2"
 openapi-schema-pydantic = "^1.2.4"
+pyjwt = "^2.8.0"
+cryptography = "^42.0.5"
 
 [tool.poetry.scripts]
 dlt-init = "openapi_python_client.cli:app"

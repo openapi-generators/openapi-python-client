@@ -2,6 +2,7 @@
 from typing import List
 
 from dlt.extract.source import DltResource
+from .rest_api.client import RESTClient
 
 {% for import_string  in imports %}
 {{ import_string }}
@@ -18,24 +19,25 @@ def {{ source_name }}(
         {% endif %}
         base_url: str = dlt.config.value,
 ) -> List[DltResource]:
+    rest_client = RESTClient(base_url=base_url)
     # Root list endpoints
     resources = {}
     {% for endpoint in endpoint_collection.root_endpoints %}
     resources["{{ endpoint.python_name }}"] = {{ endpoint.python_name }}(
+        rest_client=rest_client,
         {% if credentials and endpoint.credentials %}
         credentials = credentials,
         {% endif %}
-        base_url=base_url
     )
     {% endfor %}
 
     # Transformer endpoints which depend on list endpoints
     {% for endpoint in endpoint_collection.transformer_endpoints %}
     resources["{{ endpoint.python_name }}"] = resources["{{ endpoint.parent.python_name }}"] | {{ endpoint.python_name }}(
+        rest_client=rest_client,
         {% if credentials and endpoint.credentials %}
         credentials = credentials,
         {% endif %}
-        base_url=base_url
     )
     {% endfor %}
 

@@ -55,13 +55,13 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
 {% macro arguments(endpoint) %}
+rest_client: RESTClient,
 {% for parameter in endpoint.required_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% for parameter in endpoint.optional_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}
-base_url: str = dlt.config.value,
 {# Security #}
 {% if endpoint.credentials_parameter %}
 {{ endpoint.credentials_parameter.to_string('dlt.secrets.value') }},
@@ -71,7 +71,9 @@ base_url: str = dlt.config.value,
 {% macro resource_arguments(endpoint) %}
 {% if endpoint.transformer %}
 data: Any,
+rest_client: RESTClient,
 {% else %}
+rest_client: RESTClient,
 {% for parameter in endpoint.required_parameters.values() %}
 {{ parameter.to_string() }},
 {% endfor %}

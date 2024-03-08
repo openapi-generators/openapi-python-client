@@ -18,7 +18,7 @@ class ParamInfo(TypedDict):
     style: Optional[str]
 
 
-class TParameterMap(TypedDict):
+class TParameterMap(TypedDict, total=False):
     """
     Mapping to get the original parameter names from resource python arguments.
 
@@ -59,6 +59,23 @@ def build_query_param(info: ParamInfo, value: Any) -> Dict[str, Any]:
     return {name: json.dumps(value)}
 
 
+def build_query_parameters(parameters: Dict[str, Any], parameter_config: TParameterMap) -> Dict[str, Any]:
+    query_params = {}
+
+    for python_name, param_info in parameter_config.get("query", {}).items():
+        query_params.update(build_query_param(param_info, parameters[python_name]))
+
+    return query_params
+
+
+def build_formatted_url(endpoint_url: str, parameters: Dict[str, Any], parameter_config: TParameterMap) -> str:
+    path_params = {
+        mapped_param["name"]: parameters[python_name]
+        for python_name, mapped_param in parameter_config.get("path", {}).items()
+    }
+    return endpoint_url.format_map(path_params)
+
+
 def fetch_json(
     base_url: str,
     endpoint_url: str,
@@ -66,6 +83,7 @@ def fetch_json(
     parameter_map: TParameterMap,
     credentials: Optional[APICredentials] = None,
 ) -> Any:
+    # TODO: Drop this func, using sources client
     # Build absolute URL with path parameters
     # TODO: Path params may need serialized, explode, etc
     path_params = {
