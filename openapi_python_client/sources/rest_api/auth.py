@@ -1,6 +1,6 @@
 from base64 import b64encode
 import math
-from typing import Dict, Final, Literal, Optional, Union
+from typing import Dict, Final, Literal, Optional, Union, Any, cast, Iterable
 import requests
 from requests.auth import AuthBase
 from requests import PreparedRequest
@@ -15,6 +15,7 @@ from dlt.common import logger
 
 from dlt.common.configuration.specs.base_configuration import configspec
 from dlt.common.configuration.specs import CredentialsConfiguration
+from dlt.common.configuration.specs.exceptions import NativeValueError
 from dlt.common.typing import TSecretStrValue
 
 
@@ -37,8 +38,15 @@ class BearerTokenAuth(AuthConfigBase):
     scheme: Literal["bearer"] = "bearer"
     token: TSecretStrValue
 
-    # def __init__(self, token: TSecretStrValue = None) -> None:
-    #     self.token = token
+    def parse_native_representation(self, value: Any) -> None:
+        if isinstance(value, str):
+            self.token = cast(TSecretStrValue, value)
+        else:
+            raise NativeValueError(
+                type(self),
+                value,
+                f"BearerTokenAuth token must be a string, got {type(value)}",
+            )
 
     def __call__(self, request: PreparedRequest) -> PreparedRequest:
         request.headers["Authorization"] = f"Bearer {self.token}"
@@ -49,15 +57,18 @@ class BearerTokenAuth(AuthConfigBase):
 class APIKeyAuth(AuthConfigBase):
     type: Final[Literal["apiKey"]] = "apiKey"
     location: TApiKeyLocation = "header"
-    name: str
+    name: str = "Authorization"
     api_key: TSecretStrValue
 
-    # def __init__(
-    #     self, name: str, api_key: TSecretStrValue, location: TApiKeyLocation = "header"
-    # ) -> None:
-    #     self.name = name
-    #     self.api_key = api_key
-    #     self.location = location
+    def parse_native_representation(self, value: Any) -> None:
+        if isinstance(value, str):
+            self.api_key = cast(TSecretStrValue, value)
+        else:
+            raise NativeValueError(
+                type(self),
+                value,
+                f"APIKeyAuth api_key must be a string, got {type(value)}",
+            )
 
     def __call__(self, request: PreparedRequest) -> PreparedRequest:
         if self.location == "header":
@@ -76,9 +87,17 @@ class HttpBasicAuth(AuthConfigBase):
     username: str
     password: TSecretStrValue
 
-    # def __init__(self, username: str, password: TSecretStrValue) -> None:
-    #     self.username = username
-    #     self.password = password
+    def parse_native_representation(self, value: Any) -> None:
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            value = list(value)
+            if len(value) == 2:
+                self.username, self.password = value
+                return
+        raise NativeValueError(
+            type(self),
+            value,
+            f"HttpBasicAuth username and password must be a tuple of two strings, got {type(value)}",
+        )
 
     def __call__(self, request: PreparedRequest) -> PreparedRequest:
         encoded = b64encode(f"{self.username}:{self.password}".encode()).decode()
@@ -94,8 +113,15 @@ class OAuth2AuthBase(AuthConfigBase):
     type: Final[Literal["oauth2"]] = "oauth2"
     access_token: TSecretStrValue
 
-    # def __init__(self, access_token: TSecretStrValue) -> None:
-    #     self.access_token = access_token
+    def parse_native_representation(self, value: Any) -> None:
+        if isinstance(value, str):
+            self.access_token = cast(TSecretStrValue, value)
+        else:
+            raise NativeValueError(
+                type(self),
+                value,
+                f"OAuth2AuthBase access_token must be a string, got {type(value)}",
+            )
 
     def __call__(self, request: PreparedRequest) -> PreparedRequest:
         request.headers["Authorization"] = f"Bearer {self.access_token}"
