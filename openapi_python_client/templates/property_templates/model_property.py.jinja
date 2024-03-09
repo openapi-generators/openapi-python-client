@@ -10,14 +10,9 @@
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, dict){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, multipart=False, transform_method="to_dict") %}
-{% set transformed = source + "." + transform_method + "()" %}
-{% if multipart %}
-    {% set transformed = "(None, json.dumps(" + transformed + ").encode(), 'application/json')" %}
-    {% set type_string = property.get_type_string(multipart=True) %}
-{% else %}
-    {% set type_string = property.get_type_string(json=True) %}
-{% endif %}
+{% macro transform(property, source, destination, declare_type=True) %}
+{% set transformed = source + ".to_dict()" %}
+{% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
@@ -27,6 +22,26 @@ if not isinstance({{ source }}, Unset):
 {%- endif %}
 {% endmacro %}
 
+{% macro transform_multipart_body(property, source, destination) %}
+{% set transformed = source + ".to_multipart()" %}
+{% set type_string = property.get_type_string(multipart=True) %}
+{% if property.required %}
+{{ destination }} = {{ transformed }}
+{%- else %}
+{{ destination }}: {{ type_string }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ transformed }}
+{%- endif %}
+{% endmacro %}
+
 {% macro transform_multipart(property, source, destination) %}
-{{ transform(property, source, destination, transform_method="to_multipart") }}
+{% set transformed = "(None, json.dumps(" + source + ".to_dict()" + ").encode(), 'application/json')" %}
+{% set type_string = property.get_type_string(multipart=True) %}
+{% if property.required %}
+{{ destination }} = {{ transformed }}
+{%- else %}
+{{ destination }}: {{ type_string }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ transformed }}
+{%- endif %}
 {% endmacro %}

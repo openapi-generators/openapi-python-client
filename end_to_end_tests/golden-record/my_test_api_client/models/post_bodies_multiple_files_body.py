@@ -33,9 +33,7 @@ class PostBodiesMultipleFilesBody:
         a = self.a if isinstance(self.a, Unset) else (None, str(self.a).encode(), "text/plain")
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(
-            {key: (None, str(value).encode(), "text/plain") for key, value in self.additional_properties.items()}
-        )
+        field_dict.update(self.additional_properties)
         field_dict.update({})
         if a is not UNSET:
             field_dict["a"] = a

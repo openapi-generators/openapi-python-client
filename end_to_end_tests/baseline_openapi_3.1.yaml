@@ -1847,7 +1847,8 @@ info:
       "required": [
         "some_file",
         "some_object",
-        "some_nullable_object"
+        "some_nullable_object",
+        "some_required_number"
       ],
       "type": "object",
       "properties": {
@@ -1877,6 +1878,14 @@ info:
           "format": "date"
         },
         "some_number": {
+          "title": "Some Number",
+          "type": "number"
+        },
+        "some_nullable_number": {
+          "title": "Some Nullable Number",
+          "type": [ "number", "null" ]
+        },
+        "some_required_number": {
           "title": "Some Number",
           "type": "number"
         },

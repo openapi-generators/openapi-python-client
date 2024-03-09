@@ -39,9 +39,9 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
-{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=not multipart, multipart=multipart) }}{% endif %}
+{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True, multipart=False) }}{% endif %}
 
 {% if not property.required %}
 if isinstance({{ source }}, Unset):
@@ -64,7 +64,7 @@ elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
     {% else %}
 else:
     {% endif %}
-    {{ inner_template.transform(inner_property, source, destination, declare_type=False, multipart=multipart) | indent(4) }}
+    {{ inner_template.transform(inner_property, source, destination, declare_type=False) | indent(4) }}
 {% endfor %}
 {% if ns.contains_properties_without_transform and ns.contains_modified_properties %}
 else:
@@ -72,4 +72,28 @@ else:
 {%- elif ns.contains_properties_without_transform %}
 {{ destination }} = {{ source }}
 {%- endif %}
+{% endmacro %}
+
+
+{% macro transform_multipart(property, source, destination) %}
+{% set ns = namespace(has_if = false) %}
+{{ destination }}: {{ property.get_type_string(json=False, multipart=True) }}
+
+{% if not property.required %}
+if isinstance({{ source }}, Unset):
+    {{ destination }} = UNSET
+    {% set ns.has_if = true %}
+{% endif %}
+{% for inner_property in property.inner_properties %}
+{% if not ns.has_if %}
+if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+{% set ns.has_if = true %}
+{% elif not loop.last %}
+elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+{% else %}
+else:
+{% endif %}
+{% import "property_templates/" + inner_property.template as inner_template %}
+    {{ inner_template.transform_multipart(inner_property, source, destination) | indent(4) }}
+{% endfor %}
 {% endmacro %}
