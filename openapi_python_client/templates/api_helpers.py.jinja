@@ -1,14 +1,9 @@
-from urllib.parse import urljoin
+import json
+from typing import Dict, TypedDict, Any, List, Optional
 
-from typing import Dict, TypedDict, Any, List, Optional, Iterator
-
-from dlt.sources.helpers import requests
 from dlt.common import json
-from dlt.common.jsonpath import TJsonPath
 
 from .types import UNSET
-from .utils import extract_nested_data
-from ._base import APICredentials
 
 
 class ParamInfo(TypedDict):
@@ -74,48 +69,3 @@ def build_formatted_url(endpoint_url: str, parameters: Dict[str, Any], parameter
         for python_name, mapped_param in parameter_config.get("path", {}).items()
     }
     return endpoint_url.format_map(path_params)
-
-
-def fetch_json(
-    base_url: str,
-    endpoint_url: str,
-    parameters: Dict[str, Any],
-    parameter_map: TParameterMap,
-    credentials: Optional[APICredentials] = None,
-) -> Any:
-    # TODO: Drop this func, using sources client
-    # Build absolute URL with path parameters
-    # TODO: Path params may need serialized, explode, etc
-    path_params = {
-        mapped_param["name"]: parameters[python_name]
-        for python_name, mapped_param in parameter_map.get("path", {}).items()
-    }
-    abs_url = urljoin(base_url, endpoint_url).format_map(path_params)
-
-    request_args: Dict[str, Any] = {}
-    if credentials:
-        request_args.update(credentials.to_http_params())
-
-    query_params = {}
-    for python_name, param_info in parameter_map.get("query", {}).items():
-        query_params.update(build_query_param(param_info, parameters[python_name]))
-
-    request_query = request_args.setdefault("query", {})
-    request_query.update(query_params)
-
-    # TODO: Header/cookie params
-
-    response = requests.get(abs_url, params=query_params)
-    return response.json()
-
-
-def fetch_list_items(
-    base_url: str,
-    endpoint_url: str,
-    parameters: Dict[str, Any],
-    parameter_map: TParameterMap,
-    data_json_path: Optional[TJsonPath] = None,
-    credentials: Optional[APICredentials] = None,
-) -> Iterator[Any]:
-    data = fetch_json(base_url, endpoint_url, parameters, parameter_map, credentials=credentials)
-    yield from extract_nested_data(data, data_json_path)
