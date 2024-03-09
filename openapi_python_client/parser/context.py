@@ -1,7 +1,9 @@
+import json
 from typing import Dict, Union, cast, Tuple, Optional
 from dataclasses import dataclass
 
 import openapi_schema_pydantic as osp
+import openai
 
 from openapi_python_client.parser.config import Config
 from openapi_python_client.utils import ClassName
@@ -17,6 +19,25 @@ TComponentClass = Union[
     osp.SecurityScheme,
     osp.RequestBody,
 ]
+
+
+class OpenAI:
+    def __init__(self, api_key: Optional[str] = None) -> None:
+        self.api_key = api_key
+        self.client = openai.OpenAI(api_key=api_key)
+
+    def prompt(self, messages) -> str:
+        if not self.api_key:
+            raise ValueError("OpenAI API Key is required. Please set OPENAI_API_KEY env variable")
+        print("RUN GPT", messages)
+        resp = self.client.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=messages,
+            # temperature=0,
+            response_format={"type": "json_object"},
+        )
+        print(resp)
+        return json.loads(resp.choices[0].message.content)
 
 
 @dataclass
@@ -51,6 +72,7 @@ class OpenapiContext:
         self.config = config
         self._component_cache = {}
         self.security_schemes = {}
+        self.openai = OpenAI(config.openai_api_key)
 
     def _component_from_reference(self, ref: osp.Reference) -> TComponentClass:
         url = ref.ref

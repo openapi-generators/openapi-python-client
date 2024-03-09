@@ -413,7 +413,7 @@ class EndpointCollection:
         for endpoint in result.endpoints:
             endpoint.parent = result.find_nearest_list_parent(endpoint.path)
         for endpoint in result.root_endpoints:
-            Pagination.from_endpoint(endpoint)
+            Pagination.from_endpoint(endpoint, context)
         return result
 
     def find_immediate_parent(self, path: str) -> Optional[Endpoint]:

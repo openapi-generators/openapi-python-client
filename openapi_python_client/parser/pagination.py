@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from openapi_python_client.parser.endpoints import Endpoint, Parameter
+    from openapi_python_client.parser.context import OpenapiContext
 
 RE_OFFSET_PARAM = re.compile(r"(?i)(page|start|offset)")
 RE_CURSOR_PARAM = re.compile(r"(?i)(cursor|after|since)")
@@ -15,7 +16,7 @@ OFFSET_PARAM_KEYWORDS = {"offset", "page", "start"}
 @dataclass
 class Pagination:
     @classmethod
-    def from_endpoint(cls, endpoint: "Endpoint") -> None:
+    def from_endpoint(cls, endpoint: "Endpoint", context: "OpenapiContext") -> "Pagination":
         resp = endpoint.data_response
         if not resp or not resp.content_schema:
             raise ValueError(f"Endpoint {endpoint.path} does not have a content response")
@@ -52,6 +53,48 @@ class Pagination:
                     types=prop.types,
                 )
             )
+
+        prompt_props_str = ""
+        for prop in prompt_props:
+            prompt_props_str += f"""
+            * JSON PATH: {prop['json_path']}
+            DESCRIPTION: {prop['description']}
+            TYPES: {prop['types']}
+            """
+
+        prompt = f"""
+        The following properties are included in a JSON response of the
+        endpoint {endpoint.path}. This is a flattened representation of the
+        properties, in reality the properties are nested in a JSON object
+        according to their `json_path` where dot represents a nested object
+        and `[*]` represents an array.
+
+        Use the property names, their types and their location within the json
+        object to determine which properties are used for pagination.
+
+        If the endpoint does not use pagination then return None.
+
+        Here is the description of the endpoint from the OpenAPI schema:
+
+        {endpoint.description}
+
+        Here are the response properties:
+
+        {prompt_props_str}
+        """
+
+        ai_result = context.openai.prompt(
+            [
+                {
+                    "role": "system",
+                    "content": """You are an expert data engineer working on dlt pipeline generator from API documentations.
+                You are tasked with identifying the properties used for pagination in an API response.
+                Always respond with JSON and put the results under the key \"paginator\"!
+                """,
+                },
+                {"role": "user", "content": prompt},
+            ]
+        )
 
         # import json
 

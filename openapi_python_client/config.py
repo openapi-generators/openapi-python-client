@@ -2,6 +2,7 @@ import json
 import mimetypes
 from pathlib import Path
 from typing import Dict, List, Optional
+import os
 
 import yaml
 from pydantic import BaseModel
@@ -40,6 +41,8 @@ class Config(BaseModel):
     default_openapi_title: str = "openapi"  # Fallback title when openapi info.title is missing or empty
     project_name_suffix: str = "-pipeline"
     dataset_name_suffix: str = "_data"
+
+    openai_api_key: Optional[str] = os.environ.get("OPENAI_API_KEY")
 
     @staticmethod
     def load_from_path(path: Path) -> "Config":
