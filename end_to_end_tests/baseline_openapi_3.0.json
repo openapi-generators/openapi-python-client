@@ -1415,7 +1415,9 @@
     },
     "/naming/mixed-case": {
       "get": {
-        "tags": ["naming"],
+        "tags": [
+          "naming"
+        ],
         "operationId": "mixed_case",
         "parameters": [
           {
@@ -1436,30 +1438,32 @@
           }
         ],
         "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "mixed_case": {
-                        "type": "string"
-                      },
-                      "mixedCase": {
-                        "type": "string"
-                      }
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mixed_case": {
+                      "type": "string"
+                    },
+                    "mixedCase": {
+                      "type": "string"
                     }
                   }
                 }
               }
             }
+          }
         }
       }
     },
     "/naming/{hyphen-in-path}": {
       "get": {
-        "tags": ["naming"],
+        "tags": [
+          "naming"
+        ],
         "operationId": "hyphen_in_path",
         "parameters": [
           {
@@ -1833,7 +1837,8 @@
         "required": [
           "some_file",
           "some_object",
-          "some_nullable_object"
+          "some_nullable_object",
+          "some_required_number"
         ],
         "type": "object",
         "properties": {
@@ -1864,6 +1869,15 @@
           },
           "some_number": {
             "title": "Some Number",
+            "type": "number"
+          },
+          "some_nullable_number": {
+            "title": "Some Nullable Number",
+            "type": "number",
+            "nullable": true
+          },
+          "some_required_number": {
+            "title": "Some Required Number",
             "type": "number"
           },
           "some_array": {

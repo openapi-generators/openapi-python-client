@@ -83,8 +83,8 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% macro multipart_body(body, destination) %}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if prop_template.transform_multipart %}
-{{ prop_template.transform_multipart(property, property.python_name, destination) }}
+{% if prop_template.transform_multipart_body %}
+{{ prop_template.transform_multipart_body(property, property.python_name, destination) }}
 {% endif %}
 {% endmacro %}
 

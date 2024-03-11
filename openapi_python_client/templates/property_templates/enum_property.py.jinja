@@ -13,14 +13,22 @@
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% set transformed = source + ".value" %}
 {% set type_string = property.get_type_string(json=True) %}
-{% if multipart %}
-    {% set transformed = "(None, str(" + transformed + ").encode(), \"text/plain\")" %}
-    {% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
-{% endif %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ transformed }}
+{% endif %}
+{% endmacro %}
+
+{% macro transform_multipart(property, source, destination) %}
+{% set transformed = "(None, str(" + source + ".value" + ").encode(), \"text/plain\")" %}
+{% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
+{% if property.required %}
+{{ destination }} = {{ transformed }}
+{%- else %}
+{{ destination }}: {{ type_string }} = UNSET
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}
 {% endif %}
