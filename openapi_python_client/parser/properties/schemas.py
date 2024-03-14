@@ -91,7 +91,12 @@ class Schemas:
 
 
 def update_schemas_with_data(
-    *, ref_path: ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
+    *,
+    ref_path: ReferencePath,
+    data: oai.Schema,
+    schemas: Schemas,
+    config: Config,
+    ref_override: ReferencePath = None,
 ) -> Union[Schemas, PropertyError]:
     """
     Update a `Schemas` using some new reference.
@@ -120,7 +125,7 @@ def update_schemas_with_data(
         config=config,
         # Don't process ModelProperty properties because schemas are still being created
         process_properties=False,
-        roots={ref_path},
+        roots={ref_path if ref_override is None else ref_override},
     )
 
     if isinstance(prop, PropertyError):
