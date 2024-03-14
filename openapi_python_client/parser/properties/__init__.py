@@ -289,6 +289,7 @@ def _create_schemas(
     to_process: Iterable[tuple[str, oai.Reference | oai.Schema]] = components.items()
     still_making_progress = True
     errors: list[PropertyError] = []
+    ref_override = None
 
     # References could have forward References so keep going as long as we are making progress
     while still_making_progress:
@@ -298,13 +299,18 @@ def _create_schemas(
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
             if isinstance(data, oai.Reference):
-                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
-                continue
+                ref_override = parse_reference_path(data.ref)
             ref_path = parse_reference_path(f"#/components/schemas/{name}")
             if isinstance(ref_path, ParseError):
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
-            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+            schemas_or_err = update_schemas_with_data(
+                ref_path=ref_path,
+                data=data,
+                schemas=schemas,
+                config=config,
+                ref_override=ref_override,
+            )
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)

@@ -858,6 +858,7 @@ class TestCreateSchemas:
             schemas=Schemas(
                 errors=[PropertyError(detail="Reference schemas are not supported.", data=components["a_ref"])]
             ),
+            ref_override=None,
         )
         assert result == update_schemas_with_data.return_value
 
@@ -883,7 +884,7 @@ class TestCreateSchemas:
             ref_path="a_path",
             config=config,
             data=components["second"],
-            schemas=Schemas(errors=[PropertyError(detail="some details", data=components["first"])]),
+            ref_override=None,
         )
         assert result == update_schemas_with_data.return_value
 
