@@ -35,6 +35,7 @@ class ConfigFile(BaseModel):
     """
 
     class_overrides: Optional[Dict[str, ClassOverride]] = None
+    content_type_overrides: Optional[Dict[str, str]] = None
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
@@ -70,6 +71,7 @@ class Config:
     http_timeout: int
     document_source: Union[Path, str]
     file_encoding: str
+    content_type_overrides: Dict[str, str]
 
     @staticmethod
     def from_sources(
@@ -91,6 +93,7 @@ class Config:
         config = Config(
             meta_type=meta_type,
             class_overrides=config_file.class_overrides or {},
+            content_type_overrides=config_file.content_type_overrides or {},
             project_name_override=config_file.project_name_override,
             package_name_override=config_file.package_name_override,
             package_version_override=config_file.package_version_override,
