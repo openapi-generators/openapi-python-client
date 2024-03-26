@@ -19,7 +19,7 @@ jobs:
       - name: Install Knope
         uses: knope-dev/action@v2.0.0
         with:
-          version: 0.14.1
+          version: 0.16.1
       - name: Install Hatchling
         run: pip install --upgrade hatchling
       - name: Build
