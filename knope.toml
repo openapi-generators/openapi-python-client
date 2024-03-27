@@ -7,6 +7,7 @@ name = "prepare-release"
 
 [[workflows.steps]]
 type = "Command"
+shell = true
 command = "git switch -c release"
 
 [[workflows.steps]]
@@ -14,6 +15,7 @@ type = "PrepareRelease"
 
 [[workflows.steps]]
 type = "Command"
+shell = true
 command = "git commit -m \"chore: prepare release $version\" && git push --force --set-upstream origin release"
 
 [workflows.steps.variables]

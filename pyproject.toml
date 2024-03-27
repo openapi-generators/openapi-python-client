@@ -6,7 +6,7 @@ license = { text = "MIT" }
 requires-python = ">=3.8,<4.0"
 dependencies = [
     "jinja2>=3.0.0,<4.0.0",
-    "typer>0.6,<0.10",
+    "typer>0.6,<0.12",
     "colorama>=0.4.3; sys_platform == \"win32\"",
     "shellingham>=1.3.2,<2.0.0",
     "pydantic>=2.1.1,<3.0.0",
