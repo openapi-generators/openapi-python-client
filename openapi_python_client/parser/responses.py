@@ -38,9 +38,7 @@ class Response:
 
 
 def _source_by_content_type(content_type: str, config: Config) -> Optional[_ResponseSource]:
-    parsed_content_type = utils.get_content_type(
-        config.content_type_overrides.get(content_type, content_type)
-    )
+    parsed_content_type = utils.get_content_type(content_type, config)
     if parsed_content_type is None:
         return None
 

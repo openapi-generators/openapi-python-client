@@ -6,6 +6,8 @@ from email.message import Message
 from keyword import iskeyword
 from typing import Any
 
+from .config import Config
+
 DELIMITERS = r"\. _-"
 
 
@@ -105,10 +107,11 @@ def remove_string_escapes(value: str) -> str:
     return value.replace('"', r"\"")
 
 
-def get_content_type(content_type: str) -> str | None:
+def get_content_type(content_type: str, config: Config) -> str | None:
     """
     Given a string representing a content type with optional parameters, returns the content type only
     """
+    content_type = config.content_type_overrides.get(content_type, content_type)
     message = Message()
     message.add_header("Content-Type", content_type)
 

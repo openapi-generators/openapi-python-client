@@ -180,9 +180,7 @@ def test_response_from_data_content_type_overrides(any_property_factory):
         content={"application/zip": oai.MediaType.model_construct()},
     )
     config = MagicMock()
-    config.content_type_overrides = {
-        "application/zip": "application/octet-stream"
-    }
+    config.content_type_overrides = {"application/zip": "application/octet-stream"}
     response, schemas = response_from_data(
         status_code=200,
         data=data,

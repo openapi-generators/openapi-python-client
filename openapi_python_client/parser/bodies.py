@@ -56,7 +56,7 @@ def body_from_data(
     prefix_type_names = len(body_content) > 1
 
     for content_type, media_type in body_content.items():
-        simplified_content_type = get_content_type(content_type)
+        simplified_content_type = get_content_type(content_type, config)
         if simplified_content_type is None:
             bodies.append(
                 ParseError(
