@@ -44,8 +44,8 @@ class Client:
     _verify_ssl: Union[str, bool, ssl.SSLContext] = field(default=True, kw_only=True, alias="verify_ssl")
     _follow_redirects: bool = field(default=False, kw_only=True, alias="follow_redirects")
     _httpx_args: Dict[str, Any] = field(factory=dict, kw_only=True, alias="httpx_args")
-    _client: Optional[httpx.Client] = field(default=None, init=False, alias="client")
-    _async_client: Optional[httpx.AsyncClient] = field(default=None, init=False, alias="async_client")
+    _client: Optional[httpx.Client] = field(default=None, init=False)
+    _async_client: Optional[httpx.AsyncClient] = field(default=None, init=False)
 {% endmacro %}{{ attributes() }}
 {% macro builders(self) %}
     def with_headers(self, headers: Dict[str, str]) -> "{{ self }}":
