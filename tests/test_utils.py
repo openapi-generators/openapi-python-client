@@ -132,5 +132,5 @@ def test_pascalcase(before, after):
         pytest.param("application/vnd.api+json;charset=utf-8", "application/vnd.api+json"),
     ],
 )
-def test_get_content_type(content_type: str, expected: str) -> None:
-    assert utils.get_content_type(content_type) == expected
+def test_get_content_type(content_type: str, expected: str, config) -> None:
+    assert utils.get_content_type(content_type, config) == expected
