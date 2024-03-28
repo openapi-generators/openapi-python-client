@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict
 
 import pytest
 
-from openapi_python_client import Config, MetaType
+from openapi_python_client import Config, MetaType, utils
 from openapi_python_client import schema as oai
 from openapi_python_client.config import ConfigFile
 from openapi_python_client.parser.properties import (
@@ -267,5 +267,5 @@ def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         **kwargs,
     }
     if not kwargs.get("python_name"):
-        kwargs["python_name"] = kwargs["name"]
+        kwargs["python_name"] = utils.PythonIdentifier(value=kwargs["name"], prefix="")
     return kwargs
