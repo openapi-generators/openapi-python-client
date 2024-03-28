@@ -20,6 +20,7 @@ class TestInlineObjectsResponse200:
         a_property = self.a_property
 
         field_dict: Dict[str, Any] = {}
+
         field_dict.update({})
         if a_property is not UNSET:
             field_dict["a_property"] = a_property

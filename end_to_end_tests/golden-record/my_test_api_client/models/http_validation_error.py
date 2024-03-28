@@ -29,6 +29,7 @@ class HTTPValidationError:
                 detail.append(detail_item)
 
         field_dict: Dict[str, Any] = {}
+
         field_dict.update({})
         if detail is not UNSET:
             field_dict["detail"] = detail
