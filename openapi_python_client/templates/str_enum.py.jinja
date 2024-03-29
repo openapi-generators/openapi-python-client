@@ -1,3 +1,4 @@
+from typing import Literal
 from enum import Enum
 
 class {{ enum.class_info.name }}(str, Enum):
@@ -7,3 +8,10 @@ class {{ enum.class_info.name }}(str, Enum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+{{ enum.class_info.name }}Literal = Literal[
+    {% for _, value in enum.values|dictsort(true) %}
+    "{{ value }}",
+    {% endfor %}
+]
