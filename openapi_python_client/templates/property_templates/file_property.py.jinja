@@ -17,7 +17,9 @@ File(
 {{ destination }} = {{ source }}.to_tuple()
 {% else %}
 {{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
-if not isinstance({{ source }}, Unset):
+if {{ source }} is None:
+    {{ destination }} = None
+elif not isinstance({{ source }}, Unset):
     {{ destination }} = {{ source }}.to_tuple()
 {% endif %}
 {% endmacro %}

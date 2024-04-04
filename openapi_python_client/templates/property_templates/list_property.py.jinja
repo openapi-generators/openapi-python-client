@@ -51,7 +51,9 @@ for {{ inner_source }} in {{ source }}:
 {{ _transform(property, source, destination, multipart, transform_method) }}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
-if not isinstance({{ source }}, Unset):
+if {{ source }} is None:
+    {{ destination }} = list()
+elif not isinstance({{ source }}, Unset):
     {{ _transform(property, source, destination, multipart, transform_method) | indent(4)}}
 {% endif %}
 

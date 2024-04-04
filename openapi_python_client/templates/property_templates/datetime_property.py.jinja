@@ -25,7 +25,9 @@ isoparse({{ source }})
 {% else %}
 {{ destination }} = UNSET
 {% endif %}
-if not isinstance({{ source }}, Unset):
+if {{ source }} is None:
+    {{ destination }} = None
+elif not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}
 {%- endif %}
 {% endmacro %}

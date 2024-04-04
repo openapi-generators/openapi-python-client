@@ -44,7 +44,9 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {% if declare_type %}{{ destination }}: {{ property.get_type_string(json=not multipart, multipart=multipart) }}{% endif %}
 
 {% if not property.required %}
-if isinstance({{ source }}, Unset):
+if {{ source }} is None:
+    {{ destination }} = None
+elif isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
     {% set ns.has_if = true %}
 {% endif %}
