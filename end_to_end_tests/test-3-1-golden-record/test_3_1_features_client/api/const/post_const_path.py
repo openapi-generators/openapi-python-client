@@ -45,7 +45,13 @@ def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Literal["Why have a fixed response? I dunno"]]:
     if response.status_code == HTTPStatus.OK:
-        response_200 = cast(Literal["Why have a fixed response? I dunno"], response.json())
+        _response_200 = response.json()
+        if _response_200 != "Why have a fixed response? I dunno":
+            raise ValueError(
+                f"response_200 must match const 'Why have a fixed response? I dunno', got '{ _response_200 }'"
+            )
+        response_200 = cast(Literal["Why have a fixed response? I dunno"], _response_200)
+
         return response_200
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)

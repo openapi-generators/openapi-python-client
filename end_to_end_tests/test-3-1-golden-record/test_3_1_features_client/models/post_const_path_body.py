@@ -46,16 +46,34 @@ class PostConstPathBody:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        required = d.pop("required")
+        _required = d.pop("required")
+        if _required != "this always goes in the body":
+            raise ValueError(f"required must match const 'this always goes in the body', got '{ _required }'")
+        required = cast(Literal["this always goes in the body"], _required)
 
         def _parse_nullable(data: object) -> Union[Literal["this or null goes in the body"], None]:
             if data is None:
                 return data
+            _nullable_type_1 = data
+            if _nullable_type_1 != "this or null goes in the body":
+                raise ValueError(
+                    f"nullable_type_1 must match const 'this or null goes in the body', got '{ _nullable_type_1 }'"
+                )
+            nullable_type_1 = cast(Literal["this or null goes in the body"], _nullable_type_1)
+
+            return nullable_type_1
             return cast(Union[Literal["this or null goes in the body"], None], data)
 
         nullable = _parse_nullable(d.pop("nullable"))
 
-        optional = d.pop("optional", UNSET)
+        _optional = d.pop("optional", UNSET)
+        optional: Union[Literal["this sometimes goes in the body"], Unset]
+        if isinstance(_optional, Unset):
+            optional = UNSET
+        else:
+            if _optional != "this sometimes goes in the body":
+                raise ValueError(f"optional must match const 'this sometimes goes in the body', got '{ _optional }'")
+            optional = cast(Union[Literal["this sometimes goes in the body"], Unset], _optional)
 
         post_const_path_body = cls(
             required=required,
