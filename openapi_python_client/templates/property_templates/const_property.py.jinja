@@ -1,19 +1,5 @@
-{% macro construct_impl(property, source) %}
-if {{ source }} != {{ property.value }}:
-    raise ValueError(f"{{ property.name }} must match const {{ property.value }}, got '{ {{ source }} }'")
-{{ property.python_name }} = cast({{ property.get_type_string() }} , {{ source }})
-{%- endmacro %}
-
-
 {% macro construct(property, source) %}
-_{{ property.python_name }} = {{ source }}
-{% if property.required %}
-{{ construct_impl(property, "_" + property.python_name) }}
-{% else %}
-{{ property.python_name }} : {{ property.get_type_string() }}
-if isinstance(_{{ property.python_name }}, Unset):
-    {{ property.python_name }} = UNSET
-else:
-    {{ construct_impl(property, "_" + property.python_name) | indent }}
-{% endif %}
+{{ property.python_name }} = cast({{ property.get_type_string() }} , {{ source }})
+if {{ property.python_name }} != {{ property.value }}{% if not property.required %}and not isinstance({{ property.python_name }}, Unset){% endif %}:
+    raise ValueError(f"{{ property.name }} must match const {{ property.value }}, got '{{'{' + property.python_name + '}' }}'")
 {%- endmacro %}
