@@ -6,7 +6,7 @@ license = { text = "MIT" }
 requires-python = ">=3.8,<4.0"
 dependencies = [
     "jinja2>=3.0.0,<4.0.0",
-    "typer>0.6,<0.12",
+    "typer>0.6,<0.13",
     "colorama>=0.4.3; sys_platform == \"win32\"",
     "shellingham>=1.3.2,<2.0.0",
     "pydantic>=2.1.1,<3.0.0",
@@ -14,7 +14,7 @@ dependencies = [
     "python-dateutil>=2.8.1,<3.0.0",
     "httpx>=0.20.0,<0.28.0",
     "PyYAML>=6.0,<7.0",
-    "ruff>=0.2,<0.4",
+    "ruff>=0.2,<0.5",
     "typing-extensions>=4.8.0,<5.0.0",
 ]
 name = "openapi-python-client"
