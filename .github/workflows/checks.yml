@@ -84,7 +84,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download coverage reports
-        uses: actions/download-artifact@v4.1.5
+        uses: actions/download-artifact@v4.1.6
         with:
           merge-multiple: true
 
