@@ -51,7 +51,7 @@ class ConfigFile(BaseModel):
         if mime == "application/json":
             config_data = json.loads(path.read_text())
         else:
-            yaml=YAML(typ='safe')
+            yaml = YAML(typ="safe")
             config_data = yaml.load(path)
         config = ConfigFile(**config_data)
         return config

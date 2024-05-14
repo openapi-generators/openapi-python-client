@@ -7,7 +7,8 @@ from ruamel.yaml import YAML
 from openapi_python_client.config import ConfigFile
 
 
-yaml=YAML(typ='safe')
+yaml = YAML(typ="safe")
+
 
 def json_with_tabs(d):
     return json.dumps(d, indent=4).replace("    ", "\t")

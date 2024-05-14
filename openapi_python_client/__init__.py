@@ -351,7 +351,7 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid JSON from provided source: {err}")
     else:
         try:
-            yaml=YAML(typ='safe')
+            yaml = YAML(typ="safe")
             return yaml.load(data)
         except YAMLError as err:
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
