@@ -11,9 +11,9 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 import httpcore
 import httpx
+from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
-from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 from openapi_python_client import utils
 

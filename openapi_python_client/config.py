@@ -4,9 +4,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from ruamel.yaml import YAML
 from attr import define
 from pydantic import BaseModel
+from ruamel.yaml import YAML
 
 
 class ClassOverride(BaseModel):
