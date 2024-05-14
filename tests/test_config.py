@@ -7,7 +7,7 @@ from ruamel.yaml import YAML
 
 from openapi_python_client.config import ConfigFile
 
-yaml = YAML(typ=["safe","string"])
+yaml = YAML(typ=["safe", "string"])
 
 
 def json_with_tabs(d):
