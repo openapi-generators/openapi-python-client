@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 import httpcore
 import httpx
-import yaml
+from ruamel.yaml import YAML
 from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 from openapi_python_client import utils
@@ -350,7 +350,8 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid JSON from provided source: {err}")
     else:
         try:
-            return yaml.safe_load(data)
+            yaml=YAML(typ='safe')
+            return yaml.load(data)
         except yaml.YAMLError as err:
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 

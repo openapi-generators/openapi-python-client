@@ -3,10 +3,11 @@ import os
 from pathlib import Path
 
 import pytest
-import yaml
-
+from ruamel.yaml import YAML
 from openapi_python_client.config import ConfigFile
 
+
+yaml=YAML(typ='safe')
 
 def json_with_tabs(d):
     return json.dumps(d, indent=4).replace("    ", "\t")
@@ -15,9 +16,9 @@ def json_with_tabs(d):
 @pytest.mark.parametrize(
     "filename,dump",
     [
-        ("example.yml", yaml.dump),
+        ("example.yml", yaml.dump_to_string),
         ("example.json", json.dumps),
-        ("example.yaml", yaml.dump),
+        ("example.yaml", yaml.dump_to_string),
         ("example.json", json_with_tabs),
     ],
 )

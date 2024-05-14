@@ -4,7 +4,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-import yaml
+from ruamel.yaml import YAML
 from attr import define
 from pydantic import BaseModel
 
@@ -51,7 +51,8 @@ class ConfigFile(BaseModel):
         if mime == "application/json":
             config_data = json.loads(path.read_text())
         else:
-            config_data = yaml.safe_load(path.read_text())
+            yaml=YAML(typ='safe')
+            config_data = yaml.load(path)
         config = ConfigFile(**config_data)
         return config
 
