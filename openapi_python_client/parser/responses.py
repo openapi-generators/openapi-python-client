@@ -37,8 +37,8 @@ class Response:
     data: Union[oai.Response, oai.Reference]  # Original data which created this response, useful for custom templates
 
 
-def _source_by_content_type(content_type: str) -> Optional[_ResponseSource]:
-    parsed_content_type = utils.get_content_type(content_type)
+def _source_by_content_type(content_type: str, config: Config) -> Optional[_ResponseSource]:
+    parsed_content_type = utils.get_content_type(content_type, config)
     if parsed_content_type is None:
         return None
 
@@ -114,7 +114,7 @@ def response_from_data(
         )
 
     for content_type, media_type in content.items():
-        source = _source_by_content_type(content_type)
+        source = _source_by_content_type(content_type, config)
         if source is not None:
             schema_data = media_type.media_type_schema
             break

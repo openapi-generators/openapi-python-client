@@ -13,6 +13,31 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.19.1 (2024-03-27)
+
+### Features
+
+#### Add config option to override content types
+
+You can now define a `content_type_overrides` field in your `config.yml`:
+
+```yaml
+content_type_overrides:
+  application/zip: application/octet-stream
+```
+
+This allows `openapi-python-client` to generate code for content types it doesn't recognize.
+
+PR #1010 closes #810. Thanks @gaarutyunov!
+
+### Fixes
+
+#### Add aliases to `Client` for pyright
+
+This should resolve incompatibilities between the generated `Client` class and the pyright type checker.
+
+PR #1009 closes #909. Thanks @patrick91!
+
 ## 0.19.0 (2024-03-06)
 
 ### Breaking Changes

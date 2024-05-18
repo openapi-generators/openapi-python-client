@@ -156,6 +156,16 @@ If this option results in conflicts, you will need to manually override class na
 
 By default, the timeout for retrieving the schema file via HTTP is 5 seconds. In case there is an error when retrieving the schema, you might try and increase this setting to a higher value.
 
+### content_type_overrides
+
+Normally, `openapi-python-client` will skip any bodies or responses that it doesn't recognize the content type for.
+This config tells the generator to treat a given content type like another.
+
+```yaml
+content_type_overrides:
+  application/zip: application/octet-stream
+```
+
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
 [PDM]: https://pdm-project.org/latest/
