@@ -92,15 +92,11 @@ class {{ class_name }}:
 
 field_dict: Dict[str, Any] = {}
 {% if model.additional_properties %}
-{% if model.additional_properties.template %}{# Can be a bool instead of an object #}
-    {% import "property_templates/" + model.additional_properties.template as prop_template %}
-{% else %}
-    {% set prop_template = None %}
-{% endif %}
-{% if prop_template and multipart %}
+{% import "property_templates/" + model.additional_properties.template as prop_template %}
+{% if multipart %}
 for prop_name, prop in self.additional_properties.items():
     {{ prop_template.transform_multipart(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
-{% elif prop_template and prop_template.transform %}
+{% elif prop_template.transform %}
 for prop_name, prop in self.additional_properties.items():
     {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=false) | indent(4) }}
 {% else %}

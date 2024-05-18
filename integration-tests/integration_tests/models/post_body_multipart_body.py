@@ -56,7 +56,9 @@ class PostBodyMultipartBody:
         )
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
+        for prop_name, prop in self.additional_properties.items():
+            field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
+
         field_dict.update(
             {
                 "a_string": a_string,
