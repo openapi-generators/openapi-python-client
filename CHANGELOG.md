@@ -13,6 +13,38 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.20.0 (2024-05-18)
+
+### Breaking Changes
+
+#### `const` values in responses are now validated at runtime
+
+Prior to this version, `const` values returned from servers were assumed to always be correct. Now, if a server returns 
+an unexpected value, the client will raise a `ValueError`. This should enable better usage with `oneOf`.
+
+PR #1024. Thanks @peter-greenatlas!
+
+#### Switch YAML parsing to 1.2
+
+This change switches the YAML parsing library to `ruamel.yaml` which follows the YAML 1.2 specification. 
+[There are breaking changes](https://yaml.readthedocs.io/en/latest/pyyaml/#defaulting-to-yaml-12-support) from YAML 1.1 to 1.2,
+though they will not affect most use cases.
+
+PR #1042 fixes #1041. Thanks @rtaycher!
+
+### Features
+
+- allow Ruff 0.4 (#1031)
+
+### Fixes
+
+#### Fix nullable and required properties in multipart bodies
+
+Fixes #926.
+
+> [!WARNING]
+> This change is likely to break custom templates. Multipart body handling has been completely split from JSON bodies.
+
 ## 0.19.1 (2024-03-27)
 
 ### Features
