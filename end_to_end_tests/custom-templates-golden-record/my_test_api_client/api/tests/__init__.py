@@ -20,12 +20,20 @@ from . import (
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
     unsupported_content_tests_unsupported_content_get,
+    upload_array_of_files_in_object_tests_upload_post,
     upload_file_tests_upload_post,
     upload_multiple_files_tests_upload_post,
 )
 
 
 class TestsEndpoints:
+    @classmethod
+    def upload_array_of_files_in_object_tests_upload_post(cls) -> types.ModuleType:
+        """
+        Upload an array of files as part of an object
+        """
+        return upload_array_of_files_in_object_tests_upload_post
+
     @classmethod
     def get_user_list(cls) -> types.ModuleType:
         """

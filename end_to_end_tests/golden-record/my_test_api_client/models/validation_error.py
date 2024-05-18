@@ -26,6 +26,7 @@ class ValidationError:
         type = self.type
 
         field_dict: Dict[str, Any] = {}
+
         field_dict.update(
             {
                 "loc": loc,

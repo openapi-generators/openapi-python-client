@@ -113,6 +113,7 @@ class BodyUploadFileTestsUploadPost:
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
+
         field_dict.update(
             {
                 "some_file": some_file,
@@ -139,41 +140,55 @@ class BodyUploadFileTestsUploadPost:
 
         return field_dict
 
-    def to_multipart(self) -> Dict[str, Any]:
+    def to_multipart(self) -> List[Tuple[str, Any]]:
+        field_list: List[Tuple[str, Any]] = []
         some_file = self.some_file.to_tuple()
 
+        field_list.append(("some_file", some_file))
         some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
 
+        field_list.append(("some_object", some_object))
         some_nullable_object: Union[None, Tuple[None, bytes, str]]
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
         else:
             some_nullable_object = self.some_nullable_object
 
+        field_list.append(("some_nullable_object", some_nullable_object))
         some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
+        if some_optional_file is not UNSET:
+            field_list.append(("some_optional_file", some_optional_file))
         some_string = (
             self.some_string
             if isinstance(self.some_string, Unset)
             else (None, str(self.some_string).encode(), "text/plain")
         )
 
+        if some_string is not UNSET:
+            field_list.append(("some_string", some_string))
         a_datetime: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_datetime, Unset):
             a_datetime = self.a_datetime.isoformat().encode()
 
+        if a_datetime is not UNSET:
+            field_list.append(("a_datetime", a_datetime))
         a_date: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_date, Unset):
             a_date = self.a_date.isoformat().encode()
 
+        if a_date is not UNSET:
+            field_list.append(("a_date", a_date))
         some_number = (
             self.some_number
             if isinstance(self.some_number, Unset)
             else (None, str(self.some_number).encode(), "text/plain")
         )
 
+        if some_number is not UNSET:
+            field_list.append(("some_number", some_number))
         some_array: Union[None, Tuple[None, bytes, str], Unset]
         if isinstance(self.some_array, Unset):
             some_array = UNSET
@@ -187,42 +202,28 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_array = self.some_array
 
+        if some_array is not UNSET:
+            field_list.append(("some_array", some_array))
         some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
 
+        if some_optional_object is not UNSET:
+            field_list.append(("some_optional_object", some_optional_object))
         some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
 
+        if some_enum is not UNSET:
+            field_list.append(("some_enum", some_enum))
+
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
-        field_dict.update(
-            {
-                "some_file": some_file,
-                "some_object": some_object,
-                "some_nullable_object": some_nullable_object,
-            }
-        )
-        if some_optional_file is not UNSET:
-            field_dict["some_optional_file"] = some_optional_file
-        if some_string is not UNSET:
-            field_dict["some_string"] = some_string
-        if a_datetime is not UNSET:
-            field_dict["a_datetime"] = a_datetime
-        if a_date is not UNSET:
-            field_dict["a_date"] = a_date
-        if some_number is not UNSET:
-            field_dict["some_number"] = some_number
-        if some_array is not UNSET:
-            field_dict["some_array"] = some_array
-        if some_optional_object is not UNSET:
-            field_dict["some_optional_object"] = some_optional_object
-        if some_enum is not UNSET:
-            field_dict["some_enum"] = some_enum
 
-        return field_dict
+        field_list += list(field_dict.items())
+
+        return field_list
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
