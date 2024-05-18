@@ -198,7 +198,6 @@ class BodyUploadFileTestsUploadPost:
             some_nullable_number = UNSET
         elif isinstance(self.some_nullable_number, float):
             some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
-
         else:
             some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
 
@@ -212,7 +211,6 @@ class BodyUploadFileTestsUploadPost:
                 some_array_type_0_item = some_array_type_0_item_data.to_dict()
                 _temp_some_array.append(some_array_type_0_item)
             some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
-
         else:
             some_array = (None, str(self.some_array).encode(), "text/plain")
 

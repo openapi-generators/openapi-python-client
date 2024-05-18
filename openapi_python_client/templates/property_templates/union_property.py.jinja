@@ -94,6 +94,6 @@ elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
 else:
 {% endif %}
 {% import "property_templates/" + inner_property.template as inner_template %}
-    {{ inner_template.transform_multipart(inner_property, source, destination) | indent(4) }}
+    {{ inner_template.transform_multipart(inner_property, source, destination) | indent(4) | trim }}
 {% endfor %}
 {% endmacro %}
