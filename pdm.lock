@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:f2abd628d03874fb71ed1bdf88a8db30cccca1f5c8d86c8d67523213dc601b51"
+content_hash = "sha256:cf2b9eebb1ee290dba283b2732207f7c20bc4d8920e071179eb7f7da975ff2b9"
 
 [[package]]
 name = "annotated-types"
@@ -1035,7 +1035,7 @@ name = "ruamel-yaml-string"
 version = "0.1.1"
 requires_python = ">=3"
 summary = "add dump_to_string/dumps method that returns YAML document as string"
-groups = ["default"]
+groups = ["dev"]
 dependencies = [
     "ruamel-yaml>=0.17.17",
 ]
