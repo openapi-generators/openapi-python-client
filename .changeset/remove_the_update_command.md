@@ -14,5 +14,5 @@ but `generate` will run `post_hooks` in the `output-path` directory.
 Alternatively, you can now also run `openapi-python-client generate --meta=<your-meta-type> --overwrite` to regenerate 
 the entire client, if you don't care about keeping any changes you've made to the generated client.
 
-Please comment on [discussion #826](https://github.com/openapi-generators/openapi-python-client/discussions/826)
+Please comment on [discussion #824](https://github.com/openapi-generators/openapi-python-client/discussions/824)
 (or a new discussion, as appropriate) to aid in designing future features that fill any gaps this leaves for you.
