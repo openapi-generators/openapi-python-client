@@ -6,7 +6,7 @@ from attr import evolve
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import Schemas, StringProperty
-from openapi_python_client.parser.properties.model_property import _process_properties
+from openapi_python_client.parser.properties.model_property import ANY_ADDITIONAL_PROPERTY, _process_properties
 
 MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 
@@ -70,10 +70,10 @@ class TestBuild:
     @pytest.mark.parametrize(
         "additional_properties_schema, expected_additional_properties",
         [
-            (True, True),
-            (oai.Schema.model_construct(), True),
-            (None, True),
-            (False, False),
+            (True, ANY_ADDITIONAL_PROPERTY),
+            (oai.Schema.model_construct(), ANY_ADDITIONAL_PROPERTY),
+            (None, ANY_ADDITIONAL_PROPERTY),
+            (False, None),
             (
                 oai.Schema.model_construct(type="string"),
                 StringProperty(
@@ -163,7 +163,7 @@ class TestBuild:
                 "from typing import Union",
             },
             lazy_imports=set(),
-            additional_properties=True,
+            additional_properties=ANY_ADDITIONAL_PROPERTY,
         )
 
     def test_model_name_conflict(self, config):

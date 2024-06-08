@@ -28,7 +28,12 @@ from openapi_python_client.schema.parameter_location import ParameterLocation
 def config() -> Config:
     """Create a default config for when it doesn't matter"""
     return Config.from_sources(
-        ConfigFile(), MetaType.POETRY, document_source=Path("openapi.yaml"), file_encoding="utf-8"
+        ConfigFile(),
+        MetaType.POETRY,
+        document_source=Path("openapi.yaml"),
+        file_encoding="utf-8",
+        overwrite=False,
+        output_path=None,
     )
 
 

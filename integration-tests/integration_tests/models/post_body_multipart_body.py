@@ -45,9 +45,7 @@ class PostBodyMultipartBody:
         return field_dict
 
     def to_multipart(self) -> Dict[str, Any]:
-        a_string = (
-            self.a_string if isinstance(self.a_string, Unset) else (None, str(self.a_string).encode(), "text/plain")
-        )
+        a_string = (None, str(self.a_string).encode(), "text/plain")
 
         file = self.file.to_tuple()
 
@@ -58,9 +56,9 @@ class PostBodyMultipartBody:
         )
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(
-            {key: (None, str(value).encode(), "text/plain") for key, value in self.additional_properties.items()}
-        )
+        for prop_name, prop in self.additional_properties.items():
+            field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
+
         field_dict.update(
             {
                 "a_string": a_string,

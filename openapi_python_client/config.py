@@ -4,9 +4,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-import yaml
 from attr import define
 from pydantic import BaseModel
+from ruamel.yaml import YAML
 
 
 class ClassOverride(BaseModel):
@@ -51,7 +51,8 @@ class ConfigFile(BaseModel):
         if mime == "application/json":
             config_data = json.loads(path.read_text())
         else:
-            config_data = yaml.safe_load(path.read_text())
+            yaml = YAML(typ="safe")
+            config_data = yaml.load(path)
         config = ConfigFile(**config_data)
         return config
 
@@ -72,10 +73,17 @@ class Config:
     document_source: Union[Path, str]
     file_encoding: str
     content_type_overrides: Dict[str, str]
+    overwrite: bool
+    output_path: Optional[Path]
 
     @staticmethod
     def from_sources(
-        config_file: ConfigFile, meta_type: MetaType, document_source: Union[Path, str], file_encoding: str
+        config_file: ConfigFile,
+        meta_type: MetaType,
+        document_source: Union[Path, str],
+        file_encoding: str,
+        overwrite: bool,
+        output_path: Optional[Path],
     ) -> "Config":
         if config_file.post_hooks is not None:
             post_hooks = config_file.post_hooks
@@ -103,5 +111,7 @@ class Config:
             http_timeout=config_file.http_timeout,
             document_source=document_source,
             file_encoding=file_encoding,
+            overwrite=overwrite,
+            output_path=output_path,
         )
         return config

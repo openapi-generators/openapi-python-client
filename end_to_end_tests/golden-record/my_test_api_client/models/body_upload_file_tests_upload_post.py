@@ -32,6 +32,7 @@ class BodyUploadFileTestsUploadPost:
     """
     Attributes:
         some_file (File):
+        some_required_number (float):
         some_object (BodyUploadFileTestsUploadPostSomeObject):
         some_nullable_object (Union['BodyUploadFileTestsUploadPostSomeNullableObject', None]):
         some_optional_file (Union[Unset, File]):
@@ -39,12 +40,14 @@ class BodyUploadFileTestsUploadPost:
         a_datetime (Union[Unset, datetime.datetime]):
         a_date (Union[Unset, datetime.date]):
         some_number (Union[Unset, float]):
+        some_nullable_number (Union[None, Unset, float]):
         some_array (Union[List['AFormData'], None, Unset]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
         some_enum (Union[Unset, DifferentEnum]): An enumeration.
     """
 
     some_file: File
+    some_required_number: float
     some_object: "BodyUploadFileTestsUploadPostSomeObject"
     some_nullable_object: Union["BodyUploadFileTestsUploadPostSomeNullableObject", None]
     some_optional_file: Union[Unset, File] = UNSET
@@ -52,6 +55,7 @@ class BodyUploadFileTestsUploadPost:
     a_datetime: Union[Unset, datetime.datetime] = UNSET
     a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
+    some_nullable_number: Union[None, Unset, float] = UNSET
     some_array: Union[List["AFormData"], None, Unset] = UNSET
     some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
@@ -65,6 +69,8 @@ class BodyUploadFileTestsUploadPost:
         )
 
         some_file = self.some_file.to_tuple()
+
+        some_required_number = self.some_required_number
 
         some_object = self.some_object.to_dict()
 
@@ -89,6 +95,12 @@ class BodyUploadFileTestsUploadPost:
             a_date = self.a_date.isoformat()
 
         some_number = self.some_number
+
+        some_nullable_number: Union[None, Unset, float]
+        if isinstance(self.some_nullable_number, Unset):
+            some_nullable_number = UNSET
+        else:
+            some_nullable_number = self.some_nullable_number
 
         some_array: Union[List[Dict[str, Any]], None, Unset]
         if isinstance(self.some_array, Unset):
@@ -116,6 +128,7 @@ class BodyUploadFileTestsUploadPost:
         field_dict.update(
             {
                 "some_file": some_file,
+                "some_required_number": some_required_number,
                 "some_object": some_object,
                 "some_nullable_object": some_nullable_object,
             }
@@ -130,6 +143,8 @@ class BodyUploadFileTestsUploadPost:
             field_dict["a_date"] = a_date
         if some_number is not UNSET:
             field_dict["some_number"] = some_number
+        if some_nullable_number is not UNSET:
+            field_dict["some_nullable_number"] = some_nullable_number
         if some_array is not UNSET:
             field_dict["some_array"] = some_array
         if some_optional_object is not UNSET:
@@ -142,13 +157,16 @@ class BodyUploadFileTestsUploadPost:
     def to_multipart(self) -> Dict[str, Any]:
         some_file = self.some_file.to_tuple()
 
+        some_required_number = (None, str(self.some_required_number).encode(), "text/plain")
+
         some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
 
-        some_nullable_object: Union[None, Tuple[None, bytes, str]]
+        some_nullable_object: Tuple[None, bytes, str]
+
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
         else:
-            some_nullable_object = self.some_nullable_object
+            some_nullable_object = (None, str(self.some_nullable_object).encode(), "text/plain")
 
         some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
@@ -174,7 +192,17 @@ class BodyUploadFileTestsUploadPost:
             else (None, str(self.some_number).encode(), "text/plain")
         )
 
-        some_array: Union[None, Tuple[None, bytes, str], Unset]
+        some_nullable_number: Union[Tuple[None, bytes, str], Unset]
+
+        if isinstance(self.some_nullable_number, Unset):
+            some_nullable_number = UNSET
+        elif isinstance(self.some_nullable_number, float):
+            some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
+        else:
+            some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
+
+        some_array: Union[Tuple[None, bytes, str], Unset]
+
         if isinstance(self.some_array, Unset):
             some_array = UNSET
         elif isinstance(self.some_array, list):
@@ -183,9 +211,8 @@ class BodyUploadFileTestsUploadPost:
                 some_array_type_0_item = some_array_type_0_item_data.to_dict()
                 _temp_some_array.append(some_array_type_0_item)
             some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
-
         else:
-            some_array = self.some_array
+            some_array = (None, str(self.some_array).encode(), "text/plain")
 
         some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
@@ -201,6 +228,7 @@ class BodyUploadFileTestsUploadPost:
         field_dict.update(
             {
                 "some_file": some_file,
+                "some_required_number": some_required_number,
                 "some_object": some_object,
                 "some_nullable_object": some_nullable_object,
             }
@@ -215,6 +243,8 @@ class BodyUploadFileTestsUploadPost:
             field_dict["a_date"] = a_date
         if some_number is not UNSET:
             field_dict["some_number"] = some_number
+        if some_nullable_number is not UNSET:
+            field_dict["some_nullable_number"] = some_nullable_number
         if some_array is not UNSET:
             field_dict["some_array"] = some_array
         if some_optional_object is not UNSET:
@@ -240,6 +270,8 @@ class BodyUploadFileTestsUploadPost:
 
         d = src_dict.copy()
         some_file = File(payload=BytesIO(d.pop("some_file")))
+
+        some_required_number = d.pop("some_required_number")
 
         some_object = BodyUploadFileTestsUploadPostSomeObject.from_dict(d.pop("some_object"))
 
@@ -283,6 +315,15 @@ class BodyUploadFileTestsUploadPost:
 
         some_number = d.pop("some_number", UNSET)
 
+        def _parse_some_nullable_number(data: object) -> Union[None, Unset, float]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, float], data)
+
+        some_nullable_number = _parse_some_nullable_number(d.pop("some_nullable_number", UNSET))
+
         def _parse_some_array(data: object) -> Union[List["AFormData"], None, Unset]:
             if data is None:
                 return data
@@ -321,6 +362,7 @@ class BodyUploadFileTestsUploadPost:
 
         body_upload_file_tests_upload_post = cls(
             some_file=some_file,
+            some_required_number=some_required_number,
             some_object=some_object,
             some_nullable_object=some_nullable_object,
             some_optional_file=some_optional_file,
@@ -328,6 +370,7 @@ class BodyUploadFileTestsUploadPost:
             a_datetime=a_datetime,
             a_date=a_date,
             some_number=some_number,
+            some_nullable_number=some_nullable_number,
             some_array=some_array,
             some_optional_object=some_optional_object,
             some_enum=some_enum,

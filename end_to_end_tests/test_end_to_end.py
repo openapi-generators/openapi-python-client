@@ -215,14 +215,19 @@ def test_custom_templates():
     )
 
 
-@pytest.mark.parametrize(
-    "command", ("generate", "update")
-)
-def test_bad_url(command: str):
+def test_bad_url():
     runner = CliRunner()
-    result = runner.invoke(app, [command, "--url=not_a_url"])
+    result = runner.invoke(app, ["generate", "--url=not_a_url"])
     assert result.exit_code == 1
     assert "Could not get OpenAPI document from provided URL" in result.stdout
+
+
+def test_invalid_document():
+    runner = CliRunner()
+    path = Path(__file__).parent / "invalid_openapi.yaml"
+    result = runner.invoke(app, ["generate", f"--path={path}", "--fail-on-warning"])
+    assert result.exit_code == 1
+    assert "Warning(s) encountered while generating" in result.stdout
 
 
 def test_custom_post_hooks():
@@ -248,16 +253,6 @@ def test_generate_dir_already_exists():
     shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
 
 
-def test_update_dir_not_found():
-    project_dir = Path.cwd() / "my-test-api-client"
-    shutil.rmtree(project_dir, ignore_errors=True)
-    runner = CliRunner()
-    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
-    result = runner.invoke(app, ["update", f"--path={openapi_document}"])
-    assert result.exit_code == 1
-    assert str(project_dir) in result.stdout
-
-
 @pytest.mark.parametrize(
     ("file_name", "content", "expected_error"),
     (
@@ -280,9 +275,19 @@ def test_invalid_openapi_document(file_name, content, expected_error):
 def test_update_integration_tests():
     url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json"
     source_path = Path(__file__).parent.parent / "integration-tests"
-    project_path = Path.cwd() / "integration-tests"
-    if source_path != project_path:  # Just in case someone runs this from root dir
-        shutil.copytree(source_path, project_path)
-    config_path = project_path / "config.yaml"
-    _run_command("update", url=url, config_path=config_path)
-    _compare_directories(source_path, project_path, expected_differences={})
+    temp_dir = Path.cwd() / "test_update_integration_tests"
+    shutil.rmtree(temp_dir, ignore_errors=True)
+    shutil.copytree(source_path, temp_dir)
+    config_path = source_path / "config.yaml"
+    _run_command(
+        "generate",
+        extra_args=["--meta=none", "--overwrite", f"--output-path={source_path / 'integration_tests'}"],
+        url=url,
+        config_path=config_path
+    )
+    _compare_directories(temp_dir, source_path, expected_differences={})
+    import mypy.api
+
+    out, err, status = mypy.api.run([str(temp_dir), "--strict"])
+    assert status == 0, f"Type checking client failed: {out}"
+    shutil.rmtree(temp_dir)
