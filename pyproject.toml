@@ -85,13 +85,13 @@ ignore_missing_imports = true
 junit_family = "xunit2"
 
 
+
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest",
     "pytest-mock",
     "mypy",
     "taskipy",
-    "safety",
     "pytest-cov",
     "python-multipart",
     "types-PyYAML<7.0.0,>=6.0.3",
@@ -110,9 +110,8 @@ includes = [
 [tool.pdm.scripts]
 lint = "ruff check --fix ."
 format = "ruff format ."
-safety_check = { shell = "pdm export -o requirements.txt && safety check -r requirements.txt --bare && rm requirements.txt" }
 mypy = "mypy openapi_python_client"
-check = { composite = ["lint", "format", "safety_check", "mypy", "test"] }
+check = { composite = ["lint", "format", "mypy", "test"] }
 regen = {composite = ["regen_e2e", "regen_integration"]}
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = {composite = ["regen_e2e", "e2e"]}
