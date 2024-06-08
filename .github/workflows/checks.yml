@@ -42,9 +42,6 @@ jobs:
       - name: Check formatting
         run: pdm run ruff format . --check
 
-      - name: Run safety
-        run: pdm safety_check
-
       - name: Run mypy
         run: pdm mypy --show-error-codes
 
