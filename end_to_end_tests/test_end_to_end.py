@@ -222,6 +222,14 @@ def test_bad_url():
     assert "Could not get OpenAPI document from provided URL" in result.stdout
 
 
+def test_invalid_document():
+    runner = CliRunner()
+    path = Path(__file__).parent / "invalid_openapi.yaml"
+    result = runner.invoke(app, ["generate", f"--path={path}", "--fail-on-warning"])
+    assert result.exit_code == 1
+    assert "Warning(s) encountered while generating" in result.stdout
+
+
 def test_custom_post_hooks():
     shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
     runner = CliRunner()
