@@ -65,12 +65,22 @@ class Project:
         )
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
-        self.project_dir: Path = Path.cwd()
-        if config.meta_type != MetaType.NONE:
-            self.project_dir /= self.project_name
-
         self.package_name: str = config.package_name_override or self.project_name.replace("-", "_")
-        self.package_dir: Path = self.project_dir / self.package_name
+        self.project_dir: Path  # Where the generated code will be placed
+        self.package_dir: Path  # Where the generated Python module will be placed (same as project_dir if no meta)
+
+        if config.output_path is not None:
+            self.project_dir = config.output_path
+        elif config.meta_type == MetaType.NONE:
+            self.project_dir = Path.cwd() / self.package_name
+        else:
+            self.project_dir = Path.cwd() / self.project_name
+
+        if config.meta_type == MetaType.NONE:
+            self.package_dir = self.project_dir
+        else:
+            self.package_dir = self.project_dir / self.package_name
+
         self.package_description: str = utils.remove_string_escapes(
             f"A client library for accessing {self.openapi.title}"
         )
@@ -95,29 +105,16 @@ class Project:
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
 
-        if self.config.meta_type == MetaType.NONE:
-            print(f"Generating {self.package_name}")
-        else:
-            print(f"Generating {self.project_name}")
-            try:
-                self.project_dir.mkdir()
-            except FileExistsError:
-                return [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
+        print(f"Generating {self.project_dir}")
+        if self.config.overwrite:
+            shutil.rmtree(self.project_dir, ignore_errors=True)
+
+        try:
+            self.project_dir.mkdir()
+        except FileExistsError:
+            return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
         self._create_package()
         self._build_metadata()
-        self._build_models()
-        self._build_api()
-        self._run_post_hooks()
-        return self._get_errors()
-
-    def update(self) -> Sequence[GeneratorError]:
-        """Update an existing project"""
-
-        if not self.package_dir.is_dir():
-            return [GeneratorError(detail=f"Directory {self.package_dir} not found")]
-        print(f"Updating {self.package_name}")
-        shutil.rmtree(self.package_dir)
-        self._create_package()
         self._build_models()
         self._build_api()
         self._run_post_hooks()
@@ -138,7 +135,7 @@ class Project:
             )
             return
         try:
-            cwd = self.package_dir if self.config.meta_type == MetaType.NONE else self.project_dir
+            cwd = self.project_dir
             subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, check=True)
         except CalledProcessError as err:
             self.errors.append(
@@ -158,7 +155,8 @@ class Project:
         return errors
 
     def _create_package(self) -> None:
-        self.package_dir.mkdir()
+        if self.package_dir != self.project_dir:
+            self.package_dir.mkdir()
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
@@ -303,7 +301,7 @@ def _get_project_for_url_or_path(
     )
 
 
-def create_new_client(
+def generate(
     *,
     config: Config,
     custom_template_path: Optional[Path] = None,
@@ -321,26 +319,6 @@ def create_new_client(
     if isinstance(project, GeneratorError):
         return [project]
     return project.build()
-
-
-def update_existing_client(
-    *,
-    config: Config,
-    custom_template_path: Optional[Path] = None,
-) -> Sequence[GeneratorError]:
-    """
-    Update an existing client library
-
-    Returns:
-         A list containing any errors encountered when generating.
-    """
-    project = _get_project_for_url_or_path(
-        custom_template_path=custom_template_path,
-        config=config,
-    )
-    if isinstance(project, GeneratorError):
-        return [project]
-    return project.update()
 
 
 def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
