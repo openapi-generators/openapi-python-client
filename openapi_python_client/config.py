@@ -73,10 +73,17 @@ class Config:
     document_source: Union[Path, str]
     file_encoding: str
     content_type_overrides: Dict[str, str]
+    overwrite: bool
+    output_path: Optional[Path]
 
     @staticmethod
     def from_sources(
-        config_file: ConfigFile, meta_type: MetaType, document_source: Union[Path, str], file_encoding: str
+        config_file: ConfigFile,
+        meta_type: MetaType,
+        document_source: Union[Path, str],
+        file_encoding: str,
+        overwrite: bool,
+        output_path: Optional[Path],
     ) -> "Config":
         if config_file.post_hooks is not None:
             post_hooks = config_file.post_hooks
@@ -104,5 +111,7 @@ class Config:
             http_timeout=config_file.http_timeout,
             document_source=document_source,
             file_encoding=file_encoding,
+            overwrite=overwrite,
+            output_path=output_path,
         )
         return config
