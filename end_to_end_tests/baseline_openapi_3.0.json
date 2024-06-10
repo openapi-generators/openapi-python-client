@@ -1910,6 +1910,14 @@
             "title": "Some Required Number",
             "type": "number"
           },
+          "some_int_array": {
+            "title": "Some Integer Array",
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "nullable": true
+            }
+          },
           "some_array": {
             "title": "Some Array",
             "nullable": true,
