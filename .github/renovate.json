@@ -2,5 +2,30 @@
   "extends": [
     "config:base",
     ":semanticCommitTypeAll(chore)"
+  ],
+  "rangeStrategy": "widen",
+  "lockFileMaintenance": { "enabled": true, "automerge": true },
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "release.*\\.yml",
+        "prerelease.yml"
+      ],
+      "matchStrings": [
+        "version:\\s*(?<currentValue>.*)"
+      ],
+      "depNameTemplate": "knope",
+      "datasourceTemplate": "crate",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "packagePatterns": [
+        "^knope$"
+      ],
+      "groupName": "knope",
+      "rangeStrategy": "pin"
+    }
   ]
 }

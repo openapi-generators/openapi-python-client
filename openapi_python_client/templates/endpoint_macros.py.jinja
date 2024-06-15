@@ -1,29 +1,35 @@
 {% from "property_templates/helpers.jinja" import guarded_statement %}
+{% from "helpers.jinja" import safe_docstring %}
 
 {% macro header_params(endpoint) %}
+{% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
+headers: Dict[str, Any] = {}
 {% if endpoint.header_parameters %}
-    {% for parameter in endpoint.header_parameters.values() %}
-        {% set destination = 'headers["' +  parameter.name + '"]' %}
+    {% for parameter in endpoint.header_parameters %}
         {% import "property_templates/" + parameter.template as param_template %}
         {% if param_template.transform_header %}
-            {% set statement = param_template.transform_header(parameter, parameter.python_name, destination) %}
+            {% set expression = param_template.transform_header(parameter.python_name) %}
         {% else %}
-            {% set statement = destination + " = " + parameter.python_name %}
+            {% set expression = parameter.python_name %}
         {% endif %}
+        {% set statement = 'headers["' +  parameter.name + '"]' + " = " + expression %}
 {{ guarded_statement(parameter, parameter.python_name, statement) }}
     {% endfor %}
+{% endif %}
 {% endif %}
 {% endmacro %}
 
 {% macro cookie_params(endpoint) %}
 {% if endpoint.cookie_parameters %}
-    {% for parameter in endpoint.cookie_parameters.values() %}
+cookies = {}
+    {% for parameter in endpoint.cookie_parameters %}
         {% if parameter.required %}
 cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% else %}
 if {{ parameter.python_name }} is not UNSET:
     cookies["{{ parameter.name}}"] = {{ parameter.python_name }}
         {% endif %}
+
     {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -32,7 +38,8 @@ if {{ parameter.python_name }} is not UNSET:
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
 params: Dict[str, Any] = {}
-{% for property in endpoint.query_parameters.values() %}
+
+{% for property in endpoint.query_parameters %}
     {% set destination = property.python_name %}
     {% import "property_templates/" + property.template as prop_template %}
     {% if prop_template.transform %}
@@ -45,103 +52,106 @@ params["{{ property.name }}"] = {{ destination }}
 {{ guarded_statement(property, destination, "params.update(" + destination + ")") }}
     {% endif %}
 
-
 {% endfor %}
 
 params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro json_body(endpoint) %}
-{% if endpoint.json_body %}
-    {% set property = endpoint.json_body %}
-    {% set destination = "json_" + property.python_name %}
-    {% import "property_templates/" + property.template as prop_template %}
-    {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, destination) }}
-    {% else %}
-{{ destination }} = {{ property.python_name }}
-    {% endif %}
+{% macro body_to_kwarg(body, destination) %}
+{% if body.body_type == "data" %}
+{{ destination }} = body.to_dict()
+{% elif body.body_type == "files"%}
+{{ multipart_body(body, destination) }}
+{% elif body.body_type == "json" %}
+{{ json_body(body, destination) }}
+{% elif body.body_type == "content" %}
+{{ destination }} = body.payload
 {% endif %}
 {% endmacro %}
 
-{% macro multipart_body(endpoint) %}
-{% if endpoint.multipart_body %}
-    {% set property = endpoint.multipart_body %}
-    {% set destination = "multipart_" + property.python_name %}
-    {% import "property_templates/" + property.template as prop_template %}
-    {% if prop_template.transform_multipart %}
-{{ prop_template.transform_multipart(property, property.python_name, destination) }}
-    {% endif %}
+{% macro json_body(body, destination) %}
+{% set property = body.prop %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if prop_template.transform %}
+{{ prop_template.transform(property, property.python_name, destination) }}
+{% else %}
+{{ destination }} = {{ property.python_name }}
+{% endif %}
+{% endmacro %}
+
+{% macro multipart_body(body, destination) %}
+{% set property = body.prop %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if prop_template.transform_multipart_body %}
+{{ prop_template.transform_multipart_body(property, property.python_name, destination) }}
 {% endif %}
 {% endmacro %}
 
 {# The all the kwargs passed into an endpoint (and variants thereof)) #}
-{% macro arguments(endpoint) %}
+{% macro arguments(endpoint, include_client=True) %}
 {# path parameters #}
-{% for parameter in endpoint.path_parameters.values() %}
+{% for parameter in endpoint.path_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
+{% if include_client or ((endpoint.list_all_parameters() | length) > (endpoint.path_parameters | length)) %}
 *,
+{% endif %}
 {# Proper client based on whether or not the endpoint requires authentication #}
+{% if include_client %}
 {% if endpoint.requires_security %}
 client: AuthenticatedClient,
 {% else %}
-client: Client,
+client: Union[AuthenticatedClient, Client],
 {% endif %}
-{# Form data if any #}
-{% if endpoint.form_body_class %}
-form_data: {{ endpoint.form_body_class.name }},
 {% endif %}
-{# Multipart data if any #}
-{% if endpoint.multipart_body %}
-multipart_data: {{ endpoint.multipart_body.get_type_string() }},
-{% endif %}
-{# JSON body if any #}
-{% if endpoint.json_body %}
-json_body: {{ endpoint.json_body.get_type_string() }},
+{# Any allowed bodies #}
+{% if endpoint.bodies | length == 1 %}
+body: {{ endpoint.bodies[0].prop.get_type_string() }},
+{% elif endpoint.bodies | length > 1 %}
+body: Union[
+    {% for body in endpoint.bodies %}
+    {{ body.prop.get_type_string() }},
+    {% endfor %}
+],
 {% endif %}
 {# query parameters #}
-{% for parameter in endpoint.query_parameters.values() %}
+{% for parameter in endpoint.query_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
+{% for parameter in endpoint.header_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
 {# cookie parameters #}
-{% for parameter in endpoint.cookie_parameters.values() %}
+{% for parameter in endpoint.cookie_parameters %}
 {{ parameter.to_string() }},
 {% endfor %}
 {% endmacro %}
 
 {# Just lists all kwargs to endpoints as name=name for passing to other functions #}
-{% macro kwargs(endpoint) %}
-{% for parameter in endpoint.path_parameters.values() %}
+{% macro kwargs(endpoint, include_client=True) %}
+{% for parameter in endpoint.path_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
+{% if include_client %}
 client=client,
-{% if endpoint.form_body_class %}
-form_data=form_data,
 {% endif %}
-{% if endpoint.multipart_body %}
-multipart_data=multipart_data,
+{% if endpoint.bodies | length > 0 %}
+body=body,
 {% endif %}
-{% if endpoint.json_body %}
-json_body=json_body,
-{% endif %}
-{% for parameter in endpoint.query_parameters.values() %}
+{% for parameter in endpoint.query_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
-{% for parameter in endpoint.header_parameters.values() %}
+{% for parameter in endpoint.header_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
-{% for parameter in endpoint.cookie_parameters.values() %}
+{% for parameter in endpoint.cookie_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
 {% endfor %}
 {% endmacro %}
 
-{% macro docstring(endpoint, return_string) %}
-"""{% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
+{% macro docstring_content(endpoint, return_string, is_detailed) %}
+{% if endpoint.summary %}{{ endpoint.summary | wordwrap(100)}}
 
 {% endif -%}
 {%- if endpoint.description %} {{ endpoint.description | wordwrap(100) }}
@@ -159,7 +169,18 @@ Args:
     {% endfor %}
 
 {% endif %}
+Raises:
+    errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+    httpx.TimeoutException: If the request takes longer than Client.timeout.
+
 Returns:
+{% if is_detailed %}
     Response[{{ return_string }}]
-"""
+{% else %}
+    {{ return_string }}
+{% endif %}
+{% endmacro %}
+
+{% macro docstring(endpoint, return_string, is_detailed) %}
+{{ safe_docstring(docstring_content(endpoint, return_string, is_detailed)) }}
 {% endmacro %}

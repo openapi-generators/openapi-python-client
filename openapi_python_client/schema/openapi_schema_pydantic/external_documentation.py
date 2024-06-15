@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class ExternalDocumentation(BaseModel):
@@ -11,8 +11,8 @@ class ExternalDocumentation(BaseModel):
     """
 
     description: Optional[str] = None
-    url: AnyUrl
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {"examples": [{"description": "Find more info here", "url": "https://example.com"}]}
+    url: str
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={"examples": [{"description": "Find more info here", "url": "https://example.com"}]},
+    )

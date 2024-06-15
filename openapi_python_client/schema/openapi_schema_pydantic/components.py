@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Union
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .callback import Callback
 from .example import Example
@@ -25,7 +25,7 @@ class Components(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
-    schemas: Optional[Dict[str, Union[Reference, Schema]]] = None
+    schemas: Optional[Dict[str, Union[Schema, Reference]]] = None
     responses: Optional[Dict[str, Union[Response, Reference]]] = None
     parameters: Optional[Dict[str, Union[Parameter, Reference]]] = None
     examples: Optional[Dict[str, Union[Example, Reference]]] = None
@@ -34,10 +34,9 @@ class Components(BaseModel):
     securitySchemes: Optional[Dict[str, Union[SecurityScheme, Reference]]] = None
     links: Optional[Dict[str, Union[Link, Reference]]] = None
     callbacks: Optional[Dict[str, Union[Callback, Reference]]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "schemas": {
@@ -98,4 +97,5 @@ class Components(BaseModel):
                     },
                 }
             ]
-        }
+        },
+    )

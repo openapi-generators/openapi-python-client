@@ -1,19 +1,21 @@
-""" Contains methods for accessing the API Endpoints """
+"""Contains methods for accessing the API Endpoints"""
 
 import types
 
 from . import (
-    defaults_tests_defaults_post,
+    callback_test,
+    description_with_backslash,
     get_basic_list_of_booleans,
     get_basic_list_of_floats,
     get_basic_list_of_integers,
     get_basic_list_of_strings,
     get_user_list,
-    int_enum_tests_int_enum_post,
     json_body_tests_json_body_post,
     no_response_tests_no_response_get,
     octet_stream_tests_octet_stream_get,
+    octet_stream_tests_octet_stream_post,
     post_form_data,
+    post_form_data_inline,
     post_tests_json_body_string,
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
@@ -67,6 +69,13 @@ class TestsEndpoints:
         return post_form_data
 
     @classmethod
+    def post_form_data_inline(cls) -> types.ModuleType:
+        """
+        Post form data (inline schema)
+        """
+        return post_form_data_inline
+
+    @classmethod
     def upload_file_tests_upload_post(cls) -> types.ModuleType:
         """
         Upload a file
@@ -95,18 +104,18 @@ class TestsEndpoints:
         return post_tests_json_body_string
 
     @classmethod
-    def defaults_tests_defaults_post(cls) -> types.ModuleType:
-        """
-        Defaults
-        """
-        return defaults_tests_defaults_post
-
-    @classmethod
     def octet_stream_tests_octet_stream_get(cls) -> types.ModuleType:
         """
         Octet Stream
         """
         return octet_stream_tests_octet_stream_get
+
+    @classmethod
+    def octet_stream_tests_octet_stream_post(cls) -> types.ModuleType:
+        """
+        Binary (octet stream) request body
+        """
+        return octet_stream_tests_octet_stream_post
 
     @classmethod
     def no_response_tests_no_response_get(cls) -> types.ModuleType:
@@ -123,13 +132,6 @@ class TestsEndpoints:
         return unsupported_content_tests_unsupported_content_get
 
     @classmethod
-    def int_enum_tests_int_enum_post(cls) -> types.ModuleType:
-        """
-        Int Enum
-        """
-        return int_enum_tests_int_enum_post
-
-    @classmethod
     def test_inline_objects(cls) -> types.ModuleType:
         """
         Test Inline Objects
@@ -142,3 +144,17 @@ class TestsEndpoints:
         Test optional cookie parameters
         """
         return token_with_cookie_auth_token_with_cookie_get
+
+    @classmethod
+    def callback_test(cls) -> types.ModuleType:
+        """
+        Try sending a request related to a callback
+        """
+        return callback_test
+
+    @classmethod
+    def description_with_backslash(cls) -> types.ModuleType:
+        """
+            Test description with \
+        """
+        return description_with_backslash

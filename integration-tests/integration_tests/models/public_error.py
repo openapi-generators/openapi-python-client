@@ -1,28 +1,32 @@
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
-from ..models.problem import Problem
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.problem import Problem
+
 
 T = TypeVar("T", bound="PublicError")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class PublicError:
     """
     Attributes:
         errors (Union[Unset, List[str]]):
         extra_parameters (Union[Unset, List[str]]):
-        invalid_parameters (Union[Unset, List[Problem]]):
+        invalid_parameters (Union[Unset, List['Problem']]):
         missing_parameters (Union[Unset, List[str]]):
     """
 
     errors: Union[Unset, List[str]] = UNSET
     extra_parameters: Union[Unset, List[str]] = UNSET
-    invalid_parameters: Union[Unset, List[Problem]] = UNSET
+    invalid_parameters: Union[Unset, List["Problem"]] = UNSET
     missing_parameters: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         errors: Union[Unset, List[str]] = UNSET
@@ -38,7 +42,6 @@ class PublicError:
             invalid_parameters = []
             for invalid_parameters_item_data in self.invalid_parameters:
                 invalid_parameters_item = invalid_parameters_item_data.to_dict()
-
                 invalid_parameters.append(invalid_parameters_item)
 
         missing_parameters: Union[Unset, List[str]] = UNSET
@@ -61,6 +64,8 @@ class PublicError:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.problem import Problem
+
         d = src_dict.copy()
         errors = cast(List[str], d.pop("errors", UNSET))
 

@@ -1,7 +1,7 @@
 from enum import Enum
 
 class {{ enum.class_info.name }}(str, Enum):
-    {% for key, value in enum.values.items() %}
+    {% for key, value in enum.values|dictsort(true) %}
     {{ key }} = "{{ value }}"
     {% endfor %}
 

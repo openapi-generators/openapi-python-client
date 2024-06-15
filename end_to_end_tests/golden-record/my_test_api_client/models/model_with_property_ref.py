@@ -1,22 +1,26 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
-from ..models.model_name import ModelName
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.model_name import ModelName
+
 
 T = TypeVar("T", bound="ModelWithPropertyRef")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ModelWithPropertyRef:
     """
     Attributes:
         inner (Union[Unset, ModelName]):
     """
 
-    inner: Union[Unset, ModelName] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    inner: Union[Unset, "ModelName"] = UNSET
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         inner: Union[Unset, Dict[str, Any]] = UNSET
@@ -33,6 +37,8 @@ class ModelWithPropertyRef:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_name import ModelName
+
         d = src_dict.copy()
         _inner = d.pop("inner", UNSET)
         inner: Union[Unset, ModelName]

@@ -1,11 +1,12 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 T = TypeVar("T", bound="PostBodyMultipartResponse200")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class PostBodyMultipartResponse200:
     """
     Attributes:
@@ -21,13 +22,17 @@ class PostBodyMultipartResponse200:
     description: str
     file_name: str
     file_content_type: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_string = self.a_string
+
         file_data = self.file_data
+
         description = self.description
+
         file_name = self.file_name
+
         file_content_type = self.file_content_type
 
         field_dict: Dict[str, Any] = {}

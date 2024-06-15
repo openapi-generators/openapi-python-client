@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 from ..models.another_all_of_sub_model_type import AnotherAllOfSubModelType
 from ..models.another_all_of_sub_model_type_enum import AnotherAllOfSubModelTypeEnum
@@ -9,7 +10,7 @@ from ..types import UNSET, Unset
 T = TypeVar("T", bound="ModelFromAllOf")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ModelFromAllOf:
     """
     Attributes:
@@ -23,10 +24,11 @@ class ModelFromAllOf:
     type: Union[Unset, AnotherAllOfSubModelType] = UNSET
     type_enum: Union[Unset, AnotherAllOfSubModelTypeEnum] = UNSET
     another_sub_property: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         a_sub_property = self.a_sub_property
+
         type: Union[Unset, str] = UNSET
         if not isinstance(self.type, Unset):
             type = self.type.value

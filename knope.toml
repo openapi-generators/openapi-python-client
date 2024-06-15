@@ -1,23 +1,49 @@
-[[packages]]
+[package]
 versioned_files = ["pyproject.toml"]
 changelog = "CHANGELOG.md"
 
 [[workflows]]
-name = "task"
-    [[workflows.steps]]
-    type = "SelectGitHubIssue"
+name = "prepare-release"
 
-    [[workflows.steps]]
-    type = "SwitchBranches"
+[[workflows.steps]]
+type = "Command"
+shell = true
+command = "git switch -c release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+
+[[workflows.steps]]
+type = "Command"
+shell = true
+command = "git commit -m \"chore: prepare release $version\" && git push --force --set-upstream origin release"
+
+[workflows.steps.variables]
+"$version" = "Version"
+
+[[workflows.steps]]
+type = "CreatePullRequest"
+base = "main"
+
+[workflows.steps.title]
+template = "chore: prepare release $version"
+variables = { "$version" = "Version" }
+
+[workflows.steps.body]
+template = "This PR was created by Knope. Merging it will create a new release\n\n$changelog"
+variables = { "$changelog" = "ChangelogEntry" }
 
 [[workflows]]
 name = "release"
-    [[workflows.steps]]
-    type = "PrepareRelease"
 
-    [[workflows.steps]]
-    type = "Command"
-    command = "npx prettier --write CHANGELOG.md"
+[[workflows.steps]]
+type = "Release"
+
+[[workflows]]
+name = "document-change"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
 
 [github]
 owner = "openapi-generators"

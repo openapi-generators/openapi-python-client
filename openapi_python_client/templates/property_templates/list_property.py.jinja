@@ -1,11 +1,11 @@
-{% macro construct(property, source, initial_value="[]") %}
+{% macro construct(property, source) %}
 {% set inner_property = property.inner_property %}
 {% import "property_templates/" + inner_property.template as inner_template %}
 {% if inner_template.construct %}
 {% set inner_source = inner_property.python_name + "_data" %}
-{{ property.python_name }} = {{ initial_value }}
+{{ property.python_name }} = []
 _{{ property.python_name }} = {{ source }}
-{% if property.required and not property.nullable %}
+{% if property.required %}
 for {{ inner_source }} in (_{{ property.python_name }}):
 {% else %}
 for {{ inner_source }} in (_{{ property.python_name }} or []):
@@ -40,38 +40,38 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, multipart=False, transform_method="to_dict") %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% set inner_property = property.inner_property %}
-{% if multipart %}
-    {% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
-{% else %}
-    {% set type_string = property.get_type_string(json=True) %}
-{% endif %}
+{% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
-{% if property.nullable %}
-if {{ source }} is None:
-    {{ destination }} = None
-else:
-    {{ _transform(property, source, destination, multipart, transform_method) | indent(4) }}
-{% else %}
-{{ _transform(property, source, destination, multipart, transform_method) }}
-{% endif %}
+{{ _transform(property, source, destination, False, "to_dict") }}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
-    if {{ source }} is None:
-        {{ destination }} = None
-    else:
-        {{ _transform(property, source, destination, multipart, transform_method) | indent(8)}}
-{% else %}
-    {{ _transform(property, source, destination, multipart, transform_method) | indent(4)}}
+    {{ _transform(property, source, destination, False, "to_dict") | indent(4)}}
 {% endif %}
-{% endif %}
-
-
 {% endmacro %}
 
 {% macro transform_multipart(property, source, destination) %}
-{{ transform(property, source, destination, transform_method="to_multipart") }}
+{% set inner_property = property.inner_property %}
+{% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
+{% if property.required %}
+{{ _transform(property, source, destination, True, "to_dict") }}
+{% else %}
+{{ destination }}: {{ type_string }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ _transform(property, source, destination, True, "to_dict") | indent(4)}}
+{% endif %}
+{% endmacro %}
+
+{% macro transform_multipart_body(property, source, destination) %}
+{% set inner_property = property.inner_property %}
+{% set type_string = property.get_type_string(json=True) %}
+{% if property.required %}
+{{ _transform(property, source, destination, False, "to_multipart") }}
+{% else %}
+{{ destination }}: {{ type_string }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ _transform(property, source, destination, False, "to_multipart") | indent(4)}}
+{% endif %}
 {% endmacro %}

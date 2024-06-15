@@ -1,37 +1,36 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
-from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+    from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+
 
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ModelWithUnionPropertyInlined:
     """
     Attributes:
-        fruit (Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset]):
+        fruit (Union['ModelWithUnionPropertyInlinedFruitType0', 'ModelWithUnionPropertyInlinedFruitType1', Unset]):
     """
 
-    fruit: Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset] = UNSET
+    fruit: Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
+        from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+
         fruit: Union[Dict[str, Any], Unset]
         if isinstance(self.fruit, Unset):
             fruit = UNSET
-
         elif isinstance(self.fruit, ModelWithUnionPropertyInlinedFruitType0):
-            fruit = UNSET
-            if not isinstance(self.fruit, Unset):
-                fruit = self.fruit.to_dict()
-
+            fruit = self.fruit.to_dict()
         else:
-            fruit = UNSET
-            if not isinstance(self.fruit, Unset):
-                fruit = self.fruit.to_dict()
+            fruit = self.fruit.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -42,34 +41,27 @@ class ModelWithUnionPropertyInlined:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+        from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+
         d = src_dict.copy()
 
         def _parse_fruit(
             data: object,
-        ) -> Union[ModelWithUnionPropertyInlinedFruitType0, ModelWithUnionPropertyInlinedFruitType1, Unset]:
+        ) -> Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset]:
             if isinstance(data, Unset):
                 return data
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                _fruit_type_0 = data
-                fruit_type_0: Union[Unset, ModelWithUnionPropertyInlinedFruitType0]
-                if isinstance(_fruit_type_0, Unset):
-                    fruit_type_0 = UNSET
-                else:
-                    fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(_fruit_type_0)
+                fruit_type_0 = ModelWithUnionPropertyInlinedFruitType0.from_dict(data)
 
                 return fruit_type_0
             except:  # noqa: E722
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            _fruit_type_1 = data
-            fruit_type_1: Union[Unset, ModelWithUnionPropertyInlinedFruitType1]
-            if isinstance(_fruit_type_1, Unset):
-                fruit_type_1 = UNSET
-            else:
-                fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(_fruit_type_1)
+            fruit_type_1 = ModelWithUnionPropertyInlinedFruitType1.from_dict(data)
 
             return fruit_type_1
 

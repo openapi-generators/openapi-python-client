@@ -9,3 +9,5 @@ class_overrides:
     class_name: AnEnumValue
     module_name: an_enum_value
 field_prefix: attr_
+content_type_overrides:
+   openapi/python/client: application/json

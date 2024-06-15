@@ -1,10 +1,14 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict, Field
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
+from .header import Header  # noqa: F401
 from .parameter import Parameter
+
+# Required to update forward ref after object creation, as this is not imported yet
+from .path_item import PathItem  # noqa: F401
 from .reference import Reference
 from .request_body import RequestBody
 from .responses import Responses
@@ -26,17 +30,16 @@ class Operation(BaseModel):
     externalDocs: Optional[ExternalDocumentation] = None
     operationId: Optional[str] = None
     parameters: Optional[List[Union[Parameter, Reference]]] = None
-    requestBody: Optional[Union[RequestBody, Reference]] = None
+    request_body: Optional[Union[RequestBody, Reference]] = Field(None, alias="requestBody")
     responses: Responses
     callbacks: Optional[Dict[str, Callback]] = None
 
     deprecated: bool = False
     security: Optional[List[SecurityRequirement]] = None
     servers: Optional[List[Server]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "tags": ["pet"],
@@ -57,8 +60,14 @@ class Operation(BaseModel):
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "name": {"description": "Updated name of the pet", "type": "string"},
-                                        "status": {"description": "Updated status of the pet", "type": "string"},
+                                        "name": {
+                                            "description": "Updated name of the pet",
+                                            "type": "string",
+                                        },
+                                        "status": {
+                                            "description": "Updated status of the pet",
+                                            "type": "string",
+                                        },
                                     },
                                     "required": ["status"],
                                 }
@@ -78,4 +87,9 @@ class Operation(BaseModel):
                     "security": [{"petstore_auth": ["write:pets", "read:pets"]}],
                 }
             ]
-        }
+        },
+    )
+
+
+# PathItem in Callback uses Operation, so we need to update forward refs due to circular dependency
+Operation.model_rebuild()

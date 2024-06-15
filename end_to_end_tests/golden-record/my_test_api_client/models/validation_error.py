@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Type, TypeVar, cast
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="ValidationError")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ValidationError:
     """
     Attributes:
@@ -22,6 +22,7 @@ class ValidationError:
         loc = self.loc
 
         msg = self.msg
+
         type = self.type
 
         field_dict: Dict[str, Any] = {}

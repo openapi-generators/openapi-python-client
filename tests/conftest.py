@@ -1,9 +1,14 @@
+from pathlib import Path
 from typing import Any, Callable, Dict
 
 import pytest
 
+from openapi_python_client import Config, MetaType
+from openapi_python_client import schema as oai
+from openapi_python_client.config import ConfigFile
 from openapi_python_client.parser.properties import (
     AnyProperty,
+    BooleanProperty,
     DateProperty,
     DateTimeProperty,
     EnumProperty,
@@ -12,10 +17,24 @@ from openapi_python_client.parser.properties import (
     ListProperty,
     ModelProperty,
     NoneProperty,
-    Property,
     StringProperty,
     UnionProperty,
 )
+from openapi_python_client.schema.openapi_schema_pydantic import Parameter
+from openapi_python_client.schema.parameter_location import ParameterLocation
+
+
+@pytest.fixture(scope="session")
+def config() -> Config:
+    """Create a default config for when it doesn't matter"""
+    return Config.from_sources(
+        ConfigFile(),
+        MetaType.POETRY,
+        document_source=Path("openapi.yaml"),
+        file_encoding="utf-8",
+        overwrite=False,
+        output_path=None,
+    )
 
 
 @pytest.fixture
@@ -32,12 +51,14 @@ def model_property_factory() -> Callable[..., ModelProperty]:
         kwargs = {
             "description": "",
             "class_info": Class(name="MyClass", module_name="my_module"),
-            "required_properties": [],
-            "optional_properties": [],
-            "relative_imports": set(),
-            "additional_properties": False,
+            "data": oai.Schema.model_construct(),
+            "roots": set(),
+            "required_properties": None,
+            "optional_properties": None,
+            "relative_imports": None,
+            "lazy_imports": None,
+            "additional_properties": None,
             "python_name": "",
-            "description": "",
             "example": "",
             **kwargs,
         }
@@ -64,21 +85,6 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
             **kwargs,
         }
         return EnumProperty(**kwargs)
-
-    return _factory
-
-
-@pytest.fixture
-def property_factory() -> Callable[..., Property]:
-    """
-    This fixture surfaces in the test as a function which manufactures Properties with defaults.
-
-    You can pass the same params into this as the Property constructor to override defaults.
-    """
-
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return Property(**kwargs)
 
     return _factory
 
@@ -139,6 +145,21 @@ def none_property_factory() -> Callable[..., NoneProperty]:
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         return NoneProperty(**kwargs)
+
+    return _factory
+
+
+@pytest.fixture
+def boolean_property_factory() -> Callable[..., BooleanProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+
+    You can pass the same params into this as the StringProperty constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        return BooleanProperty(**kwargs)
 
     return _factory
 
@@ -222,11 +243,29 @@ def union_property_factory(date_time_property_factory, string_property_factory) 
     return _factory
 
 
+@pytest.fixture
+def param_factory() -> Callable[..., Parameter]:
+    """
+    This fixture surfaces in the test as a function which manufactures a Parameter with defaults.
+
+    You can pass the same params into this as the Parameter constructor to override defaults.
+    """
+
+    def _factory(**kwargs):
+        kwargs = {
+            "name": "",
+            "in": ParameterLocation.QUERY,
+            **kwargs,
+        }
+        return Parameter(**kwargs)
+
+    return _factory
+
+
 def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     kwargs = {
         "name": "test",
         "required": True,
-        "nullable": False,
         "default": None,
         "description": None,
         "example": None,

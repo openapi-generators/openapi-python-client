@@ -1,21 +1,19 @@
-# pylint: disable=W0611
-import sys
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from .components import Components
 from .external_documentation import ExternalDocumentation
 from .info import Info
+
+# Required to update forward ref after object creation
+from .path_item import PathItem  # noqa: F401
 from .paths import Paths
 from .security_requirement import SecurityRequirement
 from .server import Server
 from .tag import Tag
 
-if sys.version_info.minor < 8:
-    from typing_extensions import Literal
-else:
-    from typing import Literal  # type: ignore
+NUM_SEMVER_PARTS = 3
 
 
 class OpenAPI(BaseModel):
@@ -33,7 +31,21 @@ class OpenAPI(BaseModel):
     security: Optional[List[SecurityRequirement]] = None
     tags: Optional[List[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
-    openapi: 'Union[Literal["3.0.0"], Literal["3.0.1"], Literal["3.0.2"], Literal["3.0.3"]]'
+    openapi: str
+    model_config = ConfigDict(extra="allow")
 
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
+    @field_validator("openapi")
+    @classmethod
+    def check_openapi_version(cls, value: str) -> str:
+        """Validates that the declared OpenAPI version is a supported one"""
+        parts = value.split(".")
+        if len(parts) != NUM_SEMVER_PARTS:
+            raise ValueError(f"Invalid OpenAPI version {value}")
+        if parts[0] != "3":
+            raise ValueError(f"Only OpenAPI versions 3.* are supported, got {value}")
+        if int(parts[1]) > 1:
+            raise ValueError(f"Only OpenAPI versions 3.1.* are supported, got {value}")
+        return value
+
+
+OpenAPI.model_rebuild()

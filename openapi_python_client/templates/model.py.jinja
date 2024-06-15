@@ -1,11 +1,12 @@
-from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
+from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO, TYPE_CHECKING
 
 {% if model.additional_properties %}
 from typing import List
 
 {% endif %}
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 {% if model.is_multipart_body %}
 import json
 {% endif %}
@@ -16,19 +17,27 @@ from ..types import UNSET, Unset
 {{ relative }}
 {% endfor %}
 
+{% for lazy_import in model.lazy_imports %}
+{% if loop.first %}
+if TYPE_CHECKING:
+{% endif %}
+  {{ lazy_import }}
+{% endfor %}
+
 
 {% if model.additional_properties %}
-{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
+{% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string(quoted=not model.additional_properties.is_base_type) %}
 {% endif %}
 
 {% set class_name = model.class_info.name %}
 {% set module_name = model.class_info.module_name %}
 
+{% from "helpers.jinja" import safe_docstring %}
+
 T = TypeVar("T", bound="{{ class_name }}")
 
-@attr.s(auto_attribs=True)
-class {{ class_name }}:
-    """{% if model.title %}{{ model.title | wordwrap(116) }}
+{% macro class_docstring_content(model) %}
+    {% if model.title %}{{ model.title | wordwrap(116) }}
 
     {% endif -%}
     {%- if model.description %}{{ model.description | wordwrap(116) }}
@@ -48,7 +57,11 @@ class {{ class_name }}:
     {% for property in model.required_properties + model.optional_properties %}
         {{ property.to_docstring() | wordwrap(112) | indent(12) }}
     {% endfor %}{% endif %}
-    """
+{% endmacro %}
+
+@_attrs_define
+class {{ class_name }}:
+    {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
 
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
@@ -61,40 +74,36 @@ class {{ class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
 {% macro _to_dict(multipart=False) %}
 {% for property in model.required_properties + model.optional_properties %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if prop_template.transform %}
-{{ prop_template.transform(property, "self." + property.python_name, property.python_name, multipart=multipart) }}
-{% elif multipart %}
-{{ property.python_name }} = self.{{ property.python_name }} if isinstance(self.{{ property.python_name }}, Unset) else (None, str(self.{{ property.python_name }}).encode(), "text/plain")
+{% if multipart %}
+{{ prop_template.transform_multipart(property, "self." + property.python_name, property.python_name) }}
+{% elif prop_template.transform %}
+{{ prop_template.transform(property=property, source="self." + property.python_name, destination=property.python_name) }}
 {% else %}
 {{ property.python_name }} = self.{{ property.python_name }}
 {% endif %}
+
 {% endfor %}
 
 field_dict: Dict[str, Any] = {}
 {% if model.additional_properties %}
-{% if model.additional_properties.template %}{# Can be a bool instead of an object #}
-    {% import "property_templates/" + model.additional_properties.template as prop_template %}
-{% else %}
-    {% set prop_template = None %}
-{% endif %}
-{% if prop_template and prop_template.transform %}
+{% import "property_templates/" + model.additional_properties.template as prop_template %}
+{% if multipart %}
 for prop_name, prop in self.additional_properties.items():
-    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart) | indent(4) }}
-{% elif multipart %}
-field_dict.update({
-    key: (None, str(value).encode(), "text/plain")
-    for key, value in self.additional_properties.items()
-})
+    {{ prop_template.transform_multipart(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
+{% elif prop_template.transform %}
+for prop_name, prop in self.additional_properties.items():
+    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=false) | indent(4) }}
 {% else %}
 field_dict.update(self.additional_properties)
 {% endif %}
 {% endif %}
+{% if model.required_properties | length > 0 or model.optional_properties | length > 0 %}
 field_dict.update({
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -102,6 +111,7 @@ field_dict.update({
     {% endif %}
     {% endfor %}
 })
+{% endif %}
 {% for property in model.optional_properties %}
 {% if not property.required %}
 if {{ property.python_name }} is not UNSET:
@@ -113,6 +123,9 @@ return field_dict
 {% endmacro %}
 
     def to_dict(self) -> Dict[str, Any]:
+    {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
@@ -122,6 +135,9 @@ return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -146,6 +162,12 @@ return field_dict
 {% if model.additional_properties %}
     {% if model.additional_properties.template %}{# Can be a bool instead of an object #}
         {% import "property_templates/" + model.additional_properties.template as prop_template %}
+
+{% if model.additional_properties.lazy_imports %}
+    {% for lazy_import in model.additional_properties.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
+{% endif %}
     {% else %}
         {% set prop_template = None %}
     {% endif %}

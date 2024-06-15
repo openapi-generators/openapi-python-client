@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class License(BaseModel):
@@ -12,8 +12,10 @@ class License(BaseModel):
     """
 
     name: str
-    url: Optional[AnyUrl] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {"examples": [{"name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0.html"}]}
+    url: Optional[str] = None
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [{"name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0.html"}]
+        },
+    )

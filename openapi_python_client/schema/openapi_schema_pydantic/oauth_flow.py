@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import AnyUrl, BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class OAuthFlow(BaseModel):
@@ -12,14 +12,13 @@ class OAuthFlow(BaseModel):
         - https://swagger.io/docs/specification/authentication/oauth2/
     """
 
-    authorizationUrl: Optional[AnyUrl] = None
+    authorizationUrl: Optional[str] = None
     tokenUrl: Optional[str] = None
-    refreshUrl: Optional[AnyUrl] = None
+    refreshUrl: Optional[str] = None
     scopes: Dict[str, str]
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
             "examples": [
                 {
                     "authorizationUrl": "https://example.com/api/oauth/dialog",
@@ -31,4 +30,5 @@ class OAuthFlow(BaseModel):
                     "scopes": {"write:pets": "modify pets in your account", "read:pets": "read your pets"},
                 },
             ]
-        }
+        },
+    )

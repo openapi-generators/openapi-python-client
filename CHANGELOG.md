@@ -13,6 +13,642 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.21.0 (2024-06-08)
+
+### Breaking Changes
+
+#### Removed the `update` command
+
+The `update` command is no more, you can (mostly) replace its usage with some new flags on the `generate` command.
+
+If you had a package named `my-api-client` in the current working directory, the `update` command previously would update the `my_api_client` module within it. You can now _almost_ perfectly replicate this behavior using `openapi-python-client generate --meta=none --output-path=my-api-client/my_api_client --overwrite`.
+
+The only difference is that `my-api-client` would have run `post_hooks` in the `my-api-client` directory, 
+but `generate` will run `post_hooks` in the `output-path` directory.
+
+Alternatively, you can now also run `openapi-python-client generate --meta=<your-meta-type> --overwrite` to regenerate 
+the entire client, if you don't care about keeping any changes you've made to the generated client.
+
+Please comment on [discussion #824](https://github.com/openapi-generators/openapi-python-client/discussions/824)
+(or a new discussion, as appropriate) to aid in designing future features that fill any gaps this leaves for you.
+
+### Features
+
+#### Added an `--output-path` option to `generate`
+
+Rather than changing directories before running `generate` you can now specify an output directory with `--output-path`.
+Note that the project name will _not_ be appended to the `--output-path`, whatever path you specify is where the 
+generated code will be placed.
+
+#### Added an `--overwrite` flag to `generate`
+
+You can now tell `openapi-python-client` to overwrite an existing directory, rather than deleting it yourself before 
+running `generate`.
+
+## 0.20.0 (2024-05-18)
+
+### Breaking Changes
+
+#### `const` values in responses are now validated at runtime
+
+Prior to this version, `const` values returned from servers were assumed to always be correct. Now, if a server returns 
+an unexpected value, the client will raise a `ValueError`. This should enable better usage with `oneOf`.
+
+PR #1024. Thanks @peter-greenatlas!
+
+#### Switch YAML parsing to 1.2
+
+This change switches the YAML parsing library to `ruamel.yaml` which follows the YAML 1.2 specification. 
+[There are breaking changes](https://yaml.readthedocs.io/en/latest/pyyaml/#defaulting-to-yaml-12-support) from YAML 1.1 to 1.2,
+though they will not affect most use cases.
+
+PR #1042 fixes #1041. Thanks @rtaycher!
+
+### Features
+
+- allow Ruff 0.4 (#1031)
+
+### Fixes
+
+#### Fix nullable and required properties in multipart bodies
+
+Fixes #926.
+
+> [!WARNING]
+> This change is likely to break custom templates. Multipart body handling has been completely split from JSON bodies.
+
+## 0.19.1 (2024-03-27)
+
+### Features
+
+#### Add config option to override content types
+
+You can now define a `content_type_overrides` field in your `config.yml`:
+
+```yaml
+content_type_overrides:
+  application/zip: application/octet-stream
+```
+
+This allows `openapi-python-client` to generate code for content types it doesn't recognize.
+
+PR #1010 closes #810. Thanks @gaarutyunov!
+
+### Fixes
+
+#### Add aliases to `Client` for pyright
+
+This should resolve incompatibilities between the generated `Client` class and the pyright type checker.
+
+PR #1009 closes #909. Thanks @patrick91!
+
+## 0.19.0 (2024-03-06)
+
+### Breaking Changes
+
+#### Update PDM metadata syntax
+
+Metadata generated for PDM will now use the new `distribution = true` syntax instead of `package-type = "library"`. 
+New packages generated with `--meta pdm` will require PDM `2.12.0` or later to build. 
+
+### Features
+
+#### Add response content to `UnexpectedStatus` exception
+
+The error message for `UnexpectedStatus` exceptions will now include the UTF-8 decoded (ignoring errors) body of the response.
+
+PR #989 implements #840. Thanks @harabat!
+
+### Fixes
+
+#### Allow hyphens in path parameters
+
+Before now, path parameters which were invalid Python identifiers were not allowed, and would fail generation with an
+"Incorrect path templating" error. In particular, this meant that path parameters with hyphens were not allowed.
+This has now been fixed!
+
+PR #986 fixed issue #976. Thanks @harabat!
+
+> [!WARNING]
+> This change may break custom templates, see [this diff](https://github.com/openapi-generators/openapi-python-client/pull/986/files#diff-0de8437b26075d8fe8454cf47d8d95d4835c7f827fa87328e03f690412be803e)
+> if you have trouble upgrading.
+
+## 0.18.0 (2024-02-22)
+
+### Breaking Changes
+
+#### For custom templates, changed type of endpoint parameters
+
+**This does not affect projects that are not using `--custom-template-path`**
+
+The type of these properties on `Endpoint` has been changed from `Dict[str, Property]` to `List[Property]`:
+
+- `path_parameters`
+- `query_parameters`
+- `header_parameters`
+- `cookie_parameters`
+
+If your templates are very close to the default templates, you can probably just remove `.values()` anywhere it appears.
+
+The type of `iter_all_parameters()` is also different, you probably want `list_all_parameters()` instead.
+
+#### Updated generated config for Ruff v0.2
+
+This only affects projects using the `generate` command, not the `update` command. The `pyproject.toml` file generated which configures Ruff for linting and formatting has been updated to the 0.2 syntax, which means it will no longer work with Ruff 0.1.
+
+#### Updated naming strategy for conflicting properties
+
+While fixing #922, some naming strategies were updated. These should mostly be backwards compatible, but there may be 
+some small differences in generated code. Make sure to check your diffs before pushing updates to consumers!
+
+### Features
+
+#### support httpx 0.27 (#974)
+
+### Fixes
+
+#### Allow parameters with names differing only by case
+
+If you have two parameters to an endpoint named `mixedCase` and `mixed_case`, previously, this was a conflict and the endpoint would not be generated.
+Now, the generator will skip snake-casing the parameters and use the names as-is. Note that this means if neither of the parameters _was_ snake case, neither _will be_ in the generated code.
+
+Fixes #922 reported by @macmoritz & @benedikt-bartscher.
+
+#### Fix naming conflicts with properties in models with mixed casing
+
+If you had an object with two properties, where the names differed only by case, conflicting properties would be generated in the model, which then failed the linting step (when using default config). For example, this:
+
+```yaml
+type: "object"
+properties:
+  MixedCase:
+    type: "string"
+  mixedCase:
+    type: "string"
+```
+
+Would generate a class like this:
+
+```python
+class MyModel:
+    mixed_case: str
+    mixed_case: str
+```
+
+Now, neither of the properties will be forced into snake case, and the generated code will look like this:
+
+```python
+class MyModel:
+    MixedCase: str
+    mixedCase: str
+```
+
+## 0.17.3 (2024-02-20)
+
+### Fixes
+
+#### Remove spurious field_dict.update({}) for types without properties (#969)
+
+#### Fix invalid type check for nested unions
+
+Nested union types (unions of unions) were generating `isinstance()` checks that were not valid (at least for Python 3.9).
+
+Thanks to @codebutler for PR #959 which fixes #958 and #967.
+
+## 0.17.2 (2024-01-15)
+
+### Features
+
+#### Add `--meta=pdm` option for generating PEP621 + PDM metadata
+
+The default metadata is still `--meta=poetry`, which generates a `pyproject.toml` file with Poetry-specific metadata.
+This change adds the `--meta=pdm` option which includes [PDM](https://pdm-project.org/latest/)-specific metadata, but also 
+standard [PEP621](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-pyproject-toml)
+metadata. This may be useful as a starting point for other dependency managers & build tools (like Hatch).
+
+#### Add original OpenAPI `data` attribute to `Response` object
+
+PR #767
+
+In custom templates, you can now access a `response.data` attribute that contains the original OpenAPI definition of the
+response (Response Object or Reference Object).
+
+#### Include the `UP` rule for generated Ruff config
+
+This enables [pyupgrade-like improvements](https://docs.astral.sh/ruff/rules/#pyupgrade-up) which should replace some 
+`.format()` calls with f-strings.
+
+### Fixes
+
+#### Fix Ruff formatting for `--meta=none`
+
+PR #940 fixes issue #939. Thanks @satwell!
+
+Due to the lack of `pyproject.toml`, Ruff was not getting configured properly when `--meta=none`.
+As a result, it didn't clean up common generation issues like duplicate imports, which would then cause errors from 
+linters.
+
+This is now fixed by changing the default `post_hook` to `ruff check . --fix --extend-select=I` when `--meta=none`.
+Using `generate --meta=none` should now be almost identical to the code generated by `update`.
+
+## 0.17.1 (2024-01-04)
+
+### Features
+
+#### Export `Unset` types from generated `types.py` (#927)
+
+#### Generate properties for some boolean enums
+
+If a schema has both `type = "boolean"` and `enum` defined, a normal boolean property will now be created. 
+Previously, the generator would error. 
+
+Note that the generate code _will not_ correctly limit the values to the enum values. To work around this, use the 
+OpenAPI 3.1 `const` instead of `enum` to generate Python `Literal` types.
+
+Thanks for reporting #922 @macmoritz!
+
+### Fixes
+
+#### Do not stop generation for invalid enum values
+
+This generator only supports `enum` values that are strings or integers. 
+Previously, this was handled at the parsing level, which would cause the generator to fail if there were any unsupported values in the document.
+Now, the generator will correctly keep going, skipping only endpoints which contained unsupported values.
+
+Thanks for reporting #922 @macmoritz!
+
+#### Fix lists within unions
+
+Fixes #756 and #928. Arrays within unions (which, as of 0.17 includes nullable arrays) would generate invalid code.
+
+Thanks @kgutwin and @diesieben07!
+
+#### Simplify type checks for non-required unions
+
+## 0.17.0 (2023-12-31)
+
+### Breaking Changes
+
+#### Removed query parameter nullable/required special case
+
+In previous versions, setting _either_ `nullable: true` or `required: false` on a query parameter would act like both were set, resulting in a type signature like `Union[None, Unset, YourType]`. This special case has been removed, query parameters will now act like all other types of parameters.
+
+#### Renamed body types and parameters
+
+PR #900 addresses #822.
+
+Where previously there would be one body parameter per supported content type, now there is a single `body` parameter which takes a union of all the possible inputs. This correctly models the fact that only one body can be sent (and ever would be sent) in a request.
+
+For example, when calling a generated endpoint, code which used to look like this:
+
+```python
+post_body_multipart.sync_detailed(
+    client=client,
+    multipart_data=PostBodyMultipartMultipartData(),
+)
+```
+
+Will now look like this:
+
+```python
+post_body_multipart.sync_detailed(
+    client=client,
+    body=PostBodyMultipartBody(),
+)
+```
+
+Note that both the input parameter name _and_ the class name have changed. This should result in simpler code when there is only a single body type and now produces correct code when there are multiple body types.
+
+### Features
+
+#### OpenAPI 3.1 support
+
+The generator will now attempt to generate code for OpenAPI documents with versions 3.1.x (previously, it would exit immediately on seeing a version other than 3.0.x). The following specific OpenAPI 3.1 features are now supported:
+
+- `null` as a type
+- Arrays of types (e.g., `type: [string, null]`)
+- `const` (defines `Literal` types)
+
+The generator does not currently validate that the OpenAPI document is valid for a specific version of OpenAPI, so it may be possible to generate code for documents that include both removed 3.0 syntax (e.g., `nullable`) and new 3.1 syntax (e.g., `null` as a type).
+
+Thanks to everyone who helped make this possible with discussions and testing, including:
+
+- @frco9
+- @vogre
+- @naddeoa
+- @staticdev
+- @philsturgeon
+- @johnthagen
+
+#### Support multiple possible `requestBody`
+
+PR #900 addresses #822.
+
+It is now possible in some circumstances to generate valid code for OpenAPI documents which have multiple possible `requestBody` values. Previously, invalid code could have been generated with no warning (only one body could actually be sent).
+
+Only one content type per "category" is currently supported at a time. The categories are:
+
+- JSON, like `application/json`
+- Binary data, like `application/octet-stream`
+- Encoded form data, like `application/x-www-form-urlencoded`
+- Files, like `multipart/form-data`
+
+### Fixes
+
+#### Always use correct content type for requests
+
+In previous versions, a request body that was similar to a known content type would use that content type in the request. For example `application/json` would be used for `application/vnd.api+json`. This was incorrect and could result in invalid requests being sent.
+
+Now, the content type defined in the OpenAPI document will always be used.
+
+## 0.16.1 (2023-12-23)
+
+### Features
+
+#### Support httpx 0.26 (#913)
+
+## 0.16.0 (2023-12-07)
+
+### Breaking Changes
+
+#### Switch from Black to Ruff for formatting
+
+`black` is no longer a runtime dependency, so if you have them set in custom `post_hooks` in a config file, you'll need to make sure they're being installed manually. [`ruff`](https://docs.astral.sh/ruff) is now installed and used by default instead.
+
+#### Use Ruff instead of isort + autoflake at runtime
+
+`isort` and `autoflake` are no longer runtime dependencies, so if you have them set in custom `post_hooks` in a config file, you'll need to make sure they're being installed manually. [`ruff`](https://docs.astral.sh/ruff) is now installed and used by default instead.
+
+### Features
+
+#### Support all `text/*` content types in responses
+
+Within an API response, any content type which starts with `text/` will now be treated the same as `text/html` already was—they will return the `response.text` attribute from the [httpx Response](https://www.python-httpx.org/api/#response).
+
+Thanks to @fdintino for the initial implementation, and thanks for the discussions from @kairntech, @rubenfiszel, and @antoneladestito.
+
+Closes #797 and #821.
+
+#### Support `application/octet-stream` request bodies
+
+Endpoints that accept `application/octet-stream` request bodies are now supported using the same `File` type as octet-stream responses.
+
+Thanks to @kgutwin for the implementation and @rtaycher for the discussion!
+
+PR #899 closes #588
+
+### Fixes
+
+#### Remove useless `pass` statements from generated code
+
+## 0.15.2 (2023-09-16)
+
+### Features
+
+#### support httpx 0.25 (#854)
+
+#### Support content-type with attributes (#655, #809, #858). Thanks @sherbang!
+
+## 0.15.1 (2023-08-12)
+
+### Features
+
+#### Upgrade internal Pydantic use to v2. Thanks @KristinnVikar! (#779)
+
+### Fixes
+
+#### Naming conflicts when properties are named "field" or "define" (#781, #793). Thanks @david-dotorigin
+
+## 0.15.0 (2023-07-23)
+
+### Breaking Changes
+
+#### Minimum httpx version raised to 0.20
+
+Some features of generated clients already failed at runtime when using httpx < 0.20, but now the minimum version is enforced at generation time.
+
+#### Connections from clients no longer automatically close (PR [#775](https://github.com/openapi-generators/openapi-python-client/pull/775))
+
+`Client` and `AuthenticatedClient` now reuse an internal [`httpx.Client`](https://www.python-httpx.org/advanced/#client-instances) (or `AsyncClient`)—keeping connections open between requests. This will improve performance overall, but may cause resource leaking if clients are not closed properly. The new clients are intended to be used via context managers—though for compatibility they don't _have_ to be used with context managers. If not using a context manager, connections will probably leak. Note that once a client is closed (by leaving the context manager), it can no longer be used—and attempting to do so will raise an exception.
+
+APIs should now be called like:
+
+```python
+with client as client:
+    my_api.sync(client)
+    another_api.sync(client)
+# client is closed here and can no longer be used
+```
+
+Generated READMEs reflect the new syntax, but READMEs for existing generated clients should be updated manually. See [this diff](https://github.com/openapi-generators/openapi-python-client/pull/775/files#diff-62b50316369f84439d58f4981c37538f5b619d344393cb659080dadbda328547) for inspiration.
+
+#### Generated clients and models now use the newer attrs `@define` and `field` APIs
+
+See [the attrs docs](https://www.attrs.org/en/stable/names.html#attrs-tng) for more information on how these may affect you.
+
+#### Removed public attributes for `Client` and `AuthenticatedClient`
+
+The following attributes have been removed from `Client` and `AuthenticatedClient`:
+
+- `base_url`—this can now only be set via the initializer
+- `cookies`—set at initialization or use `.with_cookies()`
+- `headers`—set at initialization or use `.with_headers()`
+- `timeout`—set at initialization or use `.with_timeout()`
+- `verify_ssl`—this can now only be set via the initializer
+- `follow_redirects`—this can now only be set via the initializer
+
+#### The `timeout` param and `with_timeout` now take an `httpx.Timeout` instead of a float
+
+#### `AuthenticatedClient` no longer inherits from `Client`
+
+The API of `AuthenticatedClient` is still a superset of `Client`, but the two classes no longer share a common base class.
+
+### Features
+
+#### Allow customizing the underlying `httpx` clients
+
+There are many use-cases where customizing the underlying `httpx` client directly is necessary. Some examples are:
+
+- [Event hooks](https://www.python-httpx.org/advanced/#event-hooks)
+- [Proxies](https://www.python-httpx.org/advanced/#http-proxying)
+- [Custom authentication](https://www.python-httpx.org/advanced/#customizing-authentication)
+- [Retries](https://www.python-httpx.org/advanced/#usage_1)
+
+The new `Client` and `AuthenticatedClient` classes come with several methods to customize underlying clients. You can pass arbitrary arguments to `httpx.Client` or `httpx.AsyncClient` when they are constructed:
+
+```python
+client = Client(base_url="https://api.example.com", httpx_args={"proxies": {"https://": "https://proxy.example.com"}})
+```
+
+**The underlying clients are constructed lazily, only when needed. `httpx_args` are stored internally in a dictionary until the first request is made.**
+
+You can force immediate construction of an underlying client in order to edit it directly:
+
+```python
+import httpx
+from my_api import Client
+
+client = Client(base_url="https://api.example.com")
+sync_client: httpx.Client = client.get_httpx_client()
+sync_client.timeout = 10
+async_client = client.get_async_httpx_client()
+async_client.timeout = 15
+```
+
+You can also completely override the underlying clients:
+
+```python
+import httpx
+from my_api import Client
+
+client = Client(base_url="https://api.example.com")
+# The params you put in here ^ are discarded when you call set_httpx_client or set_async_httpx_client
+sync_client = httpx.Client(base_url="https://api.example.com", timeout=10)
+client.set_httpx_client(sync_client)
+async_client = httpx.AsyncClient(base_url="https://api.example.com", timeout=15)
+client.set_async_httpx_client(async_client)
+```
+
+#### Clients now reuse connections between requests
+
+This happens every time you use the same `Client` or `AuthenticatedClient` instance for multiple requests, however it is best to use a context manager (e.g., `with client as client:`) to ensure the client is closed properly.
+
+### Fixes
+
+#### Stop showing Poetry instructions in generated READMEs when not appropriate
+
+## 0.14.1
+
+### Fixes
+
+- Allow parameters named "client" and "url" [#758, #762, #765]. Thanks @truenicoco & @juanber84!
+
+## 0.14.0
+
+### Breaking Changes
+
+- Drop support for Python 3.7, put minimum version limit on Black (#754)
+
+### Features
+
+- Better typing (mypy) support for `Unset` (e.g., using if statements to check type) [#714, #752]. Thanks @taasan & @mcclurem! (#752)
+
+### Fixes
+
+- pyproject_no_poetry.toml.jinja template can be used to configure black and isort (closes #750) (#751)
+
+## 0.13.4
+
+### Features
+
+- support httpx 0.24 (#746)
+
+## 0.13.3
+
+### Features
+
+- Extend the UnexpectedStatus exception to include the response's content (#729)
+- Added support of follow HTTP redirects (#724). Thanks @expobrain & @emann!
+
+### Fixes
+
+- Parsing endpoint content types with semicolon separator (#727). Thanks @expobrain!
+- Remove Response[] from docstring of non-detailed functions (#741). Thanks @robertschweizer!
+
+## 0.13.2
+
+### Features
+
+- Always generate enums with sorted members (#728)
+
+### Fixes
+
+- Prevent backslashes in descriptions from breaking docstrings [#735]. Thanks @robertschweizer & @bryan-hunt! (#735)
+- Respect `required` field in parameters included with `$ref` (#737)
+
+## 0.13.1
+
+### Features
+
+- Add `http_timeout` config to set timeout getting document via `--url` [#718]. Thanks @Kircheneer!
+
+## 0.13.0
+
+### Breaking Changes
+
+- run `post_hooks` in package directory instead of current directory if meta=none [#696, #697]. Thanks @brenmous and @wallagib!
+- Treat leading underscore as a sign of invalid identifier [#703]. Thanks @maxkomarychev!
+
+### Fixes
+
+- generated docstring for `Client.get_headers` function [#713]. Thanks @rtaycher!
+
+## 0.12.3
+
+### Features
+
+- Add `raise_on_unexpected_status` flag to generated `Client` [#593]. Thanks @JamesHinshelwood, @ramnes, @gwenshap, @theFong!
+- add `use_path_prefixes_for_title_model_names` config option for simpler model names [#559, #560]. Thanks @rtaycher!
+- Support any content type ending in `+json` [#706, #709]. Thanks @XioNoX and @mtovt!
+
+## 0.12.2
+
+### Fixes
+
+- Support Python 3.11.0 (#701)
+
+## 0.12.1
+
+### Fixes
+
+- Version bump due to PyPI error
+
+## 0.12.0
+
+### Breaking Changes
+
+- Change the `Response.status_code` type to the `HTTPStatus` enum [#665]
+
+### Features
+
+- Add `endpoint_collections_by_tag` and `openapi` to the templating globals [#689]. Thanks @paulo-raca!
+- Support for recursive and circular references using lazy imports [#670, #338, #466]. Thanks @maz808 & @mtovt!
+- Include `__all__` in generated `__init__.py` files [#676, #631, #540, #675]. Thanks @EltonChou!
+
+### Fixes
+
+- If data.type is None but has data.properties, assume type is object [#691, #674]. Thanks @ahuang11!
+
+## 0.11.6
+
+### Features
+
+- improve the error message when parsing a response fails [#659]. Thanks @supermihi!
+- Authorization header can now be customized in AuthenticatedClient [#660]. Thanks @supermihi!
+- Support inlined form data schema in requestBody [#656, #662]. Thanks @supermihi!
+- Allow enums in headers [#663, #667]. Thanks @supermihi!
+
+### Fixes
+
+- Exception when parsing documents which contain callbacks [#661]. Thanks @dachucky!
+
+## 0.11.5
+
+### Features
+
+- support `#/components/parameters` references [#288, #615, #653]. Thanks @jsanchez7SC!
+
+### Fixes
+
+- Keep trailing newlines in generated files [#646, #654]. Thanks @eliask!
+
+## 0.11.4
+
+### Fixes
+
+- Invalid code generation with some `oneOf` and `anyOf` combinations [#603, #642]. Thanks @jselig-rigetti!
+- Allow relative references in all URLs [#630]. Thanks @jtv8!
+
 ## 0.11.3
 
 ### Fixes

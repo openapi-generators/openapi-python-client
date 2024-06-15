@@ -1,21 +1,24 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
-from ..models.validation_error import ValidationError
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.validation_error import ValidationError
+
 
 T = TypeVar("T", bound="HTTPValidationError")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class HTTPValidationError:
     """
     Attributes:
-        detail (Union[Unset, List[ValidationError]]):
+        detail (Union[Unset, List['ValidationError']]):
     """
 
-    detail: Union[Unset, List[ValidationError]] = UNSET
+    detail: Union[Unset, List["ValidationError"]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         detail: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -23,7 +26,6 @@ class HTTPValidationError:
             detail = []
             for detail_item_data in self.detail:
                 detail_item = detail_item_data.to_dict()
-
                 detail.append(detail_item)
 
         field_dict: Dict[str, Any] = {}
@@ -35,6 +37,8 @@ class HTTPValidationError:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.validation_error import ValidationError
+
         d = src_dict.copy()
         detail = []
         _detail = d.pop("detail", UNSET)
