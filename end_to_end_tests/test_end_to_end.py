@@ -222,12 +222,16 @@ def test_bad_url():
     assert "Could not get OpenAPI document from provided URL" in result.stdout
 
 
-def test_invalid_document():
+@pytest.mark.parametrize("document", ("optional-path-param.yaml", "circular-body-ref.yaml"))
+def test_documents_with_errors(snapshot, document):
     runner = CliRunner()
-    path = Path(__file__).parent / "invalid_openapi.yaml"
-    result = runner.invoke(app, ["generate", f"--path={path}", "--fail-on-warning"])
+    path = Path(__file__).parent / "documents_with_errors" / document
+    output_path = Path.cwd() / "test-documents-with-errors"
+    shutil.rmtree(output_path, ignore_errors=True)
+    result = runner.invoke(app, ["generate", f"--path={path}", "--fail-on-warning", f"--output-path={output_path}"])
     assert result.exit_code == 1
-    assert "Warning(s) encountered while generating" in result.stdout
+    assert result.stdout == snapshot
+    shutil.rmtree(output_path, ignore_errors=True)
 
 
 def test_custom_post_hooks():

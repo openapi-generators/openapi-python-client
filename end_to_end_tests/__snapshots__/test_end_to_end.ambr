@@ -1,0 +1,30 @@
+# serializer version: 1
+# name: test_documents_with_errors[circular-body-ref.yaml]
+  '''
+  Generating /Users/dylan/projects/openapi-python-client/test-documents-with-errors
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
+  
+  WARNING parsing POST / within default. Endpoint will not be generated.
+  
+  Circular $ref in request body
+  
+  
+  If you believe this was a mistake or this tool is missing a feature you need, please open an issue at https://github.com/openapi-generators/openapi-python-client/issues/new/choose
+  
+  '''
+# ---
+# name: test_documents_with_errors[optional-path-param.yaml]
+  '''
+  Generating /Users/dylan/projects/openapi-python-client/test-documents-with-errors
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
+  
+  WARNING parsing GET /{optional} within default. Endpoint will not be generated.
+  
+  Path parameter must be required
+  
+  Parameter(name='optional', param_in=<ParameterLocation.PATH: 'path'>, description=None, required=False, deprecated=False, allowEmptyValue=False, style=None, explode=False, allowReserved=False, param_schema=Schema(title=None, multipleOf=None, maximum=None, exclusiveMaximum=None, minimum=None, exclusiveMinimum=None, maxLength=None, minLength=None, pattern=None, maxItems=None, minItems=None, uniqueItems=None, maxProperties=None, minProperties=None, required=None, enum=None, const=None, type=<DataType.STRING: 'string'>, allOf=[], oneOf=[], anyOf=[], schema_not=None, items=None, properties=None, additionalProperties=None, description=None, schema_format=None, default=None, nullable=False, discriminator=None, readOnly=None, writeOnly=None, xml=None, externalDocs=None, example=None, deprecated=None), example=None, examples=None, content=None)
+  
+  If you believe this was a mistake or this tool is missing a feature you need, please open an issue at https://github.com/openapi-generators/openapi-python-client/issues/new/choose
+  
+  '''
+# ---
