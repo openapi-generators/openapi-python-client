@@ -21,4 +21,6 @@ components:
             type: string
 ```
 
-Thanks to @kigawas for PR #633 which closes #595.
+Thanks to @kigawas and @supermihi for initial implementations and @RockyMM for the initial request.
+
+Closes #633, closes #664, resolves #595.
