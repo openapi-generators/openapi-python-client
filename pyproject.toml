@@ -3,7 +3,7 @@ authors = [
     { name = "Dylan Anthony", email = "contact@dylananthony.com" },
 ]
 license = { text = "MIT" }
-requires-python = ">=3.8,<4.0"
+requires-python = ">=3.8.1,<4.0"
 dependencies = [
     "jinja2>=3.0.0,<4.0.0",
     "typer>0.6,<0.13",
@@ -84,8 +84,6 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 junit_family = "xunit2"
 
-
-
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest",
@@ -98,6 +96,7 @@ dev = [
     "types-certifi<2021.10.9,>=2020.0.0",
     "types-python-dateutil<3.0.0,>=2.0.0",
     "ruamel-yaml-string>=0.1.1",
+    "syrupy>=4",
 ]
 
 [tool.pdm.build]

@@ -83,6 +83,23 @@ info:
       }
     }
   },
+  "/bodies/refs": {
+    "post": {
+      "tags": [
+        "bodies"
+      ],
+      "description": "Test request body defined via ref",
+      "operationId": "refs",
+      "requestBody": {
+        "$ref": "#/components/requestBodies/NestedRef"
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
   "/tests/": {
     "get": {
       "tags": [
@@ -1604,7 +1621,7 @@ info:
     }
   }
 }
-"components": {
+"components":
   "schemas": {
     "AFormData": {
       "type": "object",
@@ -2704,7 +2721,7 @@ info:
         }
       }
     }
-  },
+  }
   "parameters": {
     "integer-param": {
       "name": "integer param",
@@ -2772,5 +2789,11 @@ info:
       }
     }
   }
-}
-
+  requestBodies:
+    NestedRef:
+      "$ref": "#/components/requestBodies/ARequestBody"
+    ARequestBody:
+      content:
+        "application/json":
+          "schema":
+            "$ref": "#/components/schemas/AModel"

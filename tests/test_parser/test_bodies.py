@@ -32,7 +32,9 @@ def test_errors(config):
         responses={},
     )
 
-    errs, _ = body_from_data(data=operation, schemas=Schemas(), config=config, endpoint_name="this will not succeed")
+    errs, _ = body_from_data(
+        data=operation, schemas=Schemas(), config=config, endpoint_name="this will not succeed", request_bodies={}
+    )
 
     assert len(errs) == len(operation.request_body.content)
     assert all(isinstance(err, ParseError) for err in errs)
