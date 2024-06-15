@@ -426,7 +426,9 @@ class Endpoint:
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
         if isinstance(result, ParseError):
             return result, schemas, parameters
-        bodies, schemas = body_from_data(data=data, schemas=schemas, config=config, endpoint_name=result.name)
+        bodies, schemas = body_from_data(
+            data=data, schemas=schemas, config=config, endpoint_name=result.name, request_bodies=request_bodies
+        )
         body_errors = []
         for body in bodies:
             if isinstance(body, ParseError):
@@ -510,9 +512,7 @@ class GeneratorData:
                 parameters=parameters,
                 config=config,
             )
-        request_bodies = {}
-        if openapi.components and openapi.components.requestBodies:
-            request_bodies = openapi.components.requestBodies
+        request_bodies = (openapi.components and openapi.components.requestBodies) or {}
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
             data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
         )
