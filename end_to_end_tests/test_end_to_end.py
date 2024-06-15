@@ -230,7 +230,7 @@ def test_documents_with_errors(snapshot, document):
     shutil.rmtree(output_path, ignore_errors=True)
     result = runner.invoke(app, ["generate", f"--path={path}", "--fail-on-warning", f"--output-path={output_path}"])
     assert result.exit_code == 1
-    assert result.stdout == snapshot
+    assert result.stdout.replace(str(output_path), "/test-documents-with-errors") == snapshot
     shutil.rmtree(output_path, ignore_errors=True)
 
 

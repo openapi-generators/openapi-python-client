@@ -1,7 +1,7 @@
 # serializer version: 1
 # name: test_documents_with_errors[circular-body-ref.yaml]
   '''
-  Generating /Users/dylan/projects/openapi-python-client/test-documents-with-errors
+  Generating /test-documents-with-errors
   Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
   WARNING parsing POST / within default. Endpoint will not be generated.
@@ -15,7 +15,7 @@
 # ---
 # name: test_documents_with_errors[optional-path-param.yaml]
   '''
-  Generating /Users/dylan/projects/openapi-python-client/test-documents-with-errors
+  Generating /test-documents-with-errors
   Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
   WARNING parsing GET /{optional} within default. Endpoint will not be generated.
