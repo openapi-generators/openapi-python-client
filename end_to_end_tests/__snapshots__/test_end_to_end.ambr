@@ -1,5 +1,5 @@
 # serializer version: 1
-# name: test_documents_with_errors[circular-body-ref.yaml]
+# name: test_documents_with_errors[circular-body-ref]
   '''
   Generating /test-documents-with-errors
   Warning(s) encountered while generating. Client was generated, but some pieces may be missing
@@ -13,7 +13,21 @@
   
   '''
 # ---
-# name: test_documents_with_errors[optional-path-param.yaml]
+# name: test_documents_with_errors[missing-body-ref]
+  '''
+  Generating /test-documents-with-errors
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
+  
+  WARNING parsing POST / within default. Endpoint will not be generated.
+  
+  Could not resolve $ref #/components/requestBodies/body in request body
+  
+  
+  If you believe this was a mistake or this tool is missing a feature you need, please open an issue at https://github.com/openapi-generators/openapi-python-client/issues/new/choose
+  
+  '''
+# ---
+# name: test_documents_with_errors[optional-path-param]
   '''
   Generating /test-documents-with-errors
   Warning(s) encountered while generating. Client was generated, but some pieces may be missing
