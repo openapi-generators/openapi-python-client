@@ -1919,6 +1919,13 @@ info:
           "title": "Some Number",
           "type": "number"
         },
+        "some_int_array": {
+          "title": "Some Integer Array",
+          "type": "array",
+          "items": {
+            "type": ["integer", "null"]
+          }
+        },
         "some_array": {
           "title": "Some Array",
           "type": [ "array", "null" ],

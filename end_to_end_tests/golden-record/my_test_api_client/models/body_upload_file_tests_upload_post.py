@@ -41,6 +41,7 @@ class BodyUploadFileTestsUploadPost:
         a_date (Union[Unset, datetime.date]):
         some_number (Union[Unset, float]):
         some_nullable_number (Union[None, Unset, float]):
+        some_int_array (Union[Unset, List[Union[None, int]]]):
         some_array (Union[List['AFormData'], None, Unset]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
         some_enum (Union[Unset, DifferentEnum]): An enumeration.
@@ -56,6 +57,7 @@ class BodyUploadFileTestsUploadPost:
     a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
     some_nullable_number: Union[None, Unset, float] = UNSET
+    some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
     some_array: Union[List["AFormData"], None, Unset] = UNSET
     some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
@@ -102,6 +104,14 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_number = self.some_nullable_number
 
+        some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
+        if not isinstance(self.some_int_array, Unset):
+            some_int_array = []
+            for some_int_array_item_data in self.some_int_array:
+                some_int_array_item: Union[None, int]
+                some_int_array_item = some_int_array_item_data
+                some_int_array.append(some_int_array_item)
+
         some_array: Union[List[Dict[str, Any]], None, Unset]
         if isinstance(self.some_array, Unset):
             some_array = UNSET
@@ -145,6 +155,8 @@ class BodyUploadFileTestsUploadPost:
             field_dict["some_number"] = some_number
         if some_nullable_number is not UNSET:
             field_dict["some_nullable_number"] = some_nullable_number
+        if some_int_array is not UNSET:
+            field_dict["some_int_array"] = some_int_array
         if some_array is not UNSET:
             field_dict["some_array"] = some_array
         if some_optional_object is not UNSET:
@@ -201,6 +213,15 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
 
+        some_int_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        if not isinstance(self.some_int_array, Unset):
+            _temp_some_int_array = []
+            for some_int_array_item_data in self.some_int_array:
+                some_int_array_item: Union[None, int]
+                some_int_array_item = some_int_array_item_data
+                _temp_some_int_array.append(some_int_array_item)
+            some_int_array = (None, json.dumps(_temp_some_int_array).encode(), "application/json")
+
         some_array: Union[Tuple[None, bytes, str], Unset]
 
         if isinstance(self.some_array, Unset):
@@ -245,6 +266,8 @@ class BodyUploadFileTestsUploadPost:
             field_dict["some_number"] = some_number
         if some_nullable_number is not UNSET:
             field_dict["some_nullable_number"] = some_nullable_number
+        if some_int_array is not UNSET:
+            field_dict["some_int_array"] = some_int_array
         if some_array is not UNSET:
             field_dict["some_array"] = some_array
         if some_optional_object is not UNSET:
@@ -324,6 +347,19 @@ class BodyUploadFileTestsUploadPost:
 
         some_nullable_number = _parse_some_nullable_number(d.pop("some_nullable_number", UNSET))
 
+        some_int_array = []
+        _some_int_array = d.pop("some_int_array", UNSET)
+        for some_int_array_item_data in _some_int_array or []:
+
+            def _parse_some_int_array_item(data: object) -> Union[None, int]:
+                if data is None:
+                    return data
+                return cast(Union[None, int], data)
+
+            some_int_array_item = _parse_some_int_array_item(some_int_array_item_data)
+
+            some_int_array.append(some_int_array_item)
+
         def _parse_some_array(data: object) -> Union[List["AFormData"], None, Unset]:
             if data is None:
                 return data
@@ -371,6 +407,7 @@ class BodyUploadFileTestsUploadPost:
             a_date=a_date,
             some_number=some_number,
             some_nullable_number=some_nullable_number,
+            some_int_array=some_int_array,
             some_array=some_array,
             some_optional_object=some_optional_object,
             some_enum=some_enum,
