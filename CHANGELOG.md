@@ -13,6 +13,38 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.21.1 (2024-06-15)
+
+### Features
+
+#### Support request body refs
+
+You can now define and reuse bodies via refs, with a document like this:
+
+```yaml
+paths:
+  /something:
+    post:
+      requestBody:
+        "$ref": "#/components/requestBodies/SharedBody"
+components:
+  requestBodies:
+    SharedBody:
+      content:
+        application/json:
+          schema:
+            type: string
+```
+
+Thanks to @kigawas and @supermihi for initial implementations and @RockyMM for the initial request.
+
+Closes #633, closes #664, resolves #595.
+
+### Fixes
+
+- Indent of generated code for non-required lists. Thanks @sfowl! (#1050)
+- Parsing requestBody with $ref (#633)
+
 ## 0.21.0 (2024-06-08)
 
 ### Breaking Changes
