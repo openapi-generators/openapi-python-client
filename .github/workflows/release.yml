@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: hatchling build
       - name: Push to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.8.14
+        uses: pypa/gh-action-pypi-publish@v1.9.0
       - name: Create GitHub Release
         run: knope release
         env:
