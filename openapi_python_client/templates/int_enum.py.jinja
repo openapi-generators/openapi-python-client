@@ -1,3 +1,4 @@
+from typing import Literal
 from enum import IntEnum
 
 class {{ enum.class_info.name }}(IntEnum):
@@ -7,3 +8,10 @@ class {{ enum.class_info.name }}(IntEnum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+{{ enum.class_info.name }}Literal = Literal[
+    {% for _, value in enum.values.items() %}
+    {{ value }},
+    {% endfor %}
+]
