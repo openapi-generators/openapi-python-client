@@ -41,16 +41,11 @@ Then, if you want tab completion: `openapi-python-client --install-completion`
 `openapi-python-client generate --url https://my.api.com/openapi.json`
 
 This will generate a new client library named based on the title in your OpenAPI spec. For example, if the title
-of your API is "My API", the expected output will be "my-api-client". If a folder already exists by that name, you'll
-get an error.
+of your API is "My API", the expected output will be "my-api-client". You can change that directory name with the config file (documented below) or with `--output-path`.
 
-If you have an `openapi.json` file available on disk, in any CLI invocation you can build off that instead by replacing `--url` with a `--path`:
+If the directory to generate already exists, you'll get an error unless you use `--overwrite`.
 
-`openapi-python-client generate --path location/on/disk/openapi.json`
-
-### Update an existing client
-
-`openapi-python-client update --url https://my.api.com/openapi.json`
+You can use an OpenAPI file instead of a URL like `openapi-python-client generate --path location/on/disk/openapi.json`.
 
 ### Using custom templates
 

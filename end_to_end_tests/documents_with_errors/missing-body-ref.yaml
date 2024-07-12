@@ -1,0 +1,16 @@
+openapi: "3.1.0"
+info:
+  title: "Trying to use a request body ref that does not exist"
+  version: "0.1.0"
+paths:
+  /:
+    post:
+      requestBody:
+        $ref: "#/components/requestBodies/body"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                const: "Why have a fixed response? I dunno"

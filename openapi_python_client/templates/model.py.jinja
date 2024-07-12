@@ -80,10 +80,10 @@ class {{ class_name }}:
 {% macro _to_dict(multipart=False) %}
 {% for property in model.required_properties + model.optional_properties %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if prop_template.transform %}
-{{ prop_template.transform(property, "self." + property.python_name, property.python_name, multipart=multipart) }}
-{% elif multipart %}
-{{ property.python_name }} = self.{{ property.python_name }} if isinstance(self.{{ property.python_name }}, Unset) else (None, str(self.{{ property.python_name }}).encode(), "text/plain")
+{% if multipart %}
+{{ prop_template.transform_multipart(property, "self." + property.python_name, property.python_name) }}
+{% elif prop_template.transform %}
+{{ prop_template.transform(property=property, source="self." + property.python_name, destination=property.python_name) }}
 {% else %}
 {{ property.python_name }} = self.{{ property.python_name }}
 {% endif %}
@@ -92,19 +92,13 @@ class {{ class_name }}:
 
 field_dict: Dict[str, Any] = {}
 {% if model.additional_properties %}
-{% if model.additional_properties.template %}{# Can be a bool instead of an object #}
-    {% import "property_templates/" + model.additional_properties.template as prop_template %}
-{% else %}
-    {% set prop_template = None %}
-{% endif %}
-{% if prop_template and prop_template.transform %}
+{% import "property_templates/" + model.additional_properties.template as prop_template %}
+{% if multipart %}
 for prop_name, prop in self.additional_properties.items():
-    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart, declare_type=false) | indent(4) }}
-{% elif multipart %}
-field_dict.update({
-    key: (None, str(value).encode(), "text/plain")
-    for key, value in self.additional_properties.items()
-})
+    {{ prop_template.transform_multipart(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
+{% elif prop_template.transform %}
+for prop_name, prop in self.additional_properties.items():
+    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=false) | indent(4) }}
 {% else %}
 field_dict.update(self.additional_properties)
 {% endif %}

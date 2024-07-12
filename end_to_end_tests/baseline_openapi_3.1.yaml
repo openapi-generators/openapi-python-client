@@ -83,6 +83,23 @@ info:
       }
     }
   },
+  "/bodies/refs": {
+    "post": {
+      "tags": [
+        "bodies"
+      ],
+      "description": "Test request body defined via ref",
+      "operationId": "refs",
+      "requestBody": {
+        "$ref": "#/components/requestBodies/NestedRef"
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
   "/tests/": {
     "get": {
       "tags": [
@@ -1604,7 +1621,7 @@ info:
     }
   }
 }
-"components": {
+"components":
   "schemas": {
     "AFormData": {
       "type": "object",
@@ -1877,7 +1894,8 @@ info:
       "required": [
         "some_file",
         "some_object",
-        "some_nullable_object"
+        "some_nullable_object",
+        "some_required_number"
       ],
       "type": "object",
       "properties": {
@@ -1909,6 +1927,21 @@ info:
         "some_number": {
           "title": "Some Number",
           "type": "number"
+        },
+        "some_nullable_number": {
+          "title": "Some Nullable Number",
+          "type": [ "number", "null" ]
+        },
+        "some_required_number": {
+          "title": "Some Number",
+          "type": "number"
+        },
+        "some_int_array": {
+          "title": "Some Integer Array",
+          "type": "array",
+          "items": {
+            "type": ["integer", "null"]
+          }
         },
         "some_array": {
           "title": "Some Array",
@@ -2688,7 +2721,7 @@ info:
         }
       }
     }
-  },
+  }
   "parameters": {
     "integer-param": {
       "name": "integer param",
@@ -2756,5 +2789,11 @@ info:
       }
     }
   }
-}
-
+  requestBodies:
+    NestedRef:
+      "$ref": "#/components/requestBodies/ARequestBody"
+    ARequestBody:
+      content:
+        "application/json":
+          "schema":
+            "$ref": "#/components/schemas/AModel"

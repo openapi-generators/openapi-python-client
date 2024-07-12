@@ -3,22 +3,22 @@ authors = [
     { name = "Dylan Anthony", email = "contact@dylananthony.com" },
 ]
 license = { text = "MIT" }
-requires-python = ">=3.8,<4.0"
+requires-python = ">=3.8.1,<4.0"
 dependencies = [
     "jinja2>=3.0.0,<4.0.0",
-    "typer>0.6,<0.12",
+    "typer>0.6,<0.13",
     "colorama>=0.4.3; sys_platform == \"win32\"",
     "shellingham>=1.3.2,<2.0.0",
     "pydantic>=2.1.1,<3.0.0",
     "attrs>=21.3.0",
     "python-dateutil>=2.8.1,<3.0.0",
     "httpx>=0.20.0,<0.28.0",
-    "PyYAML>=6.0,<7.0",
-    "ruff>=0.2,<0.4",
+    "ruamel.yaml>=0.18.6,<0.19.0",
+    "ruff>=0.2,<0.5",
     "typing-extensions>=4.8.0,<5.0.0",
 ]
 name = "openapi-python-client"
-version = "0.19.1"
+version = "0.21.1"
 description = "Generate modern Python clients from OpenAPI"
 keywords = [
     "OpenAPI",
@@ -84,19 +84,19 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 junit_family = "xunit2"
 
-
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest",
     "pytest-mock",
     "mypy",
     "taskipy",
-    "safety",
     "pytest-cov",
     "python-multipart",
     "types-PyYAML<7.0.0,>=6.0.3",
     "types-certifi<2021.10.9,>=2020.0.0",
     "types-python-dateutil<3.0.0,>=2.0.0",
+    "ruamel-yaml-string>=0.1.1",
+    "syrupy>=4",
 ]
 
 [tool.pdm.build]
@@ -109,9 +109,8 @@ includes = [
 [tool.pdm.scripts]
 lint = "ruff check --fix ."
 format = "ruff format ."
-safety_check = { shell = "pdm export -o requirements.txt && safety check -r requirements.txt --bare && rm requirements.txt" }
 mypy = "mypy openapi_python_client"
-check = { composite = ["lint", "format", "safety_check", "mypy", "test"] }
+check = { composite = ["lint", "format", "mypy", "test"] }
 regen = {composite = ["regen_e2e", "regen_integration"]}
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = {composite = ["regen_e2e", "e2e"]}

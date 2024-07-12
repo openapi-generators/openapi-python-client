@@ -7,7 +7,9 @@ from attrs import define, evolve
 
 from ... import Config, utils
 from ... import schema as oai
+from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
+from .any import AnyProperty
 from .enum_property import EnumProperty
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
@@ -30,7 +32,7 @@ class ModelProperty(PropertyProtocol):
     optional_properties: list[Property] | None
     relative_imports: set[str] | None
     lazy_imports: set[str] | None
-    additional_properties: bool | Property | None
+    additional_properties: Property | None
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
@@ -78,7 +80,7 @@ class ModelProperty(PropertyProtocol):
         optional_properties: list[Property] | None = None
         relative_imports: set[str] | None = None
         lazy_imports: set[str] | None = None
-        additional_properties: bool | Property | None = None
+        additional_properties: Property | None = None
         if process_properties:
             data_or_err, schemas = _process_property_data(
                 data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots
@@ -386,6 +388,16 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     )
 
 
+ANY_ADDITIONAL_PROPERTY = AnyProperty.build(
+    name="additional",
+    required=True,
+    default=None,
+    description="",
+    python_name=PythonIdentifier(value="additional", prefix=""),
+    example=None,
+)
+
+
 def _get_additional_properties(
     *,
     schema_additional: None | (bool | (oai.Reference | oai.Schema)),
@@ -393,18 +405,20 @@ def _get_additional_properties(
     class_name: utils.ClassName,
     config: Config,
     roots: set[ReferencePath | utils.ClassName],
-) -> tuple[bool | (Property | PropertyError), Schemas]:
+) -> tuple[Property | None | PropertyError, Schemas]:
     from . import property_from_data
 
     if schema_additional is None:
-        return True, schemas
+        return ANY_ADDITIONAL_PROPERTY, schemas
 
     if isinstance(schema_additional, bool):
-        return schema_additional, schemas
+        if schema_additional:
+            return ANY_ADDITIONAL_PROPERTY, schemas
+        return None, schemas
 
     if isinstance(schema_additional, oai.Schema) and not any(schema_additional.model_dump().values()):
         # An empty schema
-        return True, schemas
+        return ANY_ADDITIONAL_PROPERTY, schemas
 
     additional_properties, schemas = property_from_data(
         name="AdditionalProperty",
@@ -425,7 +439,7 @@ def _process_property_data(
     class_info: Class,
     config: Config,
     roots: set[ReferencePath | utils.ClassName],
-) -> tuple[tuple[_PropertyData, bool | Property] | PropertyError, Schemas]:
+) -> tuple[tuple[_PropertyData, Property | None] | PropertyError, Schemas]:
     property_data = _process_properties(
         data=data, schemas=schemas, class_name=class_info.name, config=config, roots=roots
     )
@@ -442,7 +456,7 @@ def _process_property_data(
     )
     if isinstance(additional_properties, PropertyError):
         return additional_properties, schemas
-    elif isinstance(additional_properties, bool):
+    elif additional_properties is None:
         pass
     else:
         property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
