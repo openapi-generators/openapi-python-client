@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Literal
 
 
 class AnIntEnum(IntEnum):
@@ -8,3 +9,10 @@ class AnIntEnum(IntEnum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+AnIntEnumLiteral = Literal[
+    -1,
+    1,
+    2,
+]

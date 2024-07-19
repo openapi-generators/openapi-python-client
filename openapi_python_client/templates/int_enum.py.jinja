@@ -1,5 +1,6 @@
-from typing import Literal
 from enum import IntEnum
+from typing import Literal
+
 
 class {{ enum.class_info.name }}(IntEnum):
     {% for key, value in enum.values.items() %}

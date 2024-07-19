@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Literal
 
 
 class AllOfHasPropertiesButNoTypeTypeEnum(IntEnum):
@@ -7,3 +8,9 @@ class AllOfHasPropertiesButNoTypeTypeEnum(IntEnum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+AllOfHasPropertiesButNoTypeTypeEnumLiteral = Literal[
+    0,
+    1,
+]

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 
 class AnAllOfEnum(str, Enum):
@@ -9,3 +10,11 @@ class AnAllOfEnum(str, Enum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+AnAllOfEnumLiteral = Literal[
+    "a_default",
+    "bar",
+    "foo",
+    "overridden_default",
+]
