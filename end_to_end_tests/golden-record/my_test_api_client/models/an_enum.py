@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 
 class AnEnum(str, Enum):
@@ -7,3 +8,9 @@ class AnEnum(str, Enum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+AnEnumLiteral = Literal[
+    "FIRST_VALUE",
+    "SECOND_VALUE",
+]

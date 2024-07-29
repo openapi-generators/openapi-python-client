@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 
 class DifferentEnum(str, Enum):
@@ -7,3 +8,9 @@ class DifferentEnum(str, Enum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+DifferentEnumLiteral = Literal[
+    "DIFFERENT",
+    "OTHER",
+]
