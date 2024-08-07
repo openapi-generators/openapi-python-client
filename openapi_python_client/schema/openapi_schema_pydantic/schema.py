@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, model_validator
 
 from ..data_type import DataType
 from .discriminator import Discriminator
@@ -36,7 +36,7 @@ class Schema(BaseModel):
     minProperties: Optional[int] = Field(default=None, ge=0)
     required: Optional[List[str]] = Field(default=None, min_length=1)
     enum: Union[None, List[Any]] = Field(default=None, min_length=1)
-    const: Union[None, StrictStr, StrictInt] = None
+    const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
     type: Union[DataType, List[DataType], None] = Field(default=None)
     allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)

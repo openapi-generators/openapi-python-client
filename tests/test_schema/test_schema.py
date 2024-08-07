@@ -12,6 +12,11 @@ def test_nullable_with_allof():
     assert schema.allOf == []
 
 
+def test_constant_bool():
+    schema = Schema.model_validate_json('{"type":"boolean", "enum":[true], "const":true, "default":true}')
+    assert schema.const is True
+
+
 def test_nullable_with_type_list():
     schema = Schema.model_validate_json('{"type": ["string", "number"], "nullable": true}')
     assert schema.type == [DataType.STRING, DataType.NUMBER, DataType.NULL]
