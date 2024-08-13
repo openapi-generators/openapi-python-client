@@ -372,6 +372,19 @@ class TestEnumProperty:
         with pytest.raises(ValueError):
             EnumProperty.values_from_list(data)
 
+    def test_values_from_list_with_case_sensitive_names(self):
+        from openapi_python_client.parser.properties import EnumProperty
+
+        data = ["abc", "123", "ABC", "thing with spaces"]
+
+        result = EnumProperty.values_from_list(data)
+
+        assert result == {
+            "abc": "abc",
+            "VALUE_1": "123",
+            "ABC": "ABC",
+            "thing_with_spaces": "thing with spaces",
+        }
 
 class TestPropertyFromData:
     def test_property_from_data_str_enum(self, enum_property_factory, config):

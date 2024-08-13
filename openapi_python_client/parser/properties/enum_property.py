@@ -187,6 +187,23 @@ class EnumProperty(PropertyProtocol):
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: dict[str, ValueType] = {}
 
+        # We normally would like to make nice-looking Python constant names for enum values, so that "myValue"
+        # becomes MY_VALUE, etc. However, that won't work if an enum has two values that differ only by case
+        # (which is allowed in OpenAPI).
+        use_case_sensitive_names = False
+        for i, value1 in enumerate(values):
+            if use_case_sensitive_names:
+                break
+            for j, value2 in enumerate(values):
+                if (
+                    i != j
+                    and isinstance(value1, str)
+                    and isinstance(value2, str)
+                    and value1.upper() == value2.upper()
+                ):
+                    use_case_sensitive_names = True
+                    break
+
         for i, value in enumerate(values):
             value = cast(Union[str, int], value)
             if isinstance(value, int):
@@ -196,11 +213,14 @@ class EnumProperty(PropertyProtocol):
                     output[f"VALUE_{value}"] = value
                 continue
             if value and value[0].isalpha():
-                key = value.upper()
+                key = value
             else:
                 key = f"VALUE_{i}"
             if key in output:
                 raise ValueError(f"Duplicate key {key} in Enum")
-            sanitized_key = utils.snake_case(key).upper()
+            if use_case_sensitive_names:
+                sanitized_key = utils.sanitize(key.replace(" ", "_"))
+            else:
+                sanitized_key = utils.snake_case(key.upper()).upper()
             output[sanitized_key] = utils.remove_string_escapes(value)
         return output
