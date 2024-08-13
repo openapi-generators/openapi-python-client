@@ -364,13 +364,18 @@ class TestEnumProperty:
             "VALUE_7": "",
         }
 
-    def test_values_from_list_duplicate(self):
+    def test_values_from_list_duplicate_is_skipped(self):
         from openapi_python_client.parser.properties import EnumProperty
 
         data = ["abc", "123", "a23", "abc"]
 
-        with pytest.raises(ValueError):
-            EnumProperty.values_from_list(data)
+        result = EnumProperty.values_from_list(data)
+
+        assert result == {
+            "ABC": "abc",
+            "VALUE_1": "123",
+            "A23": "a23",
+        }
 
     def test_values_from_list_with_case_sensitive_names(self):
         from openapi_python_client.parser.properties import EnumProperty

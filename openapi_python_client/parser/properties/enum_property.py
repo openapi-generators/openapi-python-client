@@ -187,14 +187,25 @@ class EnumProperty(PropertyProtocol):
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: dict[str, ValueType] = {}
 
-        # We normally would like to make nice-looking Python constant names for enum values, so that "myValue"
-        # becomes MY_VALUE, etc. However, that won't work if an enum has two values that differ only by case
-        # (which is allowed in OpenAPI).
+        # Strip out any duplicate values, while preserving the original order of the list.
+        # OpenAPI doesn't specifically disallow listing the exact same enum value twice; that
+        # would have no effect on validation behavior. The problem with it is just that we
+        # can't define two identically-named constants in the generated code. But there's no
+        # reason for us to do so, anyway; a single constant will suffice. So, just drop any
+        # duplicate value.
+        unique_values = []
+        for value in values:
+            if value not in unique_values:
+                unique_values.append(value)
+
+        # We normally would like to make nice-looking Python constant names for enum values,
+        # so that "myValue" becomes MY_VALUE, etc. However, that won't work if an enum has two
+        # values that differ only by case (which is allowed in OpenAPI).
         use_case_sensitive_names = False
-        for i, value1 in enumerate(values):
+        for i, value1 in enumerate(unique_values):
             if use_case_sensitive_names:
                 break
-            for j, value2 in enumerate(values):
+            for j, value2 in enumerate(unique_values):
                 if (
                     i != j
                     and isinstance(value1, str)
@@ -204,7 +215,7 @@ class EnumProperty(PropertyProtocol):
                     use_case_sensitive_names = True
                     break
 
-        for i, value in enumerate(values):
+        for i, value in enumerate(unique_values):
             value = cast(Union[str, int], value)
             if isinstance(value, int):
                 if value < 0:
