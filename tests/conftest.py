@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Union
 
 import pytest
 
@@ -20,6 +20,7 @@ from openapi_python_client.parser.properties import (
     StringProperty,
     UnionProperty,
 )
+from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.schema.openapi_schema_pydantic import Parameter
 from openapi_python_client.schema.parameter_location import ParameterLocation
 
@@ -67,6 +68,19 @@ def model_property_factory() -> Callable[..., ModelProperty]:
     return _factory
 
 
+def _simple_factory(cls: type, default_kwargs: Union[dict, Callable[[dict], dict], None]=None):
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        defaults = default_kwargs
+        if defaults:
+            if callable(defaults):
+                defaults = defaults(kwargs)
+            kwargs = {**defaults, **kwargs}
+        return cls(**kwargs)
+
+    return _factory
+
+
 @pytest.fixture
 def enum_property_factory() -> Callable[..., EnumProperty]:
     """
@@ -76,17 +90,11 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
     """
     from openapi_python_client.parser.properties import Class
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        kwargs = {
-            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
-            "values": {},
-            "value_type": str,
-            **kwargs,
-        }
-        return EnumProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(EnumProperty, lambda kwargs: {
+        "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
+        "values": {},
+        "value_type": str,
+    })
 
 
 @pytest.fixture
@@ -97,11 +105,7 @@ def any_property_factory() -> Callable[..., AnyProperty]:
     You can pass the same params into this as the AnyProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return AnyProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(AnyProperty)
 
 
 @pytest.fixture
@@ -112,56 +116,51 @@ def string_property_factory() -> Callable[..., StringProperty]:
     You can pass the same params into this as the StringProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return StringProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(StringProperty)
 
 
 @pytest.fixture
 def int_property_factory() -> Callable[..., IntProperty]:
     """
-    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+    This fixture surfaces in the test as a function which manufactures IntProperties with defaults.
 
-    You can pass the same params into this as the StringProperty constructor to override defaults.
+    You can pass the same params into this as the IntProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return IntProperty(**kwargs)
+    return _simple_factory(IntProperty)
 
-    return _factory
+
+@pytest.fixture
+def float_property_factory() -> Callable[..., FloatProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures FloatProperties with defaults.
+
+    You can pass the same params into this as the FloatProperty constructor to override defaults.
+    """
+
+    return _simple_factory(FloatProperty)
 
 
 @pytest.fixture
 def none_property_factory() -> Callable[..., NoneProperty]:
     """
-    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+    This fixture surfaces in the test as a function which manufactures NoneProperties with defaults.
 
-    You can pass the same params into this as the StringProperty constructor to override defaults.
+    You can pass the same params into this as the NoneProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return NoneProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(NoneProperty)
 
 
 @pytest.fixture
 def boolean_property_factory() -> Callable[..., BooleanProperty]:
     """
-    This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
+    This fixture surfaces in the test as a function which manufactures BooleanProperties with defaults.
 
-    You can pass the same params into this as the StringProperty constructor to override defaults.
+    You can pass the same params into this as the BooleanProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return BooleanProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(BooleanProperty)
 
 
 @pytest.fixture
@@ -172,11 +171,7 @@ def date_time_property_factory() -> Callable[..., DateTimeProperty]:
     You can pass the same params into this as the DateTimeProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return DateTimeProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(DateTimeProperty)
 
 
 @pytest.fixture
@@ -187,11 +182,7 @@ def date_property_factory() -> Callable[..., DateProperty]:
     You can pass the same params into this as the DateProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return DateProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(DateProperty)
 
 
 @pytest.fixture
@@ -202,11 +193,7 @@ def file_property_factory() -> Callable[..., FileProperty]:
     You can pass the same params into this as the FileProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        return FileProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(FileProperty)
 
 
 @pytest.fixture
@@ -217,13 +204,7 @@ def list_property_factory(string_property_factory) -> Callable[..., ListProperty
     You can pass the same params into this as the ListProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        if "inner_property" not in kwargs:
-            kwargs["inner_property"] = string_property_factory()
-        return ListProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(ListProperty, {"inner_property": string_property_factory()})
 
 
 @pytest.fixture
@@ -234,13 +215,9 @@ def union_property_factory(date_time_property_factory, string_property_factory) 
     You can pass the same params into this as the UnionProperty constructor to override defaults.
     """
 
-    def _factory(**kwargs):
-        kwargs = _common_kwargs(kwargs)
-        if "inner_properties" not in kwargs:
-            kwargs["inner_properties"] = [date_time_property_factory(), string_property_factory()]
-        return UnionProperty(**kwargs)
-
-    return _factory
+    return _simple_factory(UnionProperty, {
+        "inner_properties": [date_time_property_factory(), string_property_factory()]
+    })
 
 
 @pytest.fixture
