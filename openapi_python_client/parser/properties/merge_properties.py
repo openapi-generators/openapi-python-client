@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Dict, TypeVar, Union, cast
 
 from attr import evolve
 
@@ -10,6 +10,10 @@ from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.list_property import ListProperty
 from openapi_python_client.parser.properties.protocol import PropertyProtocol
 from openapi_python_client.parser.properties.string import StringProperty
+
+# Note that in this file we have to use PropertyProtocol instead of the union type Property,
+# to avoid circular imports.
+PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
 
 
 def merge_properties(prop1: PropertyProtocol, prop2: PropertyProtocol) -> PropertyProtocol:
@@ -56,11 +60,11 @@ def _merge_same_type(prop1: PropertyProtocol, prop2: PropertyProtocol) -> Proper
         return prop1
 
     if isinstance(prop1, StringProperty):
-        return _merge_string(prop1, prop2)
+        return _merge_string(prop1, cast(StringProperty, prop2))
 
     if isinstance(prop1, ListProperty):
         # There's no clear way to represent the intersection of two different list types. Fail in this case.
-        if prop1.inner_property != prop2.inner_property:
+        if prop1.inner_property != cast(ListProperty, prop2).inner_property:
             raise ValueError("can't redefine a list property with a different element type")
 
     # For all other property types, there aren't any special attributes that affect validation, so just
@@ -71,12 +75,12 @@ def _merge_same_type(prop1: PropertyProtocol, prop2: PropertyProtocol) -> Proper
 def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringProperty:
     # If max_length was specified for both, the smallest value takes precedence. If only one of them
     # specifies it, _combine_values will pick that one.
-    max_length: int | None = _combine_values(prop1.max_length, prop2.max_length, lambda a, b: min([a, b]))
+    max_length: Union[int, None] = _combine_values(prop1.max_length, prop2.max_length, lambda a, b: min([a, b]))
 
     # If pattern was specified for both, we have a problem. OpenAPI has no logical objection to this;
     # it would just mean the value must match both of the patterns to be valid. But we have no way to
     # represent this in our internal model currently.
-    pattern: str | None | ValueError = _combine_values(
+    pattern: Union[str, None, ValueError] = _combine_values(
         prop1.pattern, prop2.pattern, lambda a, b: ValueError("specified two different regex patterns")
     )
     if isinstance(pattern, ValueError):
@@ -89,7 +93,7 @@ def _merge_numeric(prop1: PropertyProtocol, prop2: PropertyProtocol) -> IntPrope
     # Here, one of the properties was defined as "int" and the other was just a general number (which
     # we call FloatProperty). "Must be integer" is the stricter validation rule, so the result must be
     # an IntProperty.
-    int_prop = prop1 if isinstance(prop1, IntProperty) else prop2
+    int_prop = prop1 if isinstance(prop1, IntProperty) else cast(IntProperty, prop2)
     result = _merge_common_attributes(int_prop, prop1, prop2)
     if result.default is not None:
         if isinstance(result.default, float) and not result.default.is_integer():
@@ -108,7 +112,7 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
     if isinstance(prop1, EnumProperty) and isinstance(prop2, EnumProperty):
         # We want the narrowest validation rules that fit both, so use whichever values list is a
         # subset of the other.
-        values: dict[str, ValueType]
+        values: Dict[str, ValueType]
         if _values_are_subset(prop1, prop2):
             values = prop1.values
         elif _values_are_subset(prop2, prop1):
@@ -118,7 +122,7 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
         return _merge_common_attributes(evolve(prop1, values=values), prop2)
 
     # If enum values were specified for just one of the properties, use those.
-    enum_prop = prop1 if isinstance(prop1, EnumProperty) else prop2
+    enum_prop = prop1 if isinstance(prop1, EnumProperty) else cast(EnumProperty, prop2)
     non_enum_prop = prop2 if isinstance(prop1, EnumProperty) else prop1
     if (isinstance(non_enum_prop, IntProperty) and enum_prop.value_type is int) or (
         isinstance(non_enum_prop, StringProperty) and enum_prop.value_type is str
@@ -127,7 +131,7 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
     raise ValueError("defined with two incompatible types")
 
 
-def _merge_common_attributes(base: PropertyProtocol, *extend_with: PropertyProtocol) -> PropertyProtocol:
+def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) -> PropertyT:
     """Create a new instance based on base, overriding basic attributes with values from extend_with, in order.
 
     For "default", "description", and "example", a non-None value overrides any value from a previously
@@ -140,7 +144,7 @@ def _merge_common_attributes(base: PropertyProtocol, *extend_with: PropertyProto
     current = base
     for override in extend_with:
         current = evolve(
-            current,
+            current,  # type: ignore # can't prove that every property type is an attrs class, but it is
             required=current.required or override.required,
             default=override.default or current.default,
             description=override.description or current.description,
@@ -153,7 +157,7 @@ def _values_are_subset(prop1: EnumProperty, prop2: EnumProperty) -> bool:
     return set(prop1.values.items()) <= set(prop2.values.items())
 
 
-def _combine_values(value1: Any, value2: Any, combinator: Callable) -> Any:
+def _combine_values(value1: Any, value2: Any, combinator: Callable[[Any, Any], Any]) -> Any:
     if value1 == value2:
         return value1
     if value1 is None:

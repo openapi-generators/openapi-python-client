@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, ClassVar, NamedTuple
+from typing import Any, ClassVar, NamedTuple, cast
 
 from attrs import define, evolve
 
@@ -256,7 +256,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
 
         name_conflict = properties.get(new_prop.name)
         try:
-            merged_prop = merge_properties(name_conflict, new_prop) if name_conflict else new_prop
+            merged_prop = cast(Property, merge_properties(name_conflict, new_prop)) if name_conflict else new_prop
         except ValueError as e:
             return PropertyError(
                 header=f"Found conflicting properties named {new_prop.name} when creating {class_name}",
