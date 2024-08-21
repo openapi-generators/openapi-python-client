@@ -1,4 +1,3 @@
-
 from collections.abc import Callable
 from typing import Any
 
@@ -15,9 +14,9 @@ from openapi_python_client.parser.properties.string import StringProperty
 
 def merge_properties(prop1: PropertyProtocol, prop2: PropertyProtocol) -> PropertyProtocol:
     """Attempt to create a new property that incorporates the behavior of both.
-    
+
     This is used when merging schemas with allOf, when two schemas define a property with the same name.
-    
+
     OpenAPI defines allOf in terms of validation behavior: the input must pass the validation rules
     defined in all of the listed schemas. Our task here is slightly more difficult, since we must end
     up with a single Property object that will be used to generate a single class property in the
@@ -37,10 +36,10 @@ def merge_properties(prop1: PropertyProtocol, prop2: PropertyProtocol) -> Proper
 
     if prop1.__class__ == prop2.__class__:
         return _merge_same_type(prop1, prop2)
-    
+
     if isinstance(prop1, AnyProperty) or isinstance(prop2, AnyProperty):
         return _merge_with_any(prop1, prop2)
-    
+
     if _is_numeric(prop1) and _is_numeric(prop2):
         return _merge_numeric(prop1, prop2)
 
@@ -78,13 +77,11 @@ def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringPropert
     # it would just mean the value must match both of the patterns to be valid. But we have no way to
     # represent this in our internal model currently.
     pattern: str | None | ValueError = _combine_values(
-        prop1.pattern,
-        prop2.pattern,
-        lambda a, b: ValueError("specified two different regex patterns")
+        prop1.pattern, prop2.pattern, lambda a, b: ValueError("specified two different regex patterns")
     )
     if isinstance(pattern, ValueError):
         raise pattern
-    
+
     return _merge_common_attributes(evolve(prop1, max_length=max_length, pattern=pattern), prop2)
 
 
@@ -98,7 +95,7 @@ def _merge_numeric(prop1: PropertyProtocol, prop2: PropertyProtocol) -> IntPrope
         if isinstance(result.default, float) and not result.default.is_integer():
             raise ValueError(f"default value {result.default} is not valid for an integer property")
     return result
-    
+
 
 def _merge_with_any(prop1: PropertyProtocol, prop2: PropertyProtocol) -> PropertyProtocol:
     # AnyProperty implies no validation rules for a value, so merging it with any other type just means
@@ -123,9 +120,8 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
     # If enum values were specified for just one of the properties, use those.
     enum_prop = prop1 if isinstance(prop1, EnumProperty) else prop2
     non_enum_prop = prop2 if isinstance(prop1, EnumProperty) else prop1
-    if (
-        (isinstance(non_enum_prop, IntProperty) and enum_prop.value_type is int) or
-        (isinstance(non_enum_prop, StringProperty) and enum_prop.value_type is str)
+    if (isinstance(non_enum_prop, IntProperty) and enum_prop.value_type is int) or (
+        isinstance(non_enum_prop, StringProperty) and enum_prop.value_type is str
     ):
         return _merge_common_attributes(enum_prop, prop1, prop2)
     raise ValueError("defined with two incompatible types")
@@ -133,7 +129,7 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
 
 def _merge_common_attributes(base: PropertyProtocol, *extend_with: PropertyProtocol) -> PropertyProtocol:
     """Create a new instance based on base, overriding basic attributes with values from extend_with, in order.
-    
+
     For "default", "description", and "example", a non-None value overrides any value from a previously
     specified property. The behavior is similar to using the spread operator with dictionaries, except
     that None means "not specified".
@@ -146,10 +142,10 @@ def _merge_common_attributes(base: PropertyProtocol, *extend_with: PropertyProto
         current = evolve(
             current,
             required=current.required or override.required,
-            default = override.default or current.default,
-            description = override.description or current.description,
-            example = override.example or current.example,
-    )
+            default=override.default or current.default,
+            description=override.description or current.description,
+            example=override.example or current.example,
+        )
     return current
 
 

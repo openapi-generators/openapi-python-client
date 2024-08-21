@@ -1,4 +1,3 @@
-
 import pytest
 from attr import evolve
 
@@ -73,9 +72,7 @@ def test_merge_int_with_float(int_property_factory, float_property_factory):
     assert merge_properties(int_prop, float_prop) == (
         evolve(int_prop, default=float_prop.default, description=float_prop.description)
     )
-    assert merge_properties(float_prop, int_prop) == (
-        evolve(int_prop, default=float_prop.default)
-    )
+    assert merge_properties(float_prop, int_prop) == (evolve(int_prop, default=float_prop.default))
 
     float_prop_with_non_int_default = evolve(float_prop, default=2.5)
     with pytest.raises(ValueError) as excinfo:
@@ -151,7 +148,7 @@ def test_merge_string_with_string_enum(string_property_factory, enum_property_fa
         required=True,
         default=string_prop.default,
         description=string_prop.description,
-        example=string_prop.example
+        example=string_prop.example,
     )
 
 
@@ -168,11 +165,7 @@ def test_merge_int_with_int_enum(int_property_factory, enum_property_factory):
 
     assert merge_properties(int_prop, enum_prop) == evolve(enum_prop, required=True)
     assert merge_properties(enum_prop, int_prop) == evolve(
-        enum_prop,
-        required=True,
-        default=int_prop.default,
-        description=int_prop.description,
-        example=int_prop.example
+        enum_prop, required=True, default=int_prop.default, description=int_prop.description, example=int_prop.example
     )
 
 

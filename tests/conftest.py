@@ -68,7 +68,7 @@ def model_property_factory() -> Callable[..., ModelProperty]:
     return _factory
 
 
-def _simple_factory(cls: type, default_kwargs: Union[dict, Callable[[dict], dict], None]=None):
+def _simple_factory(cls: type, default_kwargs: Union[dict, Callable[[dict], dict], None] = None):
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         defaults = default_kwargs
@@ -90,11 +90,14 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
     """
     from openapi_python_client.parser.properties import Class
 
-    return _simple_factory(EnumProperty, lambda kwargs: {
-        "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
-        "values": {},
-        "value_type": str,
-    })
+    return _simple_factory(
+        EnumProperty,
+        lambda kwargs: {
+            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
+            "values": {},
+            "value_type": str,
+        },
+    )
 
 
 @pytest.fixture
@@ -215,9 +218,9 @@ def union_property_factory(date_time_property_factory, string_property_factory) 
     You can pass the same params into this as the UnionProperty constructor to override defaults.
     """
 
-    return _simple_factory(UnionProperty, {
-        "inner_properties": [date_time_property_factory(), string_property_factory()]
-    })
+    return _simple_factory(
+        UnionProperty, {"inner_properties": [date_time_property_factory(), string_property_factory()]}
+    )
 
 
 @pytest.fixture
