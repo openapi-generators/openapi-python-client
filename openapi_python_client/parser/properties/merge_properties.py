@@ -1,5 +1,4 @@
-from collections.abc import Callable
-from typing import Any, Dict, TypeVar, Union, cast
+from typing import Any, Callable, Dict, TypeVar, Union, cast
 
 from attr import evolve
 
