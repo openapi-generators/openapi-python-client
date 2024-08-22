@@ -8,6 +8,7 @@ from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.list_property import ListProperty
 from openapi_python_client.parser.properties.protocol import PropertyProtocol
+from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.parser.properties.string import StringProperty
 
 # Note that in this file we have to use PropertyProtocol instead of the union type Property,
@@ -112,13 +113,16 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
         # We want the narrowest validation rules that fit both, so use whichever values list is a
         # subset of the other.
         values: Dict[str, ValueType]
+        class_info: Class
         if _values_are_subset(prop1, prop2):
             values = prop1.values
+            class_info = prop1.class_info
         elif _values_are_subset(prop2, prop1):
             values = prop2.values
+            class_info = prop2.class_info
         else:
             raise ValueError("can't redefine an enum property with incompatible lists of values")
-        return _merge_common_attributes(evolve(prop1, values=values), prop2)
+        return _merge_common_attributes(evolve(prop1, values=values, class_info=class_info), prop2)
 
     # If enum values were specified for just one of the properties, use those.
     enum_prop = prop1 if isinstance(prop1, EnumProperty) else cast(EnumProperty, prop2)

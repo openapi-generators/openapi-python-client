@@ -5,6 +5,7 @@ from openapi_python_client.parser.properties import StringProperty
 from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.merge_properties import merge_properties
+from openapi_python_client.parser.properties.schemas import Class
 
 MODULE_NAME = "openapi_python_client.parser.properties.merge_properties"
 
@@ -129,6 +130,34 @@ def test_merge_string_pattern(string_property_factory):
     with pytest.raises(ValueError) as excinfo:
         merge_properties(prop_with_pattern1a, prop_with_pattern2)
     assert "regex patterns" in excinfo.value.args[0]
+
+
+def test_merge_enums(enum_property_factory, config):
+    enum_with_fewer_values = enum_property_factory(
+        description="desc1",
+        values={"A": "A", "B": "B"},
+        value_type=str,
+    )
+    enum_with_more_values = enum_property_factory(
+        example="example2",
+        values={"A": "A", "B": "B", "C": "C"},
+        value_type=str,
+    )
+    # Setting class_info separately because it doesn't get initialized by the constructor - we want
+    # to make sure the right enum class name gets used in the merged property
+    enum_with_fewer_values.class_info = Class.from_string(string="FewerValuesEnum", config=config)
+    enum_with_more_values.class_info = Class.from_string(string="MoreValuesEnum", config=config)
+
+    assert merge_properties(enum_with_fewer_values, enum_with_more_values) == evolve(
+        enum_with_more_values,
+        values=enum_with_fewer_values.values,
+        class_info=enum_with_fewer_values.class_info,
+        description=enum_with_fewer_values.description,
+    )
+    assert merge_properties(enum_with_more_values, enum_with_fewer_values) == evolve(
+        enum_with_fewer_values,
+        example=enum_with_more_values.example,
+    )
 
 
 def test_merge_string_with_string_enum(string_property_factory, enum_property_factory):
