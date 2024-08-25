@@ -9,12 +9,11 @@ from attr import evolve
 from ..errors import PropertyError
 from . import FloatProperty
 from .any import AnyProperty
-from .enum_property import EnumProperty, ValueType
+from .enum_property import EnumProperty
 from .int import IntProperty
 from .list_property import ListProperty
 from .property import Property
 from .protocol import PropertyProtocol
-from .schemas import Class
 from .string import StringProperty
 
 PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
@@ -81,31 +80,25 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
     return _merge_common_attributes(prop1, prop2)
 
 
-def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringProperty:
+def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringProperty | PropertyError:
     return _merge_common_attributes(prop1, prop2)
 
 
 def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None | PropertyError:
     """Merge IntProperty with FloatProperty"""
     if isinstance(prop1, IntProperty) and isinstance(prop2, (IntProperty, FloatProperty)):
-        result = _merge_common_attributes(prop1, prop2)
+        return _merge_common_attributes(prop1, prop2)
     elif isinstance(prop2, IntProperty) and isinstance(prop1, (IntProperty, FloatProperty)):
         # Use the IntProperty as a base since it's more restrictive, but keep the correct override order
-        result = _merge_common_attributes(prop2, prop1, prop2)
+        return _merge_common_attributes(prop2, prop1, prop2)
     else:
         return None
-    if result.default is not None:
-        if isinstance(result.default, float) and not result.default.is_integer():
-            return PropertyError(detail=f"default value {result.default} is not valid for an integer property")
-    return result
 
 
 def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumProperty | PropertyError:
     if isinstance(prop1, EnumProperty) and isinstance(prop2, EnumProperty):
         # We want the narrowest validation rules that fit both, so use whichever values list is a
         # subset of the other.
-        values: dict[str, ValueType]
-        class_info: Class
         if _values_are_subset(prop1, prop2):
             values = prop1.values
             class_info = prop1.class_info
@@ -128,7 +121,7 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
     )
 
 
-def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) -> PropertyT:
+def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) -> PropertyT | PropertyError:
     """Create a new instance based on base, overriding basic attributes with values from extend_with, in order.
 
     For "default", "description", and "example", a non-None value overrides any value from a previously
@@ -140,10 +133,16 @@ def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) ->
     """
     current = base
     for override in extend_with:
+        if isinstance(override, EnumProperty):
+            override_default = current.convert_value(override.default_to_raw())
+        else:
+            override_default = current.convert_value(override.default)
+        if isinstance(override_default, PropertyError):
+            return override_default
         current = evolve(
             current,  # type: ignore # can't prove that every property type is an attrs class, but it is
             required=current.required or override.required,
-            default=override.default or current.default,
+            default=override_default or current.default,
             description=override.description or current.description,
             example=override.example or current.example,
         )

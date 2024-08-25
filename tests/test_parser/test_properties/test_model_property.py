@@ -403,25 +403,6 @@ class TestProcessProperties:
 
         assert isinstance(result, PropertyError)
 
-    def test_conflicting_properties_same_types(self, model_property_factory, string_property_factory, config):
-        data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
-        )
-        schemas = Schemas(
-            classes_by_reference={
-                "/First": model_property_factory(
-                    required_properties=[], optional_properties=[string_property_factory(default="abc")]
-                ),
-                "/Second": model_property_factory(
-                    required_properties=[], optional_properties=[string_property_factory(default="def")]
-                ),
-            }
-        )
-
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-
-        assert isinstance(result, PropertyError)
-
     def test_allof_string_and_string_enum(
         self, model_property_factory, enum_property_factory, string_property_factory, config
     ):
