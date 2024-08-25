@@ -13,6 +13,26 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.21.4 (2024-08-25)
+
+### Fixes
+
+#### Allow OpenAPI 3.1-style `exclusiveMinimum` and `exclusiveMaximum`
+
+Fixed by PR #1092. Thanks @mikkelam!
+
+#### Add missing `cast` import when using `const`
+
+Fixed by PR #1072. Thanks @dorcohe!
+
+#### Correctly resolve references to a type that is itself just a single allOf reference
+
+PR #1103 fixed issue #1091. Thanks @eli-bl!
+
+#### Support `const` booleans and floats
+
+Fixed in PR #1086. Thanks @flxdot!
+
 ## 0.21.3 (2024-08-18)
 
 ### Features
