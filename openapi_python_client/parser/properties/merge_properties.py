@@ -2,28 +2,25 @@ from __future__ import annotations
 
 __all__ = ["merge_properties"]
 
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TypeVar, cast
 
 from attr import evolve
 
+from ..errors import PropertyError
 from . import FloatProperty
 from .any import AnyProperty
 from .enum_property import EnumProperty, ValueType
 from .int import IntProperty
 from .list_property import ListProperty
+from .property import Property
 from .protocol import PropertyProtocol
 from .schemas import Class
 from .string import StringProperty
 
-if TYPE_CHECKING:
-    from .property import Property
-else:
-    Property = "Property"
-
 PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
 
 
-def merge_properties(prop1: Property, prop2: Property) -> Property:
+def merge_properties(prop1: Property, prop2: Property) -> Property | PropertyError:
     """Attempt to create a new property that incorporates the behavior of both.
 
     This is used when merging schemas with allOf, when two schemas define a property with the same name.
@@ -39,8 +36,6 @@ def merge_properties(prop1: Property, prop2: Property) -> Property:
     and "example". OpenAPI does not define any overriding/aggregation rules for these in allOf. The
     implementation here is, assuming prop1 and prop2 are in the same order that the schemas were in the
     allOf, any such attributes that prop2 specifies will override the ones from prop1.
-
-    Any failure is thrown as a ValueError.
     """
     if isinstance(prop2, AnyProperty):
         return _merge_common_attributes(prop1, prop2)
@@ -58,10 +53,12 @@ def merge_properties(prop1: Property, prop2: Property) -> Property:
     if (merged := _merge_numeric(prop1, prop2)) is not None:
         return merged
 
-    raise ValueError("defined with two incompatible types")
+    return PropertyError(
+        detail=f"{prop1.get_type_string(no_optional=True)} can't be merged with {prop2.get_type_string(no_optional=True)}"
+    )
 
 
-def _merge_same_type(prop1: Property, prop2: Property) -> Property | None:
+def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | PropertyError:
     if type(prop1) is not type(prop2):
         return None
 
@@ -74,8 +71,10 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None:
 
     if isinstance(prop1, ListProperty) and isinstance(prop2, ListProperty):
         # There's no clear way to represent the intersection of two different list types. Fail in this case.
-        if prop1.inner_property != prop2.inner_property:
-            raise ValueError("can't redefine a list property with a different element type")
+        inner_property = merge_properties(prop1.inner_property, prop2.inner_property)  # type: ignore
+        if isinstance(inner_property, PropertyError):
+            return PropertyError(detail=f"can't merge list properties: {inner_property.detail}")
+        prop1.inner_property = inner_property
 
     # For all other property types, there aren't any special attributes that affect validation, so just
     # apply the rules for common attributes like "description".
@@ -86,7 +85,7 @@ def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringPropert
     return _merge_common_attributes(prop1, prop2)
 
 
-def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None:
+def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None | PropertyError:
     """Merge IntProperty with FloatProperty"""
     if isinstance(prop1, IntProperty) and isinstance(prop2, (IntProperty, FloatProperty)):
         result = _merge_common_attributes(prop1, prop2)
@@ -97,11 +96,11 @@ def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None:
         return None
     if result.default is not None:
         if isinstance(result.default, float) and not result.default.is_integer():
-            raise ValueError(f"default value {result.default} is not valid for an integer property")
+            return PropertyError(detail=f"default value {result.default} is not valid for an integer property")
     return result
 
 
-def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumProperty:
+def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumProperty | PropertyError:
     if isinstance(prop1, EnumProperty) and isinstance(prop2, EnumProperty):
         # We want the narrowest validation rules that fit both, so use whichever values list is a
         # subset of the other.
@@ -114,7 +113,7 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
             values = prop2.values
             class_info = prop2.class_info
         else:
-            raise ValueError("can't redefine an enum property with incompatible lists of values")
+            return PropertyError(detail="can't redefine an enum property with incompatible lists of values")
         return _merge_common_attributes(evolve(prop1, values=values, class_info=class_info), prop2)
 
     # If enum values were specified for just one of the properties, use those.
@@ -124,7 +123,9 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
         isinstance(non_enum_prop, StringProperty) and enum_prop.value_type is str
     ):
         return _merge_common_attributes(enum_prop, prop1, prop2)
-    raise ValueError("defined with two incompatible types")
+    return PropertyError(
+        detail=f"can't combine enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
+    )
 
 
 def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) -> PropertyT:

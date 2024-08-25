@@ -1,13 +1,13 @@
 from itertools import permutations
 
-import pytest
 from attr import evolve
 
-from openapi_python_client.parser.properties.string import StringProperty
+from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.merge_properties import merge_properties
 from openapi_python_client.parser.properties.schemas import Class
+from openapi_python_client.parser.properties.string import StringProperty
 
 MODULE_NAME = "openapi_python_client.parser.properties.merge_properties"
 
@@ -62,9 +62,8 @@ def test_incompatible_types(
     for prop1, prop2 in permutations(props, 2):
         if {prop1.__class__, prop2.__class__} == {IntProperty, FloatProperty}:
             continue  # the int+float case is covered in another test
-        with pytest.raises(ValueError) as excinfo:
-            merge_properties(prop1, prop2)
-        assert "incompatible types" in excinfo.value.args[0]
+        error = merge_properties(prop1, prop2)
+        assert isinstance(error, PropertyError), f"Expected {type(prop1)} and {type(prop2)} to be incompatible"
 
 
 def test_merge_int_with_float(int_property_factory, float_property_factory):
@@ -77,9 +76,9 @@ def test_merge_int_with_float(int_property_factory, float_property_factory):
     assert merge_properties(float_prop, int_prop) == (evolve(int_prop, default=float_prop.default))
 
     float_prop_with_non_int_default = evolve(float_prop, default=2.5)
-    with pytest.raises(ValueError) as excinfo:
-        merge_properties(int_prop, float_prop_with_non_int_default)
-    assert "default value" in excinfo.value.args[0]
+    error = merge_properties(int_prop, float_prop_with_non_int_default)
+    assert isinstance(error, PropertyError), "Expected invalid default to error"
+    assert "default value" in error.detail
 
 
 def test_merge_with_any(
@@ -190,12 +189,8 @@ def test_merge_with_incompatible_enum(
     int_enum_prop = enum_property_factory(value_type=int)
     for prop in props:
         if not isinstance(prop, StringProperty):
-            with pytest.raises(ValueError):
-                merge_properties(prop, string_enum_prop)
-            with pytest.raises(ValueError):
-                merge_properties(string_enum_prop, prop)
+            assert isinstance(merge_properties(prop, string_enum_prop), PropertyError)
+            assert isinstance(merge_properties(string_enum_prop, prop), PropertyError)
         if not isinstance(prop, IntProperty):
-            with pytest.raises(ValueError):
-                merge_properties(prop, int_enum_prop)
-            with pytest.raises(ValueError):
-                merge_properties(int_enum_prop, prop)
+            assert isinstance(merge_properties(prop, int_enum_prop), PropertyError)
+            assert isinstance(merge_properties(int_enum_prop, prop), PropertyError)

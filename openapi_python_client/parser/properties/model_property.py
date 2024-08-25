@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, ClassVar, NamedTuple, cast
+from typing import Any, ClassVar, NamedTuple
 
 from attrs import define, evolve
 
@@ -10,7 +10,6 @@ from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
-from .merge_properties import merge_properties
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
@@ -244,6 +243,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     roots: set[ReferencePath | utils.ClassName],
 ) -> _PropertyData | PropertyError:
     from . import property_from_data
+    from .merge_properties import merge_properties
 
     properties: dict[str, Property] = {}
     relative_imports: set[str] = set()
@@ -254,13 +254,10 @@ def _process_properties(  # noqa: PLR0912, PLR0911
         nonlocal properties
 
         name_conflict = properties.get(new_prop.name)
-        try:
-            merged_prop = cast(Property, merge_properties(name_conflict, new_prop)) if name_conflict else new_prop
-        except ValueError as e:
-            return PropertyError(
-                header=f"Found conflicting properties named {new_prop.name} when creating {class_name}",
-                detail=str(e),
-            )
+        merged_prop = merge_properties(name_conflict, new_prop) if name_conflict else new_prop
+        if isinstance(merged_prop, PropertyError):
+            merged_prop.header = f"Found conflicting properties named {new_prop.name} when creating {class_name}"
+            return merged_prop
 
         for other_prop in properties.values():
             if other_prop.name == merged_prop.name:

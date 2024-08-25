@@ -752,9 +752,7 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, parent_name=None, config=config, schemas=Schemas()
         )
 
-        assert p == string_property_factory(
-            name=name, required=required, default="'\\\\\"hello world\\\\\"'"
-        )
+        assert p == string_property_factory(name=name, required=required, default="'\\\\\"hello world\\\\\"'")
 
     def test_datetime_format(self, date_time_property_factory, config):
         from openapi_python_client.parser.properties import property_from_data
