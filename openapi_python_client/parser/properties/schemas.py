@@ -22,8 +22,10 @@ from ...utils import ClassName, PythonIdentifier
 from ..errors import ParameterError, ParseError, PropertyError
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .model_property import ModelProperty
     from .property import Property
 else:
+    ModelProperty = "ModelProperty"
     Property = "Property"
 
 
@@ -77,6 +79,7 @@ class Schemas:
     classes_by_reference: Dict[ReferencePath, Property] = field(factory=dict)
     dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = field(factory=dict)
     classes_by_name: Dict[ClassName, Property] = field(factory=dict)
+    models_to_process: List[ModelProperty] = field(factory=list)
     errors: List[ParseError] = field(factory=list)
 
     def add_dependencies(self, ref_path: ReferencePath, roots: Set[Union[ReferencePath, ClassName]]) -> None:
