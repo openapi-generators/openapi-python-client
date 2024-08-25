@@ -117,6 +117,7 @@ def body_from_data(
                     **schemas.classes_by_name,
                     prop.class_info.name: prop,
                 },
+                models_to_process=[*schemas.models_to_process, prop],
             )
         bodies.append(
             Body(
