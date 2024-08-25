@@ -15,9 +15,9 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
       - name: Set up Python
-        uses: actions/setup-python@v5.1.0
+        uses: actions/setup-python@v5.1.1
         with:
           python-version: ${{ matrix.python }}
 
@@ -64,7 +64,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.6
         if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage-${{ matrix.python }}
@@ -76,12 +76,12 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Download coverage reports
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           merge-multiple: true
 
@@ -106,7 +106,7 @@ jobs:
           .venv/bin/python -m coverage report --fail-under=100          
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.6
         with:
           name: html-report
           path: htmlcov
@@ -126,9 +126,9 @@ jobs:
         ports:
           - "3000:3000"
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
       - name: Set up Python
-        uses: actions/setup-python@v5.1.0
+        uses: actions/setup-python@v5.1.1
         with:
           python-version: "3.8"
       - name: Get Python Version

@@ -48,6 +48,7 @@ class EndpointCollection:
         data: Dict[str, oai.PathItem],
         schemas: Schemas,
         parameters: Parameters,
+        request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
         config: Config,
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
@@ -69,6 +70,7 @@ class EndpointCollection:
                     tag=tag,
                     schemas=schemas,
                     parameters=parameters,
+                    request_bodies=request_bodies,
                     config=config,
                 )
                 # Add `PathItem` parameters
@@ -392,6 +394,7 @@ class Endpoint:
         tag: str,
         schemas: Schemas,
         parameters: Parameters,
+        request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
         config: Config,
     ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
@@ -423,7 +426,9 @@ class Endpoint:
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
         if isinstance(result, ParseError):
             return result, schemas, parameters
-        bodies, schemas = body_from_data(data=data, schemas=schemas, config=config, endpoint_name=result.name)
+        bodies, schemas = body_from_data(
+            data=data, schemas=schemas, config=config, endpoint_name=result.name, request_bodies=request_bodies
+        )
         body_errors = []
         for body in bodies:
             if isinstance(body, ParseError):
@@ -507,8 +512,9 @@ class GeneratorData:
                 parameters=parameters,
                 config=config,
             )
+        request_bodies = (openapi.components and openapi.components.requestBodies) or {}
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, parameters=parameters, config=config
+            data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
         )
 
         enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))

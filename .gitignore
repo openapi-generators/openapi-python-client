@@ -24,6 +24,9 @@ dmypy.json
 # JetBrains
 .idea/
 
+# Visual Studio Code
+.vscode/
+
 test-reports/
 
 /coverage.xml

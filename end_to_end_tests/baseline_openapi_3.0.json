@@ -87,6 +87,23 @@
         }
       }
     },
+    "/bodies/refs": {
+      "post": {
+        "tags": [
+          "bodies"
+        ],
+        "description": "Test request body defined via ref",
+        "operationId": "refs",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/NestedRef"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/tests/": {
       "get": {
         "tags": [
@@ -1612,6 +1629,33 @@
           }
         }
       }
+    },
+    "/models/allof": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aliased": {
+                      "$ref": "#/components/schemas/Aliased"
+                    },
+                    "extended": {
+                      "$ref": "#/components/schemas/Extended"
+                    },
+                    "model": {
+                      "$ref": "#/components/schemas/AModel"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1628,6 +1672,23 @@
         },
         "required": [
           "an_required_field"
+        ]
+      },
+      "Aliased":{
+        "allOf": [
+          {"$ref":  "#/components/schemas/AModel"}
+        ]
+      },
+      "Extended": {
+        "allOf": [
+          {"$ref": "#/components/schemas/Aliased"},
+          {"type": "object",
+            "properties": {
+              "fromExtended": {
+                "type": "string"
+              }
+            }
+          }
         ]
       },
       "AModel": {
@@ -1909,6 +1970,14 @@
           "some_required_number": {
             "title": "Some Required Number",
             "type": "number"
+          },
+          "some_int_array": {
+            "title": "Some Integer Array",
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "nullable": true
+            }
           },
           "some_array": {
             "title": "Some Array",
@@ -2751,6 +2820,20 @@
         "required": true,
         "schema": {
           "type": "string"
+        }
+      }
+    },
+    "requestBodies": {
+      "NestedRef": {
+        "$ref": "#/components/requestBodies/ARequestBody"
+      },
+      "ARequestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AModel"
+            }
+          }
         }
       }
     }

@@ -13,6 +13,82 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.21.3 (2024-08-18)
+
+### Features
+
+- update Ruff to >=0.2,<0.7 (#1097)
+
+## 0.21.2 (2024-07-20)
+
+### Features
+
+- Update to Ruff 0.5
+
+## 0.21.1 (2024-06-15)
+
+### Features
+
+#### Support request body refs
+
+You can now define and reuse bodies via refs, with a document like this:
+
+```yaml
+paths:
+  /something:
+    post:
+      requestBody:
+        "$ref": "#/components/requestBodies/SharedBody"
+components:
+  requestBodies:
+    SharedBody:
+      content:
+        application/json:
+          schema:
+            type: string
+```
+
+Thanks to @kigawas and @supermihi for initial implementations and @RockyMM for the initial request.
+
+Closes #633, closes #664, resolves #595.
+
+### Fixes
+
+- Indent of generated code for non-required lists. Thanks @sfowl! (#1050)
+- Parsing requestBody with $ref (#633)
+
+## 0.21.0 (2024-06-08)
+
+### Breaking Changes
+
+#### Removed the `update` command
+
+The `update` command is no more, you can (mostly) replace its usage with some new flags on the `generate` command.
+
+If you had a package named `my-api-client` in the current working directory, the `update` command previously would update the `my_api_client` module within it. You can now _almost_ perfectly replicate this behavior using `openapi-python-client generate --meta=none --output-path=my-api-client/my_api_client --overwrite`.
+
+The only difference is that `my-api-client` would have run `post_hooks` in the `my-api-client` directory, 
+but `generate` will run `post_hooks` in the `output-path` directory.
+
+Alternatively, you can now also run `openapi-python-client generate --meta=<your-meta-type> --overwrite` to regenerate 
+the entire client, if you don't care about keeping any changes you've made to the generated client.
+
+Please comment on [discussion #824](https://github.com/openapi-generators/openapi-python-client/discussions/824)
+(or a new discussion, as appropriate) to aid in designing future features that fill any gaps this leaves for you.
+
+### Features
+
+#### Added an `--output-path` option to `generate`
+
+Rather than changing directories before running `generate` you can now specify an output directory with `--output-path`.
+Note that the project name will _not_ be appended to the `--output-path`, whatever path you specify is where the 
+generated code will be placed.
+
+#### Added an `--overwrite` flag to `generate`
+
+You can now tell `openapi-python-client` to overwrite an existing directory, rather than deleting it yourself before 
+running `generate`.
+
 ## 0.20.0 (2024-05-18)
 
 ### Breaking Changes

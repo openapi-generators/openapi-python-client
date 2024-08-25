@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, model_validator
 
 from ..data_type import DataType
 from .discriminator import Discriminator
@@ -23,9 +23,9 @@ class Schema(BaseModel):
     title: Optional[str] = None
     multipleOf: Optional[float] = Field(default=None, gt=0.0)
     maximum: Optional[float] = None
-    exclusiveMaximum: Optional[bool] = None
+    exclusiveMaximum: Optional[Union[bool, float]] = None
     minimum: Optional[float] = None
-    exclusiveMinimum: Optional[bool] = None
+    exclusiveMinimum: Optional[Union[bool, float]] = None
     maxLength: Optional[int] = Field(default=None, ge=0)
     minLength: Optional[int] = Field(default=None, ge=0)
     pattern: Optional[str] = None
@@ -36,7 +36,7 @@ class Schema(BaseModel):
     minProperties: Optional[int] = Field(default=None, ge=0)
     required: Optional[List[str]] = Field(default=None, min_length=1)
     enum: Union[None, List[Any]] = Field(default=None, min_length=1)
-    const: Union[None, StrictStr, StrictInt] = None
+    const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
     type: Union[DataType, List[DataType], None] = Field(default=None)
     allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
@@ -159,6 +159,33 @@ class Schema(BaseModel):
             ]
         },
     )
+
+    @model_validator(mode="after")
+    def handle_exclusive_min_max(self) -> "Schema":
+        """
+        Convert exclusiveMinimum/exclusiveMaximum between OpenAPI v3.0 (bool) and v3.1 (numeric).
+        """
+        # Handle exclusiveMinimum
+        if isinstance(self.exclusiveMinimum, bool) and self.minimum is not None:
+            if self.exclusiveMinimum:
+                self.exclusiveMinimum = self.minimum
+                self.minimum = None
+            else:
+                self.exclusiveMinimum = None
+        elif isinstance(self.exclusiveMinimum, float):
+            self.minimum = None
+
+        # Handle exclusiveMaximum
+        if isinstance(self.exclusiveMaximum, bool) and self.maximum is not None:
+            if self.exclusiveMaximum:
+                self.exclusiveMaximum = self.maximum
+                self.maximum = None
+            else:
+                self.exclusiveMaximum = None
+        elif isinstance(self.exclusiveMaximum, float):
+            self.maximum = None
+
+        return self
 
     @model_validator(mode="after")
     def handle_nullable(self) -> "Schema":

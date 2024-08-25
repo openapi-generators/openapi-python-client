@@ -27,7 +27,7 @@ class ConstProperty(PropertyProtocol):
     def build(
         cls,
         *,
-        const: str | int,
+        const: str | int | float | bool,
         default: Any,
         name: str,
         python_name: PythonIdentifier,
@@ -115,6 +115,6 @@ class ConstProperty(PropertyProtocol):
         if self.required:
             return {"from typing import Literal"}
         return {
-            "from typing import Literal, Union",
+            "from typing import Literal, Union, cast",
             f"from {prefix}types import UNSET, Unset",
         }

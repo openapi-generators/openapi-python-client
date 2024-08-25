@@ -2,7 +2,7 @@
 
 import types
 
-from . import json_like, post_bodies_multiple
+from . import json_like, post_bodies_multiple, refs
 
 
 class BodiesEndpoints:
@@ -19,3 +19,10 @@ class BodiesEndpoints:
         A content type that works like json but isn't application/json
         """
         return json_like
+
+    @classmethod
+    def refs(cls) -> types.ModuleType:
+        """
+        Test request body defined via ref
+        """
+        return refs

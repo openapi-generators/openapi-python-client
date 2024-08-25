@@ -14,62 +14,6 @@ MODULE_NAME = "openapi_python_client.parser.openapi"
 
 
 class TestGeneratorData:
-    def test_from_dict(self, mocker, model_property_factory, enum_property_factory):
-        from openapi_python_client.parser.properties import Schemas
-
-        build_schemas = mocker.patch(f"{MODULE_NAME}.build_schemas")
-        build_parameters = mocker.patch(f"{MODULE_NAME}.build_parameters")
-        EndpointCollection = mocker.patch(f"{MODULE_NAME}.EndpointCollection")
-        schemas = mocker.MagicMock()
-        schemas.classes_by_name = {
-            "Model": model_property_factory(),
-            "Enum": enum_property_factory(),
-        }
-        parameters = Parameters()
-
-        endpoints_collections_by_tag = mocker.MagicMock()
-        EndpointCollection.from_data.return_value = (endpoints_collections_by_tag, schemas, parameters)
-        OpenAPI = mocker.patch(f"{MODULE_NAME}.oai.OpenAPI")
-        openapi = OpenAPI.model_validate.return_value
-        openapi.openapi = mocker.MagicMock(major=3)
-        config = mocker.MagicMock()
-        in_dict = mocker.MagicMock()
-
-        from openapi_python_client.parser.openapi import GeneratorData
-
-        generator_data = GeneratorData.from_dict(in_dict, config=config)
-
-        OpenAPI.model_validate.assert_called_once_with(in_dict)
-        build_schemas.assert_called_once_with(components=openapi.components.schemas, config=config, schemas=Schemas())
-        build_parameters.assert_called_once_with(
-            components=openapi.components.parameters,
-            parameters=parameters,
-            config=config,
-        )
-        EndpointCollection.from_data.assert_called_once_with(
-            data=openapi.paths,
-            schemas=build_schemas.return_value,
-            parameters=build_parameters.return_value,
-            config=config,
-        )
-        assert generator_data.title == openapi.info.title
-        assert generator_data.description == openapi.info.description
-        assert generator_data.version == openapi.info.version
-        assert generator_data.endpoint_collections_by_tag == endpoints_collections_by_tag
-        assert generator_data.errors == schemas.errors + parameters.errors
-        assert list(generator_data.models) == [schemas.classes_by_name["Model"]]
-        assert list(generator_data.enums) == [schemas.classes_by_name["Enum"]]
-
-        # Test no components
-        openapi.components = None
-        build_schemas.reset_mock()
-        build_parameters.reset_mock()
-
-        GeneratorData.from_dict(in_dict, config=config)
-
-        build_schemas.assert_not_called()
-        build_parameters.assert_not_called()
-
     def test_from_dict_invalid_schema(self, mocker):
         Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
         config = mocker.MagicMock()
@@ -406,7 +350,7 @@ class TestEndpoint:
             endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=config
         )
 
-        assert len(endpoint.query_parameters) == 2, "Not all query params were added"  # noqa: PLR2004
+        assert len(endpoint.query_parameters) == 2, "Not all query params were added"
         for param in endpoint.query_parameters:
             if param.name == "required":
                 assert param.required
@@ -532,6 +476,7 @@ class TestEndpoint:
             schemas=initial_schemas,
             parameters=parameters,
             config=config,
+            request_bodies={},
         )
 
         assert result == (parse_error, return_schemas, return_parameters)
@@ -566,6 +511,7 @@ class TestEndpoint:
             schemas=initial_schemas,
             parameters=initial_parameters,
             config=config,
+            request_bodies={},
         )
 
         assert result == (parse_error, response_schemas, return_parameters)
@@ -605,6 +551,7 @@ class TestEndpoint:
             schemas=initial_schemas,
             parameters=initial_parameters,
             config=config,
+            request_bodies={},
         )
 
         add_parameters.assert_called_once_with(
@@ -647,8 +594,15 @@ class TestEndpoint:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
         parameters = mocker.MagicMock()
 
-        endpoint, return_schemas, return_params = Endpoint.from_data(
-            data=data, path=path, method=method, tag="default", schemas=schemas, parameters=parameters, config=config
+        endpoint, _, return_params = Endpoint.from_data(
+            data=data,
+            path=path,
+            method=method,
+            tag="default",
+            schemas=schemas,
+            parameters=parameters,
+            config=config,
+            request_bodies={},
         )
 
         add_parameters.assert_called_once_with(
@@ -695,7 +649,14 @@ class TestEndpoint:
         parameters = mocker.MagicMock()
 
         Endpoint.from_data(
-            data=data, path=path, method=method, tag="a", schemas=schemas, parameters=parameters, config=config
+            data=data,
+            path=path,
+            method=method,
+            tag="a",
+            schemas=schemas,
+            parameters=parameters,
+            config=config,
+            request_bodies={},
         )
 
         add_parameters.assert_called_once_with(
@@ -737,6 +698,7 @@ class TestEndpoint:
             tag="tag",
             path="/",
             method="get",
+            request_bodies={},
         )
 
         assert isinstance(endpoint, Endpoint)
@@ -759,6 +721,7 @@ class TestEndpoint:
             tag="tag",
             path="/",
             method="get",
+            request_bodies={},
         )
 
         assert isinstance(endpoint, ParseError)
@@ -799,79 +762,6 @@ class TestImportStringFromReference:
 
 
 class TestEndpointCollection:
-    def test_from_data(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
-
-        path_1_put = oai.Operation.model_construct()
-        path_1_post = oai.Operation.model_construct(tags=["tag_2", "tag_3"])
-        path_2_get = oai.Operation.model_construct()
-        data = {
-            "path_1": oai.PathItem.model_construct(post=path_1_post, put=path_1_put),
-            "path_2": oai.PathItem.model_construct(get=path_2_get),
-        }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
-        endpoint_2 = mocker.MagicMock(autospec=Endpoint, tag="tag_2", relative_imports={"2"}, path="path_1")
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"}, path="path_2")
-        schemas_1 = mocker.MagicMock()
-        schemas_2 = mocker.MagicMock()
-        schemas_3 = mocker.MagicMock()
-        parameters_1 = mocker.MagicMock()
-        parameters_2 = mocker.MagicMock()
-        parameters_3 = mocker.MagicMock()
-        endpoint_from_data = mocker.patch.object(
-            Endpoint,
-            "from_data",
-            side_effect=[
-                (endpoint_1, schemas_1, parameters_1),
-                (endpoint_2, schemas_2, parameters_2),
-                (endpoint_3, schemas_3, parameters_3),
-            ],
-        )
-        schemas = mocker.MagicMock()
-        parameters = mocker.MagicMock()
-
-        result = EndpointCollection.from_data(data=data, schemas=schemas, parameters=parameters, config=config)
-
-        endpoint_from_data.assert_has_calls(
-            [
-                mocker.call(
-                    data=path_1_put,
-                    path="path_1",
-                    method="put",
-                    tag="default",
-                    schemas=schemas,
-                    parameters=parameters,
-                    config=config,
-                ),
-                mocker.call(
-                    data=path_1_post,
-                    path="path_1",
-                    method="post",
-                    tag="tag_2",
-                    schemas=schemas_1,
-                    parameters=parameters_1,
-                    config=config,
-                ),
-                mocker.call(
-                    data=path_2_get,
-                    path="path_2",
-                    method="get",
-                    tag="default",
-                    schemas=schemas_2,
-                    parameters=parameters_2,
-                    config=config,
-                ),
-            ],
-        )
-        assert result == (
-            {
-                "default": EndpointCollection("default", endpoints=[endpoint_1, endpoint_3]),
-                "tag_2": EndpointCollection("tag_2", endpoints=[endpoint_2]),
-            },
-            schemas_3,
-            parameters_3,
-        )
-
     def test_from_data_overrides_path_item_params_with_operation_params(self, config):
         data = {
             "/": oai.PathItem.model_construct(
@@ -896,6 +786,7 @@ class TestEndpointCollection:
             schemas=Schemas(),
             parameters=Parameters(),
             config=config,
+            request_bodies={},
         )
         collection: EndpointCollection = collections["default"]
         assert isinstance(collection.endpoints[0].query_parameters[0], IntProperty)
@@ -916,7 +807,7 @@ class TestEndpointCollection:
         parameters_1 = mocker.MagicMock()
         parameters_2 = mocker.MagicMock()
         parameters_3 = mocker.MagicMock()
-        endpoint_from_data = mocker.patch.object(
+        mocker.patch.object(
             Endpoint,
             "from_data",
             side_effect=[
@@ -929,40 +820,13 @@ class TestEndpointCollection:
         parameters = mocker.MagicMock()
 
         result, result_schemas, result_parameters = EndpointCollection.from_data(
-            data=data, schemas=schemas, config=config, parameters=parameters
+            data=data,
+            schemas=schemas,
+            config=config,
+            parameters=parameters,
+            request_bodies={},
         )
 
-        endpoint_from_data.assert_has_calls(
-            [
-                mocker.call(
-                    data=path_1_put,
-                    path="path_1",
-                    method="put",
-                    tag="default",
-                    schemas=schemas,
-                    parameters=parameters,
-                    config=config,
-                ),
-                mocker.call(
-                    data=path_1_post,
-                    path="path_1",
-                    method="post",
-                    tag="tag_2",
-                    schemas=schemas_1,
-                    parameters=parameters_1,
-                    config=config,
-                ),
-                mocker.call(
-                    data=path_2_get,
-                    path="path_2",
-                    method="get",
-                    tag="default",
-                    schemas=schemas_2,
-                    parameters=parameters_2,
-                    config=config,
-                ),
-            ],
-        )
         assert result["default"].parse_errors[0].data == "1"
         assert result["default"].parse_errors[1].data == "3"
         assert result["tag_2"].parse_errors[0].data == "2"
@@ -989,7 +853,7 @@ class TestEndpointCollection:
         parameters_1 = mocker.MagicMock()
         parameters_2 = mocker.MagicMock()
         parameters_3 = mocker.MagicMock()
-        endpoint_from_data = mocker.patch.object(
+        mocker.patch.object(
             Endpoint,
             "from_data",
             side_effect=[
@@ -1001,39 +865,10 @@ class TestEndpointCollection:
         schemas = mocker.MagicMock()
         parameters = mocker.MagicMock()
 
-        result = EndpointCollection.from_data(data=data, schemas=schemas, parameters=parameters, config=config)
-
-        endpoint_from_data.assert_has_calls(
-            [
-                mocker.call(
-                    data=path_1_put,
-                    path="path_1",
-                    method="put",
-                    tag="default",
-                    schemas=schemas,
-                    parameters=parameters,
-                    config=config,
-                ),
-                mocker.call(
-                    data=path_1_post,
-                    path="path_1",
-                    method="post",
-                    tag="amf_subscription_info_document",
-                    schemas=schemas_1,
-                    parameters=parameters_1,
-                    config=config,
-                ),
-                mocker.call(
-                    data=path_2_get,
-                    path="path_2",
-                    method="get",
-                    tag="tag3_abc",
-                    schemas=schemas_2,
-                    parameters=parameters_2,
-                    config=config,
-                ),
-            ],
+        result = EndpointCollection.from_data(
+            data=data, schemas=schemas, parameters=parameters, config=config, request_bodies={}
         )
+
         assert result == (
             {
                 "default": EndpointCollection("default", endpoints=[endpoint_1]),

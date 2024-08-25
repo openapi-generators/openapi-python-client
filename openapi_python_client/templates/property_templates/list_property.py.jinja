@@ -60,7 +60,7 @@ if not isinstance({{ source }}, Unset):
 {% else %}
 {{ destination }}: {{ type_string }} = UNSET
 if not isinstance({{ source }}, Unset):
-{{ _transform(property, source, destination, True, "to_dict") | indent(4)}}
+    {{ _transform(property, source, destination, True, "to_dict") | indent(4)}}
 {% endif %}
 {% endmacro %}
 

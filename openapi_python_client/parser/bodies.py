@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import attr
 
@@ -44,15 +44,19 @@ def body_from_data(
     *,
     data: oai.Operation,
     schemas: Schemas,
+    request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
     config: Config,
     endpoint_name: str,
 ) -> Tuple[List[Union[Body, ParseError]], Schemas]:
     """Adds form or JSON body to Endpoint if included in data"""
-    if data.request_body is None or isinstance(data.request_body, oai.Reference):
+    body = _resolve_reference(data.request_body, request_bodies)
+    if isinstance(body, ParseError):
+        return [body], schemas
+    if body is None:
         return [], schemas
 
     bodies: List[Union[Body, ParseError]] = []
-    body_content = data.request_body.content
+    body_content = body.content
     prefix_type_names = len(body_content) > 1
 
     for content_type, media_type in body_content.items():
@@ -61,7 +65,7 @@ def body_from_data(
             bodies.append(
                 ParseError(
                     detail="Invalid content type",
-                    data=data.request_body,
+                    data=body,
                     level=ErrorLevel.WARNING,
                 )
             )
@@ -71,7 +75,7 @@ def body_from_data(
             bodies.append(
                 ParseError(
                     detail="Missing schema",
-                    data=data.request_body,
+                    data=body,
                     level=ErrorLevel.WARNING,
                 )
             )
@@ -88,7 +92,7 @@ def body_from_data(
             bodies.append(
                 ParseError(
                     detail=f"Unsupported content type {simplified_content_type}",
-                    data=data.request_body,
+                    data=body,
                     level=ErrorLevel.WARNING,
                 )
             )
@@ -113,6 +117,7 @@ def body_from_data(
                     **schemas.classes_by_name,
                     prop.class_info.name: prop,
                 },
+                models_to_process=[*schemas.models_to_process, prop],
             )
         bodies.append(
             Body(
@@ -123,3 +128,19 @@ def body_from_data(
         )
 
     return bodies, schemas
+
+
+def _resolve_reference(
+    body: Union[oai.RequestBody, oai.Reference, None], request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]]
+) -> Union[oai.RequestBody, ParseError, None]:
+    if body is None:
+        return None
+    references_seen = []
+    while isinstance(body, oai.Reference) and body.ref not in references_seen:
+        references_seen.append(body.ref)
+        body = request_bodies.get(body.ref.split("/")[-1])
+    if isinstance(body, oai.Reference):
+        return ParseError(detail="Circular $ref in request body", data=body)
+    if body is None and references_seen:
+        return ParseError(detail=f"Could not resolve $ref {references_seen[-1]} in request body")
+    return body

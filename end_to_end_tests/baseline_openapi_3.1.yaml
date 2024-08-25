@@ -83,6 +83,23 @@ info:
       }
     }
   },
+  "/bodies/refs": {
+    "post": {
+      "tags": [
+        "bodies"
+      ],
+      "description": "Test request body defined via ref",
+      "operationId": "refs",
+      "requestBody": {
+        "$ref": "#/components/requestBodies/NestedRef"
+      },
+      "responses": {
+        "200": {
+          "description": "OK"
+        }
+      }
+    }
+  },
   "/tests/": {
     "get": {
       "tags": [
@@ -1602,9 +1619,36 @@ info:
         }
       }
     }
-  }
+  },
+  "/models/allof": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aliased": {
+                    "$ref": "#/components/schemas/Aliased"
+                  },
+                  "extended": {
+                    "$ref": "#/components/schemas/Extended"
+                  },
+                  "model": {
+                    "$ref": "#/components/schemas/AModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
 }
-"components": {
+"components":
   "schemas": {
     "AFormData": {
       "type": "object",
@@ -1618,6 +1662,23 @@ info:
       },
       "required": [
         "an_required_field"
+      ]
+    },
+    "Aliased": {
+      "allOf": [
+        { "$ref": "#/components/schemas/AModel" }
+      ]
+    },
+    "Extended": {
+      "allOf": [
+        { "$ref": "#/components/schemas/Aliased" },
+        { "type": "object",
+          "properties": {
+            "fromExtended": {
+              "type": "string"
+            }
+          }
+        }
       ]
     },
     "AModel": {
@@ -1650,11 +1711,7 @@ info:
           "default": "overridden_default"
         },
         "an_optional_allof_enum": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/AnAllOfEnum"
-            }
-          ]
+          "$ref": "#/components/schemas/AnAllOfEnum",
         },
         "nested_list_of_enums": {
           "title": "Nested List Of Enums",
@@ -1791,11 +1848,7 @@ info:
           ]
         },
         "model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "nullable_model": {
           "oneOf": [
@@ -1808,11 +1861,7 @@ info:
           ]
         },
         "not_required_model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "not_required_nullable_model": {
           "oneOf": [
@@ -1918,6 +1967,13 @@ info:
         "some_required_number": {
           "title": "Some Number",
           "type": "number"
+        },
+        "some_int_array": {
+          "title": "Some Integer Array",
+          "type": "array",
+          "items": {
+            "type": ["integer", "null"]
+          }
         },
         "some_array": {
           "title": "Some Array",
@@ -2697,7 +2753,7 @@ info:
         }
       }
     }
-  },
+  }
   "parameters": {
     "integer-param": {
       "name": "integer param",
@@ -2765,5 +2821,11 @@ info:
       }
     }
   }
-}
-
+  requestBodies:
+    NestedRef:
+      "$ref": "#/components/requestBodies/ARequestBody"
+    ARequestBody:
+      content:
+        "application/json":
+          "schema":
+            "$ref": "#/components/schemas/AModel"
