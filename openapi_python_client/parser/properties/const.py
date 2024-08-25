@@ -27,7 +27,7 @@ class ConstProperty(PropertyProtocol):
     def build(
         cls,
         *,
-        const: str | int,
+        const: str | int | float | bool,
         default: Any,
         name: str,
         python_name: PythonIdentifier,
