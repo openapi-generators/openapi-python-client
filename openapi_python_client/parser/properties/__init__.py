@@ -162,15 +162,14 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             config=config,
             roots=roots,
         )
-        if not isinstance(prop, PropertyError):
-            # We won't be generating a separate Python class for this schema - references to it will just use
-            # the class for the schema it's referencing - so we don't add it to classes_by_name; but we do
-            # add it to models_to_process, if it's a model, because its properties still need to be resolved.
-            if isinstance(prop, ModelProperty):
-                schemas = evolve(
-                    schemas,
-                    models_to_process=[*schemas.models_to_process, prop],
-                )
+        # We won't be generating a separate Python class for this schema - references to it will just use
+        # the class for the schema it's referencing - so we don't add it to classes_by_name; but we do
+        # add it to models_to_process, if it's a model, because its properties still need to be resolved.
+        if isinstance(prop, ModelProperty):
+            schemas = evolve(
+                schemas,
+                models_to_process=[*schemas.models_to_process, prop],
+            )
         return prop, schemas
 
     if data.type == oai.DataType.BOOLEAN:
