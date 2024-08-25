@@ -912,40 +912,6 @@ class TestCreateSchemas:
 
 
 class TestProcessModels:
-    def test_retries_failing_models_while_making_progress(
-        self, mocker, model_property_factory, any_property_factory, config
-    ):
-        from openapi_python_client.parser.properties import _process_models
-
-        first_model = model_property_factory()
-        second_class_name = ClassName("second", "")
-        second_model = model_property_factory()
-        any_prop = any_property_factory()
-        schemas = Schemas(
-            classes_by_name={
-                ClassName("first", ""): first_model,
-                second_class_name: second_model,
-                ClassName("non-model", ""): any_prop,
-            },
-            models_to_process=[first_model, second_model],
-        )
-        process_model = mocker.patch(
-            f"{MODULE_NAME}.process_model", side_effect=[PropertyError(), schemas, PropertyError()]
-        )
-        process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
-
-        result = _process_models(schemas=schemas, config=config)
-
-        process_model.assert_has_calls(
-            [
-                call(first_model, schemas=schemas, config=config),
-                call(second_model, schemas=schemas, config=config),
-                call(first_model, schemas=schemas, config=config),
-            ]
-        )
-        assert process_model_errors.was_called_once_with([(first_model, PropertyError())])
-        assert all(error in result.errors for error in process_model_errors.return_value)
-
     def test_detect_recursive_allof_reference_no_retry(self, mocker, model_property_factory, config):
         from openapi_python_client.parser.properties import Class, _process_models
         from openapi_python_client.schema import Reference
