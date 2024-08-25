@@ -688,7 +688,7 @@ class TestPropertyFromData:
         )[0]
 
         assert isinstance(response, UnionProperty)
-        assert len(response.inner_properties) == 2  # noqa: PLR2004
+        assert len(response.inner_properties) == 2
 
     def test_property_from_data_list_of_types(self, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -705,7 +705,7 @@ class TestPropertyFromData:
         )[0]
 
         assert isinstance(response, UnionProperty)
-        assert len(response.inner_properties) == 2  # noqa: PLR2004
+        assert len(response.inner_properties) == 2
 
     def test_property_from_data_union_of_one_element(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -907,7 +907,7 @@ class TestCreateSchemas:
                 call("#/components/schemas/first"),
             ]
         )
-        assert update_schemas_with_data.call_count == 3  # noqa: PLR2004
+        assert update_schemas_with_data.call_count == 3
         assert result.errors == [PropertyError()]
 
 
@@ -1171,7 +1171,7 @@ class TestBuildParameters:
                 call("#/components/parameters/first"),
             ]
         )
-        assert update_parameters_with_data.call_count == 3  # noqa: PLR2004
+        assert update_parameters_with_data.call_count == 3
         assert result.errors == [ParameterError()]
 
 
