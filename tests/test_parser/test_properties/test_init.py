@@ -530,6 +530,7 @@ class TestPropertyFromData:
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="", config=config
         )
+        new_schemas = attr.evolve(new_schemas, models_to_process=[])  # intermediate state irrelevant to this test
 
         assert prop == enum_property_factory(
             name="some_enum",
@@ -687,7 +688,7 @@ class TestPropertyFromData:
         )[0]
 
         assert isinstance(response, UnionProperty)
-        assert len(response.inner_properties) == 2  # noqa: PLR2004
+        assert len(response.inner_properties) == 2
 
     def test_property_from_data_list_of_types(self, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -704,7 +705,7 @@ class TestPropertyFromData:
         )[0]
 
         assert isinstance(response, UnionProperty)
-        assert len(response.inner_properties) == 2  # noqa: PLR2004
+        assert len(response.inner_properties) == 2
 
     def test_property_from_data_union_of_one_element(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -906,42 +907,11 @@ class TestCreateSchemas:
                 call("#/components/schemas/first"),
             ]
         )
-        assert update_schemas_with_data.call_count == 3  # noqa: PLR2004
+        assert update_schemas_with_data.call_count == 3
         assert result.errors == [PropertyError()]
 
 
 class TestProcessModels:
-    def test_retries_failing_models_while_making_progress(
-        self, mocker, model_property_factory, any_property_factory, config
-    ):
-        from openapi_python_client.parser.properties import _process_models
-
-        first_model = model_property_factory()
-        second_class_name = ClassName("second", "")
-        schemas = Schemas(
-            classes_by_name={
-                ClassName("first", ""): first_model,
-                second_class_name: model_property_factory(),
-                ClassName("non-model", ""): any_property_factory(),
-            }
-        )
-        process_model = mocker.patch(
-            f"{MODULE_NAME}.process_model", side_effect=[PropertyError(), Schemas(), PropertyError()]
-        )
-        process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
-
-        result = _process_models(schemas=schemas, config=config)
-
-        process_model.assert_has_calls(
-            [
-                call(first_model, schemas=schemas, config=config),
-                call(schemas.classes_by_name[second_class_name], schemas=schemas, config=config),
-                call(first_model, schemas=result, config=config),
-            ]
-        )
-        assert process_model_errors.was_called_once_with([(first_model, PropertyError())])
-        assert all(error in result.errors for error in process_model_errors.return_value)
-
     def test_detect_recursive_allof_reference_no_retry(self, mocker, model_property_factory, config):
         from openapi_python_client.parser.properties import Class, _process_models
         from openapi_python_client.schema import Reference
@@ -950,14 +920,16 @@ class TestProcessModels:
         recursive_model = model_property_factory(
             class_info=Class(name=class_name, module_name=PythonIdentifier("module_name", ""))
         )
+        second_model = model_property_factory()
         schemas = Schemas(
             classes_by_name={
                 "recursive": recursive_model,
-                "second": model_property_factory(),
-            }
+                "second": second_model,
+            },
+            models_to_process=[recursive_model, second_model],
         )
         recursion_error = PropertyError(data=Reference.model_construct(ref=f"#/{class_name}"))
-        process_model = mocker.patch(f"{MODULE_NAME}.process_model", side_effect=[recursion_error, Schemas()])
+        process_model = mocker.patch(f"{MODULE_NAME}.process_model", side_effect=[recursion_error, schemas])
         process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
 
         result = _process_models(schemas=schemas, config=config)
@@ -971,6 +943,58 @@ class TestProcessModels:
         assert process_model_errors.was_called_once_with([(recursive_model, recursion_error)])
         assert all(error in result.errors for error in process_model_errors.return_value)
         assert "\n\nRecursive allOf reference found" in recursion_error.detail
+
+    def test_resolve_reference_to_single_allof_reference(self, config, model_property_factory):
+        # test for https://github.com/openapi-generators/openapi-python-client/issues/1091
+        from openapi_python_client.parser.properties import Schemas, build_schemas
+
+        components = {
+            "Model1": oai.Schema.model_construct(
+                type="object",
+                properties={
+                    "prop1": oai.Schema.model_construct(type="string"),
+                },
+            ),
+            "Model2": oai.Schema.model_construct(
+                allOf=[
+                    oai.Reference.model_construct(ref="#/components/schemas/Model1"),
+                ]
+            ),
+            "Model3": oai.Schema.model_construct(
+                allOf=[
+                    oai.Reference.model_construct(ref="#/components/schemas/Model2"),
+                    oai.Schema.model_construct(
+                        type="object",
+                        properties={
+                            "prop2": oai.Schema.model_construct(type="string"),
+                        },
+                    ),
+                ],
+            ),
+        }
+        schemas = Schemas()
+
+        result = build_schemas(components=components, schemas=schemas, config=config)
+
+        assert result.errors == []
+        assert result.models_to_process == []
+
+        # Classes should only be generated for Model1 and Model3
+        assert result.classes_by_name.keys() == {"Model1", "Model3"}
+
+        # References to Model2 should be resolved to the same class as Model1
+        assert result.classes_by_reference.keys() == {
+            "/components/schemas/Model1",
+            "/components/schemas/Model2",
+            "/components/schemas/Model3",
+        }
+        assert (
+            result.classes_by_reference["/components/schemas/Model2"].class_info
+            == result.classes_by_reference["/components/schemas/Model1"].class_info
+        )
+
+        # Verify that Model3 extended the properties from Model1
+        assert [p.name for p in result.classes_by_name["Model3"].optional_properties] == ["prop1", "prop2"]
 
 
 class TestPropogateRemoval:
@@ -1147,7 +1171,7 @@ class TestBuildParameters:
                 call("#/components/parameters/first"),
             ]
         )
-        assert update_parameters_with_data.call_count == 3  # noqa: PLR2004
+        assert update_parameters_with_data.call_count == 3
         assert result.errors == [ParameterError()]
 
 
