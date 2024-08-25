@@ -34,9 +34,11 @@ from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadF
 from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
 from .different_enum import DifferentEnum
+from .extended import Extended
 from .free_form_model import FreeFormModel
 from .get_location_header_types_int_enum_header import GetLocationHeaderTypesIntEnumHeader
 from .get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
+from .get_models_allof_response_200 import GetModelsAllofResponse200
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .json_like_body import JsonLikeBody
@@ -111,9 +113,11 @@ __all__ = (
     "BodyUploadFileTestsUploadPostSomeObject",
     "BodyUploadFileTestsUploadPostSomeOptionalObject",
     "DifferentEnum",
+    "Extended",
     "FreeFormModel",
     "GetLocationHeaderTypesIntEnumHeader",
     "GetLocationHeaderTypesStringEnumHeader",
+    "GetModelsAllofResponse200",
     "HTTPValidationError",
     "Import",
     "JsonLikeBody",
