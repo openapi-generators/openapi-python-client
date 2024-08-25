@@ -63,6 +63,7 @@ ignore = ["E501", "PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
 "openapi_python_client/cli.py" = ["B008"]
+"tests/*" = ["PLR2004"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
