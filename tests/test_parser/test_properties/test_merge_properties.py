@@ -3,7 +3,7 @@ from itertools import permutations
 import pytest
 from attr import evolve
 
-from openapi_python_client.parser.properties import StringProperty
+from openapi_python_client.parser.properties.string import StringProperty
 from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.merge_properties import merge_properties
@@ -103,34 +103,6 @@ def test_merge_with_any(
         expected_result = evolve(prop, description=original_desc, default=prop.default)
         assert merge_properties(any_prop, prop) == expected_result
         assert merge_properties(prop, any_prop) == expected_result
-
-
-def test_merge_string_max_length(string_property_factory):
-    prop_with_no_max = string_property_factory()
-    prop_with_max_1 = evolve(prop_with_no_max, max_length=1)
-    prop_with_max_5 = evolve(prop_with_no_max, max_length=5)
-
-    assert merge_properties(prop_with_no_max, prop_with_max_1) == prop_with_max_1
-    assert merge_properties(prop_with_max_1, prop_with_no_max) == prop_with_max_1
-
-    assert merge_properties(prop_with_max_1, prop_with_max_5) == prop_with_max_1
-    assert merge_properties(prop_with_max_5, prop_with_max_1) == prop_with_max_1
-
-
-def test_merge_string_pattern(string_property_factory):
-    prop_with_no_pattern = string_property_factory()
-    prop_with_pattern1a = evolve(prop_with_no_pattern, pattern="pattern1")
-    prop_with_pattern1b = evolve(prop_with_no_pattern, pattern="pattern1")  # deliberately identical pattern
-    prop_with_pattern2 = evolve(prop_with_no_pattern, pattern="pattern2")
-
-    assert merge_properties(prop_with_no_pattern, prop_with_pattern1a) == prop_with_pattern1a
-    assert merge_properties(prop_with_pattern1a, prop_with_no_pattern) == prop_with_pattern1a
-
-    assert merge_properties(prop_with_pattern1a, prop_with_pattern1b) == prop_with_pattern1a
-
-    with pytest.raises(ValueError) as excinfo:
-        merge_properties(prop_with_pattern1a, prop_with_pattern2)
-    assert "regex patterns" in excinfo.value.args[0]
 
 
 def test_merge_enums(enum_property_factory, config):

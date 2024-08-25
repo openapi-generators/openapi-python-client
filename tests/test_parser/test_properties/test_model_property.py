@@ -410,10 +410,10 @@ class TestProcessProperties:
         schemas = Schemas(
             classes_by_reference={
                 "/First": model_property_factory(
-                    required_properties=[], optional_properties=[string_property_factory(pattern="abc")]
+                    required_properties=[], optional_properties=[string_property_factory(default="abc")]
                 ),
                 "/Second": model_property_factory(
-                    required_properties=[], optional_properties=[string_property_factory(pattern="def")]
+                    required_properties=[], optional_properties=[string_property_factory(default="def")]
                 ),
             }
         )

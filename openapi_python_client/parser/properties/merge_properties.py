@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __all__ = ["merge_properties"]
 
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from attr import evolve
 
@@ -83,20 +83,7 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None:
 
 
 def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringProperty:
-    # If max_length was specified for both, the smallest value takes precedence. If only one of them
-    # specifies it, _combine_values will pick that one.
-    max_length: int | None = _combine_values(prop1.max_length, prop2.max_length, lambda a, b: min([a, b]))
-
-    # If pattern was specified for both, we have a problem. OpenAPI has no logical objection to this;
-    # it would just mean the value must match both of the patterns to be valid. But we have no way to
-    # represent this in our internal model currently.
-    pattern: str | None | ValueError = _combine_values(
-        prop1.pattern, prop2.pattern, lambda a, b: ValueError("specified two different regex patterns")
-    )
-    if isinstance(pattern, ValueError):
-        raise pattern
-
-    return _merge_common_attributes(evolve(prop1, max_length=max_length, pattern=pattern), prop2)
+    return _merge_common_attributes(prop1, prop2)
 
 
 def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None:
@@ -164,13 +151,3 @@ def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) ->
 
 def _values_are_subset(prop1: EnumProperty, prop2: EnumProperty) -> bool:
     return set(prop1.values.items()) <= set(prop2.values.items())
-
-
-def _combine_values(value1: Any, value2: Any, combinator: Callable[[Any, Any], Any]) -> Any:
-    if value1 == value2:
-        return value1
-    if value1 is None:
-        return value2
-    if value2 is None:
-        return value1
-    return combinator(value1, value2)

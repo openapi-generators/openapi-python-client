@@ -746,14 +746,14 @@ class TestStringBasedProperty:
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.model_construct(type="string", default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", default='"hello world"')
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=config, schemas=Schemas()
         )
 
         assert p == string_property_factory(
-            name=name, required=required, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
+            name=name, required=required, default="'\\\\\"hello world\\\\\"'"
         )
 
     def test_datetime_format(self, date_time_property_factory, config):
