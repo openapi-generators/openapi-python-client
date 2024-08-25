@@ -5,13 +5,12 @@ from typing import Any, ClassVar, NamedTuple, cast
 
 from attrs import define, evolve
 
-from openapi_python_client.parser.properties.merge_properties import merge_properties
-
 from ... import Config, utils
 from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
+from .merge_properties import merge_properties
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 

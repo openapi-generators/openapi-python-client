@@ -1,28 +1,35 @@
-from typing import Any, Callable, Dict, TypeVar, Union, cast
+from __future__ import annotations
+
+__all__ = ["merge_properties"]
+
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
 
 from attr import evolve
 
-from openapi_python_client.parser.properties.any import AnyProperty
-from openapi_python_client.parser.properties.enum_property import EnumProperty, ValueType
-from openapi_python_client.parser.properties.float import FloatProperty
-from openapi_python_client.parser.properties.int import IntProperty
-from openapi_python_client.parser.properties.list_property import ListProperty
-from openapi_python_client.parser.properties.protocol import PropertyProtocol
-from openapi_python_client.parser.properties.schemas import Class
-from openapi_python_client.parser.properties.string import StringProperty
+from . import FloatProperty
+from .any import AnyProperty
+from .enum_property import EnumProperty, ValueType
+from .int import IntProperty
+from .list_property import ListProperty
+from .protocol import PropertyProtocol
+from .schemas import Class
+from .string import StringProperty
 
-# Note that in this file we have to use PropertyProtocol instead of the union type Property,
-# to avoid circular imports.
+if TYPE_CHECKING:
+    from .property import Property
+else:
+    Property = "Property"
+
 PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
 
 
-def merge_properties(prop1: PropertyProtocol, prop2: PropertyProtocol) -> PropertyProtocol:
+def merge_properties(prop1: Property, prop2: Property) -> Property:
     """Attempt to create a new property that incorporates the behavior of both.
 
     This is used when merging schemas with allOf, when two schemas define a property with the same name.
 
     OpenAPI defines allOf in terms of validation behavior: the input must pass the validation rules
-    defined in all of the listed schemas. Our task here is slightly more difficult, since we must end
+    defined in all the listed schemas. Our task here is slightly more difficult, since we must end
     up with a single Property object that will be used to generate a single class property in the
     generated code. Due to limitations of our internal model, this may not be possible for some
     combinations of property attributes that OpenAPI supports (for instance, we have no way to represent
@@ -35,36 +42,39 @@ def merge_properties(prop1: PropertyProtocol, prop2: PropertyProtocol) -> Proper
 
     Any failure is thrown as a ValueError.
     """
+    if isinstance(prop2, AnyProperty):
+        return _merge_common_attributes(prop1, prop2)
+
+    if isinstance(prop1, AnyProperty):
+        # Use the base type of `prop2`, but keep the override order
+        return _merge_common_attributes(prop2, prop1, prop2)
+
     if isinstance(prop1, EnumProperty) or isinstance(prop2, EnumProperty):
         return _merge_with_enum(prop1, prop2)
 
-    if prop1.__class__ == prop2.__class__:
-        return _merge_same_type(prop1, prop2)
+    if (merged := _merge_same_type(prop1, prop2)) is not None:
+        return merged
 
-    if isinstance(prop1, AnyProperty) or isinstance(prop2, AnyProperty):
-        return _merge_with_any(prop1, prop2)
-
-    if _is_numeric(prop1) and _is_numeric(prop2):
-        return _merge_numeric(prop1, prop2)
+    if (merged := _merge_numeric(prop1, prop2)) is not None:
+        return merged
 
     raise ValueError("defined with two incompatible types")
 
 
-def _is_numeric(prop: PropertyProtocol) -> bool:
-    return isinstance(prop, IntProperty) or isinstance(prop, FloatProperty)
+def _merge_same_type(prop1: Property, prop2: Property) -> Property | None:
+    if type(prop1) is not type(prop2):
+        return None
 
-
-def _merge_same_type(prop1: PropertyProtocol, prop2: PropertyProtocol) -> PropertyProtocol:
     if prop1 == prop2:
         # It's always OK to redefine a property with everything exactly the same
         return prop1
 
-    if isinstance(prop1, StringProperty):
-        return _merge_string(prop1, cast(StringProperty, prop2))
+    if isinstance(prop1, StringProperty) and isinstance(prop2, StringProperty):
+        return _merge_string(prop1, prop2)
 
-    if isinstance(prop1, ListProperty):
+    if isinstance(prop1, ListProperty) and isinstance(prop2, ListProperty):
         # There's no clear way to represent the intersection of two different list types. Fail in this case.
-        if prop1.inner_property != cast(ListProperty, prop2).inner_property:
+        if prop1.inner_property != prop2.inner_property:
             raise ValueError("can't redefine a list property with a different element type")
 
     # For all other property types, there aren't any special attributes that affect validation, so just
@@ -75,12 +85,12 @@ def _merge_same_type(prop1: PropertyProtocol, prop2: PropertyProtocol) -> Proper
 def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringProperty:
     # If max_length was specified for both, the smallest value takes precedence. If only one of them
     # specifies it, _combine_values will pick that one.
-    max_length: Union[int, None] = _combine_values(prop1.max_length, prop2.max_length, lambda a, b: min([a, b]))
+    max_length: int | None = _combine_values(prop1.max_length, prop2.max_length, lambda a, b: min([a, b]))
 
     # If pattern was specified for both, we have a problem. OpenAPI has no logical objection to this;
     # it would just mean the value must match both of the patterns to be valid. But we have no way to
     # represent this in our internal model currently.
-    pattern: Union[str, None, ValueError] = _combine_values(
+    pattern: str | None | ValueError = _combine_values(
         prop1.pattern, prop2.pattern, lambda a, b: ValueError("specified two different regex patterns")
     )
     if isinstance(pattern, ValueError):
@@ -89,30 +99,26 @@ def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringPropert
     return _merge_common_attributes(evolve(prop1, max_length=max_length, pattern=pattern), prop2)
 
 
-def _merge_numeric(prop1: PropertyProtocol, prop2: PropertyProtocol) -> IntProperty:
-    # Here, one of the properties was defined as "int" and the other was just a general number (which
-    # we call FloatProperty). "Must be integer" is the stricter validation rule, so the result must be
-    # an IntProperty.
-    int_prop = prop1 if isinstance(prop1, IntProperty) else cast(IntProperty, prop2)
-    result = _merge_common_attributes(int_prop, prop1, prop2)
+def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None:
+    """Merge IntProperty with FloatProperty"""
+    if isinstance(prop1, IntProperty) and isinstance(prop2, (IntProperty, FloatProperty)):
+        result = _merge_common_attributes(prop1, prop2)
+    elif isinstance(prop2, IntProperty) and isinstance(prop1, (IntProperty, FloatProperty)):
+        # Use the IntProperty as a base since it's more restrictive, but keep the correct override order
+        result = _merge_common_attributes(prop2, prop1, prop2)
+    else:
+        return None
     if result.default is not None:
         if isinstance(result.default, float) and not result.default.is_integer():
             raise ValueError(f"default value {result.default} is not valid for an integer property")
     return result
 
 
-def _merge_with_any(prop1: PropertyProtocol, prop2: PropertyProtocol) -> PropertyProtocol:
-    # AnyProperty implies no validation rules for a value, so merging it with any other type just means
-    # we should use the validation rules for the other type and the result should not be an AnyProperty.
-    non_any_prop = prop2 if isinstance(prop1, AnyProperty) else prop1
-    return _merge_common_attributes(non_any_prop, prop1, prop2)
-
-
 def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumProperty:
     if isinstance(prop1, EnumProperty) and isinstance(prop2, EnumProperty):
         # We want the narrowest validation rules that fit both, so use whichever values list is a
         # subset of the other.
-        values: Dict[str, ValueType]
+        values: dict[str, ValueType]
         class_info: Class
         if _values_are_subset(prop1, prop2):
             values = prop1.values

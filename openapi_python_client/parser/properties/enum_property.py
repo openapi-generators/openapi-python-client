@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["EnumProperty"]
+__all__ = ["EnumProperty", "ValueType"]
 
 from typing import Any, ClassVar, List, Union, cast
 
