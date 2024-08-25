@@ -1,3 +1,5 @@
+from itertools import permutations
+
 import pytest
 from attr import evolve
 
@@ -56,14 +58,13 @@ def test_incompatible_types(
         list_property_factory(),
         model_property_factory(),
     ]
-    for i, prop1 in enumerate(props):
-        for j, prop2 in enumerate(props):
-            if i != j:
-                if {prop1.__class__, prop2.__class__} == {IntProperty, FloatProperty}:
-                    continue  # the int+float case is covered in another test
-                with pytest.raises(ValueError) as excinfo:
-                    merge_properties(prop1, prop2)
-                assert "incompatible types" in excinfo.value.args[0]
+
+    for prop1, prop2 in permutations(props, 2):
+        if {prop1.__class__, prop2.__class__} == {IntProperty, FloatProperty}:
+            continue  # the int+float case is covered in another test
+        with pytest.raises(ValueError) as excinfo:
+            merge_properties(prop1, prop2)
+        assert "incompatible types" in excinfo.value.args[0]
 
 
 def test_merge_int_with_float(int_property_factory, float_property_factory):
