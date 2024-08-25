@@ -119,7 +119,11 @@ class ModelProperty(PropertyProtocol):
             )
             return error, schemas
 
-        schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
+        schemas = evolve(
+            schemas,
+            classes_by_name={**schemas.classes_by_name, class_info.name: prop},
+            models_to_process=[*schemas.models_to_process, prop],
+        )
         return prop, schemas
 
     @classmethod

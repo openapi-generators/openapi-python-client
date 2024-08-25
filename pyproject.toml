@@ -63,6 +63,7 @@ ignore = ["E501", "PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
 "openapi_python_client/cli.py" = ["B008"]
+"tests/*" = ["PLR2004"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/templates/*"]
@@ -129,7 +130,7 @@ composite = ["test --cov openapi_python_client tests --cov-report=term-missing"]
 
 [tool.pdm.scripts.regen_integration]
 shell = """
-openapi-python-client update --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests/config.yaml --meta pdm \
+openapi-python-client generate --overwrite --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests/config.yaml --meta none --output-path integration-tests/integration_tests \
 """
 
 [build-system]
