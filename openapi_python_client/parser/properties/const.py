@@ -115,6 +115,6 @@ class ConstProperty(PropertyProtocol):
         if self.required:
             return {"from typing import Literal"}
         return {
-            "from typing import Literal, Union",
+            "from typing import Literal, Union, cast",
             f"from {prefix}types import UNSET, Unset",
         }
