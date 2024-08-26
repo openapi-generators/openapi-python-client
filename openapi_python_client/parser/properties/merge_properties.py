@@ -76,7 +76,6 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
         return prop1
 
     if isinstance(prop1, ListProperty) and isinstance(prop2, ListProperty):
-        # There's no clear way to represent the intersection of two different list types. Fail in this case.
         inner_property = merge_properties(prop1.inner_property, prop2.inner_property)  # type: ignore
         if isinstance(inner_property, PropertyError):
             return PropertyError(detail=f"can't merge list properties: {inner_property.detail}")

@@ -219,3 +219,18 @@ def test_merge_string_with_formatted_string(
 
         assert isinstance(merge_properties(string_prop_with_invalid_default, formatted_prop), PropertyError)
         assert isinstance(merge_properties(formatted_prop, string_prop_with_invalid_default), PropertyError)
+
+
+def test_merge_lists(int_property_factory, list_property_factory, string_property_factory):
+    string_prop_1 = string_property_factory(description="desc1")
+    string_prop_2 = string_property_factory(example="desc2")
+    int_prop = int_property_factory()
+    list_prop_1 = list_property_factory(inner_property=string_prop_1)
+    list_prop_2 = list_property_factory(inner_property=string_prop_2)
+    list_prop_3 = list_property_factory(inner_property=int_prop)
+
+    assert merge_properties(list_prop_1, list_prop_2) == evolve(
+        list_prop_1, inner_property=merge_properties(string_prop_1, string_prop_2)
+    )
+
+    assert isinstance(merge_properties(list_prop_1, list_prop_3), PropertyError)
