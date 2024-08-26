@@ -350,7 +350,7 @@ class TestEndpoint:
             endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=config
         )
 
-        assert len(endpoint.query_parameters) == 2, "Not all query params were added"  # noqa: PLR2004
+        assert len(endpoint.query_parameters) == 2, "Not all query params were added"
         for param in endpoint.query_parameters:
             if param.name == "required":
                 assert param.required
