@@ -325,7 +325,7 @@ class TestBuild:
 
 class TestProcessProperties:
     def test_conflicting_properties_different_types(
-        self, model_property_factory, string_property_factory, date_time_property_factory, config
+        self, model_property_factory, string_property_factory, int_property_factory, config
     ):
         data = oai.Schema.model_construct(
             allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
@@ -335,9 +335,7 @@ class TestProcessProperties:
                 "/First": model_property_factory(
                     required_properties=[], optional_properties=[string_property_factory()]
                 ),
-                "/Second": model_property_factory(
-                    required_properties=[], optional_properties=[date_time_property_factory()]
-                ),
+                "/Second": model_property_factory(required_properties=[], optional_properties=[int_property_factory()]),
             }
         )
 

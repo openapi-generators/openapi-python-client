@@ -60,6 +60,8 @@ from .model_with_circular_ref_in_additional_properties_a import ModelWithCircula
 from .model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
 from .model_with_date_time_property import ModelWithDateTimeProperty
 from .model_with_discriminated_union import ModelWithDiscriminatedUnion
+from .model_with_merged_properties import ModelWithMergedProperties
+from .model_with_merged_properties_string_to_enum import ModelWithMergedPropertiesStringToEnum
 from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditionalProperties
 from .model_with_primitive_additional_properties_a_date_holder import ModelWithPrimitiveAdditionalPropertiesADateHolder
 from .model_with_property_ref import ModelWithPropertyRef
@@ -137,6 +139,8 @@ __all__ = (
     "ModelWithCircularRefInAdditionalPropertiesB",
     "ModelWithDateTimeProperty",
     "ModelWithDiscriminatedUnion",
+    "ModelWithMergedProperties",
+    "ModelWithMergedPropertiesStringToEnum",
     "ModelWithPrimitiveAdditionalProperties",
     "ModelWithPrimitiveAdditionalPropertiesADateHolder",
     "ModelWithPropertyRef",

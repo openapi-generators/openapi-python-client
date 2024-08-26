@@ -193,3 +193,29 @@ def test_merge_with_incompatible_enum(
         if not isinstance(prop, IntProperty):
             assert isinstance(merge_properties(prop, int_enum_prop), PropertyError)
             assert isinstance(merge_properties(int_enum_prop, prop), PropertyError)
+
+
+def test_merge_string_with_formatted_string(
+    date_property_factory,
+    date_time_property_factory,
+    file_property_factory,
+    string_property_factory,
+):
+    string_prop = string_property_factory(description="a plain string")
+    string_prop_with_invalid_default = string_property_factory(default="plain string value")
+    formatted_props = [
+        date_property_factory(description="a date"),
+        date_time_property_factory(description="a datetime"),
+        file_property_factory(description="a file"),
+    ]
+    for formatted_prop in formatted_props:
+        merged1 = merge_properties(string_prop, formatted_prop)
+        assert isinstance(merged1, formatted_prop.__class__)
+        assert merged1.description == formatted_prop.description
+
+        merged2 = merge_properties(formatted_prop, string_prop)
+        assert isinstance(merged2, formatted_prop.__class__)
+        assert merged2.description == string_prop.description
+
+        assert isinstance(merge_properties(string_prop_with_invalid_default, formatted_prop), PropertyError)
+        assert isinstance(merge_properties(formatted_prop, string_prop_with_invalid_default), PropertyError)

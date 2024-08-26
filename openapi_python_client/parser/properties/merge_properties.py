@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from openapi_python_client.parser.properties.date import DateProperty
+from openapi_python_client.parser.properties.datetime import DateTimeProperty
+from openapi_python_client.parser.properties.file import FileProperty
+
 __all__ = ["merge_properties"]
 
 from typing import TypeVar, cast
@@ -19,7 +23,10 @@ from .string import StringProperty
 PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
 
 
-def merge_properties(prop1: Property, prop2: Property) -> Property | PropertyError:
+STRING_WITH_FORMAT_TYPES = (DateProperty, DateTimeProperty, FileProperty)
+
+
+def merge_properties(prop1: Property, prop2: Property) -> Property | PropertyError:  # noqa: PLR0911
     """Attempt to create a new property that incorporates the behavior of both.
 
     This is used when merging schemas with allOf, when two schemas define a property with the same name.
@@ -52,6 +59,9 @@ def merge_properties(prop1: Property, prop2: Property) -> Property | PropertyErr
     if (merged := _merge_numeric(prop1, prop2)) is not None:
         return merged
 
+    if (merged := _merge_string_with_format(prop1, prop2)) is not None:
+        return merged
+
     return PropertyError(
         detail=f"{prop1.get_type_string(no_optional=True)} can't be merged with {prop2.get_type_string(no_optional=True)}"
     )
@@ -65,9 +75,6 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
         # It's always OK to redefine a property with everything exactly the same
         return prop1
 
-    if isinstance(prop1, StringProperty) and isinstance(prop2, StringProperty):
-        return _merge_string(prop1, prop2)
-
     if isinstance(prop1, ListProperty) and isinstance(prop2, ListProperty):
         # There's no clear way to represent the intersection of two different list types. Fail in this case.
         inner_property = merge_properties(prop1.inner_property, prop2.inner_property)  # type: ignore
@@ -80,8 +87,17 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
     return _merge_common_attributes(prop1, prop2)
 
 
-def _merge_string(prop1: StringProperty, prop2: StringProperty) -> StringProperty | PropertyError:
-    return _merge_common_attributes(prop1, prop2)
+def _merge_string_with_format(prop1: Property, prop2: Property) -> Property | None | PropertyError:
+    """Merge a string that has no format with a string that has a format"""
+    # Here we need to use the DateProperty/DateTimeProperty/FileProperty as the base so that we preserve
+    # its class, but keep the correct override order for merging the attributes.
+    if isinstance(prop1, StringProperty) and isinstance(prop2, STRING_WITH_FORMAT_TYPES):
+        # Use the more specific class as a base, but keep the correct override order
+        return _merge_common_attributes(prop2, prop1, prop2)
+    elif isinstance(prop2, StringProperty) and isinstance(prop1, STRING_WITH_FORMAT_TYPES):
+        return _merge_common_attributes(prop1, prop2)
+    else:
+        return None
 
 
 def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None | PropertyError:

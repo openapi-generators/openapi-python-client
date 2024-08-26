@@ -2152,6 +2152,56 @@
           "additionalProperties": {}
         }
       },
+      "ModelWithMergedProperties": {
+        "title": "ModelWithMergedProperties",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "simpleString": {
+                "type": "string",
+                "description": "base simpleString description"
+              },
+              "stringToEnum": {
+                "type": "string",
+                "default": "a"
+              },
+              "stringToDate": {
+                "type": "string"
+              },
+              "numberToInt": {
+                "type": "number"
+              },
+              "anyToString": {}
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "simpleString": {
+                "type": "string",
+                "description": "extended simpleString description",
+                "default": "new default"
+              },
+              "stringToEnum": {
+                "type": "string",
+                "enum": ["a", "b"]
+              },
+              "stringToDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "numberToInt": {
+                "type": "integer"
+              },
+              "anyToString": {
+                "type": "string",
+                "default": "x"
+              }
+            }
+          }
+        ]
+      },
       "ModelWithPrimitiveAdditionalProperties": {
         "title": "ModelWithPrimitiveAdditionalProperties",
         "type": "object",
