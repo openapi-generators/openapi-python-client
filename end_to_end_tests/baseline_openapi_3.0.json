@@ -2175,6 +2175,11 @@
           }
         ]
       },
+      "ModelWithNoProperties": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
       "AllOfSubModel": {
         "title": "AllOfSubModel",
         "type": "object",
