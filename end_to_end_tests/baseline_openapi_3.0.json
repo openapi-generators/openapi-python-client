@@ -1629,6 +1629,33 @@
           }
         }
       }
+    },
+    "/models/allof": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aliased": {
+                      "$ref": "#/components/schemas/Aliased"
+                    },
+                    "extended": {
+                      "$ref": "#/components/schemas/Extended"
+                    },
+                    "model": {
+                      "$ref": "#/components/schemas/AModel"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1645,6 +1672,23 @@
         },
         "required": [
           "an_required_field"
+        ]
+      },
+      "Aliased":{
+        "allOf": [
+          {"$ref":  "#/components/schemas/AModel"}
+        ]
+      },
+      "Extended": {
+        "allOf": [
+          {"$ref": "#/components/schemas/Aliased"},
+          {"type": "object",
+            "properties": {
+              "fromExtended": {
+                "type": "string"
+              }
+            }
+          }
         ]
       },
       "AModel": {

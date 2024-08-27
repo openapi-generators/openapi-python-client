@@ -1619,7 +1619,34 @@ info:
         }
       }
     }
-  }
+  },
+  "/models/allof": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aliased": {
+                    "$ref": "#/components/schemas/Aliased"
+                  },
+                  "extended": {
+                    "$ref": "#/components/schemas/Extended"
+                  },
+                  "model": {
+                    "$ref": "#/components/schemas/AModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
 }
 "components":
   "schemas": {
@@ -1635,6 +1662,23 @@ info:
       },
       "required": [
         "an_required_field"
+      ]
+    },
+    "Aliased": {
+      "allOf": [
+        { "$ref": "#/components/schemas/AModel" }
+      ]
+    },
+    "Extended": {
+      "allOf": [
+        { "$ref": "#/components/schemas/Aliased" },
+        { "type": "object",
+          "properties": {
+            "fromExtended": {
+              "type": "string"
+            }
+          }
+        }
       ]
     },
     "AModel": {
@@ -1667,11 +1711,7 @@ info:
           "default": "overridden_default"
         },
         "an_optional_allof_enum": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/AnAllOfEnum"
-            }
-          ]
+          "$ref": "#/components/schemas/AnAllOfEnum",
         },
         "nested_list_of_enums": {
           "title": "Nested List Of Enums",
@@ -1808,11 +1848,7 @@ info:
           ]
         },
         "model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "nullable_model": {
           "oneOf": [
@@ -1825,11 +1861,7 @@ info:
           ]
         },
         "not_required_model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "not_required_nullable_model": {
           "oneOf": [
