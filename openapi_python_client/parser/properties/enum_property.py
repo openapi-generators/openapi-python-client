@@ -198,7 +198,7 @@ class EnumProperty(PropertyProtocol):
                 continue
 
             if case_sensitive_enums:
-                sanitized_key = utils.case_insensitive_snake_case(value)
+                sanitized_key = utils.case_sensitive_snake_case(value)
             else:
                 sanitized_key = utils.snake_case(value.lower()).upper()
             if not value or not value[0].isalpha():
