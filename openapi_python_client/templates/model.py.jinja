@@ -138,6 +138,7 @@ return field_dict
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
+{% if (model.required_properties or model.optional_properties or model.additional_properties) %}
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -153,6 +154,7 @@ return field_dict
     {% endif %}
 
 {% endfor %}
+{% endif %}
         {{ module_name }} = cls(
 {% for property in model.required_properties + model.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
