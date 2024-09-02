@@ -16,14 +16,14 @@ class ModelWithMergedProperties:
     """
     Attributes:
         simple_string (Union[Unset, str]): extended simpleString description Default: 'new default'.
-        string_to_enum (Union[Unset, ModelWithMergedPropertiesStringToEnum]):
+        string_to_enum (Union[Unset, ModelWithMergedPropertiesStringToEnum]):  Default: 'a'.
         string_to_date (Union[Unset, datetime.date]):
         number_to_int (Union[Unset, int]):
         any_to_string (Union[Unset, str]):  Default: 'x'.
     """
 
     simple_string: Union[Unset, str] = "new default"
-    string_to_enum: Union[Unset, ModelWithMergedPropertiesStringToEnum] = UNSET
+    string_to_enum: Union[Unset, ModelWithMergedPropertiesStringToEnum] = "a"
     string_to_date: Union[Unset, datetime.date] = UNSET
     number_to_int: Union[Unset, int] = UNSET
     any_to_string: Union[Unset, str] = "x"

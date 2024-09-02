@@ -275,7 +275,9 @@ def _process_properties(  # noqa: PLR0912, PLR0911
         properties[merged_prop.name] = merged_prop
         return None
 
-    unprocessed_props = data.properties or {}
+    unprocessed_props: list[tuple[str, oai.Reference | oai.Schema]] = (
+        list(data.properties.items()) if data.properties else []
+    )
     for sub_prop in data.allOf:
         if isinstance(sub_prop, oai.Reference):
             ref_path = parse_reference_path(sub_prop.ref)
@@ -297,10 +299,10 @@ def _process_properties(  # noqa: PLR0912, PLR0911
                     return err
             schemas.add_dependencies(ref_path=ref_path, roots=roots)
         else:
-            unprocessed_props.update(sub_prop.properties or {})
+            unprocessed_props.extend(sub_prop.properties.items() if sub_prop.properties else [])
             required_set.update(sub_prop.required or [])
 
-    for key, value in unprocessed_props.items():
+    for key, value in unprocessed_props:
         prop_required = key in required_set
         prop_or_error: Property | (PropertyError | None)
         prop_or_error, schemas = property_from_data(
