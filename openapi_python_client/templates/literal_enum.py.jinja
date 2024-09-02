@@ -1,11 +1,11 @@
-from enum import Enum
+from typing import Literal
 
 {{ enum.class_info.name }} = Literal[
     {% for value in enum.values|list|sort(case_sensitive=true) %}
       {% if value is string %}
-        "{{ value }}"
+        "{{ value }}",
       {% else %}
-        {{ value }}
+        {{ value }},
       {% endif %}
     {% endfor %}
 ]

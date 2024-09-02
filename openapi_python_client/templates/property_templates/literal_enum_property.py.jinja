@@ -11,6 +11,7 @@
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
+{% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
 {{ destination }} = {{ source }}
 {%- else %}
