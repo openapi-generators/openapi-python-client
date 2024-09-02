@@ -70,6 +70,7 @@ jobs:
           name: coverage-${{ matrix.python }}
           path: .coverage.${{ matrix.python }}
           if-no-files-found: error
+          include-hidden-files: true
 
   coverage:
     name: Combine & check coverage
