@@ -11,6 +11,7 @@ When using `allOf` to extend a base object type, `openapi-python-client` is now 
 - Combining a generic numeric type with `int` (resulting in `int`).
 - Adding a `format` to a string.
 - Combining `any` with a specific type (resulting in that specific type).
+- Adding or overriding a `default`
 
 > [!NOTE]
 > `pattern` and `max_length` are no longer fields on `StringProperty`, which may impact custom templates.
