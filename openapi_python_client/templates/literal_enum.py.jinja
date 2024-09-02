@@ -1,0 +1,11 @@
+from enum import Enum
+
+{{ enum.class_info.name }} = Literal[
+    {% for value in enum.values|list|sort(case_sensitive=true) %}
+      {% if value is string %}
+        "{{ value }}"
+      {% else %}
+        {{ value }}
+      {% endif %}
+    {% endfor %}
+]

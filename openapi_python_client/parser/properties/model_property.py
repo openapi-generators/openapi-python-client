@@ -11,6 +11,7 @@ from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
 from .enum_property import EnumProperty
+from .literal_enum_property import LiteralEnumProperty
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
@@ -220,11 +221,11 @@ class ModelProperty(PropertyProtocol):
 from .property import Property  # noqa: E402
 
 
-def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
+def _values_are_subset(first: Union[EnumProperty, LiteralEnumProperty], second: Union[EnumProperty, LiteralEnumProperty]) -> bool:
     return set(first.values.items()) <= set(second.values.items())
 
 
-def _types_are_subset(first: EnumProperty, second: Property) -> bool:
+def _types_are_subset(first: Union[EnumProperty, LiteralEnumProperty], second: Property) -> bool:
     from . import IntProperty, StringProperty
 
     if first.value_type is int and isinstance(second, IntProperty):
@@ -234,11 +235,11 @@ def _types_are_subset(first: EnumProperty, second: Property) -> bool:
     return False
 
 
-def _enum_subset(first: Property, second: Property) -> EnumProperty | None:
+def _enum_subset(first: Property, second: Property) -> EnumProperty | LiteralEnumProperty | None:
     """Return the EnumProperty that is the subset of the other, if possible."""
 
-    if isinstance(first, EnumProperty):
-        if isinstance(second, EnumProperty):
+    if isinstance(first, (EnumProperty, LiteralEnumProperty)):
+        if isinstance(second, (EnumProperty, LiteralEnumProperty)):
             if _values_are_subset(first, second):
                 return first
             if _values_are_subset(second, first):
@@ -246,7 +247,7 @@ def _enum_subset(first: Property, second: Property) -> EnumProperty | None:
             return None
         return first if _types_are_subset(first, second) else None
 
-    if isinstance(second, EnumProperty) and _types_are_subset(second, first):
+    if isinstance(second, (EnumProperty, LiteralEnumProperty)) and _types_are_subset(second, first):
         return second
     return None
 

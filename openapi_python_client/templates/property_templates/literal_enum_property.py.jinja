@@ -1,0 +1,37 @@
+{% macro construct_function(property, source) %}
+{{ source }}
+{% endmacro %}
+
+{% from "property_templates/property_macros.py.jinja" import construct_template %}
+
+{% macro construct(property, source) %}
+{{ construct_template(construct_function, property, source) }}
+{% endmacro %}
+
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
+
+{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
+{% if property.required %}
+{{ destination }} = {{ source }}
+{%- else %}
+{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ source }}
+{% endif %}
+{% endmacro %}
+
+{% macro transform_multipart(property, source, destination) %}
+{% set transformed = "(None, str(" + source + ").encode(), \"text/plain\")" %}
+{% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
+{% if property.required %}
+{{ destination }} = {{ transformed }}
+{%- else %}
+{{ destination }}: {{ type_string }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ transformed }}
+{% endif %}
+{% endmacro %}
+
+{% macro transform_header(source) %}
+str({{ source }})
+{% endmacro %}
