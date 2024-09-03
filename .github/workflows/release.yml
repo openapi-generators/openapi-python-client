@@ -19,3 +19,5 @@ jobs:
         run: hatchling build
       - name: Push to PyPI
         uses: pypa/gh-action-pypi-publish@v1.10.1
+        with:
+            attestations: true
