@@ -642,6 +642,33 @@ class TestProcessProperties:
         result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
 
+    def test_merge_inline_objects(self, model_property_factory, enum_property_factory, config):
+        data = oai.Schema.model_construct(
+            allOf=[
+                oai.Schema.model_construct(
+                    type="object",
+                    properties={
+                        "prop1": oai.Schema.model_construct(type="string", default="a"),
+                    },
+                ),
+                oai.Schema.model_construct(
+                    type="object",
+                    properties={
+                        "prop1": oai.Schema.model_construct(type="string", description="desc"),
+                    },
+                ),
+            ]
+        )
+        schemas = Schemas()
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert not isinstance(result, PropertyError)
+        assert len(result.optional_props) == 1
+        prop1 = result.optional_props[0]
+        assert isinstance(prop1, StringProperty)
+        assert prop1.description == "desc"
+        assert prop1.default == StringProperty.convert_value("a")
+
 
 class TestProcessModel:
     def test_process_model_error(self, mocker, model_property_factory, config):

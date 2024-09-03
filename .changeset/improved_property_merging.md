@@ -15,3 +15,6 @@ When using `allOf` to extend a base object type, `openapi-python-client` is now 
 
 > [!NOTE]
 > `pattern` and `max_length` are no longer fields on `StringProperty`, which may impact custom templates.
+
+This also fixes a bug where properties of inline objects (as opposed to references) were not using the
+merge logic, but were simply overwriting previous definitions of the same property.

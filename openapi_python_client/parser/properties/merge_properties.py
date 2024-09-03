@@ -148,10 +148,7 @@ def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) ->
     """
     current = base
     for override in extend_with:
-        if isinstance(override, EnumProperty):
-            override_default = current.convert_value(override.default_to_raw())
-        else:
-            override_default = current.convert_value(override.default)
+        override_default = current.convert_value(override.default_to_raw())
         if isinstance(override_default, PropertyError):
             return override_default
         current = evolve(

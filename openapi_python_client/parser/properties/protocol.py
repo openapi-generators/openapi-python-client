@@ -177,3 +177,17 @@ class PropertyProtocol(Protocol):
             ListProperty.__name__,
             UnionProperty.__name__,
         }
+
+    def default_to_raw(self) -> Any | None:
+        d = self.default
+        if not isinstance(d, Value):
+            return d
+        if d.startswith('"') or d.startswith("'"):
+            return d[1:-1]
+        if d == "true":
+            return True
+        if d == "false":
+            return False
+        if "." in d:
+            return float(d)
+        return int(d)
