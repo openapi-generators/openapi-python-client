@@ -6,6 +6,7 @@ from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.merge_properties import merge_properties
+from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.parser.properties.string import StringProperty
 
@@ -68,14 +69,14 @@ def test_incompatible_types(
 
 def test_merge_int_with_float(int_property_factory, float_property_factory):
     int_prop = int_property_factory(description="desc1")
-    float_prop = float_property_factory(default="2", description="desc2")
+    float_prop = float_property_factory(default=2, description="desc2")
 
     assert merge_properties(int_prop, float_prop) == (
-        evolve(int_prop, default=float_prop.default, description=float_prop.description)
+        evolve(int_prop, default=Value("2"), description=float_prop.description)
     )
-    assert merge_properties(float_prop, int_prop) == (evolve(int_prop, default=float_prop.default))
+    assert merge_properties(float_prop, int_prop) == evolve(int_prop, default=Value("2"))
 
-    float_prop_with_non_int_default = evolve(float_prop, default="2.5")
+    float_prop_with_non_int_default = evolve(float_prop, default=Value("2.5"))
     error = merge_properties(int_prop, float_prop_with_non_int_default)
     assert isinstance(error, PropertyError), "Expected invalid default to error"
     assert error.detail == "Invalid int value: 2.5"

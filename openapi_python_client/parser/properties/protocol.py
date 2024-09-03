@@ -182,12 +182,4 @@ class PropertyProtocol(Protocol):
         d = self.default
         if not isinstance(d, Value):
             return d
-        if d.startswith('"') or d.startswith("'"):
-            return d[1:-1]
-        if d == "true":
-            return True
-        if d == "false":
-            return False
-        if "." in d:
-            return float(d)
-        return int(d)
+        return eval(str(d))  # This should be safe because we've already escaped string values

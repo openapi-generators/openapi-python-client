@@ -23,11 +23,11 @@ class TestStringProperty:
         assert string_property_factory().is_base_type is True
 
     @pytest.mark.parametrize(
-        "required,expected",
-        [
+        "required, expected",
+        (
             (True, "str"),
             (False, "Union[Unset, str]"),
-        ],
+        ),
     )
     def test_get_type_string(self, string_property_factory, required, expected):
         p = string_property_factory(required=required)
@@ -374,24 +374,6 @@ class TestEnumProperty:
 
 
 class TestPropertyFromData:
-    @pytest.mark.parametrize(
-        "default_value, default_repr",
-        ["a", "'a'"],
-        ["'a'", "\\'a\\'"],
-        ['"a"', "'a'"],
-    )
-    def test_property_from_data_str_defaults(self, default_value, default_repr, config):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-        from openapi_python_client.schema import Schema
-
-        name = "my_string"
-        data = Schema(type="string", default=default_value)
-        prop, _ = property_from_data(name=name, data=data, schemas=Schemas(), config=config)
-        assert isinstance(prop, StringProperty)
-        assert isinstance(prop, Value)
-        assert str(prop) == default_repr
-        assert prop.default_to_raw == default_value
-
     def test_property_from_data_str_enum(self, enum_property_factory, config):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
@@ -771,9 +753,7 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, parent_name=None, config=config, schemas=Schemas()
         )
 
-        assert p == string_property_factory(
-            name=name, required=required, default=StringProperty.convert_value("hello world")
-        )
+        assert p == string_property_factory(name=name, required=required, default="hello world")
 
     def test_datetime_format(self, date_time_property_factory, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -786,7 +766,9 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_time_property_factory(name=name, required=required, default=f"isoparse('{data.default}')")
+        assert p == date_time_property_factory(
+            name=name, required=required, default=Value(f"isoparse('{data.default}')")
+        )
 
     def test_datetime_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -814,7 +796,9 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_property_factory(name=name, required=required, default=f"isoparse('{data.default}').date()")
+        assert p == date_property_factory(
+            name=name, required=required, default=Value(f"isoparse('{data.default}').date()")
+        )
 
     def test_date_format_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data

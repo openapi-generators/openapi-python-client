@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path
 from typing import Any, Callable, Dict, Union
 
@@ -21,6 +22,7 @@ from openapi_python_client.parser.properties import (
     UnionProperty,
 )
 from openapi_python_client.parser.properties.float import FloatProperty
+from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.schema.openapi_schema_pydantic import Parameter
 from openapi_python_client.schema.parameter_location import ParameterLocation
 
@@ -76,7 +78,19 @@ def _simple_factory(cls: type, default_kwargs: Union[dict, Callable[[dict], dict
             if callable(defaults):
                 defaults = defaults(kwargs)
             kwargs = {**defaults, **kwargs}
-        return cls(**kwargs)
+        # It's very easy to accidentally set "default" to a raw value rather than a Value in our test
+        # code, which is never valid but mypy can't catch it for us. So we'll transform it here.
+        default_value = kwargs.get("default")
+        if default_value is not None and not isinstance(default_value, Value):
+            # Some of our property classes have convert_value as a class method; others have it as
+            # an instance method (because the logic requires knowing the state of the property). We
+            # can only call it here if it's a class method.
+            if inspect.ismethod(cls.convert_value) and cls.convert_value.__self__ is cls:
+                kwargs["default"] = cls.convert_value(default_value)
+            else:
+                kwargs["default"] = Value(str(default_value))
+        rv = cls(**kwargs)
+        return rv
 
     return _factory
 
