@@ -221,13 +221,15 @@ class ModelProperty(PropertyProtocol):
 from .property import Property  # noqa: E402
 
 
-def _values_are_subset(
-    first: Union[EnumProperty, LiteralEnumProperty], second: Union[EnumProperty, LiteralEnumProperty]
-) -> bool:
-    return set(first.values.items()) <= set(second.values.items())
+def _values_are_subset(first: EnumProperty | LiteralEnumProperty, second: EnumProperty | LiteralEnumProperty) -> bool:
+    if isinstance(first, LiteralEnumProperty) and isinstance(second, LiteralEnumProperty):
+        return first.values == second.values
+    elif isinstance(first, EnumProperty) and isinstance(second, EnumProperty):
+        return set(first.values.items()) <= set(second.values.items())
+    return False
 
 
-def _types_are_subset(first: Union[EnumProperty, LiteralEnumProperty], second: Property) -> bool:
+def _types_are_subset(first: EnumProperty | LiteralEnumProperty, second: Property) -> bool:
     from . import IntProperty, StringProperty
 
     if first.value_type is int and isinstance(second, IntProperty):

@@ -1,11 +1,5 @@
 from typing import Literal
 
-{{ enum.class_info.name }} = Literal[
-    {% for value in enum.values|list|sort(case_sensitive=true) %}
-      {% if value is string %}
-        "{{ value }}",
-      {% else %}
-        {{ value }},
-      {% endif %}
-    {% endfor %}
-]
+{{ enum.class_info.name }} = Literal{{ "%r" | format(enum.values|list|sort) }}
+
+{{ enum.get_values_constant_name() }} = { {% for v in enum.values|list|sort %}{{"%r"|format(v)}}, {% endfor %} }

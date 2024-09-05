@@ -1,5 +1,5 @@
 {% macro construct_function(property, source) %}
-{{ source }}
+cast({{ property.class_info.name }}, {{ source }})
 {% endmacro %}
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
@@ -8,12 +8,12 @@
 {{ construct_template(construct_function, property, source) }}
 {% endmacro %}
 
-{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
+{% macro check_type_for_construct(property, source) %}(isinstance({{ source }}, {{ property.value_type.__name__ }}) and {{ source }} in {{property.get_values_constant_name()}}){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
-{{ destination }} = {{ source }}
+{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = {{ source }}
 {%- else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):

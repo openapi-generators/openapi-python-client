@@ -27,11 +27,11 @@ from .const import ConstProperty
 from .date import DateProperty
 from .datetime import DateTimeProperty
 from .enum_property import EnumProperty
-from .literal_enum_property import LiteralEnumProperty
 from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
 from .list_property import ListProperty
+from .literal_enum_property import LiteralEnumProperty
 from .model_property import ModelProperty, process_model
 from .none import NoneProperty
 from .property import Property

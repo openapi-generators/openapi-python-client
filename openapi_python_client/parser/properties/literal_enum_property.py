@@ -120,7 +120,7 @@ class LiteralEnumProperty(PropertyProtocol):
         if parent_name:
             class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
-        values = set(value_list)
+        values: set[str | int] = set(value_list)
 
         if class_info.name in schemas.classes_by_name:
             existing = schemas.classes_by_name[class_info.name]
@@ -168,6 +168,9 @@ class LiteralEnumProperty(PropertyProtocol):
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
         return self.value_type.__name__
 
+    def get_instance_type_string(self) -> str:
+        return self.value_type.__name__
+
     def get_imports(self, *, prefix: str) -> set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere
@@ -177,5 +180,10 @@ class LiteralEnumProperty(PropertyProtocol):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
+        imports.add("from typing import cast")
         imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}")
+        imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.get_values_constant_name()}")
         return imports
+
+    def get_values_constant_name(self) -> str:
+        return f"{utils.snake_case(self.class_info.name).upper()}_VALUES"
