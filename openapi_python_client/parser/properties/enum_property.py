@@ -121,7 +121,7 @@ class EnumProperty(PropertyProtocol):
         if parent_name:
             class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
-        values = EnumProperty.values_from_list(value_list)
+        values = EnumProperty.values_from_list(value_list, class_info)
 
         if class_info.name in schemas.classes_by_name:
             existing = schemas.classes_by_name[class_info.name]
@@ -183,7 +183,7 @@ class EnumProperty(PropertyProtocol):
         return imports
 
     @staticmethod
-    def values_from_list(values: list[str] | list[int]) -> dict[str, ValueType]:
+    def values_from_list(values: list[str] | list[int], class_info: Class) -> dict[str, ValueType]:
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: dict[str, ValueType] = {}
 
@@ -200,7 +200,8 @@ class EnumProperty(PropertyProtocol):
             else:
                 key = f"VALUE_{i}"
             if key in output:
-                raise ValueError(f"Duplicate key {key} in Enum")
+                raise ValueError(f"Duplicate key {key} in enum {class_info.module_name}.{class_info.name}; "
+                                 f"consider setting literal_enums in your config")
             sanitized_key = utils.snake_case(key).upper()
             output[sanitized_key] = utils.remove_string_escapes(value)
         return output

@@ -15,6 +15,7 @@ from openapi_python_client.parser.properties import (
     FileProperty,
     IntProperty,
     ListProperty,
+    LiteralEnumProperty,
     ModelProperty,
     NoneProperty,
     StringProperty,
@@ -87,6 +88,29 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
         return EnumProperty(**kwargs)
 
     return _factory
+
+
+@pytest.fixture
+def literal_enum_property_factory() -> Callable[..., EnumProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures LiteralEnumProperties with defaults.
+
+    You can pass the same params into this as the LiteralEnumProerty constructor to override defaults.
+    """
+    from openapi_python_client.parser.properties import Class
+
+    def _factory(**kwargs):
+        kwargs = _common_kwargs(kwargs)
+        kwargs = {
+            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
+            "values": {},
+            "value_type": str,
+            **kwargs,
+        }
+        return LiteralEnumProperty(**kwargs)
+
+    return _factory
+
 
 
 @pytest.fixture
