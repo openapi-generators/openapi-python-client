@@ -221,7 +221,9 @@ class ModelProperty(PropertyProtocol):
 from .property import Property  # noqa: E402
 
 
-def _values_are_subset(first: Union[EnumProperty, LiteralEnumProperty], second: Union[EnumProperty, LiteralEnumProperty]) -> bool:
+def _values_are_subset(
+    first: Union[EnumProperty, LiteralEnumProperty], second: Union[EnumProperty, LiteralEnumProperty]
+) -> bool:
     return set(first.values.items()) <= set(second.values.items())
 
 

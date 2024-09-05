@@ -22,6 +22,7 @@ ValueType = Union[str, int]
 @define
 class LiteralEnumProperty(PropertyProtocol):
     """A property that should use a literal enum"""
+
     name: str
     required: bool
     default: Value | None

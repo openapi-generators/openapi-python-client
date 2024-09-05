@@ -518,7 +518,9 @@ class GeneratorData:
             data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
         )
 
-        enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, (EnumProperty, LiteralEnumProperty)))
+        enums = (
+            prop for prop in schemas.classes_by_name.values() if isinstance(prop, (EnumProperty, LiteralEnumProperty))
+        )
         models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
 
         return GeneratorData(
