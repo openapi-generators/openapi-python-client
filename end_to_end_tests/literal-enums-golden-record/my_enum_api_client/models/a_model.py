@@ -1,10 +1,10 @@
-from typing import Any, Dict, List, Type, TypeVar, Union, cast
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 from attrs import define as _attrs_define
 
-from ..models.an_all_of_enum import AnAllOfEnum
-from ..models.an_enum import AnEnum
-from ..models.different_enum import DifferentEnum
+from ..models.an_all_of_enum import AnAllOfEnum, check_an_all_of_enum
+from ..models.an_enum import AnEnum, check_an_enum
+from ..models.different_enum import DifferentEnum, check_different_enum
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="AModel")
@@ -69,9 +69,9 @@ class AModel:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        an_enum_value = cast(AnEnum, d.pop("an_enum_value"))
+        an_enum_value = check_an_enum(d.pop("an_enum_value"))
 
-        an_allof_enum_with_overridden_default = cast(AnAllOfEnum, d.pop("an_allof_enum_with_overridden_default"))
+        an_allof_enum_with_overridden_default = check_an_all_of_enum(d.pop("an_allof_enum_with_overridden_default"))
 
         any_value = d.pop("any_value", UNSET)
 
@@ -80,7 +80,7 @@ class AModel:
         if isinstance(_an_optional_allof_enum, Unset):
             an_optional_allof_enum = UNSET
         else:
-            an_optional_allof_enum = cast(AnAllOfEnum, _an_optional_allof_enum)
+            an_optional_allof_enum = check_an_all_of_enum(_an_optional_allof_enum)
 
         nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
@@ -88,7 +88,7 @@ class AModel:
             nested_list_of_enums_item = []
             _nested_list_of_enums_item = nested_list_of_enums_item_data
             for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
-                nested_list_of_enums_item_item = cast(DifferentEnum, nested_list_of_enums_item_item_data)
+                nested_list_of_enums_item_item = check_different_enum(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 

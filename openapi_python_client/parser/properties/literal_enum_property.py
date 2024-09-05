@@ -182,8 +182,8 @@ class LiteralEnumProperty(PropertyProtocol):
         imports = super().get_imports(prefix=prefix)
         imports.add("from typing import cast")
         imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}")
-        imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.get_values_constant_name()}")
+        imports.add(f"from {prefix}models.{self.class_info.module_name} import check_{self.get_class_name_snake_case()}")
         return imports
 
-    def get_values_constant_name(self) -> str:
-        return f"{utils.snake_case(self.class_info.name).upper()}_VALUES"
+    def get_class_name_snake_case(self) -> str:
+        return utils.snake_case(self.class_info.name)

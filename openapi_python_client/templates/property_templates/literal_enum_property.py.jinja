@@ -1,5 +1,5 @@
 {% macro construct_function(property, source) %}
-cast({{ property.class_info.name }}, {{ source }})
+check_{{ property.get_class_name_snake_case() }}({{ source }})
 {% endmacro %}
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
@@ -8,7 +8,7 @@ cast({{ property.class_info.name }}, {{ source }})
 {{ construct_template(construct_function, property, source) }}
 {% endmacro %}
 
-{% macro check_type_for_construct(property, source) %}(isinstance({{ source }}, {{ property.value_type.__name__ }}) and {{ source }} in {{property.get_values_constant_name()}}){% endmacro %}
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.get_instance_type_string() }}){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, multipart=False) %}
 {% set type_string = property.get_type_string(json=True) %}

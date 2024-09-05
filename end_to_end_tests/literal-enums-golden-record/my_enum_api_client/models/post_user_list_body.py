@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Tuple, Type, TypeVar, Union, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.an_all_of_enum import AnAllOfEnum
-from ..models.an_enum import AnEnum
-from ..models.an_enum_with_null import AN_ENUM_WITH_NULL_VALUES, AnEnumWithNull
-from ..models.different_enum import DifferentEnum
+from ..models.an_all_of_enum import AnAllOfEnum, check_an_all_of_enum
+from ..models.an_enum import AnEnum, check_an_enum
+from ..models.an_enum_with_null import AnEnumWithNull, check_an_enum_with_null
+from ..models.different_enum import DifferentEnum, check_different_enum
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PostUserListBody")
@@ -173,7 +173,7 @@ class PostUserListBody:
         an_enum_value = []
         _an_enum_value = d.pop("an_enum_value", UNSET)
         for an_enum_value_item_data in _an_enum_value or []:
-            an_enum_value_item = cast(AnEnum, an_enum_value_item_data)
+            an_enum_value_item = check_an_enum(an_enum_value_item_data)
 
             an_enum_value.append(an_enum_value_item)
 
@@ -185,9 +185,9 @@ class PostUserListBody:
                 if data is None:
                     return data
                 try:
-                    if not (isinstance(data, str) and data in AN_ENUM_WITH_NULL_VALUES):
+                    if not isinstance(data, str):
                         raise TypeError()
-                    componentsschemas_an_enum_with_null_type_1 = cast(AnEnumWithNull, data)
+                    componentsschemas_an_enum_with_null_type_1 = check_an_enum_with_null(data)
 
                     return componentsschemas_an_enum_with_null_type_1
                 except:  # noqa: E722
@@ -205,14 +205,14 @@ class PostUserListBody:
         if isinstance(_an_allof_enum_with_overridden_default, Unset):
             an_allof_enum_with_overridden_default = UNSET
         else:
-            an_allof_enum_with_overridden_default = cast(AnAllOfEnum, _an_allof_enum_with_overridden_default)
+            an_allof_enum_with_overridden_default = check_an_all_of_enum(_an_allof_enum_with_overridden_default)
 
         _an_optional_allof_enum = d.pop("an_optional_allof_enum", UNSET)
         an_optional_allof_enum: Union[Unset, AnAllOfEnum]
         if isinstance(_an_optional_allof_enum, Unset):
             an_optional_allof_enum = UNSET
         else:
-            an_optional_allof_enum = cast(AnAllOfEnum, _an_optional_allof_enum)
+            an_optional_allof_enum = check_an_all_of_enum(_an_optional_allof_enum)
 
         nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
@@ -220,7 +220,7 @@ class PostUserListBody:
             nested_list_of_enums_item = []
             _nested_list_of_enums_item = nested_list_of_enums_item_data
             for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
-                nested_list_of_enums_item_item = cast(DifferentEnum, nested_list_of_enums_item_item_data)
+                nested_list_of_enums_item_item = check_different_enum(nested_list_of_enums_item_item_data)
 
                 nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
