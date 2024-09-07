@@ -10,7 +10,6 @@ from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
-from .enum_property import EnumProperty
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
@@ -220,59 +219,6 @@ class ModelProperty(PropertyProtocol):
 from .property import Property  # noqa: E402
 
 
-def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
-    return set(first.values.items()) <= set(second.values.items())
-
-
-def _types_are_subset(first: EnumProperty, second: Property) -> bool:
-    from . import IntProperty, StringProperty
-
-    if first.value_type is int and isinstance(second, IntProperty):
-        return True
-    if first.value_type is str and isinstance(second, StringProperty):
-        return True
-    return False
-
-
-def _enum_subset(first: Property, second: Property) -> EnumProperty | None:
-    """Return the EnumProperty that is the subset of the other, if possible."""
-
-    if isinstance(first, EnumProperty):
-        if isinstance(second, EnumProperty):
-            if _values_are_subset(first, second):
-                return first
-            if _values_are_subset(second, first):
-                return second
-            return None
-        return first if _types_are_subset(first, second) else None
-
-    if isinstance(second, EnumProperty) and _types_are_subset(second, first):
-        return second
-    return None
-
-
-def _merge_properties(first: Property, second: Property) -> Property | PropertyError:
-    required = first.required or second.required
-
-    err = None
-
-    if first.__class__ == second.__class__:
-        first = evolve(first, required=required)
-        second = evolve(second, required=required)
-        if first == second:
-            return first
-        err = PropertyError(header="Cannot merge properties", detail="Properties has conflicting values")
-
-    enum_subset = _enum_subset(first, second)
-    if enum_subset is not None:
-        return evolve(enum_subset, required=required)
-
-    return err or PropertyError(
-        header="Cannot merge properties",
-        detail=f"{first.__class__}, {second.__class__}Properties have incompatible types",
-    )
-
-
 def _resolve_naming_conflict(first: Property, second: Property, config: Config) -> PropertyError | None:
     first.set_python_name(first.name, config=config, skip_snake_case=True)
     second.set_python_name(second.name, config=config, skip_snake_case=True)
@@ -301,6 +247,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     roots: set[ReferencePath | utils.ClassName],
 ) -> _PropertyData | PropertyError:
     from . import property_from_data
+    from .merge_properties import merge_properties
 
     properties: dict[str, Property] = {}
     relative_imports: set[str] = set()
@@ -311,26 +258,26 @@ def _process_properties(  # noqa: PLR0912, PLR0911
         nonlocal properties
 
         name_conflict = properties.get(new_prop.name)
-        merged_prop_or_error = _merge_properties(name_conflict, new_prop) if name_conflict else new_prop
-        if isinstance(merged_prop_or_error, PropertyError):
-            merged_prop_or_error.header = (
-                f"Found conflicting properties named {new_prop.name} when creating {class_name}"
-            )
-            return merged_prop_or_error
+        merged_prop = merge_properties(name_conflict, new_prop) if name_conflict else new_prop
+        if isinstance(merged_prop, PropertyError):
+            merged_prop.header = f"Found conflicting properties named {new_prop.name} when creating {class_name}"
+            return merged_prop
 
         for other_prop in properties.values():
-            if other_prop.name == merged_prop_or_error.name:
+            if other_prop.name == merged_prop.name:
                 continue  # Same property, probably just got merged
-            if other_prop.python_name != merged_prop_or_error.python_name:
+            if other_prop.python_name != merged_prop.python_name:
                 continue
-            naming_error = _resolve_naming_conflict(merged_prop_or_error, other_prop, config)
+            naming_error = _resolve_naming_conflict(merged_prop, other_prop, config)
             if naming_error is not None:
                 return naming_error
 
-        properties[merged_prop_or_error.name] = merged_prop_or_error
+        properties[merged_prop.name] = merged_prop
         return None
 
-    unprocessed_props = data.properties or {}
+    unprocessed_props: list[tuple[str, oai.Reference | oai.Schema]] = (
+        list(data.properties.items()) if data.properties else []
+    )
     for sub_prop in data.allOf:
         if isinstance(sub_prop, oai.Reference):
             ref_path = parse_reference_path(sub_prop.ref)
@@ -352,10 +299,10 @@ def _process_properties(  # noqa: PLR0912, PLR0911
                     return err
             schemas.add_dependencies(ref_path=ref_path, roots=roots)
         else:
-            unprocessed_props.update(sub_prop.properties or {})
+            unprocessed_props.extend(sub_prop.properties.items() if sub_prop.properties else [])
             required_set.update(sub_prop.required or [])
 
-    for key, value in unprocessed_props.items():
+    for key, value in unprocessed_props:
         prop_required = key in required_set
         prop_or_error: Property | (PropertyError | None)
         prop_or_error, schemas = property_from_data(

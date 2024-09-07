@@ -155,7 +155,7 @@ class Endpoint:
                     ParseError(
                         detail=(
                             f"Invalid response status code {code} (not a valid HTTP "
-                            f"status code), response will be ommitted from generated "
+                            f"status code), response will be omitted from generated "
                             f"client"
                         )
                     )
@@ -175,7 +175,7 @@ class Endpoint:
                     ParseError(
                         detail=(
                             f"Cannot parse response for status code {status_code}{detail_suffix}, "
-                            f"response will be ommitted from generated client"
+                            f"response will be omitted from generated client"
                         ),
                         data=response.data,
                     )

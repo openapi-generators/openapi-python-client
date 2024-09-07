@@ -90,7 +90,7 @@ class TestEndpoint:
         assert response.errors == [
             ParseError(
                 detail=f"Invalid response status code {response_status_code} (not a valid HTTP status code), "
-                "response will be ommitted from generated client"
+                "response will be omitted from generated client"
             )
         ]
         response_from_data.assert_not_called()
@@ -121,12 +121,12 @@ class TestEndpoint:
         assert response.errors == [
             ParseError(
                 detail="Cannot parse response for status code 200 (some problem), "
-                "response will be ommitted from generated client",
+                "response will be omitted from generated client",
                 data=parse_error.data,
             ),
             ParseError(
                 detail="Cannot parse response for status code 404 (some problem), "
-                "response will be ommitted from generated client",
+                "response will be omitted from generated client",
                 data=parse_error.data,
             ),
         ]

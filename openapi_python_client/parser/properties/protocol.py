@@ -177,3 +177,9 @@ class PropertyProtocol(Protocol):
             ListProperty.__name__,
             UnionProperty.__name__,
         }
+
+    def default_to_raw(self) -> Any | None:
+        d = self.default
+        if not isinstance(d, Value):
+            return d
+        return eval(str(d))  # This should be safe because we've already escaped string values

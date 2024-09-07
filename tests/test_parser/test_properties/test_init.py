@@ -11,7 +11,7 @@ from openapi_python_client.parser.properties import (
     StringProperty,
     UnionProperty,
 )
-from openapi_python_client.parser.properties.protocol import ModelProperty
+from openapi_python_client.parser.properties.protocol import ModelProperty, Value
 from openapi_python_client.schema import DataType
 from openapi_python_client.utils import ClassName, PythonIdentifier
 
@@ -747,15 +747,13 @@ class TestStringBasedProperty:
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.model_construct(type="string", default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", default="hello world")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=config, schemas=Schemas()
         )
 
-        assert p == string_property_factory(
-            name=name, required=required, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
-        )
+        assert p == string_property_factory(name=name, required=required, default="hello world")
 
     def test_datetime_format(self, date_time_property_factory, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -768,7 +766,9 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_time_property_factory(name=name, required=required, default=f"isoparse('{data.default}')")
+        assert p == date_time_property_factory(
+            name=name, required=required, default=Value(f"isoparse('{data.default}')")
+        )
 
     def test_datetime_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -796,7 +796,9 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_property_factory(name=name, required=required, default=f"isoparse('{data.default}').date()")
+        assert p == date_property_factory(
+            name=name, required=required, default=Value(f"isoparse('{data.default}').date()")
+        )
 
     def test_date_format_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data

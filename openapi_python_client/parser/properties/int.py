@@ -60,10 +60,13 @@ class IntProperty(PropertyProtocol):
             return value
         if isinstance(value, str):
             try:
-                int(value)
+                value = float(value)
             except ValueError:
                 return PropertyError(f"Invalid int value: {value}")
-            return Value(value)
+        if isinstance(value, float):
+            as_int = int(value)
+            if value == as_int:
+                value = as_int
         if isinstance(value, int) and not isinstance(value, bool):
             return Value(str(value))
         return PropertyError(f"Invalid int value: {value}")

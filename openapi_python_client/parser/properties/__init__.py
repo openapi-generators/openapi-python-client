@@ -83,7 +83,6 @@ def _string_based_property(
         name=name,
         default=data.default,
         required=required,
-        pattern=data.pattern,
         python_name=python_name,
         description=data.description,
         example=data.example,

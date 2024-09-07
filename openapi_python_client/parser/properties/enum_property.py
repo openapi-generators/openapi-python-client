@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["EnumProperty"]
+__all__ = ["EnumProperty", "ValueType"]
 
 from typing import Any, ClassVar, List, Union, cast
 
@@ -163,6 +163,12 @@ class EnumProperty(PropertyProtocol):
             except KeyError:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
+
+    def default_to_raw(self) -> ValueType | None:
+        if self.default is None:
+            return None
+        key = self.default.split(".")[1]
+        return self.values[key]
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
         return self.class_info.name
