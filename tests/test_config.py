@@ -10,7 +10,7 @@ from openapi_python_client.config import ConfigFile
 yaml = YAML(typ=["safe", "string"])
 
 
-def json_with_tabs(d):
+def json_with_tabs(d: dict) -> str:
     return json.dumps(d, indent=4).replace("    ", "\t")
 
 
@@ -24,7 +24,7 @@ def json_with_tabs(d):
     ],
 )
 @pytest.mark.parametrize("relative", (True, False), ids=("relative", "absolute"))
-def test_load_from_path(tmp_path: Path, filename, dump, relative):
+def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
     yml_file = tmp_path.joinpath(filename)
     if relative:
         if not os.getenv("TEST_RELATIVE"):

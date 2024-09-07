@@ -65,4 +65,4 @@ class StringProperty(PropertyProtocol):
             return value
         if not isinstance(value, str):
             value = str(value)
-        return Value(repr(utils.remove_string_escapes(value)))
+        return Value(python_code=repr(utils.remove_string_escapes(value)), raw_value=value)

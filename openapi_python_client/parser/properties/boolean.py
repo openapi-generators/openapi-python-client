@@ -59,9 +59,9 @@ class BooleanProperty(PropertyProtocol):
             return value
         if isinstance(value, str):
             if value.lower() == "true":
-                return Value("True")
+                return Value(python_code="True", raw_value=value)
             elif value.lower() == "false":
-                return Value("False")
+                return Value(python_code="False", raw_value=value)
         if isinstance(value, bool):
-            return Value(str(value))
+            return Value(python_code=str(value), raw_value=value)
         return PropertyError(f"Invalid boolean value: {value}")

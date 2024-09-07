@@ -148,7 +148,10 @@ def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) ->
     """
     current = base
     for override in extend_with:
-        override_default = current.convert_value(override.default_to_raw())
+        if override.default is not None:
+            override_default = current.convert_value(override.default.raw_value)
+        else:
+            override_default = None
         if isinstance(override_default, PropertyError):
             return override_default
         current = evolve(

@@ -33,9 +33,13 @@ class AnyProperty(PropertyProtocol):
 
     @classmethod
     def convert_value(cls, value: Any) -> Value | None:
+        from .string import StringProperty
+
         if value is None or isinstance(value, Value):
             return value
-        return Value(str(value))
+        if isinstance(value, str):
+            return StringProperty.convert_value(value)
+        return Value(python_code=str(value), raw_value=value)
 
     name: str
     required: bool

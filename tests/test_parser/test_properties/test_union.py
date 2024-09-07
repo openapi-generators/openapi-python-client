@@ -20,7 +20,7 @@ def test_property_from_data_union(union_property_factory, date_time_property_fac
         name=name,
         required=required,
         inner_properties=[
-            string_property_factory(name=f"{name}_type_0", default=Value("'a'")),
+            string_property_factory(name=f"{name}_type_0", default=Value("'a'", "a")),
             date_time_property_factory(name=f"{name}_type_1"),
         ],
     )

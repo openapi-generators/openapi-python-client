@@ -17,17 +17,12 @@ def test_invalid_default():
 
 
 def test_convert_from_string():
-    val = FloatProperty.convert_value("1.0")
-    assert isinstance(val, Value)
-    assert val == "1.0"
-    assert FloatProperty.convert_value("1") == "1.0"
+    assert FloatProperty.convert_value("1.0") == Value(python_code="1.0", raw_value="1.0")
+    assert FloatProperty.convert_value("1") == Value(python_code="1.0", raw_value="1")
 
 
 def test_convert_from_float():
-    val = FloatProperty.convert_value(1.0)
-    assert isinstance(val, Value)
-    assert val == "1.0"
-    assert FloatProperty.convert_value(1) == "1.0"
+    assert FloatProperty.convert_value(1.0) == Value(python_code="1.0", raw_value=1.0)
 
 
 def test_invalid_type_default():

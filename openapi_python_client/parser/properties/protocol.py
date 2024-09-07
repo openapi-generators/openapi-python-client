@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = ["PropertyProtocol", "Value"]
 
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar
 
 from ... import Config
@@ -16,8 +17,15 @@ else:
     ModelProperty = "ModelProperty"
 
 
-class Value(str):
-    """Represents a valid (converted) value for a property"""
+@dataclass
+class Value:
+    """
+    Some literal values in OpenAPI documents (like defaults) have to be converted into Python code safely
+    (with string escaping, for example). We still keep the `raw_value` around for merging `allOf`.
+    """
+
+    python_code: str
+    raw_value: Any
 
 
 PropertyType = TypeVar("PropertyType", bound="PropertyProtocol")
@@ -148,7 +156,7 @@ class PropertyProtocol(Protocol):
         """How this should be declared in a dataclass"""
         default: str | None
         if self.default is not None:
-            default = self.default
+            default = self.default.python_code
         elif not self.required:
             default = "UNSET"
         else:
@@ -162,7 +170,7 @@ class PropertyProtocol(Protocol):
         """Returns property docstring"""
         doc = f"{self.python_name} ({self.get_type_string()}): {self.description or ''}"
         if self.default:
-            doc += f" Default: {self.default}."
+            doc += f" Default: {self.default.python_code}."
         if self.example:
             doc += f" Example: {self.example}."
         return doc
@@ -177,9 +185,3 @@ class PropertyProtocol(Protocol):
             ListProperty.__name__,
             UnionProperty.__name__,
         }
-
-    def default_to_raw(self) -> Any | None:
-        d = self.default
-        if not isinstance(d, Value):
-            return d
-        return eval(str(d))  # This should be safe because we've already escaped string values

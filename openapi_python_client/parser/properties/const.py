@@ -69,7 +69,9 @@ class ConstProperty(PropertyProtocol):
         if value is None:
             return value
         if value != self.value:
-            return PropertyError(detail=f"Invalid value for const {self.name}; {value} != {self.value}")
+            return PropertyError(
+                detail=f"Invalid value for const {self.name}; {value.raw_value} != {self.value.raw_value}"
+            )
         return value
 
     @staticmethod
@@ -89,7 +91,7 @@ class ConstProperty(PropertyProtocol):
             return value  # pragma: no cover
         if isinstance(value, str):
             return StringProperty.convert_value(value)
-        return Value(str(value))
+        return Value(python_code=str(value), raw_value=value)
 
     def get_type_string(
         self,
@@ -99,7 +101,7 @@ class ConstProperty(PropertyProtocol):
         multipart: bool = False,
         quoted: bool = False,
     ) -> str:
-        lit = f"Literal[{self.value}]"
+        lit = f"Literal[{self.value.python_code}]"
         if not no_optional and not self.required:
             return f"Union[{lit}, Unset]"
         return lit
