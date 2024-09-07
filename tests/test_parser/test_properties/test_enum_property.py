@@ -1,9 +1,10 @@
 import openapi_python_client.schema as oai
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import EnumProperty, Schemas
 
 
-def test_conflict(config):
+def test_conflict(config: Config) -> None:
     schemas = Schemas()
 
     _, schemas = EnumProperty.build(
@@ -22,7 +23,7 @@ def test_conflict(config):
     assert err.detail == "Found conflicting enums named Existing with incompatible values."
 
 
-def test_bad_default_value(config):
+def test_bad_default_value(config: Config) -> None:
     data = oai.Schema(default="B", enum=["A"])
     schemas = Schemas()
 
@@ -34,7 +35,7 @@ def test_bad_default_value(config):
     assert err == PropertyError(detail="Value B is not valid for enum Existing", data=data)
 
 
-def test_bad_default_type(config):
+def test_bad_default_type(config: Config) -> None:
     data = oai.Schema(default=123, enum=["A"])
     schemas = Schemas()
 
@@ -46,7 +47,7 @@ def test_bad_default_type(config):
     assert isinstance(err, PropertyError)
 
 
-def test_mixed_types(config):
+def test_mixed_types(config: Config) -> None:
     data = oai.Schema(enum=["A", 1])
     schemas = Schemas()
 
@@ -57,7 +58,7 @@ def test_mixed_types(config):
     assert isinstance(err, PropertyError)
 
 
-def test_unsupported_type(config):
+def test_unsupported_type(config: Config) -> None:
     data = oai.Schema(enum=[1.4, 1.5])
     schemas = Schemas()
 

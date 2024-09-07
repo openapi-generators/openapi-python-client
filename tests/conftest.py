@@ -1,8 +1,10 @@
-import inspect
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable
 
 import pytest
+from mypy.semanal_shared import Protocol
 
 from openapi_python_client import Config, MetaType
 from openapi_python_client import schema as oai
@@ -10,6 +12,7 @@ from openapi_python_client.config import ConfigFile
 from openapi_python_client.parser.properties import (
     AnyProperty,
     BooleanProperty,
+    Class,
     DateProperty,
     DateTimeProperty,
     EnumProperty,
@@ -22,9 +25,10 @@ from openapi_python_client.parser.properties import (
     UnionProperty,
 )
 from openapi_python_client.parser.properties.float import FloatProperty
-from openapi_python_client.parser.properties.protocol import Value
+from openapi_python_client.parser.properties.protocol import PropertyType, Value
 from openapi_python_client.schema.openapi_schema_pydantic import Parameter
 from openapi_python_client.schema.parameter_location import ParameterLocation
+from openapi_python_client.utils import ClassName, PythonIdentifier
 
 
 @pytest.fixture(scope="session")
@@ -40,8 +44,12 @@ def config() -> Config:
     )
 
 
+class ModelFactory(Protocol):
+    def __call__(self, *args, **kwargs): ...
+
+
 @pytest.fixture
-def model_property_factory() -> Callable[..., ModelProperty]:
+def model_property_factory() -> ModelFactory:
     """
     This fixture surfaces in the test as a function which manufactures ModelProperties with defaults.
 
@@ -53,7 +61,7 @@ def model_property_factory() -> Callable[..., ModelProperty]:
         kwargs = _common_kwargs(kwargs)
         kwargs = {
             "description": "",
-            "class_info": Class(name="MyClass", module_name="my_module"),
+            "class_info": Class(name=ClassName("MyClass", ""), module_name=PythonIdentifier("my_module", "")),
             "data": oai.Schema.model_construct(),
             "roots": set(),
             "required_properties": None,
@@ -70,7 +78,9 @@ def model_property_factory() -> Callable[..., ModelProperty]:
     return _factory
 
 
-def _simple_factory(cls: type, default_kwargs: Union[dict, Callable[[dict], dict], None] = None):
+def _simple_factory(
+    cls: type[PropertyType], default_kwargs: dict | Callable[[dict], dict] | None = None
+) -> Callable[..., PropertyType]:
     def _factory(**kwargs):
         kwargs = _common_kwargs(kwargs)
         defaults = default_kwargs
@@ -78,25 +88,42 @@ def _simple_factory(cls: type, default_kwargs: Union[dict, Callable[[dict], dict
             if callable(defaults):
                 defaults = defaults(kwargs)
             kwargs = {**defaults, **kwargs}
-        # It's very easy to accidentally set "default" to a raw value rather than a Value in our test
-        # code, which is never valid but mypy can't catch it for us. So we'll transform it here.
-        default_value = kwargs.get("default")
-        if default_value is not None and not isinstance(default_value, Value):
-            # Some of our property classes have convert_value as a class method; others have it as
-            # an instance method (because the logic requires knowing the state of the property). We
-            # can only call it here if it's a class method.
-            if inspect.ismethod(cls.convert_value) and cls.convert_value.__self__ is cls:
-                kwargs["default"] = cls.convert_value(default_value)
-            else:
-                kwargs["default"] = Value(str(default_value))
         rv = cls(**kwargs)
         return rv
 
     return _factory
 
 
+class SimpleFactory(Protocol[PropertyType]):
+    def __call__(
+        self,
+        *,
+        default: Value | None = None,
+        name: str | None = None,
+        required: bool | None = None,
+        description: str | None = None,
+        example: str | None = None,
+    ) -> PropertyType: ...
+
+
+class EnumFactory(Protocol):
+    def __call__(
+        self,
+        *,
+        default: Value | None = None,
+        name: str | None = None,
+        required: bool | None = None,
+        values: dict[str, str | int] | None = None,
+        class_info: Class | None = None,
+        value_type: type | None = None,
+        python_name: PythonIdentifier | None = None,
+        description: str | None = None,
+        example: str | None = None,
+    ) -> EnumProperty: ...
+
+
 @pytest.fixture
-def enum_property_factory() -> Callable[..., EnumProperty]:
+def enum_property_factory() -> EnumFactory:
     """
     This fixture surfaces in the test as a function which manufactures EnumProperties with defaults.
 
@@ -115,7 +142,7 @@ def enum_property_factory() -> Callable[..., EnumProperty]:
 
 
 @pytest.fixture
-def any_property_factory() -> Callable[..., AnyProperty]:
+def any_property_factory() -> SimpleFactory[AnyProperty]:
     """
     This fixture surfaces in the test as a function which manufactures AnyProperty with defaults.
 
@@ -126,7 +153,7 @@ def any_property_factory() -> Callable[..., AnyProperty]:
 
 
 @pytest.fixture
-def string_property_factory() -> Callable[..., StringProperty]:
+def string_property_factory() -> SimpleFactory[StringProperty]:
     """
     This fixture surfaces in the test as a function which manufactures StringProperties with defaults.
 
@@ -137,7 +164,7 @@ def string_property_factory() -> Callable[..., StringProperty]:
 
 
 @pytest.fixture
-def int_property_factory() -> Callable[..., IntProperty]:
+def int_property_factory() -> SimpleFactory[IntProperty]:
     """
     This fixture surfaces in the test as a function which manufactures IntProperties with defaults.
 
@@ -148,7 +175,7 @@ def int_property_factory() -> Callable[..., IntProperty]:
 
 
 @pytest.fixture
-def float_property_factory() -> Callable[..., FloatProperty]:
+def float_property_factory() -> SimpleFactory[FloatProperty]:
     """
     This fixture surfaces in the test as a function which manufactures FloatProperties with defaults.
 
@@ -159,7 +186,7 @@ def float_property_factory() -> Callable[..., FloatProperty]:
 
 
 @pytest.fixture
-def none_property_factory() -> Callable[..., NoneProperty]:
+def none_property_factory() -> SimpleFactory[NoneProperty]:
     """
     This fixture surfaces in the test as a function which manufactures NoneProperties with defaults.
 
@@ -170,7 +197,7 @@ def none_property_factory() -> Callable[..., NoneProperty]:
 
 
 @pytest.fixture
-def boolean_property_factory() -> Callable[..., BooleanProperty]:
+def boolean_property_factory() -> SimpleFactory[BooleanProperty]:
     """
     This fixture surfaces in the test as a function which manufactures BooleanProperties with defaults.
 
@@ -181,7 +208,7 @@ def boolean_property_factory() -> Callable[..., BooleanProperty]:
 
 
 @pytest.fixture
-def date_time_property_factory() -> Callable[..., DateTimeProperty]:
+def date_time_property_factory() -> SimpleFactory[DateTimeProperty]:
     """
     This fixture surfaces in the test as a function which manufactures DateTimeProperties with defaults.
 
@@ -192,7 +219,7 @@ def date_time_property_factory() -> Callable[..., DateTimeProperty]:
 
 
 @pytest.fixture
-def date_property_factory() -> Callable[..., DateProperty]:
+def date_property_factory() -> SimpleFactory[DateProperty]:
     """
     This fixture surfaces in the test as a function which manufactures DateProperties with defaults.
 
@@ -203,7 +230,7 @@ def date_property_factory() -> Callable[..., DateProperty]:
 
 
 @pytest.fixture
-def file_property_factory() -> Callable[..., FileProperty]:
+def file_property_factory() -> SimpleFactory[FileProperty]:
     """
     This fixture surfaces in the test as a function which manufactures FileProperties with defaults.
 
@@ -214,7 +241,7 @@ def file_property_factory() -> Callable[..., FileProperty]:
 
 
 @pytest.fixture
-def list_property_factory(string_property_factory) -> Callable[..., ListProperty]:
+def list_property_factory(string_property_factory) -> SimpleFactory[ListProperty]:
     """
     This fixture surfaces in the test as a function which manufactures ListProperties with defaults.
 
@@ -224,8 +251,19 @@ def list_property_factory(string_property_factory) -> Callable[..., ListProperty
     return _simple_factory(ListProperty, {"inner_property": string_property_factory()})
 
 
+class UnionFactory(SimpleFactory):
+    def __call__(
+        self,
+        *,
+        default: Value | None = None,
+        name: str | None = None,
+        required: bool | None = None,
+        inner_properties: list[PropertyType] | None = None,
+    ) -> UnionProperty: ...
+
+
 @pytest.fixture
-def union_property_factory(date_time_property_factory, string_property_factory) -> Callable[..., UnionProperty]:
+def union_property_factory(date_time_property_factory, string_property_factory) -> UnionFactory:
     """
     This fixture surfaces in the test as a function which manufactures UnionProperties with defaults.
 
@@ -256,7 +294,7 @@ def param_factory() -> Callable[..., Parameter]:
     return _factory
 
 
-def _common_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def _common_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     kwargs = {
         "name": "test",
         "required": True,

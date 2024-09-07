@@ -3,7 +3,7 @@ from typer.testing import CliRunner
 runner = CliRunner()
 
 
-def test_version():
+def test_version() -> None:
     from openapi_python_client.cli import app
 
     result = runner.invoke(app, ["--version", "generate"])
@@ -12,7 +12,7 @@ def test_version():
     assert "openapi-python-client version: " in result.stdout
 
 
-def test_bad_config():
+def test_bad_config() -> None:
     from openapi_python_client.cli import app
 
     config_path = "config/path"
@@ -25,14 +25,14 @@ def test_bad_config():
 
 
 class TestGenerate:
-    def test_generate_no_params(self):
+    def test_generate_no_params(self) -> None:
         from openapi_python_client.cli import app
 
         result = runner.invoke(app, ["generate"])
 
         assert result.exit_code == 1, result.output
 
-    def test_generate_url_and_path(self):
+    def test_generate_url_and_path(self) -> None:
         from openapi_python_client.cli import app
 
         result = runner.invoke(app, ["generate", "--path=blah", "--url=otherblah"])
@@ -40,7 +40,7 @@ class TestGenerate:
         assert result.exit_code == 1
         assert result.output == "Provide either --url or --path, not both\n"
 
-    def test_generate_encoding_errors(self):
+    def test_generate_encoding_errors(self) -> None:
         path = "cool/path"
         file_encoding = "error-file-encoding"
         from openapi_python_client.cli import app
