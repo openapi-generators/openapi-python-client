@@ -595,6 +595,16 @@ info:
         {
           "required": true,
           "schema": {
+            "title": "Float with int default",
+            "type": "number",
+            "default": 3
+          },
+          "name": "float_with_int",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
             "title": "Int Prop",
             "type": "integer",
             "default": 7
@@ -1698,7 +1708,9 @@ info:
       ],
       "type": "object",
       "properties": {
-        "any_value": { },
+        "any_value": {
+          "default": "default",
+        },
         "an_enum_value": {
           "$ref": "#/components/schemas/AnEnum"
         },
@@ -1972,7 +1984,7 @@ info:
           "title": "Some Integer Array",
           "type": "array",
           "items": {
-            "type": ["integer", "null"]
+            "type": [ "integer", "null" ]
           }
         },
         "some_array": {
@@ -2166,7 +2178,7 @@ info:
             "numberToInt": {
               "type": "number"
             },
-            "anyToString": {}
+            "anyToString": { }
           }
         },
         {
@@ -2179,7 +2191,7 @@ info:
             },
             "stringToEnum": {
               "type": "string",
-              "enum": ["a", "b"]
+              "enum": [ "a", "b" ]
             },
             "stringToDate": {
               "type": "string",
@@ -2265,7 +2277,7 @@ info:
     },
     "ModelWithNoProperties": {
       "type": "object",
-      "properties": {},
+      "properties": { },
       "additionalProperties": false
     },
     "AllOfSubModel": {

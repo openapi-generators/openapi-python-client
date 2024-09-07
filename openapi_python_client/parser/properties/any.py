@@ -35,7 +35,7 @@ class AnyProperty(PropertyProtocol):
     def convert_value(cls, value: Any) -> Value | None:
         from .string import StringProperty
 
-        if value is None or isinstance(value, Value):
+        if value is None:
             return value
         if isinstance(value, str):
             return StringProperty.convert_value(value)

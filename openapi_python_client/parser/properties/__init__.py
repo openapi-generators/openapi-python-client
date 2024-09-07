@@ -280,7 +280,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
         AnyProperty.build(
             name=name,
             required=required,
-            default=None,
+            default=data.default,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,

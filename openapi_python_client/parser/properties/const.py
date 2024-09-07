@@ -63,8 +63,6 @@ class ConstProperty(PropertyProtocol):
         return prop
 
     def convert_value(self, value: Any) -> Value | None | PropertyError:
-        if isinstance(value, Value):
-            return value
         value = self._convert_value(value)
         if value is None:
             return value
@@ -87,8 +85,6 @@ class ConstProperty(PropertyProtocol):
     def _convert_value(value: Any) -> Value | None:
         if value is None or isinstance(value, Value):
             return value
-        if isinstance(value, Value):
-            return value  # pragma: no cover
         if isinstance(value, str):
             return StringProperty.convert_value(value)
         return Value(python_code=str(value), raw_value=value)
