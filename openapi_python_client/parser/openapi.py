@@ -489,7 +489,7 @@ class GeneratorData:
     models: Iterator[ModelProperty]
     errors: List[ParseError]
     endpoint_collections_by_tag: Dict[utils.PythonIdentifier, EndpointCollection]
-    enums: Union[Iterator[EnumProperty | LiteralEnumProperty]]
+    enums: Union[Iterator[Union[EnumProperty, LiteralEnumProperty]]]
 
     @staticmethod
     def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
