@@ -57,7 +57,7 @@ class DateProperty(PropertyProtocol):
                 isoparse(value).date()  # make sure it's a valid value
             except ValueError as e:
                 return PropertyError(f"Invalid date: {e}")
-            return Value(f"isoparse({value!r}).date()")
+            return Value(python_code=f"isoparse({value!r}).date()", raw_value=value)
         return PropertyError(f"Cannot convert {value} to a date")
 
     def get_imports(self, *, prefix: str) -> set[str]:

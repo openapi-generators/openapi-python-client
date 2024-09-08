@@ -1,6 +1,7 @@
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import IntProperty
 from openapi_python_client.parser.properties.protocol import Value
+from openapi_python_client.utils import PythonIdentifier
 
 
 def test_invalid_default():
@@ -17,9 +18,7 @@ def test_invalid_default():
 
 
 def test_convert_from_string():
-    val = IntProperty.convert_value("1")
-    assert isinstance(val, Value)
-    assert val == "1"
+    assert IntProperty.convert_value("1") == Value(python_code="1", raw_value="1")
 
 
 def test_invalid_type_default():
@@ -28,7 +27,7 @@ def test_invalid_type_default():
         description=None,
         example=None,
         required=False,
-        python_name="not_a_float",
+        python_name=PythonIdentifier("not_a_float", ""),
         name="not_a_float",
     )
 

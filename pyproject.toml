@@ -18,7 +18,7 @@ dependencies = [
     "typing-extensions>=4.8.0,<5.0.0",
 ]
 name = "openapi-python-client"
-version = "0.21.4"
+version = "0.21.5"
 description = "Generate modern Python clients from OpenAPI"
 keywords = [
     "OpenAPI",
@@ -66,7 +66,7 @@ ignore = ["E501", "PLR0913"]
 "tests/*" = ["PLR2004"]
 
 [tool.coverage.run]
-omit = ["openapi_python_client/templates/*"]
+omit = ["openapi_python_client/__main__.py", "openapi_python_client/templates/*"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]

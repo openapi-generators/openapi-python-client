@@ -33,7 +33,7 @@ class AModel:
         nullable_one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', None]):
         model (ModelWithUnionProperty):
         nullable_model (Union['ModelWithUnionProperty', None]):
-        any_value (Union[Unset, Any]):
+        any_value (Union[Unset, Any]):  Default: 'default'.
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
         nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
         a_not_required_date (Union[Unset, datetime.date]):
@@ -58,7 +58,7 @@ class AModel:
     model: "ModelWithUnionProperty"
     nullable_model: Union["ModelWithUnionProperty", None]
     an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
-    any_value: Union[Unset, Any] = UNSET
+    any_value: Union[Unset, Any] = "default"
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET

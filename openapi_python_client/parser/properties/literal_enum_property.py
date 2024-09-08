@@ -157,7 +157,7 @@ class LiteralEnumProperty(PropertyProtocol):
             return value
         if isinstance(value, self.value_type):
             if value in self.values:
-                return Value(repr(value))
+                return Value(python_code=repr(value), raw_value=value)
             else:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
@@ -182,7 +182,9 @@ class LiteralEnumProperty(PropertyProtocol):
         imports = super().get_imports(prefix=prefix)
         imports.add("from typing import cast")
         imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}")
-        imports.add(f"from {prefix}models.{self.class_info.module_name} import check_{self.get_class_name_snake_case()}")
+        imports.add(
+            f"from {prefix}models.{self.class_info.module_name} import check_{self.get_class_name_snake_case()}"
+        )
         return imports
 
     def get_class_name_snake_case(self) -> str:

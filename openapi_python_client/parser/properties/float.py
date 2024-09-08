@@ -61,11 +61,11 @@ class FloatProperty(PropertyProtocol):
         if isinstance(value, str):
             try:
                 parsed = float(value)
-                return Value(str(parsed))
+                return Value(python_code=str(parsed), raw_value=value)
             except ValueError:
                 return PropertyError(f"Invalid float value: {value}")
         if isinstance(value, float):
-            return Value(str(value))
+            return Value(python_code=str(value), raw_value=value)
         if isinstance(value, int) and not isinstance(value, bool):
-            return Value(str(float(value)))
+            return Value(python_code=str(float(value)), raw_value=value)
         return PropertyError(f"Cannot convert {value} to a float")
