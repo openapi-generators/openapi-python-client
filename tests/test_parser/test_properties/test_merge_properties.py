@@ -1,7 +1,7 @@
 from itertools import permutations
 
-from attr import evolve
 import pytest
+from attr import evolve
 
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties.float import FloatProperty
@@ -226,10 +226,19 @@ def test_merge_with_incompatible_enum(
         float_property_factory(),
         string_property_factory(),
         model_property_factory(),
+        enum_property_factory(values={"INCOMPATIBLE": "INCOMPATIBLE"}),
+        literal_enum_property_factory(values={"INCOMPATIBLE"}),
     ]
-    property_factory = literal_enum_property_factory if literal_enums else enum_property_factory
-    string_enum_prop = property_factory(value_type=str)
-    int_enum_prop = property_factory(value_type=int)
+    string_enum_prop = (
+        literal_enum_property_factory(value_type=str, values={"A"})
+        if literal_enums
+        else enum_property_factory(value_type=str, values={"A": "A"})
+    )
+    int_enum_prop = (
+        literal_enum_property_factory(value_type=int, values={1})
+        if literal_enums
+        else enum_property_factory(value_type=int, values={"VALUE_1": 1})
+    )
     for prop in props:
         if not isinstance(prop, StringProperty):
             assert isinstance(merge_properties(prop, string_enum_prop), PropertyError)

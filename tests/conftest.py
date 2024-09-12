@@ -155,7 +155,7 @@ def literal_enum_property_factory() -> EnumFactory[LiteralEnumProperty]:
         LiteralEnumProperty,
         lambda kwargs: {
             "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
-            "values": {},
+            "values": set(),
             "value_type": str,
         },
     )
