@@ -1,6 +1,8 @@
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import EnumProperty, Schemas
+from openapi_python_client.parser.properties.none import NoneProperty
+from openapi_python_client.parser.properties.union import UnionProperty
 
 
 def test_conflict(config):
@@ -66,3 +68,22 @@ def test_unsupported_type(config):
     )
 
     assert isinstance(err, PropertyError)
+
+
+def test_nullable_enum(config):
+    data = oai.Schema(
+        type="string",
+        enum=["a", "b", None],
+        nullable=True,
+    )
+    schemas = Schemas()
+
+    p, _ = EnumProperty.build(
+        data=data, name="prop1", required=True, schemas=schemas, parent_name="parent", config=config
+    )
+
+    assert isinstance(p, UnionProperty)
+    assert len(p.inner_properties) == 2  # noqa: PLR2004
+    assert isinstance(p.inner_properties[0], NoneProperty)
+    assert isinstance(p.inner_properties[1], EnumProperty)
+    assert p.inner_properties[1].class_info.name == "ParentProp1"

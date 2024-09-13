@@ -4,6 +4,7 @@ from .a_discriminated_union_type_1 import ADiscriminatedUnionType1
 from .a_discriminated_union_type_2 import ADiscriminatedUnionType2
 from .a_form_data import AFormData
 from .a_model import AModel
+from .a_model_nullable_enum_inline import AModelNullableEnumInline
 from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
 from .all_of_has_properties_but_no_type import AllOfHasPropertiesButNoType
 from .all_of_has_properties_but_no_type_type_enum import AllOfHasPropertiesButNoTypeTypeEnum
@@ -91,6 +92,7 @@ __all__ = (
     "AllOfSubModel",
     "AllOfSubModelTypeEnum",
     "AModel",
+    "AModelNullableEnumInline",
     "AModelWithPropertiesReferenceThatAreNotObject",
     "AnAllOfEnum",
     "AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem",

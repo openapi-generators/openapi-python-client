@@ -9,7 +9,6 @@ from attrs import define
 
 from ... import Config, utils
 from ... import schema as oai
-from ...schema import DataType
 from ..errors import PropertyError
 from .none import NoneProperty
 from .protocol import PropertyProtocol, Value
@@ -43,7 +42,7 @@ class EnumProperty(PropertyProtocol):
     }
 
     @classmethod
-    def build(  # noqa: PLR0911
+    def build(
         cls,
         *,
         data: oai.Schema,
@@ -75,9 +74,10 @@ class EnumProperty(PropertyProtocol):
         # So instead, if null is a possible value, make the property nullable.
         # Mypy is not smart enough to know that the type is right though
         unchecked_value_list = [value for value in enum if value is not None]  # type: ignore
+        allow_null = len(unchecked_value_list) < len(enum)
 
         # It's legal to have an enum that only contains null as a value, we don't bother constructing an enum for that
-        if len(unchecked_value_list) == 0:
+        if len(unchecked_value_list) == 0 and allow_null:
             return (
                 NoneProperty.build(
                     name=name,
@@ -101,21 +101,6 @@ class EnumProperty(PropertyProtocol):
         value_list = cast(
             Union[List[int], List[str]], unchecked_value_list
         )  # We checked this with all the value_types stuff
-
-        if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union
-            data.oneOf = [
-                oai.Schema(type=DataType.NULL),
-                data.model_copy(update={"enum": value_list, "default": data.default}),
-            ]
-            data.enum = None
-            return UnionProperty.build(
-                data=data,
-                name=name,
-                required=required,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
 
         class_name = data.title or name
         if parent_name:
@@ -150,8 +135,38 @@ class EnumProperty(PropertyProtocol):
             return checked_default, schemas
         prop = evolve(prop, default=checked_default)
 
+        # Now, if one of the values was None, wrap the type we just made in a union with None. We're
+        # constructing the UnionProperty directly instead of using UnionProperty.build() because we
+        # do *not* want the usual union behavior of creating ThingType1, ThingType2, etc.
+        returned_prop: EnumProperty | UnionProperty | PropertyError
+        if allow_null:
+            none_prop = NoneProperty.build(
+                name=name,
+                required=required,
+                default=None,
+                python_name=prop.python_name,
+                description=None,
+                example=None,
+            )
+            assert not isinstance(none_prop, PropertyError)
+            union_prop = UnionProperty(
+                name=name,
+                required=required,
+                default=checked_default,
+                python_name=prop.python_name,
+                description=data.description,
+                example=data.example,
+                inner_properties=[
+                    none_prop,
+                    prop,
+                ],
+            )
+            returned_prop = union_prop
+        else:
+            returned_prop = prop
+
         schemas = evolve(schemas, classes_by_name={**schemas.classes_by_name, class_info.name: prop})
-        return prop, schemas
+        return returned_prop, schemas
 
     def convert_value(self, value: Any) -> Value | PropertyError | None:
         if value is None or isinstance(value, Value):

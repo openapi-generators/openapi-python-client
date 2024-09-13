@@ -1660,7 +1660,9 @@
           "model",
           "nullable_model",
           "one_of_models",
-          "nullable_one_of_models"
+          "nullable_one_of_models",
+          "nullable_enum_as_ref",
+          "nullable_enum_inline"
         ],
         "type": "object",
         "properties": {
@@ -1830,6 +1832,14 @@
               }
             ],
             "nullable": true
+          },
+          "nullable_enum_as_ref": {
+            "$ref": "#/components/schemas/AnEnumWithNull"
+          },
+          "nullable_enum_inline": {
+            "type": "string",
+            "enum": ["FIRST_VALUE", "SECOND_VALUE", null],
+            "nullable": true
           }
         },
         "description": "A Model for testing all the ways custom objects can be used ",
@@ -1850,6 +1860,7 @@
           "SECOND_VALUE",
           null
         ],
+        "nullable": true,
         "description": "For testing Enums with mixed string / null values "
       },
       "AnEnumWithOnlyNull": {

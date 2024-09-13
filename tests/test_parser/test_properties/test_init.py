@@ -403,14 +403,23 @@ class TestPropertyFromData:
             "ParentAnEnum": prop,
         }
 
+    @pytest.mark.parametrize(
+        "desc,extra_props",
+        [
+            ("3_1_implicit_type", {}),
+            ("3_1_explicit_type", {"type": ["string", "null"]}),
+            ("3_0_implicit_type", {"nullable": True}),
+            ("3_0_explicit_type", {"type": "string", "nullable": True}),
+        ],
+    )
     def test_property_from_data_str_enum_with_null(
-        self, enum_property_factory, union_property_factory, none_property_factory, config
+        self, desc, extra_props, enum_property_factory, union_property_factory, none_property_factory, config
     ):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         existing = enum_property_factory()
-        data = Schema(title="AnEnum", enum=["A", "B", "C", None], default="B")
+        data = Schema(title="AnEnum", enum=["A", "B", "C", None], default="B", **extra_props)
         name = "my_enum"
         required = True
 
@@ -423,16 +432,16 @@ class TestPropertyFromData:
         # None / null is removed from enum, and property is now nullable
         assert isinstance(prop, UnionProperty), "Enums with None should be converted to UnionProperties"
         enum_prop = enum_property_factory(
-            name="my_enum_type_1",
+            name=name,
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
             class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
             value_type=str,
             default="ParentAnEnum.B",
         )
-        none_property = none_property_factory(name="my_enum_type_0", required=required)
+        none_property = none_property_factory(name=name, required=required)
         assert prop == union_property_factory(
-            name=name, default="ParentAnEnum.B", inner_properties=[none_property, enum_prop]
+            name=name, default="ParentAnEnum.B", inner_properties=[none_property, enum_prop], required=required
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
