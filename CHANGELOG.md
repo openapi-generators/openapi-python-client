@@ -13,6 +13,61 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.21.5 (2024-09-07)
+
+### Features
+
+#### Improved property-merging behavior with `allOf`
+
+When using `allOf` to extend a base object type, `openapi-python-client` is now able to handle some kinds of modifications to an existing property that would have previously caused an error:
+
+- Overriding attributes that do not affect validation, such as `description`.
+- Combining properties that this generator ignores, like `maxLength` or `pattern`.
+- Combining a generic numeric type with `int` (resulting in `int`).
+- Adding a `format` to a string.
+- Combining `any` with a specific type (resulting in that specific type).
+- Adding or overriding a `default`
+
+> [!NOTE]
+> `pattern` and `max_length` are no longer fields on `StringProperty`, which may impact custom templates.
+
+This also fixes a bug where properties of inline objects (as opposed to references) were not using the
+merge logic, but were simply overwriting previous definitions of the same property.
+
+### Fixes
+
+- Allow default values for properties of `Any` type
+
+#### Produce valid code for an object that has no properties at all
+
+Fixed by PR #1109. Thanks @eli-bl!
+
+## 0.21.4 (2024-08-25)
+
+### Fixes
+
+#### Allow OpenAPI 3.1-style `exclusiveMinimum` and `exclusiveMaximum`
+
+Fixed by PR #1092. Thanks @mikkelam!
+
+#### Add missing `cast` import when using `const`
+
+Fixed by PR #1072. Thanks @dorcohe!
+
+#### Correctly resolve references to a type that is itself just a single allOf reference
+
+PR #1103 fixed issue #1091. Thanks @eli-bl!
+
+#### Support `const` booleans and floats
+
+Fixed in PR #1086. Thanks @flxdot!
+
+## 0.21.3 (2024-08-18)
+
+### Features
+
+- update Ruff to >=0.2,<0.7 (#1097)
+
 ## 0.21.2 (2024-07-20)
 
 ### Features

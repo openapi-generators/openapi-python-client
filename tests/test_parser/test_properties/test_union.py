@@ -1,6 +1,7 @@
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas, UnionProperty
+from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.schema import DataType, ParameterLocation
 
 
@@ -19,7 +20,7 @@ def test_property_from_data_union(union_property_factory, date_time_property_fac
         name=name,
         required=required,
         inner_properties=[
-            string_property_factory(name=f"{name}_type_0", default="'a'"),
+            string_property_factory(name=f"{name}_type_0", default=Value("'a'", "a")),
             date_time_property_factory(name=f"{name}_type_1"),
         ],
     )

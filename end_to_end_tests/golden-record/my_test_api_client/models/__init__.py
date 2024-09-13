@@ -35,9 +35,11 @@ from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadF
 from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
 from .different_enum import DifferentEnum
+from .extended import Extended
 from .free_form_model import FreeFormModel
 from .get_location_header_types_int_enum_header import GetLocationHeaderTypesIntEnumHeader
 from .get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
+from .get_models_allof_response_200 import GetModelsAllofResponse200
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .json_like_body import JsonLikeBody
@@ -59,6 +61,9 @@ from .model_with_circular_ref_in_additional_properties_a import ModelWithCircula
 from .model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
 from .model_with_date_time_property import ModelWithDateTimeProperty
 from .model_with_discriminated_union import ModelWithDiscriminatedUnion
+from .model_with_merged_properties import ModelWithMergedProperties
+from .model_with_merged_properties_string_to_enum import ModelWithMergedPropertiesStringToEnum
+from .model_with_no_properties import ModelWithNoProperties
 from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditionalProperties
 from .model_with_primitive_additional_properties_a_date_holder import ModelWithPrimitiveAdditionalPropertiesADateHolder
 from .model_with_property_ref import ModelWithPropertyRef
@@ -113,9 +118,11 @@ __all__ = (
     "BodyUploadFileTestsUploadPostSomeObject",
     "BodyUploadFileTestsUploadPostSomeOptionalObject",
     "DifferentEnum",
+    "Extended",
     "FreeFormModel",
     "GetLocationHeaderTypesIntEnumHeader",
     "GetLocationHeaderTypesStringEnumHeader",
+    "GetModelsAllofResponse200",
     "HTTPValidationError",
     "Import",
     "JsonLikeBody",
@@ -135,6 +142,9 @@ __all__ = (
     "ModelWithCircularRefInAdditionalPropertiesB",
     "ModelWithDateTimeProperty",
     "ModelWithDiscriminatedUnion",
+    "ModelWithMergedProperties",
+    "ModelWithMergedPropertiesStringToEnum",
+    "ModelWithNoProperties",
     "ModelWithPrimitiveAdditionalProperties",
     "ModelWithPrimitiveAdditionalPropertiesADateHolder",
     "ModelWithPropertyRef",

@@ -2,6 +2,7 @@ import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 from ..models.a_model_nullable_enum_inline import AModelNullableEnumInline
@@ -16,13 +17,12 @@ if TYPE_CHECKING:
     from ..models.model_with_union_property import ModelWithUnionProperty
 
 
-T = TypeVar("T", bound="AModel")
+T = TypeVar("T", bound="Extended")
 
 
 @_attrs_define
-class AModel:
-    """A Model for testing all the ways custom objects can be used
-
+class Extended:
+    """
     Attributes:
         an_enum_value (AnEnum): For testing Enums in all the ways they can be used
         an_allof_enum_with_overridden_default (AnAllOfEnum):  Default: AnAllOfEnum.OVERRIDDEN_DEFAULT.
@@ -49,6 +49,7 @@ class AModel:
         not_required_nullable_one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', None, Unset, str]):
         not_required_model (Union[Unset, ModelWithUnionProperty]):
         not_required_nullable_model (Union['ModelWithUnionProperty', None, Unset]):
+        from_extended (Union[Unset, str]):
     """
 
     an_enum_value: AnEnum
@@ -76,6 +77,8 @@ class AModel:
     not_required_nullable_one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", None, Unset, str] = UNSET
     not_required_model: Union[Unset, "ModelWithUnionProperty"] = UNSET
     not_required_nullable_model: Union["ModelWithUnionProperty", None, Unset] = UNSET
+    from_extended: Union[Unset, str] = UNSET
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         from ..models.free_form_model import FreeFormModel
@@ -203,7 +206,10 @@ class AModel:
         else:
             not_required_nullable_model = self.not_required_nullable_model
 
+        from_extended = self.from_extended
+
         field_dict: Dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,
@@ -245,6 +251,8 @@ class AModel:
             field_dict["not_required_model"] = not_required_model
         if not_required_nullable_model is not UNSET:
             field_dict["not_required_nullable_model"] = not_required_nullable_model
+        if from_extended is not UNSET:
+            field_dict["fromExtended"] = from_extended
 
         return field_dict
 
@@ -507,7 +515,9 @@ class AModel:
 
         not_required_nullable_model = _parse_not_required_nullable_model(d.pop("not_required_nullable_model", UNSET))
 
-        a_model = cls(
+        from_extended = d.pop("fromExtended", UNSET)
+
+        extended = cls(
             an_enum_value=an_enum_value,
             an_allof_enum_with_overridden_default=an_allof_enum_with_overridden_default,
             a_camel_date_time=a_camel_date_time,
@@ -533,6 +543,24 @@ class AModel:
             not_required_nullable_one_of_models=not_required_nullable_one_of_models,
             not_required_model=not_required_model,
             not_required_nullable_model=not_required_nullable_model,
+            from_extended=from_extended,
         )
 
-        return a_model
+        extended.additional_properties = d
+        return extended
+
+    @property
+    def additional_keys(self) -> List[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

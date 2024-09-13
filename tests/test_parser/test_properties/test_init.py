@@ -7,11 +7,12 @@ import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParameterError, PropertyError
 from openapi_python_client.parser.properties import (
     ListProperty,
+    ReferencePath,
     Schemas,
     StringProperty,
     UnionProperty,
 )
-from openapi_python_client.parser.properties.protocol import ModelProperty
+from openapi_python_client.parser.properties.protocol import ModelProperty, Value
 from openapi_python_client.schema import DataType
 from openapi_python_client.utils import ClassName, PythonIdentifier
 
@@ -383,7 +384,7 @@ class TestPropertyFromData:
         name = "my_enum"
         required = True
 
-        schemas = Schemas(classes_by_name={"AnEnum": existing})
+        schemas = Schemas(classes_by_name={ClassName("AnEnum", prefix=""): existing})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
@@ -393,9 +394,9 @@ class TestPropertyFromData:
             name=name,
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
-            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=str,
-            default="ParentAnEnum.B",
+            default=Value(python_code="ParentAnEnum.B", raw_value="B"),
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -423,7 +424,7 @@ class TestPropertyFromData:
         name = "my_enum"
         required = True
 
-        schemas = Schemas(classes_by_name={"AnEnum": existing})
+        schemas = Schemas(classes_by_name={ClassName("AnEnum", ""): existing})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
@@ -435,13 +436,16 @@ class TestPropertyFromData:
             name=name,
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
-            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=str,
-            default="ParentAnEnum.B",
+            default=Value(python_code="ParentAnEnum.B", raw_value="B"),
         )
         none_property = none_property_factory(name=name, required=required)
         assert prop == union_property_factory(
-            name=name, default="ParentAnEnum.B", inner_properties=[none_property, enum_prop], required=required
+            name=name,
+            default=Value(python_code="ParentAnEnum.B", raw_value="B"),
+            inner_properties=[none_property, enum_prop],
+            required=required,
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -463,7 +467,9 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
         )
 
-        assert prop == none_property_factory(name="my_enum", required=required, default="None")
+        assert prop == none_property_factory(
+            name="my_enum", required=required, default=Value(python_code="None", raw_value="None")
+        )
 
     def test_property_from_data_int_enum(self, enum_property_factory, config):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -474,7 +480,7 @@ class TestPropertyFromData:
         data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], default=3)
 
         existing = enum_property_factory()
-        schemas = Schemas(classes_by_name={"AnEnum": existing})
+        schemas = Schemas(classes_by_name={ClassName("AnEnum", ""): existing})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
@@ -484,9 +490,9 @@ class TestPropertyFromData:
             name=name,
             required=required,
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
-            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=int,
-            default="ParentAnEnum.VALUE_3",
+            default=Value(python_code="ParentAnEnum.VALUE_3", raw_value=3),
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -529,23 +535,24 @@ class TestPropertyFromData:
         )
         existing_enum = enum_property_factory(
             name="an_enum",
-            default="MyEnum.A",
+            default=Value(python_code="MyEnum.A", raw_value="A"),
             required=required,
             values={"A": "a", "B": "b"},
-            class_info=Class(name="MyEnum", module_name="my_enum"),
+            class_info=Class(name=ClassName("MyEnum", ""), module_name=PythonIdentifier("my_enum", "")),
         )
-        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
+        schemas = Schemas(classes_by_reference={ReferencePath("/components/schemas/MyEnum"): existing_enum})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="", config=config
         )
+        new_schemas = attr.evolve(new_schemas, models_to_process=[])  # intermediate state irrelevant to this test
 
         assert prop == enum_property_factory(
             name="some_enum",
-            default="MyEnum.B",
+            default=Value(python_code="MyEnum.B", raw_value="b"),
             required=required,
             values={"A": "a", "B": "b"},
-            class_info=Class(name="MyEnum", module_name="my_enum"),
+            class_info=Class(name=ClassName("MyEnum", ""), module_name=PythonIdentifier("my_enum", "")),
         )
         assert schemas == new_schemas
 
@@ -558,12 +565,12 @@ class TestPropertyFromData:
         )
         existing_enum = enum_property_factory(
             name="an_enum",
-            default="MyEnum.A",
+            default=Value(python_code="MyEnum.A", raw_value="A"),
             values={"A": "a", "B": "b"},
-            class_info=Class(name="MyEnum", module_name="my_enum"),
-            python_name="an_enum",
+            class_info=Class(name=ClassName("MyEnum", ""), module_name=PythonIdentifier("my_enum", "")),
+            python_name=PythonIdentifier("an_enum", ""),
         )
-        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
+        schemas = Schemas(classes_by_reference={ReferencePath("/components/schemas/MyEnum"): existing_enum})
 
         prop, new_schemas = property_from_data(
             name=name, required=False, data=data, schemas=schemas, parent_name="", config=config
@@ -577,15 +584,15 @@ class TestPropertyFromData:
 
         name = "new_name"
         required = False
-        class_name = "MyModel"
+        class_name = ClassName("MyModel", "")
         data = oai.Reference.model_construct(ref=f"#/components/schemas/{class_name}")
-        class_info = Class(name=class_name, module_name="my_model")
+        class_info = Class(name=class_name, module_name=PythonIdentifier("my_model", ""))
 
         existing_model = model_property_factory(
             name="old_name",
             class_info=class_info,
         )
-        schemas = Schemas(classes_by_reference={f"/components/schemas/{class_name}": existing_model})
+        schemas = Schemas(classes_by_reference={ReferencePath(f"/components/schemas/{class_name}"): existing_model})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="", config=config
@@ -696,7 +703,7 @@ class TestPropertyFromData:
         )[0]
 
         assert isinstance(response, UnionProperty)
-        assert len(response.inner_properties) == 2  # noqa: PLR2004
+        assert len(response.inner_properties) == 2
 
     def test_property_from_data_list_of_types(self, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -713,7 +720,7 @@ class TestPropertyFromData:
         )[0]
 
         assert isinstance(response, UnionProperty)
-        assert len(response.inner_properties) == 2  # noqa: PLR2004
+        assert len(response.inner_properties) == 2
 
     def test_property_from_data_union_of_one_element(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
@@ -755,14 +762,14 @@ class TestStringBasedProperty:
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.model_construct(type="string", default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", default="hello world")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=config, schemas=Schemas()
         )
 
         assert p == string_property_factory(
-            name=name, required=required, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
+            name=name, required=required, default=StringProperty.convert_value("hello world")
         )
 
     def test_datetime_format(self, date_time_property_factory, config):
@@ -776,7 +783,11 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_time_property_factory(name=name, required=required, default=f"isoparse('{data.default}')")
+        assert p == date_time_property_factory(
+            name=name,
+            required=required,
+            default=Value(python_code=f"isoparse('{data.default}')", raw_value=data.default),
+        )
 
     def test_datetime_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -804,7 +815,11 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_property_factory(name=name, required=required, default=f"isoparse('{data.default}').date()")
+        assert p == date_property_factory(
+            name=name,
+            required=required,
+            default=Value(python_code=f"isoparse('{data.default}').date()", raw_value=data.default),
+        )
 
     def test_date_format_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -915,42 +930,11 @@ class TestCreateSchemas:
                 call("#/components/schemas/first"),
             ]
         )
-        assert update_schemas_with_data.call_count == 3  # noqa: PLR2004
+        assert update_schemas_with_data.call_count == 3
         assert result.errors == [PropertyError()]
 
 
 class TestProcessModels:
-    def test_retries_failing_models_while_making_progress(
-        self, mocker, model_property_factory, any_property_factory, config
-    ):
-        from openapi_python_client.parser.properties import _process_models
-
-        first_model = model_property_factory()
-        second_class_name = ClassName("second", "")
-        schemas = Schemas(
-            classes_by_name={
-                ClassName("first", ""): first_model,
-                second_class_name: model_property_factory(),
-                ClassName("non-model", ""): any_property_factory(),
-            }
-        )
-        process_model = mocker.patch(
-            f"{MODULE_NAME}.process_model", side_effect=[PropertyError(), Schemas(), PropertyError()]
-        )
-        process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
-
-        result = _process_models(schemas=schemas, config=config)
-
-        process_model.assert_has_calls(
-            [
-                call(first_model, schemas=schemas, config=config),
-                call(schemas.classes_by_name[second_class_name], schemas=schemas, config=config),
-                call(first_model, schemas=result, config=config),
-            ]
-        )
-        assert process_model_errors.was_called_once_with([(first_model, PropertyError())])
-        assert all(error in result.errors for error in process_model_errors.return_value)
-
     def test_detect_recursive_allof_reference_no_retry(self, mocker, model_property_factory, config):
         from openapi_python_client.parser.properties import Class, _process_models
         from openapi_python_client.schema import Reference
@@ -959,14 +943,16 @@ class TestProcessModels:
         recursive_model = model_property_factory(
             class_info=Class(name=class_name, module_name=PythonIdentifier("module_name", ""))
         )
+        second_model = model_property_factory()
         schemas = Schemas(
             classes_by_name={
                 "recursive": recursive_model,
-                "second": model_property_factory(),
-            }
+                "second": second_model,
+            },
+            models_to_process=[recursive_model, second_model],
         )
         recursion_error = PropertyError(data=Reference.model_construct(ref=f"#/{class_name}"))
-        process_model = mocker.patch(f"{MODULE_NAME}.process_model", side_effect=[recursion_error, Schemas()])
+        process_model = mocker.patch(f"{MODULE_NAME}.process_model", side_effect=[recursion_error, schemas])
         process_model_errors = mocker.patch(f"{MODULE_NAME}._process_model_errors", return_value=["error"])
 
         result = _process_models(schemas=schemas, config=config)
@@ -980,6 +966,58 @@ class TestProcessModels:
         assert process_model_errors.was_called_once_with([(recursive_model, recursion_error)])
         assert all(error in result.errors for error in process_model_errors.return_value)
         assert "\n\nRecursive allOf reference found" in recursion_error.detail
+
+    def test_resolve_reference_to_single_allof_reference(self, config, model_property_factory):
+        # test for https://github.com/openapi-generators/openapi-python-client/issues/1091
+        from openapi_python_client.parser.properties import Schemas, build_schemas
+
+        components = {
+            "Model1": oai.Schema.model_construct(
+                type="object",
+                properties={
+                    "prop1": oai.Schema.model_construct(type="string"),
+                },
+            ),
+            "Model2": oai.Schema.model_construct(
+                allOf=[
+                    oai.Reference.model_construct(ref="#/components/schemas/Model1"),
+                ]
+            ),
+            "Model3": oai.Schema.model_construct(
+                allOf=[
+                    oai.Reference.model_construct(ref="#/components/schemas/Model2"),
+                    oai.Schema.model_construct(
+                        type="object",
+                        properties={
+                            "prop2": oai.Schema.model_construct(type="string"),
+                        },
+                    ),
+                ],
+            ),
+        }
+        schemas = Schemas()
+
+        result = build_schemas(components=components, schemas=schemas, config=config)
+
+        assert result.errors == []
+        assert result.models_to_process == []
+
+        # Classes should only be generated for Model1 and Model3
+        assert result.classes_by_name.keys() == {"Model1", "Model3"}
+
+        # References to Model2 should be resolved to the same class as Model1
+        assert result.classes_by_reference.keys() == {
+            "/components/schemas/Model1",
+            "/components/schemas/Model2",
+            "/components/schemas/Model3",
+        }
+        assert (
+            result.classes_by_reference["/components/schemas/Model2"].class_info
+            == result.classes_by_reference["/components/schemas/Model1"].class_info
+        )
+
+        # Verify that Model3 extended the properties from Model1
+        assert [p.name for p in result.classes_by_name["Model3"].optional_properties] == ["prop1", "prop2"]
 
 
 class TestPropogateRemoval:
@@ -1156,7 +1194,7 @@ class TestBuildParameters:
                 call("#/components/parameters/first"),
             ]
         )
-        assert update_parameters_with_data.call_count == 3  # noqa: PLR2004
+        assert update_parameters_with_data.call_count == 3
         assert result.errors == [ParameterError()]
 
 

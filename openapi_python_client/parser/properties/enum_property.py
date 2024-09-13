@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["EnumProperty"]
+__all__ = ["EnumProperty", "ValueType"]
 
 from typing import Any, ClassVar, List, Union, cast
 
@@ -174,7 +174,7 @@ class EnumProperty(PropertyProtocol):
         if isinstance(value, self.value_type):
             inverse_values = {v: k for k, v in self.values.items()}
             try:
-                return Value(f"{self.class_info.name}.{inverse_values[value]}")
+                return Value(python_code=f"{self.class_info.name}.{inverse_values[value]}", raw_value=value)
             except KeyError:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")

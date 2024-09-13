@@ -19,6 +19,7 @@ def _get_kwargs(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
@@ -38,6 +39,8 @@ def _get_kwargs(
     params["date_prop"] = json_date_prop
 
     params["float_prop"] = float_prop
+
+    params["float_with_int"] = float_with_int
 
     params["int_prop"] = int_prop
 
@@ -117,6 +120,7 @@ def sync_detailed(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
@@ -133,6 +137,7 @@ def sync_detailed(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
@@ -155,6 +160,7 @@ def sync_detailed(
         string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
+        float_with_int=float_with_int,
         int_prop=int_prop,
         boolean_prop=boolean_prop,
         list_prop=list_prop,
@@ -179,6 +185,7 @@ def sync(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
@@ -195,6 +202,7 @@ def sync(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
@@ -218,6 +226,7 @@ def sync(
         string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
+        float_with_int=float_with_int,
         int_prop=int_prop,
         boolean_prop=boolean_prop,
         list_prop=list_prop,
@@ -236,6 +245,7 @@ async def asyncio_detailed(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
@@ -252,6 +262,7 @@ async def asyncio_detailed(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
@@ -274,6 +285,7 @@ async def asyncio_detailed(
         string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
+        float_with_int=float_with_int,
         int_prop=int_prop,
         boolean_prop=boolean_prop,
         list_prop=list_prop,
@@ -296,6 +308,7 @@ async def asyncio(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: List[AnEnum],
@@ -312,6 +325,7 @@ async def asyncio(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (List[AnEnum]):
@@ -336,6 +350,7 @@ async def asyncio(
             string_with_num=string_with_num,
             date_prop=date_prop,
             float_prop=float_prop,
+            float_with_int=float_with_int,
             int_prop=int_prop,
             boolean_prop=boolean_prop,
             list_prop=list_prop,

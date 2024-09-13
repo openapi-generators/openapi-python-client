@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.7
       - name: Set up Python
-        uses: actions/setup-python@v5.1.1
+        uses: actions/setup-python@v5.2.0
         with:
           python-version: ${{ matrix.python }}
 
@@ -64,12 +64,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
-        uses: actions/upload-artifact@v4.3.6
+        uses: actions/upload-artifact@v4.4.0
         if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage-${{ matrix.python }}
           path: .coverage.${{ matrix.python }}
           if-no-files-found: error
+          include-hidden-files: true
 
   coverage:
     name: Combine & check coverage
@@ -106,7 +107,7 @@ jobs:
           .venv/bin/python -m coverage report --fail-under=100          
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v4.3.6
+        uses: actions/upload-artifact@v4.4.0
         with:
           name: html-report
           path: htmlcov
@@ -128,7 +129,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.7
       - name: Set up Python
-        uses: actions/setup-python@v5.1.1
+        uses: actions/setup-python@v5.2.0
         with:
           python-version: "3.8"
       - name: Get Python Version

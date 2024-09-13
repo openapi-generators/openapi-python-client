@@ -1,11 +1,12 @@
 import openapi_python_client.schema as oai
+from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import EnumProperty, Schemas
 from openapi_python_client.parser.properties.none import NoneProperty
 from openapi_python_client.parser.properties.union import UnionProperty
 
 
-def test_conflict(config):
+def test_conflict(config: Config) -> None:
     schemas = Schemas()
 
     _, schemas = EnumProperty.build(
@@ -24,7 +25,7 @@ def test_conflict(config):
     assert err.detail == "Found conflicting enums named Existing with incompatible values."
 
 
-def test_bad_default_value(config):
+def test_bad_default_value(config: Config) -> None:
     data = oai.Schema(default="B", enum=["A"])
     schemas = Schemas()
 
@@ -36,7 +37,7 @@ def test_bad_default_value(config):
     assert err == PropertyError(detail="Value B is not valid for enum Existing", data=data)
 
 
-def test_bad_default_type(config):
+def test_bad_default_type(config: Config) -> None:
     data = oai.Schema(default=123, enum=["A"])
     schemas = Schemas()
 
@@ -48,7 +49,7 @@ def test_bad_default_type(config):
     assert isinstance(err, PropertyError)
 
 
-def test_mixed_types(config):
+def test_mixed_types(config: Config) -> None:
     data = oai.Schema(enum=["A", 1])
     schemas = Schemas()
 
@@ -59,7 +60,7 @@ def test_mixed_types(config):
     assert isinstance(err, PropertyError)
 
 
-def test_unsupported_type(config):
+def test_unsupported_type(config: Config) -> None:
     data = oai.Schema(enum=[1.4, 1.5])
     schemas = Schemas()
 
@@ -83,7 +84,7 @@ def test_nullable_enum(config):
     )
 
     assert isinstance(p, UnionProperty)
-    assert len(p.inner_properties) == 2  # noqa: PLR2004
+    assert len(p.inner_properties) == 2
     assert isinstance(p.inner_properties[0], NoneProperty)
     assert isinstance(p.inner_properties[1], EnumProperty)
     assert p.inner_properties[1].class_info.name == "ParentProp1"

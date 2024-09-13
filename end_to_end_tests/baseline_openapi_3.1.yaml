@@ -595,6 +595,16 @@ info:
         {
           "required": true,
           "schema": {
+            "title": "Float with int default",
+            "type": "number",
+            "default": 3
+          },
+          "name": "float_with_int",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
             "title": "Int Prop",
             "type": "integer",
             "default": 7
@@ -1619,7 +1629,34 @@ info:
         }
       }
     }
-  }
+  },
+  "/models/allof": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aliased": {
+                    "$ref": "#/components/schemas/Aliased"
+                  },
+                  "extended": {
+                    "$ref": "#/components/schemas/Extended"
+                  },
+                  "model": {
+                    "$ref": "#/components/schemas/AModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
 }
 "components":
   "schemas": {
@@ -1635,6 +1672,23 @@ info:
       },
       "required": [
         "an_required_field"
+      ]
+    },
+    "Aliased": {
+      "allOf": [
+        { "$ref": "#/components/schemas/AModel" }
+      ]
+    },
+    "Extended": {
+      "allOf": [
+        { "$ref": "#/components/schemas/Aliased" },
+        { "type": "object",
+          "properties": {
+            "fromExtended": {
+              "type": "string"
+            }
+          }
+        }
       ]
     },
     "AModel": {
@@ -1656,7 +1710,9 @@ info:
       ],
       "type": "object",
       "properties": {
-        "any_value": { },
+        "any_value": {
+          "default": "default",
+        },
         "an_enum_value": {
           "$ref": "#/components/schemas/AnEnum"
         },
@@ -1669,11 +1725,7 @@ info:
           "default": "overridden_default"
         },
         "an_optional_allof_enum": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/AnAllOfEnum"
-            }
-          ]
+          "$ref": "#/components/schemas/AnAllOfEnum",
         },
         "nested_list_of_enums": {
           "title": "Nested List Of Enums",
@@ -1810,11 +1862,7 @@ info:
           ]
         },
         "model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "nullable_model": {
           "oneOf": [
@@ -1827,11 +1875,7 @@ info:
           ]
         },
         "not_required_model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "not_required_nullable_model": {
           "oneOf": [
@@ -1950,7 +1994,7 @@ info:
           "title": "Some Integer Array",
           "type": "array",
           "items": {
-            "type": ["integer", "null"]
+            "type": [ "integer", "null" ]
           }
         },
         "some_array": {
@@ -2124,6 +2168,56 @@ info:
         "additionalProperties": { }
       }
     },
+    "ModelWithMergedProperties": {
+      "title": "ModelWithMergedProperties",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "simpleString": {
+              "type": "string",
+              "description": "base simpleString description"
+            },
+            "stringToEnum": {
+              "type": "string",
+              "default": "a"
+            },
+            "stringToDate": {
+              "type": "string"
+            },
+            "numberToInt": {
+              "type": "number"
+            },
+            "anyToString": { }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "simpleString": {
+              "type": "string",
+              "description": "extended simpleString description",
+              "default": "new default"
+            },
+            "stringToEnum": {
+              "type": "string",
+              "enum": [ "a", "b" ]
+            },
+            "stringToDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "numberToInt": {
+              "type": "integer"
+            },
+            "anyToString": {
+              "type": "string",
+              "default": "x"
+            }
+          }
+        }
+      ]
+    },
     "ModelWithPrimitiveAdditionalProperties": {
       "title": "ModelWithPrimitiveAdditionalProperties",
       "type": "object",
@@ -2190,6 +2284,11 @@ info:
           "$ref": "#/components/schemas/AnotherAllOfSubModel"
         }
       ]
+    },
+    "ModelWithNoProperties": {
+      "type": "object",
+      "properties": { },
+      "additionalProperties": false
     },
     "AllOfSubModel": {
       "title": "AllOfSubModel",
