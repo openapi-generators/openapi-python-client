@@ -4,8 +4,8 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
-        PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+    from ..models.post_responses_unions_simple_before_complex_response_200a import (
+        PostResponsesUnionsSimpleBeforeComplexResponse200A,
     )
 
 
@@ -16,19 +16,19 @@ T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200")
 class PostResponsesUnionsSimpleBeforeComplexResponse200:
     """
     Attributes:
-        a (Union['PostResponsesUnionsSimpleBeforeComplexResponse200AType1', str]):
+        a (Union['PostResponsesUnionsSimpleBeforeComplexResponse200A', str]):
     """
 
-    a: Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str]
+    a: Union["PostResponsesUnionsSimpleBeforeComplexResponse200A", str]
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
-            PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+        from ..models.post_responses_unions_simple_before_complex_response_200a import (
+            PostResponsesUnionsSimpleBeforeComplexResponse200A,
         )
 
         a: Union[Dict[str, Any], str]
-        if isinstance(self.a, PostResponsesUnionsSimpleBeforeComplexResponse200AType1):
+        if isinstance(self.a, PostResponsesUnionsSimpleBeforeComplexResponse200A):
             a = self.a.to_dict()
         else:
             a = self.a
@@ -45,22 +45,22 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
-            PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+        from ..models.post_responses_unions_simple_before_complex_response_200a import (
+            PostResponsesUnionsSimpleBeforeComplexResponse200A,
         )
 
         d = src_dict.copy()
 
-        def _parse_a(data: object) -> Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str]:
+        def _parse_a(data: object) -> Union["PostResponsesUnionsSimpleBeforeComplexResponse200A", str]:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                a_type_1 = PostResponsesUnionsSimpleBeforeComplexResponse200AType1.from_dict(data)
+                a = PostResponsesUnionsSimpleBeforeComplexResponse200A.from_dict(data)
 
-                return a_type_1
+                return a
             except:  # noqa: E722
                 pass
-            return cast(Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str], data)
+            return cast(Union["PostResponsesUnionsSimpleBeforeComplexResponse200A", str], data)
 
         a = _parse_a(d.pop("a"))
 

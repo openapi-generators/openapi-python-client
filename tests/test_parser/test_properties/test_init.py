@@ -12,6 +12,9 @@ from openapi_python_client.parser.properties import (
     StringProperty,
     UnionProperty,
 )
+from openapi_python_client.parser.properties.float import FloatProperty
+from openapi_python_client.parser.properties.int import IntProperty
+from openapi_python_client.parser.properties.none import NoneProperty
 from openapi_python_client.parser.properties.protocol import ModelProperty, Value
 from openapi_python_client.schema import DataType
 from openapi_python_client.utils import ClassName, PythonIdentifier
@@ -440,7 +443,7 @@ class TestPropertyFromData:
             value_type=str,
             default=Value(python_code="ParentAnEnum.B", raw_value="B"),
         )
-        none_property = none_property_factory(name=name, required=required)
+        none_property = none_property_factory(name=f"{name}_type_0", required=required)
         assert prop == union_property_factory(
             name=name,
             default=Value(python_code="ParentAnEnum.B", raw_value="B"),
@@ -721,6 +724,33 @@ class TestPropertyFromData:
 
         assert isinstance(response, UnionProperty)
         assert len(response.inner_properties) == 2
+        assert isinstance(response.inner_properties[0], FloatProperty)
+        assert isinstance(response.inner_properties[1], NoneProperty)
+
+    def test_property_from_data_list_of_types_and_oneof(self, config):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        name = "union_prop"
+        required = True
+        data = oai.Schema(
+            type=[DataType.NUMBER, DataType.NULL],
+            anyOf=[
+                oai.Schema(type=DataType.NUMBER),
+                oai.Schema(type=DataType.INTEGER),  # this is OK because an integer is also a number
+                oai.Schema(type=DataType.NULL),
+            ],
+        )
+        schemas = Schemas()
+
+        response = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+        )[0]
+
+        assert isinstance(response, UnionProperty)
+        assert len(response.inner_properties) == 3
+        assert isinstance(response.inner_properties[0], FloatProperty)
+        assert isinstance(response.inner_properties[1], IntProperty)
+        assert isinstance(response.inner_properties[2], NoneProperty)
 
     def test_property_from_data_union_of_one_element(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
