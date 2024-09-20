@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from itertools import chain
 from typing import Any, ClassVar, NamedTuple
 
@@ -12,6 +13,15 @@ from ..errors import ParseError, PropertyError
 from .any import AnyProperty
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
+
+
+@dataclass
+class ModelDetails:
+    required_properties: list[Property] | None = None
+    optional_properties: list[Property] | None = None
+    additional_properties: Property | None = None
+    relative_imports: set[str] | None = None
+    lazy_imports: set[str] | None = None
 
 
 @define
@@ -27,11 +37,7 @@ class ModelProperty(PropertyProtocol):
     data: oai.Schema
     description: str
     roots: set[ReferencePath | utils.ClassName]
-    required_properties: list[Property] | None
-    optional_properties: list[Property] | None
-    relative_imports: set[str] | None
-    lazy_imports: set[str] | None
-    additional_properties: Property | None
+    details: ModelDetails
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
@@ -75,22 +81,18 @@ class ModelProperty(PropertyProtocol):
                 class_string = title
         class_info = Class.from_string(string=class_string, config=config)
         model_roots = {*roots, class_info.name}
-        required_properties: list[Property] | None = None
-        optional_properties: list[Property] | None = None
-        relative_imports: set[str] | None = None
-        lazy_imports: set[str] | None = None
-        additional_properties: Property | None = None
+        details = ModelDetails()
         if process_properties:
             data_or_err, schemas = _process_property_data(
                 data=data, schemas=schemas, class_info=class_info, config=config, roots=model_roots
             )
             if isinstance(data_or_err, PropertyError):
                 return data_or_err, schemas
-            property_data, additional_properties = data_or_err
-            required_properties = property_data.required_props
-            optional_properties = property_data.optional_props
-            relative_imports = property_data.relative_imports
-            lazy_imports = property_data.lazy_imports
+            property_data, details.additional_properties = data_or_err
+            details.required_properties = property_data.required_props
+            details.optional_properties = property_data.optional_props
+            details.relative_imports = property_data.relative_imports
+            details.lazy_imports = property_data.lazy_imports
             for root in roots:
                 if isinstance(root, utils.ClassName):
                     continue
@@ -100,11 +102,7 @@ class ModelProperty(PropertyProtocol):
             class_info=class_info,
             data=data,
             roots=model_roots,
-            required_properties=required_properties,
-            optional_properties=optional_properties,
-            relative_imports=relative_imports,
-            lazy_imports=lazy_imports,
-            additional_properties=additional_properties,
+            details=details,
             description=data.description or "",
             default=None,
             required=required,
@@ -125,6 +123,31 @@ class ModelProperty(PropertyProtocol):
         )
         return prop, schemas
 
+    def needs_processing(self) -> bool:
+        return not (
+            isinstance(self.details.required_properties, list) and isinstance(self.details.optional_properties, list)
+        )
+
+    @property
+    def required_properties(self) -> list[Property]:
+        return self.details.required_properties or []
+
+    @property
+    def optional_properties(self) -> list[Property]:
+        return self.details.optional_properties or []
+
+    @property
+    def additional_properties(self) -> Property | None:
+        return self.details.additional_properties
+
+    @property
+    def relative_imports(self) -> set[str]:
+        return self.details.relative_imports or set()
+
+    @property
+    def lazy_imports(self) -> set[str] | None:
+        return self.details.lazy_imports or set()
+
     @classmethod
     def convert_value(cls, value: Any) -> Value | None | PropertyError:
         if value is not None:
@@ -132,7 +155,7 @@ class ModelProperty(PropertyProtocol):
         return None
 
     def __attrs_post_init__(self) -> None:
-        if self.relative_imports:
+        if self.details.relative_imports:
             self.set_relative_imports(self.relative_imports)
 
     @property
@@ -175,7 +198,7 @@ class ModelProperty(PropertyProtocol):
         Args:
             relative_imports: The set of relative import strings
         """
-        object.__setattr__(self, "relative_imports", {ri for ri in relative_imports if self.self_import not in ri})
+        self.details.relative_imports = {ri for ri in relative_imports if self.self_import not in ri}
 
     def set_lazy_imports(self, lazy_imports: set[str]) -> None:
         """Set the lazy imports set for this ModelProperty, filtering out self imports
@@ -183,7 +206,7 @@ class ModelProperty(PropertyProtocol):
         Args:
             lazy_imports: The set of lazy import strings
         """
-        object.__setattr__(self, "lazy_imports", {li for li in lazy_imports if self.self_import not in li})
+        self.details.lazy_imports = {li for li in lazy_imports if self.self_import not in li}
 
     def get_type_string(
         self,
@@ -289,9 +312,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
             # Properties of allOf references first should be processed first
-            if not (
-                isinstance(sub_model.required_properties, list) and isinstance(sub_model.optional_properties, list)
-            ):
+            if sub_model.needs_processing():
                 return PropertyError(f"Reference {sub_model.name} in allOf was not processed", data=sub_prop)
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
                 err = _add_if_no_conflict(prop)
@@ -437,9 +458,10 @@ def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config
 
     property_data, additional_properties = data_or_err
 
-    object.__setattr__(model_prop, "required_properties", property_data.required_props)
-    object.__setattr__(model_prop, "optional_properties", property_data.optional_props)
+    model_prop.details.required_properties = property_data.required_props
+    model_prop.details.optional_properties = property_data.optional_props
+    model_prop.details.additional_properties = additional_properties
     model_prop.set_relative_imports(property_data.relative_imports)
     model_prop.set_lazy_imports(property_data.lazy_imports)
-    object.__setattr__(model_prop, "additional_properties", additional_properties)
+
     return schemas

@@ -6,7 +6,12 @@ from attr import evolve
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import Schemas, StringProperty
-from openapi_python_client.parser.properties.model_property import ANY_ADDITIONAL_PROPERTY, _process_properties
+from openapi_python_client.parser.properties.model_property import (
+    ANY_ADDITIONAL_PROPERTY,
+    ModelDetails,
+    ModelProperty,
+    _process_properties,
+)
 
 MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 
@@ -675,7 +680,7 @@ class TestProcessModel:
         from openapi_python_client.parser.properties import Schemas
         from openapi_python_client.parser.properties.model_property import process_model
 
-        model_prop = model_property_factory()
+        model_prop: ModelProperty = model_property_factory(details=ModelDetails())
         schemas = Schemas()
         process_property_data = mocker.patch(f"{MODULE_NAME}._process_property_data")
         process_property_data.return_value = (PropertyError(), schemas)
@@ -683,9 +688,10 @@ class TestProcessModel:
         result = process_model(model_prop=model_prop, schemas=schemas, config=config)
 
         assert result == PropertyError()
-        assert model_prop.required_properties is None
-        assert model_prop.optional_properties is None
-        assert model_prop.relative_imports is None
+        assert model_prop.needs_processing()
+        assert model_prop.required_properties == []
+        assert model_prop.optional_properties == []
+        assert model_prop.relative_imports == set()
         assert model_prop.additional_properties is None
 
     def test_process_model(self, mocker, model_property_factory, config):
@@ -721,6 +727,9 @@ def test_set_relative_imports(model_property_factory):
     class_info = Class("ClassName", module_name="module_name")
     relative_imports = {"from typing import List", f"from ..models.{class_info.module_name} import {class_info.name}"}
 
-    model_property = model_property_factory(class_info=class_info, relative_imports=relative_imports)
+    model_property = model_property_factory(
+        class_info=class_info,
+        details=ModelDetails(relative_imports=relative_imports),
+    )
 
     assert model_property.relative_imports == {"from typing import List"}

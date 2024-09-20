@@ -6,6 +6,7 @@ from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.merge_properties import merge_properties
+from openapi_python_client.parser.properties.model_property import ModelDetails
 from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.parser.properties.string import StringProperty
@@ -27,7 +28,7 @@ def test_merge_basic_attributes_same_type(
         float_property_factory(default=Value("1.5", 1.5)),
         string_property_factory(default=StringProperty.convert_value("x")),
         list_property_factory(),
-        model_property_factory(),
+        model_property_factory(required_properties=[], optional_properties=[]),
     ]
     for basic_prop in basic_props:
         with_required = evolve(basic_prop, required=True)
@@ -237,3 +238,110 @@ def test_merge_lists(int_property_factory, list_property_factory, string_propert
     )
 
     assert isinstance(merge_properties(list_prop_1, list_prop_3), PropertyError)
+
+
+def test_merge_related_models(model_property_factory, string_property_factory, config):
+    base_model = model_property_factory(
+        name="BaseModel",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="req_1", description="base description"),
+            ],
+            optional_properties=[
+                string_property_factory(name="opt_1"),
+            ],
+        ),
+        description="desc_1",
+        example="example_1",
+        class_info=Class.from_string(string="BaseModel", config=config),
+    )
+    derived_model = model_property_factory(
+        name="DerivedModel",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="req_1", description="extended description"),
+                string_property_factory(name="req_2"),
+            ],
+            optional_properties=[
+                string_property_factory(name="opt_1"),
+                string_property_factory(name="opt_2"),
+            ],
+        ),
+        description="desc_2",
+        class_info=Class.from_string(string="DerivedModel", config=config),
+    )
+
+    assert merge_properties(base_model, derived_model) == evolve(derived_model, example=base_model.example)
+    assert merge_properties(derived_model, base_model) == evolve(
+        derived_model, description=base_model.description, example=base_model.example
+    )
+
+
+def test_merge_models_fails_for_unrelated_required_property(model_property_factory, string_property_factory, config):
+    model_1 = model_property_factory(
+        name="model_1",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="req_1"),
+            ],
+            optional_properties=[
+                string_property_factory(name="opt_1"),
+            ],
+        ),
+        description="desc_1",
+        example="example_1",
+        class_info=Class.from_string(string="Model1", config=config),
+    )
+    model_2 = model_property_factory(
+        name="model_2",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="req_2"),
+            ],
+            optional_properties=[
+                string_property_factory(name="opt_1"),
+                string_property_factory(name="opt_2"),
+            ],
+        ),
+        description="desc_2",
+        class_info=Class.from_string(string="Model2", config=config),
+    )
+
+    result = merge_properties(model_1, model_2)
+    assert isinstance(result, PropertyError)
+    assert result.detail == "unable to merge two unrelated object types for this property"
+
+
+def test_merge_models_fails_for_unrelated_optional_property(model_property_factory, string_property_factory, config):
+    model_1 = model_property_factory(
+        name="model_1",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="req_1"),
+            ],
+            optional_properties=[
+                string_property_factory(name="opt_1"),
+            ],
+        ),
+        description="desc_1",
+        example="example_1",
+        class_info=Class.from_string(string="Model1", config=config),
+    )
+    model_2 = model_property_factory(
+        name="model_2",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="req_1"),
+                string_property_factory(name="req_2"),
+            ],
+            optional_properties=[
+                string_property_factory(name="opt_2"),
+            ],
+        ),
+        description="desc_2",
+        class_info=Class.from_string(string="Model2", config=config),
+    )
+
+    result = merge_properties(model_1, model_2)
+    assert isinstance(result, PropertyError)
+    assert result.detail == "unable to merge two unrelated object types for this property"

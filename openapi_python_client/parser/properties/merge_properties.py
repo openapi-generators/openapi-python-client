@@ -3,6 +3,7 @@ from __future__ import annotations
 from openapi_python_client.parser.properties.date import DateProperty
 from openapi_python_client.parser.properties.datetime import DateTimeProperty
 from openapi_python_client.parser.properties.file import FileProperty
+from openapi_python_client.parser.properties.model_property import ModelProperty
 
 __all__ = ["merge_properties"]
 
@@ -75,6 +76,9 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
         # It's always OK to redefine a property with everything exactly the same
         return prop1
 
+    if isinstance(prop1, ModelProperty) and isinstance(prop2, ModelProperty):
+        return _merge_models(prop1, prop2)
+
     if isinstance(prop1, ListProperty) and isinstance(prop2, ListProperty):
         inner_property = merge_properties(prop1.inner_property, prop2.inner_property)  # type: ignore
         if isinstance(inner_property, PropertyError):
@@ -84,6 +88,24 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
     # For all other property types, there aren't any special attributes that affect validation, so just
     # apply the rules for common attributes like "description".
     return _merge_common_attributes(prop1, prop2)
+
+
+def _merge_models(prop1: ModelProperty, prop2: ModelProperty) -> Property | PropertyError:
+    # Ideally, we would treat this case the same as a schema that consisted of "allOf: [prop1, prop2]",
+    # applying the property merge logic recursively and creating a new third schema if the result could
+    # not be fully described by one or the other. But for now we will just handle the common case where
+    # B is an object type that extends A and fully includes it, with no changes to any of A's properties;
+    # in that case, it is valid to just reuse the model class for B.
+    for prop in [prop1, prop2]:
+        if prop.needs_processing():
+            return PropertyError(f"Schema for {prop} in allOf was not processed", data=prop)
+    if _model_is_extension_of(prop1, prop2):
+        extended_model = prop1
+    elif _model_is_extension_of(prop2, prop1):
+        extended_model = prop2
+    else:
+        return PropertyError(detail="unable to merge two unrelated object types for this property")
+    return _merge_common_attributes(extended_model, prop1, prop2)
 
 
 def _merge_string_with_format(prop1: Property, prop2: Property) -> Property | None | PropertyError:
@@ -166,3 +188,19 @@ def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) ->
 
 def _values_are_subset(prop1: EnumProperty, prop2: EnumProperty) -> bool:
     return set(prop1.values.items()) <= set(prop2.values.items())
+
+
+def _model_is_extension_of(extended_model: ModelProperty, base_model: ModelProperty) -> bool:
+    def _list_is_extension_of(extended_list: list[Property], base_list: list[Property]) -> bool:
+        for p2 in base_list:
+            if not [p1 for p1 in extended_list if _property_is_extension_of(p2, p1)]:
+                return False
+        return True
+
+    return _list_is_extension_of(
+        extended_model.required_properties, base_model.required_properties
+    ) and _list_is_extension_of(extended_model.optional_properties, base_model.optional_properties)
+
+
+def _property_is_extension_of(extended_prop: PropertyProtocol, base_prop: PropertyProtocol) -> bool:
+    return base_prop.name == extended_prop.name and merge_properties(base_prop, extended_prop) == extended_prop
