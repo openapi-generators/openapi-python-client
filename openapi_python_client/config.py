@@ -43,6 +43,7 @@ class ConfigFile(BaseModel):
     post_hooks: Optional[List[str]] = None
     field_prefix: str = "field_"
     http_timeout: int = 5
+    case_sensitive_enums: bool = False
 
     @staticmethod
     def load_from_path(path: Path) -> "ConfigFile":
@@ -75,6 +76,7 @@ class Config:
     content_type_overrides: Dict[str, str]
     overwrite: bool
     output_path: Optional[Path]
+    case_sensitive_enums: bool
 
     @staticmethod
     def from_sources(
@@ -113,5 +115,6 @@ class Config:
             file_encoding=file_encoding,
             overwrite=overwrite,
             output_path=output_path,
+            case_sensitive_enums=config_file.case_sensitive_enums,
         )
         return config
