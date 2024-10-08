@@ -5,6 +5,10 @@ from typing import Any, ClassVar, cast
 
 from attr import define, evolve
 
+from openapi_python_client.parser.properties.has_named_class import HasNamedClass
+from openapi_python_client.schema.openapi_schema_pydantic.reference import Reference
+from openapi_python_client.schema.openapi_schema_pydantic.schema import Schema
+
 from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
@@ -47,25 +51,45 @@ class UnionProperty(PropertyProtocol):
         """
         from . import property_from_data
 
-        sub_properties: list[PropertyProtocol] = []
-
         type_list_data = []
-        if isinstance(data.type, list):
+        if isinstance(data.type, list) and not (data.anyOf or data.oneOf):
             for _type in data.type:
                 type_list_data.append(data.model_copy(update={"type": _type, "default": None}))
 
-        for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
-            sub_prop, schemas = property_from_data(
-                name=f"{name}_type_{i}",
-                required=True,
-                data=sub_prop_data,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(sub_prop, PropertyError):
-                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
-            sub_properties.append(sub_prop)
+        def process_items(
+            preserve_name_for_item: Schema | Reference | None = None,
+        ) -> tuple[list[PropertyProtocol] | PropertyError, Schemas]:
+            props: list[PropertyProtocol] = []
+            new_schemas = schemas
+            items_with_classes: list[Schema | Reference] = []
+            for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
+                sub_prop_name = name if sub_prop_data is preserve_name_for_item else f"{name}_type_{i}"
+                sub_prop, new_schemas = property_from_data(
+                    name=sub_prop_name,
+                    required=True,
+                    data=sub_prop_data,
+                    schemas=new_schemas,
+                    parent_name=parent_name,
+                    config=config,
+                )
+                if isinstance(sub_prop, PropertyError):
+                    return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), new_schemas
+                if isinstance(sub_prop, HasNamedClass):
+                    items_with_classes.append(sub_prop_data)
+                props.append(sub_prop)
+
+            if (not preserve_name_for_item) and (len(items_with_classes) == 1):
+                # After our first pass, if it turns out that there was exactly one enum or model in the list,
+                # then we'll do a second pass where we use the original name for that item instead of a
+                # "xyz_type_n" synthetic name. Enum and model are the only types that would get their own
+                # Python class.
+                return process_items(items_with_classes[0])
+
+            return props, new_schemas
+
+        sub_properties, schemas = process_items()
+        if isinstance(sub_properties, PropertyError):
+            return sub_properties, schemas
 
         def flatten_union_properties(sub_properties: list[PropertyProtocol]) -> list[PropertyProtocol]:
             flattened = []

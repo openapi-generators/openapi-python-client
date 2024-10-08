@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Type, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="ModelWithAnyJsonPropertiesAdditionalPropertyType0")
+T = TypeVar("T", bound="ModelWithAnyJsonPropertiesAdditionalProperty")
 
 
 @_attrs_define
-class ModelWithAnyJsonPropertiesAdditionalPropertyType0:
+class ModelWithAnyJsonPropertiesAdditionalProperty:
     """ """
 
     additional_properties: Dict[str, str] = _attrs_field(init=False, factory=dict)
@@ -21,10 +21,10 @@ class ModelWithAnyJsonPropertiesAdditionalPropertyType0:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_with_any_json_properties_additional_property_type_0 = cls()
+        model_with_any_json_properties_additional_property = cls()
 
-        model_with_any_json_properties_additional_property_type_0.additional_properties = d
-        return model_with_any_json_properties_additional_property_type_0
+        model_with_any_json_properties_additional_property.additional_properties = d
+        return model_with_any_json_properties_additional_property
 
     @property
     def additional_keys(self) -> List[str]:
