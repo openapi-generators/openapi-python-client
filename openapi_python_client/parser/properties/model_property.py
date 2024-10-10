@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import chain
-from typing import Any, ClassVar, NamedTuple
+from typing import Any, ClassVar, Iterable, NamedTuple
 
 from attrs import define, evolve
 
@@ -261,7 +261,7 @@ class _PropertyData(NamedTuple):
     schemas: Schemas
 
 
-def _process_properties(  # noqa: PLR0912, PLR0911
+def _process_properties(  # noqa: PLR0911
     *,
     data: oai.Schema,
     schemas: Schemas,
@@ -273,15 +273,13 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     from .merge_properties import merge_properties
 
     properties: dict[str, Property] = {}
-    relative_imports: set[str] = set()
-    lazy_imports: set[str] = set()
     required_set = set(data.required or [])
 
     def _add_if_no_conflict(new_prop: Property) -> PropertyError | None:
         nonlocal properties
 
         name_conflict = properties.get(new_prop.name)
-        merged_prop = merge_properties(name_conflict, new_prop) if name_conflict else new_prop
+        merged_prop = merge_properties(name_conflict, new_prop, class_name, config) if name_conflict else new_prop
         if isinstance(merged_prop, PropertyError):
             merged_prop.header = f"Found conflicting properties named {new_prop.name} when creating {class_name}"
             return merged_prop
@@ -340,9 +338,15 @@ def _process_properties(  # noqa: PLR0912, PLR0911
         if isinstance(prop_or_error, PropertyError):
             return prop_or_error
 
+    return _gather_property_data(properties.values(), schemas)
+
+
+def _gather_property_data(properties: Iterable[Property], schemas: Schemas) -> _PropertyData:
     required_properties = []
     optional_properties = []
-    for prop in properties.values():
+    relative_imports: set[str] = set()
+    lazy_imports: set[str] = set()
+    for prop in properties:
         if prop.required:
             required_properties.append(prop)
         else:
@@ -350,7 +354,6 @@ def _process_properties(  # noqa: PLR0912, PLR0911
 
         lazy_imports.update(prop.get_lazy_imports(prefix=".."))
         relative_imports.update(prop.get_imports(prefix=".."))
-
     return _PropertyData(
         optional_props=optional_properties,
         required_props=required_properties,
