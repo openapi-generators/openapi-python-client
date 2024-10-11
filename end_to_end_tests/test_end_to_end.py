@@ -148,6 +148,17 @@ def test_3_1_specific_features():
     )
 
 
+def test_literal_enums_end_to_end():
+    config_path = Path(__file__).parent / "literal_enums.config.yml"
+    run_e2e_test(
+        "openapi_3.1_enums.yaml",
+        [f"--config={config_path}"],
+        {},
+        "literal-enums-golden-record",
+        "my-enum-api-client"
+    )
+
+
 @pytest.mark.parametrize(
     "meta,generated_file,expected_file",
     (

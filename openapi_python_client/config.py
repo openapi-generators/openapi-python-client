@@ -43,6 +43,7 @@ class ConfigFile(BaseModel):
     post_hooks: Optional[List[str]] = None
     field_prefix: str = "field_"
     http_timeout: int = 5
+    literal_enums: bool = False
 
     @staticmethod
     def load_from_path(path: Path) -> "ConfigFile":
@@ -70,6 +71,7 @@ class Config:
     post_hooks: List[str]
     field_prefix: str
     http_timeout: int
+    literal_enums: bool
     document_source: Union[Path, str]
     file_encoding: str
     content_type_overrides: Dict[str, str]
@@ -109,6 +111,7 @@ class Config:
             post_hooks=post_hooks,
             field_prefix=config_file.field_prefix,
             http_timeout=config_file.http_timeout,
+            literal_enums=config_file.literal_enums,
             document_source=document_source,
             file_encoding=file_encoding,
             overwrite=overwrite,

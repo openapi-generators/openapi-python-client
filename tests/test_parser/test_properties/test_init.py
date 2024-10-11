@@ -13,6 +13,7 @@ from openapi_python_client.parser.properties import (
     UnionProperty,
 )
 from openapi_python_client.parser.properties.protocol import ModelProperty, Value
+from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.schema import DataType
 from openapi_python_client.utils import ClassName, PythonIdentifier
 
@@ -352,7 +353,7 @@ class TestEnumProperty:
 
         data = ["abc", "123", "a23", "1bc", 4, -3, "a Thing WIth spaces", ""]
 
-        result = EnumProperty.values_from_list(data)
+        result = EnumProperty.values_from_list(data, Class("ClassName", "module_name"))
 
         assert result == {
             "ABC": "abc",
@@ -371,7 +372,44 @@ class TestEnumProperty:
         data = ["abc", "123", "a23", "abc"]
 
         with pytest.raises(ValueError):
-            EnumProperty.values_from_list(data)
+            EnumProperty.values_from_list(data, Class("ClassName", "module_name"))
+
+
+class TestLiteralEnumProperty:
+    def test_is_base_type(self, literal_enum_property_factory):
+        assert literal_enum_property_factory().is_base_type is True
+
+    @pytest.mark.parametrize(
+        "required, expected",
+        (
+            (False, "Union[Unset, {}]"),
+            (True, "{}"),
+        ),
+    )
+    def test_get_type_string(self, mocker, literal_enum_property_factory, required, expected):
+        fake_class = mocker.MagicMock()
+        fake_class.name = "MyTestEnum"
+
+        p = literal_enum_property_factory(class_info=fake_class, required=required)
+
+        assert p.get_type_string() == expected.format(fake_class.name)
+        assert p.get_type_string(no_optional=True) == fake_class.name
+        assert p.get_type_string(json=True) == expected.format("str")
+
+    def test_get_imports(self, mocker, literal_enum_property_factory):
+        fake_class = mocker.MagicMock(module_name="my_test_enum")
+        fake_class.name = "MyTestEnum"
+        prefix = "..."
+
+        literal_enum_property = literal_enum_property_factory(class_info=fake_class, required=False)
+
+        assert literal_enum_property.get_imports(prefix=prefix) == {
+            "from typing import cast",
+            f"from {prefix}models.{fake_class.module_name} import {fake_class.name}",
+            f"from {prefix}models.{fake_class.module_name} import check_my_test_enum",
+            "from typing import Union",  # Makes sure unset is handled via base class
+            "from ...types import UNSET, Unset",
+        }
 
 
 class TestPropertyFromData:

@@ -13,7 +13,7 @@ import json
 
 from ..types import UNSET, Unset
 
-{% for relative in model.relative_imports %}
+{% for relative in model.relative_imports | sort %}
 {{ relative }}
 {% endfor %}
 

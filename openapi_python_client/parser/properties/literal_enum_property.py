@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["EnumProperty", "ValueType"]
+__all__ = ["LiteralEnumProperty"]
 
 from typing import Any, ClassVar, List, Union, cast
 
@@ -20,8 +20,8 @@ ValueType = Union[str, int]
 
 
 @define
-class EnumProperty(PropertyProtocol):
-    """A property that should use an enum"""
+class LiteralEnumProperty(PropertyProtocol):
+    """A property that should use a literal enum"""
 
     name: str
     required: bool
@@ -29,11 +29,11 @@ class EnumProperty(PropertyProtocol):
     python_name: utils.PythonIdentifier
     description: str | None
     example: str | None
-    values: dict[str, ValueType]
+    values: set[ValueType]
     class_info: Class
     value_type: type[ValueType]
 
-    template: ClassVar[str] = "enum_property.py.jinja"
+    template: ClassVar[str] = "literal_enum_property.py.jinja"
 
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
         oai.ParameterLocation.QUERY,
@@ -52,17 +52,16 @@ class EnumProperty(PropertyProtocol):
         schemas: Schemas,
         parent_name: str,
         config: Config,
-    ) -> tuple[EnumProperty | NoneProperty | UnionProperty | PropertyError, Schemas]:
+    ) -> tuple[LiteralEnumProperty | NoneProperty | UnionProperty | PropertyError, Schemas]:
         """
-        Create an EnumProperty from schema data.
+        Create a LiteralEnumProperty from schema data.
 
         Args:
             data: The OpenAPI Schema which defines this enum.
             name: The name to use for variables which receive this Enum's value (e.g. model property name)
             required: Whether or not this Property is required in the calling context
             schemas: The Schemas which have been defined so far (used to prevent naming collisions)
-            enum: The enum from the provided data. Required separately here to prevent extra type checking.
-            parent_name: The context in which this EnumProperty is defined, used to create more specific class names.
+            parent_name: The context in which this LiteralEnumProperty is defined, used to create more specific class names.
             config: The global config for this run of the generator
 
         Returns:
@@ -121,11 +120,11 @@ class EnumProperty(PropertyProtocol):
         if parent_name:
             class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
-        values = EnumProperty.values_from_list(value_list, class_info)
+        values: set[str | int] = set(value_list)
 
         if class_info.name in schemas.classes_by_name:
             existing = schemas.classes_by_name[class_info.name]
-            if not isinstance(existing, EnumProperty) or values != existing.values:
+            if not isinstance(existing, LiteralEnumProperty) or values != existing.values:
                 return (
                     PropertyError(
                         detail=f"Found conflicting enums named {class_info.name} with incompatible values.", data=data
@@ -133,7 +132,7 @@ class EnumProperty(PropertyProtocol):
                     schemas,
                 )
 
-        prop = EnumProperty(
+        prop = LiteralEnumProperty(
             name=name,
             required=required,
             class_info=class_info,
@@ -157,10 +156,9 @@ class EnumProperty(PropertyProtocol):
         if value is None or isinstance(value, Value):
             return value
         if isinstance(value, self.value_type):
-            inverse_values = {v: k for k, v in self.values.items()}
-            try:
-                return Value(python_code=f"{self.class_info.name}.{inverse_values[value]}", raw_value=value)
-            except KeyError:
+            if value in self.values:
+                return Value(python_code=repr(value), raw_value=value)
+            else:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
 
@@ -168,6 +166,9 @@ class EnumProperty(PropertyProtocol):
         return self.class_info.name
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+        return self.value_type.__name__
+
+    def get_instance_type_string(self) -> str:
         return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> set[str]:
@@ -179,31 +180,12 @@ class EnumProperty(PropertyProtocol):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
+        imports.add("from typing import cast")
         imports.add(f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}")
+        imports.add(
+            f"from {prefix}models.{self.class_info.module_name} import check_{self.get_class_name_snake_case()}"
+        )
         return imports
 
-    @staticmethod
-    def values_from_list(values: list[str] | list[int], class_info: Class) -> dict[str, ValueType]:
-        """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
-        output: dict[str, ValueType] = {}
-
-        for i, value in enumerate(values):
-            value = cast(Union[str, int], value)
-            if isinstance(value, int):
-                if value < 0:
-                    output[f"VALUE_NEGATIVE_{-value}"] = value
-                else:
-                    output[f"VALUE_{value}"] = value
-                continue
-            if value and value[0].isalpha():
-                key = value.upper()
-            else:
-                key = f"VALUE_{i}"
-            if key in output:
-                raise ValueError(
-                    f"Duplicate key {key} in enum {class_info.module_name}.{class_info.name}; "
-                    f"consider setting literal_enums in your config"
-                )
-            sanitized_key = utils.snake_case(key).upper()
-            output[sanitized_key] = utils.remove_string_escapes(value)
-        return output
+    def get_class_name_snake_case(self) -> str:
+        return utils.snake_case(self.class_info.name)

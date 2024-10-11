@@ -20,6 +20,7 @@ from openapi_python_client import utils
 from .config import Config, MetaType
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
+from .parser.properties import LiteralEnumProperty
 
 __version__ = version(__package__)
 
@@ -227,9 +228,12 @@ class Project:
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
         int_enum_template = self.env.get_template("int_enum.py.jinja")
+        literal_enum_template = self.env.get_template("literal_enum.py.jinja")
         for enum in self.openapi.enums:
             module_path = models_dir / f"{enum.class_info.module_name}.py"
-            if enum.value_type is int:
+            if isinstance(enum, LiteralEnumProperty):
+                module_path.write_text(literal_enum_template.render(enum=enum), encoding=self.config.file_encoding)
+            elif enum.value_type is int:
                 module_path.write_text(int_enum_template.render(enum=enum), encoding=self.config.file_encoding)
             else:
                 module_path.write_text(str_enum_template.render(enum=enum), encoding=self.config.file_encoding)
