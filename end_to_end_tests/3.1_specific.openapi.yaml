@@ -47,3 +47,34 @@ paths:
             "application/json":
               schema:
                 const: "Why have a fixed response? I dunno"
+  "/prefixItems":
+    post:
+      tags: [ "prefixItems" ]
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                prefixItemsAndItems:
+                  type: array
+                  prefixItems:
+                    - type: string
+                      const: "prefix"
+                    - type: string
+                  items:
+                    type: number
+                prefixItemsOnly:
+                  type: array
+                  prefixItems:
+                    - type: string
+                    - type: number
+                  maxItems: 2
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                type: string
