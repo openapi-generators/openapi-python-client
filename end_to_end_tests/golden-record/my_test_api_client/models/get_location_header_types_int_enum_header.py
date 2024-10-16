@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Literal
 
 
 class GetLocationHeaderTypesIntEnumHeader(IntEnum):
@@ -8,3 +9,10 @@ class GetLocationHeaderTypesIntEnumHeader(IntEnum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+GetLocationHeaderTypesIntEnumHeaderLiteral = Literal[
+    1,
+    2,
+    3,
+]
