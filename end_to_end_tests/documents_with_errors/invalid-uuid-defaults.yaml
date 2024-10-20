@@ -8,9 +8,9 @@ paths:
       parameters:
         - name: id
           in: query
-          required: true
+          required: false
           schema:
-            type: ["null", string]
+            type: string
             format: uuid
             default: "notauuid"
       responses:
@@ -20,9 +20,9 @@ paths:
       parameters:
         - name: another_id
           in: query
-          required: true
+          required: false
           schema:
-            type: ["null", string]
+            type: string
             format: uuid
             default: 3
       responses:

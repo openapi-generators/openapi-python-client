@@ -84,7 +84,7 @@ def _string_based_property(
         return UuidProperty.build(
             name=name,
             required=required,
-            default=None,
+            default=data.default,
             python_name=python_name,
             description=data.description,
             example=data.example,
