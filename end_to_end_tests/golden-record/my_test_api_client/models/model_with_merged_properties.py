@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -28,9 +28,9 @@ class ModelWithMergedProperties:
     string_to_date: Union[Unset, datetime.date] = UNSET
     number_to_int: Union[Unset, int] = UNSET
     any_to_string: Union[Unset, str] = "x"
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         simple_string = self.simple_string
 
         string_to_enum: Union[Unset, str] = UNSET
@@ -45,7 +45,7 @@ class ModelWithMergedProperties:
 
         any_to_string = self.any_to_string
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if simple_string is not UNSET:
@@ -62,7 +62,7 @@ class ModelWithMergedProperties:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         simple_string = d.pop("simpleString", UNSET)
 
@@ -96,7 +96,7 @@ class ModelWithMergedProperties:
         return model_with_merged_properties
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

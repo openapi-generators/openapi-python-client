@@ -106,10 +106,10 @@ class ListProperty(PropertyProtocol):
         return None  # pragma: no cover
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
-        return f"List[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
+        return f"list[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
-        return f"List[{self.inner_property.get_type_string(json=True, quoted=not self.inner_property.is_base_type)}]"
+        return f"list[{self.inner_property.get_type_string(json=True, quoted=not self.inner_property.is_base_type)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -125,7 +125,7 @@ class ListProperty(PropertyProtocol):
         """
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
-        imports.add("from typing import cast, List")
+        imports.add("from typing import cast")
         return imports
 
     def get_lazy_imports(self, *, prefix: str) -> set[str]:
@@ -151,7 +151,7 @@ class ListProperty(PropertyProtocol):
         if json:
             type_string = self.get_base_json_type_string()
         elif multipart:
-            type_string = "Tuple[None, bytes, str]"
+            type_string = "tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string()
 

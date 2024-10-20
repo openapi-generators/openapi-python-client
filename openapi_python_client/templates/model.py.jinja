@@ -1,9 +1,4 @@
-from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO, TYPE_CHECKING
-
-{% if model.additional_properties %}
-from typing import List
-
-{% endif %}
+from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -74,7 +69,7 @@ class {{ class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: Dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
 {% macro _to_dict(multipart=False) %}
@@ -90,7 +85,7 @@ class {{ class_name }}:
 
 {% endfor %}
 
-field_dict: Dict[str, Any] = {}
+field_dict: dict[str, Any] = {}
 {% if model.additional_properties %}
 {% import "property_templates/" + model.additional_properties.template as prop_template %}
 {% if multipart %}
@@ -122,19 +117,19 @@ if {{ property.python_name }} is not UNSET:
 return field_dict
 {% endmacro %}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
-    def to_multipart(self) -> Dict[str, Any]:
+    def to_multipart(self) -> dict[str, Any]:
         {{ _to_dict(multipart=True) | indent(8) }}
 {% endif %}
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
@@ -188,7 +183,7 @@ return field_dict
 
     {% if model.additional_properties %}
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> {{ additional_property_type }}:

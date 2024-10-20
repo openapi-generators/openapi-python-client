@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 from dateutil.parser import isoparse
@@ -22,14 +22,14 @@ def _get_kwargs(
     float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    params: dict[str, Any] = {}
 
     params["string_prop"] = string_prop
 
@@ -77,7 +77,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/defaults",
         "params": params,
@@ -123,7 +123,7 @@ def sync_detailed(
     float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -140,7 +140,7 @@ def sync_detailed(
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -188,7 +188,7 @@ def sync(
     float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -205,7 +205,7 @@ def sync(
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -248,7 +248,7 @@ async def asyncio_detailed(
     float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -265,7 +265,7 @@ async def asyncio_detailed(
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -311,7 +311,7 @@ async def asyncio(
     float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -328,7 +328,7 @@ async def asyncio(
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
