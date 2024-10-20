@@ -13,6 +13,39 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.21.6 (2024-10-20)
+
+### Features
+
+- update Ruff to >=0.2,<0.8 (#1137)
+- Add UUID string format. Thanks @estyrke! (#1140)
+- Support OpenAPI 3.1 prefixItems property for arrays. Thanks @estyrke! (#1141)
+
+#### Add `literal_enums` config setting
+
+Instead of the default `Enum` classes for enums, you can now generate `Literal` sets wherever `enum` appears in the OpenAPI spec by setting `literal_enums: true` in your config file.
+
+```yaml
+literal_enums: true
+```
+
+Thanks to @emosenkis for PR #1114 closes #587, #725, #1076, and probably many more. 
+Thanks also to @eli-bl, @expobrain, @theorm, @chrisguillory, and anyone else who helped getting to this design!
+
+### Fixes
+
+- Typo in docstring (#1128)
+
+#### Use literal value instead of `HTTPStatus` enum when checking response statuses
+
+Python 3.13 renamed some of the `HTTPStatus` enum members, which means clients generated with Python 3.13 may not work 
+with older versions of Python. This change stops using the `HTTPStatus` enum directly when checking response statuses.
+
+Statuses will still be checked for validity at generation time, and transformed into `HTTPStatus` _after_ being checked 
+at runtime.
+
+This may cause some linters to complain.
+
 ## 0.21.5 (2024-09-07)
 
 ### Features
