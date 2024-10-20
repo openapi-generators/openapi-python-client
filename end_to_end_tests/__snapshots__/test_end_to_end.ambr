@@ -13,6 +13,25 @@
   
   '''
 # ---
+# name: test_documents_with_errors[invalid-uuid-defaults]
+  '''
+  Generating /test-documents-with-errors
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
+  
+  WARNING parsing PUT / within default. Endpoint will not be generated.
+  
+  cannot parse parameter of endpoint put_: Invalid UUID value: 3
+  
+  
+  WARNING parsing POST / within default. Endpoint will not be generated.
+  
+  cannot parse parameter of endpoint post_: Invalid UUID value: notauuid
+  
+  
+  If you believe this was a mistake or this tool is missing a feature you need, please open an issue at https://github.com/openapi-generators/openapi-python-client/issues/new/choose
+  
+  '''
+# ---
 # name: test_documents_with_errors[missing-body-ref]
   '''
   Generating /test-documents-with-errors
