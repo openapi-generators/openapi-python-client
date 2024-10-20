@@ -1783,12 +1783,13 @@ info:
           "anyOf": [
             {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
             },
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
         },
         "a_not_required_uuid": {
           "title": "A Not Required Uuid",

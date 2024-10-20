@@ -64,9 +64,7 @@ class UuidProperty(PropertyProtocol):
                 UUID(value)
             except ValueError:
                 return PropertyError(f"Invalid UUID value: {value}")
-            return Value(value)
-        if isinstance(value, UUID):
-            return Value(str(value))
+            return Value(python_code=f"UUID('{value}')", raw_value=value)
         return PropertyError(f"Invalid UUID value: {value}")
 
     def get_imports(self, *, prefix: str) -> set[str]:

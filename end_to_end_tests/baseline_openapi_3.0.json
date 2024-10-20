@@ -1795,7 +1795,8 @@
             "title": "A Nullable Uuid",
             "type": "string",
             "format": "uuid",
-            "nullable": true
+            "nullable": true,
+            "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
           },
           "a_not_required_uuid": {
             "title": "A Not Required Uuid",
