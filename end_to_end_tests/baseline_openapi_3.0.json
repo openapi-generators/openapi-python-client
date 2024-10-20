@@ -1714,6 +1714,8 @@
           "aCamelDateTime",
           "a_date",
           "a_nullable_date",
+          "a_uuid",
+          "a_nullable_uuid",
           "required_nullable",
           "required_not_nullable",
           "model",
@@ -1783,6 +1785,23 @@
             "title": "A Nullable Date",
             "type": "string",
             "format": "date"
+          },
+          "a_uuid": {
+            "title": "A Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "a_nullable_uuid": {
+            "title": "A Nullable Uuid",
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
+          },
+          "a_not_required_uuid": {
+            "title": "A Not Required Uuid",
+            "type": "string",
+            "format": "uuid"
           },
           "1_leading_digit": {
             "title": "Leading Digit",

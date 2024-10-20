@@ -70,7 +70,7 @@ class Client:
         return evolve(self, timeout=timeout)
 
     def set_httpx_client(self, client: httpx.Client) -> "Client":
-        """Manually the underlying httpx.Client
+        """Manually set the underlying httpx.Client
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
         """
@@ -204,7 +204,7 @@ class AuthenticatedClient:
         return evolve(self, timeout=timeout)
 
     def set_httpx_client(self, client: httpx.Client) -> "AuthenticatedClient":
-        """Manually the underlying httpx.Client
+        """Manually set the underlying httpx.Client
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
         """

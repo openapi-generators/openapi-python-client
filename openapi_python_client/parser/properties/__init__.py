@@ -46,11 +46,12 @@ from .schemas import (
 )
 from .string import StringProperty
 from .union import UnionProperty
+from .uuid import UuidProperty
 
 
 def _string_based_property(
     name: str, required: bool, data: oai.Schema, config: Config
-) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | PropertyError:
+) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | PropertyError:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
     python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
@@ -77,6 +78,15 @@ def _string_based_property(
             name=name,
             required=required,
             default=None,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
+        )
+    if string_format == "uuid":
+        return UuidProperty.build(
+            name=name,
+            required=required,
+            default=data.default,
             python_name=python_name,
             description=data.description,
             example=data.example,

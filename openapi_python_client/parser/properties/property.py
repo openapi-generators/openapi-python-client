@@ -19,6 +19,7 @@ from .model_property import ModelProperty
 from .none import NoneProperty
 from .string import StringProperty
 from .union import UnionProperty
+from .uuid import UuidProperty
 
 Property: TypeAlias = Union[
     AnyProperty,
@@ -36,4 +37,5 @@ Property: TypeAlias = Union[
     NoneProperty,
     StringProperty,
     UnionProperty,
+    UuidProperty,
 ]
