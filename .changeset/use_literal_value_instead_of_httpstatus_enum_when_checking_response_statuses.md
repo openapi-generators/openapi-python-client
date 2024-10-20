@@ -9,3 +9,5 @@ with older versions of Python. This change stops using the `HTTPStatus` enum dir
 
 Statuses will still be checked for validity at generation time, and transformed into `HTTPStatus` _after_ being checked 
 at runtime.
+
+This may cause some linters to complain.
