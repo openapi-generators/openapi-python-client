@@ -58,12 +58,28 @@ class ListProperty(PropertyProtocol):
         """
         from . import property_from_data
 
-        if data.items is None:
-            return PropertyError(data=data, detail="type array must have items defined"), schemas
+        if data.items is None and not data.prefixItems:
+            return (
+                PropertyError(
+                    data=data,
+                    detail="type array must have items or prefixItems defined",
+                ),
+                schemas,
+            )
+
+        items = data.prefixItems or []
+        if data.items:
+            items.append(data.items)
+
+        if len(items) == 1:
+            inner_schema = items[0]
+        else:
+            inner_schema = oai.Schema(anyOf=items)
+
         inner_prop, schemas = property_from_data(
             name=f"{name}_item",
             required=True,
-            data=data.items,
+            data=inner_schema,
             schemas=schemas,
             parent_name=parent_name,
             config=config,
