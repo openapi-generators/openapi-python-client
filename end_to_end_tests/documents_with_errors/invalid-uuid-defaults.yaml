@@ -1,0 +1,30 @@
+openapi: "3.1.0"
+info:
+  title: "Circular Body Ref"
+  version: "0.1.0"
+paths:
+  /:
+    post:
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: ["null", string]
+            format: uuid
+            default: "notauuid"
+      responses:
+        "200":
+          description: "Successful Response"
+    put:
+      parameters:
+        - name: another_id
+          in: query
+          required: true
+          schema:
+            type: ["null", string]
+            format: uuid
+            default: 3
+      responses:
+        "200":
+          description: "Successful Response"
