@@ -4,6 +4,7 @@ __all__ = [
     "AnyProperty",
     "Class",
     "EnumProperty",
+    "LiteralEnumProperty",
     "ModelProperty",
     "Parameters",
     "Property",
@@ -30,6 +31,7 @@ from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
 from .list_property import ListProperty
+from .literal_enum_property import LiteralEnumProperty
 from .model_property import ModelProperty, process_model
 from .none import NoneProperty
 from .property import Property
@@ -194,6 +196,15 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             schemas,
         )
     if data.enum:
+        if config.literal_enums:
+            return LiteralEnumProperty.build(
+                data=data,
+                name=name,
+                required=required,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
         return EnumProperty.build(
             data=data,
             name=name,

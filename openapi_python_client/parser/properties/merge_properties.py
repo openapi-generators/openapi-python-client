@@ -3,6 +3,7 @@ from __future__ import annotations
 from openapi_python_client.parser.properties.date import DateProperty
 from openapi_python_client.parser.properties.datetime import DateTimeProperty
 from openapi_python_client.parser.properties.file import FileProperty
+from openapi_python_client.parser.properties.literal_enum_property import LiteralEnumProperty
 
 __all__ = ["merge_properties"]
 
@@ -52,6 +53,9 @@ def merge_properties(prop1: Property, prop2: Property) -> Property | PropertyErr
 
     if isinstance(prop1, EnumProperty) or isinstance(prop2, EnumProperty):
         return _merge_with_enum(prop1, prop2)
+
+    if isinstance(prop1, LiteralEnumProperty) or isinstance(prop2, LiteralEnumProperty):
+        return _merge_with_literal_enum(prop1, prop2)
 
     if (merged := _merge_same_type(prop1, prop2)) is not None:
         return merged
@@ -133,6 +137,32 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
         return _merge_common_attributes(enum_prop, prop1, prop2)
     return PropertyError(
         detail=f"can't combine enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
+    )
+
+
+def _merge_with_literal_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> LiteralEnumProperty | PropertyError:
+    if isinstance(prop1, LiteralEnumProperty) and isinstance(prop2, LiteralEnumProperty):
+        # We want the narrowest validation rules that fit both, so use whichever values list is a
+        # subset of the other.
+        if prop1.values <= prop2.values:
+            values = prop1.values
+            class_info = prop1.class_info
+        elif prop2.values <= prop1.values:
+            values = prop2.values
+            class_info = prop2.class_info
+        else:
+            return PropertyError(detail="can't redefine a literal enum property with incompatible lists of values")
+        return _merge_common_attributes(evolve(prop1, values=values, class_info=class_info), prop2)
+
+    # If enum values were specified for just one of the properties, use those.
+    enum_prop = prop1 if isinstance(prop1, LiteralEnumProperty) else cast(LiteralEnumProperty, prop2)
+    non_enum_prop = prop2 if isinstance(prop1, LiteralEnumProperty) else prop1
+    if (isinstance(non_enum_prop, IntProperty) and enum_prop.value_type is int) or (
+        isinstance(non_enum_prop, StringProperty) and enum_prop.value_type is str
+    ):
+        return _merge_common_attributes(enum_prop, prop1, prop2)
+    return PropertyError(
+        detail=f"can't combine literal enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
     )
 
 
