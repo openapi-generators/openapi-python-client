@@ -1,5 +1,5 @@
 {% macro construct_function(property, source) %}
-uuid.UUID({{ source }})
+UUID({{ source }})
 {% endmacro %}
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}

@@ -1,6 +1,6 @@
 import datetime
-import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from dateutil.parser import isoparse
@@ -28,8 +28,8 @@ class AModel:
         a_camel_date_time (Union[datetime.date, datetime.datetime]):
         a_date (datetime.date):
         a_nullable_date (Union[None, datetime.date]):
-        a_uuid (uuid.UUID):
-        a_nullable_uuid (Union[None, uuid.UUID]):
+        a_uuid (UUID):
+        a_nullable_uuid (Union[None, UUID]):  Default: UUID('07EF8B4D-AA09-4FFA-898D-C710796AFF41').
         required_nullable (Union[None, str]):
         required_not_nullable (str):
         one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', Any]):
@@ -40,7 +40,7 @@ class AModel:
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
         nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
         a_not_required_date (Union[Unset, datetime.date]):
-        a_not_required_uuid (Union[Unset, uuid.UUID]):
+        a_not_required_uuid (Union[Unset, UUID]):
         attr_1_leading_digit (Union[Unset, str]):
         attr_leading_underscore (Union[Unset, str]):
         not_required_nullable (Union[None, Unset, str]):
@@ -55,8 +55,7 @@ class AModel:
     a_camel_date_time: Union[datetime.date, datetime.datetime]
     a_date: datetime.date
     a_nullable_date: Union[None, datetime.date]
-    a_uuid: uuid.UUID
-    a_nullable_uuid: Union[None, uuid.UUID]
+    a_uuid: UUID
     required_nullable: Union[None, str]
     required_not_nullable: str
     one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", Any]
@@ -64,11 +63,12 @@ class AModel:
     model: "ModelWithUnionProperty"
     nullable_model: Union["ModelWithUnionProperty", None]
     an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
+    a_nullable_uuid: Union[None, UUID] = UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41")
     any_value: Union[Unset, Any] = "default"
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
-    a_not_required_uuid: Union[Unset, uuid.UUID] = UNSET
+    a_not_required_uuid: Union[Unset, UUID] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
     attr_leading_underscore: Union[Unset, str] = UNSET
     not_required_nullable: Union[None, Unset, str] = UNSET
@@ -103,7 +103,7 @@ class AModel:
         a_uuid = str(self.a_uuid)
 
         a_nullable_uuid: Union[None, str]
-        if isinstance(self.a_nullable_uuid, uuid.UUID):
+        if isinstance(self.a_nullable_uuid, UUID):
             a_nullable_uuid = str(self.a_nullable_uuid)
         else:
             a_nullable_uuid = self.a_nullable_uuid
@@ -295,20 +295,20 @@ class AModel:
 
         a_nullable_date = _parse_a_nullable_date(d.pop("a_nullable_date"))
 
-        a_uuid = uuid.UUID(d.pop("a_uuid"))
+        a_uuid = UUID(d.pop("a_uuid"))
 
-        def _parse_a_nullable_uuid(data: object) -> Union[None, uuid.UUID]:
+        def _parse_a_nullable_uuid(data: object) -> Union[None, UUID]:
             if data is None:
                 return data
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                a_nullable_uuid_type_0 = uuid.UUID(data)
+                a_nullable_uuid_type_0 = UUID(data)
 
                 return a_nullable_uuid_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union[None, uuid.UUID], data)
+            return cast(Union[None, UUID], data)
 
         a_nullable_uuid = _parse_a_nullable_uuid(d.pop("a_nullable_uuid"))
 
@@ -411,11 +411,11 @@ class AModel:
             a_not_required_date = isoparse(_a_not_required_date).date()
 
         _a_not_required_uuid = d.pop("a_not_required_uuid", UNSET)
-        a_not_required_uuid: Union[Unset, uuid.UUID]
+        a_not_required_uuid: Union[Unset, UUID]
         if isinstance(_a_not_required_uuid, Unset):
             a_not_required_uuid = UNSET
         else:
-            a_not_required_uuid = uuid.UUID(_a_not_required_uuid)
+            a_not_required_uuid = UUID(_a_not_required_uuid)
 
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 

@@ -22,7 +22,7 @@ class UuidProperty(PropertyProtocol):
     description: str | None
     example: str | None
 
-    _type_string: ClassVar[str] = "uuid.UUID"
+    _type_string: ClassVar[str] = "UUID"
     _json_type_string: ClassVar[str] = "str"
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
         oai.ParameterLocation.QUERY,
@@ -76,5 +76,5 @@ class UuidProperty(PropertyProtocol):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({"import uuid"})
+        imports.update({"from uuid import UUID"})
         return imports
