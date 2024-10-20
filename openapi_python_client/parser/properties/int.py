@@ -58,12 +58,16 @@ class IntProperty(PropertyProtocol):
     def convert_value(cls, value: Any) -> Value | None | PropertyError:
         if value is None or isinstance(value, Value):
             return value
-        if isinstance(value, str):
+        converted = value
+        if isinstance(converted, str):
             try:
-                int(value)
+                converted = float(converted)
             except ValueError:
-                return PropertyError(f"Invalid int value: {value}")
-            return Value(value)
-        if isinstance(value, int) and not isinstance(value, bool):
-            return Value(str(value))
+                return PropertyError(f"Invalid int value: {converted}")
+        if isinstance(converted, float):
+            as_int = int(converted)
+            if converted == as_int:
+                converted = as_int
+        if isinstance(converted, int) and not isinstance(converted, bool):
+            return Value(python_code=str(converted), raw_value=value)
         return PropertyError(f"Invalid int value: {value}")

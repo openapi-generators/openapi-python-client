@@ -4,6 +4,7 @@ __all__ = [
     "AnyProperty",
     "Class",
     "EnumProperty",
+    "LiteralEnumProperty",
     "ModelProperty",
     "Parameters",
     "Property",
@@ -30,6 +31,7 @@ from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
 from .list_property import ListProperty
+from .literal_enum_property import LiteralEnumProperty
 from .model_property import ModelProperty, process_model
 from .none import NoneProperty
 from .property import Property
@@ -44,11 +46,12 @@ from .schemas import (
 )
 from .string import StringProperty
 from .union import UnionProperty
+from .uuid import UuidProperty
 
 
 def _string_based_property(
     name: str, required: bool, data: oai.Schema, config: Config
-) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | PropertyError:
+) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | PropertyError:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
     python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
@@ -79,11 +82,19 @@ def _string_based_property(
             description=data.description,
             example=data.example,
         )
+    if string_format == "uuid":
+        return UuidProperty.build(
+            name=name,
+            required=required,
+            default=data.default,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
+        )
     return StringProperty.build(
         name=name,
         default=data.default,
         required=required,
-        pattern=data.pattern,
         python_name=python_name,
         description=data.description,
         example=data.example,
@@ -185,6 +196,15 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             schemas,
         )
     if data.enum:
+        if config.literal_enums:
+            return LiteralEnumProperty.build(
+                data=data,
+                name=name,
+                required=required,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
         return EnumProperty.build(
             data=data,
             name=name,
@@ -281,7 +301,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
         AnyProperty.build(
             name=name,
             required=required,
-            default=None,
+            default=data.default,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,

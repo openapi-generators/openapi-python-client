@@ -74,7 +74,7 @@ class Client:
 {% endmacro %}{{ builders("Client") }}
 {% macro httpx_stuff(name, custom_constructor=None) %}
     def set_httpx_client(self, client: httpx.Client) -> "{{ name }}":
-        """Manually the underlying httpx.Client
+        """Manually set the underlying httpx.Client
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
         """

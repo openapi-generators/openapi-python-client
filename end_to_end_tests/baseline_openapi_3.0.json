@@ -599,6 +599,16 @@
           {
             "required": true,
             "schema": {
+              "title": "Float with int default",
+              "type": "number",
+              "default": 3
+            },
+            "name": "float_with_int",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
               "title": "Int Prop",
               "type": "integer",
               "default": 7
@@ -1674,15 +1684,20 @@
           "an_required_field"
         ]
       },
-      "Aliased":{
+      "Aliased": {
         "allOf": [
-          {"$ref":  "#/components/schemas/AModel"}
+          {
+            "$ref": "#/components/schemas/AModel"
+          }
         ]
       },
       "Extended": {
         "allOf": [
-          {"$ref": "#/components/schemas/Aliased"},
-          {"type": "object",
+          {
+            "$ref": "#/components/schemas/Aliased"
+          },
+          {
+            "type": "object",
             "properties": {
               "fromExtended": {
                 "type": "string"
@@ -1699,6 +1714,8 @@
           "aCamelDateTime",
           "a_date",
           "a_nullable_date",
+          "a_uuid",
+          "a_nullable_uuid",
           "required_nullable",
           "required_not_nullable",
           "model",
@@ -1708,7 +1725,9 @@
         ],
         "type": "object",
         "properties": {
-          "any_value": {},
+          "any_value": {
+            "default": "default"
+          },
           "an_enum_value": {
             "$ref": "#/components/schemas/AnEnum"
           },
@@ -1766,6 +1785,23 @@
             "title": "A Nullable Date",
             "type": "string",
             "format": "date"
+          },
+          "a_uuid": {
+            "title": "A Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "a_nullable_uuid": {
+            "title": "A Nullable Uuid",
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
+          },
+          "a_not_required_uuid": {
+            "title": "A Not Required Uuid",
+            "type": "string",
+            "format": "uuid"
           },
           "1_leading_digit": {
             "title": "Leading Digit",
@@ -2152,6 +2188,59 @@
           "additionalProperties": {}
         }
       },
+      "ModelWithMergedProperties": {
+        "title": "ModelWithMergedProperties",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "simpleString": {
+                "type": "string",
+                "description": "base simpleString description"
+              },
+              "stringToEnum": {
+                "type": "string",
+                "default": "a"
+              },
+              "stringToDate": {
+                "type": "string"
+              },
+              "numberToInt": {
+                "type": "number"
+              },
+              "anyToString": {}
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "simpleString": {
+                "type": "string",
+                "description": "extended simpleString description",
+                "default": "new default"
+              },
+              "stringToEnum": {
+                "type": "string",
+                "enum": [
+                  "a",
+                  "b"
+                ]
+              },
+              "stringToDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "numberToInt": {
+                "type": "integer"
+              },
+              "anyToString": {
+                "type": "string",
+                "default": "x"
+              }
+            }
+          }
+        ]
+      },
       "ModelWithPrimitiveAdditionalProperties": {
         "title": "ModelWithPrimitiveAdditionalProperties",
         "type": "object",
@@ -2218,6 +2307,11 @@
             "$ref": "#/components/schemas/AnotherAllOfSubModel"
           }
         ]
+      },
+      "ModelWithNoProperties": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
       },
       "AllOfSubModel": {
         "title": "AllOfSubModel",

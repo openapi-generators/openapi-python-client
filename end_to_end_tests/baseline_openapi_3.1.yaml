@@ -595,6 +595,16 @@ info:
         {
           "required": true,
           "schema": {
+            "title": "Float with int default",
+            "type": "number",
+            "default": 3
+          },
+          "name": "float_with_int",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
             "title": "Int Prop",
             "type": "integer",
             "default": 7
@@ -1689,6 +1699,8 @@ info:
         "aCamelDateTime",
         "a_date",
         "a_nullable_date",
+        "a_uuid",
+        "a_nullable_uuid",
         "required_nullable",
         "required_not_nullable",
         "model",
@@ -1698,7 +1710,9 @@ info:
       ],
       "type": "object",
       "properties": {
-        "any_value": { },
+        "any_value": {
+          "default": "default",
+        },
         "an_enum_value": {
           "$ref": "#/components/schemas/AnEnum"
         },
@@ -1758,6 +1772,29 @@ info:
           "title": "A Nullable Date",
           "type": "string",
           "format": "date"
+        },
+        "a_uuid": {
+          "title": "A Uuid",
+          "type": "string",
+          "format": "uuid"
+        },
+        "a_nullable_uuid": {
+          "title": "A Nullable Uuid",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid",
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
+        },
+        "a_not_required_uuid": {
+          "title": "A Not Required Uuid",
+          "type": "string",
+          "format": "uuid"
         },
         "1_leading_digit": {
           "title": "Leading Digit",
@@ -1972,7 +2009,7 @@ info:
           "title": "Some Integer Array",
           "type": "array",
           "items": {
-            "type": ["integer", "null"]
+            "type": [ "integer", "null" ]
           }
         },
         "some_array": {
@@ -2146,6 +2183,56 @@ info:
         "additionalProperties": { }
       }
     },
+    "ModelWithMergedProperties": {
+      "title": "ModelWithMergedProperties",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "simpleString": {
+              "type": "string",
+              "description": "base simpleString description"
+            },
+            "stringToEnum": {
+              "type": "string",
+              "default": "a"
+            },
+            "stringToDate": {
+              "type": "string"
+            },
+            "numberToInt": {
+              "type": "number"
+            },
+            "anyToString": { }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "simpleString": {
+              "type": "string",
+              "description": "extended simpleString description",
+              "default": "new default"
+            },
+            "stringToEnum": {
+              "type": "string",
+              "enum": [ "a", "b" ]
+            },
+            "stringToDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "numberToInt": {
+              "type": "integer"
+            },
+            "anyToString": {
+              "type": "string",
+              "default": "x"
+            }
+          }
+        }
+      ]
+    },
     "ModelWithPrimitiveAdditionalProperties": {
       "title": "ModelWithPrimitiveAdditionalProperties",
       "type": "object",
@@ -2212,6 +2299,11 @@ info:
           "$ref": "#/components/schemas/AnotherAllOfSubModel"
         }
       ]
+    },
+    "ModelWithNoProperties": {
+      "type": "object",
+      "properties": { },
+      "additionalProperties": false
     },
     "AllOfSubModel": {
       "title": "AllOfSubModel",

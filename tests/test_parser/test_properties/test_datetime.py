@@ -1,6 +1,5 @@
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import DateTimeProperty
-from openapi_python_client.parser.properties.protocol import Value
 
 
 def test_invalid_default_value():
@@ -27,7 +26,3 @@ def test_default_with_bad_type():
     )
 
     assert isinstance(err, PropertyError)
-
-
-def test_dont_recheck_value():
-    DateTimeProperty.convert_value(Value("not a date but trust me"))

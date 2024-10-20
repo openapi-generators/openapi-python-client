@@ -7,11 +7,13 @@ import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParameterError, PropertyError
 from openapi_python_client.parser.properties import (
     ListProperty,
+    ReferencePath,
     Schemas,
     StringProperty,
     UnionProperty,
 )
-from openapi_python_client.parser.properties.protocol import ModelProperty
+from openapi_python_client.parser.properties.protocol import ModelProperty, Value
+from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.schema import DataType
 from openapi_python_client.utils import ClassName, PythonIdentifier
 
@@ -351,7 +353,7 @@ class TestEnumProperty:
 
         data = ["abc", "123", "a23", "1bc", 4, -3, "a Thing WIth spaces", ""]
 
-        result = EnumProperty.values_from_list(data)
+        result = EnumProperty.values_from_list(data, Class("ClassName", "module_name"))
 
         assert result == {
             "ABC": "abc",
@@ -370,7 +372,44 @@ class TestEnumProperty:
         data = ["abc", "123", "a23", "abc"]
 
         with pytest.raises(ValueError):
-            EnumProperty.values_from_list(data)
+            EnumProperty.values_from_list(data, Class("ClassName", "module_name"))
+
+
+class TestLiteralEnumProperty:
+    def test_is_base_type(self, literal_enum_property_factory):
+        assert literal_enum_property_factory().is_base_type is True
+
+    @pytest.mark.parametrize(
+        "required, expected",
+        (
+            (False, "Union[Unset, {}]"),
+            (True, "{}"),
+        ),
+    )
+    def test_get_type_string(self, mocker, literal_enum_property_factory, required, expected):
+        fake_class = mocker.MagicMock()
+        fake_class.name = "MyTestEnum"
+
+        p = literal_enum_property_factory(class_info=fake_class, required=required)
+
+        assert p.get_type_string() == expected.format(fake_class.name)
+        assert p.get_type_string(no_optional=True) == fake_class.name
+        assert p.get_type_string(json=True) == expected.format("str")
+
+    def test_get_imports(self, mocker, literal_enum_property_factory):
+        fake_class = mocker.MagicMock(module_name="my_test_enum")
+        fake_class.name = "MyTestEnum"
+        prefix = "..."
+
+        literal_enum_property = literal_enum_property_factory(class_info=fake_class, required=False)
+
+        assert literal_enum_property.get_imports(prefix=prefix) == {
+            "from typing import cast",
+            f"from {prefix}models.{fake_class.module_name} import {fake_class.name}",
+            f"from {prefix}models.{fake_class.module_name} import check_my_test_enum",
+            "from typing import Union",  # Makes sure unset is handled via base class
+            "from ...types import UNSET, Unset",
+        }
 
 
 class TestPropertyFromData:
@@ -383,7 +422,7 @@ class TestPropertyFromData:
         name = "my_enum"
         required = True
 
-        schemas = Schemas(classes_by_name={"AnEnum": existing})
+        schemas = Schemas(classes_by_name={ClassName("AnEnum", prefix=""): existing})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
@@ -393,9 +432,9 @@ class TestPropertyFromData:
             name=name,
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
-            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=str,
-            default="ParentAnEnum.B",
+            default=Value(python_code="ParentAnEnum.B", raw_value="B"),
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -414,7 +453,7 @@ class TestPropertyFromData:
         name = "my_enum"
         required = True
 
-        schemas = Schemas(classes_by_name={"AnEnum": existing})
+        schemas = Schemas(classes_by_name={ClassName("AnEnum", ""): existing})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
@@ -426,13 +465,15 @@ class TestPropertyFromData:
             name="my_enum_type_1",
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
-            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=str,
-            default="ParentAnEnum.B",
+            default=Value(python_code="ParentAnEnum.B", raw_value="B"),
         )
         none_property = none_property_factory(name="my_enum_type_0", required=required)
         assert prop == union_property_factory(
-            name=name, default="ParentAnEnum.B", inner_properties=[none_property, enum_prop]
+            name=name,
+            default=Value(python_code="ParentAnEnum.B", raw_value="B"),
+            inner_properties=[none_property, enum_prop],
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -454,7 +495,9 @@ class TestPropertyFromData:
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
         )
 
-        assert prop == none_property_factory(name="my_enum", required=required, default="None")
+        assert prop == none_property_factory(
+            name="my_enum", required=required, default=Value(python_code="None", raw_value="None")
+        )
 
     def test_property_from_data_int_enum(self, enum_property_factory, config):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
@@ -465,7 +508,7 @@ class TestPropertyFromData:
         data = Schema.model_construct(title="anEnum", enum=[1, 2, 3], default=3)
 
         existing = enum_property_factory()
-        schemas = Schemas(classes_by_name={"AnEnum": existing})
+        schemas = Schemas(classes_by_name={ClassName("AnEnum", ""): existing})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
@@ -475,9 +518,9 @@ class TestPropertyFromData:
             name=name,
             required=required,
             values={"VALUE_1": 1, "VALUE_2": 2, "VALUE_3": 3},
-            class_info=Class(name="ParentAnEnum", module_name="parent_an_enum"),
+            class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=int,
-            default="ParentAnEnum.VALUE_3",
+            default=Value(python_code="ParentAnEnum.VALUE_3", raw_value=3),
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -520,12 +563,12 @@ class TestPropertyFromData:
         )
         existing_enum = enum_property_factory(
             name="an_enum",
-            default="MyEnum.A",
+            default=Value(python_code="MyEnum.A", raw_value="A"),
             required=required,
             values={"A": "a", "B": "b"},
-            class_info=Class(name="MyEnum", module_name="my_enum"),
+            class_info=Class(name=ClassName("MyEnum", ""), module_name=PythonIdentifier("my_enum", "")),
         )
-        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
+        schemas = Schemas(classes_by_reference={ReferencePath("/components/schemas/MyEnum"): existing_enum})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="", config=config
@@ -534,10 +577,10 @@ class TestPropertyFromData:
 
         assert prop == enum_property_factory(
             name="some_enum",
-            default="MyEnum.B",
+            default=Value(python_code="MyEnum.B", raw_value="b"),
             required=required,
             values={"A": "a", "B": "b"},
-            class_info=Class(name="MyEnum", module_name="my_enum"),
+            class_info=Class(name=ClassName("MyEnum", ""), module_name=PythonIdentifier("my_enum", "")),
         )
         assert schemas == new_schemas
 
@@ -550,12 +593,12 @@ class TestPropertyFromData:
         )
         existing_enum = enum_property_factory(
             name="an_enum",
-            default="MyEnum.A",
+            default=Value(python_code="MyEnum.A", raw_value="A"),
             values={"A": "a", "B": "b"},
-            class_info=Class(name="MyEnum", module_name="my_enum"),
-            python_name="an_enum",
+            class_info=Class(name=ClassName("MyEnum", ""), module_name=PythonIdentifier("my_enum", "")),
+            python_name=PythonIdentifier("an_enum", ""),
         )
-        schemas = Schemas(classes_by_reference={"/components/schemas/MyEnum": existing_enum})
+        schemas = Schemas(classes_by_reference={ReferencePath("/components/schemas/MyEnum"): existing_enum})
 
         prop, new_schemas = property_from_data(
             name=name, required=False, data=data, schemas=schemas, parent_name="", config=config
@@ -569,15 +612,15 @@ class TestPropertyFromData:
 
         name = "new_name"
         required = False
-        class_name = "MyModel"
+        class_name = ClassName("MyModel", "")
         data = oai.Reference.model_construct(ref=f"#/components/schemas/{class_name}")
-        class_info = Class(name=class_name, module_name="my_model")
+        class_info = Class(name=class_name, module_name=PythonIdentifier("my_model", ""))
 
         existing_model = model_property_factory(
             name="old_name",
             class_info=class_info,
         )
-        schemas = Schemas(classes_by_reference={f"/components/schemas/{class_name}": existing_model})
+        schemas = Schemas(classes_by_reference={ReferencePath(f"/components/schemas/{class_name}"): existing_model})
 
         prop, new_schemas = property_from_data(
             name=name, required=required, data=data, schemas=schemas, parent_name="", config=config
@@ -747,14 +790,14 @@ class TestStringBasedProperty:
         from openapi_python_client.parser.properties import property_from_data
 
         name = "some_prop"
-        data = oai.Schema.model_construct(type="string", default='"hello world"', pattern="abcdef")
+        data = oai.Schema.model_construct(type="string", default="hello world")
 
         p, _ = property_from_data(
             name=name, required=required, data=data, parent_name=None, config=config, schemas=Schemas()
         )
 
         assert p == string_property_factory(
-            name=name, required=required, default="'\\\\\"hello world\\\\\"'", pattern=data.pattern
+            name=name, required=required, default=StringProperty.convert_value("hello world")
         )
 
     def test_datetime_format(self, date_time_property_factory, config):
@@ -768,7 +811,11 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_time_property_factory(name=name, required=required, default=f"isoparse('{data.default}')")
+        assert p == date_time_property_factory(
+            name=name,
+            required=required,
+            default=Value(python_code=f"isoparse('{data.default}')", raw_value=data.default),
+        )
 
     def test_datetime_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data
@@ -796,7 +843,11 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
 
-        assert p == date_property_factory(name=name, required=required, default=f"isoparse('{data.default}').date()")
+        assert p == date_property_factory(
+            name=name,
+            required=required,
+            default=Value(python_code=f"isoparse('{data.default}').date()", raw_value=data.default),
+        )
 
     def test_date_format_bad_default(self, config):
         from openapi_python_client.parser.properties import property_from_data

@@ -7,7 +7,7 @@ from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
 from ... import errors
 
-{% for relative in endpoint.relative_imports %}
+{% for relative in endpoint.relative_imports | sort %}
 {{ relative }}
 {% endfor %}
 

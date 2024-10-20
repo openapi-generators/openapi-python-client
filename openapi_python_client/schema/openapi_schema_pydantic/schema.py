@@ -43,6 +43,7 @@ class Schema(BaseModel):
     anyOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     schema_not: Optional[Union[Reference, "Schema"]] = Field(default=None, alias="not")
     items: Optional[Union[Reference, "Schema"]] = None
+    prefixItems: Optional[List[Union[Reference, "Schema"]]] = Field(default_factory=list)
     properties: Optional[Dict[str, Union[Reference, "Schema"]]] = None
     additionalProperties: Optional[Union[bool, Reference, "Schema"]] = None
     description: Optional[str] = None

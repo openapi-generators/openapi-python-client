@@ -325,7 +325,7 @@ class TestBuild:
 
 class TestProcessProperties:
     def test_conflicting_properties_different_types(
-        self, model_property_factory, string_property_factory, date_time_property_factory, config
+        self, model_property_factory, string_property_factory, int_property_factory, config
     ):
         data = oai.Schema.model_construct(
             allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
@@ -335,9 +335,7 @@ class TestProcessProperties:
                 "/First": model_property_factory(
                     required_properties=[], optional_properties=[string_property_factory()]
                 ),
-                "/Second": model_property_factory(
-                    required_properties=[], optional_properties=[date_time_property_factory()]
-                ),
+                "/Second": model_property_factory(required_properties=[], optional_properties=[int_property_factory()]),
             }
         )
 
@@ -396,25 +394,6 @@ class TestProcessProperties:
         schemas = Schemas(
             classes_by_reference={
                 "/Unprocessed": model_property_factory(),
-            }
-        )
-
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-
-        assert isinstance(result, PropertyError)
-
-    def test_conflicting_properties_same_types(self, model_property_factory, string_property_factory, config):
-        data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
-        )
-        schemas = Schemas(
-            classes_by_reference={
-                "/First": model_property_factory(
-                    required_properties=[], optional_properties=[string_property_factory(default="abc")]
-                ),
-                "/Second": model_property_factory(
-                    required_properties=[], optional_properties=[string_property_factory()]
-                ),
             }
         )
 
@@ -662,6 +641,33 @@ class TestProcessProperties:
         schemas = Schemas()
         result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
+
+    def test_merge_inline_objects(self, model_property_factory, enum_property_factory, config):
+        data = oai.Schema.model_construct(
+            allOf=[
+                oai.Schema.model_construct(
+                    type="object",
+                    properties={
+                        "prop1": oai.Schema.model_construct(type="string", default="a"),
+                    },
+                ),
+                oai.Schema.model_construct(
+                    type="object",
+                    properties={
+                        "prop1": oai.Schema.model_construct(type="string", description="desc"),
+                    },
+                ),
+            ]
+        )
+        schemas = Schemas()
+
+        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert not isinstance(result, PropertyError)
+        assert len(result.optional_props) == 1
+        prop1 = result.optional_props[0]
+        assert isinstance(prop1, StringProperty)
+        assert prop1.description == "desc"
+        assert prop1.default == StringProperty.convert_value("a")
 
 
 class TestProcessModel:
