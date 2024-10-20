@@ -12,12 +12,12 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v4.2.1
       - name: Install Hatchling
         run: pip install --upgrade hatchling
       - name: Build
         run: hatchling build
       - name: Push to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.10.2
+        uses: pypa/gh-action-pypi-publish@v1.10.3
         with:
             attestations: true
