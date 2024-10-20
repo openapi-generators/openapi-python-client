@@ -4,9 +4,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.model_with_any_json_properties_additional_property_type_0 import (
-        ModelWithAnyJsonPropertiesAdditionalPropertyType0,
-    )
+    from ..models.model_with_any_json_properties_additional_property import ModelWithAnyJsonPropertiesAdditionalProperty
 
 
 T = TypeVar("T", bound="ModelWithAnyJsonProperties")
@@ -17,17 +15,17 @@ class ModelWithAnyJsonProperties:
     """ """
 
     additional_properties: Dict[
-        str, Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]
+        str, Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]
     ] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        from ..models.model_with_any_json_properties_additional_property_type_0 import (
-            ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+        from ..models.model_with_any_json_properties_additional_property import (
+            ModelWithAnyJsonPropertiesAdditionalProperty,
         )
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
-            if isinstance(prop, ModelWithAnyJsonPropertiesAdditionalPropertyType0):
+            if isinstance(prop, ModelWithAnyJsonPropertiesAdditionalProperty):
                 field_dict[prop_name] = prop.to_dict()
             elif isinstance(prop, list):
                 field_dict[prop_name] = prop
@@ -39,8 +37,8 @@ class ModelWithAnyJsonProperties:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.model_with_any_json_properties_additional_property_type_0 import (
-            ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+        from ..models.model_with_any_json_properties_additional_property import (
+            ModelWithAnyJsonPropertiesAdditionalProperty,
         )
 
         d = src_dict.copy()
@@ -51,13 +49,13 @@ class ModelWithAnyJsonProperties:
 
             def _parse_additional_property(
                 data: object,
-            ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
+            ) -> Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
-                    additional_property_type_0 = ModelWithAnyJsonPropertiesAdditionalPropertyType0.from_dict(data)
+                    additional_property = ModelWithAnyJsonPropertiesAdditionalProperty.from_dict(data)
 
-                    return additional_property_type_0
+                    return additional_property
                 except:  # noqa: E722
                     pass
                 try:
@@ -69,7 +67,7 @@ class ModelWithAnyJsonProperties:
                 except:  # noqa: E722
                     pass
                 return cast(
-                    Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str], data
+                    Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str], data
                 )
 
             additional_property = _parse_additional_property(prop_dict)
@@ -85,13 +83,11 @@ class ModelWithAnyJsonProperties:
 
     def __getitem__(
         self, key: str
-    ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str]:
+    ) -> Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]:
         return self.additional_properties[key]
 
     def __setitem__(
-        self,
-        key: str,
-        value: Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", List[str], bool, float, int, str],
+        self, key: str, value: Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]
     ) -> None:
         self.additional_properties[key] = value
 
