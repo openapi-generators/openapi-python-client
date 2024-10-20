@@ -40,7 +40,7 @@ class AModel:
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
         nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
         a_not_required_date (Union[Unset, datetime.date]):
-        a_not_required_uuid (Union[Unset, UUID]):  Default: UUID('07EF8B4D-AA09-4FFA-898D-C710796AFF41').
+        a_not_required_uuid (Union[Unset, UUID]):
         attr_1_leading_digit (Union[Unset, str]):
         attr_leading_underscore (Union[Unset, str]):
         not_required_nullable (Union[None, Unset, str]):
@@ -68,7 +68,7 @@ class AModel:
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
-    a_not_required_uuid: Union[Unset, UUID] = UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41")
+    a_not_required_uuid: Union[Unset, UUID] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
     attr_leading_underscore: Union[Unset, str] = UNSET
     not_required_nullable: Union[None, Unset, str] = UNSET
