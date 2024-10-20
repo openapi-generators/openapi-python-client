@@ -59,7 +59,7 @@ exclude = [
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "PL", "RUF"]
-ignore = ["E501", "PLR0913"]
+ignore = ["E501", "PLR0913", "PLR2004"]
 
 [tool.ruff.lint.per-file-ignores]
 "openapi_python_client/cli.py" = ["B008"]
