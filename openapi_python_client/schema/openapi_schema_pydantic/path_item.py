@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -30,8 +30,8 @@ class PathItem(BaseModel):
     head: Optional["Operation"] = None
     patch: Optional["Operation"] = None
     trace: Optional["Operation"] = None
-    servers: Optional[List[Server]] = None
-    parameters: Optional[List[Union[Parameter, Reference]]] = None
+    servers: Optional[list[Server]] = None
+    parameters: Optional[list[Union[Parameter, Reference]]] = None
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -12,16 +12,16 @@ class ModelWithBackslashInDescription:
 
      """
 
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        field_dict: Dict[str, Any] = {}
+    def to_dict(self) -> dict[str, Any]:
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         model_with_backslash_in_description = cls()
 
@@ -29,7 +29,7 @@ class ModelWithBackslashInDescription:
         return model_with_backslash_in_description
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

@@ -1,4 +1,4 @@
-from typing import Type, Union
+from typing import Union
 
 import pytest
 
@@ -8,7 +8,7 @@ from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import LiteralEnumProperty, Schemas
 from openapi_python_client.parser.properties.enum_property import EnumProperty
 
-PropertyClass = Union[Type[EnumProperty], Type[LiteralEnumProperty]]
+PropertyClass = Union[type[EnumProperty], type[LiteralEnumProperty]]
 
 
 @pytest.fixture(params=[EnumProperty, LiteralEnumProperty])

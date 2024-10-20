@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -14,7 +14,7 @@ class RequestBody(BaseModel):
     """
 
     description: Optional[str] = None
-    content: Dict[str, MediaType]
+    content: dict[str, MediaType]
     required: bool = False
     model_config = ConfigDict(
         extra="allow",

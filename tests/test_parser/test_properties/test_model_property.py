@@ -19,12 +19,12 @@ class TestModelProperty:
             (False, True, False, False, "MyClass"),
             (True, False, False, False, "MyClass"),
             (True, True, False, False, "MyClass"),
-            (False, True, True, False, "Dict[str, Any]"),
+            (False, True, True, False, "dict[str, Any]"),
             (False, False, False, True, "Union[Unset, 'MyClass']"),
             (False, True, False, True, "'MyClass'"),
             (True, False, False, True, "'MyClass'"),
             (True, True, False, True, "'MyClass'"),
-            (False, True, True, True, "Dict[str, Any]"),
+            (False, True, True, True, "dict[str, Any]"),
         ],
     )
     def test_get_type_string(self, no_optional, required, json, expected, model_property_factory, quoted):
@@ -40,7 +40,6 @@ class TestModelProperty:
         assert prop.get_imports(prefix="..") == {
             "from typing import Union",
             "from ..types import UNSET, Unset",
-            "from typing import Dict",
             "from typing import cast",
         }
 
@@ -719,8 +718,8 @@ def test_set_relative_imports(model_property_factory):
     from openapi_python_client.parser.properties import Class
 
     class_info = Class("ClassName", module_name="module_name")
-    relative_imports = {"from typing import List", f"from ..models.{class_info.module_name} import {class_info.name}"}
+    relative_imports = {f"from ..models.{class_info.module_name} import {class_info.name}"}
 
     model_property = model_property_factory(class_info=class_info, relative_imports=relative_imports)
 
-    assert model_property.relative_imports == {"from typing import List"}
+    assert model_property.relative_imports == set()

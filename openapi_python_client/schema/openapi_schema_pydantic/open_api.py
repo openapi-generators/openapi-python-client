@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -25,11 +25,11 @@ class OpenAPI(BaseModel):
     """
 
     info: Info
-    servers: List[Server] = [Server(url="/")]
+    servers: list[Server] = [Server(url="/")]
     paths: Paths
     components: Optional[Components] = None
-    security: Optional[List[SecurityRequirement]] = None
-    tags: Optional[List[Tag]] = None
+    security: Optional[list[SecurityRequirement]] = None
+    tags: Optional[list[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
     openapi: str
     model_config = ConfigDict(extra="allow")

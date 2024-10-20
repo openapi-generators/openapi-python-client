@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __all__ = ["LiteralEnumProperty"]
 
-from typing import Any, ClassVar, List, Union, cast
+from typing import Any, ClassVar, Union, cast
 
 from attr import evolve
 from attrs import define
@@ -98,7 +98,7 @@ class LiteralEnumProperty(PropertyProtocol):
         if value_type not in (str, int):
             return PropertyError(header=f"Unsupported enum type {value_type}", data=data), schemas
         value_list = cast(
-            Union[List[int], List[str]], unchecked_value_list
+            Union[list[int], list[str]], unchecked_value_list
         )  # We checked this with all the value_types stuff
 
         if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union

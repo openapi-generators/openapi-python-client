@@ -129,13 +129,13 @@ class TestListProperty:
     @pytest.mark.parametrize("quoted", (True, False))
     def test_get_base_json_type_string_base_inner(self, list_property_factory, quoted):
         p = list_property_factory()
-        assert p.get_base_json_type_string(quoted=quoted) == "List[str]"
+        assert p.get_base_json_type_string(quoted=quoted) == "list[str]"
 
     @pytest.mark.parametrize("quoted", (True, False))
     def test_get_base_json_type_string_model_inner(self, list_property_factory, model_property_factory, quoted):
         m = model_property_factory()
         p = list_property_factory(inner_property=m)
-        assert p.get_base_json_type_string(quoted=quoted) == "List[Dict[str, Any]]"
+        assert p.get_base_json_type_string(quoted=quoted) == "list[dict[str, Any]]"
 
     def test_get_lazy_import_base_inner(self, list_property_factory):
         p = list_property_factory()
@@ -149,8 +149,8 @@ class TestListProperty:
     @pytest.mark.parametrize(
         "required, expected",
         (
-            (True, "List[str]"),
-            (False, "Union[Unset, List[str]]"),
+            (True, "list[str]"),
+            (False, "Union[Unset, list[str]]"),
         ),
     )
     def test_get_type_string_base_inner(self, list_property_factory, required, expected):
@@ -161,8 +161,8 @@ class TestListProperty:
     @pytest.mark.parametrize(
         "required, expected",
         (
-            (True, "List['MyClass']"),
-            (False, "Union[Unset, List['MyClass']]"),
+            (True, "list['MyClass']"),
+            (False, "Union[Unset, list['MyClass']]"),
         ),
     )
     def test_get_type_string_model_inner(self, list_property_factory, model_property_factory, required, expected):
@@ -174,8 +174,8 @@ class TestListProperty:
     @pytest.mark.parametrize(
         "quoted,expected",
         [
-            (False, "List[str]"),
-            (True, "List[str]"),
+            (False, "list[str]"),
+            (True, "list[str]"),
         ],
     )
     def test_get_base_type_string_base_inner(self, list_property_factory, quoted, expected):
@@ -185,8 +185,8 @@ class TestListProperty:
     @pytest.mark.parametrize(
         "quoted,expected",
         [
-            (False, "List['MyClass']"),
-            (True, "List['MyClass']"),
+            (False, "list['MyClass']"),
+            (True, "list['MyClass']"),
         ],
     )
     def test_get_base_type_string_model_inner(self, list_property_factory, model_property_factory, quoted, expected):
@@ -202,7 +202,6 @@ class TestListProperty:
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
-            "from typing import cast, List",
         }
         if not required:
             expected |= {

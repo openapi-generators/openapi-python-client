@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 AnEnumWithNull = Literal["FIRST_VALUE", "SECOND_VALUE"]
 
-AN_ENUM_WITH_NULL_VALUES: Set[AnEnumWithNull] = {
+AN_ENUM_WITH_NULL_VALUES: set[AnEnumWithNull] = {
     "FIRST_VALUE",
     "SECOND_VALUE",
 }

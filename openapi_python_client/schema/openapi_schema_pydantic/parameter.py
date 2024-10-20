@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -32,8 +32,8 @@ class Parameter(BaseModel):
     allowReserved: bool = False
     param_schema: Optional[Union[Reference, Schema]] = Field(default=None, alias="schema")
     example: Optional[Any] = None
-    examples: Optional[Dict[str, Union[Example, Reference]]] = None
-    content: Optional[Dict[str, MediaType]] = None
+    examples: Optional[dict[str, Union[Example, Reference]]] = None
+    content: Optional[dict[str, MediaType]] = None
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,

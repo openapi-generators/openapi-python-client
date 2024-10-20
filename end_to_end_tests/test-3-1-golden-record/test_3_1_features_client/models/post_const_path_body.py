@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Type, TypeVar, Union, cast
+from typing import Any, Literal, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -20,9 +20,9 @@ class PostConstPathBody:
     required: Literal["this always goes in the body"]
     nullable: Union[Literal["this or null goes in the body"], None]
     optional: Union[Literal["this sometimes goes in the body"], Unset] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         required = self.required
 
         nullable: Union[Literal["this or null goes in the body"], None]
@@ -30,7 +30,7 @@ class PostConstPathBody:
 
         optional = self.optional
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -44,7 +44,7 @@ class PostConstPathBody:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         required = cast(Literal["this always goes in the body"], d.pop("required"))
         if required != "this always goes in the body":
@@ -77,7 +77,7 @@ class PostConstPathBody:
         return post_const_path_body
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

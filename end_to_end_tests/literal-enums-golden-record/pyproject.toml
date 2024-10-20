@@ -11,7 +11,7 @@ include = ["CHANGELOG.md", "my_enum_api_client/py.typed"]
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 httpx = ">=0.20.0,<0.28.0"
 attrs = ">=21.3.0"
 python-dateutil = "^2.8.0"

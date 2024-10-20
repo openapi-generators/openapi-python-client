@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -15,49 +15,49 @@ class AnotherAllOfSubModel:
     """
     Attributes:
         another_sub_property (Union[Unset, str]):
-        type (Union[Unset, AnotherAllOfSubModelType]):
+        type_ (Union[Unset, AnotherAllOfSubModelType]):
         type_enum (Union[Unset, AnotherAllOfSubModelTypeEnum]):
     """
 
     another_sub_property: Union[Unset, str] = UNSET
-    type: Union[Unset, AnotherAllOfSubModelType] = UNSET
+    type_: Union[Unset, AnotherAllOfSubModelType] = UNSET
     type_enum: Union[Unset, AnotherAllOfSubModelTypeEnum] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         another_sub_property = self.another_sub_property
 
-        type: Union[Unset, str] = UNSET
-        if not isinstance(self.type, Unset):
-            type = self.type.value
+        type_: Union[Unset, str] = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         type_enum: Union[Unset, int] = UNSET
         if not isinstance(self.type_enum, Unset):
             type_enum = self.type_enum.value
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if another_sub_property is not UNSET:
             field_dict["another_sub_property"] = another_sub_property
-        if type is not UNSET:
-            field_dict["type"] = type
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if type_enum is not UNSET:
             field_dict["type_enum"] = type_enum
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         another_sub_property = d.pop("another_sub_property", UNSET)
 
-        _type = d.pop("type", UNSET)
-        type: Union[Unset, AnotherAllOfSubModelType]
-        if isinstance(_type, Unset):
-            type = UNSET
+        _type_ = d.pop("type", UNSET)
+        type_: Union[Unset, AnotherAllOfSubModelType]
+        if isinstance(_type_, Unset):
+            type_ = UNSET
         else:
-            type = AnotherAllOfSubModelType(_type)
+            type_ = AnotherAllOfSubModelType(_type_)
 
         _type_enum = d.pop("type_enum", UNSET)
         type_enum: Union[Unset, AnotherAllOfSubModelTypeEnum]
@@ -68,7 +68,7 @@ class AnotherAllOfSubModel:
 
         another_all_of_sub_model = cls(
             another_sub_property=another_sub_property,
-            type=type,
+            type_=type_,
             type_enum=type_enum,
         )
 
@@ -76,7 +76,7 @@ class AnotherAllOfSubModel:
         return another_all_of_sub_model
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

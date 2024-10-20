@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -9,46 +9,46 @@ T = TypeVar("T", bound="ValidationError")
 class ValidationError:
     """
     Attributes:
-        loc (List[str]):
+        loc (list[str]):
         msg (str):
-        type (str):
+        type_ (str):
     """
 
-    loc: List[str]
+    loc: list[str]
     msg: str
-    type: str
+    type_: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         loc = self.loc
 
         msg = self.msg
 
-        type = self.type
+        type_ = self.type_
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(
             {
                 "loc": loc,
                 "msg": msg,
-                "type": type,
+                "type": type_,
             }
         )
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
-        loc = cast(List[str], d.pop("loc"))
+        loc = cast(list[str], d.pop("loc"))
 
         msg = d.pop("msg")
 
-        type = d.pop("type")
+        type_ = d.pop("type")
 
         validation_error = cls(
             loc=loc,
             msg=msg,
-            type=type,
+            type_=type_,
         )
 
         return validation_error

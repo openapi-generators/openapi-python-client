@@ -5,10 +5,10 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3b1d2a8edbe074a22af87e0a5174d19511c04e3ccee607161baa74a52a9177d9"
+content_hash = "sha256:c5b4426c9df861cd8a49dafbd5b30437d02d3fb30315b034317a53c4754f3006"
 
 [[metadata.targets]]
-requires_python = ">=3.8.1,<4.0"
+requires_python = "~=3.9"
 
 [[package]]
 name = "annotated-types"

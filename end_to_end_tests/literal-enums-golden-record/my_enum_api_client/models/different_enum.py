@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 DifferentEnum = Literal["DIFFERENT", "OTHER"]
 
-DIFFERENT_ENUM_VALUES: Set[DifferentEnum] = {
+DIFFERENT_ENUM_VALUES: set[DifferentEnum] = {
     "DIFFERENT",
     "OTHER",
 }

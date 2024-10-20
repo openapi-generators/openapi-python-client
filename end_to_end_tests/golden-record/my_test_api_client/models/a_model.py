@@ -1,5 +1,5 @@
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -38,7 +38,7 @@ class AModel:
         nullable_model (Union['ModelWithUnionProperty', None]):
         any_value (Union[Unset, Any]):  Default: 'default'.
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
+        nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
         a_not_required_date (Union[Unset, datetime.date]):
         a_not_required_uuid (Union[Unset, UUID]):
         attr_1_leading_digit (Union[Unset, str]):
@@ -66,7 +66,7 @@ class AModel:
     a_nullable_uuid: Union[None, UUID] = UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41")
     any_value: Union[Unset, Any] = "default"
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
+    nested_list_of_enums: Union[Unset, list[list[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
     a_not_required_uuid: Union[Unset, UUID] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
@@ -78,7 +78,7 @@ class AModel:
     not_required_model: Union[Unset, "ModelWithUnionProperty"] = UNSET
     not_required_nullable_model: Union["ModelWithUnionProperty", None, Unset] = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
@@ -113,7 +113,7 @@ class AModel:
 
         required_not_nullable = self.required_not_nullable
 
-        one_of_models: Union[Any, Dict[str, Any]]
+        one_of_models: Union[Any, dict[str, Any]]
         if isinstance(self.one_of_models, FreeFormModel):
             one_of_models = self.one_of_models.to_dict()
         elif isinstance(self.one_of_models, ModelWithUnionProperty):
@@ -121,7 +121,7 @@ class AModel:
         else:
             one_of_models = self.one_of_models
 
-        nullable_one_of_models: Union[Dict[str, Any], None]
+        nullable_one_of_models: Union[None, dict[str, Any]]
         if isinstance(self.nullable_one_of_models, FreeFormModel):
             nullable_one_of_models = self.nullable_one_of_models.to_dict()
         elif isinstance(self.nullable_one_of_models, ModelWithUnionProperty):
@@ -131,7 +131,7 @@ class AModel:
 
         model = self.model.to_dict()
 
-        nullable_model: Union[Dict[str, Any], None]
+        nullable_model: Union[None, dict[str, Any]]
         if isinstance(self.nullable_model, ModelWithUnionProperty):
             nullable_model = self.nullable_model.to_dict()
         else:
@@ -143,7 +143,7 @@ class AModel:
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum.value
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        nested_list_of_enums: Union[Unset, list[list[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -174,7 +174,7 @@ class AModel:
 
         not_required_not_nullable = self.not_required_not_nullable
 
-        not_required_one_of_models: Union[Dict[str, Any], Unset]
+        not_required_one_of_models: Union[Unset, dict[str, Any]]
         if isinstance(self.not_required_one_of_models, Unset):
             not_required_one_of_models = UNSET
         elif isinstance(self.not_required_one_of_models, FreeFormModel):
@@ -182,7 +182,7 @@ class AModel:
         else:
             not_required_one_of_models = self.not_required_one_of_models.to_dict()
 
-        not_required_nullable_one_of_models: Union[Dict[str, Any], None, Unset, str]
+        not_required_nullable_one_of_models: Union[None, Unset, dict[str, Any], str]
         if isinstance(self.not_required_nullable_one_of_models, Unset):
             not_required_nullable_one_of_models = UNSET
         elif isinstance(self.not_required_nullable_one_of_models, FreeFormModel):
@@ -192,11 +192,11 @@ class AModel:
         else:
             not_required_nullable_one_of_models = self.not_required_nullable_one_of_models
 
-        not_required_model: Union[Unset, Dict[str, Any]] = UNSET
+        not_required_model: Union[Unset, dict[str, Any]] = UNSET
         if not isinstance(self.not_required_model, Unset):
             not_required_model = self.not_required_model.to_dict()
 
-        not_required_nullable_model: Union[Dict[str, Any], None, Unset]
+        not_required_nullable_model: Union[None, Unset, dict[str, Any]]
         if isinstance(self.not_required_nullable_model, Unset):
             not_required_nullable_model = UNSET
         elif isinstance(self.not_required_nullable_model, ModelWithUnionProperty):
@@ -204,7 +204,7 @@ class AModel:
         else:
             not_required_nullable_model = self.not_required_nullable_model
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,
@@ -252,7 +252,7 @@ class AModel:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 

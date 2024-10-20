@@ -54,7 +54,7 @@ if not isinstance({{ source }}, Unset):
 
 {% macro transform_multipart(property, source, destination) %}
 {% set inner_property = property.inner_property %}
-{% set type_string = "Union[Unset, Tuple[None, bytes, str]]" %}
+{% set type_string = "Union[Unset, tuple[None, bytes, str]]" %}
 {% if property.required %}
 {{ _transform(property, source, destination, True, "to_dict") }}
 {% else %}

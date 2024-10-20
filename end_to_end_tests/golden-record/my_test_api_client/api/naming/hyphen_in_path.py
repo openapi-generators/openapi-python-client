@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -10,8 +10,8 @@ from ...types import Response
 
 def _get_kwargs(
     hyphen_in_path: str,
-) -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+) -> dict[str, Any]:
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/naming/{hyphen_in_path}",
     }

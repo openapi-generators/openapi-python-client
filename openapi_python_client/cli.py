@@ -1,7 +1,8 @@
 import codecs
+from collections.abc import Sequence
 from pathlib import Path
 from pprint import pformat
-from typing import Optional, Sequence, Union
+from typing import Optional, Union
 
 import typer
 

@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 AnIntEnum = Literal[-1, 1, 2]
 
-AN_INT_ENUM_VALUES: Set[AnIntEnum] = {
+AN_INT_ENUM_VALUES: set[AnIntEnum] = {
     -1,
     1,
     2,

@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -22,16 +22,16 @@ class PostBodyMultipartBody:
     a_string: str
     file: File
     description: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         a_string = self.a_string
 
         file = self.file.to_tuple()
 
         description = self.description
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -44,7 +44,7 @@ class PostBodyMultipartBody:
 
         return field_dict
 
-    def to_multipart(self) -> Dict[str, Any]:
+    def to_multipart(self) -> dict[str, Any]:
         a_string = (None, str(self.a_string).encode(), "text/plain")
 
         file = self.file.to_tuple()
@@ -55,7 +55,7 @@ class PostBodyMultipartBody:
             else (None, str(self.description).encode(), "text/plain")
         )
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
 
@@ -71,7 +71,7 @@ class PostBodyMultipartBody:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         a_string = d.pop("a_string")
 
@@ -89,7 +89,7 @@ class PostBodyMultipartBody:
         return post_body_multipart_body
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

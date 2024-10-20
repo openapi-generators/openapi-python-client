@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -12,10 +12,10 @@ from ...types import Response
 def _get_kwargs(
     *,
     body: AFormData,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/tests/post_form_data",
     }

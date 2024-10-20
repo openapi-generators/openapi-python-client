@@ -14,7 +14,7 @@ __all__ = [
     "property_from_data",
 ]
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from attrs import evolve
 

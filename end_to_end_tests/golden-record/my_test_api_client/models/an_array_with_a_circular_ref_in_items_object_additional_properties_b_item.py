@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -16,12 +16,12 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalProperties
 class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
     """ """
 
-    additional_properties: Dict[str, List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]] = (
+    additional_properties: dict[str, list["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]] = (
         _attrs_field(init=False, factory=dict)
     )
 
-    def to_dict(self) -> Dict[str, Any]:
-        field_dict: Dict[str, Any] = {}
+    def to_dict(self) -> dict[str, Any]:
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = []
             for (
@@ -35,7 +35,7 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.an_array_with_a_circular_ref_in_items_object_additional_properties_a_item import (
             AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem,
         )
@@ -68,14 +68,14 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
         return an_array_with_a_circular_ref_in_items_object_additional_properties_b_item
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]:
+    def __getitem__(self, key: str) -> list["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]:
         return self.additional_properties[key]
 
     def __setitem__(
-        self, key: str, value: List["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]
+        self, key: str, value: list["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem"]
     ) -> None:
         self.additional_properties[key] = value
 

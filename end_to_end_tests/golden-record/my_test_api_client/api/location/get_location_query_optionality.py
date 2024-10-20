@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -15,8 +15,8 @@ def _get_kwargs(
     null_required: Union[None, datetime.datetime],
     null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
     not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    params: dict[str, Any] = {}
 
     json_not_null_required = not_null_required.isoformat()
     params["not_null_required"] = json_not_null_required
@@ -44,7 +44,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/location/query/optionality",
         "params": params,

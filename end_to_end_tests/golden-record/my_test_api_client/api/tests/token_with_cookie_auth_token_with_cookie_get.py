@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -11,11 +11,11 @@ from ...types import Response
 def _get_kwargs(
     *,
     my_token: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     cookies = {}
     cookies["MyToken"] = my_token
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/auth/token_with_cookie",
         "cookies": cookies,

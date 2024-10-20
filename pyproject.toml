@@ -3,7 +3,7 @@ authors = [
     { name = "Dylan Anthony", email = "contact@dylananthony.com" },
 ]
 license = { text = "MIT" }
-requires-python = ">=3.8.1,<4.0"
+requires-python = ">=3.9,<4.0"
 dependencies = [
     "jinja2>=3.0.0,<4.0.0",
     "typer>0.6,<0.13",
@@ -30,7 +30,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

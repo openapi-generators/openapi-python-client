@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 GetUserListIntEnumHeader = Literal[1, 2, 3]
 
-GET_USER_LIST_INT_ENUM_HEADER_VALUES: Set[GetUserListIntEnumHeader] = {
+GET_USER_LIST_INT_ENUM_HEADER_VALUES: set[GetUserListIntEnumHeader] = {
     1,
     2,
     3,
