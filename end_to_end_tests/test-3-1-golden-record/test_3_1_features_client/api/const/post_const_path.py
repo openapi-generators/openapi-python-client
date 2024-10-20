@@ -44,7 +44,7 @@ def _get_kwargs(
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Literal["Why have a fixed response? I dunno"]]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = cast(Literal["Why have a fixed response? I dunno"], response.json())
         if response_200 != "Why have a fixed response? I dunno":
             raise ValueError(

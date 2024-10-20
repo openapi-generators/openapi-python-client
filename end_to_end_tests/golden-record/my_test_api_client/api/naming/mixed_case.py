@@ -34,7 +34,7 @@ def _get_kwargs(
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[MixedCaseResponse200]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = MixedCaseResponse200.from_dict(response.json())
 
         return response_200

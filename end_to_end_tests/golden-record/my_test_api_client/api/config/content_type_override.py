@@ -29,7 +29,7 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[str]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = cast(str, response.json())
         return response_200
     if client.raise_on_unexpected_status:
