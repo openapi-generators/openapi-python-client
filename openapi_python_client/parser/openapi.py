@@ -50,6 +50,7 @@ class EndpointCollection:
         schemas: Schemas,
         parameters: Parameters,
         request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
+        responses: Dict[str, Union[oai.Response, oai.Reference]],
         config: Config,
     ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
@@ -72,6 +73,7 @@ class EndpointCollection:
                     schemas=schemas,
                     parameters=parameters,
                     request_bodies=request_bodies,
+                    responses=responses,
                     config=config,
                 )
                 # Add `PathItem` parameters
@@ -144,7 +146,12 @@ class Endpoint:
 
     @staticmethod
     def _add_responses(
-        *, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas, config: Config
+        *,
+        endpoint: "Endpoint",
+        data: oai.Responses,
+        schemas: Schemas,
+        responses: Dict[str, Union[oai.Response, oai.Reference]],
+        config: Config,
     ) -> Tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
@@ -167,6 +174,7 @@ class Endpoint:
                 status_code=status_code,
                 data=response_data,
                 schemas=schemas,
+                responses=responses,
                 parent_name=endpoint.name,
                 config=config,
             )
@@ -396,6 +404,7 @@ class Endpoint:
         schemas: Schemas,
         parameters: Parameters,
         request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
+        responses: Dict[str, Union[oai.Response, oai.Reference]],
         config: Config,
     ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
@@ -424,7 +433,13 @@ class Endpoint:
         )
         if isinstance(result, ParseError):
             return result, schemas, parameters
-        result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
+        result, schemas = Endpoint._add_responses(
+            endpoint=result,
+            data=data.responses,
+            schemas=schemas,
+            responses=responses,
+            config=config,
+        )
         if isinstance(result, ParseError):
             return result, schemas, parameters
         bodies, schemas = body_from_data(
@@ -514,8 +529,14 @@ class GeneratorData:
                 config=config,
             )
         request_bodies = (openapi.components and openapi.components.requestBodies) or {}
+        responses = (openapi.components and openapi.components.responses) or {}
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
+            data=openapi.paths,
+            schemas=schemas,
+            parameters=parameters,
+            request_bodies=request_bodies,
+            responses=responses,
+            config=config,
         )
 
         enums = (
