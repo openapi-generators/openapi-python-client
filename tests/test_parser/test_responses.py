@@ -233,7 +233,7 @@ def test_response_from_data_ref_to_response_that_is_a_ref(mocker, any_property_f
 
     response, schemas = responses.response_from_data(
         status_code=400,
-        data=oai.Reference.model_construct(ref="#/components/schemas/ErrorResponse"),
+        data=oai.Reference.model_construct(ref="#/components/responses/ErrorResponse"),
         schemas=Schemas(),
         responses={
             "BaseResponse": predefined_response_base_data,
@@ -244,7 +244,7 @@ def test_response_from_data_ref_to_response_that_is_a_ref(mocker, any_property_f
     )
 
     assert isinstance(response, ParseError)
-    assert "not allowed in responses" in response.detail
+    assert "Top-level $ref" in response.detail
 
 
 def test_response_from_data_content_type_overrides(any_property_factory):
