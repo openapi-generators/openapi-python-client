@@ -80,7 +80,7 @@ def empty_response(
     )
 
 
-def response_from_data(
+def response_from_data(  # noqa: PLR0911
     *,
     status_code: HTTPStatus,
     data: Union[oai.Response, oai.Reference],
