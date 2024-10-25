@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas
@@ -179,6 +181,38 @@ def test_response_from_data_reference(mocker, any_property_factory):
         source=JSON_SOURCE,
         data=predefined_response_data,
     )
+
+
+@pytest.mark.parametrize(
+    "ref_string",
+    [
+        "#/components/responses/Nonexistent",
+        "malformed-references-string",
+        "#/components/something-that-isnt-responses/ErrorResponse",
+    ],
+)
+def test_response_from_data_reference_errors(ref_string, mocker, any_property_factory):
+    from openapi_python_client.parser import responses
+
+    prop = any_property_factory()
+    mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
+    predefined_response_data = oai.Response.model_construct(
+        description="",
+        content={"application/json": oai.MediaType.model_construct(media_type_schema="something")},
+    )
+    config = MagicMock()
+    config.content_type_overrides = {}
+
+    response, schemas = responses.response_from_data(
+        status_code=400,
+        data=oai.Reference.model_construct(ref=ref_string),
+        schemas=Schemas(),
+        responses={"ErrorResponse": predefined_response_data},
+        parent_name="parent",
+        config=config,
+    )
+
+    assert isinstance(response, ParseError)
 
 
 def test_response_from_data_content_type_overrides(any_property_factory):
