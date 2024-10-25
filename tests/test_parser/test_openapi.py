@@ -85,7 +85,9 @@ class TestEndpoint:
         response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
         config = MagicMock()
 
-        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config)
+        response, schemas = Endpoint._add_responses(
+            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
+        )
 
         assert response.errors == [
             ParseError(
@@ -110,12 +112,28 @@ class TestEndpoint:
         response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
         config = MagicMock()
 
-        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config)
+        response, schemas = Endpoint._add_responses(
+            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
+        )
 
         response_from_data.assert_has_calls(
             [
-                mocker.call(status_code=200, data=response_1_data, schemas=schemas, responses={}, parent_name="name", config=config),
-                mocker.call(status_code=404, data=response_2_data, schemas=schemas, responses={}, parent_name="name", config=config),
+                mocker.call(
+                    status_code=200,
+                    data=response_1_data,
+                    schemas=schemas,
+                    responses={},
+                    parent_name="name",
+                    config=config,
+                ),
+                mocker.call(
+                    status_code=404,
+                    data=response_2_data,
+                    schemas=schemas,
+                    responses={},
+                    parent_name="name",
+                    config=config,
+                ),
             ]
         )
         assert response.errors == [
