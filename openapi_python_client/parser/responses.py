@@ -6,7 +6,7 @@ from typing import Dict, Optional, Tuple, TypedDict, Union
 from attrs import define
 
 from openapi_python_client import utils
-from openapi_python_client.parser.properties.schemas import parse_reference_path
+from openapi_python_client.parser.properties.schemas import get_reference_simple_name, parse_reference_path
 
 from .. import Config
 from .. import schema as oai
@@ -98,7 +98,7 @@ def response_from_data(  # noqa: PLR0911
             return ref_path, schemas
         if not ref_path.startswith("/components/responses/"):
             return ParseError(data=data, detail=f"$ref to {data.ref} not allowed in responses"), schemas
-        resp_data = responses.get(ref_path.split("/")[-1], None)
+        resp_data = responses.get(get_reference_simple_name(ref_path), None)
         if not resp_data:
             return ParseError(data=data, detail=f"Could not find reference: {data.ref}"), schemas
         if not isinstance(resp_data, oai.Response):
