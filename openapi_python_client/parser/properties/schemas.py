@@ -46,6 +46,13 @@ def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
     return cast(ReferencePath, parsed.fragment)
 
 
+def get_reference_simple_name(ref_path: str) -> str:
+    """
+    Takes a path like `/components/schemas/NameOfThing` and returns a string like `NameOfThing`.
+    """
+    return ref_path.split("/", 3)[-1]
+
+
 @define
 class Class:
     """Represents Python class which will be generated from an OpenAPI schema"""

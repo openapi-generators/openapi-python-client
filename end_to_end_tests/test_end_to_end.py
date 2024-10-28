@@ -1,13 +1,17 @@
+import os
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+import sys
+from typing import Callable, Dict, List, Optional, Set
 
 import pytest
 from click.testing import Result
 from typer.testing import CliRunner
 
 from openapi_python_client.cli import app
+from .end_to_end_live_tests import live_tests_3_x
+
 
 
 def _compare_directories(
@@ -83,6 +87,7 @@ def run_e2e_test(
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
     expected_missing: Optional[Set[str]] = None,
+    live_tests: Optional[Callable[[str], None]] = None,
 ) -> Result:
     output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
@@ -97,6 +102,13 @@ def run_e2e_test(
     _compare_directories(
         gr_path, output_path, expected_differences=expected_differences, expected_missing=expected_missing
     )
+    if live_tests:
+        old_path = sys.path.copy()
+        sys.path.insert(0, str(output_path))
+        try:
+            live_tests()
+        finally:
+            sys.path = old_path
 
     import mypy.api
 
@@ -131,11 +143,11 @@ def _run_command(command: str, extra_args: Optional[List[str]] = None, openapi_d
 
 
 def test_baseline_end_to_end_3_0():
-    run_e2e_test("baseline_openapi_3.0.json", [], {})
+    run_e2e_test("baseline_openapi_3.0.json", [], {}, live_tests=live_tests_3_x)
 
 
 def test_baseline_end_to_end_3_1():
-    run_e2e_test("baseline_openapi_3.1.yaml", [], {})
+    run_e2e_test("baseline_openapi_3.1.yaml", [], {}, live_tests=live_tests_3_x)
 
 
 def test_3_1_specific_features():

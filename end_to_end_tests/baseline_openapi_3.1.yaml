@@ -2835,7 +2835,8 @@ info:
         "modelType": {
           "type": "string"
         }
-      }
+      },
+      "required": ["modelType"]
     },
     "ADiscriminatedUnionType2": {
       "type": "object",
@@ -2843,7 +2844,8 @@ info:
         "modelType": {
           "type": "string"
         }
-      }
+      },
+      "required": ["modelType"]
     }
   }
   "parameters": {
