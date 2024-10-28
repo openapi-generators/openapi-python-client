@@ -1,11 +1,12 @@
 __all__ = ["Response", "response_from_data"]
 
 from http import HTTPStatus
-from typing import Optional, Tuple, TypedDict, Union
+from typing import Dict, Optional, Tuple, TypedDict, Union
 
 from attrs import define
 
 from openapi_python_client import utils
+from openapi_python_client.parser.properties.schemas import get_reference_simple_name, parse_reference_path
 
 from .. import Config
 from .. import schema as oai
@@ -79,11 +80,12 @@ def empty_response(
     )
 
 
-def response_from_data(
+def response_from_data(  # noqa: PLR0911
     *,
     status_code: HTTPStatus,
     data: Union[oai.Response, oai.Reference],
     schemas: Schemas,
+    responses: Dict[str, Union[oai.Response, oai.Reference]],
     parent_name: str,
     config: Config,
 ) -> Tuple[Union[Response, ParseError], Schemas]:
@@ -91,15 +93,17 @@ def response_from_data(
 
     response_name = f"response_{status_code}"
     if isinstance(data, oai.Reference):
-        return (
-            empty_response(
-                status_code=status_code,
-                response_name=response_name,
-                config=config,
-                data=data,
-            ),
-            schemas,
-        )
+        ref_path = parse_reference_path(data.ref)
+        if isinstance(ref_path, ParseError):
+            return ref_path, schemas
+        if not ref_path.startswith("/components/responses/"):
+            return ParseError(data=data, detail=f"$ref to {data.ref} not allowed in responses"), schemas
+        resp_data = responses.get(get_reference_simple_name(ref_path), None)
+        if not resp_data:
+            return ParseError(data=data, detail=f"Could not find reference: {data.ref}"), schemas
+        if not isinstance(resp_data, oai.Response):
+            return ParseError(data=data, detail="Top-level $ref inside components/responses is not supported"), schemas
+        data = resp_data
 
     content = data.content
     if not content:

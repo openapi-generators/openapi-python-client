@@ -85,7 +85,9 @@ class TestEndpoint:
         response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
         config = MagicMock()
 
-        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        response, schemas = Endpoint._add_responses(
+            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
+        )
 
         assert response.errors == [
             ParseError(
@@ -110,12 +112,28 @@ class TestEndpoint:
         response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
         config = MagicMock()
 
-        response, schemas = Endpoint._add_responses(endpoint=endpoint, data=data, schemas=schemas, config=config)
+        response, schemas = Endpoint._add_responses(
+            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
+        )
 
         response_from_data.assert_has_calls(
             [
-                mocker.call(status_code=200, data=response_1_data, schemas=schemas, parent_name="name", config=config),
-                mocker.call(status_code=404, data=response_2_data, schemas=schemas, parent_name="name", config=config),
+                mocker.call(
+                    status_code=200,
+                    data=response_1_data,
+                    schemas=schemas,
+                    responses={},
+                    parent_name="name",
+                    config=config,
+                ),
+                mocker.call(
+                    status_code=404,
+                    data=response_2_data,
+                    schemas=schemas,
+                    responses={},
+                    parent_name="name",
+                    config=config,
+                ),
             ]
         )
         assert response.errors == [
@@ -474,6 +492,7 @@ class TestEndpoint:
             method=method,
             tag="default",
             schemas=initial_schemas,
+            responses={},
             parameters=parameters,
             config=config,
             request_bodies={},
@@ -509,6 +528,7 @@ class TestEndpoint:
             method=method,
             tag="default",
             schemas=initial_schemas,
+            responses={},
             parameters=initial_parameters,
             config=config,
             request_bodies={},
@@ -549,6 +569,7 @@ class TestEndpoint:
             method=method,
             tag="default",
             schemas=initial_schemas,
+            responses={},
             parameters=initial_parameters,
             config=config,
             request_bodies={},
@@ -570,7 +591,7 @@ class TestEndpoint:
             config=config,
         )
         _add_responses.assert_called_once_with(
-            endpoint=param_endpoint, data=data.responses, schemas=param_schemas, config=config
+            endpoint=param_endpoint, data=data.responses, schemas=param_schemas, responses={}, config=config
         )
 
     def test_from_data_no_operation_id(self, mocker, config):
@@ -600,6 +621,7 @@ class TestEndpoint:
             method=method,
             tag="default",
             schemas=schemas,
+            responses={},
             parameters=parameters,
             config=config,
             request_bodies={},
@@ -624,6 +646,7 @@ class TestEndpoint:
             endpoint=add_parameters.return_value[0],
             data=data.responses,
             schemas=add_parameters.return_value[1],
+            responses={},
             config=config,
         )
 
@@ -654,6 +677,7 @@ class TestEndpoint:
             method=method,
             tag="a",
             schemas=schemas,
+            responses={},
             parameters=parameters,
             config=config,
             request_bodies={},
@@ -678,6 +702,7 @@ class TestEndpoint:
             endpoint=add_parameters.return_value[0],
             data=data.responses,
             schemas=add_parameters.return_value[1],
+            responses={},
             config=config,
         )
 
@@ -693,6 +718,7 @@ class TestEndpoint:
                 ),
             ),
             schemas=Schemas(),
+            responses={},
             config=config,
             parameters=Parameters(),
             tag="tag",
@@ -716,6 +742,7 @@ class TestEndpoint:
                 ),
             ),
             schemas=Schemas(),
+            responses={},
             config=config,
             parameters=Parameters(),
             tag="tag",
@@ -787,6 +814,7 @@ class TestEndpointCollection:
             parameters=Parameters(),
             config=config,
             request_bodies={},
+            responses={},
         )
         collection: EndpointCollection = collections["default"]
         assert isinstance(collection.endpoints[0].query_parameters[0], IntProperty)
@@ -825,6 +853,7 @@ class TestEndpointCollection:
             config=config,
             parameters=parameters,
             request_bodies={},
+            responses={},
         )
 
         assert result["default"].parse_errors[0].data == "1"
@@ -866,7 +895,7 @@ class TestEndpointCollection:
         parameters = mocker.MagicMock()
 
         result = EndpointCollection.from_data(
-            data=data, schemas=schemas, parameters=parameters, config=config, request_bodies={}
+            data=data, schemas=schemas, parameters=parameters, config=config, request_bodies={}, responses={}
         )
 
         assert result == (
