@@ -16,13 +16,13 @@ if not isinstance(data, dict):
     raise TypeError()
 if "{{ discriminator.property_name }}" in data:
     _discriminator_value = data["{{ discriminator.property_name }}"]
-    {% for model in discriminator.value_to_model_map.values() %}
-    def _parse_{{ model.python_name }}(data: object) -> {{ model.get_type_string() }}:
-{{ construct_inner_property(model) | indent(12, True) }}
+    {% for value, model in discriminator.value_to_model_map.items() %}
+    def _parse_{{ loop.index }}(data: object) -> {{ model.get_type_string() }}:
+{{ construct_inner_property(model) | indent(8, True) }}
     {% endfor %}
     _discriminator_mapping = {
     {% for value, model in discriminator.value_to_model_map.items() %}
-        "{{ value }}": _parse_{{ model.python_name }},
+        "{{ value }}": _parse_{{ loop.index }},
     {% endfor %}
     }
     if _parse_fn := _discriminator_mapping.get(_discriminator_value):

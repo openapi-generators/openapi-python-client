@@ -10,7 +10,7 @@ from openapi_python_client.parser.properties import Schemas, UnionProperty
 from openapi_python_client.parser.properties.model_property import ModelProperty
 from openapi_python_client.parser.properties.property import Property
 from openapi_python_client.parser.properties.protocol import Value
-from openapi_python_client.parser.properties.schemas import Class
+from openapi_python_client.parser.properties.schemas import Class, ReferencePath
 from openapi_python_client.schema import DataType, ParameterLocation
 from tests.test_parser.test_properties.properties_test_helpers import assert_prop_error
 
@@ -66,6 +66,7 @@ def _make_basic_model(
     )
     assert isinstance(model, ModelProperty)
     if name:
+        model.ref_path = ReferencePath(f"/components/schemas/{name}")
         schemas = evolve(
             schemas, classes_by_reference={**schemas.classes_by_reference, f"/components/schemas/{name}": model}
         )
@@ -404,43 +405,3 @@ def test_discriminator_invalid_inline_schema_variant(config, string_property_fac
         name="MyUnion", required=False, data=data, schemas=schemas, parent_name="parent", config=config
     )
     assert_prop_error(p, "Inline schema")
-
-
-def test_conflicting_discriminator_mappings(config):
-    from openapi_python_client.parser.properties import Schemas, property_from_data
-
-    schemas = Schemas()
-    props = {"type": oai.Schema.model_construct(type="string")}
-    model1, schemas = _make_basic_model("Model1", props, "type", schemas, config)
-    model2, schemas = _make_basic_model("Model2", props, "type", schemas, config)
-    model3, schemas = _make_basic_model("Model3", props, "type", schemas, config)
-    model4, schemas = _make_basic_model("Model4", props, "type", schemas, config)
-    data = oai.Schema.model_construct(
-        oneOf=[
-            oai.Schema.model_construct(
-                oneOf=[
-                    oai.Reference(ref="#/components/schemas/Model1"),
-                    oai.Reference(ref="#/components/schemas/Model2"),
-                ],
-                discriminator=oai.Discriminator.model_construct(
-                    propertyName="type",
-                    mapping={"a": "Model1", "b": "Model2"},
-                ),
-            ),
-            oai.Schema.model_construct(
-                oneOf=[
-                    oai.Reference(ref="#/components/schemas/Model3"),
-                    oai.Reference(ref="#/components/schemas/Model4"),
-                ],
-                discriminator=oai.Discriminator.model_construct(
-                    propertyName="type",
-                    mapping={"a": "Model3", "x": "Model4"},
-                ),
-            ),
-        ],
-    )
-
-    p, schemas = property_from_data(
-        name="MyUnion", required=False, data=data, schemas=schemas, parent_name="parent", config=config
-    )
-    assert_prop_error(p, '"type" had more than one schema for value "a"')

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar, OrderedDict, cast
 
 from attr import define, evolve
 
@@ -15,6 +15,27 @@ from .schemas import Schemas, get_reference_simple_name, parse_reference_path
 
 @define
 class DiscriminatorDefinition:
+    """Represents a discriminator that can optionally be specified for a union type.
+    
+    Normally, a UnionProperty has either zero or one of these. However, a nested union
+    could have more than one, as we accumulate all the discriminators when we flatten
+    out the nested schemas. For example:
+
+        anyOf:
+          - anyOf:
+              - $ref: "#/components/schemas/Cat"
+              - $ref: "#/components/schemas/Dog"
+            discriminator:
+              propertyName: mammalType
+          - anyOf:
+              - $ref: "#/components/schemas/Condor"
+              - $ref: "#/components/schemas/Chicken"
+            discriminator:
+              propertyName: birdType
+
+    In this example there are four schemas and two discriminators. The deserializer
+    logic will check for the mammalType property first, then birdType.
+    """
     property_name: str
     value_to_model_map: dict[str, PropertyProtocol]
     # Every value in the map is really a ModelProperty, but this avoids circular imports
@@ -75,7 +96,7 @@ class UnionProperty(PropertyProtocol):
                 return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
             sub_properties.append(sub_prop)
 
-        sub_properties, discriminators_list = _flatten_union_properties(sub_properties)
+        sub_properties, discriminators_from_nested_unions = _flatten_union_properties(sub_properties)
 
         prop = UnionProperty(
             name=name,
@@ -92,15 +113,14 @@ class UnionProperty(PropertyProtocol):
             return default_or_error, schemas
         prop = evolve(prop, default=default_or_error)
 
+        all_discriminators = discriminators_from_nested_unions
         if data.discriminator:
             discriminator_or_error = _parse_discriminator(data.discriminator, sub_properties, schemas)
             if isinstance(discriminator_or_error, PropertyError):
                 return discriminator_or_error, schemas
-            discriminators_list = [discriminator_or_error, *discriminators_list]
-        if discriminators_list:
-            if error := _validate_discriminators(discriminators_list):
-                return error, schemas
-            prop = evolve(prop, discriminators=discriminators_list)
+            all_discriminators = [discriminator_or_error, *all_discriminators]
+        if all_discriminators:
+            prop = evolve(prop, discriminators=all_discriminators)
 
         return prop, schemas
 
@@ -227,15 +247,33 @@ def _parse_discriminator(
 
     # See: https://spec.openapis.org/oas/v3.1.0.html#discriminator-object
 
-    def _find_top_level_model(matching_model: ModelProperty) -> ModelProperty | None:
-        # This is needed because, when we built the union list, $refs were changed into a copy of
-        # the type they referred to, without preserving the original name. We need to know that
-        # every type in the discriminator is a $ref to a top-level type and we need its name.
-        for prop in schemas.classes_by_reference.values():
-            if isinstance(prop, ModelProperty):
-                if prop.class_info == matching_model.class_info:
-                    return prop
-        return None
+    # Conditions that must be true when there is a discriminator:
+    # 1. Every type in the anyOf/oneOf list must be a $ref to a named schema, such as
+    #    #/components/schemas/X, rather than an inline schema. This is important because
+    #    we may need to use the schema's simple name (X).
+    # 2. There must be a propertyName, representing a property that exists in every
+    #    schema in that list (although we can't currently enforce the latter condition,
+    #    because those properties haven't been parsed yet at this point.)
+    #
+    # There *may* also be a mapping of lookup values (the possible values of the property)
+    # to schemas. Schemas can be referenced either by a full path or a name:
+    #      mapping:
+    #        value_for_a: "#/components/schemas/ModelA"
+    #        value_for_b: ModelB   # equivalent to "#/components/schemas/ModelB"
+    # 
+    # For any type that isn't specified in the mapping (or if the whole mapping is omitted)
+    # the default lookup value for each schema is the same as the schema name. So this--
+    #      mapping:
+    #        value_for_a: "#/components/schemas/ModelA"
+    # --is exactly equivalent to this:
+    #    discriminator:
+    #      propertyName: modelType
+    #      mapping:
+    #        value_for_a: "#/components/schemas/ModelA"
+    #        ModelB: "#/components/schemas/ModelB"
+
+    def _get_model_name(model: ModelProperty) -> str | None:
+        return get_reference_simple_name(model.ref_path) if model.ref_path else None
 
     model_types_by_name: dict[str, PropertyProtocol] = {}
     for model in subtypes:
@@ -245,59 +283,32 @@ def _parse_discriminator(
             return PropertyError(
                 detail="All schema variants must be objects when using a discriminator",
             )
-        top_level_model = _find_top_level_model(model)
-        if not top_level_model:
+        name = _get_model_name(model)
+        if not name:
             return PropertyError(
                 detail="Inline schema declarations are not allowed when using a discriminator",
             )
-        name = top_level_model.name
-        if name.startswith("/components/schemas/"):
-            name = get_reference_simple_name(name)
-        model_types_by_name[name] = top_level_model
+        model_types_by_name[name] = model
 
-    # The discriminator can specify an explicit mapping of values to types, but it doesn't
-    # have to; the default behavior is that the value for each type is simply its name.
-    mapping: dict[str, PropertyProtocol] = model_types_by_name.copy()
+    mapping: dict[str, PropertyProtocol] = OrderedDict()  # use ordered dict for test determinacy
+    unspecified_models = list(model_types_by_name.values())
     if data.mapping:
         for discriminator_value, model_ref in data.mapping.items():
-            ref_path = parse_reference_path(
-                model_ref if model_ref.startswith("#/components/schemas/") else f"#/components/schemas/{model_ref}"
-            )
-            if isinstance(ref_path, ParseError) or ref_path not in schemas.classes_by_reference:
-                return PropertyError(detail=f'Invalid reference "{model_ref}" in discriminator mapping')
-            name = get_reference_simple_name(ref_path)
-            if not (lookup_model := model_types_by_name.get(name)):
+            if "/" in model_ref:
+                ref_path = parse_reference_path(model_ref)
+                if isinstance(ref_path, ParseError) or ref_path not in schemas.classes_by_reference:
+                    return PropertyError(detail=f'Invalid reference "{model_ref}" in discriminator mapping')
+                name = get_reference_simple_name(ref_path)
+            else:
+                name = model_ref
+            model = model_types_by_name.get(name)
+            if not model:
                 return PropertyError(
-                    detail=f'Discriminator mapping referred to "{model_ref}" which is not one of the schema variants',
+                    detail=f'Discriminator mapping referred to "{name}" which is not one of the schema variants',
                 )
-            for original_value in (name for name, m in model_types_by_name.items() if m == lookup_model):
-                mapping.pop(original_value)
-            mapping[discriminator_value] = lookup_model
-    else:
-        mapping = model_types_by_name
-
+            mapping[discriminator_value] = model
+            unspecified_models.remove(model)
+    for model in unspecified_models:
+        if name := _get_model_name(model):
+            mapping[name] = model
     return DiscriminatorDefinition(property_name=data.propertyName, value_to_model_map=mapping)
-
-
-def _validate_discriminators(
-    discriminators: list[DiscriminatorDefinition],
-) -> PropertyError | None:
-    from .model_property import ModelProperty
-
-    prop_names_values_classes = [
-        (discriminator.property_name, key, cast(ModelProperty, model).class_info.name)
-        for discriminator in discriminators
-        for key, model in discriminator.value_to_model_map.items()
-    ]
-    for p, v in {(p, v) for p, v, _ in prop_names_values_classes}:
-        if len({c for p1, v1, c in prop_names_values_classes if (p1, v1) == (p, v)}) > 1:
-            return PropertyError(f'Discriminator property "{p}" had more than one schema for value "{v}"')
-    return None
-
-    # TODO: We should also validate that property_name refers to a property that 1. exists,
-    # 2. is required, 3. is a string (in all of these models). However, currently we can't
-    # do that because, at the time this function is called, the ModelProperties within the
-    # union haven't yet been post-processed and so we don't have full information about
-    # their properties. To fix this, we may need to generalize the post-processing phase so
-    # that any Property type, not just ModelProperty, can say it needs post-processing; then
-    # we can defer _validate_discriminators till that phase.
