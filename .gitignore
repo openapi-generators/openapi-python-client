@@ -37,3 +37,4 @@ htmlcov/
 my-test-api-client/
 custom-e2e/
 3-1-features-client
+localtest
