@@ -1671,6 +1671,47 @@ info:
       }
     }
   },
+  "/models/oneof-with-required-const": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "alpha"
+                      },
+                      "color": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "beta"
+                      },
+                      "texture": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 "components":
   "schemas": {
