@@ -5,8 +5,12 @@ from typing import List
 
 {% endif %}
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
+{% if config.use_dataclasses %}
+from dataclasses import dataclass as _dataclass, field as _dataclasses_field
+{% else %}
+from attrs import define as _attrs_define, field as _attrs_field
+{% endif %}
+
 {% if model.is_multipart_body %}
 import json
 {% endif %}
@@ -59,7 +63,11 @@ T = TypeVar("T", bound="{{ class_name }}")
     {% endfor %}{% endif %}
 {% endmacro %}
 
+{% if config.use_dataclasses %}
+@_dataclass
+{% else %}
 @_attrs_define
+{% endif %}
 class {{ class_name }}:
     {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
 
@@ -74,7 +82,11 @@ class {{ class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
+    {% if config.use_dataclasses %}
+    additional_properties: Dict[str, {{ additional_property_type }}] = _dataclasses_field(init=False, default_factory=dict)
+    {% else %}
     additional_properties: Dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
+    {% endif %}
     {% endif %}
 
 {% macro _to_dict(multipart=False) %}

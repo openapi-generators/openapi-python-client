@@ -58,7 +58,7 @@ If you think that some of the added code is not testable (or testing it would ad
 
 This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end to end tests (snapshot tests). In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `pdm e2e`. To regenerate the snapshots, run `pdm regen`.
 
-There are 4 types of snapshots generated right now, you may have to update only some or all of these depending on the changes you're making. Within the `end_to_end_tets` directory:
+There are 4 types of snapshots generated right now, you may have to update only some or all of these depending on the changes you're making. Within the `end_to_end_tests` directory:
 
 1. `baseline_openapi_3.0.json` creates `golden-record` for testing OpenAPI 3.0 features
 2. `baseline_openapi_3.1.yaml` is checked against `golden-record` for testing OpenAPI 3.1 features (and ensuring consistency with 3.0)
