@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from itertools import chain
-from typing import Any, ClassVar, Iterable, NamedTuple
+from typing import Any, ClassVar, Iterable
 
-from attrs import define, evolve
+from attrs import define, evolve, field
 
 from ... import Config, utils
 from ... import schema as oai
@@ -15,13 +14,15 @@ from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
-@dataclass
+@define
 class ModelDetails:
+    """Container for basic attributes of a model schema that can be computed separately"""
+
     required_properties: list[Property] | None = None
     optional_properties: list[Property] | None = None
     additional_properties: Property | None = None
-    relative_imports: set[str] | None = None
-    lazy_imports: set[str] | None = None
+    relative_imports: set[str] = field(factory=set)
+    lazy_imports: set[str] = field(factory=set)
 
 
 @define
@@ -88,11 +89,7 @@ class ModelProperty(PropertyProtocol):
             )
             if isinstance(data_or_err, PropertyError):
                 return data_or_err, schemas
-            property_data, details.additional_properties = data_or_err
-            details.required_properties = property_data.required_props
-            details.optional_properties = property_data.optional_props
-            details.relative_imports = property_data.relative_imports
-            details.lazy_imports = property_data.lazy_imports
+            details = data_or_err
             for root in roots:
                 if isinstance(root, utils.ClassName):
                     continue
@@ -142,11 +139,11 @@ class ModelProperty(PropertyProtocol):
 
     @property
     def relative_imports(self) -> set[str]:
-        return self.details.relative_imports or set()
+        return self.details.relative_imports
 
     @property
     def lazy_imports(self) -> set[str] | None:
-        return self.details.lazy_imports or set()
+        return self.details.lazy_imports
 
     @classmethod
     def convert_value(cls, value: Any) -> Value | None | PropertyError:
@@ -253,14 +250,6 @@ def _resolve_naming_conflict(first: Property, second: Property, config: Config) 
     return None
 
 
-class _PropertyData(NamedTuple):
-    optional_props: list[Property]
-    required_props: list[Property]
-    relative_imports: set[str]
-    lazy_imports: set[str]
-    schemas: Schemas
-
-
 def _process_properties(  # noqa: PLR0911
     *,
     data: oai.Schema,
@@ -268,7 +257,7 @@ def _process_properties(  # noqa: PLR0911
     class_name: utils.ClassName,
     config: Config,
     roots: set[ReferencePath | utils.ClassName],
-) -> _PropertyData | PropertyError:
+) -> tuple[ModelDetails | PropertyError, Schemas]:
     from . import property_from_data
     from .merge_properties import merge_properties
 
@@ -303,19 +292,19 @@ def _process_properties(  # noqa: PLR0911
         if isinstance(sub_prop, oai.Reference):
             ref_path = parse_reference_path(sub_prop.ref)
             if isinstance(ref_path, ParseError):
-                return PropertyError(detail=ref_path.detail, data=sub_prop)
+                return PropertyError(detail=ref_path.detail, data=sub_prop), schemas
             sub_model = schemas.classes_by_reference.get(ref_path)
             if sub_model is None:
-                return PropertyError(f"Reference {sub_prop.ref} not found")
+                return PropertyError(f"Reference {sub_prop.ref} not found"), schemas
             if not isinstance(sub_model, ModelProperty):
-                return PropertyError("Cannot take allOf a non-object")
+                return PropertyError("Cannot take allOf a non-object"), schemas
             # Properties of allOf references first should be processed first
             if sub_model.needs_post_processing():
-                return PropertyError(f"Reference {sub_model.name} in allOf was not processed", data=sub_prop)
+                return PropertyError(f"Reference {sub_model.name} in allOf was not processed", data=sub_prop), schemas
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
                 err = _add_if_no_conflict(prop)
                 if err is not None:
-                    return err
+                    return err, schemas
             schemas.add_dependencies(ref_path=ref_path, roots=roots)
         else:
             unprocessed_props.extend(sub_prop.properties.items() if sub_prop.properties else [])
@@ -336,12 +325,12 @@ def _process_properties(  # noqa: PLR0911
         if not isinstance(prop_or_error, PropertyError):
             prop_or_error = _add_if_no_conflict(prop_or_error)
         if isinstance(prop_or_error, PropertyError):
-            return prop_or_error
+            return prop_or_error, schemas
 
-    return _gather_property_data(properties.values(), schemas)
+    return _gather_property_data(properties.values()), schemas
 
 
-def _gather_property_data(properties: Iterable[Property], schemas: Schemas) -> _PropertyData:
+def _gather_property_data(properties: Iterable[Property]) -> ModelDetails:
     required_properties: list[Property] = []
     optional_properties: list[Property] = []
     relative_imports: set[str] = set()
@@ -350,12 +339,12 @@ def _gather_property_data(properties: Iterable[Property], schemas: Schemas) -> _
         (required_properties if prop.required else optional_properties).append(prop)
         lazy_imports.update(prop.get_lazy_imports(prefix=".."))
         relative_imports.update(prop.get_imports(prefix=".."))
-    return _PropertyData(
-        optional_props=optional_properties,
-        required_props=required_properties,
+    return ModelDetails(
+        optional_properties=optional_properties,
+        required_properties=required_properties,
         relative_imports=relative_imports,
         lazy_imports=lazy_imports,
-        schemas=schemas,
+        additional_properties=None,
     )
 
 
@@ -410,13 +399,12 @@ def _process_property_data(
     class_info: Class,
     config: Config,
     roots: set[ReferencePath | utils.ClassName],
-) -> tuple[tuple[_PropertyData, Property | None] | PropertyError, Schemas]:
-    property_data = _process_properties(
+) -> tuple[ModelDetails | PropertyError, Schemas]:
+    model_details, schemas = _process_properties(
         data=data, schemas=schemas, class_name=class_info.name, config=config, roots=roots
     )
-    if isinstance(property_data, PropertyError):
-        return property_data, schemas
-    schemas = property_data.schemas
+    if isinstance(model_details, PropertyError):
+        return model_details, schemas
 
     additional_properties, schemas = _get_additional_properties(
         schema_additional=data.additionalProperties,
@@ -430,10 +418,11 @@ def _process_property_data(
     elif additional_properties is None:
         pass
     else:
-        property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
-        property_data.lazy_imports.update(additional_properties.get_lazy_imports(prefix=".."))
+        model_details = evolve(model_details, additional_properties=additional_properties)
+        model_details.relative_imports.update(additional_properties.get_imports(prefix=".."))
+        model_details.lazy_imports.update(additional_properties.get_lazy_imports(prefix=".."))
 
-    return (property_data, additional_properties), schemas
+    return model_details, schemas
 
 
 def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config) -> Schemas | PropertyError:
@@ -455,12 +444,8 @@ def process_model(model_prop: ModelProperty, *, schemas: Schemas, config: Config
     if isinstance(data_or_err, PropertyError):
         return data_or_err
 
-    property_data, additional_properties = data_or_err
-
-    model_prop.details.required_properties = property_data.required_props
-    model_prop.details.optional_properties = property_data.optional_props
-    model_prop.details.additional_properties = additional_properties
-    model_prop.set_relative_imports(property_data.relative_imports)
-    model_prop.set_lazy_imports(property_data.lazy_imports)
+    model_prop.details = data_or_err
+    model_prop.set_relative_imports(data_or_err.relative_imports)
+    model_prop.set_lazy_imports(data_or_err.lazy_imports)
 
     return schemas

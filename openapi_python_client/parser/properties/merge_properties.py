@@ -9,8 +9,8 @@ from openapi_python_client.parser.properties.date import DateProperty
 from openapi_python_client.parser.properties.datetime import DateTimeProperty
 from openapi_python_client.parser.properties.file import FileProperty
 from openapi_python_client.parser.properties.literal_enum_property import LiteralEnumProperty
-from openapi_python_client.parser.properties.model_property import ModelDetails, ModelProperty, _gather_property_data
-from openapi_python_client.parser.properties.schemas import Class, Schemas
+from openapi_python_client.parser.properties.model_property import ModelProperty, _gather_property_data
+from openapi_python_client.parser.properties.schemas import Class
 
 __all__ = ["merge_properties"]
 
@@ -110,21 +110,19 @@ def _merge_same_type(
 def _merge_models(
     prop1: ModelProperty, prop2: ModelProperty, parent_name: str, config: Config
 ) -> Property | PropertyError:
-    # Ideally, we would treat this case the same as a schema that consisted of "allOf: [prop1, prop2]",
-    # applying the property merge logic recursively and creating a new third schema if the result could
-    # not be fully described by one or the other. But for now we will just handle the common case where
-    # B is an object type that extends A and fully includes it, with no changes to any of A's properties;
-    # in that case, it is valid to just reuse the model class for B.
+    # The logic here is basically equivalent to what we would do for a schema that was
+    # "allOf: [prop1, prop2]". We apply the property merge logic recursively and create a new third
+    # schema if the result cannot be fully described by one or the other. If it *can* be fully
+    # described by one or the other, then we can simply reuse the class for that one: for instance,
+    # in a common case where B is an object type that extends A and fully includes it, so that
+    # "allOf: [A, B]" would be the same as B, then it's valid to use the existing B model class.
+    # We would still call _merge_common_attributes in that case, to handle metadat like "description".
     for prop in [prop1, prop2]:
         if prop.needs_post_processing():
             # This means not all of the details of the schema have been filled in, possibly due to a
             # forward reference. That may be resolved in a later pass, but for now we can't proceed.
             return PropertyError(f"Schema for {prop} in allOf was not processed", data=prop.data)
 
-    # Detect whether one of the schemas is derived from the other-- that is, if it is (or is equivalent
-    # to) the result of taking the other type and adding/modifying properties with allOf. If so, then
-    # we can simply use the class of the derived type. We will still call _merge_common_attributes in
-    # case any metadata like "description" has been modified.
     if _model_is_extension_of(prop1, prop2, parent_name, config):
         return _merge_common_attributes(prop1, prop2)
     elif _model_is_extension_of(prop2, prop1, parent_name, config):
@@ -142,20 +140,13 @@ def _merge_models(
             else:
                 merged_props[sub_prop.name] = sub_prop
 
-    prop_data = _gather_property_data(merged_props.values(), Schemas())
+    prop_details = _gather_property_data(merged_props.values())
 
     name = prop2.name
     class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(name)}"
     class_info = Class.from_string(string=class_string, config=config)
     roots = prop1.roots.union(prop2.roots).difference({prop1.class_info.name, prop2.class_info.name})
     roots.add(class_info.name)
-    prop_details = ModelDetails(
-        required_properties=prop_data.required_props,
-        optional_properties=prop_data.optional_props,
-        additional_properties=None,
-        relative_imports=prop_data.relative_imports,
-        lazy_imports=prop_data.lazy_imports,
-    )
     prop = ModelProperty(
         class_info=class_info,
         data=oai.Schema.model_construct(allOf=[prop1.data, prop2.data]),
@@ -294,9 +285,7 @@ def _model_is_extension_of(
     ) and _properties_are_extension_of(extended_model.optional_properties, base_model.optional_properties)
 
 
-def _property_is_extension_of(
-    extended_prop: Property, base_prop: Property, parent_name: str, config: Config
-) -> bool:
+def _property_is_extension_of(extended_prop: Property, base_prop: Property, parent_name: str, config: Config) -> bool:
     return base_prop.name == extended_prop.name and (
         base_prop == extended_prop or merge_properties(base_prop, extended_prop, parent_name, config) == extended_prop
     )

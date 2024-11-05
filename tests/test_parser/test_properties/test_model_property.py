@@ -344,7 +344,7 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
@@ -355,14 +355,14 @@ class TestProcessProperties:
             },
         )
 
-        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
+        result, _ = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
     def test_process_properties_all_of_reference_not_exist(self, config):
         data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/components/schema/NotExist")])
 
-        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
+        result, _ = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
@@ -370,15 +370,15 @@ class TestProcessProperties:
         roots = {"root"}
         data = oai.Schema(properties={"test_model_property": oai.Schema.model_construct(type="object")})
 
-        result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots=roots)
+        result, _ = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots=roots)
 
-        assert all(root in result.optional_props[0].roots for root in roots)
+        assert all(root in result.optional_properties[0].roots for root in roots)
 
     def test_invalid_reference(self, config):
         data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="ThisIsNotGood")])
         schemas = Schemas()
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
@@ -390,7 +390,7 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
@@ -402,7 +402,7 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
         assert isinstance(result, PropertyError)
 
@@ -425,8 +425,8 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-        assert result.required_props[0] == enum_property
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert result.required_properties[0] == enum_property
 
     def test_allof_string_enum_and_string(
         self, model_property_factory, enum_property_factory, string_property_factory, config
@@ -448,8 +448,8 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-        assert result.optional_props[0] == enum_property
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert result.optional_properties[0] == enum_property
 
     def test_allof_int_and_int_enum(self, model_property_factory, enum_property_factory, int_property_factory, config):
         data = oai.Schema.model_construct(
@@ -466,8 +466,8 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-        assert result.required_props[0] == enum_property
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert result.required_properties[0] == enum_property
 
     def test_allof_enum_incompatible_type(
         self, model_property_factory, enum_property_factory, int_property_factory, config
@@ -486,7 +486,7 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
 
     def test_allof_string_enums(self, model_property_factory, enum_property_factory, config):
@@ -510,8 +510,8 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-        assert result.required_props[0] == enum_property1
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert result.required_properties[0] == enum_property1
 
     def test_allof_int_enums(self, model_property_factory, enum_property_factory, config):
         data = oai.Schema.model_construct(
@@ -534,8 +534,8 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
-        assert result.required_props[0] == enum_property2
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        assert result.required_properties[0] == enum_property2
 
     def test_allof_enums_are_not_subsets(self, model_property_factory, enum_property_factory, config):
         data = oai.Schema.model_construct(
@@ -558,7 +558,7 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
 
     def test_duplicate_properties(self, model_property_factory, string_property_factory, config):
@@ -573,9 +573,9 @@ class TestProcessProperties:
             }
         )
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
-        assert result.optional_props == [prop], "There should only be one copy of duplicate properties"
+        assert result.optional_properties == [prop], "There should only be one copy of duplicate properties"
 
     @pytest.mark.parametrize("first_required", [True, False])
     @pytest.mark.parametrize("second_required", [True, False])
@@ -604,18 +604,18 @@ class TestProcessProperties:
         )
         roots = {"root"}
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots=roots)
+        result, schemas = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots=roots)
 
         required = first_required or second_required
         expected_prop = string_property_factory(
             required=required,
         )
 
-        assert result.schemas.dependencies == {"/First": roots, "/Second": roots}
+        assert schemas.dependencies == {"/First": roots, "/Second": roots}
         if not required:
-            assert result.optional_props == [expected_prop]
+            assert result.optional_properties == [expected_prop]
         else:
-            assert result.required_props == [expected_prop]
+            assert result.required_properties == [expected_prop]
 
     def test_direct_properties_non_ref(self, string_property_factory, config):
         data = oai.Schema.model_construct(
@@ -631,10 +631,10 @@ class TestProcessProperties:
         )
         schemas = Schemas()
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
 
-        assert result.optional_props == [string_property_factory(name="second", required=False)]
-        assert result.required_props == [string_property_factory(name="first", required=True)]
+        assert result.optional_properties == [string_property_factory(name="second", required=False)]
+        assert result.required_properties == [string_property_factory(name="first", required=True)]
 
     def test_conflicting_property_names(self, config):
         data = oai.Schema.model_construct(
@@ -644,7 +644,7 @@ class TestProcessProperties:
             }
         )
         schemas = Schemas()
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert isinstance(result, PropertyError)
 
     def test_merge_inline_objects(self, model_property_factory, enum_property_factory, config):
@@ -666,10 +666,10 @@ class TestProcessProperties:
         )
         schemas = Schemas()
 
-        result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
+        result, _ = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
         assert not isinstance(result, PropertyError)
-        assert len(result.optional_props) == 1
-        prop1 = result.optional_props[0]
+        assert len(result.optional_properties) == 1
+        prop1 = result.optional_properties[0]
         assert isinstance(prop1, StringProperty)
         assert prop1.description == "desc"
         assert prop1.default == StringProperty.convert_value("a")
@@ -694,31 +694,30 @@ class TestProcessModel:
         assert model_prop.relative_imports == set()
         assert model_prop.additional_properties is None
 
-    def test_process_model(self, mocker, model_property_factory, config):
+    def test_process_model(self, mocker, model_property_factory, string_property_factory, config):
         from openapi_python_client.parser.properties import Schemas
-        from openapi_python_client.parser.properties.model_property import _PropertyData, process_model
+        from openapi_python_client.parser.properties.model_property import ModelDetails, process_model
 
         model_prop = model_property_factory()
         schemas = Schemas()
-        property_data = _PropertyData(
-            required_props=["required"],
-            optional_props=["optional"],
+        model_details = ModelDetails(
+            required_properties=["required"],
+            optional_properties=["optional"],
             relative_imports={"relative"},
             lazy_imports={"lazy"},
-            schemas=schemas,
+            additional_properties=string_property_factory(),
         )
-        additional_properties = True
         process_property_data = mocker.patch(f"{MODULE_NAME}._process_property_data")
-        process_property_data.return_value = ((property_data, additional_properties), schemas)
+        process_property_data.return_value = (model_details, schemas)
 
         result = process_model(model_prop=model_prop, schemas=schemas, config=config)
 
         assert result == schemas
-        assert model_prop.required_properties == property_data.required_props
-        assert model_prop.optional_properties == property_data.optional_props
-        assert model_prop.relative_imports == property_data.relative_imports
-        assert model_prop.lazy_imports == property_data.lazy_imports
-        assert model_prop.additional_properties == additional_properties
+        assert model_prop.required_properties == model_details.required_properties
+        assert model_prop.optional_properties == model_details.optional_properties
+        assert model_prop.relative_imports == model_details.relative_imports
+        assert model_prop.lazy_imports == model_details.lazy_imports
+        assert model_prop.additional_properties == model_details.additional_properties
 
 
 def test_set_relative_imports(model_property_factory):

@@ -373,3 +373,51 @@ def test_merge_unrelated_models(model_property_factory, string_property_factory,
     assert [p.name for p in result.optional_properties] == ["opt_1", "opt_2"]
     assert result.class_info.name == "ParentSchemaPropName"
     assert result.description == model_2.description
+
+
+def test_merge_models_with_incompatible_property(
+    model_property_factory, string_property_factory, int_property_factory, config
+):
+    model_1 = model_property_factory(
+        name="propName",
+        details=ModelDetails(
+            required_properties=[
+                string_property_factory(name="prop1", required=True),
+            ],
+            optional_properties=[],
+        ),
+        class_info=Class.from_string(string="Model1", config=config),
+    )
+    model_2 = model_property_factory(
+        name="propName",
+        details=ModelDetails(
+            required_properties=[
+                int_property_factory(name="prop1", required=True),
+            ],
+            optional_properties=[],
+        ),
+        class_info=Class.from_string(string="Model2", config=config),
+    )
+
+    result = merge_properties(model_1, model_2, "ParentSchema", config)
+
+    assert isinstance(result, PropertyError)
+    assert result.detail == "str can't be merged with int"
+
+
+def test_merge_models_not_yet_processed(model_property_factory, string_property_factory, int_property_factory, config):
+    model_1 = model_property_factory(
+        name="propName",
+        details=ModelDetails(required_properties=None, optional_properties=None),
+        class_info=Class.from_string(string="Model1", config=config),
+    )
+    model_2 = model_property_factory(
+        name="propName",
+        details=ModelDetails(required_properties=None, optional_properties=None),
+        class_info=Class.from_string(string="Model2", config=config),
+    )
+
+    result = merge_properties(model_1, model_2, "ParentSchema", config)
+
+    assert isinstance(result, PropertyError)
+    assert "not processed" in result.detail
