@@ -137,7 +137,7 @@ def _property_from_ref(
     return prop, schemas
 
 
-def property_from_data(  # noqa: PLR0911
+def property_from_data(  # noqa: PLR0911, PLR0912
     name: str,
     required: bool,
     data: oai.Reference | oai.Schema,

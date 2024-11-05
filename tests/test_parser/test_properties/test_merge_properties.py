@@ -153,7 +153,8 @@ def test_merge_enums(literal_enums, enum_property_factory, literal_enum_property
 
 @pytest.mark.parametrize("literal_enums", (False, True))
 def test_merge_string_with_string_enum(
-    literal_enums, string_property_factory, enum_property_factory, literal_enum_property_factory, config):
+    literal_enums, string_property_factory, enum_property_factory, literal_enum_property_factory, config
+):
     string_prop = string_property_factory(default=Value("A", "A"), description="desc1", example="example1")
     enum_prop = (
         literal_enum_property_factory(
@@ -327,7 +328,9 @@ def test_merge_related_models(model_property_factory, string_property_factory, c
         class_info=Class.from_string(string="DerivedModel", config=config),
     )
 
-    assert merge_properties(base_model, extension_model, "", config) == evolve(extension_model, example=base_model.example)
+    assert merge_properties(base_model, extension_model, "", config) == evolve(
+        extension_model, example=base_model.example
+    )
     assert merge_properties(extension_model, base_model, "", config) == evolve(
         extension_model, description=base_model.description, example=base_model.example
     )

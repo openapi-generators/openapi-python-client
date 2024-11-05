@@ -342,8 +342,8 @@ def _process_properties(  # noqa: PLR0911
 
 
 def _gather_property_data(properties: Iterable[Property], schemas: Schemas) -> _PropertyData:
-    required_properties = []
-    optional_properties = []
+    required_properties: list[Property] = []
+    optional_properties: list[Property] = []
     relative_imports: set[str] = set()
     lazy_imports: set[str] = set()
     for prop in properties:

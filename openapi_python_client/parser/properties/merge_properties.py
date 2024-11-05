@@ -34,7 +34,7 @@ PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
 STRING_WITH_FORMAT_TYPES = (DateProperty, DateTimeProperty, FileProperty)
 
 
-def merge_properties( # noqa:PLR0911
+def merge_properties(  # noqa:PLR0911
     prop1: Property,
     prop2: Property,
     parent_name: str,
@@ -83,7 +83,9 @@ def merge_properties( # noqa:PLR0911
     )
 
 
-def _merge_same_type(prop1: Property, prop2: Property, parent_name: str, config: Config) -> Property | None | PropertyError:
+def _merge_same_type(
+    prop1: Property, prop2: Property, parent_name: str, config: Config
+) -> Property | None | PropertyError:
     if type(prop1) is not type(prop2):
         return None
 
@@ -105,7 +107,9 @@ def _merge_same_type(prop1: Property, prop2: Property, parent_name: str, config:
     return _merge_common_attributes(prop1, prop2)
 
 
-def _merge_models(prop1: ModelProperty, prop2: ModelProperty, parent_name: str, config: Config) -> Property | PropertyError:
+def _merge_models(
+    prop1: ModelProperty, prop2: ModelProperty, parent_name: str, config: Config
+) -> Property | PropertyError:
     # Ideally, we would treat this case the same as a schema that consisted of "allOf: [prop1, prop2]",
     # applying the property merge logic recursively and creating a new third schema if the result could
     # not be fully described by one or the other. But for now we will just handle the common case where
@@ -115,7 +119,7 @@ def _merge_models(prop1: ModelProperty, prop2: ModelProperty, parent_name: str, 
         if prop.needs_post_processing():
             # This means not all of the details of the schema have been filled in, possibly due to a
             # forward reference. That may be resolved in a later pass, but for now we can't proceed.
-            return PropertyError(f"Schema for {prop} in allOf was not processed", data=prop)
+            return PropertyError(f"Schema for {prop} in allOf was not processed", data=prop.data)
 
     # Detect whether one of the schemas is derived from the other-- that is, if it is (or is equivalent
     # to) the result of taking the other type and adding/modifying properties with allOf. If so, then
@@ -137,9 +141,9 @@ def _merge_models(prop1: ModelProperty, prop2: ModelProperty, parent_name: str, 
                 merged_props[sub_prop.name] = merged_prop
             else:
                 merged_props[sub_prop.name] = sub_prop
-    
+
     prop_data = _gather_property_data(merged_props.values(), Schemas())
-    
+
     name = prop2.name
     class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(name)}"
     class_info = Class.from_string(string=class_string, config=config)
@@ -276,7 +280,9 @@ def _values_are_subset(prop1: EnumProperty, prop2: EnumProperty) -> bool:
     return set(prop1.values.items()) <= set(prop2.values.items())
 
 
-def _model_is_extension_of(extended_model: ModelProperty, base_model: ModelProperty, parent_name: str, config: Config) -> bool:
+def _model_is_extension_of(
+    extended_model: ModelProperty, base_model: ModelProperty, parent_name: str, config: Config
+) -> bool:
     def _properties_are_extension_of(extended_list: list[Property], base_list: list[Property]) -> bool:
         for p2 in base_list:
             if not [p1 for p1 in extended_list if _property_is_extension_of(p2, p1, parent_name, config)]:
@@ -288,7 +294,9 @@ def _model_is_extension_of(extended_model: ModelProperty, base_model: ModelPrope
     ) and _properties_are_extension_of(extended_model.optional_properties, base_model.optional_properties)
 
 
-def _property_is_extension_of(extended_prop: PropertyProtocol, base_prop: PropertyProtocol, parent_name: str, config: Config) -> bool:
+def _property_is_extension_of(
+    extended_prop: Property, base_prop: Property, parent_name: str, config: Config
+) -> bool:
     return base_prop.name == extended_prop.name and (
         base_prop == extended_prop or merge_properties(base_prop, extended_prop, parent_name, config) == extended_prop
     )
