@@ -34,7 +34,7 @@ class Schema(BaseModel):
     uniqueItems: Optional[bool] = None
     maxProperties: Optional[int] = Field(default=None, ge=0)
     minProperties: Optional[int] = Field(default=None, ge=0)
-    required: Optional[List[str]] = Field(default=None, min_length=1)
+    required: Optional[List[str]] = Field(default=None)
     enum: Union[None, List[Any]] = Field(default=None, min_length=1)
     const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
     type: Union[DataType, List[DataType], None] = Field(default=None)
@@ -43,6 +43,7 @@ class Schema(BaseModel):
     anyOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
     schema_not: Optional[Union[Reference, "Schema"]] = Field(default=None, alias="not")
     items: Optional[Union[Reference, "Schema"]] = None
+    prefixItems: Optional[List[Union[Reference, "Schema"]]] = Field(default_factory=list)
     properties: Optional[Dict[str, Union[Reference, "Schema"]]] = None
     additionalProperties: Optional[Union[bool, Reference, "Schema"]] = None
     description: Optional[str] = None

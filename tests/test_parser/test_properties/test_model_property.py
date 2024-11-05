@@ -688,7 +688,7 @@ class TestProcessModel:
         result = process_model(model_prop=model_prop, schemas=schemas, config=config)
 
         assert result == PropertyError()
-        assert model_prop.needs_processing()
+        assert model_prop.needs_post_processing()
         assert model_prop.required_properties == []
         assert model_prop.optional_properties == []
         assert model_prop.relative_imports == set()

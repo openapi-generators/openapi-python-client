@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 from itertools import chain
 
+from openapi_python_client import schema as oai
 from openapi_python_client import utils
 from openapi_python_client.config import Config
 from openapi_python_client.parser.properties.date import DateProperty
 from openapi_python_client.parser.properties.datetime import DateTimeProperty
 from openapi_python_client.parser.properties.file import FileProperty
+from openapi_python_client.parser.properties.literal_enum_property import LiteralEnumProperty
 from openapi_python_client.parser.properties.model_property import ModelDetails, ModelProperty, _gather_property_data
 from openapi_python_client.parser.properties.schemas import Class, Schemas
 
@@ -31,12 +34,12 @@ PropertyT = TypeVar("PropertyT", bound=PropertyProtocol)
 STRING_WITH_FORMAT_TYPES = (DateProperty, DateTimeProperty, FileProperty)
 
 
-def merge_properties(
+def merge_properties( # noqa:PLR0911
     prop1: Property,
     prop2: Property,
     parent_name: str,
     config: Config,
-) -> Property | PropertyError:  # noqa: PLR0911
+) -> Property | PropertyError:
     """Attempt to create a new property that incorporates the behavior of both.
 
     This is used when merging schemas with allOf, when two schemas define a property with the same name.
@@ -62,6 +65,9 @@ def merge_properties(
 
     if isinstance(prop1, EnumProperty) or isinstance(prop2, EnumProperty):
         return _merge_with_enum(prop1, prop2)
+
+    if isinstance(prop1, LiteralEnumProperty) or isinstance(prop2, LiteralEnumProperty):
+        return _merge_with_literal_enum(prop1, prop2)
 
     if (merged := _merge_same_type(prop1, prop2, parent_name, config)) is not None:
         return merged
@@ -106,7 +112,7 @@ def _merge_models(prop1: ModelProperty, prop2: ModelProperty, parent_name: str, 
     # B is an object type that extends A and fully includes it, with no changes to any of A's properties;
     # in that case, it is valid to just reuse the model class for B.
     for prop in [prop1, prop2]:
-        if prop.needs_processing():
+        if prop.needs_post_processing():
             # This means not all of the details of the schema have been filled in, possibly due to a
             # forward reference. That may be resolved in a later pass, but for now we can't proceed.
             return PropertyError(f"Schema for {prop} in allOf was not processed", data=prop)
@@ -148,7 +154,7 @@ def _merge_models(prop1: ModelProperty, prop2: ModelProperty, parent_name: str, 
     )
     prop = ModelProperty(
         class_info=class_info,
-        data=prop2.data,  # TODO: not sure what this should be
+        data=oai.Schema.model_construct(allOf=[prop1.data, prop2.data]),
         roots=roots,
         details=prop_details,
         description=prop2.description or prop1.description,
@@ -209,6 +215,32 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
         return _merge_common_attributes(enum_prop, prop1, prop2)
     return PropertyError(
         detail=f"can't combine enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
+    )
+
+
+def _merge_with_literal_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> LiteralEnumProperty | PropertyError:
+    if isinstance(prop1, LiteralEnumProperty) and isinstance(prop2, LiteralEnumProperty):
+        # We want the narrowest validation rules that fit both, so use whichever values list is a
+        # subset of the other.
+        if prop1.values <= prop2.values:
+            values = prop1.values
+            class_info = prop1.class_info
+        elif prop2.values <= prop1.values:
+            values = prop2.values
+            class_info = prop2.class_info
+        else:
+            return PropertyError(detail="can't redefine a literal enum property with incompatible lists of values")
+        return _merge_common_attributes(evolve(prop1, values=values, class_info=class_info), prop2)
+
+    # If enum values were specified for just one of the properties, use those.
+    enum_prop = prop1 if isinstance(prop1, LiteralEnumProperty) else cast(LiteralEnumProperty, prop2)
+    non_enum_prop = prop2 if isinstance(prop1, LiteralEnumProperty) else prop1
+    if (isinstance(non_enum_prop, IntProperty) and enum_prop.value_type is int) or (
+        isinstance(non_enum_prop, StringProperty) and enum_prop.value_type is str
+    ):
+        return _merge_common_attributes(enum_prop, prop1, prop2)
+    return PropertyError(
+        detail=f"can't combine literal enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
     )
 
 

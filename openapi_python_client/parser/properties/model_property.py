@@ -123,7 +123,7 @@ class ModelProperty(PropertyProtocol):
         )
         return prop, schemas
 
-    def needs_processing(self) -> bool:
+    def needs_post_processing(self) -> bool:
         return not (
             isinstance(self.details.required_properties, list) and isinstance(self.details.optional_properties, list)
         )
@@ -310,7 +310,7 @@ def _process_properties(  # noqa: PLR0911
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
             # Properties of allOf references first should be processed first
-            if sub_model.needs_processing():
+            if sub_model.needs_post_processing():
                 return PropertyError(f"Reference {sub_model.name} in allOf was not processed", data=sub_prop)
             for prop in chain(sub_model.required_properties, sub_model.optional_properties):
                 err = _add_if_no_conflict(prop)
@@ -347,11 +347,7 @@ def _gather_property_data(properties: Iterable[Property], schemas: Schemas) -> _
     relative_imports: set[str] = set()
     lazy_imports: set[str] = set()
     for prop in properties:
-        if prop.required:
-            required_properties.append(prop)
-        else:
-            optional_properties.append(prop)
-
+        (required_properties if prop.required else optional_properties).append(prop)
         lazy_imports.update(prop.get_lazy_imports(prefix=".."))
         relative_imports.update(prop.get_imports(prefix=".."))
     return _PropertyData(

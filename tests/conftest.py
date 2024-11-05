@@ -19,6 +19,7 @@ from openapi_python_client.parser.properties import (
     FileProperty,
     IntProperty,
     ListProperty,
+    LiteralEnumProperty,
     ModelProperty,
     NoneProperty,
     StringProperty,
@@ -117,7 +118,7 @@ class SimpleFactory(Protocol[PropertyType]):
     ) -> PropertyType: ...
 
 
-class EnumFactory(Protocol):
+class EnumFactory(Protocol[PropertyType]):
     def __call__(
         self,
         *,
@@ -130,11 +131,11 @@ class EnumFactory(Protocol):
         python_name: PythonIdentifier | None = None,
         description: str | None = None,
         example: str | None = None,
-    ) -> EnumProperty: ...
+    ) -> PropertyType: ...
 
 
 @pytest.fixture
-def enum_property_factory() -> EnumFactory:
+def enum_property_factory() -> EnumFactory[EnumProperty]:
     """
     This fixture surfaces in the test as a function which manufactures EnumProperties with defaults.
 
@@ -147,6 +148,25 @@ def enum_property_factory() -> EnumFactory:
         lambda kwargs: {
             "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
             "values": {},
+            "value_type": str,
+        },
+    )
+
+
+@pytest.fixture
+def literal_enum_property_factory() -> EnumFactory[LiteralEnumProperty]:
+    """
+    This fixture surfaces in the test as a function which manufactures LiteralEnumProperties with defaults.
+
+    You can pass the same params into this as the LiteralEnumProerty constructor to override defaults.
+    """
+    from openapi_python_client.parser.properties import Class
+
+    return _simple_factory(
+        LiteralEnumProperty,
+        lambda kwargs: {
+            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
+            "values": set(),
             "value_type": str,
         },
     )

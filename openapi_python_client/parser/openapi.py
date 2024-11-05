@@ -15,6 +15,7 @@ from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
     Class,
     EnumProperty,
+    LiteralEnumProperty,
     ModelProperty,
     Parameters,
     Property,
@@ -488,7 +489,7 @@ class GeneratorData:
     models: Iterator[ModelProperty]
     errors: List[ParseError]
     endpoint_collections_by_tag: Dict[utils.PythonIdentifier, EndpointCollection]
-    enums: Iterator[EnumProperty]
+    enums: Iterator[Union[EnumProperty, LiteralEnumProperty]]
 
     @staticmethod
     def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
@@ -517,7 +518,9 @@ class GeneratorData:
             data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
         )
 
-        enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
+        enums = (
+            prop for prop in schemas.classes_by_name.values() if isinstance(prop, (EnumProperty, LiteralEnumProperty))
+        )
         models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
 
         return GeneratorData(

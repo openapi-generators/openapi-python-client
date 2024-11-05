@@ -1,12 +1,13 @@
 from itertools import permutations
 
+import pytest
 from attr import evolve
 
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.int import IntProperty
 from openapi_python_client.parser.properties.merge_properties import merge_properties
-from openapi_python_client.parser.properties.model_property import ModelDetails
+from openapi_python_client.parser.properties.model_property import ModelDetails, ModelProperty
 from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.parser.properties.string import StringProperty
@@ -108,17 +109,31 @@ def test_merge_with_any(
         assert merge_properties(prop, any_prop, "", config) == prop
 
 
-def test_merge_enums(enum_property_factory, config):
-    enum_with_fewer_values = enum_property_factory(
-        description="desc1",
-        values={"A": "A", "B": "B"},
-        value_type=str,
-    )
-    enum_with_more_values = enum_property_factory(
-        example="example2",
-        values={"A": "A", "B": "B", "C": "C"},
-        value_type=str,
-    )
+@pytest.mark.parametrize("literal_enums", (False, True))
+def test_merge_enums(literal_enums, enum_property_factory, literal_enum_property_factory, config):
+    if literal_enums:
+        enum_with_fewer_values = literal_enum_property_factory(
+            description="desc1",
+            values={"A", "B"},
+            value_type=str,
+        )
+        enum_with_more_values = literal_enum_property_factory(
+            example="example2",
+            values={"A", "B", "C"},
+            value_type=str,
+        )
+    else:
+        enum_with_fewer_values = enum_property_factory(
+            description="desc1",
+            values={"A": "A", "B": "B"},
+            value_type=str,
+        )
+        enum_with_more_values = enum_property_factory(
+            example="example2",
+            values={"A": "A", "B": "B", "C": "C"},
+            value_type=str,
+        )
+
     # Setting class_info separately because it doesn't get initialized by the constructor - we want
     # to make sure the right enum class name gets used in the merged property
     enum_with_fewer_values.class_info = Class.from_string(string="FewerValuesEnum", config=config)
@@ -136,36 +151,59 @@ def test_merge_enums(enum_property_factory, config):
     )
 
 
-def test_merge_string_with_string_enum(string_property_factory, enum_property_factory, config):
-    values = {"A": "A", "B": "B"}
+@pytest.mark.parametrize("literal_enums", (False, True))
+def test_merge_string_with_string_enum(
+    literal_enums, string_property_factory, enum_property_factory, literal_enum_property_factory, config):
     string_prop = string_property_factory(default=Value("A", "A"), description="desc1", example="example1")
-    enum_prop = enum_property_factory(
-        default=Value("test.B", "B"),
-        description="desc2",
-        example="example2",
-        values=values,
-        value_type=str,
+    enum_prop = (
+        literal_enum_property_factory(
+            default=Value("'B'", "B"),
+            description="desc2",
+            example="example2",
+            values={"A", "B"},
+            value_type=str,
+        )
+        if literal_enums
+        else enum_property_factory(
+            default=Value("test.B", "B"),
+            description="desc2",
+            example="example2",
+            values={"A": "A", "B": "B"},
+            value_type=str,
+        )
     )
 
     assert merge_properties(string_prop, enum_prop, "", config) == evolve(enum_prop, required=True)
     assert merge_properties(enum_prop, string_prop, "", config) == evolve(
         enum_prop,
         required=True,
-        default=Value("test.A", "A"),
+        default=Value("'A'" if literal_enums else "test.A", "A"),
         description=string_prop.description,
         example=string_prop.example,
     )
 
 
-def test_merge_int_with_int_enum(int_property_factory, enum_property_factory, config):
-    values = {"VALUE_1": 1, "VALUE_2": 2}
+@pytest.mark.parametrize("literal_enums", (False, True))
+def test_merge_int_with_int_enum(
+    literal_enums, int_property_factory, enum_property_factory, literal_enum_property_factory, config
+):
     int_prop = int_property_factory(default=Value("1", 1), description="desc1", example="example1")
-    enum_prop = enum_property_factory(
-        default=Value("test.VALUE_1", 1),
-        description="desc2",
-        example="example2",
-        values=values,
-        value_type=int,
+    enum_prop = (
+        literal_enum_property_factory(
+            default=Value("1", 1),
+            description="desc2",
+            example="example2",
+            values={1, 2},
+            value_type=int,
+        )
+        if literal_enums
+        else enum_property_factory(
+            default=Value("test.VALUE_1", 1),
+            description="desc2",
+            example="example2",
+            values={"VALUE_1": 1, "VALUE_2": 2},
+            value_type=int,
+        )
     )
 
     assert merge_properties(int_prop, enum_prop, "", config) == evolve(enum_prop, required=True)
@@ -174,12 +212,15 @@ def test_merge_int_with_int_enum(int_property_factory, enum_property_factory, co
     )
 
 
+@pytest.mark.parametrize("literal_enums", (False, True))
 def test_merge_with_incompatible_enum(
+    literal_enums,
     boolean_property_factory,
     int_property_factory,
     float_property_factory,
     string_property_factory,
     enum_property_factory,
+    literal_enum_property_factory,
     model_property_factory,
     config,
 ):
@@ -189,9 +230,19 @@ def test_merge_with_incompatible_enum(
         float_property_factory(),
         string_property_factory(),
         model_property_factory(),
+        enum_property_factory(values={"INCOMPATIBLE": "INCOMPATIBLE"}),
+        literal_enum_property_factory(values={"INCOMPATIBLE"}),
     ]
-    string_enum_prop = enum_property_factory(value_type=str)
-    int_enum_prop = enum_property_factory(value_type=int)
+    string_enum_prop = (
+        literal_enum_property_factory(value_type=str, values={"A"})
+        if literal_enums
+        else enum_property_factory(value_type=str, values={"A": "A"})
+    )
+    int_enum_prop = (
+        literal_enum_property_factory(value_type=int, values={1})
+        if literal_enums
+        else enum_property_factory(value_type=int, values={"VALUE_1": 1})
+    )
     for prop in props:
         if not isinstance(prop, StringProperty):
             assert isinstance(merge_properties(prop, string_enum_prop, "", config), PropertyError)
@@ -260,8 +311,8 @@ def test_merge_related_models(model_property_factory, string_property_factory, c
         example="example_1",
         class_info=Class.from_string(string="BaseModel", config=config),
     )
-    derived_model = model_property_factory(
-        name="DerivedModel",
+    extension_model = model_property_factory(
+        name="ExtensionModel",
         details=ModelDetails(
             required_properties=[
                 string_property_factory(name="req_1", description="extended description"),
@@ -276,21 +327,21 @@ def test_merge_related_models(model_property_factory, string_property_factory, c
         class_info=Class.from_string(string="DerivedModel", config=config),
     )
 
-    assert merge_properties(base_model, derived_model, "", config) == evolve(derived_model, example=base_model.example)
-    assert merge_properties(derived_model, base_model, "", config) == evolve(
-        derived_model, description=base_model.description, example=base_model.example
+    assert merge_properties(base_model, extension_model, "", config) == evolve(extension_model, example=base_model.example)
+    assert merge_properties(extension_model, base_model, "", config) == evolve(
+        extension_model, description=base_model.description, example=base_model.example
     )
 
 
-def test_merge_models_fails_for_unrelated_required_property(model_property_factory, string_property_factory, config):
+def test_merge_unrelated_models(model_property_factory, string_property_factory, config):
     model_1 = model_property_factory(
-        name="model_1",
+        name="propName",
         details=ModelDetails(
             required_properties=[
-                string_property_factory(name="req_1"),
+                string_property_factory(name="req_1", required=True),
             ],
             optional_properties=[
-                string_property_factory(name="opt_1"),
+                string_property_factory(name="opt_1", required=False),
             ],
         ),
         description="desc_1",
@@ -298,55 +349,24 @@ def test_merge_models_fails_for_unrelated_required_property(model_property_facto
         class_info=Class.from_string(string="Model1", config=config),
     )
     model_2 = model_property_factory(
-        name="model_2",
+        name="propName",
         details=ModelDetails(
             required_properties=[
-                string_property_factory(name="req_2"),
+                string_property_factory(name="req_1", required=True),
+                string_property_factory(name="req_2", required=True),
             ],
             optional_properties=[
-                string_property_factory(name="opt_1"),
-                string_property_factory(name="opt_2"),
+                string_property_factory(name="opt_2", required=False),
             ],
         ),
         description="desc_2",
         class_info=Class.from_string(string="Model2", config=config),
     )
 
-    result = merge_properties(model_1, model_2, "", config)
-    assert isinstance(result, PropertyError)
-    assert result.detail == "unable to merge two unrelated object types for this property"
+    result = merge_properties(model_1, model_2, "ParentSchema", config)
 
-
-def test_merge_models_fails_for_unrelated_optional_property(model_property_factory, string_property_factory, config):
-    model_1 = model_property_factory(
-        name="model_1",
-        details=ModelDetails(
-            required_properties=[
-                string_property_factory(name="req_1"),
-            ],
-            optional_properties=[
-                string_property_factory(name="opt_1"),
-            ],
-        ),
-        description="desc_1",
-        example="example_1",
-        class_info=Class.from_string(string="Model1", config=config),
-    )
-    model_2 = model_property_factory(
-        name="model_2",
-        details=ModelDetails(
-            required_properties=[
-                string_property_factory(name="req_1"),
-                string_property_factory(name="req_2"),
-            ],
-            optional_properties=[
-                string_property_factory(name="opt_2"),
-            ],
-        ),
-        description="desc_2",
-        class_info=Class.from_string(string="Model2", config=config),
-    )
-
-    result = merge_properties(model_1, model_2, "", config)
-    assert isinstance(result, PropertyError)
-    assert result.detail == "unable to merge two unrelated object types for this property"
+    assert isinstance(result, ModelProperty)
+    assert [p.name for p in result.required_properties] == ["req_1", "req_2"]
+    assert [p.name for p in result.optional_properties] == ["opt_1", "opt_2"]
+    assert result.class_info.name == "ParentSchemaPropName"
+    assert result.description == model_2.description

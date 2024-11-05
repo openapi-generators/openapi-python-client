@@ -186,6 +186,6 @@ class PropertyProtocol(Protocol):
             UnionProperty.__name__,
         }
 
-    def needs_processing(self) -> bool:
+    def needs_post_processing(self) -> bool:
         """Returns true if the parser should call process_model() on this property in a second pass."""
         return False
