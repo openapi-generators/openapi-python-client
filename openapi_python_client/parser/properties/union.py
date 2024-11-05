@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, ClassVar, OrderedDict, cast
+from typing import Any, ClassVar, Mapping, OrderedDict, cast
 
 from attr import define, evolve
 
@@ -16,7 +16,7 @@ from .schemas import Schemas, get_reference_simple_name, parse_reference_path
 @define
 class DiscriminatorDefinition:
     """Represents a discriminator that can optionally be specified for a union type.
-    
+
     Normally, a UnionProperty has either zero or one of these. However, a nested union
     could have more than one, as we accumulate all the discriminators when we flatten
     out the nested schemas. For example:
@@ -36,8 +36,9 @@ class DiscriminatorDefinition:
     In this example there are four schemas and two discriminators. The deserializer
     logic will check for the mammalType property first, then birdType.
     """
+
     property_name: str
-    value_to_model_map: dict[str, PropertyProtocol]
+    value_to_model_map: Mapping[str, PropertyProtocol]
     # Every value in the map is really a ModelProperty, but this avoids circular imports
 
 
@@ -260,7 +261,7 @@ def _parse_discriminator(
     #      mapping:
     #        value_for_a: "#/components/schemas/ModelA"
     #        value_for_b: ModelB   # equivalent to "#/components/schemas/ModelB"
-    # 
+    #
     # For any type that isn't specified in the mapping (or if the whole mapping is omitted)
     # the default lookup value for each schema is the same as the schema name. So this--
     #      mapping:
@@ -275,7 +276,7 @@ def _parse_discriminator(
     def _get_model_name(model: ModelProperty) -> str | None:
         return get_reference_simple_name(model.ref_path) if model.ref_path else None
 
-    model_types_by_name: dict[str, PropertyProtocol] = {}
+    model_types_by_name: dict[str, ModelProperty] = {}
     for model in subtypes:
         # Note, model here can never be a UnionProperty, because we've already done
         # flatten_union_properties() before this point.
@@ -290,7 +291,7 @@ def _parse_discriminator(
             )
         model_types_by_name[name] = model
 
-    mapping: dict[str, PropertyProtocol] = OrderedDict()  # use ordered dict for test determinacy
+    mapping: dict[str, ModelProperty] = OrderedDict()  # use ordered dict for test determinacy
     unspecified_models = list(model_types_by_name.values())
     if data.mapping:
         for discriminator_value, model_ref in data.mapping.items():
@@ -301,13 +302,13 @@ def _parse_discriminator(
                 name = get_reference_simple_name(ref_path)
             else:
                 name = model_ref
-            model = model_types_by_name.get(name)
-            if not model:
+            mapped_model = model_types_by_name.get(name)
+            if not mapped_model:
                 return PropertyError(
                     detail=f'Discriminator mapping referred to "{name}" which is not one of the schema variants',
                 )
-            mapping[discriminator_value] = model
-            unspecified_models.remove(model)
+            mapping[discriminator_value] = mapped_model
+            unspecified_models.remove(mapped_model)
     for model in unspecified_models:
         if name := _get_model_name(model):
             mapping[name] = model
