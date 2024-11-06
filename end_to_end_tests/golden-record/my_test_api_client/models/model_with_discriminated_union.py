@@ -78,9 +78,17 @@ class ModelWithDiscriminatedUnion:
 
                     return componentsschemas_a_discriminated_union_type_1
 
+                def _parse_3(data: object) -> ADiscriminatedUnionType2:
+                    if not isinstance(data, dict):
+                        raise TypeError()
+                    componentsschemas_a_discriminated_union_type_1 = ADiscriminatedUnionType2.from_dict(data)
+
+                    return componentsschemas_a_discriminated_union_type_1
+
                 _discriminator_mapping = {
                     "type1": _parse_1,
                     "type2": _parse_2,
+                    "type2-another-value": _parse_3,
                 }
                 if _parse_fn := _discriminator_mapping.get(_discriminator_value):
                     return cast(

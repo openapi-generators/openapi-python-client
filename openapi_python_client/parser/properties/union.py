@@ -308,7 +308,9 @@ def _parse_discriminator(
                     detail=f'Discriminator mapping referred to "{name}" which is not one of the schema variants',
                 )
             mapping[discriminator_value] = mapped_model
-            unspecified_models.remove(mapped_model)
+            if mapped_model in unspecified_models:
+                # could've already been removed if more than one value is mapped to the same model
+                unspecified_models.remove(mapped_model)
     for model in unspecified_models:
         if name := _get_model_name(model):
             mapping[name] = model
