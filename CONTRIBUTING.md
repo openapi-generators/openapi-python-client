@@ -54,16 +54,28 @@ If you think that some of the added code is not testable (or testing it would ad
 2. If you're modifying the way an existing feature works, make sure an existing test generates the _old_ code in `end_to_end_tests/golden-record`. You'll use this to check for the new code once your changes are complete.
 3. If you're improving an error or adding a new error, add a [unit test](#unit-tests)
 
-#### End-to-end tests
+#### End-to-end snapshot tests
 
-This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end to end tests (snapshot tests). In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `pdm e2e`. To regenerate the snapshots, run `pdm regen`.
+This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end-to-end tests. There are two types of these: snapshot tests, and unit tests of generated code.
 
-There are 4 types of snapshots generated right now, you may have to update only some or all of these depending on the changes you're making. Within the `end_to_end_tets` directory:
+Snapshot tests verify that the generated code is identical to a previously-committed set of snapshots (called a "golden record" here). They are basically regression tests to catch any unintended changes in the generator output.
+
+In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `pdm e2e`. To regenerate the snapshots, run `pdm regen`.
+
+There are 4 types of snapshots generated right now, you may have to update only some or all of these depending on the changes you're making. Within the `end_to_end_tests` directory:
 
 1. `baseline_openapi_3.0.json` creates `golden-record` for testing OpenAPI 3.0 features
 2. `baseline_openapi_3.1.yaml` is checked against `golden-record` for testing OpenAPI 3.1 features (and ensuring consistency with 3.0)
 3. `test_custom_templates` are used with `baseline_openapi_3.0.json` to generate `custom-templates-golden-record` for testing custom templates
 4. `3.1_specific.openapi.yaml` is used to generate `test-3-1-golden-record` and test 3.1-specific features (things which do not have a 3.0 equivalent)
+
+#### Unit tests of generated code
+
+These verify the runtime behavior of the generated code, without making assertions about the exact implementation of the code. For instance, they can verify that JSON data is correctly decoded into model class attributes.
+
+The tests run the generator against a small API spec (defined inline for each test class), and then import and execute the generated code. This can sometimes identify issues with validation logic, module imports, etc., that might be harder to diagnose via the snapshot tests, especially during development of a new feature.
+
+See [`end_to_end_tests/generated_code_live_tests`](./end_to_end_tests/generated_code_live_tests).
 
 #### Unit tests
 
