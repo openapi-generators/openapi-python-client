@@ -1,4 +1,5 @@
 __all__ = [
+    "Discriminator",
     "MediaType",
     "OpenAPI",
     "Operation",
@@ -17,6 +18,7 @@ __all__ = [
 
 from .data_type import DataType
 from .openapi_schema_pydantic import (
+    Discriminator,
     MediaType,
     OpenAPI,
     Operation,

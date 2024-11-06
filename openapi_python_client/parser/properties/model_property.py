@@ -32,6 +32,7 @@ class ModelProperty(PropertyProtocol):
     relative_imports: set[str] | None
     lazy_imports: set[str] | None
     additional_properties: Property | None
+    ref_path: ReferencePath | None = None
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
