@@ -4,14 +4,13 @@ import uuid
 import pytest
 from end_to_end_tests.end_to_end_test_helpers import (
     assert_model_decode_encode,
-    with_generated_code_import,
     with_generated_client_fixture,
+    with_generated_code_imports,
 )
 
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyModel:
@@ -29,8 +28,7 @@ components:
             req3: {"type": "string"}
           required: ["req3"]
 """)
-@with_generated_code_import(".models.MyModel")
-@with_generated_code_import(".models.DerivedModel")
+@with_generated_code_imports(".models.MyModel", ".models.DerivedModel")
 class TestRequiredAndOptionalProperties:
     def test_required_ok(self, MyModel, DerivedModel):
         assert_model_decode_encode(
@@ -67,7 +65,6 @@ class TestRequiredAndOptionalProperties:
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyModel:
@@ -80,11 +77,11 @@ components:
         arrayOfStringsProp: {"type": "array", "items": {"type": "string"}}
         anyObjectProp: {"$ref": "#/components/schemas/AnyObject"}
         nullProp: {"type": "null"}
+        anyProp: {}
     AnyObject:
         type: object
 """)
-@with_generated_code_import(".models.MyModel")
-@with_generated_code_import(".models.AnyObject")
+@with_generated_code_imports(".models.MyModel", ".models.AnyObject")
 class TestBasicModelProperties:
     def test_decode_encode(self, MyModel, AnyObject):
         json_data = {
@@ -95,6 +92,7 @@ class TestBasicModelProperties:
             "arrayOfStringsProp": ["b", "c"],
             "anyObjectProp": {"d": 3},
             "nullProp": None,
+            "anyProp": "e"
         }
         expected_any_object = AnyObject()
         expected_any_object.additional_properties = {"d": 3}
@@ -109,6 +107,7 @@ class TestBasicModelProperties:
                 array_of_strings_prop=["b", "c"],
                 any_object_prop = expected_any_object,
                 null_prop=None,
+                any_prop="e",
             )
         )
 
@@ -126,7 +125,6 @@ class TestBasicModelProperties:
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyModel:
@@ -136,7 +134,7 @@ components:
         dateTimeProp: {"type": "string", "format": "date-time"}
         uuidProp: {"type": "string", "format": "uuid"}
 """)
-@with_generated_code_import(".models.MyModel")
+@with_generated_code_imports(".models.MyModel")
 class TestSpecialStringFormats:
     def test_date(self, MyModel):
         date_value = datetime.date.today()

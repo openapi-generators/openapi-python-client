@@ -1,5 +1,5 @@
 import openapi_python_client.schema as oai
-from openapi_python_client.parser.errors import ParseError, PropertyError
+from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.properties import Schemas, UnionProperty
 from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.schema import DataType, ParameterLocation
@@ -31,31 +31,6 @@ def test_property_from_data_union(union_property_factory, date_time_property_fac
 
     assert p == expected
     assert s == Schemas()
-
-
-def test_build_union_property_invalid_property(config):
-    name = "bad_union"
-    required = True
-    reference = oai.Reference.model_construct(ref="#/components/schema/NotExist")
-    data = oai.Schema(anyOf=[reference])
-
-    p, s = UnionProperty.build(
-        name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=config
-    )
-    assert p == PropertyError(detail=f"Invalid property in union {name}", data=reference)
-
-
-def test_invalid_default(config):
-    data = oai.Schema(
-        type=[DataType.NUMBER, DataType.INTEGER],
-        default="a",
-    )
-
-    err, _ = UnionProperty.build(
-        data=data, required=True, schemas=Schemas(), parent_name="parent", name="name", config=config
-    )
-
-    assert isinstance(err, PropertyError)
 
 
 def test_invalid_location(config):

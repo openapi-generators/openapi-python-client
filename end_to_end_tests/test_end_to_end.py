@@ -264,7 +264,7 @@ def test_invalid_openapi_document(suffix, content, expected_error):
     with generate_client_from_inline_spec(
         content,
         filename_suffix=suffix,
-        add_openapi_info=False,
+        add_missing_sections=False,
         raise_on_error=False,
     ) as g:
         assert g.generator_result.exit_code == 1

@@ -1,5 +1,6 @@
 import importlib
 import os
+import re
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
@@ -92,7 +93,6 @@ def generate_client(
     if overwrite:
         args = [*args, "--overwrite"]
     generator_result = _run_command("generate", args, openapi_document, raise_on_error=raise_on_error)
-    print(generator_result.stdout)
     return GeneratedClientContext(
         full_output_path,
         generator_result,
@@ -107,21 +107,20 @@ def generate_client_from_inline_spec(
     filename_suffix: Optional[str] = None,
     config: str = "",
     base_module: str = "testapi_client",
-    add_openapi_info = True,
+    add_missing_sections = True,
     raise_on_error: bool = True,
 ) -> GeneratedClientContext:
     """Run the generator on a temporary file created with the specified contents.
     
     You can also optionally tell it to create a temporary config file.
     """
-    if add_openapi_info and not openapi_spec.lstrip().startswith("openapi:"):
-        openapi_spec += """
-openapi: "3.1.0"
-info:
-  title: "testapi"
-  description: "my test api"
-  version: "0.0.1"
-"""
+    if add_missing_sections:
+        if not re.search("^openapi:", openapi_spec, re.MULTILINE):
+            openapi_spec += "\nopenapi: '3.1.0'\n"
+        if not re.search("^info:", openapi_spec, re.MULTILINE):
+            openapi_spec += "\ninfo: {'title': 'testapi', 'description': 'my test api', 'version': '0.0.1'}\n"
+        if not re.search("^paths:", openapi_spec, re.MULTILINE):
+            openapi_spec += "\npaths: {}\n"
 
     output_path = tempfile.mkdtemp()
     file = tempfile.NamedTemporaryFile(suffix=filename_suffix, delete=False)
@@ -146,6 +145,43 @@ info:
         os.unlink(config_file.name)
 
     return generated_client
+
+
+def inline_spec_should_fail(
+    openapi_spec: str,
+    extra_args: List[str] = [],
+    filename_suffix: Optional[str] = None,
+    config: str = "",
+    add_missing_sections = True,
+) -> Result:
+    """Asserts that the generator could not process the spec.
+    
+    Returns the full output.
+    """
+    with generate_client_from_inline_spec(
+        openapi_spec, extra_args, filename_suffix, config, add_missing_sections, raise_on_error=False
+    ) as generated_client:
+        assert generated_client.generator_result.exit_code != 0
+        return generated_client.generator_result.stdout
+
+
+def inline_spec_should_cause_warnings(
+    openapi_spec: str,
+    extra_args: List[str] = [],
+    filename_suffix: Optional[str] = None,
+    config: str = "",
+    add_openapi_info = True,
+) -> str:
+    """Asserts that the generator is able to process the spec, but printed warnings.
+    
+    Returns the full output.
+    """
+    with generate_client_from_inline_spec(
+        openapi_spec, extra_args, filename_suffix, config, add_openapi_info, raise_on_error=True
+    ) as generated_client:
+        assert generated_client.generator_result.exit_code == 0
+        assert "Warning(s) encountered while generating" in generated_client.generator_result.stdout
+        return generated_client.generator_result.stdout
 
 
 def with_generated_client_fixture(
@@ -197,7 +233,31 @@ def with_generated_code_import(import_path: str, alias: Optional[str] = None):
     return _decorator
 
 
-def assert_model_decode_encode(model_class: Any, json_data: dict, expected_instance: Any):
+def with_generated_code_imports(*import_paths: str):
+    def _decorator(cls):
+        decorated = cls
+        for import_path in import_paths:
+            decorated = with_generated_code_import(import_path)(decorated)
+        return decorated
+
+    return _decorator
+
+
+def assert_model_decode_encode(model_class: Any, json_data: dict, expected_instance: Any) -> None:
     instance = model_class.from_dict(json_data)
     assert instance == expected_instance
     assert instance.to_dict() == json_data
+
+
+def assert_bad_schema_warning(output: str, schema_name: str, expected_message_str) -> None:
+    bad_schema_regex = "Unable to (parse|process) schema"
+    expected_start_regex = f"{bad_schema_regex} /components/schemas/{re.escape(schema_name)}:?\n"
+    if not (match := re.search(expected_start_regex, output)):
+        # this assert is to get better failure output
+        assert False, f"Did not find '{expected_start_regex}' in output: {output}"
+    output = output[match.end():]
+    # The amount of other information in between that message and the warning detail can vary
+    # depending on the error, so just make sure we're not picking up output from a different schema
+    if (next_match := re.search(bad_schema_regex, output)):
+        output = output[0:next_match.start()]
+    assert expected_message_str in output

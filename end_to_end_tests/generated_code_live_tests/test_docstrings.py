@@ -18,7 +18,6 @@ class DocstringParser:
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyModel:

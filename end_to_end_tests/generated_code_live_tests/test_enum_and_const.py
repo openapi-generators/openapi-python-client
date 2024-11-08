@@ -1,15 +1,18 @@
 
+from typing import Any
 import pytest
 from end_to_end_tests.end_to_end_test_helpers import (
+    assert_bad_schema_warning,
     assert_model_decode_encode,
+    inline_spec_should_cause_warnings,
     with_generated_code_import,
     with_generated_client_fixture,
+    with_generated_code_imports,
 )
 
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyEnum:
@@ -27,9 +30,7 @@ components:
             - {"$ref": "#/components/schemas/MyEnum"}
             - type: "null"
 """)
-@with_generated_code_import(".models.MyEnum")
-@with_generated_code_import(".models.MyIntEnum")
-@with_generated_code_import(".models.MyModel")
+@with_generated_code_imports(".models.MyEnum", ".models.MyIntEnum", ".models.MyModel")
 class TestEnumClasses:
     def test_enum_classes(self, MyEnum, MyIntEnum):
         assert MyEnum.A == MyEnum("a")
@@ -72,7 +73,6 @@ class TestEnumClasses:
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyEnum:
@@ -130,24 +130,75 @@ class TestLiteralEnums:
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     MyModel:
       properties:
         mustBeErnest:
           const: Ernest
+        mustBeThirty:
+          const: 30
 """,
 )
 @with_generated_code_import(".models.MyModel")
 class TestConst:
-    def test_valid_value(self, MyModel):
+    def test_valid_string(self, MyModel):
         assert_model_decode_encode(
             MyModel,
             {"mustBeErnest": "Ernest"},
             MyModel(must_be_ernest="Ernest"),
         )
 
-    def test_invalid_value(self, MyModel):
+    def test_valid_int(self, MyModel):
+        assert_model_decode_encode(
+            MyModel,
+            {"mustBeThirty": 30},
+            MyModel(must_be_thirty=30),
+        )
+
+    def test_invalid_string(self, MyModel):
         with pytest.raises(ValueError):
             MyModel.from_dict({"mustBeErnest": "Jack"})
+
+    def test_invalid_int(self, MyModel):
+        with pytest.raises(ValueError):
+            MyModel.from_dict({"mustBeThirty": 29})
+
+
+class TestEnumAndConstInvalidSchemas:
+    @pytest.fixture(scope="class")
+    def warnings(self):
+        return inline_spec_should_cause_warnings(
+"""
+components:
+  schemas:
+    WithBadDefaultValue:
+      enum: ["A"]
+      default: "B"
+    WithBadDefaultType:
+      enum: ["A"]
+      default: 123
+    WithMixedTypes:
+      enum: ["A", 1]
+    WithUnsupportedType:
+      enum: [1.4, 1.5]
+    DefaultNotMatchingConst:
+      const: "aaa"
+      default: "bbb"
+"""
+        )
+
+    def test_enum_bad_default_value(self, warnings):
+        assert_bad_schema_warning(warnings, "WithBadDefaultValue", "Value B is not valid")
+
+    def test_enum_bad_default_type(self, warnings):
+        assert_bad_schema_warning(warnings, "WithBadDefaultType", "Cannot convert 123 to enum")
+
+    def test_enum_mixed_types(self, warnings):
+        assert_bad_schema_warning(warnings, "WithMixedTypes", "Enum values must all be the same type")
+
+    def test_enum_unsupported_type(self, warnings):
+        assert_bad_schema_warning(warnings, "WithUnsupportedType", "Unsupported enum type")
+
+    def test_const_default_not_matching(self, warnings):
+        assert_bad_schema_warning(warnings, "DefaultNotMatchingConst", "Invalid value for const")

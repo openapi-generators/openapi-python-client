@@ -1,14 +1,16 @@
 
+import pytest
 from end_to_end_tests.end_to_end_test_helpers import (
+    assert_bad_schema_warning,
     assert_model_decode_encode,
-    with_generated_code_import,
+    inline_spec_should_cause_warnings,
     with_generated_client_fixture,
+    with_generated_code_imports,
 )
 
 
 @with_generated_client_fixture(
 """
-paths: {}
 components:
   schemas:
     ThingA:
@@ -25,17 +27,31 @@ components:
       type: object
       properties:
         thing:
-            oneOf:
+          oneOf:
             - $ref: "#/components/schemas/ThingA"
             - $ref: "#/components/schemas/ThingB"
         thingOrString:
-            oneOf:
+          oneOf:
             - $ref: "#/components/schemas/ThingA"
             - type: string
+    ModelWithNestedUnion:
+      type: object
+      properties:
+        thingOrValue:
+          oneOf:
+            - oneOf:
+              - $ref: "#/components/schemas/ThingA"
+              - $ref: "#/components/schemas/ThingB"
+            - oneOf:
+              - type: string
+              - type: number
 """)
-@with_generated_code_import(".models.ThingA")
-@with_generated_code_import(".models.ThingB")
-@with_generated_code_import(".models.ModelWithUnion")
+@with_generated_code_imports(
+    ".models.ThingA",
+    ".models.ThingB",
+    ".models.ModelWithUnion",
+    ".models.ModelWithNestedUnion",
+)
 class TestOneOf:
     def test_disambiguate_objects_via_required_properties(self, ThingA, ThingB, ModelWithUnion):
         assert_model_decode_encode(
@@ -60,3 +76,38 @@ class TestOneOf:
             {"thingOrString": "x"},
             ModelWithUnion(thing_or_string="x"),
         )
+    
+    def test_disambiguate_nested_union(self, ThingA, ThingB, ModelWithNestedUnion):
+        assert_model_decode_encode(
+            ModelWithNestedUnion,
+            {"thingOrValue": {"propA": "x"}},
+            ModelWithNestedUnion(thing_or_value=ThingA(prop_a="x")),
+        )
+        assert_model_decode_encode(
+            ModelWithNestedUnion,
+            {"thingOrValue": 3},
+            ModelWithNestedUnion(thing_or_value=3),
+        )
+
+
+class TestUnionInvalidSchemas:
+    @pytest.fixture(scope="class")
+    def warnings(self):
+        return inline_spec_should_cause_warnings(
+"""
+components:
+  schemas:
+    UnionWithInvalidReference:
+      anyOf:
+        - $ref: "#/components/schemas/DoesntExist"
+    UnionWithInvalidDefault:
+      type: ["number", "integer"]
+      default: aaa
+"""
+        )
+
+    def test_invalid_reference(self, warnings):
+        assert_bad_schema_warning(warnings, "UnionWithInvalidReference", "Could not find reference")
+
+    def test_invalid_default(self, warnings):
+        assert_bad_schema_warning(warnings, "UnionWithInvalidDefault", "Invalid int value: aaa")
