@@ -172,12 +172,12 @@ def property_from_data(
 def _property_from_data(  # noqa: PLR0911, PLR0912
     name: str,
     required: bool,
-    data: oai.Reference | oai.Schema,
+    data: oai.Schema,
     schemas: Schemas,
     parent_name: str,
     config: Config,
-    process_properties: bool = True,
-    roots: set[ReferencePath | utils.ClassName] | None = None,
+    process_properties: bool,
+    roots: set[ReferencePath | utils.ClassName],
 ) -> tuple[Property | PropertyError, Schemas]:
     sub_data: list[oai.Schema | oai.Reference] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
