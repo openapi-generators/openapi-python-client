@@ -163,9 +163,9 @@ def property_from_data(
 
     prop, schemas = _property_from_data(name, required, data, schemas, parent_name, config, process_properties, roots)
     if not isinstance(prop, PropertyError) and isinstance(data, oai.Schema):
-        prop.read_only = data.readOnly or False
-        # We are mutating the object instead of using evolve() because we may have already
-        # stored a reference to the original object in schema.classes_by_reference, etc.
+        updated_prop = evolve(prop, read_only=data.readOnly or False)
+        schemas = _replace_schema(schemas, prop, updated_prop)
+        prop = updated_prop
     return prop, schemas
 
 
@@ -421,6 +421,29 @@ def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
     final_model_errors.extend(latest_model_errors)
     errors = _process_model_errors(final_model_errors, schemas=schemas)
     return evolve(schemas, errors=[*schemas.errors, *errors], models_to_process=to_process)
+
+
+def _replace_schema(schemas: Schemas, original_prop: Property, updated_prop: Property) -> Schemas:
+    if isinstance(original_prop, (ModelProperty, EnumProperty)):
+        # TODO: replace that check with a protocol method like "has_class_info"
+        class_info = original_prop.class_info
+        if class_info.name in schemas.classes_by_name:
+            schemas = evolve(
+                schemas,
+                classes_by_name={**schemas.classes_by_name, class_info.name: updated_prop},
+            )
+    # We don't have to worry about classes_by_reference, because that gets populated at
+    # a higher level after property_from_data has returned.
+    if isinstance(original_prop, ModelProperty) and isinstance(updated_prop, ModelProperty):
+        # TODO: if models_to_process is generalized to hold other types, replace that check
+        # with a protocol method like "needs_post_processing"
+        updated_list = schemas.models_to_process.copy()
+        # Currently models_to_process is defined as a list of ModelProperty only, but that will
+        # change, so for now let's do this step for all
+        updated_list.remove(original_prop)
+        updated_list.append(updated_prop)
+        schemas = evolve(schemas, models_to_process=updated_list)
+    return schemas
 
 
 def build_schemas(
