@@ -156,13 +156,13 @@ def inline_spec_should_fail(
 ) -> Result:
     """Asserts that the generator could not process the spec.
     
-    Returns the full output.
+    Returns the command result, which could include stdout data or an exception.
     """
     with generate_client_from_inline_spec(
         openapi_spec, extra_args, filename_suffix, config, add_missing_sections, raise_on_error=False
     ) as generated_client:
         assert generated_client.generator_result.exit_code != 0
-        return generated_client.generator_result.stdout
+        return generated_client.generator_result
 
 
 def inline_spec_should_cause_warnings(
@@ -198,6 +198,7 @@ def with_generated_client_fixture(
     def _decorator(cls):
         def generated_client(self):
             with generate_client_from_inline_spec(openapi_spec, extra_args=extra_args, config=config) as g:
+                print(g.generator_result.stdout)  # so we'll see the output if a test failed
                 yield g
 
         setattr(cls, name, pytest.fixture(scope="class")(generated_client))

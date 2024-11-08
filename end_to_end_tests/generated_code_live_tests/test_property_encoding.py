@@ -133,6 +133,7 @@ components:
         dateProp: {"type": "string", "format": "date"}
         dateTimeProp: {"type": "string", "format": "date-time"}
         uuidProp: {"type": "string", "format": "uuid"}
+        unknownFormatProp: {"type": "string", "format": "weird"}
 """)
 @with_generated_code_imports(".models.MyModel")
 class TestSpecialStringFormats:
@@ -150,3 +151,7 @@ class TestSpecialStringFormats:
         uuid_value = uuid.uuid1()
         json_data = {"uuidProp": str(uuid_value)}
         assert_model_decode_encode(MyModel, json_data, MyModel(uuid_prop=uuid_value))
+
+    def test_unknown_format(self, MyModel):
+        json_data = {"unknownFormatProp": "whatever"}
+        assert_model_decode_encode(MyModel, json_data, MyModel(unknown_format_prop="whatever"))

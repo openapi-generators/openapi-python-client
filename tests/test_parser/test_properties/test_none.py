@@ -5,6 +5,8 @@ from openapi_python_client.utils import PythonIdentifier
 
 
 def test_default():
+    # currently this is testing an unused code path:
+    # https://github.com/openapi-generators/openapi-python-client/issues/1162
     err = NoneProperty.build(
         default="not None",
         description=None,
