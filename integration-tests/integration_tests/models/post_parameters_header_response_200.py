@@ -23,24 +23,20 @@ class PostParametersHeaderResponse200:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        boolean = self.boolean
-
-        string = self.string
-
-        number = self.number
-
-        integer = self.integer
+        prop1 = self.boolean
+        prop2 = self.string
+        prop3 = self.number
+        prop4 = self.integer
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "boolean": boolean,
-                "string": string,
-                "number": number,
-                "integer": integer,
-            }
-        )
+        field_dict = {
+            **field_dict,
+            "boolean": prop1,
+            "string": prop2,
+            "number": prop3,
+            "integer": prop4,
+        }
 
         return field_dict
 

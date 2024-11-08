@@ -81,134 +81,125 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        enum_properties_ref = []
+        prop1 = []
         for componentsschemas_an_other_array_of_enum_item_data in self.enum_properties_ref:
             componentsschemas_an_other_array_of_enum_item = componentsschemas_an_other_array_of_enum_item_data.value
-            enum_properties_ref.append(componentsschemas_an_other_array_of_enum_item)
+            prop1.append(componentsschemas_an_other_array_of_enum_item)
 
-        str_properties_ref = self.str_properties_ref
+        prop2 = self.str_properties_ref
 
-        date_properties_ref = []
+        prop3 = []
         for componentsschemas_an_other_array_of_date_item_data in self.date_properties_ref:
             componentsschemas_an_other_array_of_date_item = (
                 componentsschemas_an_other_array_of_date_item_data.isoformat()
             )
-            date_properties_ref.append(componentsschemas_an_other_array_of_date_item)
+            prop3.append(componentsschemas_an_other_array_of_date_item)
 
-        datetime_properties_ref = []
+        prop4 = []
         for componentsschemas_an_other_array_of_date_time_item_data in self.datetime_properties_ref:
             componentsschemas_an_other_array_of_date_time_item = (
                 componentsschemas_an_other_array_of_date_time_item_data.isoformat()
             )
-            datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
+            prop4.append(componentsschemas_an_other_array_of_date_time_item)
 
-        int32_properties_ref = self.int32_properties_ref
+        prop5 = self.int32_properties_ref
 
-        int64_properties_ref = self.int64_properties_ref
+        prop6 = self.int64_properties_ref
 
-        float_properties_ref = self.float_properties_ref
+        prop7 = self.float_properties_ref
 
-        double_properties_ref = self.double_properties_ref
+        prop8 = self.double_properties_ref
 
-        file_properties_ref = []
+        prop9 = []
         for componentsschemas_an_other_array_of_file_item_data in self.file_properties_ref:
             componentsschemas_an_other_array_of_file_item = (
                 componentsschemas_an_other_array_of_file_item_data.to_tuple()
             )
 
-            file_properties_ref.append(componentsschemas_an_other_array_of_file_item)
+            prop9.append(componentsschemas_an_other_array_of_file_item)
 
-        bytestream_properties_ref = self.bytestream_properties_ref
+        prop10 = self.bytestream_properties_ref
 
-        enum_properties = []
+        prop11 = []
         for componentsschemas_an_array_of_enum_item_data in self.enum_properties:
             componentsschemas_an_array_of_enum_item = componentsschemas_an_array_of_enum_item_data.value
-            enum_properties.append(componentsschemas_an_array_of_enum_item)
+            prop11.append(componentsschemas_an_array_of_enum_item)
 
-        str_properties = self.str_properties
+        prop12 = self.str_properties
 
-        date_properties = []
+        prop13 = []
         for componentsschemas_an_array_of_date_item_data in self.date_properties:
             componentsschemas_an_array_of_date_item = componentsschemas_an_array_of_date_item_data.isoformat()
-            date_properties.append(componentsschemas_an_array_of_date_item)
+            prop13.append(componentsschemas_an_array_of_date_item)
 
-        datetime_properties = []
+        prop14 = []
         for componentsschemas_an_array_of_date_time_item_data in self.datetime_properties:
             componentsschemas_an_array_of_date_time_item = componentsschemas_an_array_of_date_time_item_data.isoformat()
-            datetime_properties.append(componentsschemas_an_array_of_date_time_item)
+            prop14.append(componentsschemas_an_array_of_date_time_item)
 
-        int32_properties = self.int32_properties
+        prop15 = self.int32_properties
 
-        int64_properties = self.int64_properties
+        prop16 = self.int64_properties
 
-        float_properties = self.float_properties
+        prop17 = self.float_properties
 
-        double_properties = self.double_properties
+        prop18 = self.double_properties
 
-        file_properties = []
+        prop19 = []
         for componentsschemas_an_array_of_file_item_data in self.file_properties:
             componentsschemas_an_array_of_file_item = componentsschemas_an_array_of_file_item_data.to_tuple()
 
-            file_properties.append(componentsschemas_an_array_of_file_item)
+            prop19.append(componentsschemas_an_array_of_file_item)
 
-        bytestream_properties = self.bytestream_properties
+        prop20 = self.bytestream_properties
 
-        enum_property_ref = self.enum_property_ref.value
+        prop21 = self.enum_property_ref.value
+        prop22 = self.str_property_ref
+        prop23 = self.date_property_ref.isoformat()
+        prop24 = self.datetime_property_ref.isoformat()
+        prop25 = self.int32_property_ref
+        prop26 = self.int64_property_ref
+        prop27 = self.float_property_ref
+        prop28 = self.double_property_ref
+        prop29 = self.file_property_ref.to_tuple()
 
-        str_property_ref = self.str_property_ref
-
-        date_property_ref = self.date_property_ref.isoformat()
-
-        datetime_property_ref = self.datetime_property_ref.isoformat()
-
-        int32_property_ref = self.int32_property_ref
-
-        int64_property_ref = self.int64_property_ref
-
-        float_property_ref = self.float_property_ref
-
-        double_property_ref = self.double_property_ref
-
-        file_property_ref = self.file_property_ref.to_tuple()
-
-        bytestream_property_ref = self.bytestream_property_ref
+        prop30 = self.bytestream_property_ref
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "enum_properties_ref": enum_properties_ref,
-                "str_properties_ref": str_properties_ref,
-                "date_properties_ref": date_properties_ref,
-                "datetime_properties_ref": datetime_properties_ref,
-                "int32_properties_ref": int32_properties_ref,
-                "int64_properties_ref": int64_properties_ref,
-                "float_properties_ref": float_properties_ref,
-                "double_properties_ref": double_properties_ref,
-                "file_properties_ref": file_properties_ref,
-                "bytestream_properties_ref": bytestream_properties_ref,
-                "enum_properties": enum_properties,
-                "str_properties": str_properties,
-                "date_properties": date_properties,
-                "datetime_properties": datetime_properties,
-                "int32_properties": int32_properties,
-                "int64_properties": int64_properties,
-                "float_properties": float_properties,
-                "double_properties": double_properties,
-                "file_properties": file_properties,
-                "bytestream_properties": bytestream_properties,
-                "enum_property_ref": enum_property_ref,
-                "str_property_ref": str_property_ref,
-                "date_property_ref": date_property_ref,
-                "datetime_property_ref": datetime_property_ref,
-                "int32_property_ref": int32_property_ref,
-                "int64_property_ref": int64_property_ref,
-                "float_property_ref": float_property_ref,
-                "double_property_ref": double_property_ref,
-                "file_property_ref": file_property_ref,
-                "bytestream_property_ref": bytestream_property_ref,
-            }
-        )
+        field_dict = {
+            **field_dict,
+            "enum_properties_ref": prop1,
+            "str_properties_ref": prop2,
+            "date_properties_ref": prop3,
+            "datetime_properties_ref": prop4,
+            "int32_properties_ref": prop5,
+            "int64_properties_ref": prop6,
+            "float_properties_ref": prop7,
+            "double_properties_ref": prop8,
+            "file_properties_ref": prop9,
+            "bytestream_properties_ref": prop10,
+            "enum_properties": prop11,
+            "str_properties": prop12,
+            "date_properties": prop13,
+            "datetime_properties": prop14,
+            "int32_properties": prop15,
+            "int64_properties": prop16,
+            "float_properties": prop17,
+            "double_properties": prop18,
+            "file_properties": prop19,
+            "bytestream_properties": prop20,
+            "enum_property_ref": prop21,
+            "str_property_ref": prop22,
+            "date_property_ref": prop23,
+            "datetime_property_ref": prop24,
+            "int32_property_ref": prop25,
+            "int64_property_ref": prop26,
+            "float_property_ref": prop27,
+            "double_property_ref": prop28,
+            "file_property_ref": prop29,
+            "bytestream_property_ref": prop30,
+        }
 
         return field_dict
 

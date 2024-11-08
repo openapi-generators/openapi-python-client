@@ -21,17 +21,16 @@ class Problem:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        parameter_name = self.parameter_name
-
-        description = self.description
+        prop1 = self.parameter_name
+        prop2 = self.description
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if parameter_name is not UNSET:
-            field_dict["parameter_name"] = parameter_name
-        if description is not UNSET:
-            field_dict["description"] = description
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"parameter_name": prop1}),
+            **({} if prop2 is UNSET else {"description": prop2}),
+        }
 
         return field_dict
 

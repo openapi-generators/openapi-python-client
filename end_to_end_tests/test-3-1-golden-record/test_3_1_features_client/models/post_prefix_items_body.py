@@ -21,29 +21,29 @@ class PostPrefixItemsBody:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        prefix_items_and_items: Union[Unset, List[Union[Literal["prefix"], float, str]]] = UNSET
+        prop1: Union[Unset, List[Union[Literal["prefix"], float, str]]] = UNSET
         if not isinstance(self.prefix_items_and_items, Unset):
-            prefix_items_and_items = []
+            prop1 = []
             for prefix_items_and_items_item_data in self.prefix_items_and_items:
                 prefix_items_and_items_item: Union[Literal["prefix"], float, str]
                 prefix_items_and_items_item = prefix_items_and_items_item_data
-                prefix_items_and_items.append(prefix_items_and_items_item)
+                prop1.append(prefix_items_and_items_item)
 
-        prefix_items_only: Union[Unset, List[Union[float, str]]] = UNSET
+        prop2: Union[Unset, List[Union[float, str]]] = UNSET
         if not isinstance(self.prefix_items_only, Unset):
-            prefix_items_only = []
+            prop2 = []
             for prefix_items_only_item_data in self.prefix_items_only:
                 prefix_items_only_item: Union[float, str]
                 prefix_items_only_item = prefix_items_only_item_data
-                prefix_items_only.append(prefix_items_only_item)
+                prop2.append(prefix_items_only_item)
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if prefix_items_and_items is not UNSET:
-            field_dict["prefixItemsAndItems"] = prefix_items_and_items
-        if prefix_items_only is not UNSET:
-            field_dict["prefixItemsOnly"] = prefix_items_only
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"prefixItemsAndItems": prop1}),
+            **({} if prop2 is UNSET else {"prefixItemsOnly": prop2}),
+        }
 
         return field_dict
 

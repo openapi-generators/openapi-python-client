@@ -17,15 +17,14 @@ class BodyUploadFileTestsUploadPostSomeOptionalObject:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        foo = self.foo
+        prop1 = self.foo
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "foo": foo,
-            }
-        )
+        field_dict = {
+            **field_dict,
+            "foo": prop1,
+        }
 
         return field_dict
 

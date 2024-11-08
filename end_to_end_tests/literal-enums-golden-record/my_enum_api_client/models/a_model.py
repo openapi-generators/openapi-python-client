@@ -29,40 +29,33 @@ class AModel:
     nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        an_enum_value: str = self.an_enum_value
-
-        an_allof_enum_with_overridden_default: str = self.an_allof_enum_with_overridden_default
-
-        any_value = self.any_value
-
-        an_optional_allof_enum: Union[Unset, str] = UNSET
+        prop1: str = self.an_enum_value
+        prop2: str = self.an_allof_enum_with_overridden_default
+        prop3 = self.any_value
+        prop4: Union[Unset, str] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
-            an_optional_allof_enum = self.an_optional_allof_enum
+            prop4 = self.an_optional_allof_enum
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        prop5: Union[Unset, List[List[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
-            nested_list_of_enums = []
+            prop5 = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
                 nested_list_of_enums_item = []
                 for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
                     nested_list_of_enums_item_item: str = nested_list_of_enums_item_item_data
                     nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
-                nested_list_of_enums.append(nested_list_of_enums_item)
+                prop5.append(nested_list_of_enums_item)
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(
-            {
-                "an_enum_value": an_enum_value,
-                "an_allof_enum_with_overridden_default": an_allof_enum_with_overridden_default,
-            }
-        )
-        if any_value is not UNSET:
-            field_dict["any_value"] = any_value
-        if an_optional_allof_enum is not UNSET:
-            field_dict["an_optional_allof_enum"] = an_optional_allof_enum
-        if nested_list_of_enums is not UNSET:
-            field_dict["nested_list_of_enums"] = nested_list_of_enums
+        field_dict = {
+            **field_dict,
+            "an_enum_value": prop1,
+            "an_allof_enum_with_overridden_default": prop2,
+            **({} if prop3 is UNSET else {"any_value": prop3}),
+            **({} if prop4 is UNSET else {"an_optional_allof_enum": prop4}),
+            **({} if prop5 is UNSET else {"nested_list_of_enums": prop5}),
+        }
 
         return field_dict
 

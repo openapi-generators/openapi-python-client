@@ -24,23 +24,20 @@ class AllOfHasPropertiesButNoType:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        a_sub_property = self.a_sub_property
-
-        type = self.type
-
-        type_enum: Union[Unset, int] = UNSET
+        prop1 = self.a_sub_property
+        prop2 = self.type
+        prop3: Union[Unset, int] = UNSET
         if not isinstance(self.type_enum, Unset):
-            type_enum = self.type_enum.value
+            prop3 = self.type_enum.value
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if a_sub_property is not UNSET:
-            field_dict["a_sub_property"] = a_sub_property
-        if type is not UNSET:
-            field_dict["type"] = type
-        if type_enum is not UNSET:
-            field_dict["type_enum"] = type_enum
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a_sub_property": prop1}),
+            **({} if prop2 is UNSET else {"type": prop2}),
+            **({} if prop3 is UNSET else {"type_enum": prop3}),
+        }
 
         return field_dict
 

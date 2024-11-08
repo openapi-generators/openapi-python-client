@@ -19,13 +19,14 @@ class ADiscriminatedUnionType1:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        model_type = self.model_type
+        prop1 = self.model_type
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if model_type is not UNSET:
-            field_dict["modelType"] = model_type
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"modelType": prop1}),
+        }
 
         return field_dict
 

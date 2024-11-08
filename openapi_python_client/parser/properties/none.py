@@ -20,6 +20,7 @@ class NoneProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool = False
 
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
         oai.ParameterLocation.QUERY,

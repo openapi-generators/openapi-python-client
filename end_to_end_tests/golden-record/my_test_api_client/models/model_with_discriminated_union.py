@@ -27,21 +27,22 @@ class ModelWithDiscriminatedUnion:
         from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
         from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
 
-        discriminated_union: Union[Dict[str, Any], None, Unset]
+        prop1: Union[Dict[str, Any], None, Unset]
         if isinstance(self.discriminated_union, Unset):
-            discriminated_union = UNSET
+            prop1 = UNSET
         elif isinstance(self.discriminated_union, ADiscriminatedUnionType1):
-            discriminated_union = self.discriminated_union.to_dict()
+            prop1 = self.discriminated_union.to_dict()
         elif isinstance(self.discriminated_union, ADiscriminatedUnionType2):
-            discriminated_union = self.discriminated_union.to_dict()
+            prop1 = self.discriminated_union.to_dict()
         else:
-            discriminated_union = self.discriminated_union
+            prop1 = self.discriminated_union
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if discriminated_union is not UNSET:
-            field_dict["discriminated_union"] = discriminated_union
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"discriminated_union": prop1}),
+        }
 
         return field_dict
 

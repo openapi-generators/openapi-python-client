@@ -23,20 +23,21 @@ class AnArrayWithACircularRefInItemsObjectBItem:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        circular: Union[Unset, List[Dict[str, Any]]] = UNSET
+        prop1: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.circular, Unset):
-            circular = []
+            prop1 = []
             for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in self.circular:
                 componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item = (
                     componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data.to_dict()
                 )
-                circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
+                prop1.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if circular is not UNSET:
-            field_dict["circular"] = circular
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"circular": prop1}),
+        }
 
         return field_dict
 

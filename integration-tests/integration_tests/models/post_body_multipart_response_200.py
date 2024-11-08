@@ -25,27 +25,22 @@ class PostBodyMultipartResponse200:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        a_string = self.a_string
-
-        file_data = self.file_data
-
-        description = self.description
-
-        file_name = self.file_name
-
-        file_content_type = self.file_content_type
+        prop1 = self.a_string
+        prop2 = self.file_data
+        prop3 = self.description
+        prop4 = self.file_name
+        prop5 = self.file_content_type
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "a_string": a_string,
-                "file_data": file_data,
-                "description": description,
-                "file_name": file_name,
-                "file_content_type": file_content_type,
-            }
-        )
+        field_dict = {
+            **field_dict,
+            "a_string": prop1,
+            "file_data": prop2,
+            "description": prop3,
+            "file_name": prop4,
+            "file_content_type": prop5,
+        }
 
         return field_dict
 

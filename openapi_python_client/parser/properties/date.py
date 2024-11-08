@@ -20,6 +20,7 @@ class DateProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool = False
 
     _type_string: ClassVar[str] = "datetime.date"
     _json_type_string: ClassVar[str] = "str"

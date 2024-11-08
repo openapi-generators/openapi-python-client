@@ -100,6 +100,7 @@ class Project:
             project_dir=self.project_dir,
             openapi=self.openapi,
             endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
+            config=config,
         )
         self.errors: List[GeneratorError] = []
 

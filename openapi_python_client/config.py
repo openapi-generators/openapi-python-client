@@ -44,6 +44,7 @@ class ConfigFile(BaseModel):
     field_prefix: str = "field_"
     http_timeout: int = 5
     literal_enums: bool = False
+    skip_sending_read_only_properties: bool = False
 
     @staticmethod
     def load_from_path(path: Path) -> "ConfigFile":
@@ -72,6 +73,7 @@ class Config:
     field_prefix: str
     http_timeout: int
     literal_enums: bool
+    skip_sending_read_only_properties: bool
     document_source: Union[Path, str]
     file_encoding: str
     content_type_overrides: Dict[str, str]
@@ -112,6 +114,7 @@ class Config:
             field_prefix=config_file.field_prefix,
             http_timeout=config_file.http_timeout,
             literal_enums=config_file.literal_enums,
+            skip_sending_read_only_properties=config_file.skip_sending_read_only_properties,
             document_source=document_source,
             file_encoding=file_encoding,
             overwrite=overwrite,

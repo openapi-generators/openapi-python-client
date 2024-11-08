@@ -10,65 +10,46 @@ from typer.testing import CliRunner
 from openapi_python_client.cli import app
 
 
-def regen_golden_record():
+def regen(
+    spec_file_name: str,
+    config_file_name: str,
+    golden_record_dir_name: str,
+    output_dir_name: str,
+):
     runner = CliRunner()
-    openapi_path = Path(__file__).parent / "baseline_openapi_3.0.json"
+    openapi_path = Path(__file__).parent / spec_file_name
 
-    gr_path = Path(__file__).parent / "golden-record"
-    output_path = Path.cwd() / "my-test-api-client"
-    config_path = Path(__file__).parent / "config.yml"
+    gr_path = Path(__file__).parent / golden_record_dir_name
+    output_path = Path.cwd() / output_dir_name
+    config_path = Path(__file__).parent / config_file_name if config_file_name else None
 
     shutil.rmtree(gr_path, ignore_errors=True)
     shutil.rmtree(output_path, ignore_errors=True)
 
-    result = runner.invoke(
-        app, ["generate", f"--config={config_path}", f"--path={openapi_path}"]
-    )
+    args = [
+        "generate",
+        f"--path={openapi_path}",
+        *([f"--config={config_path}"] if config_path else []),
+    ]
+    result = runner.invoke(app, args)
 
     if result.stdout:
         print(result.stdout)
     if result.exception:
         raise result.exception
     output_path.rename(gr_path)
+
+
+def regen_golden_record():
+    regen("baseline_openapi_3.0.json", "config.yml", "golden-record", "my-test-api-client")
 
 
 def regen_golden_record_3_1_features():
-    runner = CliRunner()
-    openapi_path = Path(__file__).parent / "3.1_specific.openapi.yaml"
-
-    gr_path = Path(__file__).parent / "test-3-1-golden-record"
-    output_path = Path.cwd() / "test-3-1-features-client"
-
-    shutil.rmtree(gr_path, ignore_errors=True)
-    shutil.rmtree(output_path, ignore_errors=True)
-
-    result = runner.invoke(app, ["generate", f"--path={openapi_path}"])
-
-    if result.stdout:
-        print(result.stdout)
-    if result.exception:
-        raise result.exception
-    output_path.rename(gr_path)
+    regen("3.1_specific.openapi.yaml", "", "test-3-1-golden-record", "test-3-1-features-client")
 
 
 def regen_literal_enums_golden_record():
-    runner = CliRunner()
-    openapi_path = Path(__file__).parent / "openapi_3.1_enums.yaml"
-
-    gr_path = Path(__file__).parent / "literal-enums-golden-record"
-    output_path = Path.cwd() / "my-enum-api-client"
-    config_path = Path(__file__).parent / "literal_enums.config.yml"
-
-    shutil.rmtree(gr_path, ignore_errors=True)
-    shutil.rmtree(output_path, ignore_errors=True)
-
-    result = runner.invoke(app, ["generate", f"--path={openapi_path}", f"--config={config_path}"])
-
-    if result.stdout:
-        print(result.stdout)
-    if result.exception:
-        raise result.exception
-    output_path.rename(gr_path)
+    regen("openapi_3.1_enums.yaml", "literal_enums.config.yml", "literal-enums-golden-record", "my-enum-api-client")
 
 
 def regen_metadata_snapshots():
@@ -139,9 +120,19 @@ def regen_custom_template_golden_record():
         raise result.exception
 
 
+def regen_skip_read_only_golden_record():
+    regen(
+        "openapi_3.1_skip-read-only.yaml",
+        "config-skip-read-only.yml",
+        "golden-record-skip-read-only",
+        "my-read-only-properties-api-client",
+    )
+
+
 if __name__ == "__main__":
     regen_golden_record()
     regen_golden_record_3_1_features()
     regen_metadata_snapshots()
     regen_custom_template_golden_record()
     regen_literal_enums_golden_record()
+    regen_skip_read_only_golden_record()

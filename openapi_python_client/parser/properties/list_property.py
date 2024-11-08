@@ -22,6 +22,7 @@ class ListProperty(PropertyProtocol):
     description: str | None
     example: str | None
     inner_property: PropertyProtocol
+    read_only: bool = False
     template: ClassVar[str] = "list_property.py.jinja"
 
     @classmethod

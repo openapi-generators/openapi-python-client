@@ -1,3 +1,4 @@
+import threading
 from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO, TYPE_CHECKING
 
 {% if model.additional_properties %}
@@ -77,17 +78,27 @@ class {{ class_name }}:
     additional_properties: Dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
+{% macro _has_any_read_only_properties() -%}
+{%- for property in model.required_properties + model.optional_properties -%}
+{%- if property.read_only -%}x{%- endif -%}
+{%- endfor -%}
+{%- endmacro -%}
+
 {% macro _to_dict(multipart=False) %}
+{% if config.skip_sending_read_only_properties and _has_any_read_only_properties() %}
+serialization_context = threading.local.openapi_serialization_context or {}
+skip_read_only = serialization_context.get("request_body", False)
+{% endif %}
 {% for property in model.required_properties + model.optional_properties %}
+{% set prop_var %}prop{{ loop.index }}{% endset %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if multipart %}
-{{ prop_template.transform_multipart(property, "self." + property.python_name, property.python_name) }}
+{{ prop_template.transform_multipart(property, "self." + property.python_name, prop_var) }}
 {% elif prop_template.transform %}
-{{ prop_template.transform(property=property, source="self." + property.python_name, destination=property.python_name) }}
+{{ prop_template.transform(property=property, source="self." + property.python_name, destination=prop_var) }}
 {% else %}
-{{ property.python_name }} = self.{{ property.python_name }}
+{{ prop_var }} = self.{{ property.python_name }}
 {% endif %}
-
 {% endfor %}
 
 field_dict: Dict[str, Any] = {}
@@ -103,21 +114,27 @@ for prop_name, prop in self.additional_properties.items():
 field_dict.update(self.additional_properties)
 {% endif %}
 {% endif %}
-{% if model.required_properties | length > 0 or model.optional_properties | length > 0 %}
-field_dict.update({
+{% if model.required_properties or model.optional_properties %}
+field_dict = {
+    **field_dict,
     {% for property in model.required_properties + model.optional_properties %}
-    {% if property.required %}
-    "{{ property.name }}": {{ property.python_name }},
+        {% set prop_var_name %}prop{{ loop.index }}{% endset %}
+        {% set prop_dict_entry %}"{{ property.name }}": {{ prop_var_name }}{% endset %}
+        {% set prop_skip_conditions=[] -%}
+        {% if not property.required %}
+            {{ prop_skip_conditions.append(prop_var_name + " is UNSET") or "" }}
+        {% endif %}
+        {% if config.skip_sending_read_only_properties and property.read_only %}
+            {{ prop_skip_conditions.append("skip_read_only") or "" }}
+        {% endif %}
+        {% if prop_skip_conditions %}
+    **({} if {{ prop_skip_conditions | join(" or ") }} else { {{ prop_dict_entry }} }),
+        {% else %}
+    {{ prop_dict_entry }},
     {% endif %}
     {% endfor %}
-})
+}
 {% endif %}
-{% for property in model.optional_properties %}
-{% if not property.required %}
-if {{ property.python_name }} is not UNSET:
-    field_dict["{{ property.name }}"] = {{ property.python_name }}
-{% endif %}
-{% endfor %}
 
 return field_dict
 {% endmacro %}

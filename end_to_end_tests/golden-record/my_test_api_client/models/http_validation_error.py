@@ -21,17 +21,18 @@ class HTTPValidationError:
     detail: Union[Unset, List["ValidationError"]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        detail: Union[Unset, List[Dict[str, Any]]] = UNSET
+        prop1: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.detail, Unset):
-            detail = []
+            prop1 = []
             for detail_item_data in self.detail:
                 detail_item = detail_item_data.to_dict()
-                detail.append(detail_item)
+                prop1.append(detail_item)
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update({})
-        if detail is not UNSET:
-            field_dict["detail"] = detail
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"detail": prop1}),
+        }
 
         return field_dict
 

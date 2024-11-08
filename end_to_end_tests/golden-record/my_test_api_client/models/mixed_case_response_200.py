@@ -21,17 +21,16 @@ class MixedCaseResponse200:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        mixed_case = self.mixed_case
-
-        mixedCase = self.mixedCase
+        prop1 = self.mixed_case
+        prop2 = self.mixedCase
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if mixed_case is not UNSET:
-            field_dict["mixed_case"] = mixed_case
-        if mixedCase is not UNSET:
-            field_dict["mixedCase"] = mixedCase
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"mixed_case": prop1}),
+            **({} if prop2 is UNSET else {"mixedCase": prop2}),
+        }
 
         return field_dict
 

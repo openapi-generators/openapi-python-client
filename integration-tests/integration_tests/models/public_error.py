@@ -29,36 +29,34 @@ class PublicError:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        errors: Union[Unset, List[str]] = UNSET
+        prop1: Union[Unset, List[str]] = UNSET
         if not isinstance(self.errors, Unset):
-            errors = self.errors
+            prop1 = self.errors
 
-        extra_parameters: Union[Unset, List[str]] = UNSET
+        prop2: Union[Unset, List[str]] = UNSET
         if not isinstance(self.extra_parameters, Unset):
-            extra_parameters = self.extra_parameters
+            prop2 = self.extra_parameters
 
-        invalid_parameters: Union[Unset, List[Dict[str, Any]]] = UNSET
+        prop3: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.invalid_parameters, Unset):
-            invalid_parameters = []
+            prop3 = []
             for invalid_parameters_item_data in self.invalid_parameters:
                 invalid_parameters_item = invalid_parameters_item_data.to_dict()
-                invalid_parameters.append(invalid_parameters_item)
+                prop3.append(invalid_parameters_item)
 
-        missing_parameters: Union[Unset, List[str]] = UNSET
+        prop4: Union[Unset, List[str]] = UNSET
         if not isinstance(self.missing_parameters, Unset):
-            missing_parameters = self.missing_parameters
+            prop4 = self.missing_parameters
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if errors is not UNSET:
-            field_dict["errors"] = errors
-        if extra_parameters is not UNSET:
-            field_dict["extra_parameters"] = extra_parameters
-        if invalid_parameters is not UNSET:
-            field_dict["invalid_parameters"] = invalid_parameters
-        if missing_parameters is not UNSET:
-            field_dict["missing_parameters"] = missing_parameters
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"errors": prop1}),
+            **({} if prop2 is UNSET else {"extra_parameters": prop2}),
+            **({} if prop3 is UNSET else {"invalid_parameters": prop3}),
+            **({} if prop4 is UNSET else {"missing_parameters": prop4}),
+        }
 
         return field_dict
 

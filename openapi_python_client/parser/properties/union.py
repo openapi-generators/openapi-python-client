@@ -24,6 +24,7 @@ class UnionProperty(PropertyProtocol):
     description: str | None
     example: str | None
     inner_properties: list[PropertyProtocol]
+    read_only: bool = False
     template: ClassVar[str] = "union_property.py.jinja"
 
     @classmethod

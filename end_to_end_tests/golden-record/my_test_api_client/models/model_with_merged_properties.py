@@ -31,33 +31,27 @@ class ModelWithMergedProperties:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        simple_string = self.simple_string
-
-        string_to_enum: Union[Unset, str] = UNSET
+        prop1 = self.simple_string
+        prop2: Union[Unset, str] = UNSET
         if not isinstance(self.string_to_enum, Unset):
-            string_to_enum = self.string_to_enum.value
+            prop2 = self.string_to_enum.value
 
-        string_to_date: Union[Unset, str] = UNSET
+        prop3: Union[Unset, str] = UNSET
         if not isinstance(self.string_to_date, Unset):
-            string_to_date = self.string_to_date.isoformat()
-
-        number_to_int = self.number_to_int
-
-        any_to_string = self.any_to_string
+            prop3 = self.string_to_date.isoformat()
+        prop4 = self.number_to_int
+        prop5 = self.any_to_string
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if simple_string is not UNSET:
-            field_dict["simpleString"] = simple_string
-        if string_to_enum is not UNSET:
-            field_dict["stringToEnum"] = string_to_enum
-        if string_to_date is not UNSET:
-            field_dict["stringToDate"] = string_to_date
-        if number_to_int is not UNSET:
-            field_dict["numberToInt"] = number_to_int
-        if any_to_string is not UNSET:
-            field_dict["anyToString"] = any_to_string
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"simpleString": prop1}),
+            **({} if prop2 is UNSET else {"stringToEnum": prop2}),
+            **({} if prop3 is UNSET else {"stringToDate": prop3}),
+            **({} if prop4 is UNSET else {"numberToInt": prop4}),
+            **({} if prop5 is UNSET else {"anyToString": prop5}),
+        }
 
         return field_dict
 

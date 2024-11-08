@@ -21,6 +21,7 @@ class StringProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool = False
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {

@@ -27,14 +27,15 @@ class ModelWithAdditionalPropertiesInlined:
     )
 
     def to_dict(self) -> Dict[str, Any]:
-        a_number = self.a_number
+        prop1 = self.a_number
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
-        field_dict.update({})
-        if a_number is not UNSET:
-            field_dict["a_number"] = a_number
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a_number": prop1}),
+        }
 
         return field_dict
 

@@ -23,15 +23,16 @@ class ModelWithCircularRefA:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        circular: Union[Unset, Dict[str, Any]] = UNSET
+        prop1: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.circular, Unset):
-            circular = self.circular.to_dict()
+            prop1 = self.circular.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if circular is not UNSET:
-            field_dict["circular"] = circular
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"circular": prop1}),
+        }
 
         return field_dict
 

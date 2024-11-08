@@ -58,6 +58,7 @@ class PropertyProtocol(Protocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool
 
     template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False

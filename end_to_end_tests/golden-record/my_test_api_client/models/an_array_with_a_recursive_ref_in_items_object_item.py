@@ -19,20 +19,21 @@ class AnArrayWithARecursiveRefInItemsObjectItem:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        recursive: Union[Unset, List[Dict[str, Any]]] = UNSET
+        prop1: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.recursive, Unset):
-            recursive = []
+            prop1 = []
             for componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data in self.recursive:
                 componentsschemas_an_array_with_a_recursive_ref_in_items_object_item = (
                     componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data.to_dict()
                 )
-                recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
+                prop1.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if recursive is not UNSET:
-            field_dict["recursive"] = recursive
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"recursive": prop1}),
+        }
 
         return field_dict
 

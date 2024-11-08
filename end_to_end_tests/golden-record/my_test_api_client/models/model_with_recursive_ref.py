@@ -19,15 +19,16 @@ class ModelWithRecursiveRef:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        recursive: Union[Unset, Dict[str, Any]] = UNSET
+        prop1: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.recursive, Unset):
-            recursive = self.recursive.to_dict()
+            prop1 = self.recursive.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if recursive is not UNSET:
-            field_dict["recursive"] = recursive
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"recursive": prop1}),
+        }
 
         return field_dict
 

@@ -27,29 +27,26 @@ class ModelFromAllOf:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        a_sub_property = self.a_sub_property
-
-        type: Union[Unset, str] = UNSET
+        prop1 = self.a_sub_property
+        prop2: Union[Unset, str] = UNSET
         if not isinstance(self.type, Unset):
-            type = self.type.value
+            prop2 = self.type.value
 
-        type_enum: Union[Unset, int] = UNSET
+        prop3: Union[Unset, int] = UNSET
         if not isinstance(self.type_enum, Unset):
-            type_enum = self.type_enum.value
+            prop3 = self.type_enum.value
 
-        another_sub_property = self.another_sub_property
+        prop4 = self.another_sub_property
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if a_sub_property is not UNSET:
-            field_dict["a_sub_property"] = a_sub_property
-        if type is not UNSET:
-            field_dict["type"] = type
-        if type_enum is not UNSET:
-            field_dict["type_enum"] = type_enum
-        if another_sub_property is not UNSET:
-            field_dict["another_sub_property"] = another_sub_property
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a_sub_property": prop1}),
+            **({} if prop2 is UNSET else {"type": prop2}),
+            **({} if prop3 is UNSET else {"type_enum": prop3}),
+            **({} if prop4 is UNSET else {"another_sub_property": prop4}),
+        }
 
         return field_dict
 

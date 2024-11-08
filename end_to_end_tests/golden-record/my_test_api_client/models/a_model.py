@@ -82,172 +82,137 @@ class AModel:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
-        an_enum_value = self.an_enum_value.value
-
-        an_allof_enum_with_overridden_default = self.an_allof_enum_with_overridden_default.value
-
-        a_camel_date_time: str
+        prop1 = self.an_enum_value.value
+        prop2 = self.an_allof_enum_with_overridden_default.value
+        prop3: str
         if isinstance(self.a_camel_date_time, datetime.datetime):
-            a_camel_date_time = self.a_camel_date_time.isoformat()
+            prop3 = self.a_camel_date_time.isoformat()
         else:
-            a_camel_date_time = self.a_camel_date_time.isoformat()
+            prop3 = self.a_camel_date_time.isoformat()
 
-        a_date = self.a_date.isoformat()
-
-        a_nullable_date: Union[None, str]
+        prop4 = self.a_date.isoformat()
+        prop5: Union[None, str]
         if isinstance(self.a_nullable_date, datetime.date):
-            a_nullable_date = self.a_nullable_date.isoformat()
+            prop5 = self.a_nullable_date.isoformat()
         else:
-            a_nullable_date = self.a_nullable_date
-
-        a_uuid = str(self.a_uuid)
-
-        a_nullable_uuid: Union[None, str]
+            prop5 = self.a_nullable_date
+        prop6 = str(self.a_uuid)
+        prop7: Union[None, str]
         if isinstance(self.a_nullable_uuid, UUID):
-            a_nullable_uuid = str(self.a_nullable_uuid)
+            prop7 = str(self.a_nullable_uuid)
         else:
-            a_nullable_uuid = self.a_nullable_uuid
-
-        required_nullable: Union[None, str]
-        required_nullable = self.required_nullable
-
-        required_not_nullable = self.required_not_nullable
-
-        one_of_models: Union[Any, Dict[str, Any]]
+            prop7 = self.a_nullable_uuid
+        prop8: Union[None, str]
+        prop8 = self.required_nullable
+        prop9 = self.required_not_nullable
+        prop10: Union[Any, Dict[str, Any]]
         if isinstance(self.one_of_models, FreeFormModel):
-            one_of_models = self.one_of_models.to_dict()
+            prop10 = self.one_of_models.to_dict()
         elif isinstance(self.one_of_models, ModelWithUnionProperty):
-            one_of_models = self.one_of_models.to_dict()
+            prop10 = self.one_of_models.to_dict()
         else:
-            one_of_models = self.one_of_models
-
-        nullable_one_of_models: Union[Dict[str, Any], None]
+            prop10 = self.one_of_models
+        prop11: Union[Dict[str, Any], None]
         if isinstance(self.nullable_one_of_models, FreeFormModel):
-            nullable_one_of_models = self.nullable_one_of_models.to_dict()
+            prop11 = self.nullable_one_of_models.to_dict()
         elif isinstance(self.nullable_one_of_models, ModelWithUnionProperty):
-            nullable_one_of_models = self.nullable_one_of_models.to_dict()
+            prop11 = self.nullable_one_of_models.to_dict()
         else:
-            nullable_one_of_models = self.nullable_one_of_models
-
-        model = self.model.to_dict()
-
-        nullable_model: Union[Dict[str, Any], None]
+            prop11 = self.nullable_one_of_models
+        prop12 = self.model.to_dict()
+        prop13: Union[Dict[str, Any], None]
         if isinstance(self.nullable_model, ModelWithUnionProperty):
-            nullable_model = self.nullable_model.to_dict()
+            prop13 = self.nullable_model.to_dict()
         else:
-            nullable_model = self.nullable_model
-
-        any_value = self.any_value
-
-        an_optional_allof_enum: Union[Unset, str] = UNSET
+            prop13 = self.nullable_model
+        prop14 = self.any_value
+        prop15: Union[Unset, str] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
-            an_optional_allof_enum = self.an_optional_allof_enum.value
+            prop15 = self.an_optional_allof_enum.value
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        prop16: Union[Unset, List[List[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
-            nested_list_of_enums = []
+            prop16 = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
                 nested_list_of_enums_item = []
                 for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
                     nested_list_of_enums_item_item = nested_list_of_enums_item_item_data.value
                     nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
-                nested_list_of_enums.append(nested_list_of_enums_item)
+                prop16.append(nested_list_of_enums_item)
 
-        a_not_required_date: Union[Unset, str] = UNSET
+        prop17: Union[Unset, str] = UNSET
         if not isinstance(self.a_not_required_date, Unset):
-            a_not_required_date = self.a_not_required_date.isoformat()
-
-        a_not_required_uuid: Union[Unset, str] = UNSET
+            prop17 = self.a_not_required_date.isoformat()
+        prop18: Union[Unset, str] = UNSET
         if not isinstance(self.a_not_required_uuid, Unset):
-            a_not_required_uuid = str(self.a_not_required_uuid)
-
-        attr_1_leading_digit = self.attr_1_leading_digit
-
-        attr_leading_underscore = self.attr_leading_underscore
-
-        not_required_nullable: Union[None, Unset, str]
+            prop18 = str(self.a_not_required_uuid)
+        prop19 = self.attr_1_leading_digit
+        prop20 = self.attr_leading_underscore
+        prop21: Union[None, Unset, str]
         if isinstance(self.not_required_nullable, Unset):
-            not_required_nullable = UNSET
+            prop21 = UNSET
         else:
-            not_required_nullable = self.not_required_nullable
-
-        not_required_not_nullable = self.not_required_not_nullable
-
-        not_required_one_of_models: Union[Dict[str, Any], Unset]
+            prop21 = self.not_required_nullable
+        prop22 = self.not_required_not_nullable
+        prop23: Union[Dict[str, Any], Unset]
         if isinstance(self.not_required_one_of_models, Unset):
-            not_required_one_of_models = UNSET
+            prop23 = UNSET
         elif isinstance(self.not_required_one_of_models, FreeFormModel):
-            not_required_one_of_models = self.not_required_one_of_models.to_dict()
+            prop23 = self.not_required_one_of_models.to_dict()
         else:
-            not_required_one_of_models = self.not_required_one_of_models.to_dict()
+            prop23 = self.not_required_one_of_models.to_dict()
 
-        not_required_nullable_one_of_models: Union[Dict[str, Any], None, Unset, str]
+        prop24: Union[Dict[str, Any], None, Unset, str]
         if isinstance(self.not_required_nullable_one_of_models, Unset):
-            not_required_nullable_one_of_models = UNSET
+            prop24 = UNSET
         elif isinstance(self.not_required_nullable_one_of_models, FreeFormModel):
-            not_required_nullable_one_of_models = self.not_required_nullable_one_of_models.to_dict()
+            prop24 = self.not_required_nullable_one_of_models.to_dict()
         elif isinstance(self.not_required_nullable_one_of_models, ModelWithUnionProperty):
-            not_required_nullable_one_of_models = self.not_required_nullable_one_of_models.to_dict()
+            prop24 = self.not_required_nullable_one_of_models.to_dict()
         else:
-            not_required_nullable_one_of_models = self.not_required_nullable_one_of_models
-
-        not_required_model: Union[Unset, Dict[str, Any]] = UNSET
+            prop24 = self.not_required_nullable_one_of_models
+        prop25: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.not_required_model, Unset):
-            not_required_model = self.not_required_model.to_dict()
-
-        not_required_nullable_model: Union[Dict[str, Any], None, Unset]
+            prop25 = self.not_required_model.to_dict()
+        prop26: Union[Dict[str, Any], None, Unset]
         if isinstance(self.not_required_nullable_model, Unset):
-            not_required_nullable_model = UNSET
+            prop26 = UNSET
         elif isinstance(self.not_required_nullable_model, ModelWithUnionProperty):
-            not_required_nullable_model = self.not_required_nullable_model.to_dict()
+            prop26 = self.not_required_nullable_model.to_dict()
         else:
-            not_required_nullable_model = self.not_required_nullable_model
+            prop26 = self.not_required_nullable_model
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(
-            {
-                "an_enum_value": an_enum_value,
-                "an_allof_enum_with_overridden_default": an_allof_enum_with_overridden_default,
-                "aCamelDateTime": a_camel_date_time,
-                "a_date": a_date,
-                "a_nullable_date": a_nullable_date,
-                "a_uuid": a_uuid,
-                "a_nullable_uuid": a_nullable_uuid,
-                "required_nullable": required_nullable,
-                "required_not_nullable": required_not_nullable,
-                "one_of_models": one_of_models,
-                "nullable_one_of_models": nullable_one_of_models,
-                "model": model,
-                "nullable_model": nullable_model,
-            }
-        )
-        if any_value is not UNSET:
-            field_dict["any_value"] = any_value
-        if an_optional_allof_enum is not UNSET:
-            field_dict["an_optional_allof_enum"] = an_optional_allof_enum
-        if nested_list_of_enums is not UNSET:
-            field_dict["nested_list_of_enums"] = nested_list_of_enums
-        if a_not_required_date is not UNSET:
-            field_dict["a_not_required_date"] = a_not_required_date
-        if a_not_required_uuid is not UNSET:
-            field_dict["a_not_required_uuid"] = a_not_required_uuid
-        if attr_1_leading_digit is not UNSET:
-            field_dict["1_leading_digit"] = attr_1_leading_digit
-        if attr_leading_underscore is not UNSET:
-            field_dict["_leading_underscore"] = attr_leading_underscore
-        if not_required_nullable is not UNSET:
-            field_dict["not_required_nullable"] = not_required_nullable
-        if not_required_not_nullable is not UNSET:
-            field_dict["not_required_not_nullable"] = not_required_not_nullable
-        if not_required_one_of_models is not UNSET:
-            field_dict["not_required_one_of_models"] = not_required_one_of_models
-        if not_required_nullable_one_of_models is not UNSET:
-            field_dict["not_required_nullable_one_of_models"] = not_required_nullable_one_of_models
-        if not_required_model is not UNSET:
-            field_dict["not_required_model"] = not_required_model
-        if not_required_nullable_model is not UNSET:
-            field_dict["not_required_nullable_model"] = not_required_nullable_model
+        field_dict = {
+            **field_dict,
+            "an_enum_value": prop1,
+            "an_allof_enum_with_overridden_default": prop2,
+            "aCamelDateTime": prop3,
+            "a_date": prop4,
+            "a_nullable_date": prop5,
+            "a_uuid": prop6,
+            "a_nullable_uuid": prop7,
+            "required_nullable": prop8,
+            "required_not_nullable": prop9,
+            "one_of_models": prop10,
+            "nullable_one_of_models": prop11,
+            "model": prop12,
+            "nullable_model": prop13,
+            **({} if prop14 is UNSET else {"any_value": prop14}),
+            **({} if prop15 is UNSET else {"an_optional_allof_enum": prop15}),
+            **({} if prop16 is UNSET else {"nested_list_of_enums": prop16}),
+            **({} if prop17 is UNSET else {"a_not_required_date": prop17}),
+            **({} if prop18 is UNSET else {"a_not_required_uuid": prop18}),
+            **({} if prop19 is UNSET else {"1_leading_digit": prop19}),
+            **({} if prop20 is UNSET else {"_leading_underscore": prop20}),
+            **({} if prop21 is UNSET else {"not_required_nullable": prop21}),
+            **({} if prop22 is UNSET else {"not_required_not_nullable": prop22}),
+            **({} if prop23 is UNSET else {"not_required_one_of_models": prop23}),
+            **({} if prop24 is UNSET else {"not_required_nullable_one_of_models": prop24}),
+            **({} if prop25 is UNSET else {"not_required_model": prop25}),
+            **({} if prop26 is UNSET else {"not_required_nullable_model": prop26}),
+        }
 
         return field_dict
 

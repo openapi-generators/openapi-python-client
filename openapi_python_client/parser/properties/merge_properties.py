@@ -190,6 +190,7 @@ def _merge_common_attributes(base: PropertyT, *extend_with: PropertyProtocol) ->
             default=override_default or current.default,
             description=override.description or current.description,
             example=override.example or current.example,
+            read_only=override.read_only or current.read_only,
         )
     return current
 

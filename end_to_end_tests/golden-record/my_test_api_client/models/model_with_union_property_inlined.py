@@ -24,18 +24,19 @@ class ModelWithUnionPropertyInlined:
     def to_dict(self) -> Dict[str, Any]:
         from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
 
-        fruit: Union[Dict[str, Any], Unset]
+        prop1: Union[Dict[str, Any], Unset]
         if isinstance(self.fruit, Unset):
-            fruit = UNSET
+            prop1 = UNSET
         elif isinstance(self.fruit, ModelWithUnionPropertyInlinedFruitType0):
-            fruit = self.fruit.to_dict()
+            prop1 = self.fruit.to_dict()
         else:
-            fruit = self.fruit.to_dict()
+            prop1 = self.fruit.to_dict()
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update({})
-        if fruit is not UNSET:
-            field_dict["fruit"] = fruit
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"fruit": prop1}),
+        }
 
         return field_dict
 

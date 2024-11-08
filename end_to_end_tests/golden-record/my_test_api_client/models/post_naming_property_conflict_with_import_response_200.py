@@ -21,17 +21,16 @@ class PostNamingPropertyConflictWithImportResponse200:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        field = self.field
-
-        define = self.define
+        prop1 = self.field
+        prop2 = self.define
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if field is not UNSET:
-            field_dict["Field"] = field
-        if define is not UNSET:
-            field_dict["Define"] = define
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"Field": prop1}),
+            **({} if prop2 is UNSET else {"Define": prop2}),
+        }
 
         return field_dict
 

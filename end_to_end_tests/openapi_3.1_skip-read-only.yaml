@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: My Read-Only Properties API
+  description: An API for testing the skip_read_only_properties option
+  version: 0.1.0
+paths:
+  /thing/json:
+    post:
+      tags:
+        - things
+      description: Post a thing in JSON
+      operationId: postThingJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Thing"
+      responses:
+        '200':
+          description: OK
+  /thing/multipart:
+    post:
+      tags:
+        - things
+      description: Post a thing in multipart form data
+      operationId: postThingMultipart
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Thing"
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    Thing:
+      type: object
+      properties:
+        reqProp1ReadWrite:
+          type: string
+        reqProp2ReadOnly:
+          type: string
+          readOnly: true
+        optProp1ReadWrite:
+          type: string
+        optProp2ReadOnly:
+          type: string
+          readOnly: true
+      required:
+        - reqProp1ReadWrite
+        - reqProp2ReadOnly
+tags:
+  - name: things

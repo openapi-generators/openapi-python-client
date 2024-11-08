@@ -21,19 +21,16 @@ class AFormData:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        an_required_field = self.an_required_field
-
-        an_optional_field = self.an_optional_field
+        prop1 = self.an_required_field
+        prop2 = self.an_optional_field
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "an_required_field": an_required_field,
-            }
-        )
-        if an_optional_field is not UNSET:
-            field_dict["an_optional_field"] = an_optional_field
+        field_dict = {
+            **field_dict,
+            "an_required_field": prop1,
+            **({} if prop2 is UNSET else {"an_optional_field": prop2}),
+        }
 
         return field_dict
 

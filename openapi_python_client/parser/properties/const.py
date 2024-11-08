@@ -21,6 +21,7 @@ class ConstProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: None
+    read_only: bool = False
     template: ClassVar[str] = "const_property.py.jinja"
 
     @classmethod

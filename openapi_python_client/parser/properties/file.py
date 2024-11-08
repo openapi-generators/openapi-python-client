@@ -19,6 +19,7 @@ class FileProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool = False
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()

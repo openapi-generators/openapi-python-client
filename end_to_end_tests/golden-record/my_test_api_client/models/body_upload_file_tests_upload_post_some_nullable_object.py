@@ -19,13 +19,14 @@ class BodyUploadFileTestsUploadPostSomeNullableObject:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        bar = self.bar
+        prop1 = self.bar
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if bar is not UNSET:
-            field_dict["bar"] = bar
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"bar": prop1}),
+        }
 
         return field_dict
 

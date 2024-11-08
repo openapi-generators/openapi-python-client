@@ -70,210 +70,174 @@ class BodyUploadFileTestsUploadPost:
             BodyUploadFileTestsUploadPostSomeNullableObject,
         )
 
-        some_file = self.some_file.to_tuple()
+        prop1 = self.some_file.to_tuple()
 
-        some_required_number = self.some_required_number
-
-        some_object = self.some_object.to_dict()
-
-        some_nullable_object: Union[Dict[str, Any], None]
+        prop2 = self.some_required_number
+        prop3 = self.some_object.to_dict()
+        prop4: Union[Dict[str, Any], None]
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
-            some_nullable_object = self.some_nullable_object.to_dict()
+            prop4 = self.some_nullable_object.to_dict()
         else:
-            some_nullable_object = self.some_nullable_object
-
-        some_optional_file: Union[Unset, FileJsonType] = UNSET
+            prop4 = self.some_nullable_object
+        prop5: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
-            some_optional_file = self.some_optional_file.to_tuple()
+            prop5 = self.some_optional_file.to_tuple()
 
-        some_string = self.some_string
-
-        a_datetime: Union[Unset, str] = UNSET
+        prop6 = self.some_string
+        prop7: Union[Unset, str] = UNSET
         if not isinstance(self.a_datetime, Unset):
-            a_datetime = self.a_datetime.isoformat()
-
-        a_date: Union[Unset, str] = UNSET
+            prop7 = self.a_datetime.isoformat()
+        prop8: Union[Unset, str] = UNSET
         if not isinstance(self.a_date, Unset):
-            a_date = self.a_date.isoformat()
-
-        some_number = self.some_number
-
-        some_nullable_number: Union[None, Unset, float]
+            prop8 = self.a_date.isoformat()
+        prop9 = self.some_number
+        prop10: Union[None, Unset, float]
         if isinstance(self.some_nullable_number, Unset):
-            some_nullable_number = UNSET
+            prop10 = UNSET
         else:
-            some_nullable_number = self.some_nullable_number
-
-        some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
+            prop10 = self.some_nullable_number
+        prop11: Union[Unset, List[Union[None, int]]] = UNSET
         if not isinstance(self.some_int_array, Unset):
-            some_int_array = []
+            prop11 = []
             for some_int_array_item_data in self.some_int_array:
                 some_int_array_item: Union[None, int]
                 some_int_array_item = some_int_array_item_data
-                some_int_array.append(some_int_array_item)
+                prop11.append(some_int_array_item)
 
-        some_array: Union[List[Dict[str, Any]], None, Unset]
+        prop12: Union[List[Dict[str, Any]], None, Unset]
         if isinstance(self.some_array, Unset):
-            some_array = UNSET
+            prop12 = UNSET
         elif isinstance(self.some_array, list):
-            some_array = []
+            prop12 = []
             for some_array_type_0_item_data in self.some_array:
                 some_array_type_0_item = some_array_type_0_item_data.to_dict()
-                some_array.append(some_array_type_0_item)
+                prop12.append(some_array_type_0_item)
 
         else:
-            some_array = self.some_array
-
-        some_optional_object: Union[Unset, Dict[str, Any]] = UNSET
+            prop12 = self.some_array
+        prop13: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
-            some_optional_object = self.some_optional_object.to_dict()
-
-        some_enum: Union[Unset, str] = UNSET
+            prop13 = self.some_optional_object.to_dict()
+        prop14: Union[Unset, str] = UNSET
         if not isinstance(self.some_enum, Unset):
-            some_enum = self.some_enum.value
+            prop14 = self.some_enum.value
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
-        field_dict.update(
-            {
-                "some_file": some_file,
-                "some_required_number": some_required_number,
-                "some_object": some_object,
-                "some_nullable_object": some_nullable_object,
-            }
-        )
-        if some_optional_file is not UNSET:
-            field_dict["some_optional_file"] = some_optional_file
-        if some_string is not UNSET:
-            field_dict["some_string"] = some_string
-        if a_datetime is not UNSET:
-            field_dict["a_datetime"] = a_datetime
-        if a_date is not UNSET:
-            field_dict["a_date"] = a_date
-        if some_number is not UNSET:
-            field_dict["some_number"] = some_number
-        if some_nullable_number is not UNSET:
-            field_dict["some_nullable_number"] = some_nullable_number
-        if some_int_array is not UNSET:
-            field_dict["some_int_array"] = some_int_array
-        if some_array is not UNSET:
-            field_dict["some_array"] = some_array
-        if some_optional_object is not UNSET:
-            field_dict["some_optional_object"] = some_optional_object
-        if some_enum is not UNSET:
-            field_dict["some_enum"] = some_enum
+        field_dict = {
+            **field_dict,
+            "some_file": prop1,
+            "some_required_number": prop2,
+            "some_object": prop3,
+            "some_nullable_object": prop4,
+            **({} if prop5 is UNSET else {"some_optional_file": prop5}),
+            **({} if prop6 is UNSET else {"some_string": prop6}),
+            **({} if prop7 is UNSET else {"a_datetime": prop7}),
+            **({} if prop8 is UNSET else {"a_date": prop8}),
+            **({} if prop9 is UNSET else {"some_number": prop9}),
+            **({} if prop10 is UNSET else {"some_nullable_number": prop10}),
+            **({} if prop11 is UNSET else {"some_int_array": prop11}),
+            **({} if prop12 is UNSET else {"some_array": prop12}),
+            **({} if prop13 is UNSET else {"some_optional_object": prop13}),
+            **({} if prop14 is UNSET else {"some_enum": prop14}),
+        }
 
         return field_dict
 
     def to_multipart(self) -> Dict[str, Any]:
-        some_file = self.some_file.to_tuple()
+        prop1 = self.some_file.to_tuple()
 
-        some_required_number = (None, str(self.some_required_number).encode(), "text/plain")
+        prop2 = (None, str(self.some_required_number).encode(), "text/plain")
 
-        some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
-
-        some_nullable_object: Tuple[None, bytes, str]
+        prop3 = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
+        prop4: Tuple[None, bytes, str]
 
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
-            some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
+            prop4 = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
         else:
-            some_nullable_object = (None, str(self.some_nullable_object).encode(), "text/plain")
+            prop4 = (None, str(self.some_nullable_object).encode(), "text/plain")
 
-        some_optional_file: Union[Unset, FileJsonType] = UNSET
+        prop5: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
-            some_optional_file = self.some_optional_file.to_tuple()
+            prop5 = self.some_optional_file.to_tuple()
 
-        some_string = (
+        prop6 = (
             self.some_string
             if isinstance(self.some_string, Unset)
             else (None, str(self.some_string).encode(), "text/plain")
         )
 
-        a_datetime: Union[Unset, bytes] = UNSET
+        prop7: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_datetime, Unset):
-            a_datetime = self.a_datetime.isoformat().encode()
-
-        a_date: Union[Unset, bytes] = UNSET
+            prop7 = self.a_datetime.isoformat().encode()
+        prop8: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_date, Unset):
-            a_date = self.a_date.isoformat().encode()
-
-        some_number = (
+            prop8 = self.a_date.isoformat().encode()
+        prop9 = (
             self.some_number
             if isinstance(self.some_number, Unset)
             else (None, str(self.some_number).encode(), "text/plain")
         )
 
-        some_nullable_number: Union[Tuple[None, bytes, str], Unset]
+        prop10: Union[Tuple[None, bytes, str], Unset]
 
         if isinstance(self.some_nullable_number, Unset):
-            some_nullable_number = UNSET
+            prop10 = UNSET
         elif isinstance(self.some_nullable_number, float):
-            some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
+            prop10 = (None, str(self.some_nullable_number).encode(), "text/plain")
         else:
-            some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
+            prop10 = (None, str(self.some_nullable_number).encode(), "text/plain")
 
-        some_int_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        prop11: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_int_array, Unset):
-            _temp_some_int_array = []
+            _temp_prop11 = []
             for some_int_array_item_data in self.some_int_array:
                 some_int_array_item: Union[None, int]
                 some_int_array_item = some_int_array_item_data
-                _temp_some_int_array.append(some_int_array_item)
-            some_int_array = (None, json.dumps(_temp_some_int_array).encode(), "application/json")
+                _temp_prop11.append(some_int_array_item)
+            prop11 = (None, json.dumps(_temp_prop11).encode(), "application/json")
 
-        some_array: Union[Tuple[None, bytes, str], Unset]
+        prop12: Union[Tuple[None, bytes, str], Unset]
 
         if isinstance(self.some_array, Unset):
-            some_array = UNSET
+            prop12 = UNSET
         elif isinstance(self.some_array, list):
-            _temp_some_array = []
+            _temp_prop12 = []
             for some_array_type_0_item_data in self.some_array:
                 some_array_type_0_item = some_array_type_0_item_data.to_dict()
-                _temp_some_array.append(some_array_type_0_item)
-            some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
+                _temp_prop12.append(some_array_type_0_item)
+            prop12 = (None, json.dumps(_temp_prop12).encode(), "application/json")
         else:
-            some_array = (None, str(self.some_array).encode(), "text/plain")
+            prop12 = (None, str(self.some_array).encode(), "text/plain")
 
-        some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        prop13: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
-            some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
-
-        some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
+            prop13 = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
+        prop14: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
-            some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
+            prop14 = (None, str(self.some_enum.value).encode(), "text/plain")
 
         field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
-        field_dict.update(
-            {
-                "some_file": some_file,
-                "some_required_number": some_required_number,
-                "some_object": some_object,
-                "some_nullable_object": some_nullable_object,
-            }
-        )
-        if some_optional_file is not UNSET:
-            field_dict["some_optional_file"] = some_optional_file
-        if some_string is not UNSET:
-            field_dict["some_string"] = some_string
-        if a_datetime is not UNSET:
-            field_dict["a_datetime"] = a_datetime
-        if a_date is not UNSET:
-            field_dict["a_date"] = a_date
-        if some_number is not UNSET:
-            field_dict["some_number"] = some_number
-        if some_nullable_number is not UNSET:
-            field_dict["some_nullable_number"] = some_nullable_number
-        if some_int_array is not UNSET:
-            field_dict["some_int_array"] = some_int_array
-        if some_array is not UNSET:
-            field_dict["some_array"] = some_array
-        if some_optional_object is not UNSET:
-            field_dict["some_optional_object"] = some_optional_object
-        if some_enum is not UNSET:
-            field_dict["some_enum"] = some_enum
+        field_dict = {
+            **field_dict,
+            "some_file": prop1,
+            "some_required_number": prop2,
+            "some_object": prop3,
+            "some_nullable_object": prop4,
+            **({} if prop5 is UNSET else {"some_optional_file": prop5}),
+            **({} if prop6 is UNSET else {"some_string": prop6}),
+            **({} if prop7 is UNSET else {"a_datetime": prop7}),
+            **({} if prop8 is UNSET else {"a_date": prop8}),
+            **({} if prop9 is UNSET else {"some_number": prop9}),
+            **({} if prop10 is UNSET else {"some_nullable_number": prop10}),
+            **({} if prop11 is UNSET else {"some_int_array": prop11}),
+            **({} if prop12 is UNSET else {"some_array": prop12}),
+            **({} if prop13 is UNSET else {"some_optional_object": prop13}),
+            **({} if prop14 is UNSET else {"some_enum": prop14}),
+        }
 
         return field_dict
 

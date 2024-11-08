@@ -22,6 +22,7 @@ class DateTimeProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool = False
 
     _type_string: ClassVar[str] = "datetime.datetime"
     _json_type_string: ClassVar[str] = "str"

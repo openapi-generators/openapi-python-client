@@ -17,12 +17,13 @@ class TestInlineObjectsBody:
     a_property: Union[Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        a_property = self.a_property
+        prop1 = self.a_property
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update({})
-        if a_property is not UNSET:
-            field_dict["a_property"] = a_property
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a_property": prop1}),
+        }
 
         return field_dict
 

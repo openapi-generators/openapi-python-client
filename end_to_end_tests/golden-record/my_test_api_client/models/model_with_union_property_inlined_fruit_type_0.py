@@ -19,13 +19,14 @@ class ModelWithUnionPropertyInlinedFruitType0:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        apples = self.apples
+        prop1 = self.apples
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if apples is not UNSET:
-            field_dict["apples"] = apples
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"apples": prop1}),
+        }
 
         return field_dict
 

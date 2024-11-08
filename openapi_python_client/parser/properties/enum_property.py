@@ -32,6 +32,7 @@ class EnumProperty(PropertyProtocol):
     values: dict[str, ValueType]
     class_info: Class
     value_type: type[ValueType]
+    read_only: bool = False
 
     template: ClassVar[str] = "enum_property.py.jinja"
 

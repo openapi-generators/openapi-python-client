@@ -137,7 +137,7 @@ def _property_from_ref(
     return prop, schemas
 
 
-def property_from_data(  # noqa: PLR0911, PLR0912
+def property_from_data(
     name: str,
     required: bool,
     data: oai.Reference | oai.Schema,
@@ -161,6 +161,24 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             roots=roots,
         )
 
+    prop, schemas = _property_from_data(name, required, data, schemas, parent_name, config, process_properties, roots)
+    if not isinstance(prop, PropertyError) and isinstance(data, oai.Schema):
+        prop.read_only = data.readOnly or False
+        # We are mutating the object instead of using evolve() because we may have already
+        # stored a reference to the original object in schema.classes_by_reference, etc.
+    return prop, schemas
+
+
+def _property_from_data(  # noqa: PLR0911, PLR0912
+    name: str,
+    required: bool,
+    data: oai.Reference | oai.Schema,
+    schemas: Schemas,
+    parent_name: str,
+    config: Config,
+    process_properties: bool = True,
+    roots: set[ReferencePath | utils.ClassName] | None = None,
+) -> tuple[Property | PropertyError, Schemas]:
     sub_data: list[oai.Schema | oai.Reference] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):

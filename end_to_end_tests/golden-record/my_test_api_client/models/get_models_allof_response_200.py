@@ -28,27 +28,24 @@ class GetModelsAllofResponse200:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        aliased: Union[Unset, Dict[str, Any]] = UNSET
+        prop1: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.aliased, Unset):
-            aliased = self.aliased.to_dict()
-
-        extended: Union[Unset, Dict[str, Any]] = UNSET
+            prop1 = self.aliased.to_dict()
+        prop2: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.extended, Unset):
-            extended = self.extended.to_dict()
-
-        model: Union[Unset, Dict[str, Any]] = UNSET
+            prop2 = self.extended.to_dict()
+        prop3: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.model, Unset):
-            model = self.model.to_dict()
+            prop3 = self.model.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if aliased is not UNSET:
-            field_dict["aliased"] = aliased
-        if extended is not UNSET:
-            field_dict["extended"] = extended
-        if model is not UNSET:
-            field_dict["model"] = model
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"aliased": prop1}),
+            **({} if prop2 is UNSET else {"extended": prop2}),
+            **({} if prop3 is UNSET else {"model": prop3}),
+        }
 
         return field_dict
 

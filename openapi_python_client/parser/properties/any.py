@@ -47,5 +47,6 @@ class AnyProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    read_only: bool = False
     _type_string: ClassVar[str] = "Any"
     _json_type_string: ClassVar[str] = "Any"

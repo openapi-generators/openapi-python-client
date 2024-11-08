@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import threading
 from typing import Any, Dict, List, Optional, Union, cast
 
 import httpx
@@ -45,20 +46,34 @@ def _get_kwargs(
         {% endif %}
     }
 
+{% macro set_body(endpoint) %}
 {% if endpoint.bodies | length > 1 %}
-{% for body in endpoint.bodies %}
-    if isinstance(body, {{body.prop.get_type_string() }}):
+    {% for body in endpoint.bodies %}
+if isinstance(body, {{body.prop.get_type_string() }}):
         {% set destination = "_" + body.body_type + "_body" %}
-        {{ body_to_kwarg(body, destination) | indent(8) }}
-        _kwargs["{{ body.body_type.value }}"] = {{ destination }}
-        headers["Content-Type"] = "{{ body.content_type }}"
-{% endfor %}
-{% elif endpoint.bodies | length == 1 %}
-{% set body = endpoint.bodies[0] %}
-    {{ body_to_kwarg(body, "_body") | indent(4) }}
-    _kwargs["{{ body.body_type.value }}"] = _body
-    {% if body.content_type != "multipart/form-data" %}{# Need httpx to set the boundary automatically #}
+{{ body_to_kwarg(body, destination) | indent(4, True) }}
+    _kwargs["{{ body.body_type.value }}"] = {{ destination }}
     headers["Content-Type"] = "{{ body.content_type }}"
+    {% endfor %}
+{% elif endpoint.bodies | length == 1 %}
+    {% set body = endpoint.bodies[0] %}
+{{ body_to_kwarg(body, "_body") }}
+_kwargs["{{ body.body_type.value }}"] = _body
+    {% if body.content_type != "multipart/form-data" %}{# Need httpx to set the boundary automatically #}
+headers["Content-Type"] = "{{ body.content_type }}"
+    {% endif %}
+{% endif %}
+{% endmacro %}
+
+{% if endpoint.bodies %}
+    {% if config.skip_sending_read_only_properties %}
+    try:
+        threading.local.openapi_serialization_context = {"request_body": True}
+{{ set_body(endpoint) | indent(8, True) }}
+    finally:
+        del(threading.local.openapi_serialization_context)
+    {% else %}
+{{ set_body(endpoint) | indent(4, True) }}
     {% endif %}
 {% endif %}
 

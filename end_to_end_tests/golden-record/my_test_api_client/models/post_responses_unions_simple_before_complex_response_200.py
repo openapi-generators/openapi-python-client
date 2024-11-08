@@ -27,19 +27,18 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
             PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
         )
 
-        a: Union[Dict[str, Any], str]
+        prop1: Union[Dict[str, Any], str]
         if isinstance(self.a, PostResponsesUnionsSimpleBeforeComplexResponse200AType1):
-            a = self.a.to_dict()
+            prop1 = self.a.to_dict()
         else:
-            a = self.a
+            prop1 = self.a
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "a": a,
-            }
-        )
+        field_dict = {
+            **field_dict,
+            "a": prop1,
+        }
 
         return field_dict
 

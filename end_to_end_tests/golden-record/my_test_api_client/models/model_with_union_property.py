@@ -19,18 +19,19 @@ class ModelWithUnionProperty:
     a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        a_property: Union[Unset, int, str]
+        prop1: Union[Unset, int, str]
         if isinstance(self.a_property, Unset):
-            a_property = UNSET
+            prop1 = UNSET
         elif isinstance(self.a_property, AnEnum):
-            a_property = self.a_property.value
+            prop1 = self.a_property.value
         else:
-            a_property = self.a_property.value
+            prop1 = self.a_property.value
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update({})
-        if a_property is not UNSET:
-            field_dict["a_property"] = a_property
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a_property": prop1}),
+        }
 
         return field_dict
 

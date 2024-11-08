@@ -19,13 +19,14 @@ class BodyUploadFileTestsUploadPostAdditionalProperty:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        foo = self.foo
+        prop1 = self.foo
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if foo is not UNSET:
-            field_dict["foo"] = foo
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"foo": prop1}),
+        }
 
         return field_dict
 

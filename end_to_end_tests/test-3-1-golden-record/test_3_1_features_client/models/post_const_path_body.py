@@ -23,23 +23,19 @@ class PostConstPathBody:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        required = self.required
-
-        nullable: Union[Literal["this or null goes in the body"], None]
-        nullable = self.nullable
-
-        optional = self.optional
+        prop1 = self.required
+        prop2: Union[Literal["this or null goes in the body"], None]
+        prop2 = self.nullable
+        prop3 = self.optional
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "required": required,
-                "nullable": nullable,
-            }
-        )
-        if optional is not UNSET:
-            field_dict["optional"] = optional
+        field_dict = {
+            **field_dict,
+            "required": prop1,
+            "nullable": prop2,
+            **({} if prop3 is UNSET else {"optional": prop3}),
+        }
 
         return field_dict
 

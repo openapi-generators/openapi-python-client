@@ -32,6 +32,7 @@ class LiteralEnumProperty(PropertyProtocol):
     values: set[ValueType]
     class_info: Class
     value_type: type[ValueType]
+    read_only: bool = False
 
     template: ClassVar[str] = "literal_enum_property.py.jinja"
 

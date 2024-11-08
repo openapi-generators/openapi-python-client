@@ -19,20 +19,18 @@ class ValidationError:
     type: str
 
     def to_dict(self) -> Dict[str, Any]:
-        loc = self.loc
+        prop1 = self.loc
 
-        msg = self.msg
-
-        type = self.type
+        prop2 = self.msg
+        prop3 = self.type
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(
-            {
-                "loc": loc,
-                "msg": msg,
-                "type": type,
-            }
-        )
+        field_dict = {
+            **field_dict,
+            "loc": prop1,
+            "msg": prop2,
+            "type": prop3,
+        }
 
         return field_dict
 

@@ -19,13 +19,14 @@ class PostBodiesMultipleJsonBody:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        a = self.a
+        prop1 = self.a
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if a is not UNSET:
-            field_dict["a"] = a
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a": prop1}),
+        }
 
         return field_dict
 

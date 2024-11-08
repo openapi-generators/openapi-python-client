@@ -120,6 +120,14 @@ project_name_override: my-special-project-name
 package_name_override: my_extra_special_package_name
 ```
 
+### skip_sending_read_only_properties
+
+This option causes any properties that are marked with `readOnly: true` in the OpenAPI schema to be omitted from the JSON serialization of the schema, if and only if it is being serialized as part of a request body.
+
+```yaml
+skip_sending_read_only_properties: true
+```
+
 ### field_prefix
 
 When generating properties, the `name` attribute of the OpenAPI schema will be used. When the `name` is not a valid Python identifier (e.g. begins with a number) this string will be prepended. Defaults to "field\_". It will also be used to prefix fields in schema starting with "_" in order to avoid ambiguous semantics.

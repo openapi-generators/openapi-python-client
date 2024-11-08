@@ -25,31 +25,28 @@ class PostBodyMultipartBody:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        a_string = self.a_string
+        prop1 = self.a_string
+        prop2 = self.file.to_tuple()
 
-        file = self.file.to_tuple()
-
-        description = self.description
+        prop3 = self.description
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "a_string": a_string,
-                "file": file,
-            }
-        )
-        if description is not UNSET:
-            field_dict["description"] = description
+        field_dict = {
+            **field_dict,
+            "a_string": prop1,
+            "file": prop2,
+            **({} if prop3 is UNSET else {"description": prop3}),
+        }
 
         return field_dict
 
     def to_multipart(self) -> Dict[str, Any]:
-        a_string = (None, str(self.a_string).encode(), "text/plain")
+        prop1 = (None, str(self.a_string).encode(), "text/plain")
 
-        file = self.file.to_tuple()
+        prop2 = self.file.to_tuple()
 
-        description = (
+        prop3 = (
             self.description
             if isinstance(self.description, Unset)
             else (None, str(self.description).encode(), "text/plain")
@@ -59,14 +56,12 @@ class PostBodyMultipartBody:
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
 
-        field_dict.update(
-            {
-                "a_string": a_string,
-                "file": file,
-            }
-        )
-        if description is not UNSET:
-            field_dict["description"] = description
+        field_dict = {
+            **field_dict,
+            "a_string": prop1,
+            "file": prop2,
+            **({} if prop3 is UNSET else {"description": prop3}),
+        }
 
         return field_dict
 

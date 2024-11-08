@@ -25,15 +25,16 @@ class ModelWithPrimitiveAdditionalProperties:
     additional_properties: Dict[str, str] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        a_date_holder: Union[Unset, Dict[str, Any]] = UNSET
+        prop1: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.a_date_holder, Unset):
-            a_date_holder = self.a_date_holder.to_dict()
+            prop1 = self.a_date_holder.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if a_date_holder is not UNSET:
-            field_dict["a_date_holder"] = a_date_holder
+        field_dict = {
+            **field_dict,
+            **({} if prop1 is UNSET else {"a_date_holder": prop1}),
+        }
 
         return field_dict
 
