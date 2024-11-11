@@ -18,7 +18,6 @@ Each test class follows this pattern:
 Example:
 
 ```python
-
 @with_generated_client_fixture(
 """
 components:

@@ -1,11 +1,6 @@
-
 import datetime
 import uuid
-import pytest
 from end_to_end_tests.end_to_end_test_helpers import (
-    assert_bad_schema_warning,
-    assert_model_decode_encode,
-    inline_spec_should_cause_warnings,
     with_generated_client_fixture,
     with_generated_code_imports,
 )
@@ -36,6 +31,12 @@ components:
         numberWithStringValue: {"type": "number", "default": "5.5"}
         stringWithNumberValue: {"type": "string", "default": 6}
         stringConst: {"type": "string", "const": "always", "default": "always"}
+        unionWithValidDefaultForType1:
+          anyOf: [{"type": "boolean"}, {"type": "integer"}]
+          default: true
+        unionWithValidDefaultForType2:
+          anyOf: [{"type": "boolean"}, {"type": "integer"}]
+          default: 3
 """)
 @with_generated_code_imports(".models.MyModel")
 class TestSimpleDefaults:
@@ -62,6 +63,8 @@ class TestSimpleDefaults:
             number_with_string_value=5.5,
             string_with_number_value="6",
             string_const="always",
+            union_with_valid_default_for_type_1=True,
+            union_with_valid_default_for_type_2=3,
         )
 
 
@@ -88,70 +91,23 @@ class TestEnumDefaults:
         assert MyModel().enum_prop == MyEnum.A
 
 
-class TestInvalidDefaultValues:
-    @pytest.fixture(scope="class")
-    def warnings(self):
-        return inline_spec_should_cause_warnings(
+@with_generated_client_fixture(
 """
 components:
   schemas:
-    WithBadBoolean:
+    MyEnum:
+      type: string
+      enum: ["a", "A"]
+    MyModel:
       properties:
-        badBoolean: {"type": "boolean", "default": "not a boolean"}
-    WithBadIntAsString:
-      properties:
-        badInt: {"type": "integer", "default": "not an int"}
-    WithBadIntAsOther:
-      properties:
-        badInt: {"type": "integer", "default": true}
-    WithBadFloatAsString:
-      properties:
-        badInt: {"type": "number", "default": "not a number"}
-    WithBadFloatAsOther:
-      properties:
-        badInt: {"type": "number", "default": true}
-    WithBadDateAsString:
-      properties:
-        badDate: {"type": "string", "format": "date", "default": "xxx"}
-    WithBadDateAsOther:
-      properties:
-        badDate: {"type": "string", "format": "date", "default": 3}
-    WithBadDateTimeAsString:
-      properties:
-        badDate: {"type": "string", "format": "date-time", "default": "xxx"}
-    WithBadDateTimeAsOther:
-      properties:
-        badDate: {"type": "string", "format": "date-time", "default": 3}
-    WithBadUuidAsString:
-      properties:
-        badUuid: {"type": "string", "format": "uuid", "default": "xxx"}
-    WithBadUuidAsOther:
-      properties:
-        badUuid: {"type": "string", "format": "uuid", "default": 3}
-    WithBadEnum:
-      properties:
-        badEnum: {"type": "string", "enum": ["a", "b"], "default": "x"}
-"""
-        )
-    # Note, the null/None type, and binary strings (files), are not covered here due to a known bug:
-    # https://github.com/openapi-generators/openapi-python-client/issues/1162
-
-    @pytest.mark.parametrize(
-        ("model_name", "message"),
-        [
-            ("WithBadBoolean", "Invalid boolean value"),
-            ("WithBadIntAsString", "Invalid int value"),
-            ("WithBadIntAsOther", "Invalid int value"),
-            ("WithBadFloatAsString", "Invalid float value"),
-            ("WithBadFloatAsOther", "Cannot convert True to a float"),
-            ("WithBadDateAsString", "Invalid date"),
-            ("WithBadDateAsOther", "Cannot convert 3 to a date"),
-            ("WithBadDateTimeAsString", "Invalid datetime"),
-            ("WithBadDateTimeAsOther", "Cannot convert 3 to a datetime"),
-            ("WithBadUuidAsString", "Invalid UUID value"),
-            ("WithBadUuidAsOther", "Invalid UUID value"),
-            ("WithBadEnum", "Value x is not valid for enum"),
-        ]
-    )
-    def test_bad_default_warning(self, model_name, message, warnings):
-        assert_bad_schema_warning(warnings, model_name, message)
+        enumProp:
+          allOf:
+            - $ref: "#/components/schemas/MyEnum"
+          default: A
+""",
+    config="literal_enums: true",
+)
+@with_generated_code_imports(".models.MyModel")
+class TestLiteralEnumDefaults:
+    def test_default_value(self, MyModel):
+        assert MyModel().enum_prop == "A"

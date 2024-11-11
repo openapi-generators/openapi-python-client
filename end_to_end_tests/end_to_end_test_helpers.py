@@ -78,6 +78,7 @@ def generate_client(
     extra_args: List[str] = [],
     output_path: str = "my-test-api-client",
     base_module: str = "my_test_api_client",
+    specify_output_path_explicitly: bool = True,
     overwrite: bool = True,
     raise_on_error: bool = True,
 ) -> GeneratedClientContext:
@@ -85,11 +86,9 @@ def generate_client(
     full_output_path = Path.cwd() / output_path
     if not overwrite:
         shutil.rmtree(full_output_path, ignore_errors=True)
-    args = [
-        *extra_args,
-        "--output-path",
-        str(full_output_path),
-    ]
+    args = extra_args
+    if specify_output_path_explicitly:
+        args = [*args, "--output-path", str(full_output_path)]
     if overwrite:
         args = [*args, "--overwrite"]
     generator_result = _run_command("generate", args, openapi_document, raise_on_error=raise_on_error)
@@ -159,7 +158,7 @@ def inline_spec_should_fail(
     Returns the command result, which could include stdout data or an exception.
     """
     with generate_client_from_inline_spec(
-        openapi_spec, extra_args, filename_suffix, config, add_missing_sections, raise_on_error=False
+        openapi_spec, extra_args, filename_suffix, config, add_missing_sections=add_missing_sections, raise_on_error=False
     ) as generated_client:
         assert generated_client.generator_result.exit_code != 0
         return generated_client.generator_result
@@ -170,14 +169,14 @@ def inline_spec_should_cause_warnings(
     extra_args: List[str] = [],
     filename_suffix: Optional[str] = None,
     config: str = "",
-    add_openapi_info = True,
+    add_missing_sections = True,
 ) -> str:
     """Asserts that the generator is able to process the spec, but printed warnings.
     
     Returns the full output.
     """
     with generate_client_from_inline_spec(
-        openapi_spec, extra_args, filename_suffix, config, add_openapi_info, raise_on_error=True
+        openapi_spec, extra_args, filename_suffix, config, add_missing_sections=add_missing_sections, raise_on_error=True
     ) as generated_client:
         assert generated_client.generator_result.exit_code == 0
         assert "Warning(s) encountered while generating" in generated_client.generator_result.stdout
@@ -248,6 +247,10 @@ def assert_model_decode_encode(model_class: Any, json_data: dict, expected_insta
     instance = model_class.from_dict(json_data)
     assert instance == expected_instance
     assert instance.to_dict() == json_data
+
+
+def assert_model_property_type_hint(model_class: Any, name: str, expected_type_hint: Any) -> None:
+    assert model_class.__annotations__[name] == expected_type_hint
 
 
 def assert_bad_schema_warning(output: str, schema_name: str, expected_message_str) -> None:

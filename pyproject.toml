@@ -67,7 +67,7 @@ ignore = ["E501", "PLR0913", "PLR2004"]
 "tests/*" = ["PLR2004"]
 
 [tool.coverage.run]
-omit = ["openapi_python_client/__main__.py", "openapi_python_client/templates/*"]
+omit = ["openapi_python_client/__main__.py", "openapi_python_client/templates/*", "end_to_end_tests/*", "integration_tests/*", "tests/*"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
@@ -119,7 +119,7 @@ re = {composite = ["regen_e2e", "e2e --snapshot-update"]}
 regen_e2e = "python -m end_to_end_tests.regen_golden_record"
 
 [tool.pdm.scripts.test]
-cmd = "pytest tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp"
+cmd = "pytest tests end_to_end_tests/test_end_to_end.py end_to_end_tests/generated_code_live_tests --basetemp=tests/tmp"
 [tool.pdm.scripts.test.env]
 "TEST_RELATIVE" = "true"
 

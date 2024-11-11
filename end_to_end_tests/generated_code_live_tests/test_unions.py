@@ -1,12 +1,36 @@
-
-import pytest
+from typing import ForwardRef, Union
 from end_to_end_tests.end_to_end_test_helpers import (
-    assert_bad_schema_warning,
     assert_model_decode_encode,
-    inline_spec_should_cause_warnings,
+    assert_model_property_type_hint,
     with_generated_client_fixture,
     with_generated_code_imports,
 )
+
+
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    StringOrInt:
+      type: ["string", "integer"]
+    MyModel:
+      type: object
+      properties:
+        stringOrIntProp:
+          type: ["string", "integer"]
+"""
+)
+@with_generated_code_imports(
+    ".models.MyModel",
+    ".types.Unset"
+)
+class TestSimpleTypeList:
+    def test_decode_encode(self, MyModel):
+        assert_model_decode_encode(MyModel, {"stringOrIntProp": "a"}, MyModel(string_or_int_prop="a"))
+        assert_model_decode_encode(MyModel, {"stringOrIntProp": 1}, MyModel(string_or_int_prop=1))
+
+    def test_type_hints(self, MyModel, Unset):
+        assert_model_property_type_hint(MyModel, "string_or_int_prop", Union[str, int, Unset])
 
 
 @with_generated_client_fixture(
@@ -23,34 +47,51 @@ components:
       properties:
         propB: { type: "string" }
       required: ["propB"]
+    ThingAOrB:
+      oneOf:
+        - $ref: "#/components/schemas/ThingA"
+        - $ref: "#/components/schemas/ThingB"
     ModelWithUnion:
       type: object
       properties:
-        thing:
-          oneOf:
-            - $ref: "#/components/schemas/ThingA"
-            - $ref: "#/components/schemas/ThingB"
+        thing: {"$ref": "#/components/schemas/ThingAOrB"}
         thingOrString:
           oneOf:
             - $ref: "#/components/schemas/ThingA"
             - type: string
+    ModelWithRequiredUnion:
+      type: object
+      properties:
+        thing: {"$ref": "#/components/schemas/ThingAOrB"}
+      required: ["thing"]
     ModelWithNestedUnion:
       type: object
       properties:
         thingOrValue:
           oneOf:
-            - oneOf:
-              - $ref: "#/components/schemas/ThingA"
-              - $ref: "#/components/schemas/ThingB"
+            - "$ref": "#/components/schemas/ThingAOrB"
             - oneOf:
               - type: string
               - type: number
+    ModelWithUnionOfOne:
+      type: object
+      properties:
+        thing:
+          oneOf:
+            - $ref: "#/components/schemas/ThingA"
+        requiredThing:
+          oneOf:
+            - $ref: "#/components/schemas/ThingA"
+      required: ["requiredThing"]
 """)
 @with_generated_code_imports(
     ".models.ThingA",
     ".models.ThingB",
     ".models.ModelWithUnion",
+    ".models.ModelWithRequiredUnion",
     ".models.ModelWithNestedUnion",
+    ".models.ModelWithUnionOfOne",
+    ".types.Unset"
 )
 class TestOneOf:
     def test_disambiguate_objects_via_required_properties(self, ThingA, ThingB, ModelWithUnion):
@@ -89,25 +130,20 @@ class TestOneOf:
             ModelWithNestedUnion(thing_or_value=3),
         )
 
-
-class TestUnionInvalidSchemas:
-    @pytest.fixture(scope="class")
-    def warnings(self):
-        return inline_spec_should_cause_warnings(
-"""
-components:
-  schemas:
-    UnionWithInvalidReference:
-      anyOf:
-        - $ref: "#/components/schemas/DoesntExist"
-    UnionWithInvalidDefault:
-      type: ["number", "integer"]
-      default: aaa
-"""
+    def test_type_hints(self, ModelWithUnion, ModelWithRequiredUnion, ModelWithUnionOfOne, ThingA, Unset):
+        assert_model_property_type_hint(
+            ModelWithUnion,
+            "thing",
+            Union[ForwardRef("ThingA"), ForwardRef("ThingB"), Unset],
         )
-
-    def test_invalid_reference(self, warnings):
-        assert_bad_schema_warning(warnings, "UnionWithInvalidReference", "Could not find reference")
-
-    def test_invalid_default(self, warnings):
-        assert_bad_schema_warning(warnings, "UnionWithInvalidDefault", "Invalid int value: aaa")
+        assert_model_property_type_hint(
+            ModelWithRequiredUnion,
+            "thing",
+            Union[ForwardRef("ThingA"), ForwardRef("ThingB")],
+        )
+        assert_model_property_type_hint(
+            ModelWithUnionOfOne, "thing", Union[ForwardRef("ThingA"), Unset]
+        )
+        assert_model_property_type_hint(
+            ModelWithUnionOfOne, "required_thing", "ThingA"
+        )

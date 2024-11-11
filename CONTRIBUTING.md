@@ -77,11 +77,13 @@ The tests run the generator against a small API spec (defined inline for each te
 
 See [`end_to_end_tests/generated_code_live_tests`](./end_to_end_tests/generated_code_live_tests).
 
-#### Unit tests
+#### Other unit tests
 
-> **NOTE**: Several older-style unit tests using mocks exist in this project. These should be phased out rather than updated, as the tests are brittle and difficult to maintain. Only error cases should be tests with unit tests going forward.
+These include:
 
-In some cases, we need to test things which cannot be generated—like validating that errors are caught and handled correctly. These should be tested via unit tests in the `tests` directory, using the `pytest` framework.
+* Regular unit tests of basic pieces of fairly self-contained low-level functionality, such as helper functions. These are implemented in the `tests/unit` directory, using the `pytest` framework.
+* End-to-end tests of invalid spec conditions, where we run the generator against a small spec with some problem, and expect it to print warnings/errors rather than generating code. These are implemented in `end_to_end_tests/generator_errors_and_warnings`.
+* Older-style unit tests of low-level functions like `property_from_data` that have complex behavior. These are brittle and difficult to maintain, and should not be used going forward. Instead, use either unit tests of generated code (to test happy paths), or end-to-end tests of invalid spec conditions (to test for warnings/errors), as described above.
 
 ### Creating a Pull Request
 

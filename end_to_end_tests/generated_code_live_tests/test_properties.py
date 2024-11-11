@@ -1,9 +1,10 @@
-
 import datetime
+from typing import Any, ForwardRef, Union
 import uuid
 import pytest
 from end_to_end_tests.end_to_end_test_helpers import (
     assert_model_decode_encode,
+    assert_model_property_type_hint,
     with_generated_client_fixture,
     with_generated_code_imports,
 )
@@ -28,7 +29,11 @@ components:
             req3: {"type": "string"}
           required: ["req3"]
 """)
-@with_generated_code_imports(".models.MyModel", ".models.DerivedModel")
+@with_generated_code_imports(
+    ".models.MyModel",
+    ".models.DerivedModel",
+    ".types.Unset",
+)
 class TestRequiredAndOptionalProperties:
     def test_required_ok(self, MyModel, DerivedModel):
         assert_model_decode_encode(
@@ -56,11 +61,15 @@ class TestRequiredAndOptionalProperties:
 
     def test_required_missing(self, MyModel, DerivedModel):
         with pytest.raises(KeyError):
-            MyModel.from_dict({"requiredA": "a"})
+            MyModel.from_dict({"req1": "a"})
         with pytest.raises(KeyError):
-            MyModel.from_dict({"requiredB": "b"})
+            MyModel.from_dict({"req2": "b"})
         with pytest.raises(KeyError):
-            DerivedModel.from_dict({"requiredA": "a", "requiredB": "b"})
+            DerivedModel.from_dict({"req1": "a", "req2": "b"})
+
+    def test_type_hints(self, MyModel, Unset):
+        assert_model_property_type_hint(MyModel, "req1", str)
+        assert_model_property_type_hint(MyModel, "opt", Union[str, Unset])
 
 
 @with_generated_client_fixture(
@@ -74,14 +83,17 @@ components:
         stringProp: {"type": "string"}
         numberProp: {"type": "number"}
         intProp: {"type": "integer"}
-        arrayOfStringsProp: {"type": "array", "items": {"type": "string"}}
         anyObjectProp: {"$ref": "#/components/schemas/AnyObject"}
         nullProp: {"type": "null"}
         anyProp: {}
     AnyObject:
         type: object
 """)
-@with_generated_code_imports(".models.MyModel", ".models.AnyObject")
+@with_generated_code_imports(
+    ".models.MyModel",
+    ".models.AnyObject",
+    ".types.Unset",
+)
 class TestBasicModelProperties:
     def test_decode_encode(self, MyModel, AnyObject):
         json_data = {
@@ -89,7 +101,6 @@ class TestBasicModelProperties:
             "stringProp": "a",
             "numberProp": 1.5,
             "intProp": 2,
-            "arrayOfStringsProp": ["b", "c"],
             "anyObjectProp": {"d": 3},
             "nullProp": None,
             "anyProp": "e"
@@ -104,7 +115,6 @@ class TestBasicModelProperties:
                 string_prop="a",
                 number_prop=1.5,
                 int_prop=2,
-                array_of_strings_prop=["b", "c"],
                 any_object_prop = expected_any_object,
                 null_prop=None,
                 any_prop="e",
@@ -122,6 +132,15 @@ class TestBasicModelProperties:
             # very meaningful
             MyModel.from_dict(bad_data)
 
+    def test_type_hints(self, MyModel, Unset):
+        assert_model_property_type_hint(MyModel, "boolean_prop", Union[bool, Unset])
+        assert_model_property_type_hint(MyModel, "string_prop", Union[str, Unset])
+        assert_model_property_type_hint(MyModel, "number_prop", Union[float, Unset])
+        assert_model_property_type_hint(MyModel, "int_prop", Union[int, Unset])
+        assert_model_property_type_hint(MyModel, "any_object_prop", Union[ForwardRef("AnyObject"), Unset])
+        assert_model_property_type_hint(MyModel, "null_prop", Union[None, Unset])
+        assert_model_property_type_hint(MyModel, "any_prop", Union[Any, Unset])
+
 
 @with_generated_client_fixture(
 """
@@ -135,7 +154,10 @@ components:
         uuidProp: {"type": "string", "format": "uuid"}
         unknownFormatProp: {"type": "string", "format": "weird"}
 """)
-@with_generated_code_imports(".models.MyModel")
+@with_generated_code_imports(
+    ".models.MyModel",
+    ".types.Unset",
+)
 class TestSpecialStringFormats:
     def test_date(self, MyModel):
         date_value = datetime.date.today()
@@ -155,3 +177,9 @@ class TestSpecialStringFormats:
     def test_unknown_format(self, MyModel):
         json_data = {"unknownFormatProp": "whatever"}
         assert_model_decode_encode(MyModel, json_data, MyModel(unknown_format_prop="whatever"))
+
+    def test_type_hints(self, MyModel, Unset):
+        assert_model_property_type_hint(MyModel, "date_prop", Union[datetime.date, Unset])
+        assert_model_property_type_hint(MyModel, "date_time_prop", Union[datetime.datetime, Unset])
+        assert_model_property_type_hint(MyModel, "uuid_prop", Union[uuid.UUID, Unset])
+        assert_model_property_type_hint(MyModel, "unknown_format_prop", Union[str, Unset])

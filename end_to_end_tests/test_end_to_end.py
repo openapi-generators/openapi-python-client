@@ -86,8 +86,9 @@ def run_e2e_test(
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
     expected_missing: Optional[Set[str]] = None,
+    specify_output_path_explicitly: bool = True,
 ) -> Result:
-    with generate_client(openapi_document, extra_args, output_path) as g:
+    with generate_client(openapi_document, extra_args, output_path, specify_output_path_explicitly=specify_output_path_explicitly) as g:
         gr_path = Path(__file__).parent / golden_record_path
 
         expected_differences = expected_differences or {}
@@ -165,6 +166,7 @@ def test_none_meta():
         golden_record_path="test-3-1-golden-record/test_3_1_features_client",
         output_path="test_3_1_features_client",
         expected_missing={"py.typed"},
+        specify_output_path_explicitly=False,
     )
 
 
