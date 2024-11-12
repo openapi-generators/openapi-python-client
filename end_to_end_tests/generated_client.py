@@ -102,6 +102,7 @@ def generate_client_from_inline_spec(
     openapi_spec: str,
     extra_args: List[str] = [],
     config: str = "",
+    filename_suffix: Optional[str] = None,
     base_module: str = "testapi_client",
     add_missing_sections = True,
     raise_on_error: bool = True,
@@ -119,7 +120,7 @@ def generate_client_from_inline_spec(
             openapi_spec += "\npaths: {}\n"
 
     output_path = tempfile.mkdtemp()
-    file = tempfile.NamedTemporaryFile(delete=False)
+    file = tempfile.NamedTemporaryFile(suffix=filename_suffix, delete=False)
     file.write(openapi_spec.encode('utf-8'))
     file.close()
 

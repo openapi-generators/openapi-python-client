@@ -82,6 +82,7 @@ def inline_spec_should_fail(
     openapi_spec: str,
     extra_args: List[str] = [],
     config: str = "",
+    filename_suffix: str = "",
     add_missing_sections = True,
 ) -> Result:
     """Asserts that the generator could not process the spec.
@@ -89,7 +90,12 @@ def inline_spec_should_fail(
     Returns the command result, which could include stdout data or an exception.
     """
     with generate_client_from_inline_spec(
-        openapi_spec, extra_args, config, add_missing_sections=add_missing_sections, raise_on_error=False
+        openapi_spec,
+        extra_args,
+        config,
+        filename_suffix=filename_suffix,
+        add_missing_sections=add_missing_sections,
+        raise_on_error=False,
     ) as generated_client:
         assert generated_client.generator_result.exit_code != 0
         return generated_client.generator_result
