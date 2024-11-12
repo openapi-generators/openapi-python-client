@@ -119,7 +119,7 @@ re = {composite = ["regen_e2e", "e2e --snapshot-update"]}
 regen_e2e = "python -m end_to_end_tests.regen_golden_record"
 
 [tool.pdm.scripts.test]
-cmd = "pytest tests end_to_end_tests/test_end_to_end.py end_to_end_tests/generated_code_live_tests --basetemp=tests/tmp"
+cmd = "pytest tests end_to_end_tests/test_end_to_end.py end_to_end_tests/generated_code_live_tests end_to_end_tests/generator_errors_and_warnings --basetemp=tests/tmp"
 [tool.pdm.scripts.test.env]
 "TEST_RELATIVE" = "true"
 
