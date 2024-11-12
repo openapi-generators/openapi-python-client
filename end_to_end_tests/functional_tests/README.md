@@ -1,6 +1,14 @@
-## The `generated_code_live_tests` module
+## The `functional_tests` module
 
-These are end-to-end tests which run the code generator command, but unlike the other tests in `end_to_end_tests`, they are also unit tests _of the behavior of the generated code_.
+These are end-to-end tests which run the client generator against many small API documents that are specific to various test cases.
+
+Rather than testing low-level implementation details (like the unit tests in `tests`), or making assertions about the exact content of the generated code (like the "golden record"-based end-to-end tests), these treat both the generator and the generated code as black boxes and make assertions about their behavior.
+
+The tests are in two submodules:
+
+# `generated_code_execution`
+
+These tests use valid API specs, and after running the generator, they _import and execute_ pieces of the generated code to verify that it actually works at runtime.
 
 Each test class follows this pattern:
 
@@ -33,3 +41,16 @@ class TestSimpleJsonObject:
         instance = MyModel(string_prop="abc")
         assert instance.to_dict() == {"stringProp": "abc"}
 ```
+
+# `generator_failure_cases`
+
+These run the generator with an invalid API spec and make assertions about the warning/error output. Some of these invalid conditions are expected to only produce warnings about the affected schemas, while others are expected to produce fatal errors that terminate the generator.
+
+For warning conditions, each test class follows this pattern:
+
+- Call `inline_spec_should_cause_warnings`, providing an inline API spec (JSON or YAML). If there are several test methods in the class using the same spec, use a fixture with scope "class" so the generator is only run once.
+- Use `assert_bad_schema_warning` to parse the output and check for a specific warning message for a specific schema name.
+
+Or, for fatal error conditions:
+
+- Call `inline_spec_should_fail`, providing an inline API spec (JSON or YAML).

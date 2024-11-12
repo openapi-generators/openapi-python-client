@@ -69,21 +69,20 @@ There are 4 types of snapshots generated right now, you may have to update only 
 3. `test_custom_templates` are used with `baseline_openapi_3.0.json` to generate `custom-templates-golden-record` for testing custom templates
 4. `3.1_specific.openapi.yaml` is used to generate `test-3-1-golden-record` and test 3.1-specific features (things which do not have a 3.0 equivalent)
 
-#### Unit tests of generated code
+#### Functional tests
 
-These verify the runtime behavior of the generated code, without making assertions about the exact implementation of the code. For instance, they can verify that JSON data is correctly decoded into model class attributes.
+These are black-box tests that verify the runtime behavior of generated code, as well as the generator's validation behavior. For instance, they can verify that JSON data is correctly decoded into model class attributes, or that the generator will emit an appropriate warning for an invalid spec.
 
-The tests run the generator against a small API spec (defined inline for each test class), and then import and execute the generated code. This can sometimes identify issues with validation logic, module imports, etc., that might be harder to diagnose via the snapshot tests, especially during development of a new feature.
+This can sometimes identify issues with error handling, validation logic, module imports, etc., that might be harder to diagnose via the snapshot tests, especially during development of a new feature.
 
-See [`end_to_end_tests/generated_code_live_tests`](./end_to_end_tests/generated_code_live_tests).
+See [`end_to_end_tests/functional_tests`](./end_to_end_tests/functional_tests).
 
 #### Other unit tests
 
 These include:
 
 * Regular unit tests of basic pieces of fairly self-contained low-level functionality, such as helper functions. These are implemented in the `tests/unit` directory, using the `pytest` framework.
-* End-to-end tests of invalid spec conditions, where we run the generator against a small spec with some problem, and expect it to print warnings/errors rather than generating code. These are implemented in `end_to_end_tests/generator_errors_and_warnings`.
-* Older-style unit tests of low-level functions like `property_from_data` that have complex behavior. These are brittle and difficult to maintain, and should not be used going forward. Instead, use either unit tests of generated code (to test happy paths), or end-to-end tests of invalid spec conditions (to test for warnings/errors), as described above.
+* Older-style unit tests of low-level functions like `property_from_data` that have complex behavior. These are brittle and difficult to maintain, and should not be used going forward. Instead, they should be migrated to functional tests.
 
 ### Creating a Pull Request
 
