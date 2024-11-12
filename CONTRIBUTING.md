@@ -50,13 +50,14 @@ All changes must be tested, I recommend writing the test first, then writing the
 
 If you think that some of the added code is not testable (or testing it would add little value), mention that in your PR and we can discuss it.
 
-1. If you're adding support for a new OpenAPI feature or covering a new edge case, add an [end-to-end test](#end-to-end-tests)
-2. If you're modifying the way an existing feature works, make sure an existing test generates the _old_ code in `end_to_end_tests/golden-record`. You'll use this to check for the new code once your changes are complete.
-3. If you're improving an error or adding a new error, add a [unit test](#unit-tests)
+1. If you're adding support for a new OpenAPI feature or covering a new edge case, add [functional tests](#functional-tests), and optionally an [end-to-end snapshot test](#end-to-end-snapshot-tests).
+2. If you're modifying the way an existing feature works, make sure functional tests cover this case. Existing end-to-end snapshot tests might also be affected if you have changed what generated model/endpoint code looks like.
+3. If you're improving error handling or adding a new error, add [functional tests](#functional-tests).
+4. For tests of low-level pieces of code that are fairly self-contained, and not tightly coupled to other internal implementation details, you can use regular [unit tests](#unit-tests).
 
 #### End-to-end snapshot tests
 
-This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end-to-end tests. There are two types of these: snapshot tests, and unit tests of generated code.
+This project aims to have all "happy paths" (types of code which _can_ be generated) covered by end-to-end tests. There are two types of these: snapshot tests, and functional tests.
 
 Snapshot tests verify that the generated code is identical to a previously-committed set of snapshots (called a "golden record" here). They are basically regression tests to catch any unintended changes in the generator output.
 
@@ -71,17 +72,17 @@ There are 4 types of snapshots generated right now, you may have to update only 
 
 #### Functional tests
 
-These are black-box tests that verify the runtime behavior of generated code, as well as the generator's validation behavior. For instance, they can verify that JSON data is correctly decoded into model class attributes, or that the generator will emit an appropriate warning for an invalid spec.
+These are black-box tests that verify the runtime behavior of generated code, as well as the generator's validation behavior. They are also end-to-end tests, since they run the generator as a shell command.
 
-This can sometimes identify issues with error handling, validation logic, module imports, etc., that might be harder to diagnose via the snapshot tests, especially during development of a new feature.
+This can sometimes identify issues with error handling, validation logic, module imports, etc., that might be harder to diagnose via the snapshot tests, especially during development of a new feature. For instance, they can verify that JSON data is correctly decoded into model class attributes, or that the generator will emit an appropriate warning or error for an invalid spec.
 
 See [`end_to_end_tests/functional_tests`](./end_to_end_tests/functional_tests).
 
-#### Other unit tests
+#### Unit tests
 
 These include:
 
-* Regular unit tests of basic pieces of fairly self-contained low-level functionality, such as helper functions. These are implemented in the `tests/unit` directory, using the `pytest` framework.
+* Regular unit tests of basic pieces of fairly self-contained low-level functionality, such as helper functions. These are implemented in the `tests` directory, using the `pytest` framework.
 * Older-style unit tests of low-level functions like `property_from_data` that have complex behavior. These are brittle and difficult to maintain, and should not be used going forward. Instead, they should be migrated to functional tests.
 
 ### Creating a Pull Request
