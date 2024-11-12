@@ -18,6 +18,10 @@ components:
     UnionWithInvalidDefault:
       type: ["number", "integer"]
       default: aaa
+    UnionWithMalformedVariant:
+      anyOf:
+        - type: string
+        - type: array  # invalid because no items
 """
         )
 
@@ -26,3 +30,6 @@ components:
 
     def test_invalid_default(self, warnings):
         assert_bad_schema_warning(warnings, "UnionWithInvalidDefault", "Invalid int value: aaa")
+
+    def test_invalid_property(self, warnings):
+        assert_bad_schema_warning(warnings, "UnionWithMalformedVariant", "Invalid property in union")
