@@ -1,5 +1,6 @@
 from typing import ForwardRef, Union
-from end_to_end_tests.end_to_end_test_helpers import (
+
+from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
     assert_model_property_type_hint,
     with_generated_client_fixture,

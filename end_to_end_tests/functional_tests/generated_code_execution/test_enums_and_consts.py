@@ -1,9 +1,9 @@
 from typing import Literal, Union
 import pytest
-from end_to_end_tests.end_to_end_test_helpers import (
+
+from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
     assert_model_property_type_hint,
-    with_generated_code_import,
     with_generated_client_fixture,
     with_generated_code_imports,
 )
@@ -187,7 +187,7 @@ components:
           const: 30
 """,
 )
-@with_generated_code_import(".models.MyModel")
+@with_generated_code_imports(".models.MyModel")
 class TestConst:
     def test_valid_string(self, MyModel):
         assert_model_decode_encode(
@@ -327,7 +327,7 @@ components:
 """,
     config="literal_enums: true",
 )
-@with_generated_code_import(".models.MyModel")
+@with_generated_code_imports(".models.MyModel")
 class TestNullableLiteralEnum:
     def test_nullable_enum_prop(self, MyModel):
         assert_model_decode_encode(MyModel, {"nullableEnumProp": "B"}, MyModel(nullable_enum_prop="B"))

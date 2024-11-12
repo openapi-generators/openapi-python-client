@@ -1,5 +1,6 @@
 from typing import Any, List
-from end_to_end_tests.end_to_end_test_helpers import (
+
+from end_to_end_tests.functional_tests.helpers import (
     with_generated_code_import,
     with_generated_client_fixture,
 )

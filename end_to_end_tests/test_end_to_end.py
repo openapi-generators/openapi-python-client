@@ -7,7 +7,7 @@ import pytest
 from click.testing import Result
 from typer.testing import CliRunner
 
-from end_to_end_tests.end_to_end_test_helpers import (
+from end_to_end_tests.generated_client import (
     _run_command, generate_client, generate_client_from_inline_spec,
 )
 from openapi_python_client.cli import app
@@ -251,26 +251,6 @@ def test_generate_dir_already_exists():
         assert "Directory already exists" in result.stdout
     finally:
         shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
-
-
-@pytest.mark.parametrize(
-    ("suffix", "content", "expected_error"),
-    (
-        (".yaml", "not a valid openapi document", "Failed to parse OpenAPI document"),
-        (".json", "Invalid JSON", "Invalid JSON"),
-        (".yaml", "{", "Invalid YAML"),
-    ),
-    ids=("invalid_openapi", "invalid_json", "invalid_yaml")
-)
-def test_invalid_openapi_document(suffix, content, expected_error):
-    with generate_client_from_inline_spec(
-        content,
-        filename_suffix=suffix,
-        add_missing_sections=False,
-        raise_on_error=False,
-    ) as g:
-        assert g.generator_result.exit_code == 1
-        assert expected_error in g.generator_result.stdout
 
 
 def test_update_integration_tests():

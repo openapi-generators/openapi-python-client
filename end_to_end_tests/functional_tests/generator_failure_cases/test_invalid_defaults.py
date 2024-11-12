@@ -1,14 +1,9 @@
 import pytest
-from end_to_end_tests.end_to_end_test_helpers import (
-    assert_bad_schema_warning,
-    inline_spec_should_cause_warnings,
-)
+
+from end_to_end_tests.functional_tests.helpers import assert_bad_schema, with_generated_client_fixture
 
 
-class TestInvalidDefaultValues:
-    @pytest.fixture(scope="class")
-    def warnings(self):
-        return inline_spec_should_cause_warnings(
+@with_generated_client_fixture(
 """
 components:
   schemas:
@@ -65,7 +60,8 @@ components:
             - type: integer
           default: "xxx"
 """
-        )
+)
+class TestInvalidDefaultValues:
     # Note, the null/None type, and binary strings (files), are not covered here due to a known bug:
     # https://github.com/openapi-generators/openapi-python-client/issues/1162
 
@@ -88,5 +84,5 @@ components:
             ("UnionWithNoValidDefault", "Invalid int value"),
         ]
     )
-    def test_bad_default_warning(self, model_name, message, warnings):
-        assert_bad_schema_warning(warnings, model_name, message)
+    def test_bad_default_warning(self, model_name, message, generated_client):
+        assert_bad_schema(generated_client, model_name, message)

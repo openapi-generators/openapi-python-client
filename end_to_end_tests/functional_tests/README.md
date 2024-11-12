@@ -37,7 +37,7 @@ components:
 """)
 @with_generated_code_import(".models.MyModel")
 class TestSimpleJsonObject:
-    def test_encoding(MyModel):
+    def test_encoding(self, MyModel):
         instance = MyModel(string_prop="abc")
         assert instance.to_dict() == {"stringProp": "abc"}
 ```
@@ -46,11 +46,30 @@ class TestSimpleJsonObject:
 
 These run the generator with an invalid API spec and make assertions about the warning/error output. Some of these invalid conditions are expected to only produce warnings about the affected schemas, while others are expected to produce fatal errors that terminate the generator.
 
-For warning conditions, each test class follows this pattern:
+For warning conditions, each test class uses `@with_generated_client_fixture` as above, then uses `assert_bad_schema` to parse the output and check for a specific warning message for a specific schema name.
 
-- Call `inline_spec_should_cause_warnings`, providing an inline API spec (JSON or YAML). If there are several test methods in the class using the same spec, use a fixture with scope "class" so the generator is only run once.
-- Use `assert_bad_schema_warning` to parse the output and check for a specific warning message for a specific schema name.
+```python
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    MyModel:
+      # some kind of invalid schema
+""")
+class TestBadSchema:
+    def test_encoding(self, generated_client):
+        assert_bad_schema(generated_client, "MyModel", "some expected warning text")
+```
 
 Or, for fatal error conditions:
 
 - Call `inline_spec_should_fail`, providing an inline API spec (JSON or YAML).
+
+```python
+class TestBadSpec:
+    def test_some_spec_error(self):
+        result = inline_spec_should_fail("""
+# some kind of invalid spec
+""")
+        assert "some expected error text" in result.output
+```

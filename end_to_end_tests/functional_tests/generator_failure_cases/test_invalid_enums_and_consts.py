@@ -1,14 +1,11 @@
-import pytest
-from end_to_end_tests.end_to_end_test_helpers import (
-    assert_bad_schema_warning,
-    inline_spec_should_cause_warnings,
+from end_to_end_tests.functional_tests.helpers import (
+    assert_bad_schema,
     inline_spec_should_fail,
+    with_generated_client_fixture,
 )
 
-class TestEnumAndConstInvalidSchemas:
-    @pytest.fixture(scope="class")
-    def warnings(self):
-        return inline_spec_should_cause_warnings(
+
+@with_generated_client_fixture(
 """
 components:
   schemas:
@@ -35,26 +32,26 @@ components:
       properties:
         "2":
           enum: ["c", "d"]
-"""
-        )
+"""    
+)
+class TestEnumAndConstInvalidSchemas:
+    def test_enum_bad_default_value(self, generated_client):
+        assert_bad_schema(generated_client, "WithBadDefaultValue", "Value B is not valid")
 
-    def test_enum_bad_default_value(self, warnings):
-        assert_bad_schema_warning(warnings, "WithBadDefaultValue", "Value B is not valid")
+    def test_enum_bad_default_type(self, generated_client):
+        assert_bad_schema(generated_client, "WithBadDefaultType", "Cannot convert 123 to enum")
 
-    def test_enum_bad_default_type(self, warnings):
-        assert_bad_schema_warning(warnings, "WithBadDefaultType", "Cannot convert 123 to enum")
+    def test_enum_mixed_types(self, generated_client):
+        assert_bad_schema(generated_client, "WithMixedTypes", "Enum values must all be the same type")
 
-    def test_enum_mixed_types(self, warnings):
-        assert_bad_schema_warning(warnings, "WithMixedTypes", "Enum values must all be the same type")
+    def test_enum_unsupported_type(self, generated_client):
+        assert_bad_schema(generated_client, "WithUnsupportedType", "Unsupported enum type")
 
-    def test_enum_unsupported_type(self, warnings):
-        assert_bad_schema_warning(warnings, "WithUnsupportedType", "Unsupported enum type")
+    def test_const_default_not_matching(self, generated_client):
+        assert_bad_schema(generated_client, "DefaultNotMatchingConst", "Invalid value for const")
 
-    def test_const_default_not_matching(self, warnings):
-        assert_bad_schema_warning(warnings, "DefaultNotMatchingConst", "Invalid value for const")
-
-    def test_conflicting_inline_class_names(self, warnings):
-        assert "Found conflicting enums named WithConflictingInlineNames12 with incompatible values" in warnings
+    def test_conflicting_inline_class_names(self, generated_client):
+        assert "Found conflicting enums named WithConflictingInlineNames12 with incompatible values" in generated_client.generator_result.output
 
     def test_enum_duplicate_values(self):
         # This one currently causes a full generator failure rather than a warning
@@ -69,10 +66,7 @@ components:
         assert "Duplicate key X in enum" in str(result.exception)
 
 
-class TestLiteralEnumInvalidSchemas:
-    @pytest.fixture(scope="class")
-    def warnings(self):
-        return inline_spec_should_cause_warnings(
+@with_generated_client_fixture(
 """
 components:
   schemas:
@@ -100,26 +94,26 @@ components:
         "2":
           enum: ["c", "d"]
 """,
-        config="literal_enums: true",
-    )
+    config="literal_enums: true",    
+)
+class TestLiteralEnumInvalidSchemas:
+    def test_literal_enum_bad_default_value(self, generated_client):
+        assert_bad_schema(generated_client, "WithBadDefaultValue", "Value B is not valid")
 
-    def test_literal_enum_bad_default_value(self, warnings):
-        assert_bad_schema_warning(warnings, "WithBadDefaultValue", "Value B is not valid")
+    def test_literal_enum_bad_default_type(self, generated_client):
+        assert_bad_schema(generated_client, "WithBadDefaultType", "Cannot convert 123 to enum")
 
-    def test_literal_enum_bad_default_type(self, warnings):
-        assert_bad_schema_warning(warnings, "WithBadDefaultType", "Cannot convert 123 to enum")
+    def test_literal_enum_mixed_types(self, generated_client):
+        assert_bad_schema(generated_client, "WithMixedTypes", "Enum values must all be the same type")
 
-    def test_literal_enum_mixed_types(self, warnings):
-        assert_bad_schema_warning(warnings, "WithMixedTypes", "Enum values must all be the same type")
+    def test_literal_enum_unsupported_type(self, generated_client):
+        assert_bad_schema(generated_client, "WithUnsupportedType", "Unsupported enum type")
 
-    def test_literal_enum_unsupported_type(self, warnings):
-        assert_bad_schema_warning(warnings, "WithUnsupportedType", "Unsupported enum type")
+    def test_const_default_not_matching(self, generated_client):
+        assert_bad_schema(generated_client, "DefaultNotMatchingConst", "Invalid value for const")
 
-    def test_const_default_not_matching(self, warnings):
-        assert_bad_schema_warning(warnings, "DefaultNotMatchingConst", "Invalid value for const")
-
-    def test_conflicting_inline_literal_enum_names(self, warnings):
-        assert "Found conflicting enums named WithConflictingInlineNames12 with incompatible values" in warnings
+    def test_conflicting_inline_literal_enum_names(self, generated_client):
+        assert "Found conflicting enums named WithConflictingInlineNames12 with incompatible values" in generated_client.generator_result.output
 
     def test_literal_enum_duplicate_values(self):
         # This one currently causes a full generator failure rather than a warning

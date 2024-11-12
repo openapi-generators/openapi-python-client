@@ -1,12 +1,23 @@
 import pytest
-from end_to_end_tests.end_to_end_test_helpers import (
-    assert_bad_schema_warning,
-    inline_spec_should_cause_warnings,
+from end_to_end_tests.functional_tests.helpers import (
     inline_spec_should_fail,
 )
 
 
 class TestInvalidSpecFormats:
+    @pytest.mark.parametrize(
+        ("content", "expected_error"),
+        (
+            ("not a valid openapi document", "Failed to parse OpenAPI document"),
+            ("Invalid JSON", "Invalid JSON"),
+            ("{", "Invalid YAML"),
+        ),
+        ids=("invalid_openapi", "invalid_json", "invalid_yaml"),
+    )
+    def test_unparseable_file(self, content, expected_error):
+        result = inline_spec_should_fail(content, add_missing_sections=False)
+        assert expected_error in result.output
+        
     def test_missing_openapi_version(self):
         result = inline_spec_should_fail(
 """
