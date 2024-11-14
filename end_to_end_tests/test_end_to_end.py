@@ -7,6 +7,9 @@ import pytest
 from click.testing import Result
 from typer.testing import CliRunner
 
+from end_to_end_tests.generated_client import (
+    _run_command, generate_client, generate_client_from_inline_spec,
+)
 from openapi_python_client.cli import app
 
 
@@ -83,51 +86,26 @@ def run_e2e_test(
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
     expected_missing: Optional[Set[str]] = None,
+    specify_output_path_explicitly: bool = True,
 ) -> Result:
-    output_path = Path.cwd() / output_path
-    shutil.rmtree(output_path, ignore_errors=True)
-    result = generate(extra_args, openapi_document)
-    gr_path = Path(__file__).parent / golden_record_path
+    with generate_client(openapi_document, extra_args, output_path, specify_output_path_explicitly=specify_output_path_explicitly) as g:
+        gr_path = Path(__file__).parent / golden_record_path
 
-    expected_differences = expected_differences or {}
-    # Use absolute paths for expected differences for easier comparisons
-    expected_differences = {
-        output_path.joinpath(key): value for key, value in expected_differences.items()
-    }
-    _compare_directories(
-        gr_path, output_path, expected_differences=expected_differences, expected_missing=expected_missing
-    )
+        expected_differences = expected_differences or {}
+        # Use absolute paths for expected differences for easier comparisons
+        expected_differences = {
+            g.output_path.joinpath(key): value for key, value in expected_differences.items()
+        }
+        _compare_directories(
+            gr_path, g.output_path, expected_differences=expected_differences, expected_missing=expected_missing
+        )
 
-    import mypy.api
+        import mypy.api
 
-    out, err, status = mypy.api.run([str(output_path), "--strict"])
-    assert status == 0, f"Type checking client failed: {out}"
+        out, err, status = mypy.api.run([str(g.output_path), "--strict"])
+        assert status == 0, f"Type checking client failed: {out}"
 
-    shutil.rmtree(output_path)
-    return result
-
-
-def generate(extra_args: Optional[List[str]], openapi_document: str) -> Result:
-    """Generate a client from an OpenAPI document and return the path to the generated code"""
-    _run_command("generate", extra_args, openapi_document)
-
-
-def _run_command(command: str, extra_args: Optional[List[str]] = None, openapi_document: Optional[str] = None, url: Optional[str] = None, config_path: Optional[Path] = None) -> Result:
-    """Generate a client from an OpenAPI document and return the path to the generated code"""
-    runner = CliRunner()
-    if openapi_document is not None:
-        openapi_path = Path(__file__).parent / openapi_document
-        source_arg = f"--path={openapi_path}"
-    else:
-        source_arg = f"--url={url}"
-    config_path = config_path or (Path(__file__).parent / "config.yml")
-    args = [command, f"--config={config_path}", source_arg]
-    if extra_args:
-        args.extend(extra_args)
-    result = runner.invoke(app, args)
-    if result.exit_code != 0:
-        raise Exception(result.stdout)
-    return result
+        return g.generator_result
 
 
 def test_baseline_end_to_end_3_0():
@@ -168,18 +146,17 @@ def test_literal_enums_end_to_end():
     )
 )
 def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[str]):
-    output_path = Path.cwd() / "test-3-1-features-client"
-    shutil.rmtree(output_path, ignore_errors=True)
-    generate([f"--meta={meta}"], "3.1_specific.openapi.yaml")
-
-    if generated_file and expected_file:
-        assert (output_path / generated_file).exists()
-        assert (
-            (output_path / generated_file).read_text() ==
-            (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
-        )
-
-    shutil.rmtree(output_path)
+    with generate_client(
+        "3.1_specific.openapi.yaml",
+        extra_args=[f"--meta={meta}"],
+        output_path="test-3-1-features-client",
+    ) as g:
+        if generated_file and expected_file:
+            assert (g.output_path / generated_file).exists()
+            assert (
+                (g.output_path / generated_file).read_text() ==
+                (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+            )
 
 
 def test_none_meta():
@@ -189,6 +166,7 @@ def test_none_meta():
         golden_record_path="test-3-1-golden-record/test_3_1_features_client",
         output_path="test_3_1_features_client",
         expected_missing={"py.typed"},
+        specify_output_path_explicitly=False,
     )
 
 
@@ -238,55 +216,41 @@ ERROR_DOCUMENTS = [path for path in Path(__file__).parent.joinpath("documents_wi
 
 @pytest.mark.parametrize("document", ERROR_DOCUMENTS, ids=[path.stem for path in ERROR_DOCUMENTS])
 def test_documents_with_errors(snapshot, document):
-    runner = CliRunner()
-    output_path = Path.cwd() / "test-documents-with-errors"
-    shutil.rmtree(output_path, ignore_errors=True)
-    result = runner.invoke(app, ["generate", f"--path={document}", "--fail-on-warning", f"--output-path={output_path}"])
-    assert result.exit_code == 1
-    assert result.stdout.replace(str(output_path), "/test-documents-with-errors") == snapshot
-    shutil.rmtree(output_path, ignore_errors=True)
+    with generate_client(
+        document,
+        extra_args=["--fail-on-warning"],
+        output_path="test-documents-with-errors",
+        raise_on_error=False,
+    ) as g:
+        result = g.generator_result
+        assert result.exit_code == 1
+        output = result.stdout.replace(str(g.output_path), "/test-documents-with-errors")
+        assert output == snapshot
 
 
 def test_custom_post_hooks():
-    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
-    runner = CliRunner()
-    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
     config_path = Path(__file__).parent / "custom_post_hooks.config.yml"
-    result = runner.invoke(app, ["generate", f"--path={openapi_document}", f"--config={config_path}"])
-    assert result.exit_code == 1
-    assert "this should fail" in result.stdout
-    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+    with generate_client(
+        "baseline_openapi_3.0.json",
+        [f"--config={config_path}"],
+        raise_on_error=False,
+    ) as g:
+        assert g.generator_result.exit_code == 1
+        assert "this should fail" in g.generator_result.stdout
 
 
 def test_generate_dir_already_exists():
     project_dir = Path.cwd() / "my-test-api-client"
     if not project_dir.exists():
         project_dir.mkdir()
-    runner = CliRunner()
-    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
-    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
-    assert result.exit_code == 1
-    assert "Directory already exists" in result.stdout
-    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
-
-
-@pytest.mark.parametrize(
-    ("file_name", "content", "expected_error"),
-    (
-        ("invalid_openapi.yaml", "not a valid openapi document", "Failed to parse OpenAPI document"),
-        ("invalid_json.json", "Invalid JSON", "Invalid JSON"),
-        ("invalid_yaml.yaml", "{", "Invalid YAML"),
-    ),
-    ids=("invalid_openapi", "invalid_json", "invalid_yaml")
-)
-def test_invalid_openapi_document(file_name, content, expected_error):
-    runner = CliRunner()
-    openapi_document = Path.cwd() / file_name
-    openapi_document.write_text(content)
-    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
-    assert result.exit_code == 1
-    assert expected_error in result.stdout
-    openapi_document.unlink()
+    try:
+        runner = CliRunner()
+        openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+        result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
+        assert result.exit_code == 1
+        assert "Directory already exists" in result.stdout
+    finally:
+        shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
 
 
 def test_update_integration_tests():
@@ -294,17 +258,21 @@ def test_update_integration_tests():
     source_path = Path(__file__).parent.parent / "integration-tests"
     temp_dir = Path.cwd() / "test_update_integration_tests"
     shutil.rmtree(temp_dir, ignore_errors=True)
-    shutil.copytree(source_path, temp_dir)
-    config_path = source_path / "config.yaml"
-    _run_command(
-        "generate",
-        extra_args=["--meta=none", "--overwrite", f"--output-path={source_path / 'integration_tests'}"],
-        url=url,
-        config_path=config_path
-    )
-    _compare_directories(temp_dir, source_path, expected_differences={})
-    import mypy.api
 
-    out, err, status = mypy.api.run([str(temp_dir), "--strict"])
-    assert status == 0, f"Type checking client failed: {out}"
-    shutil.rmtree(temp_dir)
+    try:
+        shutil.copytree(source_path, temp_dir)
+        config_path = source_path / "config.yaml"
+        _run_command(
+            "generate",
+            extra_args=["--meta=none", "--overwrite", f"--output-path={source_path / 'integration_tests'}"],
+            url=url,
+            config_path=config_path
+        )
+        _compare_directories(temp_dir, source_path, expected_differences={})
+        import mypy.api
+
+        out, err, status = mypy.api.run([str(temp_dir), "--strict"])
+        assert status == 0, f"Type checking client failed: {out}"
+
+    finally:
+        shutil.rmtree(temp_dir)

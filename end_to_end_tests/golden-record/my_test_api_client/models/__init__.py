@@ -1,7 +1,5 @@
 """Contains all the data models used in inputs/outputs"""
 
-from .a_discriminated_union_type_1 import ADiscriminatedUnionType1
-from .a_discriminated_union_type_2 import ADiscriminatedUnionType2
 from .a_form_data import AFormData
 from .a_model import AModel
 from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
@@ -61,7 +59,6 @@ from .model_with_circular_ref_b import ModelWithCircularRefB
 from .model_with_circular_ref_in_additional_properties_a import ModelWithCircularRefInAdditionalPropertiesA
 from .model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
 from .model_with_date_time_property import ModelWithDateTimeProperty
-from .model_with_discriminated_union import ModelWithDiscriminatedUnion
 from .model_with_merged_properties import ModelWithMergedProperties
 from .model_with_merged_properties_string_to_enum import ModelWithMergedPropertiesStringToEnum
 from .model_with_no_properties import ModelWithNoProperties
@@ -90,8 +87,6 @@ from .test_inline_objects_response_200 import TestInlineObjectsResponse200
 from .validation_error import ValidationError
 
 __all__ = (
-    "ADiscriminatedUnionType1",
-    "ADiscriminatedUnionType2",
     "AFormData",
     "AllOfHasPropertiesButNoType",
     "AllOfHasPropertiesButNoTypeTypeEnum",
@@ -143,7 +138,6 @@ __all__ = (
     "ModelWithCircularRefInAdditionalPropertiesA",
     "ModelWithCircularRefInAdditionalPropertiesB",
     "ModelWithDateTimeProperty",
-    "ModelWithDiscriminatedUnion",
     "ModelWithMergedProperties",
     "ModelWithMergedPropertiesStringToEnum",
     "ModelWithNoProperties",

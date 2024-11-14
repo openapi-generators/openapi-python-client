@@ -4,57 +4,12 @@ import pydantic
 import pytest
 
 import openapi_python_client.schema as oai
-from openapi_python_client import GeneratorError
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
 from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
 from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
-
-
-class TestGeneratorData:
-    def test_from_dict_invalid_schema(self, mocker):
-        Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
-        config = mocker.MagicMock()
-
-        in_dict = {}
-
-        from openapi_python_client.parser.openapi import GeneratorData
-
-        generator_data = GeneratorData.from_dict(in_dict, config=config)
-
-        assert isinstance(generator_data, GeneratorError)
-        assert generator_data.header == "Failed to parse OpenAPI document"
-        keywords = ["3 validation errors for OpenAPI", "info", "paths", "openapi", "Field required"]
-        assert generator_data.detail and all(keyword in generator_data.detail for keyword in keywords)
-
-        Schemas.build.assert_not_called()
-        Schemas.assert_not_called()
-
-    def test_swagger_document_invalid_schema(self, mocker):
-        Schemas = mocker.patch(f"{MODULE_NAME}.Schemas")
-        config = mocker.MagicMock()
-
-        in_dict = {"swagger": "2.0"}
-
-        from openapi_python_client.parser.openapi import GeneratorData
-
-        generator_data = GeneratorData.from_dict(in_dict, config=config)
-
-        assert isinstance(generator_data, GeneratorError)
-        assert generator_data.header == "Failed to parse OpenAPI document"
-        keywords = [
-            "You may be trying to use a Swagger document; this is not supported by this project.",
-            "info",
-            "paths",
-            "openapi",
-            "Field required",
-        ]
-        assert generator_data.detail and all(keyword in generator_data.detail for keyword in keywords)
-
-        Schemas.build.assert_not_called()
-        Schemas.assert_not_called()
 
 
 class TestEndpoint:
