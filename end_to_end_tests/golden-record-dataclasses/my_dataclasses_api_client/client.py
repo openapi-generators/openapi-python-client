@@ -1,4 +1,4 @@
-import copy
+from copy import copy
 from dataclasses import dataclass, field, replace
 from typing import Any, Dict, Optional
 
@@ -44,8 +44,9 @@ class Client:
     """
 
     _base_url: str
-    raise_on_unexpected_status: bool
     _httpx_config: _HttpxConfig
+    _client: Optional[httpx.Client]
+    _async_client: Optional[httpx.AsyncClient]
 
     def __init__(
         self,
@@ -61,26 +62,42 @@ class Client:
         self.raise_on_unexpected_status = raise_on_unexpected_status
         self._base_url = base_url
         self._httpx_config = _HttpxConfig(cookies, headers, timeout, verify_ssl, follow_redirects, httpx_args)
+        self._client = None
+        self._async_client = None
 
     def _with_httpx_config(self, httpx_config: _HttpxConfig) -> "Client":
-        ret = copy.copy(self)
+        ret = copy(self)
         ret._httpx_config = httpx_config
+        ret._client = None
+        ret._async_client = None
         return ret
 
     def with_headers(self, headers: Dict[str, str]) -> "Client":
         """Get a new client matching this one with additional headers"""
+        if self._client is not None:
+            self._client.headers.update(headers)
+        if self._async_client is not None:
+            self._async_client.headers.update(headers)
         return self._with_httpx_config(
             replace(self._httpx_config, headers={**self._httpx_config.headers, **headers}),
         )
 
     def with_cookies(self, cookies: Dict[str, str]) -> "Client":
         """Get a new client matching this one with additional cookies"""
+        if self._client is not None:
+            self._client.cookies.update(cookies)
+        if self._async_client is not None:
+            self._async_client.cookies.update(cookies)
         return self._with_httpx_config(
             replace(self._httpx_config, cookies={**self._httpx_config.cookies, **cookies}),
         )
 
     def with_timeout(self, timeout: httpx.Timeout) -> "Client":
         """Get a new client matching this one with a new timeout (in seconds)"""
+        if self._client is not None:
+            self._client.timeout = timeout
+        if self._async_client is not None:
+            self._async_client.timeout = timeout
         return self._with_httpx_config(replace(self._httpx_config, timeout=timeout))
 
     def set_httpx_client(self, client: httpx.Client) -> "Client":
@@ -178,31 +195,70 @@ class AuthenticatedClient:
     """
 
     _base_url: str
-    raise_on_unexpected_status: bool
     token: str
     prefix: str = "Bearer"
     auth_header_name: str = "Authorization"
     _httpx_config: _HttpxConfig
+    _client: Optional[httpx.Client]
+    _async_client: Optional[httpx.AsyncClient]
+
+    def __init__(
+        self,
+        base_url: str,
+        token: str,
+        prefix: str = "Bearer",
+        auth_header_name: str = "Authorization",
+        cookies: Dict[str, str] = {},
+        headers: Dict[str, str] = {},
+        timeout: Optional[httpx.Timeout] = None,
+        verify_ssl: bool = True,
+        follow_redirects: bool = False,
+        httpx_args: Dict[str, Any] = {},
+        raise_on_unexpected_status: bool = False,
+    ) -> None:
+        self.raise_on_unexpected_status = raise_on_unexpected_status
+        self._base_url = base_url
+        self._httpx_config = _HttpxConfig(cookies, headers, timeout, verify_ssl, follow_redirects, httpx_args)
+        self._client = None
+        self._async_client = None
+
+        self.token = token
+        self.prefix = prefix
+        self.auth_header_name = auth_header_name
 
     def _with_httpx_config(self, httpx_config: _HttpxConfig) -> "AuthenticatedClient":
-        ret = copy.copy(self)
+        ret = copy(self)
         ret._httpx_config = httpx_config
+        ret._client = None
+        ret._async_client = None
         return ret
 
     def with_headers(self, headers: Dict[str, str]) -> "AuthenticatedClient":
         """Get a new client matching this one with additional headers"""
+        if self._client is not None:
+            self._client.headers.update(headers)
+        if self._async_client is not None:
+            self._async_client.headers.update(headers)
         return self._with_httpx_config(
             replace(self._httpx_config, headers={**self._httpx_config.headers, **headers}),
         )
 
     def with_cookies(self, cookies: Dict[str, str]) -> "AuthenticatedClient":
         """Get a new client matching this one with additional cookies"""
+        if self._client is not None:
+            self._client.cookies.update(cookies)
+        if self._async_client is not None:
+            self._async_client.cookies.update(cookies)
         return self._with_httpx_config(
             replace(self._httpx_config, cookies={**self._httpx_config.cookies, **cookies}),
         )
 
     def with_timeout(self, timeout: httpx.Timeout) -> "AuthenticatedClient":
         """Get a new client matching this one with a new timeout (in seconds)"""
+        if self._client is not None:
+            self._client.timeout = timeout
+        if self._async_client is not None:
+            self._async_client.timeout = timeout
         return self._with_httpx_config(replace(self._httpx_config, timeout=timeout))
 
     def set_httpx_client(self, client: httpx.Client) -> "AuthenticatedClient":
@@ -216,11 +272,13 @@ class AuthenticatedClient:
     def get_httpx_client(self) -> httpx.Client:
         """Get the underlying httpx.Client, constructing a new one if not previously set"""
         if self._client is None:
-            self._headers[self.auth_header_name] = f"{self.prefix} {self.token}" if self.prefix else self.token
             self._client = httpx.Client(
                 base_url=self._base_url,
                 cookies=self._httpx_config.cookies,
-                headers=self._httpx_config.headers,
+                headers={
+                    self.auth_header_name: (f"{self.prefix} {self.token}" if self.prefix else self.token),
+                    **self._httpx_config.headers,
+                },
                 timeout=self._httpx_config.timeout,
                 verify=self._httpx_config.verify_ssl,
                 follow_redirects=self._httpx_config.follow_redirects,
@@ -248,11 +306,13 @@ class AuthenticatedClient:
     def get_async_httpx_client(self) -> httpx.AsyncClient:
         """Get the underlying httpx.AsyncClient, constructing a new one if not previously set"""
         if self._async_client is None:
-            self._headers[self.auth_header_name] = f"{self.prefix} {self.token}" if self.prefix else self.token
             self._async_client = httpx.AsyncClient(
                 base_url=self._httpx_config.base_url,
                 cookies=self._httpx_config.cookies,
-                headers=self._httpx_config.headers,
+                headers={
+                    self.auth_header_name: (f"{self.prefix} {self.token}" if self.prefix else self.token),
+                    **self._httpx_config.headers,
+                },
                 timeout=self._httpx_config.timeout,
                 verify=self._httpx_config.verify_ssl,
                 follow_redirects=self._httpx_config.follow_redirects,

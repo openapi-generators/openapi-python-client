@@ -4,10 +4,12 @@ from typing import Any, Dict, Union, Optional
 import httpx
 
 {% if config.use_dataclasses %}
-import copy
+from copy import copy
 from dataclasses import dataclass, field, replace
+{% set class_header = "" %}
 {% else %}
 from attrs import define, field, evolve
+{% set class_header = "@define" %}
 {% endif %}
 
 {% if config.use_dataclasses %}
@@ -19,27 +21,13 @@ class _HttpxConfig:
     verify_ssl: bool = True
     follow_redirects: bool = False
     httpx_args: Dict[str, str] = field(default_factory=dict)
-
-{% macro init_args() %}
-        self,
-        base_url: str,
-        cookies: Dict[str, str] = {},
-        headers: Dict[str, str] = {},
-        timeout: Optional[httpx.Timeout] = None,
-        verify_ssl: bool = True,
-        follow_redirects: bool = False,
-        httpx_args: Dict[str, Any] = {},
-        raise_on_unexpected_status: bool = False,
-{% endmacro %}
 {% endif %}
 
 {% macro httpx_client_arg(name) -%}
 {% if config.use_dataclasses %}self._httpx_config.{{ name }}{% else %}self._{{ name }}{% endif %}
 {%- endmacro %}
 
-{% if not config.use_dataclasses %}
-@define
-{% endif %}
+{{ class_header }}
 class Client:
     """A class for keeping track of data related to the API
 
@@ -72,11 +60,12 @@ class Client:
 {% macro attributes(extra_attrs = []) %}
 {% if config.use_dataclasses %}
     _base_url: str
-    raise_on_unexpected_status: bool
 {% for extra in extra_attrs %}
     {{ extra }}
 {% endfor %}
     _httpx_config: _HttpxConfig
+    _client: Optional[httpx.Client]
+    _async_client: Optional[httpx.AsyncClient]
 {% else %}
     raise_on_unexpected_status: bool = field(default=False, kw_only=True)
     _base_url: str = field(alias="base_url")
@@ -95,49 +84,61 @@ class Client:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% endmacro %}{{ attributes() }}
+{% endmacro %}
 
-{% if config.use_dataclasses %}
+{{ attributes() }}
+
+{% macro explicit_initializer(extra_attrs = []) %}
     def __init__(
-        {{ init_args() }}
+        self,
+        base_url: str,
+{% for attr in extra_attrs %}
+        {{ attr }},
+{% endfor %}
+        cookies: Dict[str, str] = {},
+        headers: Dict[str, str] = {},
+        timeout: Optional[httpx.Timeout] = None,
+        verify_ssl: bool = True,
+        follow_redirects: bool = False,
+        httpx_args: Dict[str, Any] = {},
+        raise_on_unexpected_status: bool = False,
     ) -> None:
         self.raise_on_unexpected_status = raise_on_unexpected_status
         self._base_url = base_url
         self._httpx_config = _HttpxConfig(
             cookies, headers, timeout, verify_ssl, follow_redirects, httpx_args
         )
+        self._client = None
+        self._async_client = None
+{% endmacro %}
+
+{% if config.use_dataclasses %}
+{{ explicit_initializer() }}
 {% endif %}
 
 {% macro builders(self) %}
 {% if config.use_dataclasses %}
     def _with_httpx_config(self, httpx_config: _HttpxConfig) -> "{{ self }}":
-        ret = copy.copy(self)
+        ret = copy(self)
         ret._httpx_config = httpx_config
+        ret._client = None
+        ret._async_client = None
         return ret
+{% endif %}
 
-    def with_headers(self, headers: Dict[str, str]) -> "{{ self }}":
-        """Get a new client matching this one with additional headers"""
-        return self._with_httpx_config(
-            replace(self._httpx_config, headers={**self._httpx_config.headers, **headers}),
-        )
-
-    def with_cookies(self, cookies: Dict[str, str]) -> "{{ self }}":
-        """Get a new client matching this one with additional cookies"""
-        return self._with_httpx_config(
-            replace(self._httpx_config, cookies={**self._httpx_config.cookies, **cookies}),
-        )
-
-    def with_timeout(self, timeout: httpx.Timeout) -> "{{ self }}":
-        """Get a new client matching this one with a new timeout (in seconds)"""
-        return self._with_httpx_config(replace(self._httpx_config, timeout=timeout))
-{% else %}
     def with_headers(self, headers: Dict[str, str]) -> "{{ self }}":
         """Get a new client matching this one with additional headers"""
         if self._client is not None:
             self._client.headers.update(headers)
         if self._async_client is not None:
             self._async_client.headers.update(headers)
+        {% if config.use_dataclasses %}
+        return self._with_httpx_config(
+            replace(self._httpx_config, headers={**self._httpx_config.headers, **headers}),
+        )
+        {% else %}
         return evolve(self, headers={**self._headers, **headers})
+        {% endif %}
 
     def with_cookies(self, cookies: Dict[str, str]) -> "{{ self }}":
         """Get a new client matching this one with additional cookies"""
@@ -145,7 +146,13 @@ class Client:
             self._client.cookies.update(cookies)
         if self._async_client is not None:
             self._async_client.cookies.update(cookies)
+        {% if config.use_dataclasses %}
+        return self._with_httpx_config(
+            replace(self._httpx_config, cookies={**self._httpx_config.cookies, **cookies}),
+        )
+        {% else %}
         return evolve(self, cookies={**self._cookies, **cookies})
+        {% endif %}
 
     def with_timeout(self, timeout: httpx.Timeout) -> "{{ self }}":
         """Get a new client matching this one with a new timeout (in seconds)"""
@@ -153,11 +160,16 @@ class Client:
             self._client.timeout = timeout
         if self._async_client is not None:
             self._async_client.timeout = timeout
+        {% if config.use_dataclasses %}
+        return self._with_httpx_config(replace(self._httpx_config, timeout=timeout))
+        {% else %}
         return evolve(self, timeout=timeout)
-{% endif %}
-{% endmacro %}{{ builders("Client") }}
+        {% endif %}
+{% endmacro %}
 
-{% macro httpx_stuff(name, custom_constructor=None) %}
+{{ builders("Client") }}
+
+{% macro httpx_stuff(name, headers_expr, update_headers=None) %}
     def set_httpx_client(self, client: httpx.Client) -> "{{ name }}":
         """Manually set the underlying httpx.Client
 
@@ -169,13 +181,13 @@ class Client:
     def get_httpx_client(self) -> httpx.Client:
         """Get the underlying httpx.Client, constructing a new one if not previously set"""
         if self._client is None:
-        {% if custom_constructor %}
-            {{ custom_constructor | indent(12) }}
+        {% if update_headers %}
+            {{ update_headers | indent(12) }}
         {% endif %}
             self._client = httpx.Client(
                 base_url=self._base_url,
                 cookies={{ httpx_client_arg("cookies") }},
-                headers={{ httpx_client_arg("headers") }},
+                headers={{ headers_expr }},
                 timeout={{ httpx_client_arg("timeout") }},
                 verify={{ httpx_client_arg("verify_ssl") }},
                 follow_redirects={{ httpx_client_arg("follow_redirects") }},
@@ -203,13 +215,13 @@ class Client:
     def get_async_httpx_client(self) -> httpx.AsyncClient:
         """Get the underlying httpx.AsyncClient, constructing a new one if not previously set"""
         if self._async_client is None:
-        {% if custom_constructor %}
-            {{ custom_constructor | indent(12) }}
+        {% if update_headers %}
+            {{ update_headers | indent(12) }}
         {% endif %}
             self._async_client = httpx.AsyncClient(
                 base_url={{ httpx_client_arg("base_url") }},
                 cookies={{ httpx_client_arg("cookies") }},
-                headers={{ httpx_client_arg("headers") }},
+                headers={{ headers_expr or httpx_client_arg("headers") }},
                 timeout={{ httpx_client_arg("timeout") }},
                 verify={{ httpx_client_arg("verify_ssl") }},
                 follow_redirects={{ httpx_client_arg("follow_redirects") }},
@@ -225,11 +237,15 @@ class Client:
     async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
         """Exit a context manager for underlying httpx.AsyncClient (see httpx docs)"""
         await self.get_async_httpx_client().__aexit__(*args, **kwargs)
-{% endmacro %}{{ httpx_stuff("Client") }}
+{% endmacro %}
 
-{% if not config.use_dataclasses %}
-@define
+{% if config.use_dataclasses %}
+{{ httpx_stuff("Client", headers_expr="self._httpx_config.headers") }}
+{% else %}
+{{ httpx_stuff("Client", headers_expr="self._headers") }}
 {% endif %}
+
+{{ class_header }}
 class AuthenticatedClient:
     """A Client which has been authenticated for use on secured endpoints
 
@@ -244,7 +260,29 @@ class AuthenticatedClient:
         auth_header_name: The name of the Authorization header
     """
 
-{{ attributes(["token: str", 'prefix: str = "Bearer"', 'auth_header_name: str = "Authorization"']) }}
+{% set extra_auth_client_args = ["token: str", 'prefix: str = "Bearer"', 'auth_header_name: str = "Authorization"'] %}
+{{ attributes(extra_auth_client_args) }}
+
+{% if config.use_dataclasses %}
+{{ explicit_initializer(extra_auth_client_args) }}
+        self.token = token
+        self.prefix = prefix
+        self.auth_header_name = auth_header_name
+{% endif %}
 
 {{ builders("AuthenticatedClient") }}
-{{ httpx_stuff("AuthenticatedClient", "self._headers[self.auth_header_name] = f\"{self.prefix} {self.token}\" if self.prefix else self.token") }}
+{% set token_string_expr %} f"{self.prefix} {self.token}" if self.prefix else self.token {% endset %}
+{% if config.use_dataclasses %}
+{% set headers_expr %} { self.auth_header_name: ({{ token_string_expr }}), **self._httpx_config.headers } {% endset %}
+{{ httpx_stuff(
+     "AuthenticatedClient",
+     headers_expr=headers_expr,
+) }}
+{% else %}
+{% set update_headers %}self._headers[self.auth_header_name] = {{ token_string_expr }}{% endset %}
+{{ httpx_stuff(
+     "AuthenticatedClient",
+     headers_expr="self._headers",
+     update_headers=update_headers,
+) }}
+{% endif %}
