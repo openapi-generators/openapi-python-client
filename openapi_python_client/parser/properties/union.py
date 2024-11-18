@@ -53,17 +53,27 @@ class UnionProperty(PropertyProtocol):
 
         type_list_data = []
         if isinstance(data.type, list) and not (data.anyOf or data.oneOf):
+            # The schema specifies "type:" with a list of allowable types. If there is *not* also an "anyOf"
+            # or "oneOf", then we should treat that as a shorthand for a oneOf where each variant is just
+            # a single "type:". For example:
+            #   {"type": ["string", "int"]} becomes
+            #   {"oneOf": [{"type": "string"}, {"type": "int"}]}
+            # However, if there *is* also an "anyOf" or "oneOf" list, then the information from "type:" is
+            # redundant since every allowable variant type is already fully described in the list.
             for _type in data.type:
                 type_list_data.append(data.model_copy(update={"type": _type, "default": None}))
+                # Here we're copying properties from the top-level union schema that might apply to one
+                # of the type variants, like "format" for a string. But we don't copy "default" because
+                # default values will be handled at the top level by the UnionProperty.
 
         def process_items(
-            preserve_name_for_item: Schema | Reference | None = None,
+            use_original_name_for: oai.Schema | oai.Reference | None = None,
         ) -> tuple[list[PropertyProtocol] | PropertyError, Schemas]:
             props: list[PropertyProtocol] = []
             new_schemas = schemas
-            items_with_classes: list[Schema | Reference] = []
+            schemas_with_classes: list[oai.Schema | oai.Reference] = []
             for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
-                sub_prop_name = name if sub_prop_data is preserve_name_for_item else f"{name}_type_{i}"
+                sub_prop_name = name if sub_prop_data is use_original_name_for else f"{name}_type_{i}"
                 sub_prop, new_schemas = property_from_data(
                     name=sub_prop_name,
                     required=True,
@@ -75,15 +85,19 @@ class UnionProperty(PropertyProtocol):
                 if isinstance(sub_prop, PropertyError):
                     return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), new_schemas
                 if isinstance(sub_prop, HasNamedClass):
-                    items_with_classes.append(sub_prop_data)
+                    schemas_with_classes.append(sub_prop_data)
                 props.append(sub_prop)
 
-            if (not preserve_name_for_item) and (len(items_with_classes) == 1):
-                # After our first pass, if it turns out that there was exactly one enum or model in the list,
-                # then we'll do a second pass where we use the original name for that item instead of a
-                # "xyz_type_n" synthetic name. Enum and model are the only types that would get their own
-                # Python class.
-                return process_items(items_with_classes[0])
+            if (not use_original_name_for) and len(schemas_with_classes) == 1:
+                # An example of this scenario is a oneOf where one of the variants is an inline enum or
+                # model, and the other is a simple value like null. If the name of the union property is
+                # "foo" then it's desirable for the enum or model class to be named "Foo", not "FooType1".
+                # So, we'll do a second pass where we tell ourselves to use the original property name
+                # for that item instead of "{name}_type_{i}".
+                # This only makes a functional difference if the variant was an inline schema, because
+                # we wouldn't be generating a class otherwise, but even if it wasn't inline this will
+                # save on pointlessly long variable names inside from_dict/to_dict.
+                return process_items(use_original_name_for=schemas_with_classes[0])
 
             return props, new_schemas
 
