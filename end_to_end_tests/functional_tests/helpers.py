@@ -47,8 +47,7 @@ def with_generated_code_import(import_path: str, alias: Optional[str] = None):
         nonlocal alias
 
         def _func(self, generated_client):
-            module = generated_client.import_module(module_name)
-            return getattr(module, import_name)
+            return generated_client.import_symbol(module_name, import_name)
         
         alias = alias or import_name
         _func.__name__ = alias
