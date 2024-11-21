@@ -2,9 +2,9 @@ name: Run Checks
 
 on:
   push:
-    branches: [ "2.x" ]
+    branches: [ "prod/2.x" ]
   pull_request:
-    branches: [ "2.x" ]
+    branches: [ "prod/2.x" ]
   merge_group:
 
 jobs:

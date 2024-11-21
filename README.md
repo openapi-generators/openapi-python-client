@@ -1,9 +1,12 @@
-![Run Checks](https://github.com/openapi-generators/openapi-python-client/workflows/Run%20Checks/badge.svg)
-[![codecov](https://codecov.io/gh/openapi-generators/openapi-python-client/branch/main/graph/badge.svg)](https://codecov.io/gh/triaxtec/openapi-python-client)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-[![Generic badge](https://img.shields.io/badge/type_checked-mypy-informational.svg)](https://mypy.readthedocs.io/en/stable/introduction.html)
-[![PyPI version shields.io](https://img.shields.io/pypi/v/openapi-python-client.svg)](https://pypi.python.org/pypi/openapi-python-client/)
-[![Downloads](https://static.pepy.tech/personalized-badge/openapi-python-client?period=total&units=international_system&left_color=blue&right_color=green&left_text=Downloads)](https://pepy.tech/project/openapi-python-client)
+
+# Note: this is the fork of openapi-python-client maintained and used by Benchling.
+
+If you want the official package, go to the upstream repository: https://github.com/openapi-generators/openapi-python-client
+
+The rest of this file is a copy of the upstream README, except for descriptions of extra options added in the Benchling fork. All other Benchling-specific notes are in our internal documentation.
+
+Benchling cannot provide any support for external use of this fork.
 
 # openapi-python-client
 
