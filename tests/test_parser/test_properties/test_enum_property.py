@@ -41,7 +41,7 @@ def test_avoids_false_conflict(config: Config, property_class: PropertyClass) ->
     _, schemas = property_class.build(
         data=oai.Schema(enum=["a"]), name="Friend", required=True, schemas=schemas, parent_name="", config=config
     )
-    asdf, schemas = property_class.build(
+    _, schemas = property_class.build(
         data=oai.Schema(enum=["a", "b"]),
         name="FriendShips",
         required=True,
