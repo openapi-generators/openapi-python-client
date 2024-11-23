@@ -39,6 +39,7 @@ class ConfigFile(BaseModel):
     project_name_override: Optional[str] = None
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
+    use_dataclasses: bool = False
     use_path_prefixes_for_title_model_names: bool = True
     post_hooks: Optional[List[str]] = None
     field_prefix: str = "field_"
@@ -67,6 +68,7 @@ class Config:
     project_name_override: Optional[str]
     package_name_override: Optional[str]
     package_version_override: Optional[str]
+    use_dataclasses: bool
     use_path_prefixes_for_title_model_names: bool
     post_hooks: List[str]
     field_prefix: str
@@ -107,6 +109,7 @@ class Config:
             project_name_override=config_file.project_name_override,
             package_name_override=config_file.package_name_override,
             package_version_override=config_file.package_version_override,
+            use_dataclasses=config_file.use_dataclasses,
             use_path_prefixes_for_title_model_names=config_file.use_path_prefixes_for_title_model_names,
             post_hooks=post_hooks,
             field_prefix=config_file.field_prefix,

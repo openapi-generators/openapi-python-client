@@ -20,7 +20,9 @@ include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
 {% if pdm %}
 dependencies = [
     "httpx>=0.20.0,<0.28.0",
+{% if not config.use_dataclasses %}
     "attrs>=21.3.0",
+{% endif %}
     "python-dateutil>=2.8.0",
 ]
 
@@ -32,7 +34,9 @@ distribution = true
 [tool.poetry.dependencies]
 python = "^3.8"
 httpx = ">=0.20.0,<0.28.0"
+{% if not config.use_dataclasses -%}
 attrs = ">=21.3.0"
+{% endif %}
 python-dateutil = "^2.8.0"
 {% endif %}
 

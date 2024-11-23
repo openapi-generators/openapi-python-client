@@ -51,6 +51,26 @@ def regen_golden_record_3_1_features():
     output_path.rename(gr_path)
 
 
+def regen_dataclasses_golden_record():
+    runner = CliRunner()
+    openapi_path = Path(__file__).parent / "openapi_3.1_dataclasses.yaml"
+
+    gr_path = Path(__file__).parent / "golden-record-dataclasses"
+    output_path = Path.cwd() / "my-dataclasses-api-client"
+    config_path = Path(__file__).parent / "config_dataclasses.yml"
+
+    shutil.rmtree(gr_path, ignore_errors=True)
+    shutil.rmtree(output_path, ignore_errors=True)
+
+    result = runner.invoke(app, ["generate", f"--path={openapi_path}", f"--config={config_path}"])
+
+    if result.stdout:
+        print(result.stdout)
+    if result.exception:
+        raise result.exception
+    output_path.rename(gr_path)
+
+
 def regen_literal_enums_golden_record():
     runner = CliRunner()
     openapi_path = Path(__file__).parent / "openapi_3.1_enums.yaml"
@@ -144,4 +164,5 @@ if __name__ == "__main__":
     regen_golden_record_3_1_features()
     regen_metadata_snapshots()
     regen_custom_template_golden_record()
+    regen_dataclasses_golden_record()
     regen_literal_enums_golden_record()

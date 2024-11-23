@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: My Dataclasses API
+  description: An API for testing dataclasses in openapi-python-client
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    AModel:
+      type: object
+      properties:
+        optionalString:
+          type: string
+        requiredString:
+          type: string
+        stringWithDefault:
+          type: string
+          default: abc
+      required:
+        - requiredString
