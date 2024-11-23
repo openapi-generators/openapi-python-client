@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -16,14 +16,14 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAItem")
 class AnArrayWithACircularRefInItemsObjectAItem:
     """
     Attributes:
-        circular (Union[Unset, List['AnArrayWithACircularRefInItemsObjectBItem']]):
+        circular (Union[Unset, list['AnArrayWithACircularRefInItemsObjectBItem']]):
     """
 
-    circular: Union[Unset, List["AnArrayWithACircularRefInItemsObjectBItem"]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    circular: Union[Unset, list["AnArrayWithACircularRefInItemsObjectBItem"]] = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        circular: Union[Unset, List[Dict[str, Any]]] = UNSET
+    def to_dict(self) -> dict[str, Any]:
+        circular: Union[Unset, list[dict[str, Any]]] = UNSET
         if not isinstance(self.circular, Unset):
             circular = []
             for componentsschemas_an_array_with_a_circular_ref_in_items_object_b_item_data in self.circular:
@@ -32,7 +32,7 @@ class AnArrayWithACircularRefInItemsObjectAItem:
                 )
                 circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_b_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if circular is not UNSET:
@@ -41,7 +41,7 @@ class AnArrayWithACircularRefInItemsObjectAItem:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.an_array_with_a_circular_ref_in_items_object_b_item import (
             AnArrayWithACircularRefInItemsObjectBItem,
         )
@@ -66,7 +66,7 @@ class AnArrayWithACircularRefInItemsObjectAItem:
         return an_array_with_a_circular_ref_in_items_object_a_item
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

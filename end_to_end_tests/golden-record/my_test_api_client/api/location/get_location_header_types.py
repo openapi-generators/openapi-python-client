@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -18,8 +18,8 @@ def _get_kwargs(
     integer_header: Union[Unset, int] = UNSET,
     int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
     string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     if not isinstance(boolean_header, Unset):
         headers["Boolean-Header"] = "true" if boolean_header else "false"
 
@@ -38,7 +38,7 @@ def _get_kwargs(
     if not isinstance(string_enum_header, Unset):
         headers["String-Enum-Header"] = str(string_enum_header)
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/location/header/types",
     }

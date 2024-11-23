@@ -1,7 +1,7 @@
 import datetime
 import json
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -41,8 +41,8 @@ class BodyUploadFileTestsUploadPost:
         a_date (Union[Unset, datetime.date]):
         some_number (Union[Unset, float]):
         some_nullable_number (Union[None, Unset, float]):
-        some_int_array (Union[Unset, List[Union[None, int]]]):
-        some_array (Union[List['AFormData'], None, Unset]):
+        some_int_array (Union[Unset, list[Union[None, int]]]):
+        some_array (Union[None, Unset, list['AFormData']]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
         some_enum (Union[Unset, DifferentEnum]): An enumeration.
     """
@@ -57,15 +57,15 @@ class BodyUploadFileTestsUploadPost:
     a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
     some_nullable_number: Union[None, Unset, float] = UNSET
-    some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
-    some_array: Union[List["AFormData"], None, Unset] = UNSET
+    some_int_array: Union[Unset, list[Union[None, int]]] = UNSET
+    some_array: Union[None, Unset, list["AFormData"]] = UNSET
     some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
-    additional_properties: Dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
+    additional_properties: dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
         init=False, factory=dict
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
             BodyUploadFileTestsUploadPostSomeNullableObject,
         )
@@ -76,7 +76,7 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = self.some_object.to_dict()
 
-        some_nullable_object: Union[Dict[str, Any], None]
+        some_nullable_object: Union[None, dict[str, Any]]
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = self.some_nullable_object.to_dict()
         else:
@@ -104,7 +104,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_number = self.some_nullable_number
 
-        some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
+        some_int_array: Union[Unset, list[Union[None, int]]] = UNSET
         if not isinstance(self.some_int_array, Unset):
             some_int_array = []
             for some_int_array_item_data in self.some_int_array:
@@ -112,7 +112,7 @@ class BodyUploadFileTestsUploadPost:
                 some_int_array_item = some_int_array_item_data
                 some_int_array.append(some_int_array_item)
 
-        some_array: Union[List[Dict[str, Any]], None, Unset]
+        some_array: Union[None, Unset, list[dict[str, Any]]]
         if isinstance(self.some_array, Unset):
             some_array = UNSET
         elif isinstance(self.some_array, list):
@@ -124,7 +124,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_array = self.some_array
 
-        some_optional_object: Union[Unset, Dict[str, Any]] = UNSET
+        some_optional_object: Union[Unset, dict[str, Any]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = self.some_optional_object.to_dict()
 
@@ -132,7 +132,7 @@ class BodyUploadFileTestsUploadPost:
         if not isinstance(self.some_enum, Unset):
             some_enum = self.some_enum.value
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
         field_dict.update(
@@ -166,14 +166,14 @@ class BodyUploadFileTestsUploadPost:
 
         return field_dict
 
-    def to_multipart(self) -> Dict[str, Any]:
+    def to_multipart(self) -> dict[str, Any]:
         some_file = self.some_file.to_tuple()
 
         some_required_number = (None, str(self.some_required_number).encode(), "text/plain")
 
         some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
 
-        some_nullable_object: Tuple[None, bytes, str]
+        some_nullable_object: tuple[None, bytes, str]
 
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
@@ -204,7 +204,7 @@ class BodyUploadFileTestsUploadPost:
             else (None, str(self.some_number).encode(), "text/plain")
         )
 
-        some_nullable_number: Union[Tuple[None, bytes, str], Unset]
+        some_nullable_number: Union[Unset, tuple[None, bytes, str]]
 
         if isinstance(self.some_nullable_number, Unset):
             some_nullable_number = UNSET
@@ -213,7 +213,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
 
-        some_int_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        some_int_array: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_int_array, Unset):
             _temp_some_int_array = []
             for some_int_array_item_data in self.some_int_array:
@@ -222,7 +222,7 @@ class BodyUploadFileTestsUploadPost:
                 _temp_some_int_array.append(some_int_array_item)
             some_int_array = (None, json.dumps(_temp_some_int_array).encode(), "application/json")
 
-        some_array: Union[Tuple[None, bytes, str], Unset]
+        some_array: Union[Unset, tuple[None, bytes, str]]
 
         if isinstance(self.some_array, Unset):
             some_array = UNSET
@@ -235,15 +235,15 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_array = (None, str(self.some_array).encode(), "text/plain")
 
-        some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        some_optional_object: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
 
-        some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        some_enum: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
         field_dict.update(
@@ -278,7 +278,7 @@ class BodyUploadFileTestsUploadPost:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.a_form_data import AFormData
         from ..models.body_upload_file_tests_upload_post_additional_property import (
             BodyUploadFileTestsUploadPostAdditionalProperty,
@@ -360,7 +360,7 @@ class BodyUploadFileTestsUploadPost:
 
             some_int_array.append(some_int_array_item)
 
-        def _parse_some_array(data: object) -> Union[List["AFormData"], None, Unset]:
+        def _parse_some_array(data: object) -> Union[None, Unset, list["AFormData"]]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -378,7 +378,7 @@ class BodyUploadFileTestsUploadPost:
                 return some_array_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union[List["AFormData"], None, Unset], data)
+            return cast(Union[None, Unset, list["AFormData"]], data)
 
         some_array = _parse_some_array(d.pop("some_array", UNSET))
 
@@ -423,7 +423,7 @@ class BodyUploadFileTestsUploadPost:
         return body_upload_file_tests_upload_post
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> "BodyUploadFileTestsUploadPostAdditionalProperty":

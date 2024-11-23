@@ -1,6 +1,6 @@
 import datetime
 from io import BytesIO
-from typing import Any, Dict, List, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -16,26 +16,26 @@ T = TypeVar("T", bound="AModelWithPropertiesReferenceThatAreNotObject")
 class AModelWithPropertiesReferenceThatAreNotObject:
     """
     Attributes:
-        enum_properties_ref (List[AnEnum]):
-        str_properties_ref (List[str]):
-        date_properties_ref (List[datetime.date]):
-        datetime_properties_ref (List[datetime.datetime]):
-        int32_properties_ref (List[int]):
-        int64_properties_ref (List[int]):
-        float_properties_ref (List[float]):
-        double_properties_ref (List[float]):
-        file_properties_ref (List[File]):
-        bytestream_properties_ref (List[str]):
-        enum_properties (List[AnEnum]):
-        str_properties (List[str]):
-        date_properties (List[datetime.date]):
-        datetime_properties (List[datetime.datetime]):
-        int32_properties (List[int]):
-        int64_properties (List[int]):
-        float_properties (List[float]):
-        double_properties (List[float]):
-        file_properties (List[File]):
-        bytestream_properties (List[str]):
+        enum_properties_ref (list[AnEnum]):
+        str_properties_ref (list[str]):
+        date_properties_ref (list[datetime.date]):
+        datetime_properties_ref (list[datetime.datetime]):
+        int32_properties_ref (list[int]):
+        int64_properties_ref (list[int]):
+        float_properties_ref (list[float]):
+        double_properties_ref (list[float]):
+        file_properties_ref (list[File]):
+        bytestream_properties_ref (list[str]):
+        enum_properties (list[AnEnum]):
+        str_properties (list[str]):
+        date_properties (list[datetime.date]):
+        datetime_properties (list[datetime.datetime]):
+        int32_properties (list[int]):
+        int64_properties (list[int]):
+        float_properties (list[float]):
+        double_properties (list[float]):
+        file_properties (list[File]):
+        bytestream_properties (list[str]):
         enum_property_ref (AnEnum): For testing Enums in all the ways they can be used
         str_property_ref (str):
         date_property_ref (datetime.date):
@@ -48,26 +48,26 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         bytestream_property_ref (str):
     """
 
-    enum_properties_ref: List[AnEnum]
-    str_properties_ref: List[str]
-    date_properties_ref: List[datetime.date]
-    datetime_properties_ref: List[datetime.datetime]
-    int32_properties_ref: List[int]
-    int64_properties_ref: List[int]
-    float_properties_ref: List[float]
-    double_properties_ref: List[float]
-    file_properties_ref: List[File]
-    bytestream_properties_ref: List[str]
-    enum_properties: List[AnEnum]
-    str_properties: List[str]
-    date_properties: List[datetime.date]
-    datetime_properties: List[datetime.datetime]
-    int32_properties: List[int]
-    int64_properties: List[int]
-    float_properties: List[float]
-    double_properties: List[float]
-    file_properties: List[File]
-    bytestream_properties: List[str]
+    enum_properties_ref: list[AnEnum]
+    str_properties_ref: list[str]
+    date_properties_ref: list[datetime.date]
+    datetime_properties_ref: list[datetime.datetime]
+    int32_properties_ref: list[int]
+    int64_properties_ref: list[int]
+    float_properties_ref: list[float]
+    double_properties_ref: list[float]
+    file_properties_ref: list[File]
+    bytestream_properties_ref: list[str]
+    enum_properties: list[AnEnum]
+    str_properties: list[str]
+    date_properties: list[datetime.date]
+    datetime_properties: list[datetime.datetime]
+    int32_properties: list[int]
+    int64_properties: list[int]
+    float_properties: list[float]
+    double_properties: list[float]
+    file_properties: list[File]
+    bytestream_properties: list[str]
     enum_property_ref: AnEnum
     str_property_ref: str
     date_property_ref: datetime.date
@@ -78,9 +78,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     double_property_ref: float
     file_property_ref: File
     bytestream_property_ref: str
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         enum_properties_ref = []
         for componentsschemas_an_other_array_of_enum_item_data in self.enum_properties_ref:
             componentsschemas_an_other_array_of_enum_item = componentsschemas_an_other_array_of_enum_item_data.value
@@ -173,7 +173,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         bytestream_property_ref = self.bytestream_property_ref
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -213,7 +213,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         enum_properties_ref = []
         _enum_properties_ref = d.pop("enum_properties_ref")
@@ -222,7 +222,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             enum_properties_ref.append(componentsschemas_an_other_array_of_enum_item)
 
-        str_properties_ref = cast(List[str], d.pop("str_properties_ref"))
+        str_properties_ref = cast(list[str], d.pop("str_properties_ref"))
 
         date_properties_ref = []
         _date_properties_ref = d.pop("date_properties_ref")
@@ -242,13 +242,13 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
 
-        int32_properties_ref = cast(List[int], d.pop("int32_properties_ref"))
+        int32_properties_ref = cast(list[int], d.pop("int32_properties_ref"))
 
-        int64_properties_ref = cast(List[int], d.pop("int64_properties_ref"))
+        int64_properties_ref = cast(list[int], d.pop("int64_properties_ref"))
 
-        float_properties_ref = cast(List[float], d.pop("float_properties_ref"))
+        float_properties_ref = cast(list[float], d.pop("float_properties_ref"))
 
-        double_properties_ref = cast(List[float], d.pop("double_properties_ref"))
+        double_properties_ref = cast(list[float], d.pop("double_properties_ref"))
 
         file_properties_ref = []
         _file_properties_ref = d.pop("file_properties_ref")
@@ -259,7 +259,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             file_properties_ref.append(componentsschemas_an_other_array_of_file_item)
 
-        bytestream_properties_ref = cast(List[str], d.pop("bytestream_properties_ref"))
+        bytestream_properties_ref = cast(list[str], d.pop("bytestream_properties_ref"))
 
         enum_properties = []
         _enum_properties = d.pop("enum_properties")
@@ -268,7 +268,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             enum_properties.append(componentsschemas_an_array_of_enum_item)
 
-        str_properties = cast(List[str], d.pop("str_properties"))
+        str_properties = cast(list[str], d.pop("str_properties"))
 
         date_properties = []
         _date_properties = d.pop("date_properties")
@@ -284,13 +284,13 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
 
-        int32_properties = cast(List[int], d.pop("int32_properties"))
+        int32_properties = cast(list[int], d.pop("int32_properties"))
 
-        int64_properties = cast(List[int], d.pop("int64_properties"))
+        int64_properties = cast(list[int], d.pop("int64_properties"))
 
-        float_properties = cast(List[float], d.pop("float_properties"))
+        float_properties = cast(list[float], d.pop("float_properties"))
 
-        double_properties = cast(List[float], d.pop("double_properties"))
+        double_properties = cast(list[float], d.pop("double_properties"))
 
         file_properties = []
         _file_properties = d.pop("file_properties")
@@ -301,7 +301,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
             file_properties.append(componentsschemas_an_array_of_file_item)
 
-        bytestream_properties = cast(List[str], d.pop("bytestream_properties"))
+        bytestream_properties = cast(list[str], d.pop("bytestream_properties"))
 
         enum_property_ref = AnEnum(d.pop("enum_property_ref"))
 
@@ -360,7 +360,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         return a_model_with_properties_reference_that_are_not_object
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:
