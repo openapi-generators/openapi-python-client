@@ -9,8 +9,8 @@ __all__ = [
     "Parameters",
     "Property",
     "Schemas",
-    "build_schemas",
     "build_parameters",
+    "build_schemas",
     "property_from_data",
 ]
 

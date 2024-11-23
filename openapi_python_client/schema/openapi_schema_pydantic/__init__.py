@@ -7,6 +7,8 @@ https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#table
 """
 
 __all__ = [
+    "XML",
+    "Callback",
     "Components",
     "Contact",
     "Discriminator",
@@ -35,8 +37,6 @@ __all__ = [
     "Server",
     "ServerVariable",
     "Tag",
-    "XML",
-    "Callback",
 ]
 
 
