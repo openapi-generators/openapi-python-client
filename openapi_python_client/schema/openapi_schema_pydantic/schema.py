@@ -34,7 +34,7 @@ class Schema(BaseModel):
     uniqueItems: Optional[bool] = None
     maxProperties: Optional[int] = Field(default=None, ge=0)
     minProperties: Optional[int] = Field(default=None, ge=0)
-    required: Optional[list[str]] = Field(default=None, min_length=1)
+    required: Optional[list[str]] = Field(default=None)
     enum: Union[None, list[Any]] = Field(default=None, min_length=1)
     const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
     type: Union[DataType, list[DataType], None] = Field(default=None)

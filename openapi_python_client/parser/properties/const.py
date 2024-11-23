@@ -111,7 +111,7 @@ class ConstProperty(PropertyProtocol):
             back to the root of the generated client.
         """
         if self.required:
-            return {"from typing import Literal"}
+            return {"from typing import Literal, cast"}
         return {
             "from typing import Literal, Union, cast",
             f"from {prefix}types import UNSET, Unset",
