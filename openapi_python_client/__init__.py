@@ -22,7 +22,12 @@ from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
 from .parser.properties import LiteralEnumProperty
 
-__version__ = version(__package__)
+# __version__ = version(__package__)
+# Benchling-specific change: the original line above won't work because the installed package name of
+# our fork (benchling-openapi-python-client) deliberately does not match the base module name (see
+# pyproject.toml)
+INSTALLED_PACKAGE = "benchling-openapi-python-client"
+__version__ = version(INSTALLED_PACKAGE)
 
 
 TEMPLATE_FILTERS = {

@@ -1,48 +1,41 @@
-# Ways you can Contribute
+# Note: this is the fork of openapi-python-client maintained and used by Benchling.
 
-- Report bugs via [issues](https://github.com/openapi-generators/openapi-python-client/issues)
-- Request features via [discussions](https://github.com/openapi-generators/openapi-python-client/discussions)
-- Contribute code via [pull request](https://github.com/openapi-generators/openapi-python-client/pulls)
+If you want the official package, go to the upstream repository: https://github.com/openapi-generators/openapi-python-client
 
-## Reporting a bug
+For contribution guidelines (including contributing fixes from our fork to the upstream repo), see Benchling internal documentation.
 
-A bug is one of:
+This document mostly contains basic developer instructions.
 
-1. You get an exception when running the generator
-2. The generated code is invalid or incorrect
-3. An error message is unclear or incorrect
-4. Something which used to work no longer works, except:
-   1. Intentional breaking changes, which are documented in the [changelog](https://github.com/openapi-generators/openapi-python-client/blob/main/CHANGELOG.md)
-   2. Breaking changes to unstable features, like custom templates
+## Setting up environment
 
-If your issue does not fall under one of the above, it is not a bug; check out "[Requesting a feature](#requesting-a-feature).
+Create a virtualenv with the lowest compatible Python version (currently 3.9).
 
-### Report requirements
+To install dependencies:
 
-A bug report **must** have an OpenAPI document that can be used to replicate the bug. Reports without a valid document will be closed.
+```
+pip install poetry
+poetry install
+```
 
-## Requesting a feature
+## Running tests
 
-A feature is usually:
+See the [upstream repo]() for a full description of how the tests in this project are written.
 
-1. An improvement to the way the generated code works
-2. A feature of the generator itself which makes its use easier (e.g., a new config option)
-3. **Support for part of the OpenAPI spec**; this generator _does not yet_ support every OpenAPI feature, these missing features **are not bugs**.
+`poetry run task unit` runs only the basic unit tests.
 
-To request a feature:
+`poetry run task test` runs unit tests plus end-to-end tests.
 
-1. Search through [discussions](https://github.com/openapi-generators/openapi-python-client/discussions/categories/feature-request) to see if the feature you want has already been requested. If it has:
-   1. Upvote it with the little arrow on the original post. This enables code contributors to prioritize the most-demanded features.
-   2. Optionally leave a comment describing why _you_ want the feature, if no existing thread already covers your use-case
-2. If a relevant discussion does not already exist, create a new one. If you are not requesting support for part of the OpenAPI spec, **you must** describe _why_ you want the feature. What real-world use-case does it improve? For example, "raise exceptions for invalid responses" might have a description of "it's not worth the effort to check every error case by hand for the one-off scripts I'm writing".
+## Linting/type-checking
+
+The project uses ruff. `poetry run task lint` and `poetry run task format` run `ruff check` and `ruff format`.
+
+`poetry run task mypy` runs `mypy` on only the package module (tests are excluded).
+
+`poetry run task check` runs all of those plus tests.
 
 ## Contributing Code
 
-### Setting up a Dev Environment
-
-1. Make sure you have [PDM](https://pdm-project.org) installed and up to date.
-2. Make sure you have a supported Python version (e.g. 3.8) installed.
-3. Use `pdm install` in the project directory to create a virtual environment with the relevant dependencies.
+This section is a copy from the upstream repo, with some changes due to Benchling test framework additions that haven't yet been accepted upstream.
 
 ### Writing tests
 
@@ -61,7 +54,7 @@ This project aims to have all "happy paths" (types of code which _can_ be genera
 
 Snapshot tests verify that the generated code is identical to a previously-committed set of snapshots (called a "golden record" here). They are basically regression tests to catch any unintended changes in the generator output.
 
-In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `pdm e2e`. To regenerate the snapshots, run `pdm regen`.
+In order to check code changes against the previous set of snapshots (called a "golden record" here), you can run `poetry run task e2e`. To regenerate the snapshots, run `poetry run task regen`.
 
 There are 4 types of snapshots generated right now, you may have to update only some or all of these depending on the changes you're making. Within the `end_to_end_tests` directory:
 
@@ -84,15 +77,3 @@ These include:
 
 * Regular unit tests of basic pieces of fairly self-contained low-level functionality, such as helper functions. These are implemented in the `tests` directory, using the `pytest` framework.
 * Older-style unit tests of low-level functions like `property_from_data` that have complex behavior. These are brittle and difficult to maintain, and should not be used going forward. Instead, they should be migrated to functional tests.
-
-### Creating a Pull Request
-
-Once you've written the tests and code and run the checks, the next step is to create a pull request against the `main` branch of this repository. This repository uses [Knope] to auto-generate release notes and version numbers. This can either be done by setting the title of the PR to a [conventional commit] (for simple changes) or by adding [changesets]. If the changes are not documented yet, a check will fail on GitHub. The details of this check will have suggestions for documenting the change (including an example change file for changesets).
-
-### Wait for Review
-
-As soon as possible, your PR will be reviewed. If there are any changes requested there will likely be a bit of back and forth. Once this process is done, your changes will be merged into main and included in the next release. If you need your changes available on PyPI by a certain time, please mention it in the PR, and we'll do our best to accommodate.
-
-[Knope]: https://knope.tech
-[changesets]: https://knope.tech/reference/concepts/changeset/
-[Conventional Commits]: https://knope.tech/reference/concepts/conventional-commits/

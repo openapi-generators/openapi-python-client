@@ -30,33 +30,33 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
-      - name: Install PDM
-        run: pip install pdm
+      - name: Install Poetry
+        run: pip install poetry
 
       - name: Install Dependencies
-        run: pdm install
+        run: poetry install
 
       - name: Check formatting
-        run: pdm run ruff format . --check
+        run: poetry run ruff format . --check
 
       - name: Run mypy
-        run: pdm mypy --show-error-codes
+        run: poetry run task mypy --show-error-codes
 
       - name: Lint
-        run: pdm run ruff check .
+        run: poetry run ruff check .
 
       - name: Run pytest without coverage
         if: matrix.os != 'ubuntu-latest'
-        run: pdm test
+        run: poetry run task test
         env:
           TASKIPY: true
 
       - name: Run pytest with coverage
         if: matrix.os == 'ubuntu-latest'
-        run: pdm test_with_coverage
+        run: poetry run task test_with_coverage
         env:
           TASKIPY: true
       
@@ -131,7 +131,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5.3.0
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       - name: Get Python Version
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
@@ -139,19 +139,23 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
+      # General note on this job: the main project uses poetry, but the project inside integration-tests/
+      # uses pdm. That's because integration-tests/ is a generated client-- the output from running the
+      # generator on a test API spec-- and the "make a pdm project" option was used in that process.
       - name: Install dependencies
         run: |
+          pip install poetry
           pip install pdm
           python -m venv .venv
-          pdm install
+          poetry install
       - name: Cache Generated Client Dependencies
         uses: actions/cache@v4
         with:
           path: integration-tests/.venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/pdm.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies
       - name: Set httpx version
