@@ -29,3 +29,10 @@ class Header(Parameter):
             ]
         },
     )
+
+
+# Calling model_rebuild() here helps Pydantic to resolve the forward references that were used
+# in defining Parameter and Encoding. Without this call, any subtle change to the loading order
+# of schema submodules could result in an error like "Parameter is not fully defined".
+# See: https://docs.pydantic.dev/latest/concepts/models/#rebuilding-model-schema
+Parameter.model_rebuild()
