@@ -206,6 +206,3 @@ class Schema(BaseModel):
             self.oneOf = [Schema(type=DataType.NULL), Schema(allOf=self.allOf)]
             self.allOf = []
         return self
-
-
-Schema.model_rebuild()
