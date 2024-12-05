@@ -17,6 +17,8 @@ class RequestBody(BaseModel):
     content: dict[str, MediaType]
     required: bool = False
     model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

@@ -23,6 +23,8 @@ class Response(BaseModel):
     content: Optional[dict[str, MediaType]] = None
     links: Optional[dict[str, Union[Link, Reference]]] = None
     model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

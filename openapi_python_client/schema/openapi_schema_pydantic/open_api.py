@@ -5,9 +5,6 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from .components import Components
 from .external_documentation import ExternalDocumentation
 from .info import Info
-
-# Required to update forward ref after object creation
-from .path_item import PathItem  # noqa: F401
 from .paths import Paths
 from .security_requirement import SecurityRequirement
 from .server import Server
@@ -32,7 +29,11 @@ class OpenAPI(BaseModel):
     tags: Optional[list[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
     openapi: str
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(
+        # `Components` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
+        extra="allow",
+    )
 
     @field_validator("openapi")
     @classmethod
@@ -46,6 +47,3 @@ class OpenAPI(BaseModel):
         if int(parts[1]) > 1:
             raise ValueError(f"Only OpenAPI versions 3.1.* are supported, got {value}")
         return value
-
-
-OpenAPI.model_rebuild()
