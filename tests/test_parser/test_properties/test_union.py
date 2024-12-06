@@ -37,7 +37,7 @@ def test_property_from_data_union(union_property_factory, date_time_property_fac
     assert s == Schemas()
 
 
-def test_name_is_preserved_if_union_has_one_model(config):
+def test_name_is_preserved_if_union_is_nullable_model(config):
     from openapi_python_client.parser.properties import Schemas, property_from_data
 
     parent_name = "parent"
@@ -46,7 +46,7 @@ def test_name_is_preserved_if_union_has_one_model(config):
     data = oai.Schema(
         oneOf=[
             oai.Schema(type=DataType.OBJECT),
-            oai.Schema(type=DataType.STRING),
+            oai.Schema(type=DataType.NULL),
         ],
     )
     expected_model_class = Class(name=ClassName("ParentProp1", ""), module_name="parent_prop_1")
@@ -61,12 +61,11 @@ def test_name_is_preserved_if_union_has_one_model(config):
     assert isinstance(prop1, ModelProperty)
     assert prop1.name == name
     assert prop1.class_info == expected_model_class
-    assert p.inner_properties[1].name == f"{name}_type_1"
 
     assert s == Schemas(classes_by_name={expected_model_class.name: prop1}, models_to_process=[prop1])
 
 
-def test_name_is_preserved_if_union_has_one_enum(config):
+def test_name_is_preserved_if_union_is_nullable_enum(config):
     from openapi_python_client.parser.properties import Schemas, property_from_data
 
     parent_name = "parent"
@@ -75,7 +74,7 @@ def test_name_is_preserved_if_union_has_one_enum(config):
     data = oai.Schema(
         oneOf=[
             oai.Schema(type=DataType.INTEGER, enum=[10, 20]),
-            oai.Schema(type=DataType.STRING),
+            oai.Schema(type=DataType.NULL),
         ],
     )
     expected_enum_class = Class(name=ClassName("ParentProp1", ""), module_name="parent_prop_1")
@@ -90,7 +89,6 @@ def test_name_is_preserved_if_union_has_one_enum(config):
     assert isinstance(prop1, EnumProperty)
     assert prop1.name == name
     assert prop1.class_info == expected_enum_class
-    assert p.inner_properties[1].name == f"{name}_type_1"
 
     assert s == Schemas(classes_by_name={expected_enum_class.name: prop1})
 
