@@ -45,6 +45,17 @@ class GeneratedClientContext:
         """Attempt to import a module from the generated code."""
         return importlib.import_module(f"{self.base_module}{module_path}")
 
+    def import_symbol(self, module_path: str, name: str) -> Any:
+        module = self.import_module(module_path)
+        try:
+            return getattr(module, name)
+        except AttributeError:
+            existing = ", ".join(name for name in dir(module) if not name.startswith("_"))
+            assert False, (
+                f"Couldn't find import \"{name}\" in \"{self.base_module}{module_path}\".\n"
+                f"Available imports in that module are: {existing}\n"
+                f"Output from generator was: {self.generator_result.stdout}"
+            )
 
 def _run_command(
     command: str,
@@ -67,7 +78,8 @@ def _run_command(
         args.extend(extra_args)
     result = runner.invoke(app, args)
     if result.exit_code != 0 and raise_on_error:
-        raise Exception(result.stdout)
+        message = f"{result.stdout}\n{result.exception}" if result.exception else result.stdout
+        raise Exception(message)
     return result
 
 

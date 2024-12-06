@@ -381,9 +381,9 @@ class Extended:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
+                nullable_model = ModelWithUnionProperty.from_dict(data)
 
-                return nullable_model_type_1
+                return nullable_model
             except:  # noqa: E722
                 pass
             return cast(Union["ModelWithUnionProperty", None], data)
@@ -503,9 +503,9 @@ class Extended:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                not_required_nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
+                not_required_nullable_model = ModelWithUnionProperty.from_dict(data)
 
-                return not_required_nullable_model_type_1
+                return not_required_nullable_model
             except:  # noqa: E722
                 pass
             return cast(Union["ModelWithUnionProperty", None, Unset], data)

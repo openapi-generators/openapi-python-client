@@ -112,3 +112,35 @@ components:
 class TestLiteralEnumDefaults:
     def test_default_value(self, MyModel):
         assert MyModel().enum_prop == "A"
+
+
+@with_generated_client_fixture(
+"""
+# Test the ability to specify a default value for a union type as long as that value is
+# supported by at least one of the variants
+
+components:
+  schemas:
+    MyModel:
+      type: object
+      properties:
+        simpleTypeProp1:
+          type: ["integer", "boolean", "string"]
+          default: 3
+        simpleTypeProp2:
+          type: ["integer", "boolean", "string"]
+          default: true
+        simpleTypeProp3:
+          type: ["integer", "boolean", "string"]
+          default: abc
+"""
+)
+@with_generated_code_imports(".models.MyModel")
+class TestUnionDefaults:
+    def test_simple_type(self, MyModel):
+        instance = MyModel()
+        assert instance == MyModel(
+            simple_type_prop_1=3,
+            simple_type_prop_2=True,
+            simple_type_prop_3="abc",
+        )

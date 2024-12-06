@@ -10,12 +10,12 @@ from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
-from .protocol import PropertyProtocol, Value
+from .protocol import HasNamedClass, PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
 @define
-class ModelProperty(PropertyProtocol):
+class ModelProperty(PropertyProtocol, HasNamedClass):
     """A property which refers to another Schema"""
 
     name: str

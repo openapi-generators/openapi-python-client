@@ -12,7 +12,7 @@ from ... import schema as oai
 from ...schema import DataType
 from ..errors import PropertyError
 from .none import NoneProperty
-from .protocol import PropertyProtocol, Value
+from .protocol import HasNamedClass, PropertyProtocol, Value
 from .schemas import Class, Schemas
 from .union import UnionProperty
 
@@ -20,7 +20,7 @@ ValueType = Union[str, int]
 
 
 @define
-class EnumProperty(PropertyProtocol):
+class EnumProperty(PropertyProtocol, HasNamedClass):
     """A property that should use an enum"""
 
     name: str

@@ -12,32 +12,8 @@ from end_to_end_tests.functional_tests.helpers import (
 
 @with_generated_client_fixture(
 """
-components:
-  schemas:
-    StringOrInt:
-      type: ["string", "integer"]
-    MyModel:
-      type: object
-      properties:
-        stringOrIntProp:
-          type: ["string", "integer"]
-"""
-)
-@with_generated_code_imports(
-    ".models.MyModel",
-    ".types.Unset"
-)
-class TestSimpleTypeList:
-    def test_decode_encode(self, MyModel):
-        assert_model_decode_encode(MyModel, {"stringOrIntProp": "a"}, MyModel(string_or_int_prop="a"))
-        assert_model_decode_encode(MyModel, {"stringOrIntProp": 1}, MyModel(string_or_int_prop=1))
+# Various use cases for oneOf
 
-    def test_type_hints(self, MyModel, Unset):
-        assert_model_property_type_hint(MyModel, "string_or_int_prop", Union[str, int, Unset])
-
-
-@with_generated_client_fixture(
-"""
 components:
   schemas:
     ThingA:
@@ -154,6 +130,123 @@ class TestOneOf:
 
 @with_generated_client_fixture(
 """
+# Various use cases for a oneOf where one of the variants is null, since these are handled
+# a bit differently in the generator
+
+components:
+  schemas:
+    MyEnum:
+      type: string
+      enum: ["a", "b"]
+    MyObject:
+      type: object
+      properties:
+        name:
+          type: string
+    MyModel:
+      properties:
+        nullableEnumProp:
+          oneOf:
+            - {"$ref": "#/components/schemas/MyEnum"}
+            - type: "null"
+        nullableObjectProp:
+          oneOf:
+            - {"$ref": "#/components/schemas/MyObject"}
+            - type: "null"
+        inlineNullableObject:
+          # Note, the generated class for this should be called "MyModelInlineNullableObject",
+          # since the generator's rule for inline schemas that require their own class is to
+          # concatenate the property name to the parent schema name.
+          oneOf:
+            - type: object
+              properties:
+                name:
+                  type: string
+            - type: "null"
+""")
+@with_generated_code_imports(
+    ".models.MyEnum",
+    ".models.MyObject",
+    ".models.MyModel",
+    ".models.MyModelInlineNullableObject",
+    ".types.Unset",
+)
+class TestUnionsWithNull:
+    def test_nullable_enum_prop(self, MyModel, MyEnum):
+        assert_model_decode_encode(MyModel, {"nullableEnumProp": "b"}, MyModel(nullable_enum_prop=MyEnum.B))
+        assert_model_decode_encode(MyModel, {"nullableEnumProp": None}, MyModel(nullable_enum_prop=None))
+
+    def test_nullable_object_prop(self, MyModel, MyObject):
+        assert_model_decode_encode( MyModel, {"nullableObjectProp": None}, MyModel(nullable_object_prop=None))
+        assert_model_decode_encode( MyModel, {"nullableObjectProp": None}, MyModel(nullable_object_prop=None))
+
+    def test_nullable_object_prop_with_inline_schema(self, MyModel, MyModelInlineNullableObject):
+        assert_model_decode_encode(
+            MyModel,
+            {"inlineNullableObject": {"name": "a"}},
+            MyModel(inline_nullable_object=MyModelInlineNullableObject(name="a")),
+        )
+        assert_model_decode_encode( MyModel, {"inlineNullableObject": None}, MyModel(inline_nullable_object=None))
+    
+    def test_type_hints(self, MyModel, MyEnum, Unset):
+        assert_model_property_type_hint(MyModel, "nullable_enum_prop", Union[MyEnum, None, Unset])
+        assert_model_property_type_hint(MyModel, "nullable_object_prop", Union[ForwardRef("MyObject"), None, Unset])
+        assert_model_property_type_hint(
+            MyModel,
+            "inline_nullable_object",
+            Union[ForwardRef("MyModelInlineNullableObject"), None, Unset],
+        )
+
+
+@with_generated_client_fixture(
+"""
+# Tests for combining the OpenAPI 3.0 "nullable" attribute with an enum
+
+openapi: 3.0.0
+
+components:
+  schemas:
+    MyEnum:
+      type: string
+      enum: ["a", "b"]
+    MyEnumIncludingNull:
+      type: string
+      nullable: true
+      enum: ["a", "b", null]
+    MyModel:
+      properties:
+        nullableEnumProp:
+          allOf:
+            - {"$ref": "#/components/schemas/MyEnum"}
+          nullable: true
+        enumIncludingNullProp: {"$ref": "#/components/schemas/MyEnumIncludingNull"}
+""")
+@with_generated_code_imports(
+    ".models.MyEnum",
+    ".models.MyEnumIncludingNull",
+    ".models.MyModel",
+    ".types.Unset",
+)
+class TestNullableEnumsInOpenAPI30:
+    def test_nullable_enum_prop(self, MyModel, MyEnum, MyEnumIncludingNull):
+        assert_model_decode_encode(MyModel, {"nullableEnumProp": "b"}, MyModel(nullable_enum_prop=MyEnum.B))
+        assert_model_decode_encode(MyModel, {"nullableEnumProp": None}, MyModel(nullable_enum_prop=None))
+        assert_model_decode_encode(
+            MyModel,
+            {"enumIncludingNullProp": "a"},
+            MyModel(enum_including_null_prop=MyEnumIncludingNull.A),
+        )
+        assert_model_decode_encode( MyModel, {"enumIncludingNullProp": None}, MyModel(enum_including_null_prop=None))
+    
+    def test_type_hints(self, MyModel, MyEnum, MyEnumIncludingNull, Unset):
+        assert_model_property_type_hint(MyModel, "nullable_enum_prop", Union[MyEnum, None, Unset])
+        assert_model_property_type_hint(MyModel, "enum_including_null_prop", Union[MyEnumIncludingNull, None, Unset])
+
+
+@with_generated_client_fixture(
+"""
+# Tests for using a discriminator property
+
 components:
   schemas:
     ModelType1:
@@ -303,4 +396,113 @@ class TestDiscriminators:
             WithNestedDiscriminatorsDifferentProperty,
             {"unionProp": {"modelType": "irrelevant", "dogType": "Schnauzer", "name": "a"}},
             WithNestedDiscriminatorsDifferentProperty(union_prop=Schnauzer(model_type="irrelevant", dog_type="Schnauzer", name="a")),
+        )
+
+
+@with_generated_client_fixture(
+"""
+# Tests for using multiple values of "type:" in one schema (OpenAPI 3.1)
+
+components:
+  schemas:
+    StringOrInt:
+      type: ["string", "integer"]
+    MyModel:
+      type: object
+      properties:
+        stringOrIntProp:
+          type: ["string", "integer"]
+"""
+)
+@with_generated_code_imports(
+    ".models.MyModel",
+    ".types.Unset"
+)
+class TestListOfSimpleTypes:
+    def test_decode_encode(self, MyModel):
+        assert_model_decode_encode(MyModel, {"stringOrIntProp": "a"}, MyModel(string_or_int_prop="a"))
+        assert_model_decode_encode(MyModel, {"stringOrIntProp": 1}, MyModel(string_or_int_prop=1))
+
+    def test_type_hints(self, MyModel, Unset):
+        assert_model_property_type_hint(MyModel, "string_or_int_prop", Union[str, int, Unset])
+
+
+@with_generated_client_fixture(
+"""
+# Test cases where there's a union of types *and* an explicit list of multiple "type:"s -
+# there was a bug where this could cause enum/model classes to be generated incorrectly
+
+components:
+  schemas:
+    MyStringEnum:
+      type: string
+      enum: ["a", "b"]
+    MyIntEnum:
+      type: integer
+      enum: [1, 2]
+    MyEnumIncludingNull:
+      type: ["string", "null"]
+      enum: ["a", "b", null]
+    MyObject:
+      type: object
+      properties:
+        name:
+          type: string
+    MyModel:
+      properties:
+        enumsWithListOfTypesProp:
+          type: ["string", "integer"]
+          oneOf:
+            - {"$ref": "#/components/schemas/MyStringEnum"}
+            - {"$ref": "#/components/schemas/MyIntEnum"}
+        enumIncludingNullProp: {"$ref": "#/components/schemas/MyEnumIncludingNull"}
+        nullableObjectWithListOfTypesProp:
+          type: ["string", "object"]
+          oneOf:
+            - {"$ref": "#/components/schemas/MyObject"}
+            - type: "null"
+""")
+@with_generated_code_imports(
+    ".models.MyStringEnum",
+    ".models.MyIntEnum",
+    ".models.MyEnumIncludingNull",
+    ".models.MyObject",
+    ".models.MyModel",
+    ".types.Unset",
+)
+class TestUnionsWithListOfSimpleTypes:
+    def test_union_of_enums(self, MyModel, MyStringEnum, MyIntEnum):
+        assert_model_decode_encode(
+            MyModel,
+            {"enumsWithListOfTypesProp": "b"},
+            MyModel(enums_with_list_of_types_prop=MyStringEnum.B),
+        )
+        assert_model_decode_encode(
+            MyModel,
+            {"enumsWithListOfTypesProp": 2},
+            MyModel(enums_with_list_of_types_prop=MyIntEnum.VALUE_2),
+        )
+
+    def test_union_of_enum_with_null(self, MyModel, MyEnumIncludingNull):
+        assert_model_decode_encode(
+            MyModel,
+            {"enumIncludingNullProp": "b"},
+            MyModel(enum_including_null_prop=MyEnumIncludingNull.B),
+        )
+        assert_model_decode_encode(
+            MyModel,
+            {"enumIncludingNullProp": None},
+            MyModel(enum_including_null_prop=None),
+        )
+
+    def test_nullable_object_with_list_of_types(self, MyModel, MyObject):
+        assert_model_decode_encode(
+            MyModel,
+            {"nullableObjectWithListOfTypesProp": {"name": "a"}},
+            MyModel(nullable_object_with_list_of_types_prop=MyObject(name="a")),
+        )
+        assert_model_decode_encode(
+            MyModel,
+            {"nullableObjectWithListOfTypesProp": None},
+            MyModel(nullable_object_with_list_of_types_prop=None),
         )

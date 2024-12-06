@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, ClassVar, Mapping, OrderedDict, cast
+from typing import Any, Callable, ClassVar, Mapping, OrderedDict, cast
 
 from attr import define, evolve
+
+from openapi_python_client.parser.properties.none import NoneProperty
 
 from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import HasNamedClass, PropertyProtocol, Value
 from .schemas import Schemas, get_reference_simple_name, parse_reference_path
 
 
@@ -77,25 +79,92 @@ class UnionProperty(PropertyProtocol):
         """
         from . import property_from_data
 
-        sub_properties: list[PropertyProtocol] = []
-
         type_list_data = []
-        if isinstance(data.type, list):
+        if isinstance(data.type, list) and not (data.anyOf or data.oneOf):
+            # The schema specifies "type:" with a list of allowable types. If there is *not* also an "anyOf"
+            # or "oneOf", then we should treat that as a shorthand for a oneOf where each variant is just
+            # a single "type:". For example:
+            #   {"type": ["string", "int"]} becomes
+            #   {"oneOf": [{"type": "string"}, {"type": "int"}]}
+            # However, if there *is* also an "anyOf" or "oneOf" list, then the information from "type:" is
+            # redundant since every allowable variant type is already fully described in the list.
             for _type in data.type:
                 type_list_data.append(data.model_copy(update={"type": _type, "default": None}))
+                # Here we're copying properties from the top-level union schema that might apply to one
+                # of the type variants, like "format" for a string. But we don't copy "default" because
+                # default values will be handled at the top level by the UnionProperty.
 
-        for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
-            sub_prop, schemas = property_from_data(
-                name=f"{name}_type_{i}",
-                required=True,
-                data=sub_prop_data,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(sub_prop, PropertyError):
-                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
-            sub_properties.append(sub_prop)
+        def _add_index_suffix_to_variant_names(index: int) -> str:
+            return f"{name}_type_{index}"
+
+        def process_items(
+            variant_name_from_index_func: Callable[[int], str] = _add_index_suffix_to_variant_names,
+        ) -> tuple[list[PropertyProtocol] | PropertyError, Schemas]:
+            props: list[PropertyProtocol] = []
+            new_schemas = schemas
+            for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
+                sub_prop_name = variant_name_from_index_func(i)
+
+                # The sub_prop_name logic is what makes this a bit complicated. That value is used only
+                # if sub_prop is an *inline* schema and needs us to make up a name for it. For instance,
+                # in the following schema--
+                #
+                #   MyModel:
+                #     properties:
+                #       unionThing:
+                #         oneOf:
+                #           - type: object
+                #             properties: ...
+                #           - type: object
+                #             properties: ...
+                #
+                # --both of the variants under oneOf are inline schemas. And since they're objects, we
+                # will be creating model classes for them, which need names. Inline schemas are named by
+                # concatenating names of parents; so, when we're in UnionProperty.build() for unionThing,
+                # the value of "name" is "my_model_union_thing", and then we set sub_prop_name to
+                # "my_model_union_thing_type_0" and "my_model_union_thing_type_1" for the two variants,
+                # and their model classes will be MyModelUnionThingType0 and MyModelUnionThingType1.
+                #
+                # However, in this example, if the second variant was just a scalar type instead of an
+                # object (like "type: null" or "type: string"), so that the first variant is the only
+                # one that needs a class... then it would be friendlier to call the first variant's
+                # class just MyModelUnionThing, not MyModelUnionThingType0. We'll check for that special
+                # case below; we can't know if that's the situation until after we've processed them all.
+
+                sub_prop, new_schemas = property_from_data(
+                    name=sub_prop_name,
+                    required=True,
+                    data=sub_prop_data,
+                    schemas=new_schemas,
+                    parent_name=parent_name,
+                    config=config,
+                )
+                if isinstance(sub_prop, PropertyError):
+                    return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), new_schemas
+                props.append(sub_prop)
+
+            return props, new_schemas
+
+        sub_properties, new_schemas = process_items()
+        # Here's the check for the special case described above. If just one of the variants is
+        # an inline schema whose name matters, then we'll re-process them to simplify the naming.
+        # Unfortunately we do have to re-process them all; we can't just modify that one variant
+        # in place, because new_schemas already contains several references to its old name.
+        if (
+            not isinstance(sub_properties, PropertyError)
+            and len([p for p in sub_properties if isinstance(p, HasNamedClass)]) == 1
+        ):
+            def _use_same_name_as_parent_for_that_one_variant(index: int) -> str:
+                for i, p in enumerate(sub_properties):
+                    if i == index and isinstance(p, HasNamedClass):
+                        return name
+                return _add_index_suffix_to_variant_names(index)
+
+            sub_properties, new_schemas = process_items(_use_same_name_as_parent_for_that_one_variant)
+
+        if isinstance(sub_properties, PropertyError):
+            return sub_properties, schemas
+        schemas = new_schemas
 
         sub_properties, discriminators_from_nested_unions = _flatten_union_properties(sub_properties)
 

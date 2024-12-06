@@ -52,7 +52,7 @@ from .model_with_additional_properties_inlined_additional_property import (
 )
 from .model_with_additional_properties_refed import ModelWithAdditionalPropertiesRefed
 from .model_with_any_json_properties import ModelWithAnyJsonProperties
-from .model_with_any_json_properties_additional_property_type_0 import ModelWithAnyJsonPropertiesAdditionalPropertyType0
+from .model_with_any_json_properties_additional_property import ModelWithAnyJsonPropertiesAdditionalProperty
 from .model_with_backslash_in_description import ModelWithBackslashInDescription
 from .model_with_circular_ref_a import ModelWithCircularRefA
 from .model_with_circular_ref_b import ModelWithCircularRefB
@@ -79,8 +79,8 @@ from .post_form_data_inline_body import PostFormDataInlineBody
 from .post_naming_property_conflict_with_import_body import PostNamingPropertyConflictWithImportBody
 from .post_naming_property_conflict_with_import_response_200 import PostNamingPropertyConflictWithImportResponse200
 from .post_responses_unions_simple_before_complex_response_200 import PostResponsesUnionsSimpleBeforeComplexResponse200
-from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
-    PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+from .post_responses_unions_simple_before_complex_response_200a import (
+    PostResponsesUnionsSimpleBeforeComplexResponse200A,
 )
 from .test_inline_objects_body import TestInlineObjectsBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
@@ -131,7 +131,7 @@ __all__ = (
     "ModelWithAdditionalPropertiesInlinedAdditionalProperty",
     "ModelWithAdditionalPropertiesRefed",
     "ModelWithAnyJsonProperties",
-    "ModelWithAnyJsonPropertiesAdditionalPropertyType0",
+    "ModelWithAnyJsonPropertiesAdditionalProperty",
     "ModelWithBackslashInDescription",
     "ModelWithCircularRefA",
     "ModelWithCircularRefB",
@@ -158,7 +158,7 @@ __all__ = (
     "PostNamingPropertyConflictWithImportBody",
     "PostNamingPropertyConflictWithImportResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200",
-    "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
+    "PostResponsesUnionsSimpleBeforeComplexResponse200A",
     "TestInlineObjectsBody",
     "TestInlineObjectsResponse200",
     "ValidationError",

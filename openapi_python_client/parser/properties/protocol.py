@@ -6,12 +6,13 @@ __all__ = ["PropertyProtocol", "Value"]
 
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, runtime_checkable
 
 from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
+from .schemas import Class
 
 if TYPE_CHECKING:  # pragma: no cover
     from .model_property import ModelProperty
@@ -190,3 +191,13 @@ class PropertyProtocol(Protocol):
 
     def get_ref_path(self) -> ReferencePath | None:
         return self.ref_path if hasattr(self, "ref_path") else None
+
+
+@runtime_checkable
+class HasNamedClass(Protocol):
+    """
+    This protocol is implemented by any property types that will have a corresponding Python
+    class in the generated code. Currently that is ModelProperty and UnionProperty.
+    """
+
+    class_info: Class

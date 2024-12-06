@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Type, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200AType1")
+T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200A")
 
 
 @_attrs_define
-class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
+class PostResponsesUnionsSimpleBeforeComplexResponse200A:
     """ """
 
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -21,10 +21,10 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        post_responses_unions_simple_before_complex_response_200a_type_1 = cls()
+        post_responses_unions_simple_before_complex_response_200a = cls()
 
-        post_responses_unions_simple_before_complex_response_200a_type_1.additional_properties = d
-        return post_responses_unions_simple_before_complex_response_200a_type_1
+        post_responses_unions_simple_before_complex_response_200a.additional_properties = d
+        return post_responses_unions_simple_before_complex_response_200a
 
     @property
     def additional_keys(self) -> List[str]:
