@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 import sys
 import tempfile
-from typing import Any, List, Optional, Set
+from typing import Any, Optional
 
 from attrs import define
 import pytest
@@ -28,7 +28,7 @@ class GeneratedClientContext:
     generator_result: Result
     base_module: str
     monkeypatch: pytest.MonkeyPatch
-    old_modules: Optional[Set[str]] = None
+    old_modules: Optional[set[str]] = None
 
     def __enter__(self) -> "GeneratedClientContext":
         self.monkeypatch.syspath_prepend(self.output_path)
@@ -59,7 +59,7 @@ class GeneratedClientContext:
 
 def _run_command(
     command: str,
-    extra_args: Optional[List[str]] = None,
+    extra_args: Optional[list[str]] = None,
     openapi_document: Optional[str] = None,
     url: Optional[str] = None,
     config_path: Optional[Path] = None,
@@ -85,7 +85,7 @@ def _run_command(
 
 def generate_client(
     openapi_document: str,
-    extra_args: List[str] = [],
+    extra_args: list[str] = [],
     output_path: str = "my-test-api-client",
     base_module: str = "my_test_api_client",
     specify_output_path_explicitly: bool = True,
@@ -112,7 +112,7 @@ def generate_client(
 
 def generate_client_from_inline_spec(
     openapi_spec: str,
-    extra_args: List[str] = [],
+    extra_args: list[str] = [],
     config: str = "",
     filename_suffix: Optional[str] = None,
     base_module: str = "testapi_client",

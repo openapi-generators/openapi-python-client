@@ -1,6 +1,6 @@
 from typing import Any, Dict
 import re
-from typing import List, Optional
+from typing import Optional
 
 from click.testing import Result
 import pytest
@@ -12,7 +12,7 @@ def with_generated_client_fixture(
     openapi_spec: str,
     name: str="generated_client",
     config: str="",
-    extra_args: List[str] = [],
+    extra_args: list[str] = [],
 ):
     """Decorator to apply to a test class to create a fixture inside it called 'generated_client'.
     
@@ -79,7 +79,7 @@ def assert_model_property_type_hint(model_class: Any, name: str, expected_type_h
 
 def inline_spec_should_fail(
     openapi_spec: str,
-    extra_args: List[str] = [],
+    extra_args: list[str] = [],
     config: str = "",
     filename_suffix: str = "",
     add_missing_sections = True,
@@ -122,7 +122,7 @@ class _GeneratorWarningsParser:
         assert "Warning(s) encountered while generating" in output
         self.by_schema = {}
         self.output = output
-        bad_schema_regex = "Unable to (parse|process) schema /components/schemas/(\w*)"
+        bad_schema_regex = "Unable to (parse|process) schema /components/schemas/(\\w*)"
         last_name = ""
         while True:
             if not (match := re.search(bad_schema_regex, output)):

@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from end_to_end_tests.functional_tests.helpers import (
     with_generated_code_import,
@@ -7,12 +7,12 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 class DocstringParser:
-    lines: List[str]
+    lines: list[str]
 
     def __init__(self, item: Any):
         self.lines = [line.lstrip() for line in item.__doc__.split("\n")]
 
-    def get_section(self, header_line: str) -> List[str]:
+    def get_section(self, header_line: str) -> list[str]:
         lines = self.lines[self.lines.index(header_line)+1:]
         return lines[0:lines.index("")]
 
