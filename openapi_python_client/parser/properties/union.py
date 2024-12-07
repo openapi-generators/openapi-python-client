@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from collections import OrderedDict
+from collections.abc import Mapping
 from itertools import chain
-from typing import Any, ClassVar, Mapping, OrderedDict, cast
+from typing import Any, ClassVar, cast
 
 from attr import define, evolve
 

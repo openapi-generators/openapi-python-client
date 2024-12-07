@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import pytest
 from attr import evolve
@@ -45,11 +45,11 @@ def test_property_from_data_union(union_property_factory, date_time_property_fac
 
 def _make_basic_model(
     name: str,
-    props: Dict[str, oai.Schema],
+    props: dict[str, oai.Schema],
     required_prop: Optional[str],
     schemas: Schemas,
     config: Config,
-) -> Tuple[ModelProperty, Schemas]:
+) -> tuple[ModelProperty, Schemas]:
     model, schemas = ModelProperty.build(
         data=oai.Schema.model_construct(
             required=[required_prop] if required_prop else [],
@@ -75,7 +75,7 @@ def _make_basic_model(
 
 def _assert_valid_discriminator(
     p: Union[Property, PropertyError],
-    expected_discriminators: List[Tuple[str, Dict[str, Class]]],
+    expected_discriminators: list[tuple[str, dict[str, Class]]],
 ) -> None:
     assert isinstance(p, UnionProperty)
     assert p.discriminators
