@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 import httpx
 
@@ -11,10 +11,10 @@ from ...types import Response
 def _get_kwargs(
     *,
     body: str,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/config/content-type-override",
     }
@@ -29,7 +29,7 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[str]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = cast(str, response.json())
         return response_200
     if client.raise_on_unexpected_status:

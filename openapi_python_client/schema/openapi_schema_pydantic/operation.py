@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -24,19 +24,19 @@ class Operation(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
     """
 
-    tags: Optional[List[str]] = None
+    tags: Optional[list[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
     operationId: Optional[str] = None
-    parameters: Optional[List[Union[Parameter, Reference]]] = None
+    parameters: Optional[list[Union[Parameter, Reference]]] = None
     request_body: Optional[Union[RequestBody, Reference]] = Field(None, alias="requestBody")
     responses: Responses
-    callbacks: Optional[Dict[str, Callback]] = None
+    callbacks: Optional[dict[str, Callback]] = None
 
     deprecated: bool = False
-    security: Optional[List[SecurityRequirement]] = None
-    servers: Optional[List[Server]] = None
+    security: Optional[list[SecurityRequirement]] = None
+    servers: Optional[list[Server]] = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

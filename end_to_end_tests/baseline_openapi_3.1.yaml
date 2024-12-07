@@ -1657,6 +1657,47 @@ info:
       }
     }
   },
+  "/models/oneof-with-required-const": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "alpha"
+                      },
+                      "color": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "beta"
+                      },
+                      "texture": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 "components":
   "schemas": {
@@ -1699,6 +1740,8 @@ info:
         "aCamelDateTime",
         "a_date",
         "a_nullable_date",
+        "a_uuid",
+        "a_nullable_uuid",
         "required_nullable",
         "required_not_nullable",
         "model",
@@ -1772,6 +1815,29 @@ info:
           "title": "A Nullable Date",
           "type": "string",
           "format": "date"
+        },
+        "a_uuid": {
+          "title": "A Uuid",
+          "type": "string",
+          "format": "uuid"
+        },
+        "a_nullable_uuid": {
+          "title": "A Nullable Uuid",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid",
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
+        },
+        "a_not_required_uuid": {
+          "title": "A Not Required Uuid",
+          "type": "string",
+          "format": "uuid"
         },
         "1_leading_digit": {
           "title": "Leading Digit",

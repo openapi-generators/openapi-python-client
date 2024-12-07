@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -14,42 +14,42 @@ class AllOfHasPropertiesButNoType:
     """
     Attributes:
         a_sub_property (Union[Unset, str]):
-        type (Union[Unset, str]):
+        type_ (Union[Unset, str]):
         type_enum (Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum]):
     """
 
     a_sub_property: Union[Unset, str] = UNSET
-    type: Union[Unset, str] = UNSET
+    type_: Union[Unset, str] = UNSET
     type_enum: Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         a_sub_property = self.a_sub_property
 
-        type = self.type
+        type_ = self.type_
 
         type_enum: Union[Unset, int] = UNSET
         if not isinstance(self.type_enum, Unset):
             type_enum = self.type_enum.value
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if a_sub_property is not UNSET:
             field_dict["a_sub_property"] = a_sub_property
-        if type is not UNSET:
-            field_dict["type"] = type
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if type_enum is not UNSET:
             field_dict["type_enum"] = type_enum
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         a_sub_property = d.pop("a_sub_property", UNSET)
 
-        type = d.pop("type", UNSET)
+        type_ = d.pop("type", UNSET)
 
         _type_enum = d.pop("type_enum", UNSET)
         type_enum: Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum]
@@ -60,7 +60,7 @@ class AllOfHasPropertiesButNoType:
 
         all_of_has_properties_but_no_type = cls(
             a_sub_property=a_sub_property,
-            type=type,
+            type_=type_,
             type_enum=type_enum,
         )
 
@@ -68,7 +68,7 @@ class AllOfHasPropertiesButNoType:
         return all_of_has_properties_but_no_type
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

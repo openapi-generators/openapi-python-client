@@ -3,7 +3,7 @@
 
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
-headers: Dict[str, Any] = {}
+headers: dict[str, Any] = {}
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters %}
         {% import "property_templates/" + parameter.template as param_template %}
@@ -37,7 +37,7 @@ if {{ parameter.python_name }} is not UNSET:
 
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
-params: Dict[str, Any] = {}
+params: dict[str, Any] = {}
 
 {% for property in endpoint.query_parameters %}
     {% set destination = property.python_name %}

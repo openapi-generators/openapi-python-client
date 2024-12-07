@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -11,8 +11,8 @@ from ...models.post_responses_unions_simple_before_complex_response_200 import (
 from ...types import Response
 
 
-def _get_kwargs() -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+def _get_kwargs() -> dict[str, Any]:
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/responses/unions/simple_before_complex",
     }
@@ -23,7 +23,7 @@ def _get_kwargs() -> Dict[str, Any]:
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[PostResponsesUnionsSimpleBeforeComplexResponse200]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = PostResponsesUnionsSimpleBeforeComplexResponse200.from_dict(response.json())
 
         return response_200

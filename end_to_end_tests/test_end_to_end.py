@@ -1,7 +1,7 @@
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 import pytest
 from click.testing import Result
@@ -13,9 +13,9 @@ from openapi_python_client.cli import app
 def _compare_directories(
     record: Path,
     test_subject: Path,
-    expected_differences: Dict[Path, str],
-    expected_missing: Optional[Set[str]] = None,
-    ignore: List[str] = None,
+    expected_differences: dict[Path, str],
+    expected_missing: Optional[set[str]] = None,
+    ignore: list[str] = None,
     depth=0,
 ):
     """
@@ -78,11 +78,11 @@ def _compare_directories(
 
 def run_e2e_test(
     openapi_document: str,
-    extra_args: List[str],
-    expected_differences: Optional[Dict[Path, str]] = None,
+    extra_args: list[str],
+    expected_differences: Optional[dict[Path, str]] = None,
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
-    expected_missing: Optional[Set[str]] = None,
+    expected_missing: Optional[set[str]] = None,
 ) -> Result:
     output_path = Path.cwd() / output_path
     shutil.rmtree(output_path, ignore_errors=True)
@@ -107,12 +107,12 @@ def run_e2e_test(
     return result
 
 
-def generate(extra_args: Optional[List[str]], openapi_document: str) -> Result:
+def generate(extra_args: Optional[list[str]], openapi_document: str) -> Result:
     """Generate a client from an OpenAPI document and return the path to the generated code"""
     _run_command("generate", extra_args, openapi_document)
 
 
-def _run_command(command: str, extra_args: Optional[List[str]] = None, openapi_document: Optional[str] = None, url: Optional[str] = None, config_path: Optional[Path] = None) -> Result:
+def _run_command(command: str, extra_args: Optional[list[str]] = None, openapi_document: Optional[str] = None, url: Optional[str] = None, config_path: Optional[Path] = None) -> Result:
     """Generate a client from an OpenAPI document and return the path to the generated code"""
     runner = CliRunner()
     if openapi_document is not None:
@@ -145,6 +145,17 @@ def test_3_1_specific_features():
         {},
         "test-3-1-golden-record",
         "test-3-1-features-client",
+    )
+
+
+def test_literal_enums_end_to_end():
+    config_path = Path(__file__).parent / "literal_enums.config.yml"
+    run_e2e_test(
+        "openapi_3.1_enums.yaml",
+        [f"--config={config_path}"],
+        {},
+        "literal-enums-golden-record",
+        "my-enum-api-client"
     )
 
 

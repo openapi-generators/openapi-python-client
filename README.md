@@ -97,6 +97,17 @@ class_overrides:
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the `models` folder.
 
+### literal_enums
+
+By default, `openapi-python-client` generates classes inheriting for `Enum` for enums. It can instead use `Literal` 
+values for enums by setting this to `true`:
+
+```yaml
+literal_enums: true
+```
+
+This is especially useful if enum values, when transformed to their Python names, end up conflicting due to case sensitivity or special symbols.
+
 ### project_name_override and package_name_override
 
 Used to change the name of generated client library project/package. If the project name is changed but an override for the package name

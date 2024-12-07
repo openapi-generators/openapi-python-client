@@ -1,5 +1,6 @@
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -29,6 +30,8 @@ class Extended:
         a_camel_date_time (Union[datetime.date, datetime.datetime]):
         a_date (datetime.date):
         a_nullable_date (Union[None, datetime.date]):
+        a_uuid (UUID):
+        a_nullable_uuid (Union[None, UUID]):  Default: UUID('07EF8B4D-AA09-4FFA-898D-C710796AFF41').
         required_nullable (Union[None, str]):
         required_not_nullable (str):
         one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', Any]):
@@ -39,8 +42,9 @@ class Extended:
         nullable_enum_inline (Union[AModelNullableEnumInline, None]):
         any_value (Union[Unset, Any]):  Default: 'default'.
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
+        nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
         a_not_required_date (Union[Unset, datetime.date]):
+        a_not_required_uuid (Union[Unset, UUID]):
         attr_1_leading_digit (Union[Unset, str]):
         attr_leading_underscore (Union[Unset, str]):
         not_required_nullable (Union[None, Unset, str]):
@@ -56,6 +60,7 @@ class Extended:
     a_camel_date_time: Union[datetime.date, datetime.datetime]
     a_date: datetime.date
     a_nullable_date: Union[None, datetime.date]
+    a_uuid: UUID
     required_nullable: Union[None, str]
     required_not_nullable: str
     one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", Any]
@@ -65,10 +70,12 @@ class Extended:
     nullable_enum_as_ref: Union[AnEnumWithNull, None]
     nullable_enum_inline: Union[AModelNullableEnumInline, None]
     an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
+    a_nullable_uuid: Union[None, UUID] = UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41")
     any_value: Union[Unset, Any] = "default"
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
+    nested_list_of_enums: Union[Unset, list[list[DifferentEnum]]] = UNSET
     a_not_required_date: Union[Unset, datetime.date] = UNSET
+    a_not_required_uuid: Union[Unset, UUID] = UNSET
     attr_1_leading_digit: Union[Unset, str] = UNSET
     attr_leading_underscore: Union[Unset, str] = UNSET
     not_required_nullable: Union[None, Unset, str] = UNSET
@@ -78,9 +85,9 @@ class Extended:
     not_required_model: Union[Unset, "ModelWithUnionProperty"] = UNSET
     not_required_nullable_model: Union["ModelWithUnionProperty", None, Unset] = UNSET
     from_extended: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
@@ -102,12 +109,20 @@ class Extended:
         else:
             a_nullable_date = self.a_nullable_date
 
+        a_uuid = str(self.a_uuid)
+
+        a_nullable_uuid: Union[None, str]
+        if isinstance(self.a_nullable_uuid, UUID):
+            a_nullable_uuid = str(self.a_nullable_uuid)
+        else:
+            a_nullable_uuid = self.a_nullable_uuid
+
         required_nullable: Union[None, str]
         required_nullable = self.required_nullable
 
         required_not_nullable = self.required_not_nullable
 
-        one_of_models: Union[Any, Dict[str, Any]]
+        one_of_models: Union[Any, dict[str, Any]]
         if isinstance(self.one_of_models, FreeFormModel):
             one_of_models = self.one_of_models.to_dict()
         elif isinstance(self.one_of_models, ModelWithUnionProperty):
@@ -115,7 +130,7 @@ class Extended:
         else:
             one_of_models = self.one_of_models
 
-        nullable_one_of_models: Union[Dict[str, Any], None]
+        nullable_one_of_models: Union[None, dict[str, Any]]
         if isinstance(self.nullable_one_of_models, FreeFormModel):
             nullable_one_of_models = self.nullable_one_of_models.to_dict()
         elif isinstance(self.nullable_one_of_models, ModelWithUnionProperty):
@@ -125,7 +140,7 @@ class Extended:
 
         model = self.model.to_dict()
 
-        nullable_model: Union[Dict[str, Any], None]
+        nullable_model: Union[None, dict[str, Any]]
         if isinstance(self.nullable_model, ModelWithUnionProperty):
             nullable_model = self.nullable_model.to_dict()
         else:
@@ -149,7 +164,7 @@ class Extended:
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum.value
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        nested_list_of_enums: Union[Unset, list[list[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -164,6 +179,10 @@ class Extended:
         if not isinstance(self.a_not_required_date, Unset):
             a_not_required_date = self.a_not_required_date.isoformat()
 
+        a_not_required_uuid: Union[Unset, str] = UNSET
+        if not isinstance(self.a_not_required_uuid, Unset):
+            a_not_required_uuid = str(self.a_not_required_uuid)
+
         attr_1_leading_digit = self.attr_1_leading_digit
 
         attr_leading_underscore = self.attr_leading_underscore
@@ -176,7 +195,7 @@ class Extended:
 
         not_required_not_nullable = self.not_required_not_nullable
 
-        not_required_one_of_models: Union[Dict[str, Any], Unset]
+        not_required_one_of_models: Union[Unset, dict[str, Any]]
         if isinstance(self.not_required_one_of_models, Unset):
             not_required_one_of_models = UNSET
         elif isinstance(self.not_required_one_of_models, FreeFormModel):
@@ -184,7 +203,7 @@ class Extended:
         else:
             not_required_one_of_models = self.not_required_one_of_models.to_dict()
 
-        not_required_nullable_one_of_models: Union[Dict[str, Any], None, Unset, str]
+        not_required_nullable_one_of_models: Union[None, Unset, dict[str, Any], str]
         if isinstance(self.not_required_nullable_one_of_models, Unset):
             not_required_nullable_one_of_models = UNSET
         elif isinstance(self.not_required_nullable_one_of_models, FreeFormModel):
@@ -194,11 +213,11 @@ class Extended:
         else:
             not_required_nullable_one_of_models = self.not_required_nullable_one_of_models
 
-        not_required_model: Union[Unset, Dict[str, Any]] = UNSET
+        not_required_model: Union[Unset, dict[str, Any]] = UNSET
         if not isinstance(self.not_required_model, Unset):
             not_required_model = self.not_required_model.to_dict()
 
-        not_required_nullable_model: Union[Dict[str, Any], None, Unset]
+        not_required_nullable_model: Union[None, Unset, dict[str, Any]]
         if isinstance(self.not_required_nullable_model, Unset):
             not_required_nullable_model = UNSET
         elif isinstance(self.not_required_nullable_model, ModelWithUnionProperty):
@@ -208,7 +227,7 @@ class Extended:
 
         from_extended = self.from_extended
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -217,6 +236,8 @@ class Extended:
                 "aCamelDateTime": a_camel_date_time,
                 "a_date": a_date,
                 "a_nullable_date": a_nullable_date,
+                "a_uuid": a_uuid,
+                "a_nullable_uuid": a_nullable_uuid,
                 "required_nullable": required_nullable,
                 "required_not_nullable": required_not_nullable,
                 "one_of_models": one_of_models,
@@ -235,6 +256,8 @@ class Extended:
             field_dict["nested_list_of_enums"] = nested_list_of_enums
         if a_not_required_date is not UNSET:
             field_dict["a_not_required_date"] = a_not_required_date
+        if a_not_required_uuid is not UNSET:
+            field_dict["a_not_required_uuid"] = a_not_required_uuid
         if attr_1_leading_digit is not UNSET:
             field_dict["1_leading_digit"] = attr_1_leading_digit
         if attr_leading_underscore is not UNSET:
@@ -257,7 +280,7 @@ class Extended:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
@@ -299,6 +322,23 @@ class Extended:
             return cast(Union[None, datetime.date], data)
 
         a_nullable_date = _parse_a_nullable_date(d.pop("a_nullable_date"))
+
+        a_uuid = UUID(d.pop("a_uuid"))
+
+        def _parse_a_nullable_uuid(data: object) -> Union[None, UUID]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                a_nullable_uuid_type_0 = UUID(data)
+
+                return a_nullable_uuid_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[None, UUID], data)
+
+        a_nullable_uuid = _parse_a_nullable_uuid(d.pop("a_nullable_uuid"))
 
         def _parse_required_nullable(data: object) -> Union[None, str]:
             if data is None:
@@ -428,6 +468,13 @@ class Extended:
         else:
             a_not_required_date = isoparse(_a_not_required_date).date()
 
+        _a_not_required_uuid = d.pop("a_not_required_uuid", UNSET)
+        a_not_required_uuid: Union[Unset, UUID]
+        if isinstance(_a_not_required_uuid, Unset):
+            a_not_required_uuid = UNSET
+        else:
+            a_not_required_uuid = UUID(_a_not_required_uuid)
+
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
         attr_leading_underscore = d.pop("_leading_underscore", UNSET)
@@ -523,6 +570,8 @@ class Extended:
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,
             a_nullable_date=a_nullable_date,
+            a_uuid=a_uuid,
+            a_nullable_uuid=a_nullable_uuid,
             required_nullable=required_nullable,
             required_not_nullable=required_not_nullable,
             one_of_models=one_of_models,
@@ -535,6 +584,7 @@ class Extended:
             an_optional_allof_enum=an_optional_allof_enum,
             nested_list_of_enums=nested_list_of_enums,
             a_not_required_date=a_not_required_date,
+            a_not_required_uuid=a_not_required_uuid,
             attr_1_leading_digit=attr_1_leading_digit,
             attr_leading_underscore=attr_leading_underscore,
             not_required_nullable=not_required_nullable,
@@ -550,7 +600,7 @@ class Extended:
         return extended
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

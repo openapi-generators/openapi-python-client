@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 
@@ -21,10 +21,10 @@ class ModelWithUnionPropertyInlined:
 
     fruit: Union["ModelWithUnionPropertyInlinedFruitType0", "ModelWithUnionPropertyInlinedFruitType1", Unset] = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
 
-        fruit: Union[Dict[str, Any], Unset]
+        fruit: Union[Unset, dict[str, Any]]
         if isinstance(self.fruit, Unset):
             fruit = UNSET
         elif isinstance(self.fruit, ModelWithUnionPropertyInlinedFruitType0):
@@ -32,7 +32,7 @@ class ModelWithUnionPropertyInlined:
         else:
             fruit = self.fruit.to_dict()
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update({})
         if fruit is not UNSET:
             field_dict["fruit"] = fruit
@@ -40,7 +40,7 @@ class ModelWithUnionPropertyInlined:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
         from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 

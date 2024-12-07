@@ -40,6 +40,8 @@ from .free_form_model import FreeFormModel
 from .get_location_header_types_int_enum_header import GetLocationHeaderTypesIntEnumHeader
 from .get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
 from .get_models_allof_response_200 import GetModelsAllofResponse200
+from .get_models_oneof_with_required_const_response_200_type_0 import GetModelsOneofWithRequiredConstResponse200Type0
+from .get_models_oneof_with_required_const_response_200_type_1 import GetModelsOneofWithRequiredConstResponse200Type1
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .json_like_body import JsonLikeBody
@@ -123,6 +125,8 @@ __all__ = (
     "GetLocationHeaderTypesIntEnumHeader",
     "GetLocationHeaderTypesStringEnumHeader",
     "GetModelsAllofResponse200",
+    "GetModelsOneofWithRequiredConstResponse200Type0",
+    "GetModelsOneofWithRequiredConstResponse200Type1",
     "HTTPValidationError",
     "Import",
     "JsonLikeBody",

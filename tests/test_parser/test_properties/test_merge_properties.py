@@ -1,5 +1,6 @@
 from itertools import permutations
 
+import pytest
 from attr import evolve
 
 from openapi_python_client.parser.errors import PropertyError
@@ -104,17 +105,31 @@ def test_merge_with_any(
         assert merge_properties(prop, any_prop) == prop
 
 
-def test_merge_enums(enum_property_factory, config):
-    enum_with_fewer_values = enum_property_factory(
-        description="desc1",
-        values={"A": "A", "B": "B"},
-        value_type=str,
-    )
-    enum_with_more_values = enum_property_factory(
-        example="example2",
-        values={"A": "A", "B": "B", "C": "C"},
-        value_type=str,
-    )
+@pytest.mark.parametrize("literal_enums", (False, True))
+def test_merge_enums(literal_enums, enum_property_factory, literal_enum_property_factory, config):
+    if literal_enums:
+        enum_with_fewer_values = literal_enum_property_factory(
+            description="desc1",
+            values={"A", "B"},
+            value_type=str,
+        )
+        enum_with_more_values = literal_enum_property_factory(
+            example="example2",
+            values={"A", "B", "C"},
+            value_type=str,
+        )
+    else:
+        enum_with_fewer_values = enum_property_factory(
+            description="desc1",
+            values={"A": "A", "B": "B"},
+            value_type=str,
+        )
+        enum_with_more_values = enum_property_factory(
+            example="example2",
+            values={"A": "A", "B": "B", "C": "C"},
+            value_type=str,
+        )
+
     # Setting class_info separately because it doesn't get initialized by the constructor - we want
     # to make sure the right enum class name gets used in the merged property
     enum_with_fewer_values.class_info = Class.from_string(string="FewerValuesEnum", config=config)
@@ -132,36 +147,60 @@ def test_merge_enums(enum_property_factory, config):
     )
 
 
-def test_merge_string_with_string_enum(string_property_factory, enum_property_factory):
-    values = {"A": "A", "B": "B"}
+@pytest.mark.parametrize("literal_enums", (False, True))
+def test_merge_string_with_string_enum(
+    literal_enums, string_property_factory, enum_property_factory, literal_enum_property_factory
+):
     string_prop = string_property_factory(default=Value("A", "A"), description="desc1", example="example1")
-    enum_prop = enum_property_factory(
-        default=Value("test.B", "B"),
-        description="desc2",
-        example="example2",
-        values=values,
-        value_type=str,
+    enum_prop = (
+        literal_enum_property_factory(
+            default=Value("'B'", "B"),
+            description="desc2",
+            example="example2",
+            values={"A", "B"},
+            value_type=str,
+        )
+        if literal_enums
+        else enum_property_factory(
+            default=Value("test.B", "B"),
+            description="desc2",
+            example="example2",
+            values={"A": "A", "B": "B"},
+            value_type=str,
+        )
     )
 
     assert merge_properties(string_prop, enum_prop) == evolve(enum_prop, required=True)
     assert merge_properties(enum_prop, string_prop) == evolve(
         enum_prop,
         required=True,
-        default=Value("test.A", "A"),
+        default=Value("'A'" if literal_enums else "test.A", "A"),
         description=string_prop.description,
         example=string_prop.example,
     )
 
 
-def test_merge_int_with_int_enum(int_property_factory, enum_property_factory):
-    values = {"VALUE_1": 1, "VALUE_2": 2}
+@pytest.mark.parametrize("literal_enums", (False, True))
+def test_merge_int_with_int_enum(
+    literal_enums, int_property_factory, enum_property_factory, literal_enum_property_factory
+):
     int_prop = int_property_factory(default=Value("1", 1), description="desc1", example="example1")
-    enum_prop = enum_property_factory(
-        default=Value("test.VALUE_1", 1),
-        description="desc2",
-        example="example2",
-        values=values,
-        value_type=int,
+    enum_prop = (
+        literal_enum_property_factory(
+            default=Value("1", 1),
+            description="desc2",
+            example="example2",
+            values={1, 2},
+            value_type=int,
+        )
+        if literal_enums
+        else enum_property_factory(
+            default=Value("test.VALUE_1", 1),
+            description="desc2",
+            example="example2",
+            values={"VALUE_1": 1, "VALUE_2": 2},
+            value_type=int,
+        )
     )
 
     assert merge_properties(int_prop, enum_prop) == evolve(enum_prop, required=True)
@@ -170,12 +209,15 @@ def test_merge_int_with_int_enum(int_property_factory, enum_property_factory):
     )
 
 
+@pytest.mark.parametrize("literal_enums", (False, True))
 def test_merge_with_incompatible_enum(
+    literal_enums,
     boolean_property_factory,
     int_property_factory,
     float_property_factory,
     string_property_factory,
     enum_property_factory,
+    literal_enum_property_factory,
     model_property_factory,
 ):
     props = [
@@ -184,9 +226,19 @@ def test_merge_with_incompatible_enum(
         float_property_factory(),
         string_property_factory(),
         model_property_factory(),
+        enum_property_factory(values={"INCOMPATIBLE": "INCOMPATIBLE"}),
+        literal_enum_property_factory(values={"INCOMPATIBLE"}),
     ]
-    string_enum_prop = enum_property_factory(value_type=str)
-    int_enum_prop = enum_property_factory(value_type=int)
+    string_enum_prop = (
+        literal_enum_property_factory(value_type=str, values={"A"})
+        if literal_enums
+        else enum_property_factory(value_type=str, values={"A": "A"})
+    )
+    int_enum_prop = (
+        literal_enum_property_factory(value_type=int, values={1})
+        if literal_enums
+        else enum_property_factory(value_type=int, values={"VALUE_1": 1})
+    )
     for prop in props:
         if not isinstance(prop, StringProperty):
             assert isinstance(merge_properties(prop, string_enum_prop), PropertyError)

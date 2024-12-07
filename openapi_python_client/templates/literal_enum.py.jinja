@@ -1,0 +1,10 @@
+from typing import Literal, cast
+
+{{ enum.class_info.name }} = Literal{{ "%r" | format(enum.values|list|sort) }}
+
+{{ enum.get_class_name_snake_case() | upper }}_VALUES: set[{{ enum.class_info.name }}] = { {% for v in enum.values|list|sort %}{{"%r"|format(v)}}, {% endfor %} }
+
+def check_{{ enum.get_class_name_snake_case() }}(value: {{ enum.get_instance_type_string() }}) -> {{ enum.class_info.name}}:
+    if value in {{ enum.get_class_name_snake_case() | upper }}_VALUES:
+        return cast({{enum.class_info.name}}, value)
+    raise TypeError(f"Unexpected value {value!r}. Expected one of {{"{"}}{{ enum.get_class_name_snake_case() | upper }}_VALUES!r}")

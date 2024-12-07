@@ -67,9 +67,6 @@ class UnionProperty(PropertyProtocol):
         def _add_index_suffix_to_variant_names(index: int) -> str:
             return f"{name}_type_{index}"
 
-        def _add_index_suffix_to_variant_names(index: int) -> str:
-            return f"{name}_type_{index}"
-
         def process_items(
             variant_name_from_index_func: Callable[[int], str] = _add_index_suffix_to_variant_names,
         ) -> tuple[list[PropertyProtocol] | PropertyError, Schemas]:
@@ -123,17 +120,17 @@ class UnionProperty(PropertyProtocol):
         # an inline schema whose name matters, then we'll re-process them to simplify the naming.
         # Unfortunately we do have to re-process them all; we can't just modify that one variant
         # in place, because new_schemas already contains several references to its old name.
-        if (
-            not isinstance(sub_properties, PropertyError)
-            and len([p for p in sub_properties if isinstance(p, HasNamedClass)]) == 1
-        ):
-            def _use_same_name_as_parent_for_that_one_variant(index: int) -> str:
-                for i, p in enumerate(sub_properties):
-                    if i == index and isinstance(p, HasNamedClass):
-                        return name
-                return _add_index_suffix_to_variant_names(index)
+        if not isinstance(sub_properties, PropertyError):
+            if len([p for p in sub_properties if isinstance(p, HasNamedClass)]) == 1:
+                original_sub_props = sub_properties
 
-            sub_properties, new_schemas = process_items(_use_same_name_as_parent_for_that_one_variant)
+                def _use_same_name_as_parent_for_that_one_variant(index: int) -> str:
+                    for i, p in enumerate(original_sub_props):
+                        if i == index and isinstance(p, HasNamedClass):
+                            return name
+                    return _add_index_suffix_to_variant_names(index)
+
+                sub_properties, new_schemas = process_items(_use_same_name_as_parent_for_that_one_variant)
 
         if isinstance(sub_properties, PropertyError):
             return sub_properties, schemas
