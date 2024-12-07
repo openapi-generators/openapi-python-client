@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -19,7 +19,7 @@ class Encoding(BaseModel):
     """
 
     contentType: Optional[str] = None
-    headers: Optional[Dict[str, Union[Header, Reference]]] = None
+    headers: Optional[dict[str, Union[Header, Reference]]] = None
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False

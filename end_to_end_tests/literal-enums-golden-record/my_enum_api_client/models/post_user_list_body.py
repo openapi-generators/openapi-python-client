@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Tuple, Type, TypeVar, Union, cast
+from typing import Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -17,31 +17,31 @@ T = TypeVar("T", bound="PostUserListBody")
 class PostUserListBody:
     """
     Attributes:
-        an_enum_value (Union[Unset, List[AnEnum]]):
-        an_enum_value_with_null (Union[Unset, List[Union[AnEnumWithNull, None]]]):
-        an_enum_value_with_only_null (Union[Unset, List[None]]):
+        an_enum_value (Union[Unset, list[AnEnum]]):
+        an_enum_value_with_null (Union[Unset, list[Union[AnEnumWithNull, None]]]):
+        an_enum_value_with_only_null (Union[Unset, list[None]]):
         an_allof_enum_with_overridden_default (Union[Unset, AnAllOfEnum]):  Default: 'overridden_default'.
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
+        nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
     """
 
-    an_enum_value: Union[Unset, List[AnEnum]] = UNSET
-    an_enum_value_with_null: Union[Unset, List[Union[AnEnumWithNull, None]]] = UNSET
-    an_enum_value_with_only_null: Union[Unset, List[None]] = UNSET
+    an_enum_value: Union[Unset, list[AnEnum]] = UNSET
+    an_enum_value_with_null: Union[Unset, list[Union[AnEnumWithNull, None]]] = UNSET
+    an_enum_value_with_only_null: Union[Unset, list[None]] = UNSET
     an_allof_enum_with_overridden_default: Union[Unset, AnAllOfEnum] = "overridden_default"
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    nested_list_of_enums: Union[Unset, list[list[DifferentEnum]]] = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        an_enum_value: Union[Unset, List[str]] = UNSET
+    def to_dict(self) -> dict[str, Any]:
+        an_enum_value: Union[Unset, list[str]] = UNSET
         if not isinstance(self.an_enum_value, Unset):
             an_enum_value = []
             for an_enum_value_item_data in self.an_enum_value:
                 an_enum_value_item: str = an_enum_value_item_data
                 an_enum_value.append(an_enum_value_item)
 
-        an_enum_value_with_null: Union[Unset, List[Union[None, str]]] = UNSET
+        an_enum_value_with_null: Union[Unset, list[Union[None, str]]] = UNSET
         if not isinstance(self.an_enum_value_with_null, Unset):
             an_enum_value_with_null = []
             for an_enum_value_with_null_item_data in self.an_enum_value_with_null:
@@ -52,7 +52,7 @@ class PostUserListBody:
                     an_enum_value_with_null_item = an_enum_value_with_null_item_data
                 an_enum_value_with_null.append(an_enum_value_with_null_item)
 
-        an_enum_value_with_only_null: Union[Unset, List[None]] = UNSET
+        an_enum_value_with_only_null: Union[Unset, list[None]] = UNSET
         if not isinstance(self.an_enum_value_with_only_null, Unset):
             an_enum_value_with_only_null = self.an_enum_value_with_only_null
 
@@ -64,7 +64,7 @@ class PostUserListBody:
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        nested_list_of_enums: Union[Unset, list[list[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -75,7 +75,7 @@ class PostUserListBody:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if an_enum_value is not UNSET:
@@ -93,8 +93,8 @@ class PostUserListBody:
 
         return field_dict
 
-    def to_multipart(self) -> Dict[str, Any]:
-        an_enum_value: Union[Unset, Tuple[None, bytes, str]] = UNSET
+    def to_multipart(self) -> dict[str, Any]:
+        an_enum_value: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_enum_value, Unset):
             _temp_an_enum_value = []
             for an_enum_value_item_data in self.an_enum_value:
@@ -102,7 +102,7 @@ class PostUserListBody:
                 _temp_an_enum_value.append(an_enum_value_item)
             an_enum_value = (None, json.dumps(_temp_an_enum_value).encode(), "application/json")
 
-        an_enum_value_with_null: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        an_enum_value_with_null: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_enum_value_with_null, Unset):
             _temp_an_enum_value_with_null = []
             for an_enum_value_with_null_item_data in self.an_enum_value_with_null:
@@ -114,7 +114,7 @@ class PostUserListBody:
                 _temp_an_enum_value_with_null.append(an_enum_value_with_null_item)
             an_enum_value_with_null = (None, json.dumps(_temp_an_enum_value_with_null).encode(), "application/json")
 
-        an_enum_value_with_only_null: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        an_enum_value_with_only_null: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_enum_value_with_only_null, Unset):
             _temp_an_enum_value_with_only_null = self.an_enum_value_with_only_null
             an_enum_value_with_only_null = (
@@ -123,7 +123,7 @@ class PostUserListBody:
                 "application/json",
             )
 
-        an_allof_enum_with_overridden_default: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        an_allof_enum_with_overridden_default: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_allof_enum_with_overridden_default, Unset):
             an_allof_enum_with_overridden_default = (
                 None,
@@ -131,11 +131,11 @@ class PostUserListBody:
                 "text/plain",
             )
 
-        an_optional_allof_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        an_optional_allof_enum: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = (None, str(self.an_optional_allof_enum).encode(), "text/plain")
 
-        nested_list_of_enums: Union[Unset, Tuple[None, bytes, str]] = UNSET
+        nested_list_of_enums: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             _temp_nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -147,7 +147,7 @@ class PostUserListBody:
                 _temp_nested_list_of_enums.append(nested_list_of_enums_item)
             nested_list_of_enums = (None, json.dumps(_temp_nested_list_of_enums).encode(), "application/json")
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
 
@@ -168,7 +168,7 @@ class PostUserListBody:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         an_enum_value = []
         _an_enum_value = d.pop("an_enum_value", UNSET)
@@ -198,7 +198,7 @@ class PostUserListBody:
 
             an_enum_value_with_null.append(an_enum_value_with_null_item)
 
-        an_enum_value_with_only_null = cast(List[None], d.pop("an_enum_value_with_only_null", UNSET))
+        an_enum_value_with_only_null = cast(list[None], d.pop("an_enum_value_with_only_null", UNSET))
 
         _an_allof_enum_with_overridden_default = d.pop("an_allof_enum_with_overridden_default", UNSET)
         an_allof_enum_with_overridden_default: Union[Unset, AnAllOfEnum]
@@ -239,7 +239,7 @@ class PostUserListBody:
         return post_user_list_body
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

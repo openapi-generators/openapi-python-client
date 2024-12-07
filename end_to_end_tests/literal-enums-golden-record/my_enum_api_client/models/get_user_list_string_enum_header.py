@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 GetUserListStringEnumHeader = Literal["one", "three", "two"]
 
-GET_USER_LIST_STRING_ENUM_HEADER_VALUES: Set[GetUserListStringEnumHeader] = {
+GET_USER_LIST_STRING_ENUM_HEADER_VALUES: set[GetUserListStringEnumHeader] = {
     "one",
     "three",
     "two",

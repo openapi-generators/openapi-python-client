@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -14,8 +14,8 @@ def _get_kwargs(
     param_query: Union[Unset, str] = UNSET,
     param_header: Union[Unset, str] = UNSET,
     param_cookie: Union[Unset, str] = UNSET,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     if not isinstance(param_header, Unset):
         headers["param"] = param_header
 
@@ -23,13 +23,13 @@ def _get_kwargs(
     if param_cookie is not UNSET:
         cookies["param"] = param_cookie
 
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
 
     params["param"] = param_query
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": f"/same-name-multiple-locations/{param_path}",
         "params": params,

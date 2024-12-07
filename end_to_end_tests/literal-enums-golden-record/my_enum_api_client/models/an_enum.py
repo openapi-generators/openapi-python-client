@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 AnEnum = Literal["FIRST_VALUE", "SECOND_VALUE"]
 
-AN_ENUM_VALUES: Set[AnEnum] = {
+AN_ENUM_VALUES: set[AnEnum] = {
     "FIRST_VALUE",
     "SECOND_VALUE",
 }

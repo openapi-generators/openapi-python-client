@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from itertools import chain
-from typing import Any, ClassVar, Iterable
+from typing import Any, ClassVar
 
 from attrs import define, evolve, field
 
@@ -39,7 +40,7 @@ class ModelProperty(PropertyProtocol):
     description: str
     roots: set[ReferencePath | utils.ClassName]
     details: ModelDetails
-    _json_type_string: ClassVar[str] = "Dict[str, Any]"
+    _json_type_string: ClassVar[str] = "dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
@@ -174,7 +175,6 @@ class ModelProperty(PropertyProtocol):
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                "from typing import Dict",
                 "from typing import cast",
             }
         )
@@ -223,7 +223,7 @@ class ModelProperty(PropertyProtocol):
         if json:
             type_string = self.get_base_json_type_string()
         elif multipart:
-            type_string = "Tuple[None, bytes, str]"
+            type_string = "tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string()
 
