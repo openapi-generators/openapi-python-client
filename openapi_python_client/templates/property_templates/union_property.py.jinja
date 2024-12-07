@@ -1,3 +1,36 @@
+{% macro construct_inner_property(inner_property) %}
+{% import "property_templates/" + inner_property.template as inner_template %}
+{% if inner_template.check_type_for_construct %}
+if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
+    raise TypeError()
+{% endif %}
+{{ inner_template.construct(inner_property, "data") }}
+return {{ inner_property.python_name }}
+{%- endmacro %}
+
+{% macro construct_discriminator_lookup(property) %}
+{% set _discriminator_properties = [] -%}
+{% for discriminator in property.discriminators %}
+{{- _discriminator_properties.append(discriminator.property_name) or "" -}}
+if not isinstance(data, dict):
+    raise TypeError()
+if "{{ discriminator.property_name }}" in data:
+    _discriminator_value = data["{{ discriminator.property_name }}"]
+    {% for value, model in discriminator.value_to_model_map.items() %}
+    def _parse_{{ loop.index }}(data: object) -> {{ model.get_type_string() }}:
+{{ construct_inner_property(model) | indent(8, True) }}
+    {% endfor %}
+    _discriminator_mapping = {
+    {% for value, model in discriminator.value_to_model_map.items() %}
+        "{{ value }}": _parse_{{ loop.index }},
+    {% endfor %}
+    }
+    if _parse_fn := _discriminator_mapping.get(_discriminator_value):
+        return cast({{ property.get_type_string() }}, _parse_fn(data))
+{% endfor %}
+raise TypeError(f"unrecognized value for property {{ _discriminator_properties | join(' or ') }}")
+{% endmacro %}
+
 {% macro construct(property, source) %}
 def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_string() }}:
     {% if "None" in property.get_type_strings_in_union(json=True, multipart=False) %}
@@ -8,6 +41,9 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     if isinstance(data, Unset):
         return data
     {% endif %}
+{% if property.discriminators %}
+{{ construct_discriminator_lookup(property) | indent(4, True) }}
+{% else %}
     {% set ns = namespace(contains_unmodified_properties = false) %}
     {% for inner_property in property.inner_properties %}
     {% import "property_templates/" + inner_property.template as inner_template %}
@@ -17,24 +53,17 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
         {% endif %}
     {% if inner_template.check_type_for_construct and (not loop.last or ns.contains_unmodified_properties) %}
     try:
-        if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
-            raise TypeError()
-        {{ inner_template.construct(inner_property, "data") | indent(8) }}
-        return {{ inner_property.python_name }}
+{{ construct_inner_property(inner_property) | indent(8, True) }}
     except: # noqa: E722
         pass
     {% else  %}{# Don't do try/except for the last one nor any properties with no type checking #}
-    {% if inner_template.check_type_for_construct %}
-    if not {{ inner_template.check_type_for_construct(inner_property, "data") }}:
-        raise TypeError()
-    {% endif %}
-    {{ inner_template.construct(inner_property, "data") | indent(4) }}
-    return {{ inner_property.python_name }}
+{{ construct_inner_property(inner_property) | indent(4, True) }}
     {% endif %}
     {% endfor %}
     {% if ns.contains_unmodified_properties %}
     return cast({{ property.get_type_string() }}, data)
     {% endif %}
+{% endif %}
 
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}

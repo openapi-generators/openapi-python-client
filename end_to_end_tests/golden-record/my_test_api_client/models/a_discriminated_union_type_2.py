@@ -1,9 +1,7 @@
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ADiscriminatedUnionType2")
 
@@ -12,10 +10,10 @@ T = TypeVar("T", bound="ADiscriminatedUnionType2")
 class ADiscriminatedUnionType2:
     """
     Attributes:
-        model_type (Union[Unset, str]):
+        model_type (str):
     """
 
-    model_type: Union[Unset, str] = UNSET
+    model_type: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -23,16 +21,18 @@ class ADiscriminatedUnionType2:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if model_type is not UNSET:
-            field_dict["modelType"] = model_type
+        field_dict.update(
+            {
+                "modelType": model_type,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
-        model_type = d.pop("modelType", UNSET)
+        model_type = d.pop("modelType")
 
         a_discriminated_union_type_2 = cls(
             model_type=model_type,

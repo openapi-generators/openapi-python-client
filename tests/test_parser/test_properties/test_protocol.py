@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from openapi_python_client.parser.properties.protocol import Value
+from openapi_python_client.parser.properties.schemas import ReferencePath
 
 
 def test_is_base_type(any_property_factory):
@@ -85,3 +86,12 @@ def test_get_base_json_type_string(quoted, expected, any_property_factory, mocke
     mocker.patch.object(AnyProperty, "_json_type_string", "str")
     p = any_property_factory()
     assert p.get_base_json_type_string(quoted=quoted) is expected
+
+
+def test_ref_path(any_property_factory, model_property_factory):
+    p1 = any_property_factory()
+    assert p1.get_ref_path() is None
+
+    path = ReferencePath("/components/schemas/A")
+    p2 = model_property_factory(ref_path=path)
+    assert p2.get_ref_path() == path
