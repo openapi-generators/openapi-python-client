@@ -41,7 +41,7 @@ To request a feature:
 ### Setting up a Dev Environment
 
 1. Make sure you have [PDM](https://pdm-project.org) installed and up to date.
-2. Make sure you have a supported Python version (e.g. 3.8) installed.
+2. Make sure you have a supported Python version (e.g. 3.13) installed.
 3. Use `pdm install` in the project directory to create a virtual environment with the relevant dependencies.
 
 ### Writing tests

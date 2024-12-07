@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 
@@ -19,16 +19,16 @@ class AModel:
         an_allof_enum_with_overridden_default (AnAllOfEnum):  Default: 'overridden_default'.
         any_value (Union[Unset, Any]):
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
+        nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
     """
 
     an_enum_value: AnEnum
     an_allof_enum_with_overridden_default: AnAllOfEnum = "overridden_default"
     any_value: Union[Unset, Any] = UNSET
     an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
+    nested_list_of_enums: Union[Unset, list[list[DifferentEnum]]] = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         an_enum_value: str = self.an_enum_value
 
         an_allof_enum_with_overridden_default: str = self.an_allof_enum_with_overridden_default
@@ -39,7 +39,7 @@ class AModel:
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        nested_list_of_enums: Union[Unset, list[list[str]]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -50,7 +50,7 @@ class AModel:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,
@@ -67,7 +67,7 @@ class AModel:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         an_enum_value = check_an_enum(d.pop("an_enum_value"))
 

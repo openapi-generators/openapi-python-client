@@ -1,7 +1,7 @@
 __all__ = ["Response", "response_from_data"]
 
 from http import HTTPStatus
-from typing import Dict, Optional, Tuple, TypedDict, Union
+from typing import Optional, TypedDict, Union
 
 from attrs import define
 
@@ -85,10 +85,10 @@ def response_from_data(  # noqa: PLR0911
     status_code: HTTPStatus,
     data: Union[oai.Response, oai.Reference],
     schemas: Schemas,
-    responses: Dict[str, Union[oai.Response, oai.Reference]],
+    responses: dict[str, Union[oai.Response, oai.Reference]],
     parent_name: str,
     config: Config,
-) -> Tuple[Union[Response, ParseError], Schemas]:
+) -> tuple[Union[Response, ParseError], Schemas]:
     """Generate a Response from the OpenAPI dictionary representation of it"""
 
     response_name = f"response_{status_code}"
