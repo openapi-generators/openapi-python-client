@@ -21,6 +21,8 @@ class MediaType(BaseModel):
     examples: Optional[dict[str, Union[Example, Reference]]] = None
     encoding: Optional[dict[str, Encoding]] = None
     model_config = ConfigDict(
+        # `Encoding` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={
