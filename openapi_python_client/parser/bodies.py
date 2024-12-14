@@ -9,6 +9,7 @@ from openapi_python_client.parser.properties import (
     Schemas,
     property_from_data,
 )
+from openapi_python_client.parser.properties.schemas import get_reference_simple_name
 
 from .. import schema as oai
 from ..config import Config
@@ -138,7 +139,7 @@ def _resolve_reference(
     references_seen = []
     while isinstance(body, oai.Reference) and body.ref not in references_seen:
         references_seen.append(body.ref)
-        body = request_bodies.get(body.ref.split("/")[-1])
+        body = request_bodies.get(get_reference_simple_name(body.ref))
     if isinstance(body, oai.Reference):
         return ParseError(detail="Circular $ref in request body", data=body)
     if body is None and references_seen:
