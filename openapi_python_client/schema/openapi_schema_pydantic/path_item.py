@@ -7,7 +7,7 @@ from .reference import Reference
 from .server import Server
 
 if TYPE_CHECKING:
-    from .operation import Operation
+    from .operation import Operation  # pragma: no cover
 
 
 class PathItem(BaseModel):
