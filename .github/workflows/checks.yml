@@ -37,7 +37,12 @@ jobs:
         run: pip install pdm
 
       - name: Install Dependencies
+        if: matrix.python != '3.9'
         run: pdm install
+
+      - name: Install minimum dependencies
+        if: matrix.python == '3.9'
+        run: pdm install -L pdm.minimal.lock
 
       - name: Check formatting
         run: pdm run ruff format . --check
