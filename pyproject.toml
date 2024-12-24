@@ -87,10 +87,9 @@ junit_family = "xunit2"
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "pytest",
-    "pytest-mock",
-    "mypy",
-    "taskipy",
+    "pytest>8",
+    "pytest-mock>3",
+    "mypy>=1.13",
     "pytest-cov",
     "python-multipart",
     "types-PyYAML<7.0.0,>=6.0.3",
@@ -116,6 +115,7 @@ regen = {composite = ["regen_e2e", "regen_integration"]}
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = {composite = ["regen_e2e", "e2e --snapshot-update"]}
 regen_e2e = "python -m end_to_end_tests.regen_golden_record"
+unit_test = "pytest tests"
 
 [tool.pdm.scripts.test]
 cmd = "pytest tests end_to_end_tests/test_end_to_end.py --basetemp=tests/tmp"
