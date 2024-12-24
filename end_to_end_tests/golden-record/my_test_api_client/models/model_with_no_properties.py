@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -9,13 +9,13 @@ T = TypeVar("T", bound="ModelWithNoProperties")
 class ModelWithNoProperties:
     """ """
 
-    def to_dict(self) -> Dict[str, Any]:
-        field_dict: Dict[str, Any] = {}
+    def to_dict(self) -> dict[str, Any]:
+        field_dict: dict[str, Any] = {}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         model_with_no_properties = cls()
 
         return model_with_no_properties

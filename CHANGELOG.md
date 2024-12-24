@@ -13,6 +13,31 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.22.0 (2024-11-23)
+
+### Breaking Changes
+
+#### Drop support for Python 3.8
+
+Python 3.8 is no longer supported. "New" 3.9 syntax, like generics on builtin collections, is used both in the generator 
+and the generated code.
+
+#### `type` is now a reserved field name
+
+Because `type` is used in type annotations now, it is no longer a valid field name. Fields which were previously named 
+`type` will be renamed to `type_`.
+
+### Features
+
+- Support Ruff 0.8 (#1169)
+
+## 0.21.7 (2024-10-28)
+
+### Fixes
+
+- allow required fields list to be specified as empty (#651) (#1149)
+- import cast for required const properties, since it's used in the template (#1153)
+
 ## 0.21.6 (2024-10-20)
 
 ### Features

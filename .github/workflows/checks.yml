@@ -11,7 +11,7 @@ jobs:
   test:
     strategy:
       matrix:
-        python: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        python: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -51,26 +51,61 @@ jobs:
       - name: Run pytest without coverage
         if: matrix.os != 'ubuntu-latest'
         run: pdm test
-        env:
-          TASKIPY: true
 
       - name: Run pytest with coverage
         if: matrix.os == 'ubuntu-latest'
         run: pdm test_with_coverage
-        env:
-          TASKIPY: true
-      
+
       - run: mv .coverage .coverage.${{ matrix.python }}
         if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.5.0
         if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage-${{ matrix.python }}
           path: .coverage.${{ matrix.python }}
           if-no-files-found: error
           include-hidden-files: true
+
+  test_min_deps:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Set up Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: "3.9"
+
+      - name: Get Python Version
+        id: get_python_version
+        run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-min-dependencies-${{ hashFiles('**/pdm.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-min-dependencies
+      - name: Install PDM
+        run: pip install pdm
+
+      - name: Install minimum dependencies
+        run: pdm install -L pdm.minimal.lock
+
+      - name: Run mypy
+        run: pdm mypy --show-error-codes
+
+      - name: Lint
+        run: pdm run ruff check .
+
+      - name: Run unit tests only  # snapshots are expected to fail
+        run: pdm unit_test
 
   coverage:
     name: Combine & check coverage
@@ -107,7 +142,7 @@ jobs:
           .venv/bin/python -m coverage report --fail-under=100          
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.5.0
         with:
           name: html-report
           path: htmlcov
@@ -131,7 +166,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5.3.0
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       - name: Get Python Version
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT

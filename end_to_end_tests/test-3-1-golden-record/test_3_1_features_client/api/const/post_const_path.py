@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Literal, Optional, Union, cast
+from typing import Any, Literal, Optional, Union, cast
 
 import httpx
 
@@ -15,10 +15,10 @@ def _get_kwargs(
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
 
     params["required query"] = required_query
 
@@ -26,7 +26,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": f"/const/{path}",
         "params": params,

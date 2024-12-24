@@ -4,10 +4,11 @@ import json
 import mimetypes
 import shutil
 import subprocess
+from collections.abc import Sequence
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Optional, Union
 
 import httpcore
 import httpx
@@ -101,7 +102,7 @@ class Project:
             openapi=self.openapi,
             endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
         )
-        self.errors: List[GeneratorError] = []
+        self.errors: list[GeneratorError] = []
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
@@ -147,8 +148,8 @@ class Project:
                 )
             )
 
-    def _get_errors(self) -> List[GeneratorError]:
-        errors: List[GeneratorError] = []
+    def _get_errors(self) -> list[GeneratorError]:
+        errors: list[GeneratorError] = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
         errors.extend(self.openapi.errors)
@@ -325,7 +326,7 @@ def generate(
     return project.build()
 
 
-def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
+def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[dict[str, Any], GeneratorError]:
     if content_type == "application/json":
         try:
             return json.loads(data.decode())
@@ -339,7 +340,7 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
-def _get_document(*, source: Union[str, Path], timeout: int) -> Union[Dict[str, Any], GeneratorError]:
+def _get_document(*, source: Union[str, Path], timeout: int) -> Union[dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
     content_type: Optional[str]
     if isinstance(source, str):

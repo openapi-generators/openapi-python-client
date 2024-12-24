@@ -1,8 +1,8 @@
-from typing import Literal, Set, cast
+from typing import Literal, cast
 
 AnAllOfEnum = Literal["a_default", "bar", "foo", "overridden_default"]
 
-AN_ALL_OF_ENUM_VALUES: Set[AnAllOfEnum] = {
+AN_ALL_OF_ENUM_VALUES: set[AnAllOfEnum] = {
     "a_default",
     "bar",
     "foo",
