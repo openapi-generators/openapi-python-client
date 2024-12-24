@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["direct_minimal_versions", "inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:50f45ddc1fe2529d12869f3f378bf09b25166e6c66cdf84f1c32db1cbe43ff8c"
+content_hash = "sha256:7f8035cfb12eec0bca9053eb34cc6b70a1cfbf464921c1abb3ae3c3e63cfeab4"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -43,13 +43,13 @@ files = [
 
 [[package]]
 name = "attrs"
-version = "21.3.0"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+version = "22.2.0"
+requires_python = ">=3.6"
 summary = "Classes Without Boilerplate"
 groups = ["default"]
 files = [
-    {file = "attrs-21.3.0-py2.py3-none-any.whl", hash = "sha256:8f7335278dedd26b58c38e006338242cc0977f06d51579b2b8b87b9b33bff66c"},
-    {file = "attrs-21.3.0.tar.gz", hash = "sha256:50f3c9b216dc9021042f71b392859a773b904ce1a029077f58f6598272432045"},
+    {file = "attrs-22.2.0-py3-none-any.whl", hash = "sha256:29e95c7f6778868dbd49170f98f8818f78f3dc5e0e37c0b1f474e3561b240836"},
+    {file = "attrs-22.2.0.tar.gz", hash = "sha256:c9227bfc2f01993c03f68db37d1d15c9690188323c067c641f1a35ca58185f99"},
 ]
 
 [[package]]
