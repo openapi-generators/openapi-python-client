@@ -4,36 +4,36 @@ isoparse({{ source }})
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
 
-{% macro construct(property, source, initial_value=None) %}
-{{ construct_template(construct_function, property, source, initial_value=initial_value) }}
+{% macro construct(property, source) %}
+{{ construct_template(construct_function, property, source) }}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
+{% macro transform(property, source, destination, declare_type=True) %}
 {% set transformed = source + ".isoformat()" %}
-{% if multipart %}{# Multipart data must be bytes, not str #}
-{% set transformed = transformed + ".encode()" %}
-{% endif %}
 {% if property.required %}
-{% if property.nullable %}
-{{ destination }} = {{ transformed }} if {{ source }} else None
-{% else %}
 {{ destination }} = {{ transformed }}
-{% endif %}
-{% else %}
+{%- else %}
 {% if declare_type %}
 {% set type_annotation = property.get_type_string(json=True) %}
-{% if multipart %}{% set type_annotation = type_annotation | replace("str", "bytes") %}{% endif %}
 {{ destination }}: {{ type_annotation }} = UNSET
 {% else %}
 {{ destination }} = UNSET
 {% endif %}
 if not isinstance({{ source }}, Unset):
-{% if property.nullable %}
-    {{ destination }} = {{ transformed }} if {{ source }} else None
-{% else %}
     {{ destination }} = {{ transformed }}
-{% endif %}
-{% endif %}
+{%- endif %}
+{% endmacro %}
+
+{% macro transform_multipart(property, source, destination) %}
+{% set transformed = source + ".isoformat().encode()" %}
+{% if property.required %}
+{{ destination }} = {{ transformed }}
+{%- else %}
+{% set type_annotation = property.get_type_string(json=True) | replace("str", "bytes") %}
+{{ destination }}: {{ type_annotation }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ transformed }}
+{%- endif %}
 {% endmacro %}

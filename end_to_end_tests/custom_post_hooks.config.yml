@@ -1,0 +1,2 @@
+post_hooks:
+  - echo "this should fail" && exit 1

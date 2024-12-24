@@ -1,40 +1,39 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Union
 
 import httpx
 
 from ... import errors
-from ...client import Client
-from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
+from ...client import AuthenticatedClient, Client
+from ...models.test_inline_objects_body import TestInlineObjectsBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
 
 
 def _get_kwargs(
     *,
-    client: Client,
-    json_body: TestInlineObjectsJsonBody,
-) -> Dict[str, Any]:
-    url = "{}/tests/inline_objects".format(client.base_url)
+    body: TestInlineObjectsBody,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
-    json_json_body = json_body.to_dict()
-
-    return {
+    _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
-        "json": json_json_body,
+        "url": "/tests/inline_objects",
     }
 
+    _body = body.to_dict()
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[TestInlineObjectsResponse200]:
-    if response.status_code == HTTPStatus.OK:
+    _kwargs["json"] = _body
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
+    return _kwargs
+
+
+def _parse_response(
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
+) -> Optional[TestInlineObjectsResponse200]:
+    if response.status_code == 200:
         response_200 = TestInlineObjectsResponse200.from_dict(response.json())
 
         return response_200
@@ -44,7 +43,9 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Tes
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[TestInlineObjectsResponse200]:
+def _build_response(
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
+) -> Response[TestInlineObjectsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -55,13 +56,13 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Tes
 
 def sync_detailed(
     *,
-    client: Client,
-    json_body: TestInlineObjectsJsonBody,
+    client: Union[AuthenticatedClient, Client],
+    body: TestInlineObjectsBody,
 ) -> Response[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
-        json_body (TestInlineObjectsJsonBody):
+        body (TestInlineObjectsBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -72,12 +73,10 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
-        json_body=json_body,
+        body=body,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -86,13 +85,13 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Client,
-    json_body: TestInlineObjectsJsonBody,
+    client: Union[AuthenticatedClient, Client],
+    body: TestInlineObjectsBody,
 ) -> Optional[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
-        json_body (TestInlineObjectsJsonBody):
+        body (TestInlineObjectsBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -104,19 +103,19 @@ def sync(
 
     return sync_detailed(
         client=client,
-        json_body=json_body,
+        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
-    client: Client,
-    json_body: TestInlineObjectsJsonBody,
+    client: Union[AuthenticatedClient, Client],
+    body: TestInlineObjectsBody,
 ) -> Response[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
-        json_body (TestInlineObjectsJsonBody):
+        body (TestInlineObjectsBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -127,25 +126,23 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        client=client,
-        json_body=json_body,
+        body=body,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
 
 async def asyncio(
     *,
-    client: Client,
-    json_body: TestInlineObjectsJsonBody,
+    client: Union[AuthenticatedClient, Client],
+    body: TestInlineObjectsBody,
 ) -> Optional[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
-        json_body (TestInlineObjectsJsonBody):
+        body (TestInlineObjectsBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -158,6 +155,6 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            json_body=json_body,
+            body=body,
         )
     ).parsed

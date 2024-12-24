@@ -1,8 +1,14 @@
-""" Contains methods for accessing the API Endpoints """
+"""Contains methods for accessing the API Endpoints"""
 
 import types
 
-from . import get_common_parameters, post_common_parameters, reserved_parameters
+from . import (
+    get_common_parameters,
+    get_models_allof,
+    get_models_oneof_with_required_const,
+    post_common_parameters,
+    reserved_parameters,
+)
 
 
 class DefaultEndpoints:
@@ -17,3 +23,11 @@ class DefaultEndpoints:
     @classmethod
     def reserved_parameters(cls) -> types.ModuleType:
         return reserved_parameters
+
+    @classmethod
+    def get_models_allof(cls) -> types.ModuleType:
+        return get_models_allof
+
+    @classmethod
+    def get_models_oneof_with_required_const(cls) -> types.ModuleType:
+        return get_models_oneof_with_required_const

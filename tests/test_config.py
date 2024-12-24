@@ -3,30 +3,32 @@ import os
 from pathlib import Path
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
 
-from openapi_python_client.config import Config
+from openapi_python_client.config import ConfigFile
+
+yaml = YAML(typ=["safe", "string"])
 
 
-def json_with_tabs(d):
+def json_with_tabs(d: dict) -> str:
     return json.dumps(d, indent=4).replace("    ", "\t")
 
 
 @pytest.mark.parametrize(
     "filename,dump",
     [
-        ("example.yml", yaml.dump),
+        ("example.yml", yaml.dump_to_string),
         ("example.json", json.dumps),
-        ("example.yaml", yaml.dump),
+        ("example.yaml", yaml.dump_to_string),
         ("example.json", json_with_tabs),
     ],
 )
 @pytest.mark.parametrize("relative", (True, False), ids=("relative", "absolute"))
-def test_load_from_path(tmp_path: Path, filename, dump, relative):
+def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
     yml_file = tmp_path.joinpath(filename)
     if relative:
-        if not os.getenv("TASKIPY"):
-            pytest.skip("Only test relative paths when running with `task check`")
+        if not os.getenv("TEST_RELATIVE"):
+            pytest.skip("Skipping relative path checks")
             return
         yml_file = yml_file.relative_to(Path.cwd())
     override1 = {"class_name": "ExampleClass", "module_name": "example_module"}
@@ -40,10 +42,10 @@ def test_load_from_path(tmp_path: Path, filename, dump, relative):
     }
     yml_file.write_text(dump(data))
 
-    config = Config.load_from_path(yml_file)
+    config = ConfigFile.load_from_path(yml_file)
     assert config.field_prefix == "blah"
-    assert config.class_overrides["Class1"] == override1
-    assert config.class_overrides["Class2"] == override2
+    assert config.class_overrides["Class1"].model_dump() == override1
+    assert config.class_overrides["Class2"].model_dump() == override2
     assert config.project_name_override == "project-name"
     assert config.package_name_override == "package_name"
     assert config.package_version_override == "package_version"

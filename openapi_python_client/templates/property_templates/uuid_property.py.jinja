@@ -1,0 +1,38 @@
+{% macro construct_function(property, source) %}
+UUID({{ source }})
+{% endmacro %}
+
+{% from "property_templates/property_macros.py.jinja" import construct_template %}
+
+{% macro construct(property, source) %}
+{{ construct_template(construct_function, property, source) }}
+{% endmacro %}
+
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
+
+{% macro transform(property, source, destination, declare_type=True) %}
+{% set transformed = "str(" + source + ")" %}
+{% if property.required %}
+{{ destination }} = {{ transformed }}
+{%- else %}
+{% if declare_type %}
+{% set type_annotation = property.get_type_string(json=True) %}
+{{ destination }}: {{ type_annotation }} = UNSET
+{% else %}
+{{ destination }} = UNSET
+{% endif %}
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ transformed }}
+{%- endif %}
+{% endmacro %}
+
+{% macro transform_multipart(property, source, destination) %}
+{% if property.required %}
+{{ destination }} = str({{ source }})
+{%- else %}
+{% set type_annotation = property.get_type_string(json=True) | replace("str", "bytes") %}
+{{ destination }}: {{ type_annotation }} = UNSET
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = str({{ source }})
+{%- endif %}
+{% endmacro %}

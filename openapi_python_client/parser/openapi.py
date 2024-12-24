@@ -1,22 +1,22 @@
 import re
-from collections import OrderedDict
+from collections.abc import Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
 from http import HTTPStatus
-from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, Protocol, Union
 
-import attr
 from pydantic import ValidationError
 
 from .. import schema as oai
 from .. import utils
 from ..config import Config
-from ..utils import PythonIdentifier, get_content_type
+from ..utils import PythonIdentifier
+from .bodies import Body, body_from_data
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
-    AnyProperty,
     Class,
     EnumProperty,
+    LiteralEnumProperty,
     ModelProperty,
     Parameters,
     Property,
@@ -28,7 +28,7 @@ from .properties import (
 from .properties.schemas import parameter_from_reference
 from .responses import Response, response_from_data
 
-_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
+_PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
 
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
@@ -41,15 +41,20 @@ class EndpointCollection:
     """A bunch of endpoints grouped under a tag that will become a module"""
 
     tag: str
-    endpoints: List["Endpoint"] = field(default_factory=list)
-    parse_errors: List[ParseError] = field(default_factory=list)
+    endpoints: list["Endpoint"] = field(default_factory=list)
+    parse_errors: list[ParseError] = field(default_factory=list)
 
     @staticmethod
     def from_data(
-        *, data: Dict[str, oai.PathItem], schemas: Schemas, parameters: Parameters, config: Config
-    ) -> Tuple[Dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
+        *,
+        data: dict[str, oai.PathItem],
+        schemas: Schemas,
+        parameters: Parameters,
+        request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
+        config: Config,
+    ) -> tuple[dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
-        endpoints_by_tag: Dict[utils.PythonIdentifier, EndpointCollection] = {}
+        endpoints_by_tag: dict[utils.PythonIdentifier, EndpointCollection] = {}
 
         methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
@@ -60,6 +65,8 @@ class EndpointCollection:
                     continue
 
                 tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in operation.tags or ["default"]]
+                if not config.generate_all_tags:
+                    tags = tags[:1]
 
                 collections = [endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag)) for tag in tags]
 
@@ -70,12 +77,17 @@ class EndpointCollection:
                     tags=tags,
                     schemas=schemas,
                     parameters=parameters,
+                    request_bodies=request_bodies,
                     config=config,
                 )
                 # Add `PathItem` parameters
                 if not isinstance(endpoint, ParseError):
                     endpoint, schemas, parameters = Endpoint.add_parameters(
-                        endpoint=endpoint, data=path_data, schemas=schemas, parameters=parameters, config=config
+                        endpoint=endpoint,
+                        data=path_data,
+                        schemas=schemas,
+                        parameters=parameters,
+                        config=config,
                     )
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
@@ -107,7 +119,14 @@ def generate_operation_id(*, path: str, method: str) -> str:
 models_relative_prefix: str = "..."
 
 
-# pylint: disable=too-many-instance-attributes
+class RequestBodyParser(Protocol):
+    __name__: str = "RequestBodyParser"
+
+    def __call__(
+        self, *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
+    ) -> tuple[Union[Property, PropertyError, None], Schemas]: ...  # pragma: no cover
+
+
 @dataclass
 class Endpoint:
     """
@@ -119,159 +138,21 @@ class Endpoint:
     description: Optional[str]
     name: str
     requires_security: bool
-    tags: List[str]
+    tags: list[PythonIdentifier]
     summary: Optional[str] = ""
-    relative_imports: Set[str] = field(default_factory=set)
-    query_parameters: Dict[str, Property] = field(default_factory=dict)
-    path_parameters: "OrderedDict[str, Property]" = field(default_factory=OrderedDict)
-    header_parameters: Dict[str, Property] = field(default_factory=dict)
-    cookie_parameters: Dict[str, Property] = field(default_factory=dict)
-    responses: List[Response] = field(default_factory=list)
-    form_body: Optional[Property] = None
-    json_body: Optional[Property] = None
-    multipart_body: Optional[Property] = None
-    errors: List[ParseError] = field(default_factory=list)
-    used_python_identifiers: Set[PythonIdentifier] = field(default_factory=set)
-
-    @staticmethod
-    def parse_request_form_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return form_body and updated schemas"""
-        body_content = body.content
-        form_body = body_content.get("application/x-www-form-urlencoded")
-        if form_body is not None and form_body.media_type_schema is not None:
-            prop, schemas = property_from_data(
-                name="data",
-                required=True,
-                data=form_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(prop, ModelProperty):
-                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
-            return prop, schemas
-        return None, schemas
-
-    @staticmethod
-    def parse_multipart_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return multipart_body"""
-        body_content = body.content
-        multipart_body = body_content.get("multipart/form-data")
-        if multipart_body is not None and multipart_body.media_type_schema is not None:
-            prop, schemas = property_from_data(
-                name="multipart_data",
-                required=True,
-                data=multipart_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-            if isinstance(prop, ModelProperty):
-                prop = attr.evolve(prop, is_multipart_body=True)
-                schemas = attr.evolve(schemas, classes_by_name={**schemas.classes_by_name, prop.class_info.name: prop})
-            return prop, schemas
-        return None, schemas
-
-    @staticmethod
-    def parse_request_json_body(
-        *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> Tuple[Union[Property, PropertyError, None], Schemas]:
-        """Return json_body"""
-        json_body = None
-        for content_type, schema in body.content.items():
-            content_type = get_content_type(content_type)
-
-            if content_type == "application/json" or content_type.endswith("+json"):
-                json_body = schema
-                break
-
-        if json_body is not None and json_body.media_type_schema is not None:
-            return property_from_data(
-                name="json_body",
-                required=True,
-                data=json_body.media_type_schema,
-                schemas=schemas,
-                parent_name=parent_name,
-                config=config,
-            )
-        return None, schemas
-
-    @staticmethod
-    def _add_body(
-        *,
-        endpoint: "Endpoint",
-        data: oai.Operation,
-        schemas: Schemas,
-        config: Config,
-    ) -> Tuple[Union[ParseError, "Endpoint"], Schemas]:
-        """Adds form or JSON body to Endpoint if included in data"""
-        endpoint = deepcopy(endpoint)
-        if data.requestBody is None or isinstance(data.requestBody, oai.Reference):
-            return endpoint, schemas
-
-        form_body, schemas = Endpoint.parse_request_form_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
-        )
-
-        if isinstance(form_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse form body of endpoint {endpoint.name}",
-                    detail=form_body.detail,
-                    data=form_body.data,
-                ),
-                schemas,
-            )
-
-        json_body, schemas = Endpoint.parse_request_json_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
-        )
-        if isinstance(json_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse JSON body of endpoint {endpoint.name}",
-                    detail=json_body.detail,
-                    data=json_body.data,
-                ),
-                schemas,
-            )
-
-        multipart_body, schemas = Endpoint.parse_multipart_body(
-            body=data.requestBody, schemas=schemas, parent_name=endpoint.name, config=config
-        )
-        if isinstance(multipart_body, ParseError):
-            return (
-                ParseError(
-                    header=f"Cannot parse multipart body of endpoint {endpoint.name}",
-                    detail=multipart_body.detail,
-                    data=multipart_body.data,
-                ),
-                schemas,
-            )
-
-        # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-        if form_body is not None:
-            endpoint.form_body = form_body
-            endpoint.relative_imports.update(endpoint.form_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.form_body.get_lazy_imports(prefix=models_relative_prefix))
-        if multipart_body is not None:
-            endpoint.multipart_body = multipart_body
-            endpoint.relative_imports.update(endpoint.multipart_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.multipart_body.get_lazy_imports(prefix=models_relative_prefix))
-        if json_body is not None:
-            endpoint.json_body = json_body
-            endpoint.relative_imports.update(endpoint.json_body.get_imports(prefix=models_relative_prefix))
-            endpoint.relative_imports.update(endpoint.json_body.get_lazy_imports(prefix=models_relative_prefix))
-        return endpoint, schemas
+    relative_imports: set[str] = field(default_factory=set)
+    query_parameters: list[Property] = field(default_factory=list)
+    path_parameters: list[Property] = field(default_factory=list)
+    header_parameters: list[Property] = field(default_factory=list)
+    cookie_parameters: list[Property] = field(default_factory=list)
+    responses: list[Response] = field(default_factory=list)
+    bodies: list[Body] = field(default_factory=list)
+    errors: list[ParseError] = field(default_factory=list)
 
     @staticmethod
     def _add_responses(
         *, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas, config: Config
-    ) -> Tuple["Endpoint", Schemas]:
+    ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
             status_code: HTTPStatus
@@ -282,7 +163,7 @@ class Endpoint:
                     ParseError(
                         detail=(
                             f"Invalid response status code {code} (not a valid HTTP "
-                            f"status code), response will be ommitted from generated "
+                            f"status code), response will be omitted from generated "
                             f"client"
                         )
                     )
@@ -290,7 +171,11 @@ class Endpoint:
                 continue
 
             response, schemas = response_from_data(
-                status_code=status_code, data=response_data, schemas=schemas, parent_name=endpoint.name, config=config
+                status_code=status_code,
+                data=response_data,
+                schemas=schemas,
+                parent_name=endpoint.name,
+                config=config,
             )
             if isinstance(response, ParseError):
                 detail_suffix = "" if response.detail is None else f" ({response.detail})"
@@ -298,7 +183,7 @@ class Endpoint:
                     ParseError(
                         detail=(
                             f"Cannot parse response for status code {status_code}{detail_suffix}, "
-                            f"response will be ommitted from generated client"
+                            f"response will be omitted from generated client"
                         ),
                         data=response.data,
                     )
@@ -311,7 +196,6 @@ class Endpoint:
             endpoint.responses.append(response)
         return endpoint, schemas
 
-    # pylint: disable=too-many-return-statements
     @staticmethod
     def add_parameters(
         *,
@@ -320,7 +204,7 @@ class Endpoint:
         schemas: Schemas,
         parameters: Parameters,
         config: Config,
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
+    ) -> tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Process the defined `parameters` for an Endpoint.
 
         Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
@@ -342,7 +226,6 @@ class Endpoint:
             - https://swagger.io/docs/specification/describing-parameters/
             - https://swagger.io/docs/specification/paths-and-operations/
         """
-        # pylint: disable=too-many-branches, too-many-locals
         # There isn't much value in breaking down this function further other than to satisfy the linter.
 
         if data.parameters is None:
@@ -350,16 +233,12 @@ class Endpoint:
 
         endpoint = deepcopy(endpoint)
 
-        unique_parameters: Set[Tuple[str, oai.ParameterLocation]] = set()
-        parameters_by_location: Dict[str, Dict[str, Property]] = {
+        unique_parameters: set[tuple[str, oai.ParameterLocation]] = set()
+        parameters_by_location: dict[str, list[Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
             oai.ParameterLocation.HEADER: endpoint.header_parameters,
             oai.ParameterLocation.COOKIE: endpoint.cookie_parameters,
-            "RESERVED": {  # These can't be param names because codegen needs them as vars, the properties don't matter
-                "client": AnyProperty("client", True, False, None, PythonIdentifier("client", ""), None, None),
-                "url": AnyProperty("url", True, False, None, PythonIdentifier("url", ""), None, None),
-            },
         }
 
         for param in data.parameters:
@@ -367,7 +246,7 @@ class Endpoint:
             param_or_error = parameter_from_reference(param=param, parameters=parameters)
             if isinstance(param_or_error, ParseError):
                 return param_or_error, schemas, parameters
-            param = param_or_error
+            param = param_or_error  # noqa: PLW2901
 
             if param.param_schema is None:
                 continue
@@ -389,6 +268,12 @@ class Endpoint:
 
             unique_parameters.add(unique_param)
 
+            if any(
+                other_param for other_param in parameters_by_location[param.param_in] if other_param.name == param.name
+            ):
+                # Defined at the operation level, ignore it here
+                continue
+
             prop, new_schemas = property_from_data(
                 name=param.name,
                 required=param.required,
@@ -400,7 +285,10 @@ class Endpoint:
 
             if isinstance(prop, ParseError):
                 return (
-                    ParseError(detail=f"cannot parse parameter of endpoint {endpoint.name}", data=prop.data),
+                    ParseError(
+                        detail=f"cannot parse parameter of endpoint {endpoint.name}: {prop.detail}",
+                        data=prop.data,
+                    ),
                     schemas,
                     parameters,
                 )
@@ -412,49 +300,69 @@ class Endpoint:
                 location_error.data = param
                 return location_error, schemas, parameters
 
-            if prop.name in parameters_by_location[param.param_in]:
-                # This parameter was defined in the Operation, so ignore the PathItem definition
-                continue
-
-            for location, parameters_dict in parameters_by_location.items():
-                if location == param.param_in or prop.name not in parameters_dict:
-                    continue
-                existing_prop: Property = parameters_dict[prop.name]
-                # Existing should be converted too for consistency
-                endpoint.used_python_identifiers.discard(existing_prop.python_name)
-                existing_prop.set_python_name(new_name=f"{existing_prop.name}_{location}", config=config)
-
-                if existing_prop.python_name in endpoint.used_python_identifiers:
-                    return (
-                        ParseError(
-                            detail=f"Parameters with same Python identifier `{existing_prop.python_name}` detected",
-                            data=data,
-                        ),
-                        schemas,
-                        parameters,
-                    )
-                endpoint.used_python_identifiers.add(existing_prop.python_name)
-                prop.set_python_name(new_name=f"{param.name}_{param.param_in}", config=config)
-
-            if prop.python_name in endpoint.used_python_identifiers:
-                return (
-                    ParseError(
-                        detail=f"Parameters with same Python identifier `{prop.python_name}` detected", data=data
-                    ),
-                    schemas,
-                    parameters,
-                )
-            if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
-                # There is no NULL for query params, so nullable and not required are the same.
-                prop = attr.evolve(prop, required=False, nullable=True)
-
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             endpoint.relative_imports.update(prop.get_lazy_imports(prefix=models_relative_prefix))
             endpoint.relative_imports.update(prop.get_imports(prefix=models_relative_prefix))
-            endpoint.used_python_identifiers.add(prop.python_name)
-            parameters_by_location[param.param_in][prop.name] = prop
+            parameters_by_location[param.param_in].append(prop)
 
-        return endpoint, schemas, parameters
+        return endpoint._check_parameters_for_conflicts(config=config), schemas, parameters
+
+    def _check_parameters_for_conflicts(
+        self,
+        *,
+        config: Config,
+        previously_modified_params: Optional[set[tuple[oai.ParameterLocation, str]]] = None,
+    ) -> Union["Endpoint", ParseError]:
+        """Check for conflicting parameters
+
+        For parameters that have the same python_name but are in different locations, append the location to the
+        python_name. For parameters that have the same name but are in the same location, use their raw name without
+        snake casing instead.
+
+        Function stops when there's a conflict that can't be resolved or all parameters are guaranteed to have a
+        unique python_name.
+        """
+        modified_params = previously_modified_params or set()
+        used_python_names: dict[PythonIdentifier, tuple[oai.ParameterLocation, Property]] = {}
+        reserved_names = ["client", "url"]
+        for parameter in self.iter_all_parameters():
+            location, prop = parameter
+
+            if prop.python_name in reserved_names:
+                prop.set_python_name(new_name=f"{prop.python_name}_{location}", config=config)
+                modified_params.add((location, prop.name))
+                continue
+
+            conflicting = used_python_names.pop(prop.python_name, None)
+            if conflicting is None:
+                used_python_names[prop.python_name] = parameter
+                continue
+            conflicting_location, conflicting_prop = conflicting
+            if (conflicting_location, conflicting_prop.name) in modified_params or (
+                location,
+                prop.name,
+            ) in modified_params:
+                return ParseError(
+                    detail=f"Parameters with same Python identifier {conflicting_prop.python_name} detected",
+                )
+
+            if location != conflicting_location:
+                conflicting_prop.set_python_name(
+                    new_name=f"{conflicting_prop.python_name}_{conflicting_location}", config=config
+                )
+                prop.set_python_name(new_name=f"{prop.python_name}_{location}", config=config)
+            elif conflicting_prop.name != prop.name:  # Use the name to differentiate
+                conflicting_prop.set_python_name(new_name=conflicting_prop.name, config=config, skip_snake_case=True)
+                prop.set_python_name(new_name=prop.name, config=config, skip_snake_case=True)
+
+            modified_params.add((location, conflicting_prop.name))
+            modified_params.add((conflicting_location, conflicting_prop.name))
+            used_python_names[prop.python_name] = parameter
+            used_python_names[conflicting_prop.python_name] = conflicting
+
+        if len(modified_params) > 0 and modified_params != previously_modified_params:
+            return self._check_parameters_for_conflicts(config=config, previously_modified_params=modified_params)
+        return self
 
     @staticmethod
     def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
@@ -471,17 +379,18 @@ class Endpoint:
         endpoint = deepcopy(endpoint)
         parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
         try:
-            sorted_params = sorted(
-                endpoint.path_parameters.values(), key=lambda param: parameters_from_path.index(param.name)
+            endpoint.path_parameters.sort(
+                key=lambda param: parameters_from_path.index(param.name),
             )
-            endpoint.path_parameters = OrderedDict((param.name, param) for param in sorted_params)
         except ValueError:
             pass  # We're going to catch the difference down below
 
-        if parameters_from_path != list(endpoint.path_parameters):
+        if parameters_from_path != [param.name for param in endpoint.path_parameters]:
             return ParseError(
                 detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
             )
+        for parameter in endpoint.path_parameters:
+            endpoint.path = endpoint.path.replace(f"{{{parameter.name}}}", f"{{{parameter.python_name}}}")
         return endpoint
 
     @staticmethod
@@ -490,11 +399,12 @@ class Endpoint:
         data: oai.Operation,
         path: str,
         method: str,
-        tags: List[str],
+        tags: list[PythonIdentifier],
         schemas: Schemas,
         parameters: Parameters,
+        request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
         config: Config,
-    ) -> Tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
+    ) -> tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
 
         if data.operationId is None:
@@ -513,12 +423,39 @@ class Endpoint:
         )
 
         result, schemas, parameters = Endpoint.add_parameters(
-            endpoint=endpoint, data=data, schemas=schemas, parameters=parameters, config=config
+            endpoint=endpoint,
+            data=data,
+            schemas=schemas,
+            parameters=parameters,
+            config=config,
         )
         if isinstance(result, ParseError):
             return result, schemas, parameters
         result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
-        result, schemas = Endpoint._add_body(endpoint=result, data=data, schemas=schemas, config=config)
+        if isinstance(result, ParseError):
+            return result, schemas, parameters
+        bodies, schemas = body_from_data(
+            data=data, schemas=schemas, config=config, endpoint_name=result.name, request_bodies=request_bodies
+        )
+        body_errors = []
+        for body in bodies:
+            if isinstance(body, ParseError):
+                body_errors.append(body)
+                continue
+            result.bodies.append(body)
+            result.relative_imports.update(body.prop.get_imports(prefix=models_relative_prefix))
+            result.relative_imports.update(body.prop.get_lazy_imports(prefix=models_relative_prefix))
+        if len(result.bodies) > 0:
+            result.errors.extend(body_errors)
+        elif len(body_errors) > 0:
+            return (
+                ParseError(
+                    header="Endpoint requires a body, but none were parseable.",
+                    detail="\n".join(error.detail or "" for error in body_errors),
+                ),
+                schemas,
+                parameters,
+            )
 
         return result, schemas, parameters
 
@@ -531,20 +468,22 @@ class Endpoint:
             return self.responses[0].prop.get_type_string(quoted=False)
         return f"Union[{', '.join(types)}]"
 
-    def iter_all_parameters(self) -> Iterator[Property]:
+    def iter_all_parameters(self) -> Iterator[tuple[oai.ParameterLocation, Property]]:
         """Iterate through all the parameters of this endpoint"""
-        yield from self.path_parameters.values()
-        yield from self.query_parameters.values()
-        yield from self.header_parameters.values()
-        yield from self.cookie_parameters.values()
-        if self.multipart_body:
-            yield self.multipart_body
-        if self.json_body:
-            yield self.json_body
+        yield from ((oai.ParameterLocation.PATH, param) for param in self.path_parameters)
+        yield from ((oai.ParameterLocation.QUERY, param) for param in self.query_parameters)
+        yield from ((oai.ParameterLocation.HEADER, param) for param in self.header_parameters)
+        yield from ((oai.ParameterLocation.COOKIE, param) for param in self.cookie_parameters)
 
-    def list_all_parameters(self) -> List[Property]:
-        """Return a List of all the parameters of this endpoint"""
-        return list(self.iter_all_parameters())
+    def list_all_parameters(self) -> list[Property]:
+        """Return a list of all the parameters of this endpoint"""
+        return (
+            self.path_parameters
+            + self.query_parameters
+            + self.header_parameters
+            + self.cookie_parameters
+            + [body.prop for body in self.bodies]
+        )
 
 
 @dataclass
@@ -555,15 +494,15 @@ class GeneratorData:
     description: Optional[str]
     version: str
     models: Iterator[ModelProperty]
-    errors: List[ParseError]
-    endpoint_collections_by_tag: Dict[utils.PythonIdentifier, EndpointCollection]
-    enums: Iterator[EnumProperty]
+    errors: list[ParseError]
+    endpoint_collections_by_tag: dict[utils.PythonIdentifier, EndpointCollection]
+    enums: Iterator[Union[EnumProperty, LiteralEnumProperty]]
 
     @staticmethod
-    def from_dict(data: Dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
+    def from_dict(data: dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
         """Create an OpenAPI from dict"""
         try:
-            openapi = oai.OpenAPI.parse_obj(data)
+            openapi = oai.OpenAPI.model_validate(data)
         except ValidationError as err:
             detail = str(err)
             if "swagger" in data:
@@ -576,12 +515,19 @@ class GeneratorData:
         if openapi.components and openapi.components.schemas:
             schemas = build_schemas(components=openapi.components.schemas, schemas=schemas, config=config)
         if openapi.components and openapi.components.parameters:
-            parameters = build_parameters(components=openapi.components.parameters, parameters=parameters)
+            parameters = build_parameters(
+                components=openapi.components.parameters,
+                parameters=parameters,
+                config=config,
+            )
+        request_bodies = (openapi.components and openapi.components.requestBodies) or {}
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, parameters=parameters, config=config
+            data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
         )
 
-        enums = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty))
+        enums = (
+            prop for prop in schemas.classes_by_name.values() if isinstance(prop, (EnumProperty, LiteralEnumProperty))
+        )
         models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
 
         return GeneratorData(

@@ -1,31 +1,23 @@
 name: Release
 
-on: workflow_dispatch
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 jobs:
   release:
+    if: github.head_ref == 'knope/release' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.PAT }}
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_push_gpgsign: false
-      - name: Install Knope
-        uses: knope-dev/action@v1
-        with:
-          version: 0.7.3
-      - name: Bump Version & Create GitHub Release
-        run: knope release
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-      - name: Install Poetry
-        run: pip install --upgrade poetry
+      - uses: actions/checkout@v4.2.2
+      - name: Install Hatchling
+        run: pip install --upgrade hatchling
+      - name: Build
+        run: hatchling build
       - name: Push to PyPI
-        run: poetry publish --build -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@v1.12.3
+        with:
+            attestations: true

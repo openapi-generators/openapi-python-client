@@ -1,10 +1,13 @@
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .parameter import Parameter
 from .reference import Reference
 from .server import Server
+
+if TYPE_CHECKING:
+    from .operation import Operation  # pragma: no cover
 
 
 class PathItem(BaseModel):
@@ -30,13 +33,14 @@ class PathItem(BaseModel):
     head: Optional["Operation"] = None
     patch: Optional["Operation"] = None
     trace: Optional["Operation"] = None
-    servers: Optional[List[Server]] = None
-    parameters: Optional[List[Union[Parameter, Reference]]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    servers: Optional[list[Server]] = None
+    parameters: Optional[list[Union[Parameter, Reference]]] = None
+    model_config = ConfigDict(
+        # `Operation` is an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {
                     "get": {
@@ -68,10 +72,5 @@ class PathItem(BaseModel):
                     ],
                 }
             ]
-        }
-
-
-# Operation uses PathItem via Callback, so we need late import and to update forward refs due to circular dependency
-from .operation import Operation  # pylint: disable=wrong-import-position unused-import
-
-PathItem.update_forward_refs()
+        },
+    )

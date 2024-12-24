@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
     from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class PostResponsesUnionsSimpleBeforeComplexResponse200:
     """
     Attributes:
@@ -19,22 +20,20 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
     """
 
     a: Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str]
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
             PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
         )
 
-        a: Union[Dict[str, Any], str]
-
+        a: Union[dict[str, Any], str]
         if isinstance(self.a, PostResponsesUnionsSimpleBeforeComplexResponse200AType1):
             a = self.a.to_dict()
-
         else:
             a = self.a
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -45,7 +44,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
             PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
         )
@@ -73,7 +72,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
         return post_responses_unions_simple_before_complex_response_200
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

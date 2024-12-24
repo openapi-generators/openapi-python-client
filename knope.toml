@@ -1,0 +1,10 @@
+[package]
+versioned_files = ["pyproject.toml"]
+changelog = "CHANGELOG.md"
+
+[github]
+owner = "openapi-generators"
+repo = "openapi-python-client"
+
+[bot.releases]
+enabled = true

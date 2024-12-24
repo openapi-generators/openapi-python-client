@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, Extra, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, model_validator
 
 from ..data_type import DataType
 from .discriminator import Discriminator
@@ -23,9 +23,9 @@ class Schema(BaseModel):
     title: Optional[str] = None
     multipleOf: Optional[float] = Field(default=None, gt=0.0)
     maximum: Optional[float] = None
-    exclusiveMaximum: Optional[bool] = None
+    exclusiveMaximum: Optional[Union[bool, float]] = None
     minimum: Optional[float] = None
-    exclusiveMinimum: Optional[bool] = None
+    exclusiveMinimum: Optional[Union[bool, float]] = None
     maxLength: Optional[int] = Field(default=None, ge=0)
     minLength: Optional[int] = Field(default=None, ge=0)
     pattern: Optional[str] = None
@@ -34,20 +34,22 @@ class Schema(BaseModel):
     uniqueItems: Optional[bool] = None
     maxProperties: Optional[int] = Field(default=None, ge=0)
     minProperties: Optional[int] = Field(default=None, ge=0)
-    required: Optional[List[str]] = Field(default=None, min_items=1)
-    enum: Union[None, List[Optional[StrictInt]], List[Optional[StrictStr]]] = Field(default=None, min_items=1)
-    type: Optional[DataType] = Field(default=None)
-    allOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
-    oneOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
-    anyOf: List[Union[Reference, "Schema"]] = Field(default_factory=list)
+    required: Optional[list[str]] = Field(default=None)
+    enum: Union[None, list[Any]] = Field(default=None, min_length=1)
+    const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
+    type: Union[DataType, list[DataType], None] = Field(default=None)
+    allOf: list[Union[Reference, "Schema"]] = Field(default_factory=list)
+    oneOf: list[Union[Reference, "Schema"]] = Field(default_factory=list)
+    anyOf: list[Union[Reference, "Schema"]] = Field(default_factory=list)
     schema_not: Optional[Union[Reference, "Schema"]] = Field(default=None, alias="not")
     items: Optional[Union[Reference, "Schema"]] = None
-    properties: Optional[Dict[str, Union[Reference, "Schema"]]] = None
+    prefixItems: list[Union[Reference, "Schema"]] = Field(default_factory=list)
+    properties: Optional[dict[str, Union[Reference, "Schema"]]] = None
     additionalProperties: Optional[Union[bool, Reference, "Schema"]] = None
     description: Optional[str] = None
     schema_format: Optional[str] = Field(default=None, alias="format")
     default: Optional[Any] = None
-    nullable: bool = False
+    nullable: bool = Field(default=False)
     discriminator: Optional[Discriminator] = None
     readOnly: Optional[bool] = None
     writeOnly: Optional[bool] = None
@@ -55,11 +57,10 @@ class Schema(BaseModel):
     externalDocs: Optional[ExternalDocumentation] = None
     example: Optional[Any] = None
     deprecated: Optional[bool] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {"type": "string", "format": "email"},
                 {
@@ -72,10 +73,16 @@ class Schema(BaseModel):
                     },
                 },
                 {"type": "object", "additionalProperties": {"type": "string"}},
-                {"type": "object", "additionalProperties": {"$ref": "#/components/schemas/ComplexModel"}},
                 {
                     "type": "object",
-                    "properties": {"id": {"type": "integer", "format": "int64"}, "name": {"type": "string"}},
+                    "additionalProperties": {"$ref": "#/components/schemas/ComplexModel"},
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "format": "int64"},
+                        "name": {"type": "string"},
+                    },
                     "required": ["name"],
                     "example": {"name": "Puma", "id": 1},
                 },
@@ -90,13 +97,20 @@ class Schema(BaseModel):
                 {
                     "allOf": [
                         {"$ref": "#/components/schemas/ErrorModel"},
-                        {"type": "object", "required": ["rootCause"], "properties": {"rootCause": {"type": "string"}}},
+                        {
+                            "type": "object",
+                            "required": ["rootCause"],
+                            "properties": {"rootCause": {"type": "string"}},
+                        },
                     ]
                 },
                 {
                     "type": "object",
                     "discriminator": {"propertyName": "petType"},
-                    "properties": {"name": {"type": "string"}, "petType": {"type": "string"}},
+                    "properties": {
+                        "name": {"type": "string"},
+                        "petType": {"type": "string"},
+                    },
                     "required": ["name", "petType"],
                 },
                 {
@@ -111,7 +125,12 @@ class Schema(BaseModel):
                                     "type": "string",
                                     "description": "The measured skill for hunting",
                                     "default": "lazy",
-                                    "enum": ["clueless", "lazy", "adventurous", "aggressive"],
+                                    "enum": [
+                                        "clueless",
+                                        "lazy",
+                                        "adventurous",
+                                        "aggressive",
+                                    ],
                                 }
                             },
                             "required": ["huntingSkill"],
@@ -139,7 +158,51 @@ class Schema(BaseModel):
                     ],
                 },
             ]
-        }
+        },
+    )
 
+    @model_validator(mode="after")
+    def handle_exclusive_min_max(self) -> "Schema":
+        """
+        Convert exclusiveMinimum/exclusiveMaximum between OpenAPI v3.0 (bool) and v3.1 (numeric).
+        """
+        # Handle exclusiveMinimum
+        if isinstance(self.exclusiveMinimum, bool) and self.minimum is not None:
+            if self.exclusiveMinimum:
+                self.exclusiveMinimum = self.minimum
+                self.minimum = None
+            else:
+                self.exclusiveMinimum = None
+        elif isinstance(self.exclusiveMinimum, float):
+            self.minimum = None
 
-Schema.update_forward_refs()
+        # Handle exclusiveMaximum
+        if isinstance(self.exclusiveMaximum, bool) and self.maximum is not None:
+            if self.exclusiveMaximum:
+                self.exclusiveMaximum = self.maximum
+                self.maximum = None
+            else:
+                self.exclusiveMaximum = None
+        elif isinstance(self.exclusiveMaximum, float):
+            self.maximum = None
+
+        return self
+
+    @model_validator(mode="after")
+    def handle_nullable(self) -> "Schema":
+        """Convert the old 3.0 `nullable` property into the new 3.1 style"""
+        if not self.nullable:
+            return self
+        if isinstance(self.type, str):
+            self.type = [self.type, DataType.NULL]
+        elif isinstance(self.type, list):
+            if DataType.NULL not in self.type:
+                self.type.append(DataType.NULL)
+        elif len(self.oneOf) > 0:
+            self.oneOf.append(Schema(type=DataType.NULL))
+        elif len(self.anyOf) > 0:
+            self.anyOf.append(Schema(type=DataType.NULL))
+        elif len(self.allOf) > 0:  # Nullable allOf is basically oneOf[null, allOf]
+            self.oneOf = [Schema(type=DataType.NULL), Schema(allOf=self.allOf)]
+            self.allOf = []
+        return self

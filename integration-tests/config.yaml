@@ -1,0 +1,4 @@
+project_name_override: integration-tests
+post_hooks:
+  - ruff check . --fix
+  - ruff format .

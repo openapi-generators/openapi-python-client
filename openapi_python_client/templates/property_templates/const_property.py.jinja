@@ -1,0 +1,5 @@
+{% macro construct(property, source) %}
+{{ property.python_name }} = cast({{ property.get_type_string() }} , {{ source }})
+if {{ property.python_name }} != {{ property.value.python_code }}{% if not property.required %}and not isinstance({{ property.python_name }}, Unset){% endif %}:
+    raise ValueError(f"{{ property.name }} must match const {{ property.value.python_code }}, got '{{'{' + property.python_name + '}' }}'")
+{%- endmacro %}

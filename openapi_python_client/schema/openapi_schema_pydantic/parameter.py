@@ -1,6 +1,6 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..parameter_location import ParameterLocation
 from .example import Example
@@ -32,13 +32,14 @@ class Parameter(BaseModel):
     allowReserved: bool = False
     param_schema: Optional[Union[Reference, Schema]] = Field(default=None, alias="schema")
     example: Optional[Any] = None
-    examples: Optional[Dict[str, Union[Example, Reference]]] = None
-    content: Optional[Dict[str, MediaType]] = None
-
-    class Config:  # pylint: disable=missing-class-docstring
-        extra = Extra.allow
-        allow_population_by_field_name = True
-        schema_extra = {
+    examples: Optional[dict[str, Union[Example, Reference]]] = None
+    content: Optional[dict[str, MediaType]] = None
+    model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
+        extra="allow",
+        populate_by_name=True,
+        json_schema_extra={
             "examples": [
                 {
                     "name": "token",
@@ -84,4 +85,5 @@ class Parameter(BaseModel):
                     },
                 },
             ]
-        }
+        },
+    )

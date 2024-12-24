@@ -1,13 +1,13 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TestInlineObjectsResponse200")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class TestInlineObjectsResponse200:
     """
     Attributes:
@@ -16,10 +16,10 @@ class TestInlineObjectsResponse200:
 
     a_property: Union[Unset, str] = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         a_property = self.a_property
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update({})
         if a_property is not UNSET:
             field_dict["a_property"] = a_property
@@ -27,7 +27,7 @@ class TestInlineObjectsResponse200:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         a_property = d.pop("a_property", UNSET)
 

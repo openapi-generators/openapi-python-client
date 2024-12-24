@@ -1,18 +1,14 @@
-from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO, TYPE_CHECKING
+from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING
 
-{% if model.additional_properties %}
-from typing import List
-
-{% endif %}
-
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 {% if model.is_multipart_body %}
 import json
 {% endif %}
 
 from ..types import UNSET, Unset
 
-{% for relative in model.relative_imports %}
+{% for relative in model.relative_imports | sort %}
 {{ relative }}
 {% endfor %}
 
@@ -58,7 +54,7 @@ T = TypeVar("T", bound="{{ class_name }}")
     {% endfor %}{% endif %}
 {% endmacro %}
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class {{ class_name }}:
     {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
 
@@ -73,40 +69,36 @@ class {{ class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: Dict[str, {{ additional_property_type }}] = attr.ib(init=False, factory=dict)
+    additional_properties: dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
 {% macro _to_dict(multipart=False) %}
 {% for property in model.required_properties + model.optional_properties %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if prop_template.transform %}
-{{ prop_template.transform(property, "self." + property.python_name, property.python_name, multipart=multipart) }}
-{% elif multipart %}
-{{ property.python_name }} = self.{{ property.python_name }} if isinstance(self.{{ property.python_name }}, Unset) else (None, str(self.{{ property.python_name }}).encode(), "text/plain")
+{% if multipart %}
+{{ prop_template.transform_multipart(property, "self." + property.python_name, property.python_name) }}
+{% elif prop_template.transform %}
+{{ prop_template.transform(property=property, source="self." + property.python_name, destination=property.python_name) }}
 {% else %}
 {{ property.python_name }} = self.{{ property.python_name }}
 {% endif %}
+
 {% endfor %}
 
-field_dict: Dict[str, Any] = {}
+field_dict: dict[str, Any] = {}
 {% if model.additional_properties %}
-{% if model.additional_properties.template %}{# Can be a bool instead of an object #}
-    {% import "property_templates/" + model.additional_properties.template as prop_template %}
-{% else %}
-    {% set prop_template = None %}
-{% endif %}
-{% if prop_template and prop_template.transform %}
+{% import "property_templates/" + model.additional_properties.template as prop_template %}
+{% if multipart %}
 for prop_name, prop in self.additional_properties.items():
-    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", multipart=multipart, declare_type=false) | indent(4) }}
-{% elif multipart %}
-field_dict.update({
-    key: (None, str(value).encode(), "text/plain")
-    for key, value in self.additional_properties.items()
-})
+    {{ prop_template.transform_multipart(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
+{% elif prop_template.transform %}
+for prop_name, prop in self.additional_properties.items():
+    {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=false) | indent(4) }}
 {% else %}
 field_dict.update(self.additional_properties)
 {% endif %}
 {% endif %}
+{% if model.required_properties | length > 0 or model.optional_properties | length > 0 %}
 field_dict.update({
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -114,6 +106,7 @@ field_dict.update({
     {% endif %}
     {% endfor %}
 })
+{% endif %}
 {% for property in model.optional_properties %}
 {% if not property.required %}
 if {{ property.python_name }} is not UNSET:
@@ -124,22 +117,23 @@ if {{ property.python_name }} is not UNSET:
 return field_dict
 {% endmacro %}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
-    def to_multipart(self) -> Dict[str, Any]:
+    def to_multipart(self) -> dict[str, Any]:
         {{ _to_dict(multipart=True) | indent(8) }}
 {% endif %}
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
+{% if (model.required_properties or model.optional_properties or model.additional_properties) %}
         d = src_dict.copy()
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
@@ -155,6 +149,7 @@ return field_dict
     {% endif %}
 
 {% endfor %}
+{% endif %}
         {{ module_name }} = cls(
 {% for property in model.required_properties + model.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
@@ -188,7 +183,7 @@ return field_dict
 
     {% if model.additional_properties %}
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> {{ additional_property_type }}:

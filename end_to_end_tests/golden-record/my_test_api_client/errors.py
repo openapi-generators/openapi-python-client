@@ -1,4 +1,4 @@
-""" Contains shared errors types that can be raised from API functions """
+"""Contains shared errors types that can be raised from API functions"""
 
 
 class UnexpectedStatus(Exception):
@@ -8,7 +8,9 @@ class UnexpectedStatus(Exception):
         self.status_code = status_code
         self.content = content
 
-        super().__init__(f"Unexpected status code: {status_code}")
+        super().__init__(
+            f"Unexpected status code: {status_code}\n\nResponse content:\n{content.decode(errors='ignore')}"
+        )
 
 
 __all__ = ["UnexpectedStatus"]

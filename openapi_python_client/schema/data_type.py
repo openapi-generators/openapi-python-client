@@ -6,6 +6,7 @@ class DataType(str, Enum):
 
     References:
         - https://swagger.io/docs/specification/data-models/data-types/
+        - https://json-schema.org/draft/2020-12/json-schema-validation.html#name-type
     """
 
     STRING = "string"
@@ -14,3 +15,4 @@ class DataType(str, Enum):
     BOOLEAN = "boolean"
     ARRAY = "array"
     OBJECT = "object"
+    NULL = "null"

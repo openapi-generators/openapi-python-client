@@ -1,37 +1,33 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, TypeVar
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     """ """
 
-    additional_properties: Dict[str, List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = attr.ib(
-        init=False, factory=dict
+    additional_properties: dict[str, list["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = (
+        _attrs_field(init=False, factory=dict)
     )
 
-    def to_dict(self) -> Dict[str, Any]:
-        field_dict: Dict[str, Any] = {}
+    def to_dict(self) -> dict[str, Any]:
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = []
             for componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item_data in prop:
-                componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item = (
-                    componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item_data.to_dict()
-                )
-
+                componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item = componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item_data.to_dict()
                 field_dict[prop_name].append(
                     componentsschemas_an_array_with_a_recursive_ref_in_items_object_additional_properties_item
                 )
 
-        field_dict.update({})
-
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
         an_array_with_a_recursive_ref_in_items_object_additional_properties_item = cls()
 
@@ -60,14 +56,14 @@ class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
         return an_array_with_a_recursive_ref_in_items_object_additional_properties_item
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]:
+    def __getitem__(self, key: str) -> list["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]:
         return self.additional_properties[key]
 
     def __setitem__(
-        self, key: str, value: List["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]
+        self, key: str, value: list["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]
     ) -> None:
         self.additional_properties[key] = value
 

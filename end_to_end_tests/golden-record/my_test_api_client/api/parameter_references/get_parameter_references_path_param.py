@@ -1,53 +1,50 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     path_param: str,
     *,
-    client: Client,
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
-) -> Dict[str, Any]:
-    url = "{}/parameter-references/{path_param}".format(client.base_url, path_param=path_param)
-
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
-
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     if not isinstance(header_param, Unset):
         headers["header param"] = header_param
 
+    cookies = {}
     if cookie_param is not UNSET:
         cookies["cookie param"] = cookie_param
 
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
+
     params["string param"] = string_param
 
     params["integer param"] = integer_param
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    return {
+    _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-        "follow_redirects": client.follow_redirects,
+        "url": f"/parameter-references/{path_param}",
         "params": params,
+        "cookies": cookies,
     }
 
+    _kwargs["headers"] = headers
+    return _kwargs
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
-    if response.status_code == HTTPStatus.OK:
+
+def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
+    if response.status_code == 200:
         return None
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -55,7 +52,7 @@ def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any
         return None
 
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -67,19 +64,19 @@ def _build_response(*, client: Client, response: httpx.Response) -> Response[Any
 def sync_detailed(
     path_param: str,
     *,
-    client: Client,
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    client: Union[AuthenticatedClient, Client],
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
-        header_param (Union[Unset, str]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):  Default: 0.
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:
@@ -92,15 +89,13 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         path_param=path_param,
-        client=client,
         string_param=string_param,
         integer_param=integer_param,
         header_param=header_param,
         cookie_param=cookie_param,
     )
 
-    response = httpx.request(
-        verify=client.verify_ssl,
+    response = client.get_httpx_client().request(
         **kwargs,
     )
 
@@ -110,19 +105,19 @@ def sync_detailed(
 async def asyncio_detailed(
     path_param: str,
     *,
-    client: Client,
-    string_param: Union[Unset, None, str] = UNSET,
-    integer_param: Union[Unset, None, int] = 0,
-    header_param: Union[Unset, str] = UNSET,
+    client: Union[AuthenticatedClient, Client],
+    string_param: Union[Unset, str] = UNSET,
+    integer_param: Union[Unset, int] = 0,
+    header_param: Union[None, Unset, str] = UNSET,
     cookie_param: Union[Unset, str] = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, None, str]):
-        integer_param (Union[Unset, None, int]):
-        header_param (Union[Unset, str]):
+        string_param (Union[Unset, str]):
+        integer_param (Union[Unset, int]):  Default: 0.
+        header_param (Union[None, Unset, str]):
         cookie_param (Union[Unset, str]):
 
     Raises:
@@ -135,14 +130,12 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         path_param=path_param,
-        client=client,
         string_param=string_param,
         integer_param=integer_param,
         header_param=header_param,
         cookie_param=cookie_param,
     )
 
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)

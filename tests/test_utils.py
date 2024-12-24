@@ -99,7 +99,7 @@ def test_no_string_escapes():
         ("int", "int_"),
         ("dict", "dict_"),
         ("not_reserved", "not_reserved"),
-        ("type", "type"),
+        ("type", "type_"),
         ("id", "id"),
         ("None", "None_"),
     ],
@@ -132,5 +132,5 @@ def test_pascalcase(before, after):
         pytest.param("application/vnd.api+json;charset=utf-8", "application/vnd.api+json"),
     ],
 )
-def test_get_content_type(content_type: str, expected: str) -> None:
-    assert utils.get_content_type(content_type) == expected
+def test_get_content_type(content_type: str, expected: str, config) -> None:
+    assert utils.get_content_type(content_type, config) == expected

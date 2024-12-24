@@ -1,18 +1,19 @@
 __all__ = [
     "Class",
-    "Schemas",
     "Parameters",
-    "parse_reference_path",
-    "update_schemas_with_data",
-    "update_parameters_with_data",
-    "parameter_from_reference",
+    "ReferencePath",
+    "Schemas",
     "parameter_from_data",
+    "parameter_from_reference",
+    "parse_reference_path",
+    "update_parameters_with_data",
+    "update_schemas_with_data",
 ]
 
-from typing import TYPE_CHECKING, Dict, List, NewType, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, NewType, Union, cast
 from urllib.parse import urlparse
 
-import attr
+from attrs import define, evolve, field
 
 from ... import Config
 from ... import schema as oai
@@ -21,9 +22,11 @@ from ...utils import ClassName, PythonIdentifier
 from ..errors import ParameterError, ParseError, PropertyError
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .model_property import ModelProperty
     from .property import Property
 else:
-    Property = "Property"  # pylint: disable=invalid-name
+    ModelProperty = "ModelProperty"
+    Property = "Property"
 
 
 ReferencePath = NewType("ReferencePath", str)
@@ -43,7 +46,7 @@ def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
     return cast(ReferencePath, parsed.fragment)
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Class:
     """Represents Python class which will be generated from an OpenAPI schema"""
 
@@ -69,16 +72,17 @@ class Class:
         return Class(name=class_name, module_name=module_name)
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
-    classes_by_reference: Dict[ReferencePath, Property] = attr.ib(factory=dict)
-    dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = attr.ib(factory=dict)
-    classes_by_name: Dict[ClassName, Property] = attr.ib(factory=dict)
-    errors: List[ParseError] = attr.ib(factory=list)
+    classes_by_reference: dict[ReferencePath, Property] = field(factory=dict)
+    dependencies: dict[ReferencePath, set[Union[ReferencePath, ClassName]]] = field(factory=dict)
+    classes_by_name: dict[ClassName, Property] = field(factory=dict)
+    models_to_process: list[ModelProperty] = field(factory=list)
+    errors: list[ParseError] = field(factory=list)
 
-    def add_dependencies(self, ref_path: ReferencePath, roots: Set[Union[ReferencePath, ClassName]]) -> None:
+    def add_dependencies(self, ref_path: ReferencePath, roots: set[Union[ReferencePath, ClassName]]) -> None:
         """Record new dependencies on the given ReferencePath
 
         Args:
@@ -131,17 +135,17 @@ def update_schemas_with_data(
             )
         return prop
 
-    schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})
+    schemas = evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})
     return schemas
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@define
 class Parameters:
     """Structure for containing all defined, shareable, and reusable parameters"""
 
-    classes_by_reference: Dict[ReferencePath, Parameter] = attr.ib(factory=dict)
-    classes_by_name: Dict[ClassName, Parameter] = attr.ib(factory=dict)
-    errors: List[ParseError] = attr.ib(factory=list)
+    classes_by_reference: dict[ReferencePath, Parameter] = field(factory=dict)
+    classes_by_name: dict[ClassName, Parameter] = field(factory=dict)
+    errors: list[ParseError] = field(factory=list)
 
 
 def parameter_from_data(
@@ -149,7 +153,8 @@ def parameter_from_data(
     name: str,
     data: Union[oai.Reference, oai.Parameter],
     parameters: Parameters,
-) -> Tuple[Union[Parameter, ParameterError], Parameters]:
+    config: Config,
+) -> tuple[Union[Parameter, ParameterError], Parameters]:
     """Generates parameters from an OpenAPI Parameter spec."""
 
     if isinstance(data, oai.Reference):
@@ -166,12 +171,14 @@ def parameter_from_data(
         param_schema=data.param_schema,
         param_in=data.param_in,
     )
-    parameters = attr.evolve(parameters, classes_by_name={**parameters.classes_by_name, name: new_param})
+    parameters = evolve(
+        parameters, classes_by_name={**parameters.classes_by_name, ClassName(name, config.field_prefix): new_param}
+    )
     return new_param, parameters
 
 
 def update_parameters_with_data(
-    *, ref_path: ReferencePath, data: oai.Parameter, parameters: Parameters
+    *, ref_path: ReferencePath, data: oai.Parameter, parameters: Parameters, config: Config
 ) -> Union[Parameters, ParameterError]:
     """
     Update a `Parameters` using some new reference.
@@ -187,7 +194,7 @@ def update_parameters_with_data(
     See Also:
         - https://swagger.io/docs/specification/using-ref/
     """
-    param, parameters = parameter_from_data(data=data, name=data.name, parameters=parameters)
+    param, parameters = parameter_from_data(data=data, name=data.name, parameters=parameters, config=config)
 
     if isinstance(param, ParameterError):
         param.detail = f"{param.header}: {param.detail}"
@@ -199,7 +206,7 @@ def update_parameters_with_data(
             )
         return param
 
-    parameters = attr.evolve(parameters, classes_by_reference={ref_path: param, **parameters.classes_by_reference})
+    parameters = evolve(parameters, classes_by_reference={ref_path: param, **parameters.classes_by_reference})
     return parameters
 
 
