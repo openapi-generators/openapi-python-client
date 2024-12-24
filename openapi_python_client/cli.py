@@ -10,7 +10,7 @@ from openapi_python_client import MetaType
 from openapi_python_client.config import Config, ConfigFile
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
-app = typer.Typer()
+app = typer.Typer(name="openapi-python-client")
 
 
 def _version_callback(value: bool) -> None:
