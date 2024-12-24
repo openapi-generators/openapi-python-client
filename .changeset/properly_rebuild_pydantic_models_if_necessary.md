@@ -1,8 +1,8 @@
 ---
-default: CHANGE_TYPE
+default: patch
 ---
 
-# Properly rebuild Pydantic models if necessary
+# Fix compatibility with Pydantic 2.10+
 
 #1176 by @Viicos
 
