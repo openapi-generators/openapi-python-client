@@ -5,8 +5,10 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from dateutil.parser import isoparse
 
+from ..models.a_model_nullable_enum_inline import AModelNullableEnumInline
 from ..models.an_all_of_enum import AnAllOfEnum
 from ..models.an_enum import AnEnum
+from ..models.an_enum_with_null import AnEnumWithNull
 from ..models.different_enum import DifferentEnum
 from ..types import UNSET, Unset
 
@@ -36,6 +38,8 @@ class AModel:
         nullable_one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', None]):
         model (ModelWithUnionProperty):
         nullable_model (Union['ModelWithUnionProperty', None]):
+        nullable_enum_as_ref (Union[AnEnumWithNull, None]): For testing Enums with mixed string / null values
+        nullable_enum_inline (Union[AModelNullableEnumInline, None]):
         any_value (Union[Unset, Any]):  Default: 'default'.
         an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
         nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
@@ -62,6 +66,8 @@ class AModel:
     nullable_one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", None]
     model: "ModelWithUnionProperty"
     nullable_model: Union["ModelWithUnionProperty", None]
+    nullable_enum_as_ref: Union[AnEnumWithNull, None]
+    nullable_enum_inline: Union[AModelNullableEnumInline, None]
     an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
     a_nullable_uuid: Union[None, UUID] = UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41")
     any_value: Union[Unset, Any] = "default"
@@ -136,6 +142,18 @@ class AModel:
             nullable_model = self.nullable_model.to_dict()
         else:
             nullable_model = self.nullable_model
+
+        nullable_enum_as_ref: Union[None, str]
+        if isinstance(self.nullable_enum_as_ref, AnEnumWithNull):
+            nullable_enum_as_ref = self.nullable_enum_as_ref.value
+        else:
+            nullable_enum_as_ref = self.nullable_enum_as_ref
+
+        nullable_enum_inline: Union[None, str]
+        if isinstance(self.nullable_enum_inline, AModelNullableEnumInline):
+            nullable_enum_inline = self.nullable_enum_inline.value
+        else:
+            nullable_enum_inline = self.nullable_enum_inline
 
         any_value = self.any_value
 
@@ -220,6 +238,8 @@ class AModel:
                 "nullable_one_of_models": nullable_one_of_models,
                 "model": model,
                 "nullable_model": nullable_model,
+                "nullable_enum_as_ref": nullable_enum_as_ref,
+                "nullable_enum_inline": nullable_enum_inline,
             }
         )
         if any_value is not UNSET:
@@ -373,14 +393,44 @@ class AModel:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
+                nullable_model = ModelWithUnionProperty.from_dict(data)
 
-                return nullable_model_type_1
+                return nullable_model
             except:  # noqa: E722
                 pass
             return cast(Union["ModelWithUnionProperty", None], data)
 
         nullable_model = _parse_nullable_model(d.pop("nullable_model"))
+
+        def _parse_nullable_enum_as_ref(data: object) -> Union[AnEnumWithNull, None]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                componentsschemas_an_enum_with_null = AnEnumWithNull(data)
+
+                return componentsschemas_an_enum_with_null
+            except:  # noqa: E722
+                pass
+            return cast(Union[AnEnumWithNull, None], data)
+
+        nullable_enum_as_ref = _parse_nullable_enum_as_ref(d.pop("nullable_enum_as_ref"))
+
+        def _parse_nullable_enum_inline(data: object) -> Union[AModelNullableEnumInline, None]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                nullable_enum_inline = AModelNullableEnumInline(data)
+
+                return nullable_enum_inline
+            except:  # noqa: E722
+                pass
+            return cast(Union[AModelNullableEnumInline, None], data)
+
+        nullable_enum_inline = _parse_nullable_enum_inline(d.pop("nullable_enum_inline"))
 
         any_value = d.pop("any_value", UNSET)
 
@@ -495,9 +545,9 @@ class AModel:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                not_required_nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
+                not_required_nullable_model = ModelWithUnionProperty.from_dict(data)
 
-                return not_required_nullable_model_type_1
+                return not_required_nullable_model
             except:  # noqa: E722
                 pass
             return cast(Union["ModelWithUnionProperty", None, Unset], data)
@@ -518,6 +568,8 @@ class AModel:
             nullable_one_of_models=nullable_one_of_models,
             model=model,
             nullable_model=nullable_model,
+            nullable_enum_as_ref=nullable_enum_as_ref,
+            nullable_enum_inline=nullable_enum_inline,
             any_value=any_value,
             an_optional_allof_enum=an_optional_allof_enum,
             nested_list_of_enums=nested_list_of_enums,

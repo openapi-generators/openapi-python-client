@@ -12,6 +12,9 @@ from openapi_python_client.parser.properties import (
     StringProperty,
     UnionProperty,
 )
+from openapi_python_client.parser.properties.float import FloatProperty
+from openapi_python_client.parser.properties.int import IntProperty
+from openapi_python_client.parser.properties.none import NoneProperty
 from openapi_python_client.parser.properties.protocol import ModelProperty, Value
 from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.schema import DataType
@@ -441,14 +444,23 @@ class TestPropertyFromData:
             "ParentAnEnum": prop,
         }
 
+    @pytest.mark.parametrize(
+        "desc,extra_props",
+        [
+            ("3_1_implicit_type", {}),
+            ("3_1_explicit_type", {"type": ["string", "null"]}),
+            ("3_0_implicit_type", {"nullable": True}),
+            ("3_0_explicit_type", {"type": "string", "nullable": True}),
+        ],
+    )
     def test_property_from_data_str_enum_with_null(
-        self, enum_property_factory, union_property_factory, none_property_factory, config
+        self, desc, extra_props, enum_property_factory, union_property_factory, none_property_factory, config
     ):
         from openapi_python_client.parser.properties import Class, Schemas, property_from_data
         from openapi_python_client.schema import Schema
 
         existing = enum_property_factory()
-        data = Schema(title="AnEnum", enum=["A", "B", "C", None], default="B")
+        data = Schema(title="AnEnum", enum=["A", "B", "C", None], default="B", **extra_props)
         name = "my_enum"
         required = True
 
@@ -461,18 +473,19 @@ class TestPropertyFromData:
         # None / null is removed from enum, and property is now nullable
         assert isinstance(prop, UnionProperty), "Enums with None should be converted to UnionProperties"
         enum_prop = enum_property_factory(
-            name="my_enum_type_1",
+            name=name,
             required=required,
             values={"A": "A", "B": "B", "C": "C"},
             class_info=Class(name=ClassName("ParentAnEnum", ""), module_name=PythonIdentifier("parent_an_enum", "")),
             value_type=str,
             default=Value(python_code="ParentAnEnum.B", raw_value="B"),
         )
-        none_property = none_property_factory(name="my_enum_type_0", required=required)
+        none_property = none_property_factory(name=f"{name}_type_0", required=required)
         assert prop == union_property_factory(
             name=name,
             default=Value(python_code="ParentAnEnum.B", raw_value="B"),
             inner_properties=[none_property, enum_prop],
+            required=required,
         )
         assert schemas != new_schemas, "Provided Schemas was mutated"
         assert new_schemas.classes_by_name == {
@@ -748,6 +761,33 @@ class TestPropertyFromData:
 
         assert isinstance(response, UnionProperty)
         assert len(response.inner_properties) == 2
+        assert isinstance(response.inner_properties[0], FloatProperty)
+        assert isinstance(response.inner_properties[1], NoneProperty)
+
+    def test_property_from_data_list_of_types_and_oneof(self, config):
+        from openapi_python_client.parser.properties import Schemas, property_from_data
+
+        name = "union_prop"
+        required = True
+        data = oai.Schema(
+            type=[DataType.NUMBER, DataType.NULL],
+            anyOf=[
+                oai.Schema(type=DataType.NUMBER),
+                oai.Schema(type=DataType.INTEGER),  # this is OK because an integer is also a number
+                oai.Schema(type=DataType.NULL),
+            ],
+        )
+        schemas = Schemas()
+
+        response = property_from_data(
+            name=name, required=required, data=data, schemas=schemas, parent_name="parent", config=config
+        )[0]
+
+        assert isinstance(response, UnionProperty)
+        assert len(response.inner_properties) == 3
+        assert isinstance(response.inner_properties[0], FloatProperty)
+        assert isinstance(response.inner_properties[1], IntProperty)
+        assert isinstance(response.inner_properties[2], NoneProperty)
 
     def test_property_from_data_union_of_one_element(self, model_property_factory, config):
         from openapi_python_client.parser.properties import Schemas, property_from_data
