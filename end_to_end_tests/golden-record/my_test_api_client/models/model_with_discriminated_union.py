@@ -59,23 +59,42 @@ class ModelWithDiscriminatedUnion:
                 return data
             if isinstance(data, Unset):
                 return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                componentsschemas_a_discriminated_union_type_0 = ADiscriminatedUnionType1.from_dict(data)
+            if not isinstance(data, dict):
+                raise TypeError()
+            if "modelType" in data:
+                _discriminator_value = data["modelType"]
 
-                return componentsschemas_a_discriminated_union_type_0
-            except:  # noqa: E722
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                componentsschemas_a_discriminated_union_type_1 = ADiscriminatedUnionType2.from_dict(data)
+                def _parse_1(data: object) -> ADiscriminatedUnionType1:
+                    if not isinstance(data, dict):
+                        raise TypeError()
+                    componentsschemas_a_discriminated_union_type_0 = ADiscriminatedUnionType1.from_dict(data)
 
-                return componentsschemas_a_discriminated_union_type_1
-            except:  # noqa: E722
-                pass
-            return cast(Union["ADiscriminatedUnionType1", "ADiscriminatedUnionType2", None, Unset], data)
+                    return componentsschemas_a_discriminated_union_type_0
+
+                def _parse_2(data: object) -> ADiscriminatedUnionType2:
+                    if not isinstance(data, dict):
+                        raise TypeError()
+                    componentsschemas_a_discriminated_union_type_1 = ADiscriminatedUnionType2.from_dict(data)
+
+                    return componentsschemas_a_discriminated_union_type_1
+
+                def _parse_3(data: object) -> ADiscriminatedUnionType2:
+                    if not isinstance(data, dict):
+                        raise TypeError()
+                    componentsschemas_a_discriminated_union_type_1 = ADiscriminatedUnionType2.from_dict(data)
+
+                    return componentsschemas_a_discriminated_union_type_1
+
+                _discriminator_mapping = {
+                    "type1": _parse_1,
+                    "type2": _parse_2,
+                    "type2-another-value": _parse_3,
+                }
+                if _parse_fn := _discriminator_mapping.get(_discriminator_value):
+                    return cast(
+                        Union["ADiscriminatedUnionType1", "ADiscriminatedUnionType2", None, Unset], _parse_fn(data)
+                    )
+            raise TypeError("unrecognized value for property modelType")
 
         discriminated_union = _parse_discriminated_union(d.pop("discriminated_union", UNSET))
 
