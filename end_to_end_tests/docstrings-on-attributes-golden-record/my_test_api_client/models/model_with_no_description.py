@@ -5,36 +5,45 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlinedAdditionalProperty")
+T = TypeVar("T", bound="ModelWithNoDescription")
 
 
 @_attrs_define
-class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
-    extra_props_prop: Union[Unset, str] = UNSET
+class ModelWithNoDescription:
+    prop_with_no_desc: Union[Unset, str] = UNSET
+    prop_with_desc: Union[Unset, str] = UNSET
+    """ This is a nice property. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        extra_props_prop = self.extra_props_prop
+        prop_with_no_desc = self.prop_with_no_desc
+
+        prop_with_desc = self.prop_with_desc
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if extra_props_prop is not UNSET:
-            field_dict["extra_props_prop"] = extra_props_prop
+        if prop_with_no_desc is not UNSET:
+            field_dict["propWithNoDesc"] = prop_with_no_desc
+        if prop_with_desc is not UNSET:
+            field_dict["propWithDesc"] = prop_with_desc
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
-        extra_props_prop = d.pop("extra_props_prop", UNSET)
+        prop_with_no_desc = d.pop("propWithNoDesc", UNSET)
 
-        model_with_additional_properties_inlined_additional_property = cls(
-            extra_props_prop=extra_props_prop,
+        prop_with_desc = d.pop("propWithDesc", UNSET)
+
+        model_with_no_description = cls(
+            prop_with_no_desc=prop_with_no_desc,
+            prop_with_desc=prop_with_desc,
         )
 
-        model_with_additional_properties_inlined_additional_property.additional_properties = d
-        return model_with_additional_properties_inlined_additional_property
+        model_with_no_description.additional_properties = d
+        return model_with_no_description
 
     @property
     def additional_keys(self) -> list[str]:

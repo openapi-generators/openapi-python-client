@@ -86,7 +86,7 @@ def regen_metadata_snapshots():
 
 def regen_docstrings_on_attributes_golden_record():
     _regenerate(
-        spec_file_name="baseline_openapi_3.0.json",
+        spec_file_name="docstrings_on_attributes.yml",
         golden_record_dir="docstrings-on-attributes-golden-record",
         config_file_name="docstrings_on_attributes.config.yml",
     )
