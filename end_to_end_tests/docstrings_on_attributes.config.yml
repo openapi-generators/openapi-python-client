@@ -1,0 +1,15 @@
+class_overrides:
+  _ABCResponse:
+    class_name: ABCResponse
+    module_name: abc_response
+  AnEnumValueItem:
+    class_name: AnEnumValue
+    module_name: an_enum_value
+  NestedListOfEnumsItemItem:
+    class_name: AnEnumValue
+    module_name: an_enum_value
+field_prefix: attr_
+content_type_overrides:
+  openapi/python/client: application/json
+generate_all_tags: true
+docstrings_on_attributes: true

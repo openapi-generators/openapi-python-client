@@ -14,19 +14,12 @@ dependencies = [
 [tool.pdm]
 distribution = true
 
-[tool.pdm.dev-dependencies]
-dev = [
-    "pytest",
-    "mypy",
-    "pytest-asyncio>=0.23.5",
-]
-
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
- 
+
 [tool.ruff]
 line-length = 120
 
 [tool.ruff.lint]
-select = ["F", "I"]
+select = ["F", "I", "UP"]
