@@ -1,4 +1,4 @@
-from typing import Any, ForwardRef, List, Union
+from typing import Any, ForwardRef, Union
 
 from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
@@ -65,9 +65,9 @@ class TestArraySchemas:
         )
 
     def test_type_hints(self, ModelWithArrayOfAny, ModelWithArrayOfInts, ModelWithArrayOfObjects, Unset):
-        assert_model_property_type_hint(ModelWithArrayOfAny, "array_prop", Union[List[Any], Unset])
-        assert_model_property_type_hint(ModelWithArrayOfInts, "array_prop", Union[List[int], Unset])
-        assert_model_property_type_hint(ModelWithArrayOfObjects, "array_prop", Union[List[ForwardRef("SimpleObject")], Unset])
+        assert_model_property_type_hint(ModelWithArrayOfAny, "array_prop", Union[list[Any], Unset])
+        assert_model_property_type_hint(ModelWithArrayOfInts, "array_prop", Union[list[int], Unset])
+        assert_model_property_type_hint(ModelWithArrayOfObjects, "array_prop", Union[list["SimpleObject"], Unset]) # type: ignore
 
 
 @with_generated_client_fixture(
@@ -133,16 +133,16 @@ class TestArraysWithPrefixItems:
         )
 
     def test_type_hints(self, ModelWithSinglePrefixItem, ModelWithPrefixItems, ModelWithMixedItems, Unset):
-        assert_model_property_type_hint(ModelWithSinglePrefixItem, "array_prop", Union[List[str], Unset])
+        assert_model_property_type_hint(ModelWithSinglePrefixItem, "array_prop", Union[list[str], Unset])
         assert_model_property_type_hint(
             ModelWithPrefixItems,
             "array_prop",
-            Union[List[Union[ForwardRef("SimpleObject"), str]], Unset],
+            Union[list[Union[ForwardRef("SimpleObject"), str]], Unset],
         )
         assert_model_property_type_hint(
             ModelWithMixedItems,
             "array_prop",
-            Union[List[Union[ForwardRef("SimpleObject"), str]], Unset],
+            Union[list[Union[ForwardRef("SimpleObject"), str]], Unset],
         )
         # Note, this test is asserting the current behavior which, due to limitations of the implementation
         # (see: https://github.com/openapi-generators/openapi-python-client/pull/1130), is not really doing

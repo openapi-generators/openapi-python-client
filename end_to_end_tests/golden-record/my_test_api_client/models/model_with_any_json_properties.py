@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -14,16 +14,16 @@ T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 class ModelWithAnyJsonProperties:
     """ """
 
-    additional_properties: Dict[
-        str, Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]
+    additional_properties: dict[
+        str, Union["ModelWithAnyJsonPropertiesAdditionalProperty", bool, float, int, list[str], str]
     ] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.model_with_any_json_properties_additional_property import (
             ModelWithAnyJsonPropertiesAdditionalProperty,
         )
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             if isinstance(prop, ModelWithAnyJsonPropertiesAdditionalProperty):
                 field_dict[prop_name] = prop.to_dict()
@@ -36,7 +36,7 @@ class ModelWithAnyJsonProperties:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         from ..models.model_with_any_json_properties_additional_property import (
             ModelWithAnyJsonPropertiesAdditionalProperty,
         )
@@ -49,7 +49,7 @@ class ModelWithAnyJsonProperties:
 
             def _parse_additional_property(
                 data: object,
-            ) -> Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]:
+            ) -> Union["ModelWithAnyJsonPropertiesAdditionalProperty", bool, float, int, list[str], str]:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
@@ -61,13 +61,13 @@ class ModelWithAnyJsonProperties:
                 try:
                     if not isinstance(data, list):
                         raise TypeError()
-                    additional_property_type_1 = cast(List[str], data)
+                    additional_property_type_1 = cast(list[str], data)
 
                     return additional_property_type_1
                 except:  # noqa: E722
                     pass
                 return cast(
-                    Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str], data
+                    Union["ModelWithAnyJsonPropertiesAdditionalProperty", bool, float, int, list[str], str], data
                 )
 
             additional_property = _parse_additional_property(prop_dict)
@@ -78,16 +78,16 @@ class ModelWithAnyJsonProperties:
         return model_with_any_json_properties
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(
         self, key: str
-    ) -> Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]:
+    ) -> Union["ModelWithAnyJsonPropertiesAdditionalProperty", bool, float, int, list[str], str]:
         return self.additional_properties[key]
 
     def __setitem__(
-        self, key: str, value: Union["ModelWithAnyJsonPropertiesAdditionalProperty", List[str], bool, float, int, str]
+        self, key: str, value: Union["ModelWithAnyJsonPropertiesAdditionalProperty", bool, float, int, list[str], str]
     ) -> None:
         self.additional_properties[key] = value
 

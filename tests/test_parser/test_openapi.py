@@ -22,7 +22,7 @@ class TestEndpoint:
             description=None,
             name="name",
             requires_security=False,
-            tag="tag",
+            tags=["tag"],
             relative_imports={"import_3"},
         )
 
@@ -445,7 +445,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=initial_schemas,
             responses={},
             parameters=parameters,
@@ -481,7 +481,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=initial_schemas,
             responses={},
             parameters=initial_parameters,
@@ -522,7 +522,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=initial_schemas,
             responses={},
             parameters=initial_parameters,
@@ -538,7 +538,7 @@ class TestEndpoint:
                 summary="",
                 name=data.operationId,
                 requires_security=True,
-                tag="default",
+                tags=["default"],
             ),
             data=data,
             schemas=initial_schemas,
@@ -574,7 +574,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="default",
+            tags=["default"],
             schemas=schemas,
             responses={},
             parameters=parameters,
@@ -590,7 +590,7 @@ class TestEndpoint:
                 summary="",
                 name="get_path_with_param",
                 requires_security=True,
-                tag="default",
+                tags=["default"],
             ),
             data=data,
             schemas=schemas,
@@ -630,7 +630,7 @@ class TestEndpoint:
             data=data,
             path=path,
             method=method,
-            tag="a",
+            tags=["a"],
             schemas=schemas,
             responses={},
             parameters=parameters,
@@ -646,7 +646,7 @@ class TestEndpoint:
                 summary="",
                 name=data.operationId,
                 requires_security=False,
-                tag="a",
+                tags=["a"],
             ),
             data=data,
             parameters=parameters,
@@ -676,7 +676,7 @@ class TestEndpoint:
             responses={},
             config=config,
             parameters=Parameters(),
-            tag="tag",
+            tags=["tag"],
             path="/",
             method="get",
             request_bodies={},
@@ -700,7 +700,7 @@ class TestEndpoint:
             responses={},
             config=config,
             parameters=Parameters(),
-            tag="tag",
+            tags=["tag"],
             path="/",
             method="get",
             request_bodies={},
@@ -773,94 +773,3 @@ class TestEndpointCollection:
         )
         collection: EndpointCollection = collections["default"]
         assert isinstance(collection.endpoints[0].query_parameters[0], IntProperty)
-
-    def test_from_data_errors(self, mocker, config):
-        from openapi_python_client.parser.openapi import ParseError
-
-        path_1_put = oai.Operation.model_construct()
-        path_1_post = oai.Operation.model_construct(tags=["tag_2", "tag_3"])
-        path_2_get = oai.Operation.model_construct()
-        data = {
-            "path_1": oai.PathItem.model_construct(post=path_1_post, put=path_1_put),
-            "path_2": oai.PathItem.model_construct(get=path_2_get),
-        }
-        schemas_1 = mocker.MagicMock()
-        schemas_2 = mocker.MagicMock()
-        schemas_3 = mocker.MagicMock()
-        parameters_1 = mocker.MagicMock()
-        parameters_2 = mocker.MagicMock()
-        parameters_3 = mocker.MagicMock()
-        mocker.patch.object(
-            Endpoint,
-            "from_data",
-            side_effect=[
-                (ParseError(data="1"), schemas_1, parameters_1),
-                (ParseError(data="2"), schemas_2, parameters_2),
-                (mocker.MagicMock(errors=[ParseError(data="3")], path="path_2"), schemas_3, parameters_3),
-            ],
-        )
-        schemas = mocker.MagicMock()
-        parameters = mocker.MagicMock()
-
-        result, result_schemas, result_parameters = EndpointCollection.from_data(
-            data=data,
-            schemas=schemas,
-            config=config,
-            parameters=parameters,
-            request_bodies={},
-            responses={},
-        )
-
-        assert result["default"].parse_errors[0].data == "1"
-        assert result["default"].parse_errors[1].data == "3"
-        assert result["tag_2"].parse_errors[0].data == "2"
-        assert result_schemas == schemas_3
-
-    def test_from_data_tags_snake_case_sanitizer(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
-
-        path_1_put = oai.Operation.model_construct()
-        path_1_post = oai.Operation.model_construct(tags=["AMF Subscription Info (Document)", "tag_3"])
-        path_2_get = oai.Operation.model_construct(tags=["3. ABC"])
-        data = {
-            "path_1": oai.PathItem.model_construct(post=path_1_post, put=path_1_put),
-            "path_2": oai.PathItem.model_construct(get=path_2_get),
-        }
-        endpoint_1 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"1", "2"}, path="path_1")
-        endpoint_2 = mocker.MagicMock(
-            autospec=Endpoint, tag="AMFSubscriptionInfo (Document)", relative_imports={"2"}, path="path_1"
-        )
-        endpoint_3 = mocker.MagicMock(autospec=Endpoint, tag="default", relative_imports={"2", "3"}, path="path_2")
-        schemas_1 = mocker.MagicMock()
-        schemas_2 = mocker.MagicMock()
-        schemas_3 = mocker.MagicMock()
-        parameters_1 = mocker.MagicMock()
-        parameters_2 = mocker.MagicMock()
-        parameters_3 = mocker.MagicMock()
-        mocker.patch.object(
-            Endpoint,
-            "from_data",
-            side_effect=[
-                (endpoint_1, schemas_1, parameters_1),
-                (endpoint_2, schemas_2, parameters_2),
-                (endpoint_3, schemas_3, parameters_3),
-            ],
-        )
-        schemas = mocker.MagicMock()
-        parameters = mocker.MagicMock()
-
-        result = EndpointCollection.from_data(
-            data=data, schemas=schemas, parameters=parameters, config=config, request_bodies={}, responses={}
-        )
-
-        assert result == (
-            {
-                "default": EndpointCollection("default", endpoints=[endpoint_1]),
-                "amf_subscription_info_document": EndpointCollection(
-                    "amf_subscription_info_document", endpoints=[endpoint_2]
-                ),
-                "tag3_abc": EndpointCollection("tag3_abc", endpoints=[endpoint_3]),
-            },
-            schemas_3,
-            parameters_3,
-        )

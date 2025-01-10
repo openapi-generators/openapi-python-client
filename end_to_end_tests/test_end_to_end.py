@@ -1,7 +1,7 @@
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 import pytest
 from click.testing import Result
@@ -16,9 +16,9 @@ from openapi_python_client.cli import app
 def _compare_directories(
     record: Path,
     test_subject: Path,
-    expected_differences: Dict[Path, str],
-    expected_missing: Optional[Set[str]] = None,
-    ignore: List[str] = None,
+    expected_differences: Optional[dict[Path, str]] = None,
+    expected_missing: Optional[set[str]] = None,
+    ignore: list[str] = None,
     depth=0,
 ):
     """
@@ -81,11 +81,11 @@ def _compare_directories(
 
 def run_e2e_test(
     openapi_document: str,
-    extra_args: List[str],
-    expected_differences: Optional[Dict[Path, str]] = None,
+    extra_args: list[str],
+    expected_differences: Optional[dict[Path, str]] = None,
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
-    expected_missing: Optional[Set[str]] = None,
+    expected_missing: Optional[set[str]] = None,
     specify_output_path_explicitly: bool = True,
 ) -> Result:
     with generate_client(openapi_document, extra_args, output_path, specify_output_path_explicitly=specify_output_path_explicitly) as g:

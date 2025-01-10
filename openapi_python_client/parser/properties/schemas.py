@@ -1,16 +1,16 @@
 __all__ = [
     "Class",
-    "Schemas",
     "Parameters",
     "ReferencePath",
-    "parse_reference_path",
-    "update_schemas_with_data",
-    "update_parameters_with_data",
-    "parameter_from_reference",
+    "Schemas",
     "parameter_from_data",
+    "parameter_from_reference",
+    "parse_reference_path",
+    "update_parameters_with_data",
+    "update_schemas_with_data",
 ]
 
-from typing import TYPE_CHECKING, Dict, List, NewType, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, NewType, Union, cast
 from urllib.parse import urlparse
 
 from attrs import define, evolve, field
@@ -83,13 +83,13 @@ class Class:
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
-    classes_by_reference: Dict[ReferencePath, Property] = field(factory=dict)
-    dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = field(factory=dict)
-    classes_by_name: Dict[ClassName, Property] = field(factory=dict)
-    models_to_process: List[ModelProperty] = field(factory=list)
-    errors: List[ParseError] = field(factory=list)
+    classes_by_reference: dict[ReferencePath, Property] = field(factory=dict)
+    dependencies: dict[ReferencePath, set[Union[ReferencePath, ClassName]]] = field(factory=dict)
+    classes_by_name: dict[ClassName, Property] = field(factory=dict)
+    models_to_process: list[ModelProperty] = field(factory=list)
+    errors: list[ParseError] = field(factory=list)
 
-    def add_dependencies(self, ref_path: ReferencePath, roots: Set[Union[ReferencePath, ClassName]]) -> None:
+    def add_dependencies(self, ref_path: ReferencePath, roots: set[Union[ReferencePath, ClassName]]) -> None:
         """Record new dependencies on the given ReferencePath
 
         Args:
@@ -159,9 +159,9 @@ def update_schemas_with_data(
 class Parameters:
     """Structure for containing all defined, shareable, and reusable parameters"""
 
-    classes_by_reference: Dict[ReferencePath, Parameter] = field(factory=dict)
-    classes_by_name: Dict[ClassName, Parameter] = field(factory=dict)
-    errors: List[ParseError] = field(factory=list)
+    classes_by_reference: dict[ReferencePath, Parameter] = field(factory=dict)
+    classes_by_name: dict[ClassName, Parameter] = field(factory=dict)
+    errors: list[ParseError] = field(factory=list)
 
 
 def parameter_from_data(
@@ -170,7 +170,7 @@ def parameter_from_data(
     data: Union[oai.Reference, oai.Parameter],
     parameters: Parameters,
     config: Config,
-) -> Tuple[Union[Parameter, ParameterError], Parameters]:
+) -> tuple[Union[Parameter, ParameterError], Parameters]:
     """Generates parameters from an OpenAPI Parameter spec."""
 
     if isinstance(data, oai.Reference):

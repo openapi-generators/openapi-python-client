@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -6,8 +6,6 @@ from .reference import Reference
 
 if TYPE_CHECKING:  # pragma: no cover
     from .header import Header
-else:
-    Header = "Header"
 
 
 class Encoding(BaseModel):
@@ -19,11 +17,13 @@ class Encoding(BaseModel):
     """
 
     contentType: Optional[str] = None
-    headers: Optional[Dict[str, Union[Header, Reference]]] = None
+    headers: Optional[dict[str, Union["Header", Reference]]] = None
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False
     model_config = ConfigDict(
+        # `Header` is an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

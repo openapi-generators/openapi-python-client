@@ -119,7 +119,7 @@ class PropertyProtocol(Protocol):
         if json:
             type_string = self.get_base_json_type_string(quoted=quoted)
         elif multipart:
-            type_string = "Tuple[None, bytes, str]"
+            type_string = "tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string(quoted=quoted)
 

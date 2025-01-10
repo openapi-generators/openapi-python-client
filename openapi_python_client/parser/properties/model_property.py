@@ -33,7 +33,7 @@ class ModelProperty(PropertyProtocol, HasNamedClass):
     lazy_imports: set[str] | None
     additional_properties: Property | None
     ref_path: ReferencePath | None = None
-    _json_type_string: ClassVar[str] = "Dict[str, Any]"
+    _json_type_string: ClassVar[str] = "dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
     json_is_dict: ClassVar[bool] = True
@@ -155,7 +155,6 @@ class ModelProperty(PropertyProtocol, HasNamedClass):
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
-                "from typing import Dict",
                 "from typing import cast",
             }
         )
@@ -204,7 +203,7 @@ class ModelProperty(PropertyProtocol, HasNamedClass):
         if json:
             type_string = self.get_base_json_type_string()
         elif multipart:
-            type_string = "Tuple[None, bytes, str]"
+            type_string = "tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string()
 

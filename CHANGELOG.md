@@ -13,6 +13,72 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.23.0 (2024-12-24)
+
+### Breaking Changes
+
+#### Delete fewer files with `--overwrite`
+
+`--overwrite` will no longer delete the entire output directory before regenerating. Instead, it will only delete 
+specific, known directories within that directory. Right now, that is only the generated `models` and `api` directories.
+
+Other generated files, like `README.md`, will be overwritten. Extra files and directories outside of those listed above 
+will be left untouched, so you can any extra modules or files around while still updating `pyproject.toml` automatically.
+
+Closes #1105.
+
+### Features
+
+- Support httpx 0.28 (#1172)
+
+#### Add `generate_all_tags` config option
+
+You can now, optionally, generate **duplicate** endpoint functions/modules using _every_ tag for an endpoint,
+not just the first one, by setting `generate_all_tags: true` in your configuration file.
+
+### Fixes
+
+- Support Typer 0.14 and 0.15 (#1173)
+
+#### Fix minimum `attrs` version
+
+The minimum `attrs` dependency version was incorrectly set to 21.3.0. This has been corrected to 22.2.0, the minimum 
+supported version since `openapi-python-client` 0.19.1.
+
+Closes #1084, thanks @astralblue!
+
+#### Fix compatibility with Pydantic 2.10+
+
+##1176 by @Viicos
+
+Set `defer_build` to models that we know will fail to build, and call `model_rebuild`
+in the `__init__.py` file.
+
+## 0.22.0 (2024-11-23)
+
+### Breaking Changes
+
+#### Drop support for Python 3.8
+
+Python 3.8 is no longer supported. "New" 3.9 syntax, like generics on builtin collections, is used both in the generator 
+and the generated code.
+
+#### `type` is now a reserved field name
+
+Because `type` is used in type annotations now, it is no longer a valid field name. Fields which were previously named 
+`type` will be renamed to `type_`.
+
+### Features
+
+- Support Ruff 0.8 (#1169)
+
+## 0.21.7 (2024-10-28)
+
+### Fixes
+
+- allow required fields list to be specified as empty (#651) (#1149)
+- import cast for required const properties, since it's used in the template (#1153)
+
 ## 0.21.6 (2024-10-20)
 
 ### Features

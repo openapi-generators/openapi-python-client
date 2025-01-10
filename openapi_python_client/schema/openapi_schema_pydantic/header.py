@@ -21,6 +21,8 @@ class Header(Parameter):
     name: str = Field(default="")
     param_in: ParameterLocation = Field(default=ParameterLocation.HEADER, alias="in")
     model_config = ConfigDict(
+        # `Parameter` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={
@@ -29,10 +31,3 @@ class Header(Parameter):
             ]
         },
     )
-
-
-# Calling model_rebuild() here helps Pydantic to resolve the forward references that were used
-# in defining Parameter and Encoding. Without this call, any subtle change to the loading order
-# of schema submodules could result in an error like "Parameter is not fully defined".
-# See: https://docs.pydantic.dev/latest/concepts/models/#rebuilding-model-schema
-Parameter.model_rebuild()

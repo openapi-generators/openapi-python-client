@@ -111,6 +111,16 @@ literal_enums: true
 
 This is especially useful if enum values, when transformed to their Python names, end up conflicting due to case sensitivity or special symbols.
 
+### generate_all_tags
+
+`openapi-python-client` generates module names within the `api` module based on the OpenAPI `tags` of each endpoint. 
+By default, only the _first_ tag is generated. If you want to generate **duplicate** endpoint functions using _every_ tag 
+listed, you can enable this option:
+
+```yaml
+generate_all_tags: true
+```
+
 ### project_name_override and package_name_override
 
 Used to change the name of generated client library project/package. If the project name is changed but an override for the package name

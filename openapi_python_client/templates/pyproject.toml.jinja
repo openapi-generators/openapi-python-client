@@ -9,7 +9,7 @@ version = "{{ package_version }}"
 description = "{{ package_description }}"
 authors = []
 readme = "README.md"
-{% if pdm %}requires-python = ">=3.8,<4.0"{% endif %}
+{% if pdm %}requires-python = ">=3.9,<4.0"{% endif %}
 {% if poetry %}
 packages = [
     {include = "{{ package_name }}"},
@@ -19,8 +19,8 @@ include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
 
 {% if pdm %}
 dependencies = [
-    "httpx>=0.20.0,<0.28.0",
-    "attrs>=21.3.0",
+    "httpx>=0.20.0,<0.29.0",
+    "attrs>=22.2.0",
     "python-dateutil>=2.8.0",
 ]
 
@@ -30,9 +30,9 @@ distribution = true
 {% if poetry %}
 
 [tool.poetry.dependencies]
-python = "^3.8"
-httpx = ">=0.20.0,<0.28.0"
-attrs = ">=21.3.0"
+python = "^3.9"
+httpx = ">=0.20.0,<0.29.0"
+attrs = ">=22.2.0"
 python-dateutil = "^2.8.0"
 {% endif %}
 

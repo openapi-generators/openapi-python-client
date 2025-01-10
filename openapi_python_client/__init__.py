@@ -4,10 +4,11 @@ import json
 import mimetypes
 import shutil
 import subprocess
+from collections.abc import Sequence
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Optional, Union
 
 import httpcore
 import httpx
@@ -106,19 +107,17 @@ class Project:
             openapi=self.openapi,
             endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
         )
-        self.errors: List[GeneratorError] = []
+        self.errors: list[GeneratorError] = []
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
 
         print(f"Generating {self.project_dir}")
-        if self.config.overwrite:
-            shutil.rmtree(self.project_dir, ignore_errors=True)
-
         try:
             self.project_dir.mkdir()
         except FileExistsError:
-            return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
+            if not self.config.overwrite:
+                return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
         self._create_package()
         self._build_metadata()
         self._build_models()
@@ -152,8 +151,8 @@ class Project:
                 )
             )
 
-    def _get_errors(self) -> List[GeneratorError]:
-        errors: List[GeneratorError] = []
+    def _get_errors(self) -> list[GeneratorError]:
+        errors: list[GeneratorError] = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
         errors.extend(self.openapi.errors)
@@ -162,7 +161,7 @@ class Project:
 
     def _create_package(self) -> None:
         if self.package_dir != self.project_dir:
-            self.package_dir.mkdir()
+            self.package_dir.mkdir(exist_ok=True)
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
@@ -218,6 +217,7 @@ class Project:
     def _build_models(self) -> None:
         # Generate models
         models_dir = self.package_dir / "models"
+        shutil.rmtree(models_dir, ignore_errors=True)
         models_dir.mkdir()
         models_init = models_dir / "__init__.py"
         imports = []
@@ -263,6 +263,7 @@ class Project:
 
         # Generate endpoints
         api_dir = self.package_dir / "api"
+        shutil.rmtree(api_dir, ignore_errors=True)
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")
@@ -330,7 +331,7 @@ def generate(
     return project.build()
 
 
-def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
+def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[dict[str, Any], GeneratorError]:
     if content_type == "application/json":
         try:
             return json.loads(data.decode())
@@ -344,7 +345,7 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
-def _get_document(*, source: Union[str, Path], timeout: int) -> Union[Dict[str, Any], GeneratorError]:
+def _get_document(*, source: Union[str, Path], timeout: int) -> Union[dict[str, Any], GeneratorError]:
     yaml_bytes: bytes
     content_type: Optional[str]
     if isinstance(source, str):

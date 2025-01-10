@@ -1,6 +1,8 @@
 """ Contains some shared types for properties """
+
+from collections.abc import MutableMapping
 from http import HTTPStatus
-from typing import Any, BinaryIO, Generic, MutableMapping, Optional, Tuple, TypeVar, Literal
+from typing import BinaryIO, Generic, Optional, TypeVar, Literal
 
 from attrs import define
 
@@ -13,7 +15,7 @@ class Unset:
 UNSET: Unset = Unset()
 
 {# Used as `FileProperty._json_type_string` #}
-FileJsonType = Tuple[Optional[str], BinaryIO, Optional[str]]
+FileJsonType = tuple[Optional[str], BinaryIO, Optional[str]]
 
 
 @define
@@ -42,4 +44,4 @@ class Response(Generic[T]):
     parsed: Optional[T]
 
 
-__all__ = ["File", "Response", "FileJsonType", "Unset", "UNSET"]
+__all__ = ["UNSET", "File", "FileJsonType", "Response", "Unset"]

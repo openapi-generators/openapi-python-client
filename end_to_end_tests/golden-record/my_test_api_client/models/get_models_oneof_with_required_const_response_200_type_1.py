@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Type, TypeVar, Union, cast
+from typing import Any, Literal, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -12,24 +12,24 @@ T = TypeVar("T", bound="GetModelsOneofWithRequiredConstResponse200Type1")
 class GetModelsOneofWithRequiredConstResponse200Type1:
     """
     Attributes:
-        type (Literal['beta']):
+        type_ (Literal['beta']):
         texture (Union[Unset, str]):
     """
 
-    type: Literal["beta"]
+    type_: Literal["beta"]
     texture: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        type = self.type
+    def to_dict(self) -> dict[str, Any]:
+        type_ = self.type_
 
         texture = self.texture
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "type": type,
+                "type": type_,
             }
         )
         if texture is not UNSET:
@@ -38,16 +38,16 @@ class GetModelsOneofWithRequiredConstResponse200Type1:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
         d = src_dict.copy()
-        type = cast(Literal["beta"], d.pop("type"))
-        if type != "beta":
-            raise ValueError(f"type must match const 'beta', got '{type}'")
+        type_ = cast(Literal["beta"], d.pop("type"))
+        if type_ != "beta":
+            raise ValueError(f"type must match const 'beta', got '{type_}'")
 
         texture = d.pop("texture", UNSET)
 
         get_models_oneof_with_required_const_response_200_type_1 = cls(
-            type=type,
+            type_=type_,
             texture=texture,
         )
 
@@ -55,7 +55,7 @@ class GetModelsOneofWithRequiredConstResponse200Type1:
         return get_models_oneof_with_required_const_response_200_type_1
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

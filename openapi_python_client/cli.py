@@ -1,7 +1,8 @@
 import codecs
+from collections.abc import Sequence
 from pathlib import Path
 from pprint import pformat
-from typing import Optional, Sequence, Union
+from typing import Optional, Union
 
 import typer
 
@@ -9,7 +10,7 @@ from openapi_python_client import MetaType
 from openapi_python_client.config import Config, ConfigFile
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
-app = typer.Typer()
+app = typer.Typer(name="openapi-python-client")
 
 
 def _version_callback(value: bool) -> None:
@@ -62,7 +63,7 @@ def _process_config(
 # noinspection PyUnusedLocal
 
 
-@app.callback(name="openapi-python-client")
+@app.callback()
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
 ) -> None:

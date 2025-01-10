@@ -1163,9 +1163,7 @@
     },
     "/tag_with_number": {
       "get": {
-        "tags": [
-          "1"
-        ],
+        "tags": ["1", "2"],
         "responses": {
           "200": {
             "description": "Success"
