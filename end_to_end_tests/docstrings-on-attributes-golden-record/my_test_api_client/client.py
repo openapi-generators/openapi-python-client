@@ -27,14 +27,10 @@ class Client:
 
         ``httpx_args``: A dictionary of additional arguments to be passed to the ``httpx.Client`` and ``httpx.AsyncClient`` constructor.
 
-
-    Attributes:
-        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
-            status code that was not documented in the source OpenAPI document. Can also be provided as a keyword
-            argument to the constructor.
     """
 
     raise_on_unexpected_status: bool = field(default=False, kw_only=True)
+    """Whether or not to raise an errors.UnexpectedStatus if the API returns a status code that was not documented in the source OpenAPI document. Can also be provided as a keyword argument to the constructor."""
     _base_url: str = field(alias="base_url")
     _cookies: dict[str, str] = field(factory=dict, kw_only=True, alias="cookies")
     _headers: dict[str, str] = field(factory=dict, kw_only=True, alias="headers")
@@ -154,17 +150,10 @@ class AuthenticatedClient:
 
         ``httpx_args``: A dictionary of additional arguments to be passed to the ``httpx.Client`` and ``httpx.AsyncClient`` constructor.
 
-
-    Attributes:
-        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
-            status code that was not documented in the source OpenAPI document. Can also be provided as a keyword
-            argument to the constructor.
-        token: The token to use for authentication
-        prefix: The prefix to use for the Authorization header
-        auth_header_name: The name of the Authorization header
     """
 
     raise_on_unexpected_status: bool = field(default=False, kw_only=True)
+    """Whether or not to raise an errors.UnexpectedStatus if the API returns a status code that was not documented in the source OpenAPI document. Can also be provided as a keyword argument to the constructor."""
     _base_url: str = field(alias="base_url")
     _cookies: dict[str, str] = field(factory=dict, kw_only=True, alias="cookies")
     _headers: dict[str, str] = field(factory=dict, kw_only=True, alias="headers")
@@ -176,8 +165,11 @@ class AuthenticatedClient:
     _async_client: Optional[httpx.AsyncClient] = field(default=None, init=False)
 
     token: str
+    """The token to use for authentication"""
     prefix: str = "Bearer"
+    """The prefix to use for the Authorization header"""
     auth_header_name: str = "Authorization"
+    """The name of the Authorization header"""
 
     def with_headers(self, headers: dict[str, str]) -> "AuthenticatedClient":
         """Get a new client matching this one with additional headers"""
