@@ -95,6 +95,7 @@ class Project:
 
         self.env.filters.update(TEMPLATE_FILTERS)
         self.env.globals.update(
+            config=config,
             utils=utils,
             python_identifier=lambda x: utils.PythonIdentifier(x, config.field_prefix),
             class_name=lambda x: utils.ClassName(x, config.field_prefix),

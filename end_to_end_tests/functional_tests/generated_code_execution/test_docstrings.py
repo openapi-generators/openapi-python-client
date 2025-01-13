@@ -1,9 +1,11 @@
+import re
 from typing import Any, List
 
 from end_to_end_tests.functional_tests.helpers import (
     with_generated_code_import,
     with_generated_client_fixture,
 )
+from end_to_end_tests.generated_client import GeneratedClientContext
 
 
 class DocstringParser:
@@ -36,16 +38,55 @@ components:
       required: ["reqStr", "undescribedProp"]
 """)
 @with_generated_code_import(".models.MyModel")
-class TestSchemaDocstrings:
+class TestSchemaDocstringsDefaultBehavior:
     def test_model_description(self, MyModel):
         assert DocstringParser(MyModel).lines[0] == "I like this type."
 
-    def test_model_properties(self, MyModel):
+    def test_model_properties_in_model_description(self, MyModel):
         assert set(DocstringParser(MyModel).get_section("Attributes:")) == {
             "req_str (str): This is necessary.",
             "opt_str (Union[Unset, str]): This isn't necessary.",
             "undescribed_prop (str):",
         }
+
+
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    MyModel:
+      description: I like this type.
+      type: object
+      properties:
+        prop1:
+          type: string
+          description: This attribute has a description
+        prop2:
+          type: string  # no description for this one
+      required: ["prop1", "prop2"]
+""",
+config="docstrings_on_attributes: true",
+)
+@with_generated_code_import(".models.MyModel")
+class TestSchemaWithDocstringsOnAttributesOption:
+    def test_model_description_is_entire_docstring(self, MyModel):
+        assert MyModel.__doc__.strip() == "I like this type."
+
+    def test_attrs_have_docstrings(self, generated_client: GeneratedClientContext):
+        # A docstring that appears after an attribute is *not* stored in __doc__ anywhere
+        # by the interpreter, so we can't inspect it that way-- but it's still valid for it
+        # to appear there, and it will be recognized by documentation tools. So we'll assert
+        # that these strings appear in the source code. The code should look like this:
+        #     class MyModel:
+        #         """I like this type."""
+        #         prop1: str
+        #         """This attribute has a description"""
+        #         prop2: str
+        # 
+        source_file_path = generated_client.output_path / generated_client.base_module / "models" / "my_model.py"
+        content = source_file_path.read_text()
+        assert re.search('\n *prop1: *str\n *""" *This attribute has a description *"""\n', content)
+        assert re.search('\n *prop2: *str\n *[^"]', content)
 
 
 @with_generated_client_fixture(

@@ -41,6 +41,7 @@ class ConfigFile(BaseModel):
     package_version_override: Optional[str] = None
     use_path_prefixes_for_title_model_names: bool = True
     post_hooks: Optional[list[str]] = None
+    docstrings_on_attributes: bool = False
     field_prefix: str = "field_"
     generate_all_tags: bool = False
     http_timeout: int = 5
@@ -70,6 +71,7 @@ class Config:
     package_version_override: Optional[str]
     use_path_prefixes_for_title_model_names: bool
     post_hooks: list[str]
+    docstrings_on_attributes: bool
     field_prefix: str
     generate_all_tags: bool
     http_timeout: int
@@ -111,6 +113,7 @@ class Config:
             package_version_override=config_file.package_version_override,
             use_path_prefixes_for_title_model_names=config_file.use_path_prefixes_for_title_model_names,
             post_hooks=post_hooks,
+            docstrings_on_attributes=config_file.docstrings_on_attributes,
             field_prefix=config_file.field_prefix,
             generate_all_tags=config_file.generate_all_tags,
             http_timeout=config_file.http_timeout,

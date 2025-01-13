@@ -100,6 +100,16 @@ class_overrides:
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the `models` folder.
 
+### docstrings_on_attributes
+
+By default, when `openapi-python-client` generates a model class, it includes a list of attributes and their
+descriptions in the docstring for the class. If you set this option to `true`, then the attribute descriptions
+will be put in docstrings for the attributes themselves, and will not be in the class docstring.
+
+```yaml
+docstrings_on_attributes: true
+```
+
 ### literal_enums
 
 By default, `openapi-python-client` generates classes inheriting for `Enum` for enums. It can instead use `Literal` 
