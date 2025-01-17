@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, Stri
 from ..data_type import DataType
 from .discriminator import Discriminator
 from .external_documentation import ExternalDocumentation
-from .reference import Reference
+from .reference import ReferenceOr
 from .xml import XML
 
 
@@ -38,14 +38,14 @@ class Schema(BaseModel):
     enum: Union[None, list[Any]] = Field(default=None, min_length=1)
     const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
     type: Union[DataType, list[DataType], None] = Field(default=None)
-    allOf: list[Union[Reference, "Schema"]] = Field(default_factory=list)
-    oneOf: list[Union[Reference, "Schema"]] = Field(default_factory=list)
-    anyOf: list[Union[Reference, "Schema"]] = Field(default_factory=list)
-    schema_not: Optional[Union[Reference, "Schema"]] = Field(default=None, alias="not")
-    items: Optional[Union[Reference, "Schema"]] = None
-    prefixItems: list[Union[Reference, "Schema"]] = Field(default_factory=list)
-    properties: Optional[dict[str, Union[Reference, "Schema"]]] = None
-    additionalProperties: Optional[Union[bool, Reference, "Schema"]] = None
+    allOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
+    oneOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
+    anyOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
+    schema_not: Optional[ReferenceOr["Schema"]] = Field(default=None, alias="not")
+    items: Optional[ReferenceOr["Schema"]] = None
+    prefixItems: Optional[list[ReferenceOr["Schema"]]] = Field(default_factory=list)
+    properties: Optional[dict[str, ReferenceOr["Schema"]]] = None
+    additionalProperties: Optional[Union[bool, ReferenceOr["Schema"]]] = None
     description: Optional[str] = None
     schema_format: Optional[str] = Field(default=None, alias="format")
     default: Optional[Any] = None

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated, TypeVar
+
+from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
 
 
 class Reference(BaseModel):
@@ -24,3 +26,12 @@ class Reference(BaseModel):
             "examples": [{"$ref": "#/components/schemas/Pet"}, {"$ref": "Pet.json"}, {"$ref": "definitions.json#/Pet"}]
         },
     )
+
+
+T = TypeVar('T')
+
+
+ReferenceOr = Annotated[
+    Annotated[Reference, Tag('ref')] |
+    Annotated[T, Tag('other')],
+    Discriminator(lambda d: 'ref' if '$ref' in d else 'other')]

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field
 
 from .parameter import Parameter
-from .reference import Reference
+from .reference import ReferenceOr
 from .server import Server
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ class PathItem(BaseModel):
     patch: Optional["Operation"] = None
     trace: Optional["Operation"] = None
     servers: Optional[list[Server]] = None
-    parameters: Optional[list[Union[Parameter, Reference]]] = None
+    parameters: Optional[list[ReferenceOr[Parameter]]] = None
     model_config = ConfigDict(
         # `Operation` is an unresolvable forward reference, will rebuild in `__init__.py`:
         defer_build=True,
