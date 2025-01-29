@@ -197,6 +197,7 @@ def test_custom_templates():
         {}
     )  # key: path relative to generated directory, value: expected generated content
     api_dir = Path("my_test_api_client").joinpath("api")
+    models_dir = Path("my_test_api_client").joinpath("models")
     golden_tpls_root_dir = Path(__file__).parent.joinpath(
         "custom-templates-golden-record"
     )
@@ -204,6 +205,7 @@ def test_custom_templates():
     expected_difference_paths = [
         Path("README.md"),
         api_dir.joinpath("__init__.py"),
+        models_dir.joinpath("__init__.py"),
     ]
 
     for expected_difference_path in expected_difference_paths:
