@@ -47,25 +47,34 @@ T = TypeVar("T", bound="{{ class_name }}")
         {{ model.example | string | wordwrap(112) | indent(12) }}
 
     {% endif %}
-    {% if model.required_properties or model.optional_properties %}
+    {% if (not config.docstrings_on_attributes) and (model.required_properties or model.optional_properties) %}
     Attributes:
     {% for property in model.required_properties + model.optional_properties %}
         {{ property.to_docstring() | wordwrap(112) | indent(12) }}
     {% endfor %}{% endif %}
 {% endmacro %}
 
+{% macro declare_property(property) %}
+{%- if config.docstrings_on_attributes and property.description -%}
+{{ property.to_string() }}
+{{ safe_docstring(property.description, omit_if_empty=True) | wordwrap(112) }}
+{%- else -%}
+{{ property.to_string() }}
+{%- endif -%}
+{% endmacro %}
+
 @_attrs_define
 class {{ class_name }}:
-    {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
+    {{ safe_docstring(class_docstring_content(model), omit_if_empty=config.docstrings_on_attributes) | indent(4) }}
 
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
-    {{ property.to_string() }}
+    {{ declare_property(property) | indent(4) }}
     {% endif %}
     {% endfor %}
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is not none or not property.required %}
-    {{ property.to_string() }}
+    {{ declare_property(property) | indent(4) }}
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}

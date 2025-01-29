@@ -192,6 +192,16 @@ def test_none_meta():
     )
 
 
+def test_docstrings_on_attributes():
+    config_path = Path(__file__).parent / "docstrings_on_attributes.config.yml"
+    run_e2e_test(
+        "docstrings_on_attributes.yml",
+        [f"--config={config_path}"],
+        {},
+        "docstrings-on-attributes-golden-record",
+    )
+
+
 def test_custom_templates():
     expected_differences = (
         {}
