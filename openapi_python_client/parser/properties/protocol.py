@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from openapi_python_client.parser.properties.schemas import ReferencePath
+
 __all__ = ["PropertyProtocol", "Value"]
 
 from abc import abstractmethod
@@ -185,3 +187,6 @@ class PropertyProtocol(Protocol):
             ListProperty.__name__,
             UnionProperty.__name__,
         }
+
+    def get_ref_path(self) -> ReferencePath | None:
+        return self.ref_path if hasattr(self, "ref_path") else None
