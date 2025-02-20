@@ -11,3 +11,4 @@ class_overrides:
 field_prefix: attr_
 content_type_overrides:
    openapi/python/client: application/json
+generate_all_tags: true

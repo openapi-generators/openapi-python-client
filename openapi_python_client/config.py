@@ -42,6 +42,7 @@ class ConfigFile(BaseModel):
     use_path_prefixes_for_title_model_names: bool = True
     post_hooks: Optional[list[str]] = None
     field_prefix: str = "field_"
+    generate_all_tags: bool = False
     http_timeout: int = 5
     literal_enums: bool = False
 
@@ -70,6 +71,7 @@ class Config:
     use_path_prefixes_for_title_model_names: bool
     post_hooks: list[str]
     field_prefix: str
+    generate_all_tags: bool
     http_timeout: int
     literal_enums: bool
     document_source: Union[Path, str]
@@ -110,6 +112,7 @@ class Config:
             use_path_prefixes_for_title_model_names=config_file.use_path_prefixes_for_title_model_names,
             post_hooks=post_hooks,
             field_prefix=config_file.field_prefix,
+            generate_all_tags=config_file.generate_all_tags,
             http_timeout=config_file.http_timeout,
             literal_enums=config_file.literal_enums,
             document_source=document_source,

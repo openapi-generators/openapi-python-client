@@ -11,6 +11,7 @@ from .parameter_references import ParameterReferencesEndpoints
 from .parameters import ParametersEndpoints
 from .responses import ResponsesEndpoints
 from .tag1 import Tag1Endpoints
+from .tag2 import Tag2Endpoints
 from .tests import TestsEndpoints
 from .true_ import True_Endpoints
 
@@ -47,6 +48,10 @@ class MyTestApiClientApi:
     @classmethod
     def tag1(cls) -> type[Tag1Endpoints]:
         return Tag1Endpoints
+
+    @classmethod
+    def tag2(cls) -> type[Tag2Endpoints]:
+        return Tag2Endpoints
 
     @classmethod
     def location(cls) -> type[LocationEndpoints]:

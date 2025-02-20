@@ -4,12 +4,12 @@ version = "0.0.1"
 description = "A client library for accessing OpenAPI Test Server"
 authors = []
 readme = "README.md"
+requires-python = ">=3.9,<4.0"
 dependencies = [
-    "httpx>=0.20.0,<0.28.0",
-    "attrs>=21.3.0",
+    "httpx>=0.20.0,<0.29.0",
+    "attrs>=22.2.0",
     "python-dateutil>=2.8.0",
 ]
-requires-python = ">=3.8,<4.0"
 
 [tool.pdm]
 distribution = true
