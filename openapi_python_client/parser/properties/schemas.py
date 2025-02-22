@@ -46,6 +46,24 @@ def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
     return cast(ReferencePath, parsed.fragment)
 
 
+EXISTING_MODULE_NAMES: set[PythonIdentifier] = set()
+
+def _unique_module_name(candidate_name: PythonIdentifier) -> PythonIdentifier:
+    if candidate_name not in EXISTING_MODULE_NAMES:
+        EXISTING_MODULE_NAMES.add(candidate_name)
+        return candidate_name
+
+    counter = 0
+    while True:
+        new_name = f"{candidate_name}{counter}"
+
+        if new_name not in EXISTING_MODULE_NAMES:
+            EXISTING_MODULE_NAMES.add(new_name)
+            return new_name
+
+        counter += 1
+
+
 @define
 class Class:
     """Represents Python class which will be generated from an OpenAPI schema"""
@@ -67,7 +85,9 @@ class Class:
             module_name = override.module_name
         else:
             module_name = class_name
+
         module_name = PythonIdentifier(module_name, config.field_prefix)
+        module_name = _unique_module_name(module_name)
 
         return Class(name=class_name, module_name=module_name)
 
