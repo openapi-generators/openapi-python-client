@@ -187,9 +187,9 @@ class PostUserListBody:
                 try:
                     if not isinstance(data, str):
                         raise TypeError()
-                    componentsschemas_an_enum_with_null_type_1 = check_an_enum_with_null(data)
+                    componentsschemas_an_enum_with_null = check_an_enum_with_null(data)
 
-                    return componentsschemas_an_enum_with_null_type_1
+                    return componentsschemas_an_enum_with_null
                 except:  # noqa: E722
                     pass
                 return cast(Union[AnEnumWithNull, None], data)
