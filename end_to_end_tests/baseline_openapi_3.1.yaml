@@ -2856,7 +2856,8 @@ info:
         "propertyName": "modelType",
         "mapping": {
           "type1": "#/components/schemas/ADiscriminatedUnionType1",
-          "type2": "#/components/schemas/ADiscriminatedUnionType2"
+          "type2": "#/components/schemas/ADiscriminatedUnionType2",
+          "type2-another-value": "#/components/schemas/ADiscriminatedUnionType2"
         }
       },
       "oneOf": [
@@ -2874,7 +2875,8 @@ info:
         "modelType": {
           "type": "string"
         }
-      }
+      },
+      "required": ["modelType"]
     },
     "ADiscriminatedUnionType2": {
       "type": "object",
@@ -2882,7 +2884,8 @@ info:
         "modelType": {
           "type": "string"
         }
-      }
+      },
+      "required": ["modelType"]
     }
   }
   "parameters": {
