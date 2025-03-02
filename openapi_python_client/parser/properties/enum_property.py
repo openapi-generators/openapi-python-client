@@ -120,6 +120,11 @@ class EnumProperty(PropertyProtocol):
         class_name = data.title or name
         if parent_name:
             class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
+            original_class_name = class_name
+            name_index = 0
+            while class_name in schemas.classes_by_name:
+                name_index += 1
+                class_name = f"{original_class_name}PropertyEnum_{name_index}"
         class_info = Class.from_string(string=class_name, config=config)
         values = EnumProperty.values_from_list(value_list, class_info)
 
