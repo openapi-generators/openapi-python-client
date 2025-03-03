@@ -13,6 +13,29 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.24.0 (2025-03-03)
+
+### Breaking Changes
+
+#### Support `$ref` in responses
+
+Previously, using a `$ref` to define a response was ignored, the code to call the endpoint was still generated, but 
+the response would not be parsed. Now, responses defined with `$ref` will be used to generate the response model, which 
+will parse the response at runtime.
+
+If a `$ref` is incorrect or uses a feature that is not supported by the generator, these endpoints will start failing to 
+generate.
+
+### Features
+
+#### Make `config` available in custom templates
+
+The configuration options object is now exposed as a variable called `config` in Jinja2 templates.
+
+#### Add `docstrings_on_attributes` config setting
+
+Setting this option to `true` changes the docstring behavior in model classes: for any attribute that have a non-empty `description`, instead of describing the attribute as part of the class's docstring, the description will appear in an individual docstring for that attribute.
+
 ## 0.23.1 (2025-01-13)
 
 ### Features
