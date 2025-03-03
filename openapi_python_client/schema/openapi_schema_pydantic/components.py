@@ -35,6 +35,8 @@ class Components(BaseModel):
     links: Optional[dict[str, Union[Link, Reference]]] = None
     callbacks: Optional[dict[str, Union[Callback, Reference]]] = None
     model_config = ConfigDict(
+        # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

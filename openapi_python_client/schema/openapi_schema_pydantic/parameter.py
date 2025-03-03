@@ -35,6 +35,8 @@ class Parameter(BaseModel):
     examples: Optional[dict[str, Union[Example, Reference]]] = None
     content: Optional[dict[str, MediaType]] = None
     model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={

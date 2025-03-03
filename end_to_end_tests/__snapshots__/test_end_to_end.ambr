@@ -1,4 +1,18 @@
 # serializer version: 1
+# name: test_documents_with_errors[bad-status-code]
+  '''
+  Generating /test-documents-with-errors
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
+  
+  WARNING parsing GET / within default.
+  
+  Invalid response status code abcdef (not a valid HTTP status code), response will be omitted from generated client
+  
+  
+  If you believe this was a mistake or this tool is missing a feature you need, please open an issue at https://github.com/openapi-generators/openapi-python-client/issues/new/choose
+  
+  '''
+# ---
 # name: test_documents_with_errors[circular-body-ref]
   '''
   Generating /test-documents-with-errors

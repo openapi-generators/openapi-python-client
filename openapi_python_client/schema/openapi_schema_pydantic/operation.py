@@ -4,11 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
-from .header import Header  # noqa: F401
 from .parameter import Parameter
-
-# Required to update forward ref after object creation, as this is not imported yet
-from .path_item import PathItem  # noqa: F401
 from .reference import Reference
 from .request_body import RequestBody
 from .responses import Responses
@@ -38,6 +34,8 @@ class Operation(BaseModel):
     security: Optional[list[SecurityRequirement]] = None
     servers: Optional[list[Server]] = None
     model_config = ConfigDict(
+        # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [
@@ -89,7 +87,3 @@ class Operation(BaseModel):
             ]
         },
     )
-
-
-# PathItem in Callback uses Operation, so we need to update forward refs due to circular dependency
-Operation.model_rebuild()
