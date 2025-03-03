@@ -50,7 +50,7 @@ def get_reference_simple_name(ref_path: str) -> str:
     """
     Takes a path like `/components/schemas/NameOfThing` and returns a string like `NameOfThing`.
     """
-    return ref_path.split("/", 3)[-1]
+    return ref_path.split("/")[-1]
 
 
 @define
