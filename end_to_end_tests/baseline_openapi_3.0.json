@@ -991,6 +991,20 @@
         }
       }
     },
+    "/responses/reference": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "summary": "Endpoint using predefined response",
+        "operationId": "reference_response",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AResponse"
+          }
+        }
+      }
+    },
     "/auth/token_with_cookie": {
       "get": {
         "tags": [
@@ -2961,6 +2975,18 @@
         "$ref": "#/components/requestBodies/ARequestBody"
       },
       "ARequestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AModel"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "AResponse": {
+        "description": "OK",
         "content": {
           "application/json": {
             "schema": {
