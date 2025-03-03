@@ -30,3 +30,6 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["F", "I"]
+
+[tool.mypy]
+# Just to get mypy to _not_ look at the parent directory's config
