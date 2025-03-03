@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any, Literal, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
@@ -38,8 +39,8 @@ class GetModelsOneofWithRequiredConstResponse200Type1:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         type_ = cast(Literal["beta"], d.pop("type"))
         if type_ != "beta":
             raise ValueError(f"type must match const 'beta', got '{type_}'")

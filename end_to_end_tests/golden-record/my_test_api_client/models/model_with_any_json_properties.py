@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
@@ -38,12 +39,12 @@ class ModelWithAnyJsonProperties:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_any_json_properties_additional_property_type_0 import (
             ModelWithAnyJsonPropertiesAdditionalPropertyType0,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         model_with_any_json_properties = cls()
 
         additional_properties = {}

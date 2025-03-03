@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
@@ -38,12 +39,12 @@ class ModelWithPrimitiveAdditionalProperties:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_primitive_additional_properties_a_date_holder import (
             ModelWithPrimitiveAdditionalPropertiesADateHolder,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         _a_date_holder = d.pop("a_date_holder", UNSET)
         a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]
         if isinstance(_a_date_holder, Unset):

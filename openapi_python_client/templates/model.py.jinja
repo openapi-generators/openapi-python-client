@@ -1,3 +1,5 @@
+import copy
+from collections.abc import Mapping
 from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING
 
 from attrs import define as _attrs_define
@@ -138,12 +140,12 @@ return field_dict
 {% endif %}
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
 {% if (model.required_properties or model.optional_properties or model.additional_properties) %}
-        d = src_dict.copy()
+        d = dict(src_dict)
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
         {% set property_source = 'd.pop("' + property.name + '")' %}
