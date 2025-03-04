@@ -11,7 +11,7 @@ isoparse({{ source }})
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True) %}
-{% set transformed = source + ".isoformat()" %}
+{% set transformed = source + ".isoformat(timespec='seconds') + 'Z'" %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
@@ -27,7 +27,7 @@ if not isinstance({{ source }}, Unset):
 {% endmacro %}
 
 {% macro transform_multipart(property, source, destination) %}
-{% set transformed = source + ".isoformat().encode()" %}
+{% set transformed = "(" + source + ".isoformat(timespec='seconds') + 'Z').encode()" %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
