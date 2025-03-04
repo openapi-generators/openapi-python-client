@@ -166,19 +166,27 @@ class TestBuild:
         )
 
     @pytest.mark.parametrize(
-        "existing_names, new_name, enumerate_duplicate_model_names, expected",
+        "existing_names, new_name, enumerate_duplicate_model_names, should_raise, expected",
         ids=(
             "name without duplicate suffix",
             "name with duplicate suffix",
             "name with duplicate suffix and matching existing name",
         ),
         argvalues=(
-            (["OtherModel"], "OtherModel", None, 'Attempted to generate duplicate models with name "OtherModel"'),
-            (["OtherModel"], "OtherModel", True, "OtherModel2"),
-            (["OtherModel", "OtherModel2"], "OtherModel", True, "OtherModel3"),
+            (["OtherModel"], "OtherModel", None, True, 'Attempted to generate duplicate models with name "OtherModel"'),
+            (["OtherModel"], "OtherModel", True, False, "OtherModel1"),
+            (["OtherModel", "OtherModel1"], "OtherModel", True, False, "OtherModel2"),
         ),
     )
-    def test_model_name_conflict(self, existing_names: str, new_name: str, enumerate_duplicate_model_names: Optional[str], expected: str, config):
+    def test_model_name_conflict(
+        self,
+        existing_names: str,
+        new_name: str,
+        enumerate_duplicate_model_names: Optional[str],
+        should_raise: bool,
+        expected: str,
+        config,
+    ):
         from openapi_python_client.parser.properties import ModelProperty
 
         data = oai.Schema.model_construct()
@@ -195,11 +203,12 @@ class TestBuild:
             process_properties=True,
         )
 
-        assert isinstance(result, (PropertyError, ModelProperty))
-        if isinstance(result, PropertyError):
+        if should_raise:
+            assert isinstance(result, PropertyError)
             assert new_schemas == schemas
-            assert result == PropertyError(detail=expected, data=data)
-        else: # ModelProperty
+            assert result.detail == expected
+        else:
+            assert isinstance(result, ModelProperty)
             assert result.class_info.name in new_schemas.classes_by_name
             assert result.class_info.name == expected
 

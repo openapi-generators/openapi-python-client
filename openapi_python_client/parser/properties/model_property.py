@@ -75,7 +75,7 @@ class ModelProperty(PropertyProtocol):
                 class_string = title
         class_info = Class.from_string(string=class_string, config=config)
         if config.enumerate_duplicate_model_names:
-            suffix = 2
+            suffix = 1
             while class_info.name in schemas.classes_by_name:
                 class_info = Class.from_string(string=class_string + str(suffix), config=config)
                 suffix += 1

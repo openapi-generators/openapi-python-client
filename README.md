@@ -182,7 +182,7 @@ If this option results in conflicts, you will need to manually override class na
 
 Even with `use_path_prefixes_for_title_model_names` set to `true`, duplicate model class names can occur. By default, when duplicates are encountered they will be skipped.
 
-Setting `enumerate_duplicate_model_names` to `true` in your config file will result in a number being added to duplicate names starting with 2. For instance, if `MyModelName` already exists, then the next time a model with that name is encountered, it will be named `MyModelName2`, then `MyModelName3` and so on.
+Setting `enumerate_duplicate_model_names` to `true` in your config file will result in a number being added to duplicate names starting with 1. For instance, if there are multiple occurances in the schema of `MyModelName`, the initial occurance will remain `MyModelName` and subsequent occurances will be named `MyModelName1`, `MyModelName2` and so on.
 
 ### http_timeout
 
