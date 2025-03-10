@@ -1,4 +1,3 @@
-from typing import Union
 
 from .reference import ReferenceOr
 from .response import Response

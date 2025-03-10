@@ -17,8 +17,19 @@ from typing import Annotated, TypeVar, Union, get_args, get_origin
 import pytest
 from pydantic import TypeAdapter
 
-from openapi_python_client.schema.openapi_schema_pydantic import Callback, Example, Header, Link, Parameter, PathItem, Reference, RequestBody, Response, Schema, SecurityScheme
-
+from openapi_python_client.schema.openapi_schema_pydantic import (
+    Callback,
+    Example,
+    Header,
+    Link,
+    Parameter,
+    PathItem,
+    Reference,
+    RequestBody,
+    Response,
+    Schema,
+    SecurityScheme,
+)
 
 try:
     from openapi_python_client.schema.openapi_schema_pydantic.reference import ReferenceOr
@@ -34,10 +45,11 @@ def get_example(base_type):
         return schema["examples"][0]
     if "$defs" in schema:
         return schema["$defs"][base_type.__name__]["examples"][0]
-    assert False, f"No example found for {base_type.__name__}"
+    raise TypeError(f"No example found for {base_type.__name__}")
+
 
 def deannotate_type(t):
-    while get_origin(t) == Annotated:
+    while get_origin(t) is Annotated:
         t = get_args(t)[0]
     return t
 
@@ -60,17 +72,18 @@ def deannotate_type(t):
 def test_type(ref_or_type, get_example_fn):
     base_type = None
     print(deannotate_type(ref_or_type))
-    for base_type in get_args(deannotate_type(ref_or_type)):
-        base_type = deannotate_type(base_type)
-        if base_type != Reference:
+    for maybe_annotated_type in get_args(deannotate_type(ref_or_type)):
+        each_type = deannotate_type(maybe_annotated_type)
+        if each_type is not Reference:
+            base_type = each_type
             break
     assert base_type is not None
 
     example = get_example_fn(base_type)
 
     parsed = TypeAdapter(ref_or_type).validate_python(example)
-    assert type(parsed) == get_origin(base_type) or base_type
+    assert type(parsed) is get_origin(base_type) or base_type
 
     example["$ref"] = "ref"
     parsed = TypeAdapter(ref_or_type).validate_python(example)
-    assert type(parsed) == Reference
+    assert type(parsed) is Reference
