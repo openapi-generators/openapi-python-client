@@ -1,6 +1,7 @@
-from typing import Annotated, TypeVar
+from typing import Annotated, Any, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
+from pydantic_core import ArgsKwargs
 
 
 class Reference(BaseModel):
@@ -31,7 +32,15 @@ class Reference(BaseModel):
 T = TypeVar('T')
 
 
+def _reference_discriminator(obj: Any) -> Literal['ref', 'other']:
+    if isinstance(obj, dict):
+        return 'ref' if '$ref' in obj else 'other'
+    if isinstance(obj, ArgsKwargs):
+        return 'ref' if 'ref' in obj.kwargs else 'other'
+    return 'ref' if isinstance(obj, Reference) else 'other'
+
+
 ReferenceOr = Annotated[
     Annotated[Reference, Tag('ref')] |
     Annotated[T, Tag('other')],
-    Discriminator(lambda d: 'ref' if '$ref' in d else 'other')]
+    Discriminator(_reference_discriminator)]
