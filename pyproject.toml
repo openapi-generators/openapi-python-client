@@ -95,7 +95,6 @@ dev = [
     "types-PyYAML<7.0.0,>=6.0.3",
     "types-certifi<2021.10.9,>=2020.0.0",
     "types-python-dateutil<3.0.0,>=2.0.0",
-    "ruamel-yaml-string>=0.1.1",
     "syrupy>=4",
 ]
 
