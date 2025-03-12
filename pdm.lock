@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:8dcb899b717280109d70077a4cc3195bfd2a89406e885b8baca012cb35deeae8"
+content_hash = "sha256:a61b1a29b26191b1402ee74c129493c29b9519851951940e4e38c0730299ac6f"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -727,7 +727,7 @@ name = "ruamel-yaml"
 version = "0.18.10"
 requires_python = ">=3.7"
 summary = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
-groups = ["default", "dev"]
+groups = ["default"]
 dependencies = [
     "ruamel-yaml-clib>=0.2.7; platform_python_implementation == \"CPython\" and python_version < \"3.13\"",
 ]
@@ -741,7 +741,7 @@ name = "ruamel-yaml-clib"
 version = "0.2.12"
 requires_python = ">=3.9"
 summary = "C version of reader, parser and emitter for ruamel.yaml derived from libyaml"
-groups = ["default", "dev"]
+groups = ["default"]
 marker = "platform_python_implementation == \"CPython\" and python_version < \"3.13\""
 files = [
     {file = "ruamel.yaml.clib-0.2.12-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:11f891336688faf5156a36293a9c362bdc7c88f03a8a027c2c1d8e0bcde998e5"},
@@ -790,20 +790,6 @@ files = [
     {file = "ruamel.yaml.clib-0.2.12-cp39-cp39-win32.whl", hash = "sha256:beffaed67936fbbeffd10966a4eb53c402fafd3d6833770516bf7314bc6ffa12"},
     {file = "ruamel.yaml.clib-0.2.12-cp39-cp39-win_amd64.whl", hash = "sha256:040ae85536960525ea62868b642bdb0c2cc6021c9f9d507810c0c604e66f5a7b"},
     {file = "ruamel.yaml.clib-0.2.12.tar.gz", hash = "sha256:6c8fbb13ec503f99a91901ab46e0b07ae7941cd527393187039aec586fdfd36f"},
-]
-
-[[package]]
-name = "ruamel-yaml-string"
-version = "0.1.1"
-requires_python = ">=3"
-summary = "add dump_to_string/dumps method that returns YAML document as string"
-groups = ["dev"]
-dependencies = [
-    "ruamel-yaml>=0.17.17",
-]
-files = [
-    {file = "ruamel.yaml.string-0.1.1-py3-none-any.whl", hash = "sha256:eb146bcb42b116216638034a434e9cf3ae2a5d3933aa37183a9854b5f3ff42de"},
-    {file = "ruamel.yaml.string-0.1.1.tar.gz", hash = "sha256:7a7aedcc055d45c004d38b756f58474ebefb106851f4ce56ce58415709784350"},
 ]
 
 [[package]]
