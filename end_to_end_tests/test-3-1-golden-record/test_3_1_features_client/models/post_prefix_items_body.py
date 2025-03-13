@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any, Literal, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
@@ -48,8 +49,8 @@ class PostPrefixItemsBody:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         prefix_items_and_items = []
         _prefix_items_and_items = d.pop("prefixItemsAndItems", UNSET)
         for prefix_items_and_items_item_data in _prefix_items_and_items or []:

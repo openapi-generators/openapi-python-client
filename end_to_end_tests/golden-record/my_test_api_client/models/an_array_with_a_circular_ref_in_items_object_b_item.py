@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
@@ -41,12 +42,12 @@ class AnArrayWithACircularRefInItemsObjectBItem:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.an_array_with_a_circular_ref_in_items_object_a_item import (
             AnArrayWithACircularRefInItemsObjectAItem,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         circular = []
         _circular = d.pop("circular", UNSET)
         for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in _circular or []:

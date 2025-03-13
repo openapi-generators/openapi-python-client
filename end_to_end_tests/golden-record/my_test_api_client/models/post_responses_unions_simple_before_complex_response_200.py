@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
@@ -44,12 +45,12 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
             PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
 
         def _parse_a(data: object) -> Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str]:
             try:

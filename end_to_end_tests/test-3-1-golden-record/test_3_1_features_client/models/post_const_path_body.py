@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any, Literal, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
@@ -44,8 +45,8 @@ class PostConstPathBody:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         required = cast(Literal["this always goes in the body"], d.pop("required"))
         if required != "this always goes in the body":
             raise ValueError(f"required must match const 'this always goes in the body', got '{required}'")

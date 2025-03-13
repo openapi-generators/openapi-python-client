@@ -1,4 +1,5 @@
 import datetime
+from collections.abc import Mapping
 from typing import Any, TypeVar, Union
 
 from attrs import define as _attrs_define
@@ -34,8 +35,8 @@ class ModelWithDateTimeProperty:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         _datetime_ = d.pop("datetime", UNSET)
         datetime_: Union[Unset, datetime.datetime]
         if isinstance(_datetime_, Unset):

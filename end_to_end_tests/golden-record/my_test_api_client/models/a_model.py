@@ -1,4 +1,5 @@
 import datetime
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 from uuid import UUID
 
@@ -252,11 +253,11 @@ class AModel:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
         an_allof_enum_with_overridden_default = AnAllOfEnum(d.pop("an_allof_enum_with_overridden_default"))

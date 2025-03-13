@@ -1,4 +1,5 @@
 import datetime
+from collections.abc import Mapping
 from io import BytesIO
 from typing import Any, TypeVar, cast
 
@@ -213,8 +214,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         enum_properties_ref = []
         _enum_properties_ref = d.pop("enum_properties_ref")
         for componentsschemas_an_other_array_of_enum_item_data in _enum_properties_ref:
