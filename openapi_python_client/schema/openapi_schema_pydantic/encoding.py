@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from .reference import Reference
+from .reference import ReferenceOr
 
 if TYPE_CHECKING:  # pragma: no cover
     from .header import Header
@@ -17,7 +17,7 @@ class Encoding(BaseModel):
     """
 
     contentType: Optional[str] = None
-    headers: Optional[dict[str, Union["Header", Reference]]] = None
+    headers: Optional[dict[str, ReferenceOr["Header"]]] = None
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False

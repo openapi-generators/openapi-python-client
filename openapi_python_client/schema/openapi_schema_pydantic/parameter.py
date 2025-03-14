@@ -1,11 +1,11 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..parameter_location import ParameterLocation
 from .example import Example
 from .media_type import MediaType
-from .reference import Reference
+from .reference import ReferenceOr
 from .schema import Schema
 
 
@@ -30,9 +30,9 @@ class Parameter(BaseModel):
     style: Optional[str] = None
     explode: bool = False
     allowReserved: bool = False
-    param_schema: Optional[Union[Reference, Schema]] = Field(default=None, alias="schema")
+    param_schema: Optional[ReferenceOr[Schema]] = Field(default=None, alias="schema")
     example: Optional[Any] = None
-    examples: Optional[dict[str, Union[Example, Reference]]] = None
+    examples: Optional[dict[str, ReferenceOr[Example]]] = None
     content: Optional[dict[str, MediaType]] = None
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:
