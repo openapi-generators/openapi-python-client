@@ -1,4 +1,3 @@
-
 from .reference import ReferenceOr
 from .response import Response
 

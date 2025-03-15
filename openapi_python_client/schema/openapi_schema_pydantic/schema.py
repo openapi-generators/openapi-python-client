@@ -43,7 +43,7 @@ class Schema(BaseModel):
     anyOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
     schema_not: Optional[ReferenceOr["Schema"]] = Field(default=None, alias="not")
     items: Optional[ReferenceOr["Schema"]] = None
-    prefixItems: Optional[list[ReferenceOr["Schema"]]] = Field(default_factory=list)
+    prefixItems: list[ReferenceOr["Schema"]] = Field(default_factory=list)
     properties: Optional[dict[str, ReferenceOr["Schema"]]] = None
     additionalProperties: Optional[Union[bool, ReferenceOr["Schema"]]] = None
     description: Optional[str] = None

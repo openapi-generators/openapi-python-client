@@ -11,7 +11,6 @@
 # References:
 #   [1] https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object
 #   [2] https://docs.pydantic.dev/latest/concepts/unions/#smart-mode
-import json
 from typing import Annotated, TypeVar, Union, get_args, get_origin
 
 import pytest
@@ -56,18 +55,21 @@ def deannotate_type(t):
 # The following types occur in various models, so we want to make sure they
 # parse properly.  They are verified to /fail/ to parse as of commit 3bd12f86.
 
-@pytest.mark.parametrize(("ref_or_type", "get_example_fn"), [
-    (ReferenceOr[Callback], lambda t: {"test1": get_example(PathItem),
-                                       "test2": get_example(PathItem)}),
-    (ReferenceOr[Example], get_example),
-    (ReferenceOr[Header], get_example),
-    (ReferenceOr[Link], get_example),
-    (ReferenceOr[Parameter], get_example),
-    (ReferenceOr[RequestBody], get_example),
-    (ReferenceOr[Response], get_example),
-    (ReferenceOr[Schema], get_example),
-    (ReferenceOr[SecurityScheme], get_example),
-])
+
+@pytest.mark.parametrize(
+    ("ref_or_type", "get_example_fn"),
+    [
+        (ReferenceOr[Callback], lambda t: {"test1": get_example(PathItem), "test2": get_example(PathItem)}),
+        (ReferenceOr[Example], get_example),
+        (ReferenceOr[Header], get_example),
+        (ReferenceOr[Link], get_example),
+        (ReferenceOr[Parameter], get_example),
+        (ReferenceOr[RequestBody], get_example),
+        (ReferenceOr[Response], get_example),
+        (ReferenceOr[Schema], get_example),
+        (ReferenceOr[SecurityScheme], get_example),
+    ],
+)
 def test_type(ref_or_type, get_example_fn):
     base_type = None
     for maybe_annotated_type in get_args(deannotate_type(ref_or_type)):
