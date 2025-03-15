@@ -16,7 +16,7 @@ from openapi_python_client.cli import app
 def _compare_directories(
     record: Path,
     test_subject: Path,
-    expected_differences: dict[Path, str],
+    expected_differences: Optional[dict[Path, str]] = None,
     expected_missing: Optional[set[str]] = None,
     ignore: list[str] = None,
     depth=0,
@@ -170,6 +170,16 @@ def test_none_meta():
     )
 
 
+def test_docstrings_on_attributes():
+    config_path = Path(__file__).parent / "docstrings_on_attributes.config.yml"
+    run_e2e_test(
+        "docstrings_on_attributes.yml",
+        [f"--config={config_path}"],
+        {},
+        "docstrings-on-attributes-golden-record",
+    )
+
+
 def test_custom_templates():
     expected_differences = (
         {}
@@ -264,11 +274,11 @@ def test_update_integration_tests():
         config_path = source_path / "config.yaml"
         _run_command(
             "generate",
-            extra_args=["--meta=none", "--overwrite", f"--output-path={source_path / 'integration_tests'}"],
+            extra_args=["--overwrite", "--meta=pdm", f"--output-path={temp_dir}"],
             url=url,
             config_path=config_path
         )
-        _compare_directories(temp_dir, source_path, expected_differences={})
+        _compare_directories(source_path, temp_dir, ignore=["pyproject.toml"])
         import mypy.api
 
         out, err, status = mypy.api.run([str(temp_dir), "--strict"])

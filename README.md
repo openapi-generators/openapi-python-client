@@ -97,6 +97,16 @@ class_overrides:
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the `models` folder.
 
+### docstrings_on_attributes
+
+By default, when `openapi-python-client` generates a model class, it includes a list of attributes and their
+descriptions in the docstring for the class. If you set this option to `true`, then the attribute descriptions
+will be put in docstrings for the attributes themselves, and will not be in the class docstring.
+
+```yaml
+docstrings_on_attributes: true
+```
+
 ### literal_enums
 
 By default, `openapi-python-client` generates classes inheriting for `Enum` for enums. It can instead use `Literal` 
@@ -107,6 +117,16 @@ literal_enums: true
 ```
 
 This is especially useful if enum values, when transformed to their Python names, end up conflicting due to case sensitivity or special symbols.
+
+### generate_all_tags
+
+`openapi-python-client` generates module names within the `api` module based on the OpenAPI `tags` of each endpoint. 
+By default, only the _first_ tag is generated. If you want to generate **duplicate** endpoint functions using _every_ tag 
+listed, you can enable this option:
+
+```yaml
+generate_all_tags: true
+```
 
 ### project_name_override and package_name_override
 

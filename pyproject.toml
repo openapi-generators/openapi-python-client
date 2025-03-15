@@ -6,19 +6,19 @@ license = { text = "MIT" }
 requires-python = ">=3.9,<4.0"
 dependencies = [
     "jinja2>=3.0.0,<4.0.0",
-    "typer>0.6,<0.14",
+    "typer>0.6,<0.16",
     "colorama>=0.4.3; sys_platform == \"win32\"",
     "shellingham>=1.3.2,<2.0.0",
-    "pydantic>=2.1.1,<3.0.0",
-    "attrs>=21.3.0",
+    "pydantic>=2.10,<3.0.0",
+    "attrs>=22.2.0",
     "python-dateutil>=2.8.1,<3.0.0",
-    "httpx>=0.20.0,<0.28.0",
+    "httpx>=0.20.0,<0.29.0",
     "ruamel.yaml>=0.18.6,<0.19.0",
-    "ruff>=0.2,<0.9",
+    "ruff>=0.2,<0.12",
     "typing-extensions>=4.8.0,<5.0.0",
 ]
 name = "openapi-python-client"
-version = "0.21.7"
+version = "0.24.0"
 description = "Generate modern Python clients from OpenAPI"
 keywords = [
     "OpenAPI",
@@ -87,16 +87,14 @@ junit_family = "xunit2"
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "pytest",
-    "pytest-mock",
-    "mypy",
-    "taskipy",
+    "pytest>8",
+    "pytest-mock>3",
+    "mypy>=1.13",
     "pytest-cov",
     "python-multipart",
     "types-PyYAML<7.0.0,>=6.0.3",
     "types-certifi<2021.10.9,>=2020.0.0",
     "types-python-dateutil<3.0.0,>=2.0.0",
-    "ruamel-yaml-string>=0.1.1",
     "syrupy>=4",
 ]
 
@@ -116,6 +114,7 @@ regen = {composite = ["regen_e2e", "regen_integration"]}
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
 re = {composite = ["regen_e2e", "e2e --snapshot-update"]}
 regen_e2e = "python -m end_to_end_tests.regen_golden_record"
+unit_test = "pytest tests"
 
 [tool.pdm.scripts.test]
 cmd = "pytest tests end_to_end_tests/test_end_to_end.py end_to_end_tests/functional_tests --basetemp=tests/tmp"
@@ -130,7 +129,7 @@ composite = ["test --cov openapi_python_client tests --cov-report=term-missing"]
 
 [tool.pdm.scripts.regen_integration]
 shell = """
-openapi-python-client generate --overwrite --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests/config.yaml --meta none --output-path integration-tests/integration_tests \
+openapi-python-client generate --overwrite --url https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json --config integration-tests/config.yaml --meta pdm --output-path integration-tests \
 """
 
 [build-system]

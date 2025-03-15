@@ -46,6 +46,13 @@ def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
     return cast(ReferencePath, parsed.fragment)
 
 
+def get_reference_simple_name(ref_path: str) -> str:
+    """
+    Takes a path like `/components/schemas/NameOfThing` and returns a string like `NameOfThing`.
+    """
+    return ref_path.split("/")[-1]
+
+
 @define
 class Class:
     """Represents Python class which will be generated from an OpenAPI schema"""
@@ -56,7 +63,7 @@ class Class:
     @staticmethod
     def from_string(*, string: str, config: Config) -> "Class":
         """Get a Class from an arbitrary string"""
-        class_name = string.split("/")[-1]  # Get rid of ref path stuff
+        class_name = get_reference_simple_name(string)  # Get rid of ref path stuff
         class_name = ClassName(class_name, config.field_prefix)
         override = config.class_overrides.get(class_name)
 

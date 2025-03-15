@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
@@ -19,8 +20,8 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         post_responses_unions_simple_before_complex_response_200a_type_1 = cls()
 
         post_responses_unions_simple_before_complex_response_200a_type_1.additional_properties = d

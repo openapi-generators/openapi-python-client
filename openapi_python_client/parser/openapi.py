@@ -51,6 +51,7 @@ class EndpointCollection:
         schemas: Schemas,
         parameters: Parameters,
         request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
+        responses: dict[str, Union[oai.Response, oai.Reference]],
         config: Config,
     ) -> tuple[dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
@@ -63,16 +64,22 @@ class EndpointCollection:
                 operation: Optional[oai.Operation] = getattr(path_data, method)
                 if operation is None:
                     continue
-                tag = utils.PythonIdentifier(value=(operation.tags or ["default"])[0], prefix="tag")
-                collection = endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag))
+
+                tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in operation.tags or ["default"]]
+                if not config.generate_all_tags:
+                    tags = tags[:1]
+
+                collections = [endpoints_by_tag.setdefault(tag, EndpointCollection(tag=tag)) for tag in tags]
+
                 endpoint, schemas, parameters = Endpoint.from_data(
                     data=operation,
                     path=path,
                     method=method,
-                    tag=tag,
+                    tags=tags,
                     schemas=schemas,
                     parameters=parameters,
                     request_bodies=request_bodies,
+                    responses=responses,
                     config=config,
                 )
                 # Add `PathItem` parameters
@@ -87,15 +94,16 @@ class EndpointCollection:
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
-                    endpoint.header = (
-                        f"WARNING parsing {method.upper()} {path} within {tag}. Endpoint will not be generated."
-                    )
-                    collection.parse_errors.append(endpoint)
+                    endpoint.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}. Endpoint will not be generated."
+                    for collection in collections:
+                        collection.parse_errors.append(endpoint)
                     continue
                 for error in endpoint.errors:
-                    error.header = f"WARNING parsing {method.upper()} {path} within {tag}."
-                    collection.parse_errors.append(error)
-                collection.endpoints.append(endpoint)
+                    error.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}."
+                    for collection in collections:
+                        collection.parse_errors.append(error)
+                for collection in collections:
+                    collection.endpoints.append(endpoint)
 
         return endpoints_by_tag, schemas, parameters
 
@@ -132,7 +140,7 @@ class Endpoint:
     description: Optional[str]
     name: str
     requires_security: bool
-    tag: str
+    tags: list[PythonIdentifier]
     summary: Optional[str] = ""
     relative_imports: set[str] = field(default_factory=set)
     query_parameters: list[Property] = field(default_factory=list)
@@ -145,7 +153,12 @@ class Endpoint:
 
     @staticmethod
     def _add_responses(
-        *, endpoint: "Endpoint", data: oai.Responses, schemas: Schemas, config: Config
+        *,
+        endpoint: "Endpoint",
+        data: oai.Responses,
+        schemas: Schemas,
+        responses: dict[str, Union[oai.Response, oai.Reference]],
+        config: Config,
     ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
@@ -168,6 +181,7 @@ class Endpoint:
                 status_code=status_code,
                 data=response_data,
                 schemas=schemas,
+                responses=responses,
                 parent_name=endpoint.name,
                 config=config,
             )
@@ -393,10 +407,11 @@ class Endpoint:
         data: oai.Operation,
         path: str,
         method: str,
-        tag: str,
+        tags: list[PythonIdentifier],
         schemas: Schemas,
         parameters: Parameters,
         request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
+        responses: dict[str, Union[oai.Response, oai.Reference]],
         config: Config,
     ) -> tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
@@ -413,7 +428,7 @@ class Endpoint:
             description=utils.remove_string_escapes(data.description) if data.description else "",
             name=name,
             requires_security=bool(data.security),
-            tag=tag,
+            tags=tags,
         )
 
         result, schemas, parameters = Endpoint.add_parameters(
@@ -425,7 +440,13 @@ class Endpoint:
         )
         if isinstance(result, ParseError):
             return result, schemas, parameters
-        result, schemas = Endpoint._add_responses(endpoint=result, data=data.responses, schemas=schemas, config=config)
+        result, schemas = Endpoint._add_responses(
+            endpoint=result,
+            data=data.responses,
+            schemas=schemas,
+            responses=responses,
+            config=config,
+        )
         if isinstance(result, ParseError):
             return result, schemas, parameters
         bodies, schemas = body_from_data(
@@ -515,8 +536,14 @@ class GeneratorData:
                 config=config,
             )
         request_bodies = (openapi.components and openapi.components.requestBodies) or {}
+        responses = (openapi.components and openapi.components.responses) or {}
         endpoint_collections_by_tag, schemas, parameters = EndpointCollection.from_data(
-            data=openapi.paths, schemas=schemas, parameters=parameters, request_bodies=request_bodies, config=config
+            data=openapi.paths,
+            schemas=schemas,
+            parameters=parameters,
+            request_bodies=request_bodies,
+            responses=responses,
+            config=config,
         )
 
         enums = (

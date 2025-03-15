@@ -90,6 +90,7 @@ class Project:
 
         self.env.filters.update(TEMPLATE_FILTERS)
         self.env.globals.update(
+            config=config,
             utils=utils,
             python_identifier=lambda x: utils.PythonIdentifier(x, config.field_prefix),
             class_name=lambda x: utils.ClassName(x, config.field_prefix),
@@ -108,13 +109,11 @@ class Project:
         """Create the project from templates"""
 
         print(f"Generating {self.project_dir}")
-        if self.config.overwrite:
-            shutil.rmtree(self.project_dir, ignore_errors=True)
-
         try:
             self.project_dir.mkdir()
         except FileExistsError:
-            return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
+            if not self.config.overwrite:
+                return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
         self._create_package()
         self._build_metadata()
         self._build_models()
@@ -158,7 +157,7 @@ class Project:
 
     def _create_package(self) -> None:
         if self.package_dir != self.project_dir:
-            self.package_dir.mkdir()
+            self.package_dir.mkdir(exist_ok=True)
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
@@ -214,6 +213,7 @@ class Project:
     def _build_models(self) -> None:
         # Generate models
         models_dir = self.package_dir / "models"
+        shutil.rmtree(models_dir, ignore_errors=True)
         models_dir.mkdir()
         models_init = models_dir / "__init__.py"
         imports = []
@@ -259,6 +259,7 @@ class Project:
 
         # Generate endpoints
         api_dir = self.package_dir / "api"
+        shutil.rmtree(api_dir, ignore_errors=True)
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")

@@ -1,5 +1,6 @@
 import datetime
 import json
+from collections.abc import Mapping
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
@@ -278,7 +279,7 @@ class BodyUploadFileTestsUploadPost:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.a_form_data import AFormData
         from ..models.body_upload_file_tests_upload_post_additional_property import (
             BodyUploadFileTestsUploadPostAdditionalProperty,
@@ -291,7 +292,7 @@ class BodyUploadFileTestsUploadPost:
             BodyUploadFileTestsUploadPostSomeOptionalObject,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         some_file = File(payload=BytesIO(d.pop("some_file")))
 
         some_required_number = d.pop("some_required_number")

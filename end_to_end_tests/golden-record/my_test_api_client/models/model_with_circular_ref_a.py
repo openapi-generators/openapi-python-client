@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
@@ -36,10 +37,10 @@ class ModelWithCircularRefA:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_circular_ref_b import ModelWithCircularRefB
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         _circular = d.pop("circular", UNSET)
         circular: Union[Unset, ModelWithCircularRefB]
         if isinstance(_circular, Unset):
