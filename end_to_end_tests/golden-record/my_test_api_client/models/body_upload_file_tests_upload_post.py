@@ -304,9 +304,9 @@ class BodyUploadFileTestsUploadPost:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                some_nullable_object_type_0 = BodyUploadFileTestsUploadPostSomeNullableObject.from_dict(data)
+                some_nullable_object = BodyUploadFileTestsUploadPostSomeNullableObject.from_dict(data)
 
-                return some_nullable_object_type_0
+                return some_nullable_object
             except:  # noqa: E722
                 pass
             return cast(Union["BodyUploadFileTestsUploadPostSomeNullableObject", None], data)

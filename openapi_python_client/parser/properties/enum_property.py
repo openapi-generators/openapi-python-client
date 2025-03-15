@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from openapi_python_client.parser.properties.has_named_class import HasNamedClass
+from openapi_python_client.schema.data_type import DataType
+
 __all__ = ["EnumProperty", "ValueType"]
 
 from typing import Any, ClassVar, Union, cast
@@ -9,7 +12,6 @@ from attrs import define
 
 from ... import Config, utils
 from ... import schema as oai
-from ...schema import DataType
 from ..errors import PropertyError
 from .none import NoneProperty
 from .protocol import PropertyProtocol, Value
@@ -20,7 +22,7 @@ ValueType = Union[str, int]
 
 
 @define
-class EnumProperty(PropertyProtocol):
+class EnumProperty(PropertyProtocol, HasNamedClass):
     """A property that should use an enum"""
 
     name: str
@@ -75,9 +77,10 @@ class EnumProperty(PropertyProtocol):
         # So instead, if null is a possible value, make the property nullable.
         # Mypy is not smart enough to know that the type is right though
         unchecked_value_list = [value for value in enum if value is not None]  # type: ignore
+        allow_null = len(unchecked_value_list) < len(enum)
 
         # It's legal to have an enum that only contains null as a value, we don't bother constructing an enum for that
-        if len(unchecked_value_list) == 0:
+        if len(unchecked_value_list) == 0 and allow_null:
             return (
                 NoneProperty.build(
                     name=name,
@@ -102,7 +105,7 @@ class EnumProperty(PropertyProtocol):
             Union[list[int], list[str]], unchecked_value_list
         )  # We checked this with all the value_types stuff
 
-        if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union
+        if allow_null:  # Only one of the values was None, that becomes a union
             data.oneOf = [
                 oai.Schema(type=DataType.NULL),
                 data.model_copy(update={"enum": value_list, "default": data.default}),

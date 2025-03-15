@@ -5,8 +5,13 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
-from openapi_python_client.parser.properties import LiteralEnumProperty, Schemas
-from openapi_python_client.parser.properties.enum_property import EnumProperty
+from openapi_python_client.parser.properties import (
+    EnumProperty,
+    LiteralEnumProperty,
+    NoneProperty,
+    Schemas,
+    UnionProperty,
+)
 
 PropertyClass = Union[type[EnumProperty], type[LiteralEnumProperty]]
 
@@ -79,3 +84,22 @@ def test_unsupported_type(config: Config, property_class: PropertyClass) -> None
     )
 
     assert isinstance(err, PropertyError)
+
+
+def test_nullable_enum(config):
+    data = oai.Schema(
+        type="string",
+        enum=["a", "b", None],
+        nullable=True,
+    )
+    schemas = Schemas()
+
+    p, _ = EnumProperty.build(
+        data=data, name="prop1", required=True, schemas=schemas, parent_name="parent", config=config
+    )
+
+    assert isinstance(p, UnionProperty)
+    assert len(p.inner_properties) == 2
+    assert isinstance(p.inner_properties[0], NoneProperty)
+    assert isinstance(p.inner_properties[1], EnumProperty)
+    assert p.inner_properties[1].class_info.name == "ParentProp1"
