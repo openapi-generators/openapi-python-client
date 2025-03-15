@@ -13,6 +13,24 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.24.1 (2025-03-15)
+
+### Features
+
+- allow Ruff to 0.10 (#1220)
+- allow Ruff 0.11 (#1222)
+- Allow any `Mapping` in generated `from_dict` functions (#1211)
+
+### Fixes
+
+#### Always parse `$ref` as a reference
+
+If additional attributes were included with a `$ref` (for example `title` or `description`), the property could be 
+interpreted as a new type instead of a reference, usually resulting in `Any` in the generated code.
+Now, any sibling properties to `$ref` will properly be ignored, as per the OpenAPI specification.
+
+Thanks @nkrishnaswami!
+
 ## 0.24.0 (2025-03-03)
 
 ### Breaking Changes
