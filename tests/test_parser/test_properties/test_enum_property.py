@@ -35,6 +35,34 @@ def test_conflict(config: Config, property_class: PropertyClass) -> None:
     assert err.detail == "Found conflicting enums named Existing with incompatible values."
 
 
+def test_avoids_false_conflict(config: Config, property_class: PropertyClass) -> None:
+    schemas = Schemas()
+
+    _, schemas = property_class.build(
+        data=oai.Schema(enum=["a"]), name="Friend", required=True, schemas=schemas, parent_name="", config=config
+    )
+    _, schemas = property_class.build(
+        data=oai.Schema(enum=["a", "b"]),
+        name="FriendShips",
+        required=True,
+        schemas=schemas,
+        parent_name="",
+        config=config,
+    )
+    prop, new_schemas = property_class.build(
+        data=oai.Schema(enum=["c"]),
+        name="ships",
+        required=True,
+        schemas=schemas,
+        parent_name="Friend",
+        config=config,
+    )
+
+    assert sorted([n for n in schemas.classes_by_name]) == ["Friend", "FriendShips"]
+    assert sorted([n for n in new_schemas.classes_by_name]) == ["Friend", "FriendShips", "FriendShipsPropertyEnum1"]
+    assert prop.name == "ships"
+
+
 def test_bad_default_value(config: Config, property_class: PropertyClass) -> None:
     data = oai.Schema(default="B", enum=["A"])
     schemas = Schemas()
