@@ -1,11 +1,11 @@
-from typing import Optional, Union
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
 from .parameter import Parameter
-from .reference import Reference
+from .reference import ReferenceOr
 from .request_body import RequestBody
 from .responses import Responses
 from .security_requirement import SecurityRequirement
@@ -25,8 +25,8 @@ class Operation(BaseModel):
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
     operationId: Optional[str] = None
-    parameters: Optional[list[Union[Parameter, Reference]]] = None
-    request_body: Optional[Union[RequestBody, Reference]] = Field(None, alias="requestBody")
+    parameters: Optional[list[ReferenceOr[Parameter]]] = None
+    request_body: Optional[ReferenceOr[RequestBody]] = Field(None, alias="requestBody")
     responses: Responses
     callbacks: Optional[dict[str, Callback]] = None
 
