@@ -5,6 +5,8 @@ from typing import Any, ClassVar, NamedTuple
 
 from attrs import define, evolve
 
+from openapi_python_client.parser.properties.has_named_class import HasNamedClass
+
 from ... import Config, utils
 from ... import schema as oai
 from ...utils import PythonIdentifier
@@ -15,7 +17,7 @@ from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
 @define
-class ModelProperty(PropertyProtocol):
+class ModelProperty(PropertyProtocol, HasNamedClass):
     """A property which refers to another Schema"""
 
     name: str
