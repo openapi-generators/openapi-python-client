@@ -40,7 +40,6 @@ except ImportError:
 
 def get_example(base_type):
     schema = base_type.model_json_schema()
-    print(json.dumps(schema.get("examples", []), indent=4))
     if "examples" in schema:
         return schema["examples"][0]
     if "$defs" in schema:
@@ -71,7 +70,6 @@ def deannotate_type(t):
 ])
 def test_type(ref_or_type, get_example_fn):
     base_type = None
-    print(deannotate_type(ref_or_type))
     for maybe_annotated_type in get_args(deannotate_type(ref_or_type)):
         each_type = deannotate_type(maybe_annotated_type)
         if each_type is not Reference:
