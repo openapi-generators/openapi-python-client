@@ -184,7 +184,9 @@ class EnumProperty(PropertyProtocol):
         return imports
 
     @staticmethod
-    def values_from_list(values: list[str] | list[int], class_info: Class, var_names: list[str]) -> dict[str, ValueType]:
+    def values_from_list(
+        values: list[str] | list[int], class_info: Class, var_names: list[str]
+    ) -> dict[str, ValueType]:
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: dict[str, ValueType] = {}
         use_var_names = len(var_names) == len(values)
