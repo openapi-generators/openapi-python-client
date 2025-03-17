@@ -195,8 +195,9 @@ class EnumProperty(PropertyProtocol):
             value = cast(Union[str, int], value)
             if isinstance(value, int):
                 if use_var_names:
-                    key = var_names[i].upper()
-                    output[key] = value
+                    key = var_names[i]
+                    sanitized_key = utils.snake_case(key).upper()
+                    output[sanitized_key] = value
                 elif value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value
                 else:

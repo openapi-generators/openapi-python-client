@@ -352,7 +352,7 @@ class TestEnumProperty:
 
         data = ["abc", "123", "a23", "1bc", 4, -3, "a Thing WIth spaces", ""]
 
-        result = EnumProperty.values_from_list(data, Class("ClassName", "module_name"))
+        result = EnumProperty.values_from_list(data, Class("ClassName", "module_name"), [])
 
         assert result == {
             "ABC": "abc",
@@ -371,7 +371,21 @@ class TestEnumProperty:
         data = ["abc", "123", "a23", "abc"]
 
         with pytest.raises(ValueError):
-            EnumProperty.values_from_list(data, Class("ClassName", "module_name"))
+            EnumProperty.values_from_list(data, Class("ClassName", "module_name"), [])
+
+    def test_int_enum_var_names_extension(self):
+        from openapi_python_client.parser.properties import EnumProperty
+
+        data = [-1, 1, 2]
+        var_names = ["Negative One", "One", "Two"]
+
+        result = EnumProperty.values_from_list(data, Class("ClassName", "module_name"), var_names)
+
+        assert result == {
+            "NEGATIVE_ONE": -1,
+            "ONE": 1,
+            "TWO": 2,
+        }
 
 
 class TestLiteralEnumProperty:
