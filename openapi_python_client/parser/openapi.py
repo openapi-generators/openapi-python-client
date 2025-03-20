@@ -508,10 +508,10 @@ class GeneratorData:
     title: str
     description: Optional[str]
     version: str
-    models: Iterator[ModelProperty]
+    models: list[ModelProperty]
     errors: list[ParseError]
     endpoint_collections_by_tag: dict[utils.PythonIdentifier, EndpointCollection]
-    enums: Iterator[Union[EnumProperty, LiteralEnumProperty]]
+    enums: list[Union[EnumProperty, LiteralEnumProperty]]
 
     @staticmethod
     def from_dict(data: dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
@@ -546,10 +546,10 @@ class GeneratorData:
             config=config,
         )
 
-        enums = (
+        enums = [
             prop for prop in schemas.classes_by_name.values() if isinstance(prop, (EnumProperty, LiteralEnumProperty))
-        )
-        models = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
+        ]
+        models = [prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty)]
 
         return GeneratorData(
             title=openapi.info.title,
