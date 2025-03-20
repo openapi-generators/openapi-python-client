@@ -134,6 +134,35 @@ class TestIntEnumClass:
 components:
   schemas:
     MyEnum:
+      type: integer
+      enum: [2, 3, -4]
+      x-enum-varnames: [
+        "Two",
+        "Three",
+        "Negative Four"
+      ]
+""")
+@with_generated_code_imports(
+    ".models.MyEnum",
+)
+class TestIntEnumVarNameExtensions:
+    @pytest.mark.parametrize(
+        "expected_name,expected_value",
+        [
+            ("TWO", 2),
+            ("THREE", 3),
+            ("NEGATIVE_FOUR", -4),
+        ],
+    )
+    def test_enum_values(self, MyEnum, expected_name, expected_value):
+        assert getattr(MyEnum, expected_name) == MyEnum(expected_value)
+
+
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    MyEnum:
       type: string
       enum: ["a", "b"]
     MyEnumIncludingNull:

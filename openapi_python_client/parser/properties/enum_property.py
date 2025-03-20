@@ -121,7 +121,8 @@ class EnumProperty(PropertyProtocol):
         if parent_name:
             class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
-        values = EnumProperty.values_from_list(value_list, class_info)
+        var_names = data.model_extra.get("x-enum-varnames", []) if data.model_extra else []
+        values = EnumProperty.values_from_list(value_list, class_info, var_names)
 
         if class_info.name in schemas.classes_by_name:
             existing = schemas.classes_by_name[class_info.name]
@@ -183,14 +184,21 @@ class EnumProperty(PropertyProtocol):
         return imports
 
     @staticmethod
-    def values_from_list(values: list[str] | list[int], class_info: Class) -> dict[str, ValueType]:
+    def values_from_list(
+        values: list[str] | list[int], class_info: Class, var_names: list[str]
+    ) -> dict[str, ValueType]:
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: dict[str, ValueType] = {}
+        use_var_names = len(var_names) == len(values)
 
         for i, value in enumerate(values):
             value = cast(Union[str, int], value)
             if isinstance(value, int):
-                if value < 0:
+                if use_var_names:
+                    key = var_names[i]
+                    sanitized_key = utils.snake_case(key).upper()
+                    output[sanitized_key] = value
+                elif value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value
                 else:
                     output[f"VALUE_{value}"] = value
