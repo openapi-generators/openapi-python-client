@@ -85,3 +85,11 @@ def test_get_base_json_type_string(quoted, expected, any_property_factory, mocke
     mocker.patch.object(AnyProperty, "_json_type_string", "str")
     p = any_property_factory()
     assert p.get_base_json_type_string(quoted=quoted) is expected
+
+
+def test_needs_post_processing(any_property_factory, model_property_factory):
+    p1 = any_property_factory()
+    assert p1.needs_post_processing() is False
+
+    p2 = model_property_factory()
+    assert p2.needs_post_processing() is True
