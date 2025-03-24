@@ -60,7 +60,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v4.6.2
         if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage-${{ matrix.python }}
@@ -117,7 +117,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download coverage reports
-        uses: actions/download-artifact@v4.1.9
+        uses: actions/download-artifact@v4.2.1
         with:
           merge-multiple: true
 
@@ -142,7 +142,7 @@ jobs:
           .venv/bin/python -m coverage report --fail-under=100          
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: html-report
           path: htmlcov
