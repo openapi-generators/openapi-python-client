@@ -192,6 +192,39 @@ content_type_overrides:
   application/zip: application/octet-stream
 ```
 
+## Supported Extensions
+
+### x-enum-varnames
+
+This extension has been adopted by similar projects such as [OpenAPI Tools](https://github.com/OpenAPITools/openapi-generator/pull/917).
+It is intended to provide user-friendly names for integer Enum members that get generated.
+It is critical that the length of the array matches that of the enum values.
+
+```
+"Colors": {
+   "type": "integer",
+   "format": "int32",
+   "enum": [
+       0,
+       1,
+       2
+   ], 
+  "x-enum-varnames": [
+      "Red",
+      "Green",
+      "Blue"
+   ]
+}
+```
+
+Results in:
+```
+class Color(IntEnum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+```
+
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
 [PDM]: https://pdm-project.org/latest/
