@@ -74,6 +74,11 @@ class ModelProperty(PropertyProtocol):
             else:
                 class_string = title
         class_info = Class.from_string(string=class_string, config=config)
+        if config.enumerate_duplicate_model_names:
+            suffix = 1
+            while class_info.name in schemas.classes_by_name:
+                class_info = Class.from_string(string=class_string + str(suffix), config=config)
+                suffix += 1
         model_roots = {*roots, class_info.name}
         required_properties: list[Property] | None = None
         optional_properties: list[Property] | None = None
