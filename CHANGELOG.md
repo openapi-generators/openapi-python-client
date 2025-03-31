@@ -13,6 +13,47 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.24.3 (2025-03-31)
+
+### Features
+
+#### Adding support for named integer enums
+
+##1214 by @barrybarrette
+
+Adding support for named integer enums via an optional extension, `x-enum-varnames`. 
+
+This extension is added to the schema inline with the `enum` definition:
+```
+"MyEnum": {
+    "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        99
+    ],
+    "type": "integer",
+    "format": "int32",
+    "x-enum-varnames": [
+        "Deinstalled",
+        "Installed",
+        "Upcoming_Site",
+        "Lab_Site",
+        "Pending_Deinstall",
+        "Suspended",
+        "Install_In_Progress",
+        "Unknown"
+    ]
+}
+```
+
+The result:
+![image](https://github.com/user-attachments/assets/780880b3-2f1f-49be-823b-f9abb713a3e1)
+
 ## 0.24.2 (2025-03-22)
 
 ### Fixes
