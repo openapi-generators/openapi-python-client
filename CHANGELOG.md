@@ -13,6 +13,77 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.24.3 (2025-03-31)
+
+### Features
+
+#### Adding support for named integer enums
+
+##1214 by @barrybarrette
+
+Adding support for named integer enums via an optional extension, `x-enum-varnames`. 
+
+This extension is added to the schema inline with the `enum` definition:
+```
+"MyEnum": {
+    "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        99
+    ],
+    "type": "integer",
+    "format": "int32",
+    "x-enum-varnames": [
+        "Deinstalled",
+        "Installed",
+        "Upcoming_Site",
+        "Lab_Site",
+        "Pending_Deinstall",
+        "Suspended",
+        "Install_In_Progress",
+        "Unknown"
+    ]
+}
+```
+
+The result:
+![image](https://github.com/user-attachments/assets/780880b3-2f1f-49be-823b-f9abb713a3e1)
+
+## 0.24.2 (2025-03-22)
+
+### Fixes
+
+#### Make lists of models and enums work correctly in custom templates
+
+Lists of model and enum classes should be available to custom templates via the Jinja
+variables `openapi.models` and `openapi.enums`, but these were being passed in a way that made
+them always appear empty. This has been fixed so a custom template can now iterate over them.
+
+Closes #1188.
+
+## 0.24.1 (2025-03-15)
+
+### Features
+
+- allow Ruff to 0.10 (#1220)
+- allow Ruff 0.11 (#1222)
+- Allow any `Mapping` in generated `from_dict` functions (#1211)
+
+### Fixes
+
+#### Always parse `$ref` as a reference
+
+If additional attributes were included with a `$ref` (for example `title` or `description`), the property could be 
+interpreted as a new type instead of a reference, usually resulting in `Any` in the generated code.
+Now, any sibling properties to `$ref` will properly be ignored, as per the OpenAPI specification.
+
+Thanks @nkrishnaswami!
+
 ## 0.24.0 (2025-03-03)
 
 ### Breaking Changes

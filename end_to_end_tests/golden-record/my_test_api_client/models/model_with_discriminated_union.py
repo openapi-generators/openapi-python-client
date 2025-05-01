@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
@@ -46,11 +47,11 @@ class ModelWithDiscriminatedUnion:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
         from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
 
-        d = src_dict.copy()
+        d = dict(src_dict)
 
         def _parse_discriminated_union(
             data: object,
