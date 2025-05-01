@@ -7,7 +7,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "benchling-openapi-python-client"
-version = "2.0.0-alpha.1"
+version = "2.0.0-alpha.2"
 description = "Generate modern Python clients from OpenAPI - Benchling fork"
 repository = "https://github.com/benchling/openapi-python-client"
 license = "MIT"
