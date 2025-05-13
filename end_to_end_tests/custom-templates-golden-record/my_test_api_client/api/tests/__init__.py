@@ -20,6 +20,7 @@ from . import (
     test_inline_objects,
     token_with_cookie_auth_token_with_cookie_get,
     unsupported_content_tests_unsupported_content_get,
+    upload_array_of_files_in_object_tests_upload_post,
     upload_file_tests_upload_post,
     upload_multiple_files_tests_upload_post,
 )
@@ -88,6 +89,13 @@ class TestsEndpoints:
         Upload several files in the same request
         """
         return upload_multiple_files_tests_upload_post
+
+    @classmethod
+    def upload_array_of_files_in_object_tests_upload_post(cls) -> types.ModuleType:
+        """
+        Upload an array of files as part of an object
+        """
+        return upload_array_of_files_in_object_tests_upload_post
 
     @classmethod
     def json_body_tests_json_body_post(cls) -> types.ModuleType:

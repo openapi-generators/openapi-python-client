@@ -29,6 +29,7 @@ class ModelWithUnionProperty:
             a_property = self.a_property.value
 
         field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if a_property is not UNSET:
             field_dict["a_property"] = a_property

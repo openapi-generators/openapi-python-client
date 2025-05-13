@@ -75,6 +75,14 @@ else:
 {% endmacro %}
 
 
+{% macro instance_check(inner_property, source) %}
+{% if inner_property.get_instance_type_string() == "None" %}
+if {{ source }} is None:
+{% else %}
+if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+{% endif %}
+{% endmacro %}
+
 {% macro transform_multipart(property, source, destination) %}
 {% set ns = namespace(has_if = false) %}
 {{ destination }}: {{ property.get_type_string(json=False, multipart=True) }}
@@ -86,10 +94,10 @@ if isinstance({{ source }}, Unset):
 {% endif %}
 {% for inner_property in property.inner_properties %}
 {% if not ns.has_if %}
-if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+{{ instance_check(inner_property, source) }}
 {% set ns.has_if = true %}
 {% elif not loop.last %}
-elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+el{{ instance_check(inner_property, source) }}
 {% else %}
 else:
 {% endif %}

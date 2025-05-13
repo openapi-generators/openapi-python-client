@@ -87,6 +87,7 @@ from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
 )
 from .test_inline_objects_body import TestInlineObjectsBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
+from .upload_array_of_files_in_object_tests_upload_post_body import UploadArrayOfFilesInObjectTestsUploadPostBody
 from .validation_error import ValidationError
 
 __all__ = (
@@ -167,5 +168,6 @@ __all__ = (
     "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
     "TestInlineObjectsBody",
     "TestInlineObjectsResponse200",
+    "UploadArrayOfFilesInObjectTestsUploadPostBody",
     "ValidationError",
 )

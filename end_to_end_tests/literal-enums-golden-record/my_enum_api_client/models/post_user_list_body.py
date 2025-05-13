@@ -94,35 +94,27 @@ class PostUserListBody:
 
         return field_dict
 
-    def to_multipart(self) -> dict[str, Any]:
-        an_enum_value: Union[Unset, tuple[None, bytes, str]] = UNSET
-        if not isinstance(self.an_enum_value, Unset):
-            _temp_an_enum_value = []
-            for an_enum_value_item_data in self.an_enum_value:
-                an_enum_value_item: str = an_enum_value_item_data
-                _temp_an_enum_value.append(an_enum_value_item)
-            an_enum_value = (None, json.dumps(_temp_an_enum_value).encode(), "application/json")
+    def to_multipart(self) -> list[tuple[str, Any]]:
+        field_list: list[tuple[str, Any]] = []
+        for an_enum_value_element in self.an_enum_value or []:
+            an_enum_value_item = (None, str(an_enum_value_element).encode(), "text/plain")
 
-        an_enum_value_with_null: Union[Unset, tuple[None, bytes, str]] = UNSET
-        if not isinstance(self.an_enum_value_with_null, Unset):
-            _temp_an_enum_value_with_null = []
-            for an_enum_value_with_null_item_data in self.an_enum_value_with_null:
-                an_enum_value_with_null_item: Union[None, str]
-                if isinstance(an_enum_value_with_null_item_data, str):
-                    an_enum_value_with_null_item = an_enum_value_with_null_item_data
-                else:
-                    an_enum_value_with_null_item = an_enum_value_with_null_item_data
-                _temp_an_enum_value_with_null.append(an_enum_value_with_null_item)
-            an_enum_value_with_null = (None, json.dumps(_temp_an_enum_value_with_null).encode(), "application/json")
+            field_list.append(("an_enum_value", an_enum_value_item))
 
-        an_enum_value_with_only_null: Union[Unset, tuple[None, bytes, str]] = UNSET
-        if not isinstance(self.an_enum_value_with_only_null, Unset):
-            _temp_an_enum_value_with_only_null = self.an_enum_value_with_only_null
-            an_enum_value_with_only_null = (
-                None,
-                json.dumps(_temp_an_enum_value_with_only_null).encode(),
-                "application/json",
-            )
+        for an_enum_value_with_null_element in self.an_enum_value_with_null or []:
+            an_enum_value_with_null_item: tuple[None, bytes, str]
+
+            if an_enum_value_with_null_element is None:
+                an_enum_value_with_null_item = (None, str(an_enum_value_with_null_element).encode(), "text/plain")
+            else:
+                an_enum_value_with_null_item = (None, str(an_enum_value_with_null_element).encode(), "text/plain")
+
+            field_list.append(("an_enum_value_with_null", an_enum_value_with_null_item))
+
+        for an_enum_value_with_only_null_element in self.an_enum_value_with_only_null or []:
+            an_enum_value_with_only_null_item = (None, str(an_enum_value_with_only_null_element).encode(), "text/plain")
+
+            field_list.append(("an_enum_value_with_only_null", an_enum_value_with_only_null_item))
 
         an_allof_enum_with_overridden_default: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_allof_enum_with_overridden_default, Unset):
@@ -132,41 +124,30 @@ class PostUserListBody:
                 "text/plain",
             )
 
+        if an_allof_enum_with_overridden_default is not UNSET:
+            field_list.append(("an_allof_enum_with_overridden_default", an_allof_enum_with_overridden_default))
         an_optional_allof_enum: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = (None, str(self.an_optional_allof_enum).encode(), "text/plain")
 
-        nested_list_of_enums: Union[Unset, tuple[None, bytes, str]] = UNSET
-        if not isinstance(self.nested_list_of_enums, Unset):
-            _temp_nested_list_of_enums = []
-            for nested_list_of_enums_item_data in self.nested_list_of_enums:
-                nested_list_of_enums_item = []
-                for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
-                    nested_list_of_enums_item_item: str = nested_list_of_enums_item_item_data
-                    nested_list_of_enums_item.append(nested_list_of_enums_item_item)
+        if an_optional_allof_enum is not UNSET:
+            field_list.append(("an_optional_allof_enum", an_optional_allof_enum))
+        for nested_list_of_enums_element in self.nested_list_of_enums or []:
+            _temp_nested_list_of_enums_item = []
+            for nested_list_of_enums_item_item_data in nested_list_of_enums_element:
+                nested_list_of_enums_item_item: str = nested_list_of_enums_item_item_data
+                _temp_nested_list_of_enums_item.append(nested_list_of_enums_item_item)
+            nested_list_of_enums_item = (None, json.dumps(_temp_nested_list_of_enums_item).encode(), "application/json")
 
-                _temp_nested_list_of_enums.append(nested_list_of_enums_item)
-            nested_list_of_enums = (None, json.dumps(_temp_nested_list_of_enums).encode(), "application/json")
+            field_list.append(("nested_list_of_enums", nested_list_of_enums_item))
 
         field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
 
-        field_dict.update({})
-        if an_enum_value is not UNSET:
-            field_dict["an_enum_value"] = an_enum_value
-        if an_enum_value_with_null is not UNSET:
-            field_dict["an_enum_value_with_null"] = an_enum_value_with_null
-        if an_enum_value_with_only_null is not UNSET:
-            field_dict["an_enum_value_with_only_null"] = an_enum_value_with_only_null
-        if an_allof_enum_with_overridden_default is not UNSET:
-            field_dict["an_allof_enum_with_overridden_default"] = an_allof_enum_with_overridden_default
-        if an_optional_allof_enum is not UNSET:
-            field_dict["an_optional_allof_enum"] = an_optional_allof_enum
-        if nested_list_of_enums is not UNSET:
-            field_dict["nested_list_of_enums"] = nested_list_of_enums
+        field_list += list(field_dict.items())
 
-        return field_dict
+        return field_list
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
