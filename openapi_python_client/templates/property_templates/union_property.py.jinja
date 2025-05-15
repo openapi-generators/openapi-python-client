@@ -86,7 +86,6 @@ if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
 {% macro transform_multipart(property, source, destination) %}
 {% set ns = namespace(has_if = false) %}
 {{ destination }}: {{ property.get_type_string(json=False, multipart=True) }}
-
 {% if not property.required %}
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
@@ -97,11 +96,13 @@ if isinstance({{ source }}, Unset):
 {{ instance_check(inner_property, source) }}
 {% set ns.has_if = true %}
 {% elif not loop.last %}
+
 el{{ instance_check(inner_property, source) }}
 {% else %}
+
 else:
 {% endif %}
 {% import "property_templates/" + inner_property.template as inner_template %}
     {{ inner_template.transform_multipart(inner_property, source, destination) | indent(4) | trim }}
-{% endfor %}
+{%- endfor -%}
 {% endmacro %}

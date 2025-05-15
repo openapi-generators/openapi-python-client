@@ -96,19 +96,17 @@ class PostUserListBody:
 
     def to_multipart(self) -> list[tuple[str, Any]]:
         field_list: list[tuple[str, Any]] = []
+
         for an_enum_value_element in self.an_enum_value or []:
             an_enum_value_item = (None, str(an_enum_value_element).encode(), "text/plain")
-
             field_list.append(("an_enum_value", an_enum_value_item))
 
         for an_enum_value_with_null_element in self.an_enum_value_with_null or []:
             an_enum_value_with_null_item: tuple[None, bytes, str]
-
             if an_enum_value_with_null_element is None:
                 an_enum_value_with_null_item = (None, str(an_enum_value_with_null_element).encode(), "text/plain")
             else:
                 an_enum_value_with_null_item = (None, str(an_enum_value_with_null_element).encode(), "text/plain")
-
             field_list.append(("an_enum_value_with_null", an_enum_value_with_null_item))
 
         for an_enum_value_with_only_null_element in self.an_enum_value_with_only_null or []:
@@ -126,12 +124,14 @@ class PostUserListBody:
 
         if an_allof_enum_with_overridden_default is not UNSET:
             field_list.append(("an_allof_enum_with_overridden_default", an_allof_enum_with_overridden_default))
+
         an_optional_allof_enum: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = (None, str(self.an_optional_allof_enum).encode(), "text/plain")
 
         if an_optional_allof_enum is not UNSET:
             field_list.append(("an_optional_allof_enum", an_optional_allof_enum))
+
         for nested_list_of_enums_element in self.nested_list_of_enums or []:
             _temp_nested_list_of_enums_item = []
             for nested_list_of_enums_item_item_data in nested_list_of_enums_element:

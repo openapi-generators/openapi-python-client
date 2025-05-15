@@ -7,5 +7,5 @@ str({{ source }})
 {{ destination }} = {{source}} if isinstance({{source}}, Unset) else (None, str({{source}}).encode(), "text/plain")
 {% else %}
 {{ destination }} =  (None, str({{ source }}).encode(), "text/plain")
-{% endif %}
+{%- endif -%}
 {% endmacro %}

@@ -25,9 +25,9 @@ if not isinstance({{ source }}, Unset):
 {% macro transform_multipart(property, source, destination) %}
 {% if property.required %}
 {{ destination }} = {{ source }}.to_tuple()
-{% else %}
+{%- else %}
 {{ destination }}: {{ property.get_type_string(json=True) }} = UNSET
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ source }}.to_tuple()
-{% endif %}
+{%- endif -%}
 {% endmacro %}

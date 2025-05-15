@@ -47,12 +47,14 @@ class PostBodyMultipartBody:
 
     def to_multipart(self) -> list[tuple[str, Any]]:
         field_list: list[tuple[str, Any]] = []
+
         a_string = (None, str(self.a_string).encode(), "text/plain")
 
         field_list.append(("a_string", a_string))
-        file = self.file.to_tuple()
 
+        file = self.file.to_tuple()
         field_list.append(("file", file))
+
         description = (
             self.description
             if isinstance(self.description, Unset)

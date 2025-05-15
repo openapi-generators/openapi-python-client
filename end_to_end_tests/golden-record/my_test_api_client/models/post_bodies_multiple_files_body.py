@@ -32,6 +32,7 @@ class PostBodiesMultipleFilesBody:
 
     def to_multipart(self) -> list[tuple[str, Any]]:
         field_list: list[tuple[str, Any]] = []
+
         a = self.a if isinstance(self.a, Unset) else (None, str(self.a).encode(), "text/plain")
 
         if a is not UNSET:

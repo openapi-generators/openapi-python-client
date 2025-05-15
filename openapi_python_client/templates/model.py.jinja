@@ -84,14 +84,13 @@ class {{ class_name }}:
 
 {% macro _transform_property(property, content, multipart=False) %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if multipart %}
+{%- if multipart -%}
 {{ prop_template.transform_multipart(property, content, property.python_name) }}
-{% elif prop_template.transform %}
+{%- elif prop_template.transform -%}
 {{ prop_template.transform(property=property, source=content, destination=property.python_name) }}
-{% else %}
+{%- else -%}
 {{ property.python_name }} = {{ content }}
-{% endif %}
-
+{%- endif -%}
 {% endmacro %}
 
 {% macro _prepare_field_dict(multipart=False) %}
@@ -113,6 +112,7 @@ field_dict.update(self.additional_properties)
 {% macro _to_dict() %}
 {% for property in model.required_properties + model.optional_properties -%}
 {{ _transform_property(property, "self." + property.python_name) }}
+
 {% endfor %}
 
 {{ _prepare_field_dict() }}
@@ -144,6 +144,7 @@ return field_dict
 {% if model.is_multipart_body %}
     def to_multipart(self) -> list[tuple[str, Any]]:
         field_list: list[tuple[str, Any]] = []
+
         {% for property in model.required_properties + model.optional_properties %}
         {% if property.__class__.__name__ == 'ListProperty' %}
         {% if not property.required %}
@@ -163,6 +164,7 @@ return field_dict
         field_list.append(("{{ property.python_name }}", {{property.python_name}}))
         {% endif %}
         {% endif %}
+
         {% endfor %}
 
         {{ _prepare_field_dict(True) | indent(8) }}
