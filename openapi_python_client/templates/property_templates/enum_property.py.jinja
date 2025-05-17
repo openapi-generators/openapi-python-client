@@ -22,16 +22,9 @@ if not isinstance({{ source }}, Unset):
 {% endif %}
 {% endmacro %}
 
-{% macro transform_multipart(property, source, destination) %}
+{% macro multipart(property, source, destination) %}
 {% set transformed = "(None, str(" + source + ".value" + ").encode(), \"text/plain\")" %}
-{% set type_string = "Union[Unset, tuple[None, bytes, str]]" %}
-{% if property.required %}
-{{ destination }} = {{ transformed }}
-{%- else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ destination }} = {{ transformed }}
-{% endif %}
+field_list.append(({{ destination }}, {{ transformed }}))
 {% endmacro %}
 
 {% macro transform_header(source) %}

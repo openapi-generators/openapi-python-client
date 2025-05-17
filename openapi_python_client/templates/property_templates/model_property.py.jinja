@@ -34,14 +34,7 @@ if not isinstance({{ source }}, Unset):
 {%- endif %}
 {% endmacro %}
 
-{% macro transform_multipart(property, source, destination) %}
+{% macro multipart(property, source, destination) %}
 {% set transformed = "(None, json.dumps(" + source + ".to_dict()" + ").encode(), 'application/json')" %}
-{% set type_string = property.get_type_string(multipart=True) %}
-{% if property.required %}
-{{ destination }} = {{ transformed }}
-{%- else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ destination }} = {{ transformed }}
-{%- endif %}
+field_list.append(({{ destination }}, {{ transformed }}))
 {% endmacro %}

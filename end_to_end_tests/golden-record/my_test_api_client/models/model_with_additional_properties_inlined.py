@@ -33,6 +33,7 @@ class ModelWithAdditionalPropertiesInlined:
         field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
+
         field_dict.update({})
         if a_number is not UNSET:
             field_dict["a_number"] = a_number

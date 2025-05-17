@@ -52,6 +52,7 @@ class AModel:
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
         field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,

@@ -206,6 +206,7 @@ class AModel:
             not_required_nullable_model = self.not_required_nullable_model
 
         field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,

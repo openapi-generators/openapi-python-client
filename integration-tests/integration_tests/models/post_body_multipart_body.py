@@ -45,31 +45,20 @@ class PostBodyMultipartBody:
 
         return field_dict
 
-    def to_multipart(self) -> dict[str, Any]:
-        a_string = (None, str(self.a_string).encode(), "text/plain")
+    def to_multipart(self) -> list[tuple[str, Any]]:
+        field_list: list[tuple[str, Any]] = []
 
-        file = self.file.to_tuple()
+        field_list.append(("a_string", (None, str(self.a_string).encode(), "text/plain")))
 
-        description = (
-            self.description
-            if isinstance(self.description, Unset)
-            else (None, str(self.description).encode(), "text/plain")
-        )
+        field_list.append(("file", self.file.to_tuple()))
 
-        field_dict: dict[str, Any] = {}
+        if not isinstance(self.description, Unset):
+            field_list.append(("description", (None, str(self.description).encode(), "text/plain")))
+
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
+            field_list.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
-        field_dict.update(
-            {
-                "a_string": a_string,
-                "file": file,
-            }
-        )
-        if description is not UNSET:
-            field_dict["description"] = description
-
-        return field_dict
+        return field_list
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
