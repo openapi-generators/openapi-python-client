@@ -48,27 +48,15 @@ class PostBodyMultipartBody:
     def to_multipart(self) -> list[tuple[str, Any]]:
         field_list: list[tuple[str, Any]] = []
 
-        a_string = (None, str(self.a_string).encode(), "text/plain")
+        field_list.append(("a_string", (None, str(self.a_string).encode(), "text/plain")))
 
-        field_list.append(("a_string", a_string))
+        field_list.append(("file", self.file.to_tuple()))
 
-        file = self.file.to_tuple()
-        field_list.append(("file", file))
+        if not isinstance(self.description, Unset):
+            field_list.append(("description", (None, str(self.description).encode(), "text/plain")))
 
-        description = (
-            self.description
-            if isinstance(self.description, Unset)
-            else (None, str(self.description).encode(), "text/plain")
-        )
-
-        if description is not UNSET:
-            field_list.append(("description", description))
-
-        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
-
-        field_list += list(field_dict.items())
+            field_list.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
         return field_list
 

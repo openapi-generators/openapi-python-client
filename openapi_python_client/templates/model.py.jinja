@@ -82,25 +82,30 @@ class {{ class_name }}:
     additional_properties: dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
-{% macro _transform_property(property, content, multipart=False) %}
+{% macro _transform_property(property, content) %}
 {% import "property_templates/" + property.template as prop_template %}
-{%- if multipart -%}
-{{ prop_template.transform_multipart(property, content, property.python_name) }}
-{%- elif prop_template.transform -%}
+{%- if prop_template.transform -%}
 {{ prop_template.transform(property=property, source=content, destination=property.python_name) }}
 {%- else -%}
 {{ property.python_name }} = {{ content }}
 {%- endif -%}
 {% endmacro %}
 
-{% macro _prepare_field_dict(multipart=False) %}
+{% macro multipart(property, source, destination) %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if not property.required %}
+if not isinstance({{source}}, Unset):
+    {{ prop_template.multipart(property, source, destination) | indent(4) }}
+{% else %}
+{{ prop_template.multipart(property, source, destination) }}
+{% endif %}
+{% endmacro %}
+
+{% macro _prepare_field_dict() %}
 field_dict: dict[str, Any] = {}
 {% if model.additional_properties %}
 {% import "property_templates/" + model.additional_properties.template as prop_template %}
-{% if multipart %}
-for prop_name, prop in self.additional_properties.items():
-    {{ prop_template.transform_multipart(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
-{% elif prop_template.transform %}
+{% if prop_template.transform %}
 for prop_name, prop in self.additional_properties.items():
     {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=false) | indent(4) }}
 {% else %}
@@ -146,30 +151,15 @@ return field_dict
         field_list: list[tuple[str, Any]] = []
 
         {% for property in model.required_properties + model.optional_properties %}
-        {% if property.__class__.__name__ == 'ListProperty' %}
-        {% if not property.required %}
-        for {{ property.python_name }}_element in self.{{ property.python_name }} or []:
-        {% else %}
-        for {{ property.python_name }}_element in self.{{ property.python_name }}:
-        {% endif %}
-            {{ _transform_property(property.inner_property, property.python_name + "_element", True) | indent(12) }}
-            field_list.append(("{{ property.python_name }}", {{property.inner_property.python_name}}))
-
-        {% else %}
-        {{ _transform_property(property, "self." + property.python_name, True) | indent(8) }}
-        {% if not property.required %}
-        if {{ property.python_name }} is not UNSET:
-            field_list.append(("{{ property.python_name }}", {{property.python_name}}))
-        {% else %}
-        field_list.append(("{{ property.python_name }}", {{property.python_name}}))
-        {% endif %}
-        {% endif %}
+        {% set destination = "\"" + property.name + "\"" %}
+        {{ multipart(property, "self." + property.python_name, destination) | indent(8) }}
 
         {% endfor %}
 
-        {{ _prepare_field_dict(True) | indent(8) }}
-
-        field_list += list(field_dict.items())
+        {% if model.additional_properties %}
+        for prop_name, prop in self.additional_properties.items():
+            {{ multipart(model.additional_properties, "prop", "prop_name") | indent(4) }}
+        {% endif %}
 
         return field_list
 
