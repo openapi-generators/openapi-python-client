@@ -188,8 +188,11 @@ class Endpoint:
                 continue
 
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
-            endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
-            endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
+            for media_type in response.content:
+                if not media_type.prop:
+                    continue
+                endpoint.relative_imports |= media_type.prop.get_lazy_imports(prefix=models_relative_prefix)
+                endpoint.relative_imports |= media_type.prop.get_imports(prefix=models_relative_prefix)
             if response.is_default():
                 endpoint.responses.default = response
             else:
@@ -469,7 +472,14 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        types = sorted(
+            {
+                media_type.prop.get_type_string()
+                for response in self.responses
+                for media_type in response.content
+                if media_type.prop
+            }
+        )
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
