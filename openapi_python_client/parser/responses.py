@@ -29,12 +29,23 @@ NONE_SOURCE = _ResponseSource(attribute="None", return_type="None")
 
 
 @define
+class MediaType:
+    """Describes the response for a given content type"""
+
+    content_type: Optional[str]
+    source: _ResponseSource
+    prop: Property
+    data: Union[
+        oai.MediaType, oai.Reference, None
+    ]  # Original data which created this response, useful for custom templates
+
+
+@define
 class Response:
     """Describes a single response for an endpoint"""
 
     status_code: HTTPStatus
-    prop: Property
-    source: _ResponseSource
+    content: list[MediaType]
     data: Union[oai.Response, oai.Reference]  # Original data which created this response, useful for custom templates
 
 
@@ -68,15 +79,21 @@ def empty_response(
     return Response(
         data=data,
         status_code=status_code,
-        prop=AnyProperty(
-            name=response_name,
-            default=None,
-            required=True,
-            python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
-            description=data.description if isinstance(data, oai.Response) else None,
-            example=None,
-        ),
-        source=NONE_SOURCE,
+        content=[
+            MediaType(
+                content_type=None,
+                prop=AnyProperty(
+                    name=response_name,
+                    default=None,
+                    required=True,
+                    python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
+                    description=data.description if isinstance(data, oai.Response) else None,
+                    example=None,
+                ),
+                source=NONE_SOURCE,
+                data=None,
+            )
+        ],
     )
 
 
@@ -116,19 +133,31 @@ def response_from_data(  # noqa: PLR0911
             ),
             schemas,
         )
-
+    content_types: list[MediaType] = []
     for content_type, media_type in content.items():
         source = _source_by_content_type(content_type, config)
         if source is not None:
-            schema_data = media_type.media_type_schema
-            break
-    else:
-        return (
-            ParseError(data=data, detail=f"Unsupported content_type {content}"),
-            schemas,
-        )
+            prop, schemas = property_from_data(
+                name=response_name,
+                required=True,
+                data=media_type.media_type_schema or oai.Schema(),
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
+            if isinstance(prop, PropertyError):
+                return prop, schemas
+            if prop.description is None and isinstance(data, oai.Response):
+                prop.description = data.description
 
-    if schema_data is None:
+            content_types.append(MediaType(content_type=content_type, source=source, prop=prop, data=media_type))
+    if not content_types:
+        if content:
+            return (
+                ParseError(data=data, detail=f"Unsupported content_type {content}"),
+                schemas,
+            )
+
         return (
             empty_response(
                 status_code=status_code,
@@ -139,16 +168,4 @@ def response_from_data(  # noqa: PLR0911
             schemas,
         )
 
-    prop, schemas = property_from_data(
-        name=response_name,
-        required=True,
-        data=schema_data,
-        schemas=schemas,
-        parent_name=parent_name,
-        config=config,
-    )
-
-    if isinstance(prop, PropertyError):
-        return prop, schemas
-
-    return Response(status_code=status_code, prop=prop, source=source, data=data), schemas
+    return Response(status_code=status_code, content=content_types, data=data), schemas
