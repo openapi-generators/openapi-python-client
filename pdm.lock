@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:18a45e099de16a3f298e7c5bf873869d842e647755df674a9d2c53c4ce9b0d71"
+content_hash = "sha256:dba408d9e5f1146846a3c2bdfdbb55df2679944d739a1975ef13beddc6ca8227"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -923,19 +923,19 @@ files = [
 
 [[package]]
 name = "typer"
-version = "0.15.4"
+version = "0.16.0"
 requires_python = ">=3.7"
 summary = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 groups = ["default"]
 dependencies = [
-    "click<8.2,>=8.0.0",
+    "click>=8.0.0",
     "rich>=10.11.0",
     "shellingham>=1.3.0",
     "typing-extensions>=3.7.4.3",
 ]
 files = [
-    {file = "typer-0.15.4-py3-none-any.whl", hash = "sha256:eb0651654dcdea706780c466cf06d8f174405a659ffff8f163cfbfee98c0e173"},
-    {file = "typer-0.15.4.tar.gz", hash = "sha256:89507b104f9b6a0730354f27c39fae5b63ccd0c95b1ce1f1a6ba0cfd329997c3"},
+    {file = "typer-0.16.0-py3-none-any.whl", hash = "sha256:1f79bed11d4d02d4310e3c1b7ba594183bcedb0ac73b27a9e5f28f6fb5b98855"},
+    {file = "typer-0.16.0.tar.gz", hash = "sha256:af377ffaee1dbe37ae9440cb4e8f11686ea5ce4e9bae01b84ae7c63b87f1dd3b"},
 ]
 
 [[package]]
