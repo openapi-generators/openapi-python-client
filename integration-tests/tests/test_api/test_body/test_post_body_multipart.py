@@ -9,23 +9,29 @@ from integration_tests.models.post_body_multipart_body import PostBodyMultipartB
 from integration_tests.models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from integration_tests.types import File
 
+files = [
+    File(
+        payload=BytesIO(b"some file content"),
+        file_name="cool_stuff.txt",
+        mime_type="application/openapi-python-client",
+    ),
+    File(
+        payload=BytesIO(b"more file content"),
+        file_name=None,
+        mime_type=None,
+    ),
+]
+
 
 def test(client: Client) -> None:
     a_string = "a test string"
-    payload = b"some file content"
-    file_name = "cool_stuff.txt"
-    mime_type = "application/openapi-python-client"
     description = "super descriptive thing"
 
     response = post_body_multipart.sync_detailed(
         client=client,
         body=PostBodyMultipartBody(
             a_string=a_string,
-            file=File(
-                payload=BytesIO(payload),
-                file_name=file_name,
-                mime_type=mime_type,
-            ),
+            files=files,
             description=description,
         ),
     )
@@ -35,17 +41,16 @@ def test(client: Client) -> None:
         raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")
 
     assert content.a_string == a_string
-    assert content.file_name == file_name
-    assert content.file_content_type == mime_type
-    assert content.file_data.encode() == payload
     assert content.description == description
+    for i, file in enumerate(content.files):
+        files[i].payload.seek(0)
+        assert file.data == files[i].payload.read().decode()
+        assert file.name == files[i].file_name
+        assert file.content_type == files[i].mime_type
 
 
 def test_custom_hooks() -> None:
     a_string = "a test string"
-    payload = b"some file content"
-    file_name = "cool_stuff.txt"
-    mime_type = "application/openapi-python-client"
     description = "super descriptive thing"
 
     request_hook_called = False
@@ -67,11 +72,7 @@ def test_custom_hooks() -> None:
         client=client,
         body=PostBodyMultipartBody(
             a_string=a_string,
-            file=File(
-                payload=BytesIO(payload),
-                file_name=file_name,
-                mime_type=mime_type,
-            ),
+            files=files,
             description=description,
         ),
     )
@@ -82,9 +83,6 @@ def test_custom_hooks() -> None:
 
 def test_context_manager(client: Client) -> None:
     a_string = "a test string"
-    payload = b"some file content"
-    file_name = "cool_stuff.txt"
-    mime_type = "application/openapi-python-client"
     description = "super descriptive thing"
 
     with client as client:
@@ -92,11 +90,7 @@ def test_context_manager(client: Client) -> None:
             client=client,
             body=PostBodyMultipartBody(
                 a_string=a_string,
-                file=File(
-                    payload=BytesIO(payload),
-                    file_name=file_name,
-                    mime_type=mime_type,
-                ),
+                files=files,
                 description=description,
             ),
         )
@@ -104,11 +98,7 @@ def test_context_manager(client: Client) -> None:
             client=client,
             body=PostBodyMultipartBody(
                 a_string=a_string,
-                file=File(
-                    payload=BytesIO(payload),
-                    file_name=file_name,
-                    mime_type=mime_type,
-                ),
+                files=files,
                 description=description,
             ),
         )
@@ -118,11 +108,7 @@ def test_context_manager(client: Client) -> None:
             client=client,
             body=PostBodyMultipartBody(
                 a_string=a_string,
-                file=File(
-                    payload=BytesIO(payload),
-                    file_name=file_name,
-                    mime_type=mime_type,
-                ),
+                files=files,
                 description=description,
             ),
         )
@@ -131,30 +117,17 @@ def test_context_manager(client: Client) -> None:
     if not isinstance(content, PostBodyMultipartResponse200):
         raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")
 
-    assert content.a_string == a_string
-    assert content.file_name == file_name
-    assert content.file_content_type == mime_type
-    assert content.file_data.encode() == payload
-    assert content.description == description
-
 
 @pytest.mark.asyncio
 async def test_async(client: Client) -> None:
     a_string = "a test string"
-    payload = b"some file content"
-    file_name = "cool_stuff.txt"
-    mime_type = "application/openapi-python-client"
     description = "super descriptive thing"
 
     response = await post_body_multipart.asyncio_detailed(
         client=client,
         body=PostBodyMultipartBody(
             a_string=a_string,
-            file=File(
-                payload=BytesIO(payload),
-                file_name=file_name,
-                mime_type=mime_type,
-            ),
+            files=files,
             description=description,
         ),
     )
@@ -164,18 +137,17 @@ async def test_async(client: Client) -> None:
         raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")
 
     assert content.a_string == a_string
-    assert content.file_name == file_name
-    assert content.file_content_type == mime_type
-    assert content.file_data.encode() == payload
     assert content.description == description
+    for i, file in enumerate(content.files):
+        files[i].payload.seek(0)
+        assert file.data == files[i].payload.read().decode()
+        assert file.name == files[i].file_name
+        assert file.content_type == files[i].mime_type
 
 
 @pytest.mark.asyncio
 async def test_async_context_manager(client: Client) -> None:
     a_string = "a test string"
-    payload = b"some file content"
-    file_name = "cool_stuff.txt"
-    mime_type = "application/openapi-python-client"
     description = "super descriptive thing"
 
     async with client as client:
@@ -183,11 +155,7 @@ async def test_async_context_manager(client: Client) -> None:
             client=client,
             body=PostBodyMultipartBody(
                 a_string=a_string,
-                file=File(
-                    payload=BytesIO(payload),
-                    file_name=file_name,
-                    mime_type=mime_type,
-                ),
+                files=files,
                 description=description,
             ),
         )
@@ -195,11 +163,7 @@ async def test_async_context_manager(client: Client) -> None:
             client=client,
             body=PostBodyMultipartBody(
                 a_string=a_string,
-                file=File(
-                    payload=BytesIO(payload),
-                    file_name=file_name,
-                    mime_type=mime_type,
-                ),
+                files=files,
                 description=description,
             ),
         )
@@ -209,11 +173,7 @@ async def test_async_context_manager(client: Client) -> None:
             client=client,
             body=PostBodyMultipartBody(
                 a_string=a_string,
-                file=File(
-                    payload=BytesIO(payload),
-                    file_name=file_name,
-                    mime_type=mime_type,
-                ),
+                files=files,
                 description=description,
             ),
         )
@@ -223,7 +183,9 @@ async def test_async_context_manager(client: Client) -> None:
         raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")
 
     assert content.a_string == a_string
-    assert content.file_name == file_name
-    assert content.file_content_type == mime_type
-    assert content.file_data.encode() == payload
     assert content.description == description
+    for i, file in enumerate(content.files):
+        files[i].payload.seek(0)
+        assert file.data == files[i].payload.read().decode()
+        assert file.name == files[i].file_name
+        assert file.content_type == files[i].mime_type
