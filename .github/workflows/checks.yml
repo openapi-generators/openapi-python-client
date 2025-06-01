@@ -180,6 +180,7 @@ jobs:
       - name: Install Integration Dependencies
         run: |
           cd integration-tests
+          pip install pdm
           pdm install -L ${{ matrix.lockfile }}
       - name: Run Tests
         run: |
