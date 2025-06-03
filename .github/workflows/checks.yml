@@ -158,7 +158,7 @@ jobs:
           - "pdm.minimal.lock"
     services:
       openapi-test-server:
-        image: ghcr.io/openapi-generators/openapi-test-server:0.2.0
+        image: ghcr.io/openapi-generators/openapi-test-server:0.2.1
         ports:
           - "3000:3000"
     steps:

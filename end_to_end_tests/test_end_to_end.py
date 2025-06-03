@@ -266,7 +266,7 @@ def test_generate_dir_already_exists():
 
 
 def test_update_integration_tests():
-    url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/refs/tags/v0.2.0/openapi.yaml"
+    url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/refs/tags/v0.2.1/openapi.yaml"
     source_path = Path(__file__).parent.parent / "integration-tests"
     temp_dir = Path.cwd() / "test_update_integration_tests"
     shutil.rmtree(temp_dir, ignore_errors=True)

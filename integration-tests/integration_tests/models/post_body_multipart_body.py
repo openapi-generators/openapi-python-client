@@ -1,12 +1,19 @@
+import datetime
+import json
 from collections.abc import Mapping
 from io import BytesIO
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
 
 from .. import types
 from ..types import File
+
+if TYPE_CHECKING:
+    from ..models.an_object import AnObject
+
 
 T = TypeVar("T", bound="PostBodyMultipartBody")
 
@@ -18,11 +25,15 @@ class PostBodyMultipartBody:
         a_string (str):
         files (list[File]):
         description (str):
+        objects (list['AnObject']):
+        times (list[datetime.datetime]):
     """
 
     a_string: str
     files: list[File]
     description: str
+    objects: list["AnObject"]
+    times: list[datetime.datetime]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -36,6 +47,16 @@ class PostBodyMultipartBody:
 
         description = self.description
 
+        objects = []
+        for objects_item_data in self.objects:
+            objects_item = objects_item_data.to_dict()
+            objects.append(objects_item)
+
+        times = []
+        for times_item_data in self.times:
+            times_item = times_item_data.isoformat()
+            times.append(times_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -43,6 +64,8 @@ class PostBodyMultipartBody:
                 "a_string": a_string,
                 "files": files,
                 "description": description,
+                "objects": objects,
+                "times": times,
             }
         )
 
@@ -58,6 +81,12 @@ class PostBodyMultipartBody:
 
         files.append(("description", (None, str(self.description).encode(), "text/plain")))
 
+        for objects_item_element in self.objects:
+            files.append(("objects", (None, json.dumps(objects_item_element.to_dict()).encode(), "application/json")))
+
+        for times_item_element in self.times:
+            files.append(("times", (None, times_item_element.isoformat().encode(), "text/plain")))
+
         for prop_name, prop in self.additional_properties.items():
             files.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
@@ -65,6 +94,8 @@ class PostBodyMultipartBody:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.an_object import AnObject
+
         d = dict(src_dict)
         a_string = d.pop("a_string")
 
@@ -77,10 +108,26 @@ class PostBodyMultipartBody:
 
         description = d.pop("description")
 
+        objects = []
+        _objects = d.pop("objects")
+        for objects_item_data in _objects:
+            objects_item = AnObject.from_dict(objects_item_data)
+
+            objects.append(objects_item)
+
+        times = []
+        _times = d.pop("times")
+        for times_item_data in _times:
+            times_item = isoparse(times_item_data)
+
+            times.append(times_item)
+
         post_body_multipart_body = cls(
             a_string=a_string,
             files=files,
             description=description,
+            objects=objects,
+            times=times,
         )
 
         post_body_multipart_body.additional_properties = d

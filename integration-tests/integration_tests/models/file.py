@@ -6,11 +6,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostBodyMultipartResponse200FilesItem")
+T = TypeVar("T", bound="File")
 
 
 @_attrs_define
-class PostBodyMultipartResponse200FilesItem:
+class File:
     """
     Attributes:
         data (Union[Unset, str]): Echo of content of the 'file' input parameter from the form.
@@ -51,14 +51,14 @@ class PostBodyMultipartResponse200FilesItem:
 
         content_type = d.pop("content_type", UNSET)
 
-        post_body_multipart_response_200_files_item = cls(
+        file = cls(
             data=data,
             name=name,
             content_type=content_type,
         )
 
-        post_body_multipart_response_200_files_item.additional_properties = d
-        return post_body_multipart_response_200_files_item
+        file.additional_properties = d
+        return file
 
     @property
     def additional_keys(self) -> list[str]:
