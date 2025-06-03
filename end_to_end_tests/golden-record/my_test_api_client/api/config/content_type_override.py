@@ -19,9 +19,8 @@ def _get_kwargs(
         "url": "/config/content-type-override",
     }
 
-    _body = body
+    _kwargs["json"] = body
 
-    _kwargs["json"] = _body
     headers["Content-Type"] = "openapi/python/client"
 
     _kwargs["headers"] = headers

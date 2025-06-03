@@ -4,6 +4,7 @@ from typing import Any, TypeVar, Union, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from .. import types
 from ..models.an_all_of_enum import AnAllOfEnum, check_an_all_of_enum
 from ..models.an_enum import AnEnum, check_an_enum
 from ..models.an_enum_with_null import AnEnumWithNull, check_an_enum_with_null
@@ -93,24 +94,24 @@ class PostUserListBody:
 
         return field_dict
 
-    def to_multipart(self) -> list[tuple[str, Any]]:
-        field_list: list[tuple[str, Any]] = []
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
         if not isinstance(self.an_enum_value, Unset):
             for an_enum_value_item_element in self.an_enum_value:
-                field_list.append(("an_enum_value", (None, str(an_enum_value_item_element).encode(), "text/plain")))
+                files.append(("an_enum_value", (None, str(an_enum_value_item_element).encode(), "text/plain")))
 
         if not isinstance(self.an_enum_value_with_null, Unset):
             for an_enum_value_with_null_item_element in self.an_enum_value_with_null:
                 if an_enum_value_with_null_item_element is None:
-                    field_list.append(
+                    files.append(
                         (
                             "an_enum_value_with_null",
                             (None, str(an_enum_value_with_null_item_element).encode(), "text/plain"),
                         )
                     )
                 else:
-                    field_list.append(
+                    files.append(
                         (
                             "an_enum_value_with_null",
                             (None, str(an_enum_value_with_null_item_element).encode(), "text/plain"),
@@ -119,7 +120,7 @@ class PostUserListBody:
 
         if not isinstance(self.an_enum_value_with_only_null, Unset):
             for an_enum_value_with_only_null_item_element in self.an_enum_value_with_only_null:
-                field_list.append(
+                files.append(
                     (
                         "an_enum_value_with_only_null",
                         (None, str(an_enum_value_with_only_null_item_element).encode(), "text/plain"),
@@ -127,7 +128,7 @@ class PostUserListBody:
                 )
 
         if not isinstance(self.an_allof_enum_with_overridden_default, Unset):
-            field_list.append(
+            files.append(
                 (
                     "an_allof_enum_with_overridden_default",
                     (None, str(self.an_allof_enum_with_overridden_default).encode(), "text/plain"),
@@ -135,14 +136,12 @@ class PostUserListBody:
             )
 
         if not isinstance(self.an_optional_allof_enum, Unset):
-            field_list.append(
-                ("an_optional_allof_enum", (None, str(self.an_optional_allof_enum).encode(), "text/plain"))
-            )
+            files.append(("an_optional_allof_enum", (None, str(self.an_optional_allof_enum).encode(), "text/plain")))
 
         if not isinstance(self.nested_list_of_enums, Unset):
             for nested_list_of_enums_item_element in self.nested_list_of_enums:
                 for nested_list_of_enums_item_item_element in nested_list_of_enums_item_element:
-                    field_list.append(
+                    files.append(
                         (
                             "nested_list_of_enums",
                             (None, str(nested_list_of_enums_item_item_element).encode(), "text/plain"),
@@ -150,9 +149,9 @@ class PostUserListBody:
                     )
 
         for prop_name, prop in self.additional_properties.items():
-            field_list.append((prop_name, (None, str(prop).encode(), "text/plain")))
+            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
-        return field_list
+        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:

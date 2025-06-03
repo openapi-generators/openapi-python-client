@@ -418,51 +418,6 @@ info:
       }
     }
   },
-  "/tests/upload/multiple": {
-    "post": {
-      "tags": [
-        "tests"
-      ],
-      "summary": "Upload multiple files",
-      "description": "Upload several files in the same request",
-      "operationId": "upload_multiple_files_tests_upload_post",
-      "parameters": [ ],
-      "requestBody": {
-        "content": {
-          "multipart/form-data": {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "binary"
-              }
-            }
-          }
-        },
-        "required": true
-      },
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json": {
-              "schema": { }
-            }
-          }
-        },
-        "422": {
-          "description": "Validation Error",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HTTPValidationError"
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "/tests/json_body": {
     "post": {
       "tags": [

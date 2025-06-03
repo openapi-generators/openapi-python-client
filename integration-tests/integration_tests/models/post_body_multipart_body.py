@@ -5,6 +5,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from .. import types
 from ..types import File
 
 T = TypeVar("T", bound="PostBodyMultipartBody")
@@ -47,20 +48,20 @@ class PostBodyMultipartBody:
 
         return field_dict
 
-    def to_multipart(self) -> list[tuple[str, Any]]:
-        field_list: list[tuple[str, Any]] = []
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
-        field_list.append(("a_string", (None, str(self.a_string).encode(), "text/plain")))
+        files.append(("a_string", (None, str(self.a_string).encode(), "text/plain")))
 
         for files_item_element in self.files:
-            field_list.append(("files", files_item_element.to_tuple()))
+            files.append(("files", files_item_element.to_tuple()))
 
-        field_list.append(("description", (None, str(self.description).encode(), "text/plain")))
+        files.append(("description", (None, str(self.description).encode(), "text/plain")))
 
         for prop_name, prop in self.additional_properties.items():
-            field_list.append((prop_name, (None, str(prop).encode(), "text/plain")))
+            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
-        return field_list
+        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:

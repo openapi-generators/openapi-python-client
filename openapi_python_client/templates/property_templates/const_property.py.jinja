@@ -4,6 +4,6 @@ if {{ property.python_name }} != {{ property.value.python_code }}{% if not prope
     raise ValueError(f"{{ property.name }} must match const {{ property.value.python_code }}, got '{{'{' + property.python_name + '}' }}'")
 {%- endmacro %}
 
-{% macro multipart(property, source, destination) %}
-field_list.append(({{ destination }}, source))
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, {{ source }}, "text/plain")))
 {% endmacro %}

@@ -24,7 +24,7 @@ dev = [
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
- 
+
 [tool.ruff]
 line-length = 120
 

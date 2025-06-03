@@ -4,6 +4,7 @@ from typing import Any, TypeVar, Union
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from .. import types
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PostBodiesMultipleFilesBody")
@@ -30,16 +31,16 @@ class PostBodiesMultipleFilesBody:
 
         return field_dict
 
-    def to_multipart(self) -> list[tuple[str, Any]]:
-        field_list: list[tuple[str, Any]] = []
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
         if not isinstance(self.a, Unset):
-            field_list.append(("a", (None, str(self.a).encode(), "text/plain")))
+            files.append(("a", (None, str(self.a).encode(), "text/plain")))
 
         for prop_name, prop in self.additional_properties.items():
-            field_list.append((prop_name, (None, str(prop).encode(), "text/plain")))
+            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
-        return field_list
+        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:

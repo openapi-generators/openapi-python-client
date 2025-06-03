@@ -26,7 +26,6 @@ if not isinstance({{ source }}, Unset):
 {%- endif %}
 {% endmacro %}
 
-{% macro multipart(property, source, destination) %}
-{% set transformed = source + ".isoformat().encode()" %}
-field_list.append(({{ destination }}, {{ transformed }}))
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, {{ source }}.isoformat().encode(), "text/plain")))
 {% endmacro %}

@@ -22,6 +22,6 @@ if not isinstance({{ source }}, Unset):
 {% endif %}
 {% endmacro %}
 
-{% macro multipart(property, source, destination) %}
-field_list.append(({{ destination }}, {{ source }}.to_tuple()))
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, {{ source }}.to_tuple()))
 {% endmacro %}

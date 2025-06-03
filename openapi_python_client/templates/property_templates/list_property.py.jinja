@@ -45,18 +45,6 @@ if not isinstance({{ source }}, Unset):
 {% endif %}
 {% endmacro %}
 
-{% macro transform_multipart_body(property, source, destination) %}
-{% set inner_property = property.inner_property %}
-{% set type_string = property.get_type_string(json=True) %}
-{% if property.required %}
-{{ _transform(property, source, destination, "to_multipart") }}
-{% else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ _transform(property, source, destination, "to_multipart") | indent(4)}}
-{% endif %}
-{% endmacro %}
-
 {% macro multipart(property, source, destination) %}
 {% set inner_property = property.inner_property %}
 {% import "property_templates/" + inner_property.template as inner_template %}

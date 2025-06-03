@@ -8,8 +8,9 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
+from .. import types
 from ..models.different_enum import DifferentEnum
-from ..types import UNSET, File, FileJsonType, Unset
+from ..types import UNSET, File, Unset
 
 if TYPE_CHECKING:
     from ..models.a_form_data import AFormData
@@ -83,7 +84,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_object = self.some_nullable_object
 
-        some_optional_file: Union[Unset, FileJsonType] = UNSET
+        some_optional_file: Union[Unset, types.FileTypes] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
@@ -168,75 +169,67 @@ class BodyUploadFileTestsUploadPost:
 
         return field_dict
 
-    def to_multipart(self) -> list[tuple[str, Any]]:
-        field_list: list[tuple[str, Any]] = []
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
-        field_list.append(("some_file", self.some_file.to_tuple()))
+        files.append(("some_file", self.some_file.to_tuple()))
 
-        field_list.append(("some_required_number", (None, str(self.some_required_number).encode(), "text/plain")))
+        files.append(("some_required_number", (None, str(self.some_required_number).encode(), "text/plain")))
 
-        field_list.append(("some_object", (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")))
+        files.append(("some_object", (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")))
 
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
-            field_list.append(
+            files.append(
                 (
                     "some_nullable_object",
                     (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json"),
                 )
             )
         else:
-            field_list.append(("some_nullable_object", (None, str(self.some_nullable_object).encode(), "text/plain")))
+            files.append(("some_nullable_object", (None, str(self.some_nullable_object).encode(), "text/plain")))
 
         if not isinstance(self.some_optional_file, Unset):
-            field_list.append(("some_optional_file", self.some_optional_file.to_tuple()))
+            files.append(("some_optional_file", self.some_optional_file.to_tuple()))
 
         if not isinstance(self.some_string, Unset):
-            field_list.append(("some_string", (None, str(self.some_string).encode(), "text/plain")))
+            files.append(("some_string", (None, str(self.some_string).encode(), "text/plain")))
 
         if not isinstance(self.a_datetime, Unset):
-            field_list.append(("a_datetime", self.a_datetime.isoformat().encode()))
+            files.append(("a_datetime", (None, self.a_datetime.isoformat().encode(), "text/plain")))
 
         if not isinstance(self.a_date, Unset):
-            field_list.append(("a_date", self.a_date.isoformat().encode()))
+            files.append(("a_date", (None, self.a_date.isoformat().encode(), "text/plain")))
 
         if not isinstance(self.some_number, Unset):
-            field_list.append(("some_number", (None, str(self.some_number).encode(), "text/plain")))
+            files.append(("some_number", (None, str(self.some_number).encode(), "text/plain")))
 
         if not isinstance(self.some_nullable_number, Unset):
             if isinstance(self.some_nullable_number, float):
-                field_list.append(
-                    ("some_nullable_number", (None, str(self.some_nullable_number).encode(), "text/plain"))
-                )
+                files.append(("some_nullable_number", (None, str(self.some_nullable_number).encode(), "text/plain")))
             else:
-                field_list.append(
-                    ("some_nullable_number", (None, str(self.some_nullable_number).encode(), "text/plain"))
-                )
+                files.append(("some_nullable_number", (None, str(self.some_nullable_number).encode(), "text/plain")))
 
         if not isinstance(self.some_int_array, Unset):
             for some_int_array_item_element in self.some_int_array:
                 if isinstance(some_int_array_item_element, int):
-                    field_list.append(
-                        ("some_int_array", (None, str(some_int_array_item_element).encode(), "text/plain"))
-                    )
+                    files.append(("some_int_array", (None, str(some_int_array_item_element).encode(), "text/plain")))
                 else:
-                    field_list.append(
-                        ("some_int_array", (None, str(some_int_array_item_element).encode(), "text/plain"))
-                    )
+                    files.append(("some_int_array", (None, str(some_int_array_item_element).encode(), "text/plain")))
 
         if not isinstance(self.some_array, Unset):
             if isinstance(self.some_array, list):
                 for some_array_type_0_item_element in self.some_array:
-                    field_list.append(
+                    files.append(
                         (
                             "some_array",
                             (None, json.dumps(some_array_type_0_item_element.to_dict()).encode(), "application/json"),
                         )
                     )
             else:
-                field_list.append(("some_array", (None, str(self.some_array).encode(), "text/plain")))
+                files.append(("some_array", (None, str(self.some_array).encode(), "text/plain")))
 
         if not isinstance(self.some_optional_object, Unset):
-            field_list.append(
+            files.append(
                 (
                     "some_optional_object",
                     (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json"),
@@ -244,12 +237,12 @@ class BodyUploadFileTestsUploadPost:
             )
 
         if not isinstance(self.some_enum, Unset):
-            field_list.append(("some_enum", (None, str(self.some_enum.value).encode(), "text/plain")))
+            files.append(("some_enum", (None, str(self.some_enum.value).encode(), "text/plain")))
 
         for prop_name, prop in self.additional_properties.items():
-            field_list.append((prop_name, (None, json.dumps(prop.to_dict()).encode(), "application/json")))
+            files.append((prop_name, (None, json.dumps(prop.to_dict()).encode(), "application/json")))
 
-        return field_list
+        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:

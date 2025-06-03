@@ -2,6 +2,6 @@
 "true" if {{ source }} else "false"
 {% endmacro %}
 
-{% macro multipart(property, source, destination) %}
-field_list.append(({{ destination }}, (None, str({{source}}).encode(), "text/plain")))
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, str({{source}}).encode(), "text/plain")))
 {% endmacro %}

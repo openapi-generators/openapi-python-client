@@ -20,9 +20,8 @@ def _get_kwargs(
         "url": "/tests/post_form_data",
     }
 
-    _body = body.to_dict()
+    _kwargs["data"] = body.to_dict()
 
-    _kwargs["data"] = _body
     headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     _kwargs["headers"] = headers

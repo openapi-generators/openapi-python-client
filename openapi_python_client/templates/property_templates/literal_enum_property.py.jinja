@@ -21,9 +21,8 @@ if not isinstance({{ source }}, Unset):
 {% endif %}
 {% endmacro %}
 
-{% macro multipart(property, source, destination) %}
-{% set transformed = "(None, str(" + source + ").encode(), \"text/plain\")" %}
-field_list.append(({{ destination }}, {{ transformed }}))
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, str({{ source }}).encode(), "text/plain")))
 {% endmacro %}
 
 {% macro transform_header(source) %}

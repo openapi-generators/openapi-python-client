@@ -1,10 +1,11 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING
+from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 {% if model.is_multipart_body %}
 import json
+from .. import types
 {% endif %}
 
 from ..types import UNSET, Unset
@@ -147,8 +148,8 @@ return field_dict
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
-    def to_multipart(self) -> list[tuple[str, Any]]:
-        field_list: list[tuple[str, Any]] = []
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
         {% for property in model.required_properties + model.optional_properties %}
         {% set destination = "\"" + property.name + "\"" %}
@@ -161,7 +162,7 @@ return field_dict
             {{ multipart(model.additional_properties, "prop", "prop_name") | indent(4) }}
         {% endif %}
 
-        return field_list
+        return files
 
 {% endif %}
 
