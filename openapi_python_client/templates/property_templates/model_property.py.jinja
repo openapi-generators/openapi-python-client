@@ -22,12 +22,12 @@ if not isinstance({{ source }}, Unset):
 {%- endif %}
 {% endmacro %}
 
-{% macro transform_multipart_body(property, source) %}
-{% set transformed = source + ".to_multipart()" %}
+{% macro transform_multipart_body(property) %}
+{% set transformed = property.python_name + ".to_multipart()" %}
 {% if property.required %}
 _kwargs["files"] = {{ transformed }}
 {%- else %}
-if not isinstance({{ source }}, Unset):
+if not isinstance({{ property.python_name }}, Unset):
     _kwargs["files"] = {{ transformed }}
 {%- endif %}
 {% endmacro %}

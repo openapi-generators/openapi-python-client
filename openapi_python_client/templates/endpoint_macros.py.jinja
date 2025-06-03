@@ -84,7 +84,7 @@ _kwargs["json"] = {{ property.python_name }}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform_multipart_body %}
-{{ prop_template.transform_multipart_body(property, property.python_name) }}
+{{ prop_template.transform_multipart_body(property) }}
 {% endif %}
 {% endmacro %}
 
