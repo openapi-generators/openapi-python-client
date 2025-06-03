@@ -1,10 +1,10 @@
 {% macro construct(property, source) %}
 def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_string() }}:
-    {% if "None" in property.get_type_strings_in_union(json=True, multipart=False) %}
+    {% if "None" in property.get_type_strings_in_union(json=True) %}
     if data is None:
         return data
     {% endif %}
-    {% if "Unset" in property.get_type_strings_in_union(json=True, multipart=False) %}
+    {% if "Unset" in property.get_type_strings_in_union(json=True) %}
     if isinstance(data, Unset):
         return data
     {% endif %}
@@ -41,7 +41,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 
 {% macro transform(property, source, destination, declare_type=True) %}
 {% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
-{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True, multipart=False) }}{% endif %}
+{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) }}{% endif %}
 
 {% if not property.required %}
 if isinstance({{ source }}, Unset):

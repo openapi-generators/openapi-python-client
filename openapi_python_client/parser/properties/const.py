@@ -94,7 +94,6 @@ class ConstProperty(PropertyProtocol):
         no_optional: bool = False,
         json: bool = False,
         *,
-        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         lit = f"Literal[{self.value.python_code}]"
