@@ -19,6 +19,7 @@ dev = [
     "pytest>8",
     "mypy>=1.13",
     "pytest-asyncio>=0.23.5",
+    "types-python-dateutil>=2.9",
 ]
 
 [build-system]
