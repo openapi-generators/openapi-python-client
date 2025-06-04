@@ -1,11 +1,18 @@
+import datetime
+import json
 from collections.abc import Mapping
 from io import BytesIO
-from typing import Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
 
-from ..types import UNSET, File, Unset
+from ..types import File
+
+if TYPE_CHECKING:
+    from ..models.an_object import AnObject
+
 
 T = TypeVar("T", bound="PostBodyMultipartBody")
 
@@ -15,46 +22,77 @@ class PostBodyMultipartBody:
     """
     Attributes:
         a_string (str):
-        file (File): For the sake of this test, include a file name and content type. The payload should also be valid
-            UTF-8.
-        description (Union[Unset, str]):
+        files (list[File]):
+        description (str):
+        objects (list['AnObject']):
+        times (list[datetime.datetime]):
     """
 
     a_string: str
-    file: File
-    description: Union[Unset, str] = UNSET
+    files: list[File]
+    description: str
+    objects: list["AnObject"]
+    times: list[datetime.datetime]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_string = self.a_string
 
-        file = self.file.to_tuple()
+        files = []
+        for files_item_data in self.files:
+            files_item = files_item_data.to_tuple()
+
+            files.append(files_item)
 
         description = self.description
+
+        objects = []
+        for objects_item_data in self.objects:
+            objects_item = objects_item_data.to_dict()
+            objects.append(objects_item)
+
+        times = []
+        for times_item_data in self.times:
+            times_item = times_item_data.isoformat()
+            times.append(times_item)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "a_string": a_string,
-                "file": file,
+                "files": files,
+                "description": description,
+                "objects": objects,
+                "times": times,
             }
         )
-        if description is not UNSET:
-            field_dict["description"] = description
 
         return field_dict
 
     def to_multipart(self) -> dict[str, Any]:
         a_string = (None, str(self.a_string).encode(), "text/plain")
 
-        file = self.file.to_tuple()
+        _temp_files = []
+        for files_item_data in self.files:
+            files_item = files_item_data.to_tuple()
 
-        description = (
-            self.description
-            if isinstance(self.description, Unset)
-            else (None, str(self.description).encode(), "text/plain")
-        )
+            _temp_files.append(files_item)
+        files = (None, json.dumps(_temp_files).encode(), "application/json")
+
+        description = (None, str(self.description).encode(), "text/plain")
+
+        _temp_objects = []
+        for objects_item_data in self.objects:
+            objects_item = objects_item_data.to_dict()
+            _temp_objects.append(objects_item)
+        objects = (None, json.dumps(_temp_objects).encode(), "application/json")
+
+        _temp_times = []
+        for times_item_data in self.times:
+            times_item = times_item_data.isoformat()
+            _temp_times.append(times_item)
+        times = (None, json.dumps(_temp_times).encode(), "application/json")
 
         field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
@@ -63,27 +101,51 @@ class PostBodyMultipartBody:
         field_dict.update(
             {
                 "a_string": a_string,
-                "file": file,
+                "files": files,
+                "description": description,
+                "objects": objects,
+                "times": times,
             }
         )
-        if description is not UNSET:
-            field_dict["description"] = description
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.an_object import AnObject
+
         d = dict(src_dict)
         a_string = d.pop("a_string")
 
-        file = File(payload=BytesIO(d.pop("file")))
+        files = []
+        _files = d.pop("files")
+        for files_item_data in _files:
+            files_item = File(payload=BytesIO(files_item_data))
 
-        description = d.pop("description", UNSET)
+            files.append(files_item)
+
+        description = d.pop("description")
+
+        objects = []
+        _objects = d.pop("objects")
+        for objects_item_data in _objects:
+            objects_item = AnObject.from_dict(objects_item_data)
+
+            objects.append(objects_item)
+
+        times = []
+        _times = d.pop("times")
+        for times_item_data in _times:
+            times_item = isoparse(times_item_data)
+
+            times.append(times_item)
 
         post_body_multipart_body = cls(
             a_string=a_string,
-            file=file,
+            files=files,
             description=description,
+            objects=objects,
+            times=times,
         )
 
         post_body_multipart_body.additional_properties = d

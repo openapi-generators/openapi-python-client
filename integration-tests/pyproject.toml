@@ -1,6 +1,6 @@
 [project]
 name = "integration-tests"
-version = "0.0.1"
+version = "0.2.1"
 description = "A client library for accessing OpenAPI Test Server"
 authors = []
 readme = "README.md"
