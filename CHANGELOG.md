@@ -13,6 +13,33 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.25.0 (2025-06-06)
+
+### Breaking Changes
+
+- Raise minimum httpx version to 0.23
+
+#### Removed ability to set an array as a multipart body
+
+Previously, when defining a request's body as `multipart/form-data`, the generator would attempt to generate code 
+for both `object` schemas and `array` schemas. However, most arrays could not generate valid multipart bodies, as 
+there would be no field names (required to set the `Content-Disposition` headers).
+
+The code to generate any body for `multipart/form-data` where the schema is `array` has been removed, and any such 
+bodies will be skipped. This is not _expected_ to be a breaking change in practice, since the code generated would 
+probably never work.
+
+If you have a use-case for `multipart/form-data` with an `array` schema, please [open a new discussion](https://github.com/openapi-generators/openapi-python-client/discussions) with an example schema and the desired functional Python code.
+
+#### Change default multipart array serialization
+
+Previously, any arrays of values in a `multipart/form-data` body would be serialized as an `application/json` part.
+This matches the default behavior specified by OpenAPI and supports arrays of files (`binary` format strings).
+However, because this generator doesn't yet support specifying `encoding` per property, this may result in 
+now-incorrect code when the encoding _was_ explicitly set to `application/json` for arrays of scalar values.
+
+PR #938 fixes #692. Thanks @micha91 for the fix, @ratgen and @FabianSchurig for testing, and @davidlizeng for the original report... many years ago 😅.
+
 ## 0.24.3 (2025-03-31)
 
 ### Features
