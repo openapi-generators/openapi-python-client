@@ -13,6 +13,6 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(),
     python_requires=">=3.9, <4",
-    install_requires=["httpx >= 0.20.0, < 0.29.0", "attrs >= 22.2.0", "python-dateutil >= 2.8.0, < 3"],
+    install_requires=["httpx >= 0.23.0, < 0.29.0", "attrs >= 22.2.0", "python-dateutil >= 2.8.0, < 3"],
     package_data={"test_3_1_features_client": ["py.typed"]},
 )

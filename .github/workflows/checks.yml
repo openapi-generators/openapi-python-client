@@ -153,12 +153,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        httpx_version:
-          - "0.20.0"
-          - ""
+        lockfile:
+          - "pdm.lock"
+          - "pdm.minimal.lock"
     services:
       openapi-test-server:
-        image: ghcr.io/openapi-generators/openapi-test-server:0.0.1
+        image: ghcr.io/openapi-generators/openapi-test-server:0.2.1
         ports:
           - "3000:3000"
     steps:
@@ -170,34 +170,18 @@ jobs:
       - name: Get Python Version
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/pdm.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies
-      - name: Install dependencies
-        run: |
-          pip install pdm
-          python -m venv .venv
-          pdm install
       - name: Cache Generated Client Dependencies
         uses: actions/cache@v4
         with:
           path: integration-tests/.venv
-          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/pdm.lock') }}
+          key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('integration-tests/pdm*.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies
-      - name: Set httpx version
-        if: matrix.httpx_version != ''
-        run: |
-          cd integration-tests 
-          pdm add httpx==${{ matrix.httpx_version }}
       - name: Install Integration Dependencies
         run: |
           cd integration-tests
-          pdm install
+          pip install pdm
+          pdm install -L ${{ matrix.lockfile }}
       - name: Run Tests
         run: |
           cd integration-tests

@@ -22,12 +22,6 @@ if not isinstance({{ source }}, Unset):
 {% endif %}
 {% endmacro %}
 
-{% macro transform_multipart(property, source, destination) %}
-{% if property.required %}
-{{ destination }} = {{ source }}.to_tuple()
-{% else %}
-{{ destination }}: {{ property.get_type_string(json=True) }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ destination }} = {{ source }}.to_tuple()
-{% endif %}
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, {{ source }}.to_tuple()))
 {% endmacro %}

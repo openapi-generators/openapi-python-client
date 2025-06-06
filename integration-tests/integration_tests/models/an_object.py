@@ -1,58 +1,54 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from .. import types
-from ..types import UNSET, Unset
-
-T = TypeVar("T", bound="PostBodiesMultipleFilesBody")
+T = TypeVar("T", bound="AnObject")
 
 
 @_attrs_define
-class PostBodiesMultipleFilesBody:
+class AnObject:
     """
     Attributes:
-        a (Union[Unset, str]):
+        an_int (int):
+        a_float (float):
     """
 
-    a: Union[Unset, str] = UNSET
+    an_int: int
+    a_float: float
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        a = self.a
+        an_int = self.an_int
+
+        a_float = self.a_float
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if a is not UNSET:
-            field_dict["a"] = a
+        field_dict.update(
+            {
+                "an_int": an_int,
+                "a_float": a_float,
+            }
+        )
 
         return field_dict
-
-    def to_multipart(self) -> types.RequestFiles:
-        files: types.RequestFiles = []
-
-        if not isinstance(self.a, Unset):
-            files.append(("a", (None, str(self.a).encode(), "text/plain")))
-
-        for prop_name, prop in self.additional_properties.items():
-            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
-
-        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        a = d.pop("a", UNSET)
+        an_int = d.pop("an_int")
 
-        post_bodies_multiple_files_body = cls(
-            a=a,
+        a_float = d.pop("a_float")
+
+        an_object = cls(
+            an_int=an_int,
+            a_float=a_float,
         )
 
-        post_bodies_multiple_files_body.additional_properties = d
-        return post_bodies_multiple_files_body
+        an_object.additional_properties = d
+        return an_object
 
     @property
     def additional_keys(self) -> list[str]:

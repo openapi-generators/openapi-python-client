@@ -1,12 +1,12 @@
 [project]
 name = "integration-tests"
-version = "0.0.1"
+version = "0.1.0"
 description = "A client library for accessing OpenAPI Test Server"
 authors = []
 readme = "README.md"
 requires-python = ">=3.9,<4.0"
 dependencies = [
-    "httpx>=0.20.0,<0.29.0",
+    "httpx>=0.23.0,<0.29.0",
     "attrs>=22.2.0",
     "python-dateutil>=2.8.0",
 ]
@@ -16,15 +16,16 @@ distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "pytest",
-    "mypy",
+    "pytest>8",
+    "mypy>=1.13",
     "pytest-asyncio>=0.23.5",
+    "types-python-dateutil>=2.9",
 ]
 
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
- 
+
 [tool.ruff]
 line-length = 120
 

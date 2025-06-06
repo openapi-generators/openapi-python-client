@@ -17,12 +17,8 @@ for {{ inner_source }} in (_{{ property.python_name }} or []):
 {% endif %}
 {% endmacro %}
 
-{% macro _transform(property, source, destination, multipart, transform_method) %}
+{% macro _transform(property, source, destination, transform_method) %}
 {% set inner_property = property.inner_property %}
-{% if multipart %}
-{% set multipart_destination = destination %}
-{% set destination = "_temp_" + destination %}
-{% endif %}
 {% import "property_templates/" + inner_property.template as inner_template %}
 {% if inner_template.transform %}
 {% set inner_source = inner_property.python_name + "_data" %}
@@ -33,9 +29,6 @@ for {{ inner_source }} in {{ source }}:
 {% else %}
 {{ destination }} = {{ source }}
 {% endif %}
-{% if multipart %}
-{{ multipart_destination }} = (None, json.dumps({{ destination }}).encode(), 'application/json')
-{% endif %}
 {% endmacro %}
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
@@ -44,34 +37,18 @@ for {{ inner_source }} in {{ source }}:
 {% set inner_property = property.inner_property %}
 {% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
-{{ _transform(property, source, destination, False, "to_dict") }}
+{{ _transform(property, source, destination, "to_dict") }}
 {% else %}
 {{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
 if not isinstance({{ source }}, Unset):
-    {{ _transform(property, source, destination, False, "to_dict") | indent(4)}}
+    {{ _transform(property, source, destination, "to_dict") | indent(4)}}
 {% endif %}
 {% endmacro %}
 
-{% macro transform_multipart(property, source, destination) %}
+{% macro multipart(property, source, destination) %}
 {% set inner_property = property.inner_property %}
-{% set type_string = "Union[Unset, tuple[None, bytes, str]]" %}
-{% if property.required %}
-{{ _transform(property, source, destination, True, "to_dict") }}
-{% else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ _transform(property, source, destination, True, "to_dict") | indent(4)}}
-{% endif %}
-{% endmacro %}
-
-{% macro transform_multipart_body(property, source, destination) %}
-{% set inner_property = property.inner_property %}
-{% set type_string = property.get_type_string(json=True) %}
-{% if property.required %}
-{{ _transform(property, source, destination, False, "to_multipart") }}
-{% else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ _transform(property, source, destination, False, "to_multipart") | indent(4)}}
-{% endif %}
+{% import "property_templates/" + inner_property.template as inner_template %}
+{% set inner_source = inner_property.python_name + "_element" %}
+for {{ inner_source }} in {{ source }}:
+    {{ inner_template.multipart(inner_property, inner_source, destination) | indent(4) }}
 {% endmacro %}

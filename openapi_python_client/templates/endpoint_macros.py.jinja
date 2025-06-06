@@ -58,33 +58,33 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro body_to_kwarg(body, destination) %}
+{% macro body_to_kwarg(body) %}
 {% if body.body_type == "data" %}
-{{ destination }} = body.to_dict()
+_kwargs["data"] = body.to_dict()
 {% elif body.body_type == "files"%}
-{{ multipart_body(body, destination) }}
+{{ multipart_body(body) }}
 {% elif body.body_type == "json" %}
-{{ json_body(body, destination) }}
+{{ json_body(body) }}
 {% elif body.body_type == "content" %}
-{{ destination }} = body.payload
+_kwargs["content"] = body.payload
 {% endif %}
 {% endmacro %}
 
-{% macro json_body(body, destination) %}
+{% macro json_body(body) %}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, destination) }}
+{{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]") }}
 {% else %}
-{{ destination }} = {{ property.python_name }}
+_kwargs["json"] = {{ property.python_name }}
 {% endif %}
 {% endmacro %}
 
-{% macro multipart_body(body, destination) %}
+{% macro multipart_body(body) %}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform_multipart_body %}
-{{ prop_template.transform_multipart_body(property, property.python_name, destination) }}
+{{ prop_template.transform_multipart_body(property) }}
 {% endif %}
 {% endmacro %}
 

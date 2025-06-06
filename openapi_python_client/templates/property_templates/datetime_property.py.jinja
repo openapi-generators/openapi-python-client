@@ -26,14 +26,6 @@ if not isinstance({{ source }}, Unset):
 {%- endif %}
 {% endmacro %}
 
-{% macro transform_multipart(property, source, destination) %}
-{% set transformed = source + ".isoformat().encode()" %}
-{% if property.required %}
-{{ destination }} = {{ transformed }}
-{%- else %}
-{% set type_annotation = property.get_type_string(json=True) | replace("str", "bytes") %}
-{{ destination }}: {{ type_annotation }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ destination }} = {{ transformed }}
-{%- endif %}
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, {{ source }}.isoformat().encode(), "text/plain")))
 {% endmacro %}

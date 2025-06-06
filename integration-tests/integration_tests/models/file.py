@@ -4,55 +4,61 @@ from typing import Any, TypeVar, Union
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from .. import types
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="PostBodiesMultipleFilesBody")
+T = TypeVar("T", bound="File")
 
 
 @_attrs_define
-class PostBodiesMultipleFilesBody:
+class File:
     """
     Attributes:
-        a (Union[Unset, str]):
+        data (Union[Unset, str]): Echo of content of the 'file' input parameter from the form.
+        name (Union[Unset, str]): The name of the file uploaded.
+        content_type (Union[Unset, str]): The content type of the file uploaded.
     """
 
-    a: Union[Unset, str] = UNSET
+    data: Union[Unset, str] = UNSET
+    name: Union[Unset, str] = UNSET
+    content_type: Union[Unset, str] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        a = self.a
+        data = self.data
+
+        name = self.name
+
+        content_type = self.content_type
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if a is not UNSET:
-            field_dict["a"] = a
+        if data is not UNSET:
+            field_dict["data"] = data
+        if name is not UNSET:
+            field_dict["name"] = name
+        if content_type is not UNSET:
+            field_dict["content_type"] = content_type
 
         return field_dict
-
-    def to_multipart(self) -> types.RequestFiles:
-        files: types.RequestFiles = []
-
-        if not isinstance(self.a, Unset):
-            files.append(("a", (None, str(self.a).encode(), "text/plain")))
-
-        for prop_name, prop in self.additional_properties.items():
-            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
-
-        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        a = d.pop("a", UNSET)
+        data = d.pop("data", UNSET)
 
-        post_bodies_multiple_files_body = cls(
-            a=a,
+        name = d.pop("name", UNSET)
+
+        content_type = d.pop("content_type", UNSET)
+
+        file = cls(
+            data=data,
+            name=name,
+            content_type=content_type,
         )
 
-        post_bodies_multiple_files_body.additional_properties = d
-        return post_bodies_multiple_files_body
+        file.additional_properties = d
+        return file
 
     @property
     def additional_keys(self) -> list[str]:

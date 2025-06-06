@@ -34,6 +34,7 @@ class ModelWithUnionPropertyInlined:
             fruit = self.fruit.to_dict()
 
         field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if fruit is not UNSET:
             field_dict["fruit"] = fruit

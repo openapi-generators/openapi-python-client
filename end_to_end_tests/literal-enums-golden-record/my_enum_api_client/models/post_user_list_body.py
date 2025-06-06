@@ -1,10 +1,10 @@
-import json
 from collections.abc import Mapping
 from typing import Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from .. import types
 from ..models.an_all_of_enum import AnAllOfEnum, check_an_all_of_enum
 from ..models.an_enum import AnEnum, check_an_enum
 from ..models.an_enum_with_null import AnEnumWithNull, check_an_enum_with_null
@@ -94,79 +94,64 @@ class PostUserListBody:
 
         return field_dict
 
-    def to_multipart(self) -> dict[str, Any]:
-        an_enum_value: Union[Unset, tuple[None, bytes, str]] = UNSET
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
+
         if not isinstance(self.an_enum_value, Unset):
-            _temp_an_enum_value = []
-            for an_enum_value_item_data in self.an_enum_value:
-                an_enum_value_item: str = an_enum_value_item_data
-                _temp_an_enum_value.append(an_enum_value_item)
-            an_enum_value = (None, json.dumps(_temp_an_enum_value).encode(), "application/json")
+            for an_enum_value_item_element in self.an_enum_value:
+                files.append(("an_enum_value", (None, str(an_enum_value_item_element).encode(), "text/plain")))
 
-        an_enum_value_with_null: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_enum_value_with_null, Unset):
-            _temp_an_enum_value_with_null = []
-            for an_enum_value_with_null_item_data in self.an_enum_value_with_null:
-                an_enum_value_with_null_item: Union[None, str]
-                if isinstance(an_enum_value_with_null_item_data, str):
-                    an_enum_value_with_null_item = an_enum_value_with_null_item_data
+            for an_enum_value_with_null_item_element in self.an_enum_value_with_null:
+                if an_enum_value_with_null_item_element is None:
+                    files.append(
+                        (
+                            "an_enum_value_with_null",
+                            (None, str(an_enum_value_with_null_item_element).encode(), "text/plain"),
+                        )
+                    )
                 else:
-                    an_enum_value_with_null_item = an_enum_value_with_null_item_data
-                _temp_an_enum_value_with_null.append(an_enum_value_with_null_item)
-            an_enum_value_with_null = (None, json.dumps(_temp_an_enum_value_with_null).encode(), "application/json")
+                    files.append(
+                        (
+                            "an_enum_value_with_null",
+                            (None, str(an_enum_value_with_null_item_element).encode(), "text/plain"),
+                        )
+                    )
 
-        an_enum_value_with_only_null: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_enum_value_with_only_null, Unset):
-            _temp_an_enum_value_with_only_null = self.an_enum_value_with_only_null
-            an_enum_value_with_only_null = (
-                None,
-                json.dumps(_temp_an_enum_value_with_only_null).encode(),
-                "application/json",
-            )
+            for an_enum_value_with_only_null_item_element in self.an_enum_value_with_only_null:
+                files.append(
+                    (
+                        "an_enum_value_with_only_null",
+                        (None, str(an_enum_value_with_only_null_item_element).encode(), "text/plain"),
+                    )
+                )
 
-        an_allof_enum_with_overridden_default: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_allof_enum_with_overridden_default, Unset):
-            an_allof_enum_with_overridden_default = (
-                None,
-                str(self.an_allof_enum_with_overridden_default).encode(),
-                "text/plain",
+            files.append(
+                (
+                    "an_allof_enum_with_overridden_default",
+                    (None, str(self.an_allof_enum_with_overridden_default).encode(), "text/plain"),
+                )
             )
 
-        an_optional_allof_enum: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
-            an_optional_allof_enum = (None, str(self.an_optional_allof_enum).encode(), "text/plain")
+            files.append(("an_optional_allof_enum", (None, str(self.an_optional_allof_enum).encode(), "text/plain")))
 
-        nested_list_of_enums: Union[Unset, tuple[None, bytes, str]] = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
-            _temp_nested_list_of_enums = []
-            for nested_list_of_enums_item_data in self.nested_list_of_enums:
-                nested_list_of_enums_item = []
-                for nested_list_of_enums_item_item_data in nested_list_of_enums_item_data:
-                    nested_list_of_enums_item_item: str = nested_list_of_enums_item_item_data
-                    nested_list_of_enums_item.append(nested_list_of_enums_item_item)
+            for nested_list_of_enums_item_element in self.nested_list_of_enums:
+                for nested_list_of_enums_item_item_element in nested_list_of_enums_item_element:
+                    files.append(
+                        (
+                            "nested_list_of_enums",
+                            (None, str(nested_list_of_enums_item_item_element).encode(), "text/plain"),
+                        )
+                    )
 
-                _temp_nested_list_of_enums.append(nested_list_of_enums_item)
-            nested_list_of_enums = (None, json.dumps(_temp_nested_list_of_enums).encode(), "application/json")
-
-        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
+            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
-        field_dict.update({})
-        if an_enum_value is not UNSET:
-            field_dict["an_enum_value"] = an_enum_value
-        if an_enum_value_with_null is not UNSET:
-            field_dict["an_enum_value_with_null"] = an_enum_value_with_null
-        if an_enum_value_with_only_null is not UNSET:
-            field_dict["an_enum_value_with_only_null"] = an_enum_value_with_only_null
-        if an_allof_enum_with_overridden_default is not UNSET:
-            field_dict["an_allof_enum_with_overridden_default"] = an_allof_enum_with_overridden_default
-        if an_optional_allof_enum is not UNSET:
-            field_dict["an_optional_allof_enum"] = an_optional_allof_enum
-        if nested_list_of_enums is not UNSET:
-            field_dict["nested_list_of_enums"] = nested_list_of_enums
-
-        return field_dict
+        return files
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:

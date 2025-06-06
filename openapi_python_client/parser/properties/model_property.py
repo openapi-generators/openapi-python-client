@@ -189,7 +189,6 @@ class ModelProperty(PropertyProtocol):
         no_optional: bool = False,
         json: bool = False,
         *,
-        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -201,8 +200,6 @@ class ModelProperty(PropertyProtocol):
         """
         if json:
             type_string = self.get_base_json_type_string()
-        elif multipart:
-            type_string = "tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string()
 

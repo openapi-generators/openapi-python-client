@@ -23,7 +23,7 @@ class TestFileProperty:
 
         expected = {
             "from io import BytesIO",
-            "from ...types import File, FileJsonType",
+            "from ...types import File, FileTypes",
         }
         if not required:
             expected |= {

@@ -20,9 +20,8 @@ def _get_kwargs(
         "url": "/tests/octet_stream",
     }
 
-    _body = body.payload
+    _kwargs["content"] = body.payload
 
-    _kwargs["content"] = _body
     headers["Content-Type"] = "application/octet-stream"
 
     _kwargs["headers"] = headers
