@@ -165,15 +165,36 @@ class TestBuild:
             additional_properties=ANY_ADDITIONAL_PROPERTY,
         )
 
-    def test_model_name_conflict(self, config):
+    @pytest.mark.parametrize(
+        "existing_names, new_name, enumerate_duplicate_model_names, should_raise, expected",
+        ids=(
+            "name without duplicate suffix",
+            "name with duplicate suffix",
+            "name with duplicate suffix and matching existing name",
+        ),
+        argvalues=(
+            (["OtherModel"], "OtherModel", None, True, 'Attempted to generate duplicate models with name "OtherModel"'),
+            (["OtherModel"], "OtherModel", True, False, "OtherModel1"),
+            (["OtherModel", "OtherModel1"], "OtherModel", True, False, "OtherModel2"),
+        ),
+    )
+    def test_model_name_conflict(
+        self,
+        existing_names: str,
+        new_name: str,
+        enumerate_duplicate_model_names: Optional[str],
+        should_raise: bool,
+        expected: str,
+        config,
+    ):
         from openapi_python_client.parser.properties import ModelProperty
 
         data = oai.Schema.model_construct()
-        schemas = Schemas(classes_by_name={"OtherModel": None})
-
-        err, new_schemas = ModelProperty.build(
+        schemas = Schemas(classes_by_name={name: None for name in existing_names})
+        config = evolve(config, enumerate_duplicate_model_names=enumerate_duplicate_model_names)
+        result, new_schemas = ModelProperty.build(
             data=data,
-            name="OtherModel",
+            name=new_name,
             schemas=schemas,
             required=True,
             parent_name=None,
@@ -182,8 +203,14 @@ class TestBuild:
             process_properties=True,
         )
 
-        assert new_schemas == schemas
-        assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
+        if should_raise:
+            assert isinstance(result, PropertyError)
+            assert new_schemas == schemas
+            assert result.detail == expected
+        else:
+            assert isinstance(result, ModelProperty)
+            assert result.class_info.name in new_schemas.classes_by_name
+            assert result.class_info.name == expected
 
     @pytest.mark.parametrize(
         "name, title, parent_name, use_title_prefixing, expected",

@@ -40,6 +40,7 @@ class ConfigFile(BaseModel):
     package_name_override: Optional[str] = None
     package_version_override: Optional[str] = None
     use_path_prefixes_for_title_model_names: bool = True
+    enumerate_duplicate_model_names: bool = False
     post_hooks: Optional[list[str]] = None
     docstrings_on_attributes: bool = False
     field_prefix: str = "field_"
@@ -70,6 +71,7 @@ class Config:
     package_name_override: Optional[str]
     package_version_override: Optional[str]
     use_path_prefixes_for_title_model_names: bool
+    enumerate_duplicate_model_names: bool
     post_hooks: list[str]
     docstrings_on_attributes: bool
     field_prefix: str
@@ -112,6 +114,7 @@ class Config:
             package_name_override=config_file.package_name_override,
             package_version_override=config_file.package_version_override,
             use_path_prefixes_for_title_model_names=config_file.use_path_prefixes_for_title_model_names,
+            enumerate_duplicate_model_names=config_file.enumerate_duplicate_model_names,
             post_hooks=post_hooks,
             docstrings_on_attributes=config_file.docstrings_on_attributes,
             field_prefix=config_file.field_prefix,
