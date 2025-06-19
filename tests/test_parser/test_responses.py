@@ -3,16 +3,15 @@ from unittest.mock import MagicMock
 import pytest
 
 import openapi_python_client.schema as oai
+from openapi_python_client.parser import responses
 from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas
-from openapi_python_client.parser.responses import JSON_SOURCE, NONE_SOURCE
+from openapi_python_client.parser.responses import JSON_SOURCE, NONE_SOURCE, Response, response_from_data
 
 MODULE_NAME = "openapi_python_client.parser.responses"
 
 
 def test_response_from_data_no_content(any_property_factory):
-    from openapi_python_client.parser.responses import Response, response_from_data
-
     data = oai.Response.model_construct(description="")
 
     response, schemas = response_from_data(
@@ -38,8 +37,6 @@ def test_response_from_data_no_content(any_property_factory):
 
 
 def test_response_from_data_unsupported_content_type():
-    from openapi_python_client.parser.responses import response_from_data
-
     data = oai.Response.model_construct(description="", content={"blah": None})
     config = MagicMock()
     config.content_type_overrides = {}
@@ -56,8 +53,6 @@ def test_response_from_data_unsupported_content_type():
 
 
 def test_response_from_data_no_content_schema(any_property_factory):
-    from openapi_python_client.parser.responses import Response, response_from_data
-
     data = oai.Response.model_construct(
         description="",
         content={"application/vnd.api+json; version=2.2": oai.MediaType.model_construct()},
@@ -87,8 +82,6 @@ def test_response_from_data_no_content_schema(any_property_factory):
 
 
 def test_response_from_data_property_error(mocker):
-    from openapi_python_client.parser import responses
-
     property_from_data = mocker.patch.object(responses, "property_from_data", return_value=(PropertyError(), Schemas()))
     data = oai.Response.model_construct(
         description="",
@@ -118,8 +111,6 @@ def test_response_from_data_property_error(mocker):
 
 
 def test_response_from_data_property(mocker, any_property_factory):
-    from openapi_python_client.parser import responses
-
     prop = any_property_factory()
     property_from_data = mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     data = oai.Response.model_construct(
@@ -155,8 +146,6 @@ def test_response_from_data_property(mocker, any_property_factory):
 
 
 def test_response_from_data_reference(mocker, any_property_factory):
-    from openapi_python_client.parser import responses
-
     prop = any_property_factory()
     mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     predefined_response_data = oai.Response.model_construct(
@@ -192,8 +181,6 @@ def test_response_from_data_reference(mocker, any_property_factory):
     ],
 )
 def test_response_from_data_invalid_reference(ref_string, expected_error_string, mocker, any_property_factory):
-    from openapi_python_client.parser import responses
-
     prop = any_property_factory()
     mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     predefined_response_data = oai.Response.model_construct(
@@ -217,8 +204,6 @@ def test_response_from_data_invalid_reference(ref_string, expected_error_string,
 
 
 def test_response_from_data_ref_to_response_that_is_a_ref(mocker, any_property_factory):
-    from openapi_python_client.parser import responses
-
     prop = any_property_factory()
     mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
     predefined_response_base_data = oai.Response.model_construct(
@@ -248,8 +233,6 @@ def test_response_from_data_ref_to_response_that_is_a_ref(mocker, any_property_f
 
 
 def test_response_from_data_content_type_overrides(any_property_factory):
-    from openapi_python_client.parser.responses import Response, response_from_data
-
     data = oai.Response.model_construct(
         description="",
         content={"application/zip": oai.MediaType.model_construct()},

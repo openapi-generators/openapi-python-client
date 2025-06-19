@@ -33,7 +33,7 @@ class AnyProperty(PropertyProtocol):
 
     @classmethod
     def convert_value(cls, value: Any) -> Value | None:
-        from .string import StringProperty
+        from .string import StringProperty  # noqa: PLC0415
 
         if value is None:
             return value

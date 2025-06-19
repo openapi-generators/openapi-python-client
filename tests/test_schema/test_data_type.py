@@ -1,3 +1,4 @@
+import pydantic
 import pytest
 
 import openapi_python_client.schema as oai
@@ -5,8 +6,6 @@ import openapi_python_client.schema as oai
 
 class TestDataType:
     def test_schema_bad_types(self):
-        import pydantic
-
         with pytest.raises(pydantic.ValidationError):
             oai.Schema(type="bad_type")
 

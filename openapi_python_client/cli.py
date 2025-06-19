@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 import typer
 
-from openapi_python_client import MetaType
+from openapi_python_client import MetaType, __version__
 from openapi_python_client.config import Config, ConfigFile
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
@@ -14,8 +14,6 @@ app = typer.Typer(name="openapi-python-client")
 
 
 def _version_callback(value: bool) -> None:
-    from openapi_python_client import __version__
-
     if value:
         typer.echo(f"openapi-python-client version: {__version__}")
         raise typer.Exit()
@@ -153,7 +151,7 @@ def generate(
     ),
 ) -> None:
     """Generate a new OpenAPI Client library"""
-    from . import generate
+    from . import generate  # noqa: PLC0415
 
     config = _process_config(
         url=url,

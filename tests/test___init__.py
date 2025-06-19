@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from openapi_python_client import Config, ErrorLevel, Project
@@ -7,10 +9,6 @@ default_http_timeout = ConfigFile.model_json_schema()["properties"]["http_timeou
 
 
 def make_project(config: Config) -> Project:
-    from unittest.mock import MagicMock
-
-    from openapi_python_client import Project
-
     return Project(openapi=MagicMock(title="My Test API"), config=config)
 
 

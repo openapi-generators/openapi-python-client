@@ -174,7 +174,7 @@ class PropertyProtocol(Protocol):
     @property
     def is_base_type(self) -> bool:
         """Base types, represented by any other of `Property` than `ModelProperty` should not be quoted."""
-        from . import ListProperty, ModelProperty, UnionProperty
+        from . import ListProperty, ModelProperty, UnionProperty  # noqa: PLC0415
 
         return self.__class__.__name__ not in {
             ModelProperty.__name__,
