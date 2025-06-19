@@ -26,6 +26,7 @@ from openapi_python_client.parser.properties import (
     UnionProperty,
 )
 from openapi_python_client.parser.properties.float import FloatProperty
+from openapi_python_client.parser.properties.model_property import ModelDetails
 from openapi_python_client.parser.properties.protocol import PropertyType, Value
 from openapi_python_client.schema.openapi_schema_pydantic import Parameter
 from openapi_python_client.schema.parameter_location import ParameterLocation
@@ -65,15 +66,25 @@ def model_property_factory() -> ModelFactory:
             "class_info": Class(name=ClassName("MyClass", ""), module_name=PythonIdentifier("my_module", "")),
             "data": oai.Schema.model_construct(),
             "roots": set(),
-            "required_properties": None,
-            "optional_properties": None,
-            "relative_imports": None,
-            "lazy_imports": None,
-            "additional_properties": None,
             "python_name": "",
             "example": "",
             **kwargs,
         }
+        # shortcuts for setting attributes within ModelDetails
+        if "details" not in kwargs:
+            detail_args = {}
+            for arg_name in [
+                "required_properties",
+                "optional_properties",
+                "additional_properties",
+                "relative_imports",
+                "lazy_imports",
+            ]:
+                if arg_name in kwargs:
+                    detail_args[arg_name] = kwargs[arg_name]
+                    kwargs.pop(arg_name)
+            kwargs["details"] = ModelDetails(**detail_args)
+
         return ModelProperty(**kwargs)
 
     return _factory
