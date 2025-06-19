@@ -45,7 +45,7 @@ class UnionProperty(PropertyProtocol):
             `(result, schemas)` where `schemas` is the updated version of the input `schemas` and `result` is the
                 constructed `UnionProperty` or a `PropertyError` describing what went wrong.
         """
-        from . import property_from_data
+        from . import property_from_data  # noqa: PLC0415
 
         sub_properties: list[PropertyProtocol] = []
 
@@ -180,7 +180,7 @@ class UnionProperty(PropertyProtocol):
 
     def validate_location(self, location: oai.ParameterLocation) -> ParseError | None:
         """Returns an error if this type of property is not allowed in the given location"""
-        from ..properties import Property
+        from ..properties import Property  # noqa: PLC0415
 
         for inner_prop in self.inner_properties:
             if evolve(cast(Property, inner_prop), required=self.required).validate_location(location) is not None:

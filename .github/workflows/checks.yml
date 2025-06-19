@@ -101,9 +101,6 @@ jobs:
       - name: Run mypy
         run: pdm mypy --show-error-codes
 
-      - name: Lint
-        run: pdm run ruff check .
-
       - name: Run unit tests only  # snapshots are expected to fail
         run: pdm unit_test
 

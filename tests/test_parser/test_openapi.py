@@ -5,8 +5,8 @@ import pytest
 
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError
-from openapi_python_client.parser.openapi import Endpoint, EndpointCollection
-from openapi_python_client.parser.properties import IntProperty, Parameters, Schemas
+from openapi_python_client.parser.openapi import Endpoint, EndpointCollection, import_string_from_class
+from openapi_python_client.parser.properties import Class, IntProperty, Parameters, Schemas
 from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
@@ -14,8 +14,6 @@ MODULE_NAME = "openapi_python_client.parser.openapi"
 
 class TestEndpoint:
     def make_endpoint(self):
-        from openapi_python_client.parser.openapi import Endpoint
-
         return Endpoint(
             path="path",
             method="method",
@@ -28,8 +26,6 @@ class TestEndpoint:
 
     @pytest.mark.parametrize("response_status_code", ["not_a_number", 499])
     def test__add_responses_status_code_error(self, response_status_code, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
         schemas = Schemas()
         response_1_data = mocker.MagicMock()
         data = {
@@ -53,8 +49,6 @@ class TestEndpoint:
         response_from_data.assert_not_called()
 
     def test__add_responses_error(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
         schemas = Schemas()
         response_1_data = mocker.MagicMock()
         response_2_data = mocker.MagicMock()
@@ -105,8 +99,6 @@ class TestEndpoint:
         ]
 
     def test_add_parameters_handles_no_params(self):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
         endpoint = self.make_endpoint()
         schemas = Schemas()
         parameters = Parameters()
@@ -122,8 +114,6 @@ class TestEndpoint:
         ) == (endpoint, schemas, parameters)
 
     def test_add_parameters_parse_error(self, mocker):
-        from openapi_python_client.parser.openapi import Endpoint
-
         endpoint = self.make_endpoint()
         initial_schemas = mocker.MagicMock()
         initial_parameters = mocker.MagicMock()
@@ -163,8 +153,6 @@ class TestEndpoint:
         ],
     )
     def test_add_parameters_header_types(self, data_type, allowed, config):
-        from openapi_python_client.parser.openapi import Endpoint
-
         endpoint = self.make_endpoint()
         initial_schemas = Schemas()
         parameters = Parameters()
@@ -331,8 +319,6 @@ class TestEndpoint:
                 assert not param.required
 
     def test_add_parameters_duplicate_properties(self, config):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
         endpoint = self.make_endpoint()
         param = oai.Parameter.model_construct(
             name="test", required=True, param_schema=oai.Schema.model_construct(type="string"), param_in="path"
@@ -356,8 +342,6 @@ class TestEndpoint:
         )
 
     def test_add_parameters_duplicate_properties_different_location(self, config):
-        from openapi_python_client.parser.openapi import Endpoint, Schemas
-
         endpoint = self.make_endpoint()
         path_param = oai.Parameter.model_construct(
             name="test", required=True, param_schema=oai.Schema.model_construct(type="string"), param_in="path"
@@ -380,8 +364,6 @@ class TestEndpoint:
         assert result.query_parameters[0].name == "test"
 
     def test_sort_parameters(self, string_property_factory):
-        from openapi_python_client.parser.openapi import Endpoint
-
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters/{param4}/{param2}/{param1}/{param3}"
 
@@ -396,8 +378,6 @@ class TestEndpoint:
         assert result_names == expected_names
 
     def test_sort_parameters_missing_param(self, string_property_factory):
-        from openapi_python_client.parser.openapi import Endpoint
-
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters/{param1}/{param2}"
         param = string_property_factory(name="param1")
@@ -410,8 +390,6 @@ class TestEndpoint:
         assert endpoint.path in result.detail
 
     def test_sort_parameters_extra_param(self, string_property_factory):
-        from openapi_python_client.parser.openapi import Endpoint
-
         endpoint = self.make_endpoint()
         endpoint.path = "/multiple-path-parameters"
         param = string_property_factory(name="param1")
@@ -424,8 +402,6 @@ class TestEndpoint:
         assert endpoint.path in result.detail
 
     def test_from_data_bad_params(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint
-
         path = mocker.MagicMock()
         method = mocker.MagicMock()
         parse_error = ParseError(data=mocker.MagicMock())
@@ -456,8 +432,6 @@ class TestEndpoint:
         assert result == (parse_error, return_schemas, return_parameters)
 
     def test_from_data_bad_responses(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint
-
         path = mocker.MagicMock()
         method = mocker.MagicMock()
         parse_error = ParseError(data=mocker.MagicMock())
@@ -492,8 +466,6 @@ class TestEndpoint:
         assert result == (parse_error, response_schemas, return_parameters)
 
     def test_from_data_standard(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint
-
         path = mocker.MagicMock()
         method = mocker.MagicMock()
         param_schemas = mocker.MagicMock()
@@ -550,8 +522,6 @@ class TestEndpoint:
         )
 
     def test_from_data_no_operation_id(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint
-
         path = "/path/with/{param}/"
         method = "get"
         add_parameters = mocker.patch.object(
@@ -606,8 +576,6 @@ class TestEndpoint:
         )
 
     def test_from_data_no_security(self, mocker, config):
-        from openapi_python_client.parser.openapi import Endpoint
-
         data = oai.Operation.model_construct(
             description=mocker.MagicMock(),
             operationId=mocker.MagicMock(),
@@ -724,18 +692,12 @@ class TestEndpoint:
 
 class TestImportStringFromReference:
     def test_import_string_from_reference_no_prefix(self, mocker):
-        from openapi_python_client.parser.openapi import import_string_from_class
-        from openapi_python_client.parser.properties import Class
-
         class_ = mocker.MagicMock(autospec=Class)
         result = import_string_from_class(class_)
 
         assert result == f"from .{class_.module_name} import {class_.name}"
 
     def test_import_string_from_reference_with_prefix(self, mocker):
-        from openapi_python_client.parser.openapi import import_string_from_class
-        from openapi_python_client.parser.properties import Class
-
         prefix = mocker.MagicMock(autospec=str)
         class_ = mocker.MagicMock(autospec=Class)
         result = import_string_from_class(class_=class_, prefix=prefix)

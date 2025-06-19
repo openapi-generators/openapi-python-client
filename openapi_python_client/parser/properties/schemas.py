@@ -118,7 +118,7 @@ def update_schemas_with_data(
     See Also:
         - https://swagger.io/docs/specification/using-ref/
     """
-    from . import property_from_data
+    from . import property_from_data  # noqa: PLC0415
 
     prop: Union[PropertyError, Property]
     prop, schemas = property_from_data(

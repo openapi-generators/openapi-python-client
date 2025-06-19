@@ -5,9 +5,19 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParameterError, PropertyError
 from openapi_python_client.parser.properties import (
+    Class,
+    Parameters,
     ReferencePath,
     Schemas,
+    _create_schemas,
+    _process_model_errors,
+    _process_models,
+    _propogate_removal,
+    build_parameters,
+    build_schemas,
+    property_from_data,
 )
+from openapi_python_client.schema import Parameter, Reference, Schema
 from openapi_python_client.utils import ClassName, PythonIdentifier
 
 MODULE_NAME = "openapi_python_client.parser.properties"
@@ -137,8 +147,6 @@ class TestUnionProperty:
 
 class TestPropertyFromData:
     def test_property_from_data_ref_model(self, model_property_factory, config):
-        from openapi_python_client.parser.properties import Class, Schemas, property_from_data
-
         name = "new_name"
         required = False
         class_name = ClassName("MyModel", "")
@@ -163,8 +171,6 @@ class TestPropertyFromData:
         assert schemas == new_schemas
 
     def test_property_from_data_ref_not_found(self, mocker):
-        from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
-
         data = oai.Reference.model_construct(ref="a/b/c")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
         schemas = Schemas()
@@ -180,8 +186,6 @@ class TestPropertyFromData:
 
     @pytest.mark.parametrize("references_exist", (True, False))
     def test_property_from_data_ref(self, any_property_factory, references_exist, config):
-        from openapi_python_client.parser.properties import Schemas, property_from_data
-
         name = "new_name"
         required = False
         ref_path = "/components/schemas/RefName"
@@ -201,8 +205,6 @@ class TestPropertyFromData:
         assert schemas.dependencies == {ref_path: {*roots, *references.get(ref_path, set())}}
 
     def test_property_from_data_invalid_ref(self, mocker):
-        from openapi_python_client.parser.properties import PropertyError, Schemas, property_from_data
-
         name = mocker.MagicMock()
         required = mocker.MagicMock()
         data = oai.Reference.model_construct(ref=mocker.MagicMock())
@@ -222,8 +224,6 @@ class TestPropertyFromData:
 
 class TestStringBasedProperty:
     def test__string_based_property_binary_format(self, file_property_factory, config):
-        from openapi_python_client.parser.properties import property_from_data
-
         name = "file_prop"
         required = True
         data = oai.Schema.model_construct(type="string", schema_format="binary", default="a")
@@ -236,9 +236,6 @@ class TestStringBasedProperty:
 
 class TestCreateSchemas:
     def test_skips_references_and_keeps_going(self, mocker, config):
-        from openapi_python_client.parser.properties import Schemas, _create_schemas
-        from openapi_python_client.schema import Reference, Schema
-
         components = {"a_ref": Reference.model_construct(), "a_schema": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
@@ -258,9 +255,6 @@ class TestCreateSchemas:
         assert result == update_schemas_with_data.return_value
 
     def test_records_bad_uris_and_keeps_going(self, mocker, config):
-        from openapi_python_client.parser.properties import Schemas, _create_schemas
-        from openapi_python_client.schema import Schema
-
         components = {"first": Schema.model_construct(), "second": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
         parse_reference_path = mocker.patch(
@@ -284,9 +278,6 @@ class TestCreateSchemas:
         assert result == update_schemas_with_data.return_value
 
     def test_retries_failing_properties_while_making_progress(self, mocker, config):
-        from openapi_python_client.parser.properties import Schemas, _create_schemas
-        from openapi_python_client.schema import Schema
-
         components = {"first": Schema.model_construct(), "second": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(
             f"{MODULE_NAME}.update_schemas_with_data", side_effect=[PropertyError(), Schemas(), PropertyError()]
@@ -308,9 +299,6 @@ class TestCreateSchemas:
 
 class TestProcessModels:
     def test_detect_recursive_allof_reference_no_retry(self, mocker, model_property_factory, config):
-        from openapi_python_client.parser.properties import Class, _process_models
-        from openapi_python_client.schema import Reference
-
         class_name = ClassName("class_name", "")
         recursive_model = model_property_factory(
             class_info=Class(name=class_name, module_name=PythonIdentifier("module_name", ""))
@@ -341,7 +329,6 @@ class TestProcessModels:
 
     def test_resolve_reference_to_single_allof_reference(self, config, model_property_factory):
         # test for https://github.com/openapi-generators/openapi-python-client/issues/1091
-        from openapi_python_client.parser.properties import Schemas, build_schemas
 
         components = {
             "Model1": oai.Schema.model_construct(
@@ -394,9 +381,6 @@ class TestProcessModels:
 
 class TestPropogateRemoval:
     def test_propogate_removal_class_name(self):
-        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
-        from openapi_python_client.utils import ClassName
-
         root = ClassName("ClassName", "")
         ref_path = ReferencePath("/reference")
         other_class_name = ClassName("OtherClassName", "")
@@ -414,9 +398,6 @@ class TestPropogateRemoval:
         assert not error.detail
 
     def test_propogate_removal_ref_path(self):
-        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
-        from openapi_python_client.utils import ClassName
-
         root = ReferencePath("/root/reference")
         class_name = ClassName("ClassName", "")
         ref_path = ReferencePath("/ref/path")
@@ -434,9 +415,6 @@ class TestPropogateRemoval:
         assert error.detail == f"\n{root}\n{ref_path}"
 
     def test_propogate_removal_ref_path_no_refs(self):
-        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
-        from openapi_python_client.utils import ClassName
-
         root = ReferencePath("/root/reference")
         class_name = ClassName("ClassName", "")
         ref_path = ReferencePath("/ref/path")
@@ -450,9 +428,6 @@ class TestPropogateRemoval:
         assert error.detail == f"\n{root}"
 
     def test_propogate_removal_ref_path_already_removed(self):
-        from openapi_python_client.parser.properties import ReferencePath, _propogate_removal
-        from openapi_python_client.utils import ClassName
-
         root = ReferencePath("/root/reference")
         class_name = ClassName("ClassName", "")
         ref_path = ReferencePath("/ref/path")
@@ -471,8 +446,6 @@ class TestPropogateRemoval:
 
 
 def test_process_model_errors(mocker, model_property_factory):
-    from openapi_python_client.parser.properties import _process_model_errors
-
     propogate_removal = mocker.patch(f"{MODULE_NAME}._propogate_removal")
     model_errors = [
         (model_property_factory(roots={"root1", "root2"}), PropertyError(detail="existing detail")),
@@ -492,9 +465,6 @@ def test_process_model_errors(mocker, model_property_factory):
 
 class TestBuildParameters:
     def test_skips_references_and_keeps_going(self, mocker, config):
-        from openapi_python_client.parser.properties import Parameters, build_parameters
-        from openapi_python_client.schema import Parameter, Reference
-
         parameters = {
             "reference": Reference(ref="#/components/parameters/another_parameter"),
             "defined": Parameter(
@@ -524,9 +494,6 @@ class TestBuildParameters:
         assert result == update_parameters_with_data.return_value
 
     def test_records_bad_uris_and_keeps_going(self, mocker, config):
-        from openapi_python_client.parser.properties import Parameters, build_parameters
-        from openapi_python_client.schema import Parameter
-
         parameters = {"first": Parameter.model_construct(), "second": Parameter.model_construct()}
         update_parameters_with_data = mocker.patch(f"{MODULE_NAME}.update_parameters_with_data")
         parse_reference_path = mocker.patch(
@@ -549,9 +516,6 @@ class TestBuildParameters:
         assert result == update_parameters_with_data.return_value
 
     def test_retries_failing_parameters_while_making_progress(self, mocker, config):
-        from openapi_python_client.parser.properties import Parameters, build_parameters
-        from openapi_python_client.schema import Parameter
-
         parameters = {"first": Parameter.model_construct(), "second": Parameter.model_construct()}
         update_parameters_with_data = mocker.patch(
             f"{MODULE_NAME}.update_parameters_with_data", side_effect=[ParameterError(), Parameters(), ParameterError()]
@@ -571,9 +535,6 @@ class TestBuildParameters:
 
 
 def test_build_schemas(mocker, config):
-    from openapi_python_client.parser.properties import Schemas, build_schemas
-    from openapi_python_client.schema import Reference, Schema
-
     create_schemas = mocker.patch(f"{MODULE_NAME}._create_schemas")
     process_models = mocker.patch(f"{MODULE_NAME}._process_models")
 

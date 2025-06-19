@@ -56,7 +56,7 @@ class ListProperty(PropertyProtocol):
             `(result, schemas)` where `schemas` is an updated version of the input named the same including any inner
             classes that were defined and `result` is either the `ListProperty` or a `PropertyError`.
         """
-        from . import property_from_data
+        from . import property_from_data  # noqa: PLC0415
 
         if data.items is None and not data.prefixItems:
             return (

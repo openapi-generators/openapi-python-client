@@ -5,8 +5,13 @@ from attr import evolve
 
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError
-from openapi_python_client.parser.properties import Schemas, StringProperty
-from openapi_python_client.parser.properties.model_property import ANY_ADDITIONAL_PROPERTY, _process_properties
+from openapi_python_client.parser.properties import Class, ModelProperty, Schemas, StringProperty
+from openapi_python_client.parser.properties.model_property import (
+    ANY_ADDITIONAL_PROPERTY,
+    _process_properties,
+    _PropertyData,
+    process_model,
+)
 
 MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 
@@ -87,8 +92,6 @@ class TestBuild:
         ],
     )
     def test_additional_schemas(self, additional_properties_schema, expected_additional_properties, config):
-        from openapi_python_client.parser.properties import ModelProperty, Schemas
-
         data = oai.Schema.model_construct(
             additionalProperties=additional_properties_schema,
         )
@@ -107,8 +110,6 @@ class TestBuild:
         assert model.additional_properties == expected_additional_properties
 
     def test_happy_path(self, model_property_factory, string_property_factory, date_time_property_factory, config):
-        from openapi_python_client.parser.properties import Class, ModelProperty, Schemas
-
         name = "prop"
         required = True
 
@@ -166,8 +167,6 @@ class TestBuild:
         )
 
     def test_model_name_conflict(self, config):
-        from openapi_python_client.parser.properties import ModelProperty
-
         data = oai.Schema.model_construct()
         schemas = Schemas(classes_by_name={"OtherModel": None})
 
@@ -213,8 +212,6 @@ class TestBuild:
         expected: str,
         config,
     ):
-        from openapi_python_client.parser.properties import ModelProperty
-
         data = oai.Schema(
             title=title,
             properties={},
@@ -233,8 +230,6 @@ class TestBuild:
         assert result.class_info.name == expected
 
     def test_model_bad_properties(self, config):
-        from openapi_python_client.parser.properties import ModelProperty
-
         data = oai.Schema(
             properties={
                 "bad": oai.Reference.model_construct(ref="#/components/schema/NotExist"),
@@ -253,8 +248,6 @@ class TestBuild:
         assert isinstance(result, PropertyError)
 
     def test_model_bad_additional_properties(self, config):
-        from openapi_python_client.parser.properties import ModelProperty
-
         additional_properties = oai.Schema(
             type="object",
             properties={
@@ -275,8 +268,6 @@ class TestBuild:
         assert isinstance(result, PropertyError)
 
     def test_process_properties_false(self, model_property_factory, config):
-        from openapi_python_client.parser.properties import Class, ModelProperty
-
         name = "prop"
         required = True
 
@@ -671,9 +662,6 @@ class TestProcessProperties:
 
 class TestProcessModel:
     def test_process_model_error(self, mocker, model_property_factory, config):
-        from openapi_python_client.parser.properties import Schemas
-        from openapi_python_client.parser.properties.model_property import process_model
-
         model_prop = model_property_factory()
         schemas = Schemas()
         process_property_data = mocker.patch(f"{MODULE_NAME}._process_property_data")
@@ -688,9 +676,6 @@ class TestProcessModel:
         assert model_prop.additional_properties is None
 
     def test_process_model(self, mocker, model_property_factory, config):
-        from openapi_python_client.parser.properties import Schemas
-        from openapi_python_client.parser.properties.model_property import _PropertyData, process_model
-
         model_prop = model_property_factory()
         schemas = Schemas()
         property_data = _PropertyData(
@@ -715,8 +700,6 @@ class TestProcessModel:
 
 
 def test_set_relative_imports(model_property_factory):
-    from openapi_python_client.parser.properties import Class
-
     class_info = Class("ClassName", module_name="module_name")
     relative_imports = {f"from ..models.{class_info.module_name} import {class_info.name}"}
 
