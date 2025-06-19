@@ -43,7 +43,7 @@ jobs:
         run: pdm run ruff format . --check
 
       - name: Run mypy
-        run: pdm mypy --show-error-codes
+        run: pdm run mypy --show-error-codes
 
       - name: Lint
         run: pdm run ruff check .
