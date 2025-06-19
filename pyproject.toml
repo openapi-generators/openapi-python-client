@@ -108,7 +108,7 @@ includes = [
 [tool.pdm.scripts]
 lint = "ruff check --fix ."
 format = "ruff format ."
-mypy = "mypy openapi_python_client"
+mypy = "mypy openapi_python_client --show-error-codes"
 check = { composite = ["lint", "format", "mypy", "test"] }
 regen = {composite = ["regen_e2e", "regen_integration"]}
 e2e = "pytest openapi_python_client end_to_end_tests/test_end_to_end.py"
