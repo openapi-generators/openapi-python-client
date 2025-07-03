@@ -22,7 +22,7 @@ class FileProperty(PropertyProtocol):
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
-    _json_type_string: ClassVar[str] = "types.FileTypes"
+    _json_type_string: ClassVar[str] = "FileTypes"
     template: ClassVar[str] = "file_property.py.jinja"
 
     @classmethod
