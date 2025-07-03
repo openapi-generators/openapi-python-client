@@ -10,7 +10,7 @@ from dateutil.parser import isoparse
 
 from .. import types
 from ..models.different_enum import DifferentEnum
-from ..types import UNSET, File, Unset
+from ..types import UNSET, File, FileTypes, Unset
 
 if TYPE_CHECKING:
     from ..models.a_form_data import AFormData
@@ -84,7 +84,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_object = self.some_nullable_object
 
-        some_optional_file: Union[Unset, types.FileTypes] = UNSET
+        some_optional_file: Union[Unset, FileTypes] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 

@@ -714,7 +714,13 @@ info:
           "content": {
             "application/json": {
               "schema": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
@@ -1110,7 +1116,7 @@ info:
   },
   "/tag_with_number": {
     "get": {
-      "tags": ["1", "2"],
+      "tags": [ "1", "2" ],
       "responses": {
         "200": {
           "description": "Success"
@@ -1643,7 +1649,7 @@ info:
                         "type": "string"
                       }
                     },
-                    "required": ["type"]
+                    "required": [ "type" ]
                   },
                   {
                     "type": "object",
@@ -1655,7 +1661,7 @@ info:
                         "type": "string"
                       }
                     },
-                    "required": ["type"]
+                    "required": [ "type" ]
                   }
                 ]
               }
