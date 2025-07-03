@@ -13,6 +13,12 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.25.2 (2025-07-03)
+
+### Fixes
+
+- Import error for `types.FileType` (#1274) (#1278)
+
 ## 0.25.1 (2025-06-19)
 
 ### Fixes
