@@ -1,9 +1,9 @@
-{% set poetry = meta == "poetry" %}
-{% set pdm = meta == "pdm" %}
-{% if poetry %}
+{% if meta == "poetry" %}
 {% include "pyproject_poetry.toml.jinja" %}
-{% elif pdm %}
+{% elif meta == "pdm" %}
 {% include "pyproject_pdm.toml.jinja" %}
+{% elif meta == "uv" %}
+{% include "pyproject_uv.toml.jinja" %}
 {% endif %}
 
 {% include "pyproject_ruff.toml.jinja" %}
