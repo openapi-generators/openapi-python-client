@@ -5,10 +5,9 @@ description = "A client library for accessing My Enum API"
 authors = []
 readme = "README.md"
 packages = [
-    {include = "my_enum_api_client"},
+    { include = "my_enum_api_client" },
 ]
 include = ["CHANGELOG.md", "my_enum_api_client/py.typed"]
-
 
 [tool.poetry.dependencies]
 python = "^3.9"

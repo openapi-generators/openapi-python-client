@@ -1,49 +1,9 @@
 {% set poetry = meta == "poetry" %}
 {% set pdm = meta == "pdm" %}
-{% if poetry or pdm %}
-{% if poetry %}[tool.poetry]
-{% elif pdm %}[project]
-{% endif %}
-name = "{{ project_name }}"
-version = "{{ package_version }}"
-description = "{{ package_description }}"
-authors = []
-readme = "README.md"
-{% if pdm %}requires-python = ">=3.9,<4.0"{% endif %}
 {% if poetry %}
-packages = [
-    {include = "{{ package_name }}"},
-]
-include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
-{% endif %}
-
-{% if pdm %}
-dependencies = [
-    "httpx>=0.23.0,<0.29.0",
-    "attrs>=22.2.0",
-    "python-dateutil>=2.8.0",
-]
-
-[tool.pdm]
-distribution = true
-{% endif %}
-{% if poetry %}
-
-[tool.poetry.dependencies]
-python = "^3.9"
-httpx = ">=0.23.0,<0.29.0"
-attrs = ">=22.2.0"
-python-dateutil = "^2.8.0"
-{% endif %}
-
-[build-system]
-{% if poetry %}
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+{% include "pyproject_poetry.toml.jinja" %}
 {% elif pdm %}
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+{% include "pyproject_pdm.toml.jinja" %}
 {% endif %}
-{% endif %}{# poetry or pdm #}
 
 {% include "pyproject_ruff.toml.jinja" %}
