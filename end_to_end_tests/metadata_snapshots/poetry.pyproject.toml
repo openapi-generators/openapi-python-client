@@ -5,10 +5,9 @@ description = "A client library for accessing Test 3.1 Features"
 authors = []
 readme = "README.md"
 packages = [
-    {include = "test_3_1_features_client"},
+    { include = "test_3_1_features_client" },
 ]
 include = ["CHANGELOG.md", "test_3_1_features_client/py.typed"]
-
 
 [tool.poetry.dependencies]
 python = "^3.9"

@@ -26,6 +26,7 @@ class MetaType(str, Enum):
     POETRY = "poetry"
     SETUP = "setup"
     PDM = "pdm"
+    UV = "uv"
 
 
 class ConfigFile(BaseModel):

@@ -184,7 +184,7 @@ class Project:
         readme = self.project_dir / "README.md"
         readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
-            readme_template.render(poetry=self.config.meta_type == MetaType.POETRY),
+            readme_template.render(meta=self.config.meta_type),
             encoding=self.config.file_encoding,
         )
 
