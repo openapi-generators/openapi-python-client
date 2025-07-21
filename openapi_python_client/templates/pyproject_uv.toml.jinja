@@ -11,20 +11,13 @@ dependencies = [
     "python-dateutil>=2.8.0,<3",
 ]
 
-[tool.hatch.build.targets.sdist]
-include = [
-    "{{ package_name }}",
+[tool.uv.build-backend]
+module-name = "{{ package_name }}"
+module-root = ""
+data = [
     "CHANGELOG.md",
-    "{{ package_name }}/py.typed",
-]
-
-[tool.hatch.build.targets.wheel]
-include = [
-    "{{ package_name }}",
-    "CHANGELOG.md",
-    "{{ package_name }}/py.typed",
 ]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.0,<1"]
+build-backend = "uv_build"
