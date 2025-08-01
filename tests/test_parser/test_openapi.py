@@ -684,7 +684,8 @@ class TestEndpoint:
         endpoint = self.make_endpoint()
         for response_type in response_types:
             mock_response = MagicMock()
-            mock_response.prop.get_type_string.return_value = response_type
+            mock_response.content = [MagicMock()]
+            mock_response.content[0].prop.get_type_string.return_value = response_type
             endpoint.responses.append(mock_response)
 
         assert endpoint.response_type() == expected

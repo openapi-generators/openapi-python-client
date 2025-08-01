@@ -6,7 +6,14 @@ import openapi_python_client.schema as oai
 from openapi_python_client.parser import responses
 from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas
-from openapi_python_client.parser.responses import JSON_SOURCE, NONE_SOURCE, Response, response_from_data
+from openapi_python_client.parser.responses import (
+    BYTES_SOURCE,
+    JSON_SOURCE,
+    NONE_SOURCE,
+    MediaType,
+    Response,
+    response_from_data,
+)
 
 MODULE_NAME = "openapi_python_client.parser.responses"
 
@@ -25,13 +32,19 @@ def test_response_from_data_no_content(any_property_factory):
 
     assert response == Response(
         status_code=200,
-        prop=any_property_factory(
-            name="response_200",
-            default=None,
-            required=True,
-            description="",
-        ),
-        source=NONE_SOURCE,
+        content=[
+            MediaType(
+                content_type=None,
+                prop=any_property_factory(
+                    name="response_200",
+                    default=None,
+                    required=True,
+                    description="",
+                ),
+                source=NONE_SOURCE,
+                data=None,
+            )
+        ],
         data=data,
     )
 
@@ -54,7 +67,7 @@ def test_response_from_data_unsupported_content_type():
 
 def test_response_from_data_no_content_schema(any_property_factory):
     data = oai.Response.model_construct(
-        description="",
+        description="Description",
         content={"application/vnd.api+json; version=2.2": oai.MediaType.model_construct()},
     )
     config = MagicMock()
@@ -70,13 +83,19 @@ def test_response_from_data_no_content_schema(any_property_factory):
 
     assert response == Response(
         status_code=200,
-        prop=any_property_factory(
-            name="response_200",
-            default=None,
-            required=True,
-            description=data.description,
-        ),
-        source=NONE_SOURCE,
+        content=[
+            MediaType(
+                content_type="application/vnd.api+json; version=2.2",
+                prop=any_property_factory(
+                    name="response_200",
+                    default=None,
+                    required=True,
+                    description=data.description,
+                ),
+                source=JSON_SOURCE,
+                data=data.content["application/vnd.api+json; version=2.2"],
+            )
+        ],
         data=data,
     )
 
@@ -131,8 +150,14 @@ def test_response_from_data_property(mocker, any_property_factory):
 
     assert response == responses.Response(
         status_code=400,
-        prop=prop,
-        source=JSON_SOURCE,
+        content=[
+            MediaType(
+                content_type="application/json",
+                prop=prop,
+                source=JSON_SOURCE,
+                data=data.content["application/json"],
+            )
+        ],
         data=data,
     )
     property_from_data.assert_called_once_with(
@@ -166,8 +191,14 @@ def test_response_from_data_reference(mocker, any_property_factory):
 
     assert response == responses.Response(
         status_code=400,
-        prop=prop,
-        source=JSON_SOURCE,
+        content=[
+            MediaType(
+                content_type="application/json",
+                prop=prop,
+                source=JSON_SOURCE,
+                data=predefined_response_data.content["application/json"],
+            )
+        ],
         data=predefined_response_data,
     )
 
@@ -250,12 +281,18 @@ def test_response_from_data_content_type_overrides(any_property_factory):
 
     assert response == Response(
         status_code=200,
-        prop=any_property_factory(
-            name="response_200",
-            default=None,
-            required=True,
-            description=data.description,
-        ),
-        source=NONE_SOURCE,
+        content=[
+            MediaType(
+                content_type="application/zip",
+                prop=any_property_factory(
+                    name="response_200",
+                    default=None,
+                    required=True,
+                    description=data.description,
+                ),
+                source=BYTES_SOURCE,
+                data=data.content["application/zip"],
+            )
+        ],
         data=data,
     )

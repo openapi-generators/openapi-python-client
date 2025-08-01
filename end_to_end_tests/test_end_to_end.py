@@ -137,6 +137,17 @@ def test_literal_enums_end_to_end():
     )
 
 
+def test_multiple_media_types():
+    config_path = Path(__file__).parent / "multiple-media-types.config.yml"
+    run_e2e_test(
+        "multiple-media-types.yml",
+        [f"--config={config_path}"],
+        {},
+        "multiple-media-types-golden-record",
+        "multiple-media-types-client"
+    )
+
+
 @pytest.mark.parametrize(
     "meta,generated_file,expected_file",
     (
