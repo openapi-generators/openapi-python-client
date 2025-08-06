@@ -6,6 +6,8 @@ from email.message import Message
 from keyword import iskeyword
 from typing import Any
 
+from unidecode import unidecode
+
 from .config import Config
 
 DELIMITERS = r"\. _-"
@@ -44,8 +46,8 @@ class ClassName(str):
 
 
 def sanitize(value: str) -> str:
-    """Removes every character that isn't 0-9, A-Z, a-z, or a known delimiter"""
-    return re.sub(rf"[^\w{DELIMITERS}]+", "", value)
+    """Removes every character that isn't 0-9, A-Z, a-z, or a known delimiter and normalizes it to convert special characters"""
+    return unidecode(re.sub(rf"[^\w{DELIMITERS}]+", "", value))
 
 
 def split_words(value: str) -> list[str]:
