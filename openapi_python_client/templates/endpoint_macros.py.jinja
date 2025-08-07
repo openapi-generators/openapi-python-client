@@ -47,7 +47,11 @@ params: dict[str, Any] = {}
 {{ prop_template.transform(property, property.python_name, destination) }}
     {% endif %}
     {%- if not property.json_is_dict %}
+        {% if property.explode == False %}
+params["{{ property.name }}"] = ",".join(str(item) for item in {{ destination }})
+        {% else %}
 params["{{ property.name }}"] = {{ destination }}
+        {% endif %}
     {% else %}
 {{ guarded_statement(property, destination, "params.update(" + destination + ")") }}
     {% endif %}

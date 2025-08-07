@@ -148,6 +148,19 @@ info:
         {
           "required": true,
           "schema": {
+            "title": "Non exploded array",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": "non_exploded_array",
+          "in": "query",
+          "explode": false
+        },
+        {
+          "required": true,
+          "schema": {
             "title": "Some Date",
             "anyOf": [
               {
