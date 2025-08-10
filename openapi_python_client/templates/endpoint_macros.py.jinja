@@ -46,9 +46,14 @@ params: dict[str, Any] = {}
         {% set destination = "json_" + property.python_name %}
 {{ prop_template.transform(property, property.python_name, destination) }}
     {% endif %}
-    {%- if not property.json_is_dict %}
+    {%- if not property.json_is_dict  %}
         {% if property.explode == False %}
+            {% if property.required %}
 params["{{ property.name }}"] = ",".join(str(item) for item in {{ destination }})
+            {% else %}
+if not isinstance({{ destination }}, Unset):
+    params["{{ property.name }}"] = ",".join(str(item) for item in {{ destination }})
+            {% endif %}
         {% else %}
 params["{{ property.name }}"] = {{ destination }}
         {% endif %}

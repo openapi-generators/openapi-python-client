@@ -163,6 +163,19 @@
             "explode": false
           },
           {
+            "required": false,
+            "schema": {
+              "title": "Optional non exploded array",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "name": "optional_non_exploded_array",
+            "in": "query",
+            "explode": false
+          },
+          {
             "required": true,
             "schema": {
               "title": "Some Date",
