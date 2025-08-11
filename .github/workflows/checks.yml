@@ -15,7 +15,7 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4.3.0
       - name: Set up Python
         uses: actions/setup-python@v5.6.0
         with:
@@ -74,7 +74,7 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4.3.0
       - name: Set up Python
         uses: actions/setup-python@v5.6.0
         with:
@@ -109,7 +109,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4.3.0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -159,7 +159,7 @@ jobs:
         ports:
           - "3000:3000"
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4.3.0
       - name: Set up Python
         uses: actions/setup-python@v5.6.0
         with:
