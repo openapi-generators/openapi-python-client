@@ -10,7 +10,7 @@ from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -18,6 +18,8 @@ def _get_kwargs(
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: list[None],
+    non_exploded_array: list[str],
+    optional_non_exploded_array: Union[Unset, list[str]] = UNSET,
     some_date: Union[datetime.date, datetime.datetime],
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
@@ -43,6 +45,17 @@ def _get_kwargs(
     json_an_enum_value_with_only_null = an_enum_value_with_only_null
 
     params["an_enum_value_with_only_null"] = json_an_enum_value_with_only_null
+
+    json_non_exploded_array = non_exploded_array
+
+    params["non_exploded_array"] = ",".join(str(item) for item in json_non_exploded_array)
+
+    json_optional_non_exploded_array: Union[Unset, list[str]] = UNSET
+    if not isinstance(optional_non_exploded_array, Unset):
+        json_optional_non_exploded_array = optional_non_exploded_array
+
+    if not isinstance(json_optional_non_exploded_array, Unset):
+        params["optional_non_exploded_array"] = ",".join(str(item) for item in json_optional_non_exploded_array)
 
     json_some_date: str
     if isinstance(some_date, datetime.date):
@@ -106,6 +119,8 @@ def sync_detailed(
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: list[None],
+    non_exploded_array: list[str],
+    optional_non_exploded_array: Union[Unset, list[str]] = UNSET,
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, list["AModel"]]]:
     """Get List
@@ -116,6 +131,8 @@ def sync_detailed(
         an_enum_value (list[AnEnum]):
         an_enum_value_with_null (list[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (list[None]):
+        non_exploded_array (list[str]):
+        optional_non_exploded_array (Union[Unset, list[str]]):
         some_date (Union[datetime.date, datetime.datetime]):
 
     Raises:
@@ -130,6 +147,8 @@ def sync_detailed(
         an_enum_value=an_enum_value,
         an_enum_value_with_null=an_enum_value_with_null,
         an_enum_value_with_only_null=an_enum_value_with_only_null,
+        non_exploded_array=non_exploded_array,
+        optional_non_exploded_array=optional_non_exploded_array,
         some_date=some_date,
     )
 
@@ -146,6 +165,8 @@ def sync(
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: list[None],
+    non_exploded_array: list[str],
+    optional_non_exploded_array: Union[Unset, list[str]] = UNSET,
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, list["AModel"]]]:
     """Get List
@@ -156,6 +177,8 @@ def sync(
         an_enum_value (list[AnEnum]):
         an_enum_value_with_null (list[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (list[None]):
+        non_exploded_array (list[str]):
+        optional_non_exploded_array (Union[Unset, list[str]]):
         some_date (Union[datetime.date, datetime.datetime]):
 
     Raises:
@@ -171,6 +194,8 @@ def sync(
         an_enum_value=an_enum_value,
         an_enum_value_with_null=an_enum_value_with_null,
         an_enum_value_with_only_null=an_enum_value_with_only_null,
+        non_exploded_array=non_exploded_array,
+        optional_non_exploded_array=optional_non_exploded_array,
         some_date=some_date,
     ).parsed
 
@@ -181,6 +206,8 @@ async def asyncio_detailed(
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: list[None],
+    non_exploded_array: list[str],
+    optional_non_exploded_array: Union[Unset, list[str]] = UNSET,
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Response[Union[HTTPValidationError, list["AModel"]]]:
     """Get List
@@ -191,6 +218,8 @@ async def asyncio_detailed(
         an_enum_value (list[AnEnum]):
         an_enum_value_with_null (list[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (list[None]):
+        non_exploded_array (list[str]):
+        optional_non_exploded_array (Union[Unset, list[str]]):
         some_date (Union[datetime.date, datetime.datetime]):
 
     Raises:
@@ -205,6 +234,8 @@ async def asyncio_detailed(
         an_enum_value=an_enum_value,
         an_enum_value_with_null=an_enum_value_with_null,
         an_enum_value_with_only_null=an_enum_value_with_only_null,
+        non_exploded_array=non_exploded_array,
+        optional_non_exploded_array=optional_non_exploded_array,
         some_date=some_date,
     )
 
@@ -219,6 +250,8 @@ async def asyncio(
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[Union[AnEnumWithNull, None]],
     an_enum_value_with_only_null: list[None],
+    non_exploded_array: list[str],
+    optional_non_exploded_array: Union[Unset, list[str]] = UNSET,
     some_date: Union[datetime.date, datetime.datetime],
 ) -> Optional[Union[HTTPValidationError, list["AModel"]]]:
     """Get List
@@ -229,6 +262,8 @@ async def asyncio(
         an_enum_value (list[AnEnum]):
         an_enum_value_with_null (list[Union[AnEnumWithNull, None]]):
         an_enum_value_with_only_null (list[None]):
+        non_exploded_array (list[str]):
+        optional_non_exploded_array (Union[Unset, list[str]]):
         some_date (Union[datetime.date, datetime.datetime]):
 
     Raises:
@@ -245,6 +280,8 @@ async def asyncio(
             an_enum_value=an_enum_value,
             an_enum_value_with_null=an_enum_value_with_null,
             an_enum_value_with_only_null=an_enum_value_with_only_null,
+            non_exploded_array=non_exploded_array,
+            optional_non_exploded_array=optional_non_exploded_array,
             some_date=some_date,
         )
     ).parsed
