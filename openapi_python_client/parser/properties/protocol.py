@@ -66,10 +66,6 @@ class PropertyProtocol(Protocol):
     def type_string(self) -> str:
         return self.get_type_string()
 
-    @property
-    def instance_type_string(self) -> str:
-        return self.get_instance_type_string()
-
     @abstractmethod
     def convert_value(self, value: Any) -> Value | None | PropertyError:
         """Convert a string value to a Value object"""
