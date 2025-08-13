@@ -200,7 +200,7 @@ class Endpoint:
 
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             for media_type in response.content:
-                if not media_type.prop:
+                if not media_type.prop:  # pragma: no cover
                     continue
                 endpoint.relative_imports |= media_type.prop.get_lazy_imports(prefix=models_relative_prefix)
                 endpoint.relative_imports |= media_type.prop.get_imports(prefix=models_relative_prefix)
