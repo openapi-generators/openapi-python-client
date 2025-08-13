@@ -15,6 +15,10 @@ paths:
               schema:
                 const: "Why have a fixed response? I dunno"
             "application/octet-stream": {}
+        "404":
+          description: "Not Found"
+          content:
+            "text/plain": {}
         "503":
           description: "Server Not Available"
           content:
