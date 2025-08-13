@@ -82,7 +82,11 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
         {% endif %}
     {% else %}
+        {% if response.content[1:] %}
         {{response.content[0].prop.python_name}}: Union[{{ response.content | map(attribute='prop') | map(attribute='type_string')  | join(', ') }}]
+        {% else %}
+        {{response.content[0].prop.python_name}}: {{response.content[0].prop.type_string}}
+        {% endif %}
         {% for media_type in response.content %}
         {% if media_type.content_type %}
         if response.headers.get("content-type") == "{{ media_type.content_type }}":

@@ -33,6 +33,11 @@ def _parse_response(
         if response.headers.get("content-type") == "application/octet-stream":
             response_200 = cast(Any, response.content)
             return response_200
+    if response.status_code == 404:
+        response_404: Any
+        if response.headers.get("content-type") == "text/plain":
+            response_404 = cast(Any, response.text)
+            return response_404
     if response.status_code == 503:
         response_503: Union[ErrorResponse, Any]
         if response.headers.get("content-type") == "application/json":
