@@ -152,19 +152,8 @@ def response_from_data(  # noqa: PLR0911
 
             content_types.append(MediaType(content_type=content_type, source=source, prop=prop, data=media_type))
     if not content_types:
-        if content:
-            return (
-                ParseError(data=data, detail=f"Unsupported content_type {content}"),
-                schemas,
-            )
-
         return (
-            empty_response(
-                status_code=status_code,
-                response_name=response_name,
-                config=config,
-                data=data,
-            ),
+            ParseError(data=data, detail=f"Unsupported content_type {content}"),
             schemas,
         )
 
