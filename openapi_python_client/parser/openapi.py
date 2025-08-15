@@ -2,7 +2,6 @@ import re
 from collections.abc import Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
-from http import HTTPStatus
 from typing import Any, Optional, Protocol, Union
 
 from pydantic import ValidationError
@@ -26,7 +25,7 @@ from .properties import (
     property_from_data,
 )
 from .properties.schemas import parameter_from_reference
-from .responses import Response, response_from_data
+from .responses import HTTPStatusSpec, Response, http_status_spec, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
@@ -162,22 +161,13 @@ class Endpoint:
     ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-            status_code: HTTPStatus
-            try:
-                status_code = HTTPStatus(int(code))
-            except ValueError:
-                endpoint.errors.append(
-                    ParseError(
-                        detail=(
-                            f"Invalid response status code {code} (not a valid HTTP "
-                            f"status code), response will be omitted from generated "
-                            f"client"
-                        )
-                    )
-                )
+            status_code: HTTPStatusSpec | ParseError = http_status_spec(code)
+            if isinstance(status_code, ParseError):
+                endpoint.errors.append(status_code)
                 continue
 
             response, schemas = response_from_data(
+                status_code_str=code,
                 status_code=status_code,
                 data=response_data,
                 schemas=schemas,
@@ -190,7 +180,7 @@ class Endpoint:
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Cannot parse response for status code {status_code}{detail_suffix}, "
+                            f"Cannot parse response for status code {code}{detail_suffix}, "
                             f"response will be omitted from generated client"
                         ),
                         data=response.data,

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from unittest.mock import MagicMock
 
 import pydantic
@@ -7,6 +8,7 @@ import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection, import_string_from_class
 from openapi_python_client.parser.properties import Class, IntProperty, Parameters, Schemas
+from openapi_python_client.parser.responses import empty_response
 from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
@@ -48,6 +50,44 @@ class TestEndpoint:
         ]
         response_from_data.assert_not_called()
 
+    def test__add_response_with_patterned_status_code(self, mocker):
+        schemas = Schemas()
+        response_1_data = mocker.MagicMock()
+        data = {
+            "2XX": response_1_data,
+        }
+        endpoint = self.make_endpoint()
+        config = MagicMock()
+        response = empty_response(
+            status_code=(HTTPStatus(200), 299),
+            response_name="dummy",
+            config=config,
+            data=data,
+        )
+        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(response, schemas))
+
+        response, schemas = Endpoint._add_responses(
+            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
+        )
+
+        assert response.errors == []
+
+        assert response.responses[0].status_code == (200, 299)
+
+        response_from_data.assert_has_calls(
+            [
+                mocker.call(
+                    status_code_str="2XX",
+                    status_code=(HTTPStatus(200), 299),
+                    data=response_1_data,
+                    schemas=schemas,
+                    responses={},
+                    parent_name="name",
+                    config=config,
+                ),
+            ]
+        )
+
     def test__add_responses_error(self, mocker):
         schemas = Schemas()
         response_1_data = mocker.MagicMock()
@@ -68,6 +108,7 @@ class TestEndpoint:
         response_from_data.assert_has_calls(
             [
                 mocker.call(
+                    status_code_str="200",
                     status_code=200,
                     data=response_1_data,
                     schemas=schemas,
@@ -76,6 +117,7 @@ class TestEndpoint:
                     config=config,
                 ),
                 mocker.call(
+                    status_code_str="404",
                     status_code=404,
                     data=response_2_data,
                     schemas=schemas,
