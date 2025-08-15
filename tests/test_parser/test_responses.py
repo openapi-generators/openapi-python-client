@@ -240,6 +240,7 @@ def test_response_from_data_content_type_overrides(any_property_factory):
     config = MagicMock()
     config.content_type_overrides = {"application/zip": "application/octet-stream"}
     response, schemas = response_from_data(
+        status_code_str="200",
         status_code=200,
         data=data,
         schemas=Schemas(),
