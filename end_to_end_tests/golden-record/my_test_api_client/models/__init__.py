@@ -86,6 +86,9 @@ from .post_responses_unions_simple_before_complex_response_200 import PostRespon
 from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
 )
+from .status_code_patterns_response_2xx import StatusCodePatternsResponse2XX
+from .status_code_patterns_response_2xx_status import StatusCodePatternsResponse2XXStatus
+from .status_code_patterns_response_4xx import StatusCodePatternsResponse4XX
 from .test_inline_objects_body import TestInlineObjectsBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
 from .validation_error import ValidationError
@@ -167,6 +170,9 @@ __all__ = (
     "PostNamingPropertyConflictWithImportResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
+    "StatusCodePatternsResponse2XX",
+    "StatusCodePatternsResponse2XXStatus",
+    "StatusCodePatternsResponse4XX",
     "TestInlineObjectsBody",
     "TestInlineObjectsResponse200",
     "ValidationError",

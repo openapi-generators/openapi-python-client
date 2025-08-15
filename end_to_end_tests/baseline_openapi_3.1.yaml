@@ -958,6 +958,115 @@ info:
       }
     }
   },
+  "/responses/status-codes/default": {
+      "get": {
+        "tags": ["responses"],
+        "summary": "Default Status Code Only",
+        "operationId": "default_status_code",
+        "responses": {
+          "default": {
+            "description": "Default response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/response/status-codes/patterns": {
+      "get": {
+        "tags": ["responses"],
+        "summary": "Status Code Patterns",
+        "operationId": "status_code_patterns",
+        "responses": {
+          "2XX": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["success", "failure"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/response/status-codes/precedence": {
+      "get": {
+        "operationId": "status_code_precedence",
+        "tags": ["responses"],
+        "summary": "Status Codes Precedence",
+        "description": "Verify that specific status codes are always checked first, then ranges, then default",
+        "responses": {
+          "default": {
+            "description": "Default Response Should Be Last",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Pattern should be after specific codes",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
   "/auth/token_with_cookie": {
     "get": {
       "tags": [

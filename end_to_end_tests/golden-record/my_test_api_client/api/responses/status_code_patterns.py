@@ -5,19 +5,15 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_models_oneof_with_required_const_response_200_type_0 import (
-    GetModelsOneofWithRequiredConstResponse200Type0,
-)
-from ...models.get_models_oneof_with_required_const_response_200_type_1 import (
-    GetModelsOneofWithRequiredConstResponse200Type1,
-)
+from ...models.status_code_patterns_response_2xx import StatusCodePatternsResponse2XX
+from ...models.status_code_patterns_response_4xx import StatusCodePatternsResponse4XX
 from ...types import Response
 
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/models/oneof-with-required-const",
+        "url": "/response/status-codes/patterns",
     }
 
     return _kwargs
@@ -25,33 +21,16 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
-    if response.status_code == 200:
+) -> Optional[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    if 200 <= response.status_code <= 299:
+        response_2xx = StatusCodePatternsResponse2XX.from_dict(response.json())
 
-        def _parse_response_200(
-            data: object,
-        ) -> Union[
-            "GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"
-        ]:
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                response_200_type_0 = GetModelsOneofWithRequiredConstResponse200Type0.from_dict(data)
+        return response_2xx
 
-                return response_200_type_0
-            except:  # noqa: E722
-                pass
-            if not isinstance(data, dict):
-                raise TypeError()
-            response_200_type_1 = GetModelsOneofWithRequiredConstResponse200Type1.from_dict(data)
+    if 400 <= response.status_code <= 499:
+        response_4xx = StatusCodePatternsResponse4XX.from_dict(response.json())
 
-            return response_200_type_1
-
-        response_200 = _parse_response_200(response.json())
-
-        return response_200
+        return response_4xx
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -61,9 +40,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+) -> Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -75,16 +52,15 @@ def _build_response(
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
-    """
+) -> Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    """Status Code Patterns
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']]
+        Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]
     """
 
     kwargs = _get_kwargs()
@@ -99,16 +75,15 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
-    """
+) -> Optional[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    """Status Code Patterns
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']
+        Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]
     """
 
     return sync_detailed(
@@ -119,16 +94,15 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
-    """
+) -> Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    """Status Code Patterns
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']]
+        Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]
     """
 
     kwargs = _get_kwargs()
@@ -141,16 +115,15 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
-    """
+) -> Optional[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    """Status Code Patterns
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']
+        Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]
     """
 
     return (
