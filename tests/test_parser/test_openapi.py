@@ -24,80 +24,6 @@ class TestEndpoint:
             relative_imports={"import_3"},
         )
 
-    @pytest.mark.parametrize("response_status_code", ["not_a_number", 499])
-    def test__add_responses_status_code_error(self, response_status_code, mocker):
-        schemas = Schemas()
-        response_1_data = mocker.MagicMock()
-        data = {
-            response_status_code: response_1_data,
-        }
-        endpoint = self.make_endpoint()
-        parse_error = ParseError(data=mocker.MagicMock())
-        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
-        config = MagicMock()
-
-        response, schemas = Endpoint._add_responses(
-            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
-        )
-
-        assert response.errors == [
-            ParseError(
-                detail=f"Invalid response status code {response_status_code} (not a valid HTTP status code), "
-                "response will be omitted from generated client"
-            )
-        ]
-        response_from_data.assert_not_called()
-
-    def test__add_responses_error(self, mocker):
-        schemas = Schemas()
-        response_1_data = mocker.MagicMock()
-        response_2_data = mocker.MagicMock()
-        data = {
-            "200": response_1_data,
-            "404": response_2_data,
-        }
-        endpoint = self.make_endpoint()
-        parse_error = ParseError(data=mocker.MagicMock(), detail="some problem")
-        response_from_data = mocker.patch(f"{MODULE_NAME}.response_from_data", return_value=(parse_error, schemas))
-        config = MagicMock()
-
-        response, schemas = Endpoint._add_responses(
-            endpoint=endpoint, data=data, schemas=schemas, responses={}, config=config
-        )
-
-        response_from_data.assert_has_calls(
-            [
-                mocker.call(
-                    status_code=200,
-                    data=response_1_data,
-                    schemas=schemas,
-                    responses={},
-                    parent_name="name",
-                    config=config,
-                ),
-                mocker.call(
-                    status_code=404,
-                    data=response_2_data,
-                    schemas=schemas,
-                    responses={},
-                    parent_name="name",
-                    config=config,
-                ),
-            ]
-        )
-        assert response.errors == [
-            ParseError(
-                detail="Cannot parse response for status code 200 (some problem), "
-                "response will be omitted from generated client",
-                data=parse_error.data,
-            ),
-            ParseError(
-                detail="Cannot parse response for status code 404 (some problem), "
-                "response will be omitted from generated client",
-                data=parse_error.data,
-            ),
-        ]
-
     def test_add_parameters_handles_no_params(self):
         endpoint = self.make_endpoint()
         schemas = Schemas()
@@ -685,7 +611,7 @@ class TestEndpoint:
         for response_type in response_types:
             mock_response = MagicMock()
             mock_response.prop.get_type_string.return_value = response_type
-            endpoint.responses.append(mock_response)
+            endpoint.responses.patterns.append(mock_response)
 
         assert endpoint.response_type() == expected
 

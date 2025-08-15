@@ -2,7 +2,14 @@
 
 import types
 
-from . import post_responses_unions_simple_before_complex, reference_response, text_response
+from . import (
+    default_status_code,
+    post_responses_unions_simple_before_complex,
+    reference_response,
+    status_code_patterns,
+    status_code_precedence,
+    text_response,
+)
 
 
 class ResponsesEndpoints:
@@ -26,3 +33,24 @@ class ResponsesEndpoints:
         Endpoint using predefined response
         """
         return reference_response
+
+    @classmethod
+    def default_status_code(cls) -> types.ModuleType:
+        """
+        Default Status Code Only
+        """
+        return default_status_code
+
+    @classmethod
+    def status_code_patterns(cls) -> types.ModuleType:
+        """
+        Status Code Patterns
+        """
+        return status_code_patterns
+
+    @classmethod
+    def status_code_precedence(cls) -> types.ModuleType:
+        """
+        Verify that specific status codes are always checked first, then ranges, then default
+        """
+        return status_code_precedence
