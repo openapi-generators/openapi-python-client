@@ -6,11 +6,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ModelWithUnionPropertyInlinedFruitType1")
+T = TypeVar("T", bound="ModelWithUnionPropertyInlinedBananas")
 
 
 @_attrs_define
-class ModelWithUnionPropertyInlinedFruitType1:
+class ModelWithUnionPropertyInlinedBananas:
     """
     Attributes:
         bananas (Union[Unset, str]):
@@ -35,12 +35,12 @@ class ModelWithUnionPropertyInlinedFruitType1:
         d = dict(src_dict)
         bananas = d.pop("bananas", UNSET)
 
-        model_with_union_property_inlined_fruit_type_1 = cls(
+        model_with_union_property_inlined_bananas = cls(
             bananas=bananas,
         )
 
-        model_with_union_property_inlined_fruit_type_1.additional_properties = d
-        return model_with_union_property_inlined_fruit_type_1
+        model_with_union_property_inlined_bananas.additional_properties = d
+        return model_with_union_property_inlined_bananas
 
     @property
     def additional_keys(self) -> list[str]:

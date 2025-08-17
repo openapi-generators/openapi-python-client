@@ -2171,6 +2171,7 @@
             "oneOf": [
               {
                 "type": "object",
+                "title": "Apples",
                 "properties": {
                   "apples": {
                     "type": "string"
@@ -2179,6 +2180,7 @@
               },
               {
                 "type": "object",
+                "title": "Bananas",
                 "properties": {
                   "bananas": {
                     "type": "string"

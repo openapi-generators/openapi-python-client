@@ -72,8 +72,8 @@ from .model_with_recursive_ref import ModelWithRecursiveRef
 from .model_with_recursive_ref_in_additional_properties import ModelWithRecursiveRefInAdditionalProperties
 from .model_with_union_property import ModelWithUnionProperty
 from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
-from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+from .model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
+from .model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 from .none import None_
 from .octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
 from .post_bodies_multiple_data_body import PostBodiesMultipleDataBody
@@ -155,8 +155,8 @@ __all__ = (
     "ModelWithRecursiveRefInAdditionalProperties",
     "ModelWithUnionProperty",
     "ModelWithUnionPropertyInlined",
-    "ModelWithUnionPropertyInlinedFruitType0",
-    "ModelWithUnionPropertyInlinedFruitType1",
+    "ModelWithUnionPropertyInlinedApples",
+    "ModelWithUnionPropertyInlinedBananas",
     "None_",
     "OctetStreamTestsOctetStreamPostResponse200",
     "PostBodiesMultipleDataBody",
