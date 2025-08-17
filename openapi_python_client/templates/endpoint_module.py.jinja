@@ -66,21 +66,48 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[{{ return_string }}]:
-    {% for response in endpoint.responses %}
+{% for response in endpoint.responses %}
     if response.status_code == {{ response.status_code.value }}:
-        {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
+    {% if not config.multiple_media_types %}
+        {% if parsed_responses %}{% import "property_templates/" + response.content[0].prop.template as prop_template %}
         {% if prop_template.construct %}
-        {{ prop_template.construct(response.prop, response.source.attribute) | indent(8) }}
-        {% elif response.source.return_type == response.prop.get_type_string()  %}
-        {{ response.prop.python_name }} = {{ response.source.attribute }}
+        {{ prop_template.construct(response.content[0].prop, response.content[0].source.attribute) | indent(8) }}
+        {% elif response.content[0].source.return_type == response.content[0].prop.get_type_string()  %}
+        {{ response.content[0].prop.python_name }} = {{ response.content[0].source.attribute }}
         {% else %}
-        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source.attribute }})
+        {{ response.content[0].prop.python_name }} = cast({{ response.content[0].prop.get_type_string() }}, {{ response.content[0].source.attribute }})
         {% endif %}
-        return {{ response.prop.python_name }}
+        return {{ response.content[0].prop.python_name }}
         {% else %}
         return None
         {% endif %}
-    {% endfor %}
+    {% else %}
+        {% if response.content[1:] %}
+        {{response.content[0].prop.python_name}}: Union[{{ response.content | map(attribute='prop') | map(attribute='type_string')  | join(', ') }}]
+        {% else %}
+        {{response.content[0].prop.python_name}}: {{response.content[0].prop.type_string}}
+        {% endif %}
+        {% for media_type in response.content %}
+        {% if media_type.content_type %}
+        if response.headers.get("content-type") == "{{ media_type.content_type }}":
+        {% else %}
+        if True:  # Any Content-Type header value
+        {% endif %}
+            {% if parsed_responses %}{% import "property_templates/" + media_type.prop.template as prop_template %}
+            {% if prop_template.construct %}
+            {{ prop_template.construct(media_type.prop, media_type.source.attribute) | indent(12) }}
+            {% elif media_type.source.return_type == media_type.prop.get_type_string()  %}
+            {{ media_type.prop.python_name }} = {{ media_type.source.attribute }}
+            {% else %}
+            {{ media_type.prop.python_name }} = cast({{ media_type.prop.get_type_string() }}, {{ media_type.source.attribute }})
+            {% endif %}
+            return {{ media_type.prop.python_name }}
+            {% else %}
+            return None
+            {% endif %}
+        {% endfor %}
+    {%- endif %}
+{% endfor %}
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:

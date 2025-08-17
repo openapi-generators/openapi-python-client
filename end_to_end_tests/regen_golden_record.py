@@ -69,6 +69,15 @@ def regen_literal_enums_golden_record():
     )
 
 
+def regen_multiple_media_types_golden_record():
+    _regenerate(
+        spec_file_name="multiple-media-types.yml",
+        output_dir="multiple-media-types-client",
+        golden_record_dir="multiple-media-types-golden-record",
+        config_file_name="multiple-media-types.config.yml",
+    )
+
+
 def regen_metadata_snapshots():
     output_path = Path.cwd() / "test-3-1-features-client"
     snapshots_dir = Path(__file__).parent / "metadata_snapshots"
@@ -147,3 +156,4 @@ if __name__ == "__main__":
     regen_docstrings_on_attributes_golden_record()
     regen_custom_template_golden_record()
     regen_literal_enums_golden_record()
+    regen_multiple_media_types_golden_record()

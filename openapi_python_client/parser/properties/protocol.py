@@ -62,6 +62,10 @@ class PropertyProtocol(Protocol):
     template: ClassVar[str] = "any_property.py.jinja"
     json_is_dict: ClassVar[bool] = False
 
+    @property
+    def type_string(self) -> str:
+        return self.get_type_string()
+
     @abstractmethod
     def convert_value(self, value: Any) -> Value | None | PropertyError:
         """Convert a string value to a Value object"""
