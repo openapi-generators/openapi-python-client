@@ -13,6 +13,25 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.26.0 (2025-08-17)
+
+### Breaking Changes
+
+#### Change some union variant names
+
+When creating a union with `oneOf`, `anyOf`, or a list of `type`, the name of each variant used to be `type_{index}`
+where the index is based on the order of the types in the union.
+
+This made some modules difficult to understand, what is a `my_type_type_0` after all?
+It also meant that reordering union members, while not a breaking change to the API, _would_ be a breaking change 
+for generated clients.
+
+Now, if an individual variant has a `title` attribute, that `title` will be used in the name instead.
+This is only an enhancement for documents which use `title` in union variants, and only a breaking change for 
+_inline models_ (not `#/components/schemas` which should already have used more descriptive names).
+
+Thanks @wallagib for PR #962!
+
 ## 0.25.3 (2025-07-21)
 
 ### Features
