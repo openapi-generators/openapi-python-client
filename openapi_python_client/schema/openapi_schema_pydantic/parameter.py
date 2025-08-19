@@ -36,7 +36,7 @@ class Parameter(BaseModel):
     examples: Optional[dict[str, ReferenceOr[Example]]] = None
     content: Optional[dict[str, MediaType]] = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     @classmethod
     def validate_dependencies(cls, model: "Parameter") -> "Parameter":
         param_in = model.param_in
@@ -47,7 +47,6 @@ class Parameter(BaseModel):
                 model.style = Style.SIMPLE
             elif param_in in [ParameterLocation.QUERY, ParameterLocation.COOKIE]:
                 model.style = Style.FORM
-
 
         # Validate style based on parameter location, not all combinations are valid.
         # https://swagger.io/docs/specification/v3_0/serialization/
@@ -64,7 +63,6 @@ class Parameter(BaseModel):
             if model.style != Style.FORM:
                 raise ValueError(f"Invalid style '{model.style}' for cookie parameter")
 
-
         if explode is None:
             if model.style == Style.FORM:
                 model.explode = True
@@ -72,8 +70,6 @@ class Parameter(BaseModel):
                 model.explode = False
 
         return model
-
-
 
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:

@@ -64,7 +64,11 @@ class TestParameterFromData:
 
     def test_registers_new_parameters(self, config):
         param = Parameter.model_construct(
-            name="a_param", param_in=ParameterLocation.QUERY, style=Style.FORM, explode=True, param_schema=Schema.model_construct()
+            name="a_param",
+            param_in=ParameterLocation.QUERY,
+            style=Style.FORM,
+            explode=True,
+            param_schema=Schema.model_construct(),
         )
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(
