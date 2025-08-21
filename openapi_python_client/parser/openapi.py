@@ -26,7 +26,7 @@ from .properties import (
     property_from_data,
 )
 from .properties.schemas import parameter_from_reference
-from .responses import Response, response_from_data
+from .responses import OpenAPIStatus, Response, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
@@ -162,9 +162,9 @@ class Endpoint:
     ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-            status_code: HTTPStatus
+            status_code: OpenAPIStatus
             try:
-                status_code = HTTPStatus(int(code))
+                status_code = HTTPStatus(int(code)) if code != "default" else "default"
             except ValueError:
                 endpoint.errors.append(
                     ParseError(

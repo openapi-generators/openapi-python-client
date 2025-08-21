@@ -1,7 +1,7 @@
 __all__ = ["Response", "response_from_data"]
 
 from http import HTTPStatus
-from typing import Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from attrs import define
 
@@ -13,6 +13,8 @@ from .. import schema as oai
 from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
+
+OpenAPIStatus = Union[HTTPStatus, Literal["default"]]
 
 
 class _ResponseSource(TypedDict):
@@ -32,7 +34,7 @@ NONE_SOURCE = _ResponseSource(attribute="None", return_type="None")
 class Response:
     """Describes a single response for an endpoint"""
 
-    status_code: HTTPStatus
+    status_code: OpenAPIStatus
     prop: Property
     source: _ResponseSource
     data: Union[oai.Response, oai.Reference]  # Original data which created this response, useful for custom templates
@@ -59,7 +61,7 @@ def _source_by_content_type(content_type: str, config: Config) -> Optional[_Resp
 
 def empty_response(
     *,
-    status_code: HTTPStatus,
+    status_code: OpenAPIStatus,
     response_name: str,
     config: Config,
     data: Union[oai.Response, oai.Reference],
@@ -82,7 +84,7 @@ def empty_response(
 
 def response_from_data(  # noqa: PLR0911
     *,
-    status_code: HTTPStatus,
+    status_code: OpenAPIStatus,
     data: Union[oai.Response, oai.Reference],
     schemas: Schemas,
     responses: dict[str, Union[oai.Response, oai.Reference]],

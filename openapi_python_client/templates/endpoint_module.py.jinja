@@ -12,7 +12,7 @@ from ... import errors
 {% endfor %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
-    arguments, client, kwargs, parse_response, docstring, body_to_kwarg %}
+    arguments, client, kwargs, parse_response, docstring, body_to_kwarg, parse_response %}
 
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
@@ -64,27 +64,28 @@ def _get_kwargs(
 {% endif %}
     return _kwargs
 
+{% set def_response = namespace(exists=false) %}
+{% for response in endpoint.responses if response.status_code == "default" %}
+{% set def_response.exists = true %}
+{% endfor %}
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[{{ return_string }}]:
-    {% for response in endpoint.responses %}
+
+def _parse_response(
+    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
+) -> {% if def_response.exists %}{{ return_string }}{% else %}Optional[{{ return_string }}]{% endif %}:
+    {% for response in endpoint.responses if response.status_code != "default" %}
     if response.status_code == {{ response.status_code.value }}:
-        {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
-        {% if prop_template.construct %}
-        {{ prop_template.construct(response.prop, response.source.attribute) | indent(8) }}
-        {% elif response.source.return_type == response.prop.get_type_string()  %}
-        {{ response.prop.python_name }} = {{ response.source.attribute }}
-        {% else %}
-        {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source.attribute }})
-        {% endif %}
-        return {{ response.prop.python_name }}
-        {% else %}
-        return None
-        {% endif %}
+{{ parse_response(parsed_responses, response) | indent(8, first=true, blank=true) }}
     {% endfor %}
+    {% for response in endpoint.responses if response.status_code == "default" %}
+{{ parse_response(parsed_responses, response) | indent(4, first=true, blank=true) }}
+    {% endfor %}
+    {% if not def_response.exists %}
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
         return None
+    {% endif %}
 
 
 def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[{{ return_string }}]:
