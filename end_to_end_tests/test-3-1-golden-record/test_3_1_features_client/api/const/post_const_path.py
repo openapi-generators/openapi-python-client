@@ -50,6 +50,7 @@ def _parse_response(
                 f"response_200 must match const 'Why have a fixed response? I dunno', got '{response_200}'"
             )
         return response_200
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:

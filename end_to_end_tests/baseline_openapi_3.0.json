@@ -961,6 +961,37 @@
         }
       }
     },
+    "/responses/default": {
+      "post": {
+        "tags": [
+          "responses"
+        ],
+        "summary": "Default Response",
+        "operationId": "default_response",
+        "responses": {
+          "200": {
+            "description": "Text response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/responses/reference": {
       "get": {
         "tags": [

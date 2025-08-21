@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from typing import Union
 
 from end_to_end_tests.functional_tests.helpers import (
     with_generated_client_fixture,
@@ -112,3 +113,41 @@ components:
 class TestLiteralEnumDefaults:
     def test_default_value(self, MyModel):
         assert MyModel().enum_prop == "A"
+
+@with_generated_client_fixture(
+"""
+tags:
+    - name: service1
+paths:
+  "/simple":
+    get:
+      operationId: getSimpleThing
+      description: Get a simple thing.
+      responses:
+        "200":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoodResponse"
+        default:
+          description: Failure!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      tags:
+        - service1
+components:
+  schemas:
+    GoodResponse:
+      type: object
+    ErrorResponse:
+      type: object
+""",
+    config="literal_enums: true",
+)
+@with_generated_code_imports(".api.service1.get_simple_thing._parse_response", ".models.GoodResponse", ".models.ErrorResponse")
+class TestDefaultResponseCode:
+    def test_default_response(self, _parse_response, GoodResponse, ErrorResponse):
+        assert _parse_response.__annotations__['return'] == Union[GoodResponse, ErrorResponse]

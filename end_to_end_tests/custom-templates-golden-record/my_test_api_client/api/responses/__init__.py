@@ -2,7 +2,7 @@
 
 import types
 
-from . import post_responses_unions_simple_before_complex, reference_response, text_response
+from . import default_response, post_responses_unions_simple_before_complex, reference_response, text_response
 
 
 class ResponsesEndpoints:
@@ -19,6 +19,13 @@ class ResponsesEndpoints:
         Text Response
         """
         return text_response
+
+    @classmethod
+    def default_response(cls) -> types.ModuleType:
+        """
+        Default Response
+        """
+        return default_response
 
     @classmethod
     def reference_response(cls) -> types.ModuleType:
