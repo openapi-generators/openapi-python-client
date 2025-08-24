@@ -184,3 +184,18 @@ Returns:
 {% macro docstring(endpoint, return_string, is_detailed) %}
 {{ safe_docstring(docstring_content(endpoint, return_string, is_detailed)) }}
 {% endmacro %}
+
+{% macro parse_response(parsed_responses, response) %}
+{% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
+{% if prop_template.construct %}
+{{ prop_template.construct(response.prop, response.source.attribute) }}
+{% elif response.source.return_type == response.prop.get_type_string()  %}
+{{ response.prop.python_name }} = {{ response.source.attribute }}
+{% else %}
+{{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source.attribute }})
+{% endif %}
+return {{ response.prop.python_name }}
+{% else %}
+return None
+{% endif %}
+{% endmacro %}
