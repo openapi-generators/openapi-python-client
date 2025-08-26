@@ -2,7 +2,6 @@ import re
 from collections.abc import Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
-from http import HTTPStatus
 from typing import Any, Optional, Protocol, Union
 
 from pydantic import ValidationError
@@ -26,7 +25,7 @@ from .properties import (
     property_from_data,
 )
 from .properties.schemas import parameter_from_reference
-from .responses import Response, response_from_data
+from .responses import HTTPStatusPattern, Responses, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
@@ -147,7 +146,7 @@ class Endpoint:
     path_parameters: list[Property] = field(default_factory=list)
     header_parameters: list[Property] = field(default_factory=list)
     cookie_parameters: list[Property] = field(default_factory=list)
-    responses: list[Response] = field(default_factory=list)
+    responses: Responses = field(default_factory=lambda: Responses(patterns=[], default=None))
     bodies: list[Body] = field(default_factory=list)
     errors: list[ParseError] = field(default_factory=list)
 
@@ -162,19 +161,9 @@ class Endpoint:
     ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
         for code, response_data in data.items():
-            status_code: HTTPStatus
-            try:
-                status_code = HTTPStatus(int(code))
-            except ValueError:
-                endpoint.errors.append(
-                    ParseError(
-                        detail=(
-                            f"Invalid response status code {code} (not a valid HTTP "
-                            f"status code), response will be omitted from generated "
-                            f"client"
-                        )
-                    )
-                )
+            status_code = HTTPStatusPattern.parse(code)
+            if isinstance(status_code, ParseError):
+                endpoint.errors.append(status_code)
                 continue
 
             response, schemas = response_from_data(
@@ -190,7 +179,7 @@ class Endpoint:
                 endpoint.errors.append(
                     ParseError(
                         detail=(
-                            f"Cannot parse response for status code {status_code}{detail_suffix}, "
+                            f"Cannot parse response for status code {code}{detail_suffix}, "
                             f"response will be omitted from generated client"
                         ),
                         data=response.data,
@@ -201,7 +190,11 @@ class Endpoint:
             # No reasons to use lazy imports in endpoints, so add lazy imports to relative here.
             endpoint.relative_imports |= response.prop.get_lazy_imports(prefix=models_relative_prefix)
             endpoint.relative_imports |= response.prop.get_imports(prefix=models_relative_prefix)
-            endpoint.responses.append(response)
+            if response.is_default():
+                endpoint.responses.default = response
+            else:
+                endpoint.responses.patterns.append(response)
+        endpoint.responses.patterns.sort()
         return endpoint, schemas
 
     @staticmethod
@@ -480,7 +473,7 @@ class Endpoint:
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
-            return self.responses[0].prop.get_type_string(quoted=False)
+            return types[0]
         return f"Union[{', '.join(types)}]"
 
     def iter_all_parameters(self) -> Iterator[tuple[oai.ParameterLocation, Property]]:
