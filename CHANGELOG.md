@@ -13,6 +13,41 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.26.0 (2025-08-26)
+
+### Breaking Changes
+
+#### Change some union variant names
+
+When creating a union with `oneOf`, `anyOf`, or a list of `type`, the name of each variant used to be `type_{index}`
+where the index is based on the order of the types in the union.
+
+This made some modules difficult to understand, what is a `my_type_type_0` after all?
+It also meant that reordering union members, while not a breaking change to the API, _would_ be a breaking change 
+for generated clients.
+
+Now, if an individual variant has a `title` attribute, that `title` will be used in the name instead.
+This is only an enhancement for documents which use `title` in union variants, and only a breaking change for 
+_inline models_ (not `#/components/schemas` which should already have used more descriptive names).
+
+Thanks @wallagib for PR #962!
+
+### Features
+
+#### Support patterned and default HTTP statuses
+
+HTTP statuses like `2XX` and `default` are now supported!
+
+A big thank you to:
+- @PSU3D0 for PR #973 (eons ago 😅)
+- @obs-gh-peterkolloch for PR #1300
+- @goodsonjr for PR #1304
+
+Closes #1271 and #832
+
+> [!NOTE]
+> Custom template users: the `endpoint.responses` type has changed quite a bit. Check out #1303 for the changes.
+
 ## 0.25.3 (2025-07-21)
 
 ### Features
