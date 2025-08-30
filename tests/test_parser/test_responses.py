@@ -128,6 +128,7 @@ def test_response_from_data_property(mocker, any_property_factory):
     )
     config = MagicMock()
     config.content_type_overrides = {}
+    config.alt_json_decoder = None
     status_code = HTTPStatusPattern(pattern="400", code_range=(400, 400))
 
     response, schemas = responses.response_from_data(
@@ -164,6 +165,7 @@ def test_response_from_data_reference(mocker, any_property_factory):
     )
     config = MagicMock()
     config.content_type_overrides = {}
+    config.alt_json_decoder = None
 
     response, schemas = responses.response_from_data(
         status_code=HTTPStatusPattern(pattern="400", code_range=(400, 400)),

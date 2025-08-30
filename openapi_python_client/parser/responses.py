@@ -37,6 +37,7 @@ class _ResponseSource(TypedDict):
 
 
 JSON_SOURCE = _ResponseSource(attribute="response.json()", return_type="Any")
+ALT_JSON_SOURCE = _ResponseSource(attribute="loads(response.content)", return_type="Any")
 BYTES_SOURCE = _ResponseSource(attribute="response.content", return_type="bytes")
 TEXT_SOURCE = _ResponseSource(attribute="response.text", return_type="str")
 NONE_SOURCE = _ResponseSource(attribute="None", return_type="None")
@@ -135,15 +136,20 @@ def _source_by_content_type(content_type: str, config: Config) -> Optional[_Resp
 
     if parsed_content_type.startswith("text/"):
         return TEXT_SOURCE
+    
+    if config.alt_json_decoder:
+        USED_JSON_SOURCE = ALT_JSON_SOURCE
+    else:
+        USED_JSON_SOURCE = JSON_SOURCE
 
     known_content_types = {
-        "application/json": JSON_SOURCE,
+        "application/json": USED_JSON_SOURCE,
         "application/octet-stream": BYTES_SOURCE,
     }
     source = known_content_types.get(parsed_content_type)
     if source is None and parsed_content_type.endswith("+json"):
         # Implements https://www.rfc-editor.org/rfc/rfc6838#section-4.2.8 for the +json suffix
-        source = JSON_SOURCE
+        source = USED_JSON_SOURCE
     return source
 
 

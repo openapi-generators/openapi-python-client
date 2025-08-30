@@ -9,6 +9,9 @@ dependencies = [
     "httpx>=0.23.0,<0.29.0",
     "attrs>=22.2.0",
     "python-dateutil>=2.8.0",
+{% if config.alt_json_decoder %}
+    "{{ json_package(config) }}{{ json_package_vers(config) }}",
+{% endif %}
 ]
 
 [tool.pdm]

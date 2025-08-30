@@ -1,0 +1,15 @@
+{% macro json_package(config) %}
+{% if config.alt_json_decoder == "ujson" %}
+ujson
+{% elif config.alt_json_decoder == "orjson" %}
+orjson
+{% endif %}
+{% endmacro %}
+
+{% macro json_package_ver(config) %}
+{% if config.alt_json_decoder == "ujson" %}
+>=5.11.0
+{% elif config.alt_json_decoder == "orjson" %}
+>=3.11.3
+{% endif %}
+{% endmacro %}

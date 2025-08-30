@@ -2,7 +2,7 @@ import json
 import mimetypes
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from attr import define
 from pydantic import BaseModel
@@ -28,6 +28,9 @@ class MetaType(str, Enum):
     PDM = "pdm"
     UV = "uv"
 
+class JSONDecoder(str, Enum):
+    UJSON = "ujson"
+    ORJSON = "orjson"
 
 class ConfigFile(BaseModel):
     """Contains any configurable values passed via a config file.
@@ -47,6 +50,7 @@ class ConfigFile(BaseModel):
     generate_all_tags: bool = False
     http_timeout: int = 5
     literal_enums: bool = False
+    alt_json_decoder: Optional[str] = None
 
     @staticmethod
     def load_from_path(path: Path) -> "ConfigFile":
@@ -82,6 +86,7 @@ class Config:
     content_type_overrides: dict[str, str]
     overwrite: bool
     output_path: Optional[Path]
+    alt_json_decoder: Optional[JSONDecoder]
 
     @staticmethod
     def from_sources(
@@ -104,6 +109,14 @@ class Config:
                 "ruff check --fix .",
                 "ruff format .",
             ]
+        
+        if config_file.alt_json_decoder == "ujson":
+            json_decoder = JSONDecoder.UJSON
+        elif config_file.alt_json_decoder == "orjson":
+            json_decoder = JSONDecoder.ORJSON
+        else:
+            json_decoder = None
+        
 
         config = Config(
             meta_type=meta_type,
@@ -119,6 +132,7 @@ class Config:
             generate_all_tags=config_file.generate_all_tags,
             http_timeout=config_file.http_timeout,
             literal_enums=config_file.literal_enums,
+            alt_json_decoder=json_decoder,
             document_source=document_source,
             file_encoding=file_encoding,
             overwrite=overwrite,

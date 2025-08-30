@@ -2,6 +2,9 @@ from http import HTTPStatus
 from typing import Any, Optional, Union, cast
 
 import httpx
+{% if endpoint.json_decoder %}
+from {{ endpoint.json_decoder }} import loads
+{% endif %}
 
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
