@@ -19,7 +19,7 @@ def test_bad_config() -> None:
     result = runner.invoke(app, ["generate", f"--config={config_path}", f"--path={path}"])
 
     assert result.exit_code == 2
-    assert "Unable to parse config" in result.stdout
+    assert "Unable to parse config" in result.output
 
 
 class TestGenerate:
