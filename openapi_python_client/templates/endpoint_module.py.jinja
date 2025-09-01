@@ -3,12 +3,22 @@ from typing import Any, Optional, Union, cast
 
 import httpx
 
+{% macro transform_import(original_string) -%}
+    {%- if original_string.startswith('from ...models') -%}
+        {%- set parts = original_string.split(' ') -%}
+        {%- set new_string = 'from ...models import ' + parts[3] -%}
+        {{ new_string }}
+    {%- else -%}
+        {{ original_string }}
+    {%- endif -%}
+{%- endmacro %}
+
 from ...client import AuthenticatedClient, Client
 from ...types import Response, UNSET
 from ... import errors
 
 {% for relative in endpoint.relative_imports | sort %}
-{{ relative }}
+{{ transform_import(relative) }}
 {% endfor %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
