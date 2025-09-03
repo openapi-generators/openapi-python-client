@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from ruamel.yaml import YAML as _YAML
 
-from openapi_python_client.config import ConfigFile
+from openapi_python_client.config import ConfigFile, JSONDecoder
 
 
 class YAML(_YAML):
@@ -49,6 +49,7 @@ def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
         "project_name_override": "project-name",
         "package_name_override": "package_name",
         "package_version_override": "package_version",
+        "alt_json_decoder": "orjson",
     }
     yml_file.write_text(dump(data))
 
@@ -59,3 +60,4 @@ def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
     assert config.project_name_override == "project-name"
     assert config.package_name_override == "package_name"
     assert config.package_version_override == "package_version"
+    assert config.alt_json_decoder == JSONDecoder.ORJSON

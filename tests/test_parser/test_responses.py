@@ -3,10 +3,12 @@ from unittest.mock import MagicMock
 import pytest
 
 import openapi_python_client.schema as oai
+from openapi_python_client.config import JSONDecoder
 from openapi_python_client.parser import responses
 from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas
 from openapi_python_client.parser.responses import (
+    ALT_JSON_SOURCE,
     JSON_SOURCE,
     NONE_SOURCE,
     HTTPStatusPattern,
@@ -181,6 +183,44 @@ def test_response_from_data_reference(mocker, any_property_factory):
         prop=prop,
         source=JSON_SOURCE,
         data=predefined_response_data,
+    )
+
+
+def test_response_with_alt_decoder(mocker, any_property_factory):
+    prop = any_property_factory()
+    property_from_data = mocker.patch.object(responses, "property_from_data", return_value=(prop, Schemas()))
+    data = oai.Response.model_construct(
+        description="",
+        content={"application/json": oai.MediaType.model_construct(media_type_schema="something")},
+    )
+    config = MagicMock()
+    config.content_type_overrides = {}
+    config.alt_json_decoder = JSONDecoder.ORJSON
+    status_code = HTTPStatusPattern(pattern="400", code_range=(400, 400))
+
+    response, schemas = responses.response_from_data(
+        status_code=status_code,
+        data=data,
+        schemas=Schemas(),
+        responses={},
+        parent_name="parent",
+        config=config,
+    )
+
+    assert response == responses.Response(
+        status_code=status_code,
+        prop=prop,
+        source=ALT_JSON_SOURCE,
+        data=data,
+        
+    )
+    property_from_data.assert_called_once_with(
+        name="response_400",
+        required=True,
+        data="something",
+        schemas=Schemas(),
+        parent_name="parent",
+        config=config,
     )
 
 
