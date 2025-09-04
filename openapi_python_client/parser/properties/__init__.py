@@ -40,6 +40,7 @@ from .schemas import (
     Parameters,
     ReferencePath,
     Schemas,
+    get_reference_simple_name,
     parse_reference_path,
     update_parameters_with_data,
     update_schemas_with_data,
@@ -324,17 +325,30 @@ def _create_schemas(
     while still_making_progress:
         still_making_progress = False
         errors = []
-        next_round = []
+        next_round: list[tuple[str, oai.Reference | oai.Schema]] = []
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
-            if isinstance(data, oai.Reference):
-                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
-                continue
+            schema_data: oai.Reference | oai.Schema | None = data
             ref_path = parse_reference_path(f"#/components/schemas/{name}")
             if isinstance(ref_path, ParseError):
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
-            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+            if isinstance(data, oai.Reference):
+                # Fully dereference reference schemas
+                seen = [name]
+                while isinstance(schema_data, oai.Reference):
+                    data_ref_schema = get_reference_simple_name(schema_data.ref)
+                    if data_ref_schema in seen:
+                        schemas.errors.append(PropertyError(detail="Circular schema references found", data=data))
+                        break
+                    # use derefenced schema definition for this schema
+                    schema_data = components.get(data_ref_schema)
+            if isinstance(schema_data, oai.Schema):
+                schemas_or_err = update_schemas_with_data(
+                    ref_path=ref_path, data=schema_data, schemas=schemas, config=config
+                )
+            else:
+                schemas.errors.append(PropertyError(detail="Referent schema not found", data=data))
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)
