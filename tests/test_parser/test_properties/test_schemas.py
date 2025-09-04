@@ -10,6 +10,7 @@ from openapi_python_client.parser.properties.schemas import (
     update_parameters_with_data,
 )
 from openapi_python_client.schema import Parameter, ParameterLocation, Reference, Schema
+from openapi_python_client.schema.style import Style
 from openapi_python_client.utils import ClassName
 
 MODULE_NAME = "openapi_python_client.parser.properties.schemas"
@@ -63,7 +64,11 @@ class TestParameterFromData:
 
     def test_registers_new_parameters(self, config):
         param = Parameter.model_construct(
-            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
+            name="a_param",
+            param_in=ParameterLocation.QUERY,
+            style=Style.FORM,
+            explode=True,
+            param_schema=Schema.model_construct(),
         )
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(
