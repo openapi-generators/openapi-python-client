@@ -466,7 +466,7 @@ class TestEndpoint:
         mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
         parameters = mocker.MagicMock()
 
-        endpoint, _, return_params = Endpoint.from_data(
+        Endpoint.from_data(
             data=data,
             path=path,
             method=method,
@@ -651,7 +651,7 @@ class TestEndpointCollection:
             )
         }
 
-        collections, schemas, parameters = EndpointCollection.from_data(
+        collections, _schemas, _parameters = EndpointCollection.from_data(
             data=data,
             schemas=Schemas(),
             parameters=Parameters(),
