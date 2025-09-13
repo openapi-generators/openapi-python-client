@@ -12,7 +12,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
@@ -29,7 +29,8 @@ components:
           properties:
             req3: {"type": "string"}
           required: ["req3"]
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyModel",
     ".models.DerivedModel",
@@ -74,7 +75,7 @@ class TestRequiredAndOptionalProperties:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
@@ -89,7 +90,8 @@ components:
         anyProp: {}
     AnyObject:
         type: object
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyModel",
     ".models.AnyObject",
@@ -104,7 +106,7 @@ class TestBasicModelProperties:
             "intProp": 2,
             "anyObjectProp": {"d": 3},
             "nullProp": None,
-            "anyProp": "e"
+            "anyProp": "e",
         }
         expected_any_object = AnyObject()
         expected_any_object.additional_properties = {"d": 3}
@@ -116,10 +118,10 @@ class TestBasicModelProperties:
                 string_prop="a",
                 number_prop=1.5,
                 int_prop=2,
-                any_object_prop = expected_any_object,
+                any_object_prop=expected_any_object,
                 null_prop=None,
                 any_prop="e",
-            )
+            ),
         )
 
     @pytest.mark.parametrize(
@@ -144,7 +146,7 @@ class TestBasicModelProperties:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
@@ -154,7 +156,8 @@ components:
         dateTimeProp: {"type": "string", "format": "date-time"}
         uuidProp: {"type": "string", "format": "uuid"}
         unknownFormatProp: {"type": "string", "format": "weird"}
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyModel",
     ".types.Unset",
@@ -184,3 +187,59 @@ class TestSpecialStringFormats:
         assert_model_property_type_hint(MyModel, "date_time_prop", Union[datetime.datetime, Unset])
         assert_model_property_type_hint(MyModel, "uuid_prop", Union[uuid.UUID, Unset])
         assert_model_property_type_hint(MyModel, "unknown_format_prop", Union[str, Unset])
+
+
+@with_generated_client_fixture(
+    """
+components:
+  schemas:
+    MyModel:
+      type: object
+      properties:
+        booleanProp: {"type": "boolean"}
+        stringProp: {"type": "string"}
+        numberProp: {"type": "number"}
+        intProp: {"type": "integer"}
+        anyObjectProp: {"$ref": "#/components/schemas/AnyObject"}
+        nullProp: {"type": "null"}
+        anyProp: {}
+    AnyObject:
+      $ref: "#/components/schemas/OtherObject"
+    OtherObject:
+      $ref: "#/components/schemas/AnotherObject"
+    AnotherObject:
+      type: object
+      properties:
+        booleanProp: {"type": "boolean"}
+    
+"""
+)
+@with_generated_code_imports(
+    ".models.MyModel",
+    ".models.AnyObject",
+    ".types.Unset",
+)
+class TestReferenceSchemaProperties:
+    def test_decode_encode(self, MyModel, AnyObject):
+        json_data = {
+            "booleanProp": True,
+            "stringProp": "a",
+            "numberProp": 1.5,
+            "intProp": 2,
+            "anyObjectProp": {"booleanProp": False},
+            "nullProp": None,
+            "anyProp": "e",
+        }
+        assert_model_decode_encode(
+            MyModel,
+            json_data,
+            MyModel(
+                boolean_prop=True,
+                string_prop="a",
+                number_prop=1.5,
+                int_prop=2,
+                any_object_prop=AnyObject(boolean_prop=False),
+                null_prop=None,
+                any_prop="e",
+            ),
+        )

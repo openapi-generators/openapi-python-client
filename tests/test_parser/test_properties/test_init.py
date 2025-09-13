@@ -235,22 +235,22 @@ class TestStringBasedProperty:
 
 
 class TestCreateSchemas:
-    def test_skips_references_and_keeps_going(self, mocker, config):
-        components = {"a_ref": Reference.model_construct(), "a_schema": Schema.model_construct()}
+    def test_dereference_references(self, mocker, config):
+        components = {"a_ref": Reference(ref="#/components/schemas/a_schema"), "a_schema": Schema.model_construct()}
         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
         schemas = Schemas()
 
         result = _create_schemas(components=components, schemas=schemas, config=config)
-        # Should not even try to parse a path for the Reference
-        parse_reference_path.assert_called_once_with("#/components/schemas/a_schema")
-        update_schemas_with_data.assert_called_once_with(
+
+        parse_reference_path.assert_has_calls(
+            [call("#/components/schemas/a_ref"), call("#/components/schemas/a_schema")]
+        )
+        update_schemas_with_data.assert_called_with(
             ref_path=parse_reference_path.return_value,
             config=config,
             data=components["a_schema"],
-            schemas=Schemas(
-                errors=[PropertyError(detail="Reference schemas are not supported.", data=components["a_ref"])]
-            ),
+            schemas=result,
         )
         assert result == update_schemas_with_data.return_value
 
