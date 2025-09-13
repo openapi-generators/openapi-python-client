@@ -20,7 +20,7 @@ MODULE_NAME = "openapi_python_client.parser.responses"
 def test_response_from_data_no_content(any_property_factory):
     data = oai.Response.model_construct(description="")
 
-    response, schemas = response_from_data(
+    response, _schemas = response_from_data(
         status_code=HTTPStatusPattern(pattern="200", code_range=(200, 200)),
         data=data,
         schemas=Schemas(),
@@ -49,7 +49,7 @@ def test_response_from_data_unsupported_content_type():
     data = oai.Response.model_construct(description="", content={"blah": None})
     config = MagicMock()
     config.content_type_overrides = {}
-    response, schemas = response_from_data(
+    response, _schemas = response_from_data(
         status_code=status_code,
         data=data,
         schemas=Schemas(),
@@ -68,7 +68,7 @@ def test_response_from_data_no_content_schema(any_property_factory):
     )
     config = MagicMock()
     config.content_type_overrides = {}
-    response, schemas = response_from_data(
+    response, _schemas = response_from_data(
         status_code=status_code,
         data=data,
         schemas=Schemas(),
@@ -99,7 +99,7 @@ def test_response_from_data_property_error(mocker):
     config = MagicMock()
     config.content_type_overrides = {}
 
-    response, schemas = responses.response_from_data(
+    response, _schemas = responses.response_from_data(
         status_code=HTTPStatusPattern(pattern="400", code_range=(400, 400)),
         data=data,
         schemas=Schemas(),
@@ -130,7 +130,7 @@ def test_response_from_data_property(mocker, any_property_factory):
     config.content_type_overrides = {}
     status_code = HTTPStatusPattern(pattern="400", code_range=(400, 400))
 
-    response, schemas = responses.response_from_data(
+    response, _schemas = responses.response_from_data(
         status_code=status_code,
         data=data,
         schemas=Schemas(),
@@ -165,7 +165,7 @@ def test_response_from_data_reference(mocker, any_property_factory):
     config = MagicMock()
     config.content_type_overrides = {}
 
-    response, schemas = responses.response_from_data(
+    response, _schemas = responses.response_from_data(
         status_code=HTTPStatusPattern(pattern="400", code_range=(400, 400)),
         data=oai.Reference.model_construct(ref="#/components/responses/ErrorResponse"),
         schemas=Schemas(),
@@ -200,7 +200,7 @@ def test_response_from_data_invalid_reference(ref_string, expected_error_string,
     config = MagicMock()
     config.content_type_overrides = {}
 
-    response, schemas = responses.response_from_data(
+    response, _schemas = responses.response_from_data(
         status_code=HTTPStatusPattern(pattern="400", code_range=(400, 400)),
         data=oai.Reference.model_construct(ref=ref_string),
         schemas=Schemas(),
@@ -226,7 +226,7 @@ def test_response_from_data_ref_to_response_that_is_a_ref(mocker, any_property_f
     config = MagicMock()
     config.content_type_overrides = {}
 
-    response, schemas = responses.response_from_data(
+    response, _schemas = responses.response_from_data(
         status_code=HTTPStatusPattern(pattern="400", code_range=(400, 400)),
         data=oai.Reference.model_construct(ref="#/components/responses/ErrorResponse"),
         schemas=Schemas(),
@@ -249,7 +249,7 @@ def test_response_from_data_content_type_overrides(any_property_factory):
     )
     config = MagicMock()
     config.content_type_overrides = {"application/zip": "application/octet-stream"}
-    response, schemas = response_from_data(
+    response, _schemas = response_from_data(
         status_code=HTTPStatusPattern(pattern="200", code_range=(200, 200)),
         data=data,
         schemas=Schemas(),
