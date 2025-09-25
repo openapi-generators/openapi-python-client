@@ -13,6 +13,354 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.26.1 (2025-09-13)
+
+### Features
+
+- Reference schema support (#800) (#1307)
+- Support Ruff 0.13
+
+## 0.26.0 (2025-08-26)
+
+### Breaking Changes
+
+#### Change some union variant names
+
+When creating a union with `oneOf`, `anyOf`, or a list of `type`, the name of each variant used to be `type_{index}`
+where the index is based on the order of the types in the union.
+
+This made some modules difficult to understand, what is a `my_type_type_0` after all?
+It also meant that reordering union members, while not a breaking change to the API, _would_ be a breaking change 
+for generated clients.
+
+Now, if an individual variant has a `title` attribute, that `title` will be used in the name instead.
+This is only an enhancement for documents which use `title` in union variants, and only a breaking change for 
+_inline models_ (not `#/components/schemas` which should already have used more descriptive names).
+
+Thanks @wallagib for PR #962!
+
+### Features
+
+#### Support patterned and default HTTP statuses
+
+HTTP statuses like `2XX` and `default` are now supported!
+
+A big thank you to:
+- @PSU3D0 for PR #973 (eons ago 😅)
+- @obs-gh-peterkolloch for PR #1300
+- @goodsonjr for PR #1304
+
+Closes #1271 and #832
+
+> [!NOTE]
+> Custom template users: the `endpoint.responses` type has changed quite a bit. Check out #1303 for the changes.
+
+## 0.25.3 (2025-07-21)
+
+### Features
+
+- Add --meta uv for generating astral-sh/uv compatible packages. (#1286)
+- Switch to `uv_build` build backend. (#1290)
+
+## 0.25.2 (2025-07-03)
+
+### Fixes
+
+- Import error for `types.FileType` (#1274) (#1278)
+
+## 0.25.1 (2025-06-19)
+
+### Fixes
+
+- Support ruff 0.12 (#1270)
+
+## 0.25.0 (2025-06-06)
+
+### Breaking Changes
+
+- Raise minimum httpx version to 0.23
+
+#### Removed ability to set an array as a multipart body
+
+Previously, when defining a request's body as `multipart/form-data`, the generator would attempt to generate code 
+for both `object` schemas and `array` schemas. However, most arrays could not generate valid multipart bodies, as 
+there would be no field names (required to set the `Content-Disposition` headers).
+
+The code to generate any body for `multipart/form-data` where the schema is `array` has been removed, and any such 
+bodies will be skipped. This is not _expected_ to be a breaking change in practice, since the code generated would 
+probably never work.
+
+If you have a use-case for `multipart/form-data` with an `array` schema, please [open a new discussion](https://github.com/openapi-generators/openapi-python-client/discussions) with an example schema and the desired functional Python code.
+
+#### Change default multipart array serialization
+
+Previously, any arrays of values in a `multipart/form-data` body would be serialized as an `application/json` part.
+This matches the default behavior specified by OpenAPI and supports arrays of files (`binary` format strings).
+However, because this generator doesn't yet support specifying `encoding` per property, this may result in 
+now-incorrect code when the encoding _was_ explicitly set to `application/json` for arrays of scalar values.
+
+PR #938 fixes #692. Thanks @micha91 for the fix, @ratgen and @FabianSchurig for testing, and @davidlizeng for the original report... many years ago 😅.
+
+## 0.24.3 (2025-03-31)
+
+### Features
+
+#### Adding support for named integer enums
+
+##1214 by @barrybarrette
+
+Adding support for named integer enums via an optional extension, `x-enum-varnames`. 
+
+This extension is added to the schema inline with the `enum` definition:
+```
+"MyEnum": {
+    "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        99
+    ],
+    "type": "integer",
+    "format": "int32",
+    "x-enum-varnames": [
+        "Deinstalled",
+        "Installed",
+        "Upcoming_Site",
+        "Lab_Site",
+        "Pending_Deinstall",
+        "Suspended",
+        "Install_In_Progress",
+        "Unknown"
+    ]
+}
+```
+
+The result:
+![image](https://github.com/user-attachments/assets/780880b3-2f1f-49be-823b-f9abb713a3e1)
+
+## 0.24.2 (2025-03-22)
+
+### Fixes
+
+#### Make lists of models and enums work correctly in custom templates
+
+Lists of model and enum classes should be available to custom templates via the Jinja
+variables `openapi.models` and `openapi.enums`, but these were being passed in a way that made
+them always appear empty. This has been fixed so a custom template can now iterate over them.
+
+Closes #1188.
+
+## 0.24.1 (2025-03-15)
+
+### Features
+
+- allow Ruff to 0.10 (#1220)
+- allow Ruff 0.11 (#1222)
+- Allow any `Mapping` in generated `from_dict` functions (#1211)
+
+### Fixes
+
+#### Always parse `$ref` as a reference
+
+If additional attributes were included with a `$ref` (for example `title` or `description`), the property could be 
+interpreted as a new type instead of a reference, usually resulting in `Any` in the generated code.
+Now, any sibling properties to `$ref` will properly be ignored, as per the OpenAPI specification.
+
+Thanks @nkrishnaswami!
+
+## 0.24.0 (2025-03-03)
+
+### Breaking Changes
+
+#### Support `$ref` in responses
+
+Previously, using a `$ref` to define a response was ignored, the code to call the endpoint was still generated, but 
+the response would not be parsed. Now, responses defined with `$ref` will be used to generate the response model, which 
+will parse the response at runtime.
+
+If a `$ref` is incorrect or uses a feature that is not supported by the generator, these endpoints will start failing to 
+generate.
+
+### Features
+
+#### Make `config` available in custom templates
+
+The configuration options object is now exposed as a variable called `config` in Jinja2 templates.
+
+#### Add `docstrings_on_attributes` config setting
+
+Setting this option to `true` changes the docstring behavior in model classes: for any attribute that have a non-empty `description`, instead of describing the attribute as part of the class's docstring, the description will appear in an individual docstring for that attribute.
+
+## 0.23.1 (2025-01-13)
+
+### Features
+
+- allow Ruff 0.9 (#1192)
+
+## 0.23.0 (2024-12-24)
+
+### Breaking Changes
+
+#### Delete fewer files with `--overwrite`
+
+`--overwrite` will no longer delete the entire output directory before regenerating. Instead, it will only delete 
+specific, known directories within that directory. Right now, that is only the generated `models` and `api` directories.
+
+Other generated files, like `README.md`, will be overwritten. Extra files and directories outside of those listed above 
+will be left untouched, so you can any extra modules or files around while still updating `pyproject.toml` automatically.
+
+Closes #1105.
+
+### Features
+
+- Support httpx 0.28 (#1172)
+
+#### Add `generate_all_tags` config option
+
+You can now, optionally, generate **duplicate** endpoint functions/modules using _every_ tag for an endpoint,
+not just the first one, by setting `generate_all_tags: true` in your configuration file.
+
+### Fixes
+
+- Support Typer 0.14 and 0.15 (#1173)
+
+#### Fix minimum `attrs` version
+
+The minimum `attrs` dependency version was incorrectly set to 21.3.0. This has been corrected to 22.2.0, the minimum 
+supported version since `openapi-python-client` 0.19.1.
+
+Closes #1084, thanks @astralblue!
+
+#### Fix compatibility with Pydantic 2.10+
+
+##1176 by @Viicos
+
+Set `defer_build` to models that we know will fail to build, and call `model_rebuild`
+in the `__init__.py` file.
+
+## 0.22.0 (2024-11-23)
+
+### Breaking Changes
+
+#### Drop support for Python 3.8
+
+Python 3.8 is no longer supported. "New" 3.9 syntax, like generics on builtin collections, is used both in the generator 
+and the generated code.
+
+#### `type` is now a reserved field name
+
+Because `type` is used in type annotations now, it is no longer a valid field name. Fields which were previously named 
+`type` will be renamed to `type_`.
+
+### Features
+
+- Support Ruff 0.8 (#1169)
+
+## 0.21.7 (2024-10-28)
+
+### Fixes
+
+- allow required fields list to be specified as empty (#651) (#1149)
+- import cast for required const properties, since it's used in the template (#1153)
+
+## 0.21.6 (2024-10-20)
+
+### Features
+
+- update Ruff to >=0.2,<0.8 (#1137)
+- Add UUID string format. Thanks @estyrke! (#1140)
+- Support OpenAPI 3.1 prefixItems property for arrays. Thanks @estyrke! (#1141)
+
+#### Add `literal_enums` config setting
+
+Instead of the default `Enum` classes for enums, you can now generate `Literal` sets wherever `enum` appears in the OpenAPI spec by setting `literal_enums: true` in your config file.
+
+```yaml
+literal_enums: true
+```
+
+Thanks to @emosenkis for PR #1114 closes #587, #725, #1076, and probably many more. 
+Thanks also to @eli-bl, @expobrain, @theorm, @chrisguillory, and anyone else who helped getting to this design!
+
+### Fixes
+
+- Typo in docstring (#1128)
+
+#### Use literal value instead of `HTTPStatus` enum when checking response statuses
+
+Python 3.13 renamed some of the `HTTPStatus` enum members, which means clients generated with Python 3.13 may not work 
+with older versions of Python. This change stops using the `HTTPStatus` enum directly when checking response statuses.
+
+Statuses will still be checked for validity at generation time, and transformed into `HTTPStatus` _after_ being checked 
+at runtime.
+
+This may cause some linters to complain.
+
+## 0.21.5 (2024-09-07)
+
+### Features
+
+#### Improved property-merging behavior with `allOf`
+
+When using `allOf` to extend a base object type, `openapi-python-client` is now able to handle some kinds of modifications to an existing property that would have previously caused an error:
+
+- Overriding attributes that do not affect validation, such as `description`.
+- Combining properties that this generator ignores, like `maxLength` or `pattern`.
+- Combining a generic numeric type with `int` (resulting in `int`).
+- Adding a `format` to a string.
+- Combining `any` with a specific type (resulting in that specific type).
+- Adding or overriding a `default`
+
+> [!NOTE]
+> `pattern` and `max_length` are no longer fields on `StringProperty`, which may impact custom templates.
+
+This also fixes a bug where properties of inline objects (as opposed to references) were not using the
+merge logic, but were simply overwriting previous definitions of the same property.
+
+### Fixes
+
+- Allow default values for properties of `Any` type
+
+#### Produce valid code for an object that has no properties at all
+
+Fixed by PR #1109. Thanks @eli-bl!
+
+## 0.21.4 (2024-08-25)
+
+### Fixes
+
+#### Allow OpenAPI 3.1-style `exclusiveMinimum` and `exclusiveMaximum`
+
+Fixed by PR #1092. Thanks @mikkelam!
+
+#### Add missing `cast` import when using `const`
+
+Fixed by PR #1072. Thanks @dorcohe!
+
+#### Correctly resolve references to a type that is itself just a single allOf reference
+
+PR #1103 fixed issue #1091. Thanks @eli-bl!
+
+#### Support `const` booleans and floats
+
+Fixed in PR #1086. Thanks @flxdot!
+
+## 0.21.3 (2024-08-18)
+
+### Features
+
+- update Ruff to >=0.2,<0.7 (#1097)
+
+## 0.21.2 (2024-07-20)
+
+### Features
+
+- Update to Ruff 0.5
+
 ## 0.21.1 (2024-06-15)
 
 ### Features

@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = ["PropertyProtocol", "Value"]
 
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar
 
 from ... import Config
@@ -16,8 +17,15 @@ else:
     ModelProperty = "ModelProperty"
 
 
-class Value(str):
-    """Represents a valid (converted) value for a property"""
+@dataclass
+class Value:
+    """
+    Some literal values in OpenAPI documents (like defaults) have to be converted into Python code safely
+    (with string escaping, for example). We still keep the `raw_value` around for merging `allOf`.
+    """
+
+    python_code: str
+    raw_value: Any
 
 
 PropertyType = TypeVar("PropertyType", bound="PropertyProtocol")
@@ -93,7 +101,6 @@ class PropertyProtocol(Protocol):
         no_optional: bool = False,
         json: bool = False,
         *,
-        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -102,13 +109,10 @@ class PropertyProtocol(Protocol):
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
             json: True if the type refers to the property after JSON serialization
-            multipart: True if the type should be used in a multipart request
             quoted: True if the type should be wrapped in quotes (if not a base type)
         """
         if json:
             type_string = self.get_base_json_type_string(quoted=quoted)
-        elif multipart:
-            type_string = "Tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string(quoted=quoted)
 
@@ -148,7 +152,7 @@ class PropertyProtocol(Protocol):
         """How this should be declared in a dataclass"""
         default: str | None
         if self.default is not None:
-            default = self.default
+            default = self.default.python_code
         elif not self.required:
             default = "UNSET"
         else:
@@ -162,7 +166,7 @@ class PropertyProtocol(Protocol):
         """Returns property docstring"""
         doc = f"{self.python_name} ({self.get_type_string()}): {self.description or ''}"
         if self.default:
-            doc += f" Default: {self.default}."
+            doc += f" Default: {self.default.python_code}."
         if self.example:
             doc += f" Example: {self.example}."
         return doc
@@ -170,7 +174,7 @@ class PropertyProtocol(Protocol):
     @property
     def is_base_type(self) -> bool:
         """Base types, represented by any other of `Property` than `ModelProperty` should not be quoted."""
-        from . import ListProperty, ModelProperty, UnionProperty
+        from . import ListProperty, ModelProperty, UnionProperty  # noqa: PLC0415
 
         return self.__class__.__name__ not in {
             ModelProperty.__name__,

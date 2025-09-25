@@ -1,28 +1,28 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
+from ...models.octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
 from ...types import File, Response
 
 
 def _get_kwargs(
     *,
     body: File,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/tests/octet_stream",
     }
 
-    _body = body.payload
+    _kwargs["content"] = body.payload
 
-    _kwargs["content"] = _body
     headers["Content-Type"] = "application/octet-stream"
 
     _kwargs["headers"] = headers
@@ -31,14 +31,17 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[HTTPValidationError, str]]:
-    if response.status_code == HTTPStatus.OK:
-        response_200 = cast(str, response.json())
+) -> Optional[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]:
+    if response.status_code == 200:
+        response_200 = OctetStreamTestsOctetStreamPostResponse200.from_dict(response.json())
+
         return response_200
-    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+
+    if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -47,7 +50,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[HTTPValidationError, str]]:
+) -> Response[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -60,7 +63,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: File,
-) -> Response[Union[HTTPValidationError, str]]:
+) -> Response[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]:
     """Binary (octet stream) request body
 
     Args:
@@ -71,7 +74,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, str]]
+        Response[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]
     """
 
     kwargs = _get_kwargs(
@@ -89,7 +92,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: File,
-) -> Optional[Union[HTTPValidationError, str]]:
+) -> Optional[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]:
     """Binary (octet stream) request body
 
     Args:
@@ -100,7 +103,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, str]
+        Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]
     """
 
     return sync_detailed(
@@ -113,7 +116,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: File,
-) -> Response[Union[HTTPValidationError, str]]:
+) -> Response[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]:
     """Binary (octet stream) request body
 
     Args:
@@ -124,7 +127,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, str]]
+        Response[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]
     """
 
     kwargs = _get_kwargs(
@@ -140,7 +143,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: File,
-) -> Optional[Union[HTTPValidationError, str]]:
+) -> Optional[Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]]:
     """Binary (octet stream) request body
 
     Args:
@@ -151,7 +154,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, str]
+        Union[HTTPValidationError, OctetStreamTestsOctetStreamPostResponse200]
     """
 
     return (

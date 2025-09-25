@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -21,13 +22,13 @@ class ModelWithDiscriminatedUnion:
     """
 
     discriminated_union: Union["ADiscriminatedUnionType1", "ADiscriminatedUnionType2", None, Unset] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
         from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
 
-        discriminated_union: Union[Dict[str, Any], None, Unset]
+        discriminated_union: Union[None, Unset, dict[str, Any]]
         if isinstance(self.discriminated_union, Unset):
             discriminated_union = UNSET
         elif isinstance(self.discriminated_union, ADiscriminatedUnionType1):
@@ -37,7 +38,7 @@ class ModelWithDiscriminatedUnion:
         else:
             discriminated_union = self.discriminated_union
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if discriminated_union is not UNSET:
@@ -46,11 +47,11 @@ class ModelWithDiscriminatedUnion:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
         from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
 
-        d = src_dict.copy()
+        d = dict(src_dict)
 
         def _parse_discriminated_union(
             data: object,
@@ -87,7 +88,7 @@ class ModelWithDiscriminatedUnion:
         return model_with_discriminated_union
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

@@ -1,11 +1,11 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
 from .header import Header
 from .link import Link
 from .media_type import MediaType
-from .reference import Reference
+from .reference import ReferenceOr
 
 
 class Response(BaseModel):
@@ -19,10 +19,12 @@ class Response(BaseModel):
     """
 
     description: str
-    headers: Optional[Dict[str, Union[Header, Reference]]] = None
-    content: Optional[Dict[str, MediaType]] = None
-    links: Optional[Dict[str, Union[Link, Reference]]] = None
+    headers: Optional[dict[str, ReferenceOr[Header]]] = None
+    content: Optional[dict[str, MediaType]] = None
+    links: Optional[dict[str, ReferenceOr[Link]]] = None
     model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

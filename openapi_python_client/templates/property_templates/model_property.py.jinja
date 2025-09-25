@@ -22,26 +22,16 @@ if not isinstance({{ source }}, Unset):
 {%- endif %}
 {% endmacro %}
 
-{% macro transform_multipart_body(property, source, destination) %}
-{% set transformed = source + ".to_multipart()" %}
-{% set type_string = property.get_type_string(multipart=True) %}
+{% macro transform_multipart_body(property) %}
+{% set transformed = property.python_name + ".to_multipart()" %}
 {% if property.required %}
-{{ destination }} = {{ transformed }}
+_kwargs["files"] = {{ transformed }}
 {%- else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ destination }} = {{ transformed }}
+if not isinstance({{ property.python_name }}, Unset):
+    _kwargs["files"] = {{ transformed }}
 {%- endif %}
 {% endmacro %}
 
-{% macro transform_multipart(property, source, destination) %}
-{% set transformed = "(None, json.dumps(" + source + ".to_dict()" + ").encode(), 'application/json')" %}
-{% set type_string = property.get_type_string(multipart=True) %}
-{% if property.required %}
-{{ destination }} = {{ transformed }}
-{%- else %}
-{{ destination }}: {{ type_string }} = UNSET
-if not isinstance({{ source }}, Unset):
-    {{ destination }} = {{ transformed }}
-{%- endif %}
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, json.dumps( {{source}}.to_dict()).encode(), "application/json")))
 {% endmacro %}

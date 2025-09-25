@@ -56,14 +56,30 @@ class ListProperty(PropertyProtocol):
             `(result, schemas)` where `schemas` is an updated version of the input named the same including any inner
             classes that were defined and `result` is either the `ListProperty` or a `PropertyError`.
         """
-        from . import property_from_data
+        from . import property_from_data  # noqa: PLC0415
 
-        if data.items is None:
-            return PropertyError(data=data, detail="type array must have items defined"), schemas
+        if data.items is None and not data.prefixItems:
+            return (
+                PropertyError(
+                    data=data,
+                    detail="type array must have items or prefixItems defined",
+                ),
+                schemas,
+            )
+
+        items = data.prefixItems or []
+        if data.items:
+            items.append(data.items)
+
+        if len(items) == 1:
+            inner_schema = items[0]
+        else:
+            inner_schema = oai.Schema(anyOf=items)
+
         inner_prop, schemas = property_from_data(
             name=f"{name}_item",
             required=True,
-            data=data.items,
+            data=inner_schema,
             schemas=schemas,
             parent_name=parent_name,
             config=config,
@@ -90,10 +106,10 @@ class ListProperty(PropertyProtocol):
         return None  # pragma: no cover
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
-        return f"List[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
+        return f"list[{self.inner_property.get_type_string(quoted=not self.inner_property.is_base_type)}]"
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
-        return f"List[{self.inner_property.get_type_string(json=True, quoted=not self.inner_property.is_base_type)}]"
+        return f"list[{self.inner_property.get_type_string(json=True, quoted=not self.inner_property.is_base_type)}]"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
@@ -109,7 +125,7 @@ class ListProperty(PropertyProtocol):
         """
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
-        imports.add("from typing import cast, List")
+        imports.add("from typing import cast")
         return imports
 
     def get_lazy_imports(self, *, prefix: str) -> set[str]:
@@ -122,7 +138,6 @@ class ListProperty(PropertyProtocol):
         no_optional: bool = False,
         json: bool = False,
         *,
-        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -134,8 +149,6 @@ class ListProperty(PropertyProtocol):
         """
         if json:
             type_string = self.get_base_json_type_string()
-        elif multipart:
-            type_string = "Tuple[None, bytes, str]"
         else:
             type_string = self.get_base_type_string()
 

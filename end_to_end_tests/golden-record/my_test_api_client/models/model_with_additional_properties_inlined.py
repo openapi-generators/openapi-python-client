@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -22,16 +23,17 @@ class ModelWithAdditionalPropertiesInlined:
     """
 
     a_number: Union[Unset, float] = UNSET
-    additional_properties: Dict[str, "ModelWithAdditionalPropertiesInlinedAdditionalProperty"] = _attrs_field(
+    additional_properties: dict[str, "ModelWithAdditionalPropertiesInlinedAdditionalProperty"] = _attrs_field(
         init=False, factory=dict
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         a_number = self.a_number
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
+
         field_dict.update({})
         if a_number is not UNSET:
             field_dict["a_number"] = a_number
@@ -39,12 +41,12 @@ class ModelWithAdditionalPropertiesInlined:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_additional_properties_inlined_additional_property import (
             ModelWithAdditionalPropertiesInlinedAdditionalProperty,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         a_number = d.pop("a_number", UNSET)
 
         model_with_additional_properties_inlined = cls(
@@ -61,7 +63,7 @@ class ModelWithAdditionalPropertiesInlined:
         return model_with_additional_properties_inlined
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> "ModelWithAdditionalPropertiesInlinedAdditionalProperty":

@@ -3,7 +3,7 @@
 
 {% macro header_params(endpoint) %}
 {% if endpoint.header_parameters or endpoint.bodies | length > 0 %}
-headers: Dict[str, Any] = {}
+headers: dict[str, Any] = {}
 {% if endpoint.header_parameters %}
     {% for parameter in endpoint.header_parameters %}
         {% import "property_templates/" + parameter.template as param_template %}
@@ -37,7 +37,7 @@ if {{ parameter.python_name }} is not UNSET:
 
 {% macro query_params(endpoint) %}
 {% if endpoint.query_parameters %}
-params: Dict[str, Any] = {}
+params: dict[str, Any] = {}
 
 {% for property in endpoint.query_parameters %}
     {% set destination = property.python_name %}
@@ -58,33 +58,33 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% endif %}
 {% endmacro %}
 
-{% macro body_to_kwarg(body, destination) %}
+{% macro body_to_kwarg(body) %}
 {% if body.body_type == "data" %}
-{{ destination }} = body.to_dict()
+_kwargs["data"] = body.to_dict()
 {% elif body.body_type == "files"%}
-{{ multipart_body(body, destination) }}
+{{ multipart_body(body) }}
 {% elif body.body_type == "json" %}
-{{ json_body(body, destination) }}
+{{ json_body(body) }}
 {% elif body.body_type == "content" %}
-{{ destination }} = body.payload
+_kwargs["content"] = body.payload
 {% endif %}
 {% endmacro %}
 
-{% macro json_body(body, destination) %}
+{% macro json_body(body) %}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, destination) }}
+{{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]") }}
 {% else %}
-{{ destination }} = {{ property.python_name }}
+_kwargs["json"] = {{ property.python_name }}
 {% endif %}
 {% endmacro %}
 
-{% macro multipart_body(body, destination) %}
+{% macro multipart_body(body) %}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform_multipart_body %}
-{{ prop_template.transform_multipart_body(property, property.python_name, destination) }}
+{{ prop_template.transform_multipart_body(property) }}
 {% endif %}
 {% endmacro %}
 
@@ -183,4 +183,19 @@ Returns:
 
 {% macro docstring(endpoint, return_string, is_detailed) %}
 {{ safe_docstring(docstring_content(endpoint, return_string, is_detailed)) }}
+{% endmacro %}
+
+{% macro parse_response(parsed_responses, response) %}
+{% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
+{% if prop_template.construct %}
+{{ prop_template.construct(response.prop, response.source.attribute) }}
+{% elif response.source.return_type == response.prop.get_type_string()  %}
+{{ response.prop.python_name }} = {{ response.source.attribute }}
+{% else %}
+{{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source.attribute }})
+{% endif %}
+return {{ response.prop.python_name }}
+{% else %}
+return None
+{% endif %}
 {% endmacro %}

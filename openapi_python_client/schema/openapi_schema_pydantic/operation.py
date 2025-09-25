@@ -1,15 +1,11 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
-from .header import Header  # noqa: F401
 from .parameter import Parameter
-
-# Required to update forward ref after object creation, as this is not imported yet
-from .path_item import PathItem  # noqa: F401
-from .reference import Reference
+from .reference import ReferenceOr
 from .request_body import RequestBody
 from .responses import Responses
 from .security_requirement import SecurityRequirement
@@ -24,20 +20,22 @@ class Operation(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
     """
 
-    tags: Optional[List[str]] = None
+    tags: Optional[list[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
     operationId: Optional[str] = None
-    parameters: Optional[List[Union[Parameter, Reference]]] = None
-    request_body: Optional[Union[RequestBody, Reference]] = Field(None, alias="requestBody")
+    parameters: Optional[list[ReferenceOr[Parameter]]] = None
+    request_body: Optional[ReferenceOr[RequestBody]] = Field(None, alias="requestBody")
     responses: Responses
-    callbacks: Optional[Dict[str, Callback]] = None
+    callbacks: Optional[dict[str, Callback]] = None
 
     deprecated: bool = False
-    security: Optional[List[SecurityRequirement]] = None
-    servers: Optional[List[Server]] = None
+    security: Optional[list[SecurityRequirement]] = None
+    servers: Optional[list[Server]] = None
     model_config = ConfigDict(
+        # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [
@@ -89,7 +87,3 @@ class Operation(BaseModel):
             ]
         },
     )
-
-
-# PathItem in Callback uses Operation, so we need to update forward refs due to circular dependency
-Operation.model_rebuild()

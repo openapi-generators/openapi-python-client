@@ -418,51 +418,6 @@ info:
       }
     }
   },
-  "/tests/upload/multiple": {
-    "post": {
-      "tags": [
-        "tests"
-      ],
-      "summary": "Upload multiple files",
-      "description": "Upload several files in the same request",
-      "operationId": "upload_multiple_files_tests_upload_post",
-      "parameters": [ ],
-      "requestBody": {
-        "content": {
-          "multipart/form-data": {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "binary"
-              }
-            }
-          }
-        },
-        "required": true
-      },
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json": {
-              "schema": { }
-            }
-          }
-        },
-        "422": {
-          "description": "Validation Error",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HTTPValidationError"
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "/tests/json_body": {
     "post": {
       "tags": [
@@ -590,6 +545,16 @@ info:
             "default": 3.14
           },
           "name": "float_prop",
+          "in": "query"
+        },
+        {
+          "required": true,
+          "schema": {
+            "title": "Float with int default",
+            "type": "number",
+            "default": 3
+          },
+          "name": "float_with_int",
           "in": "query"
         },
         {
@@ -749,7 +714,13 @@ info:
           "content": {
             "application/json": {
               "schema": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
@@ -973,6 +944,129 @@ info:
       }
     }
   },
+  "/responses/reference": {
+    "get": {
+      "tags": [
+        "responses"
+      ],
+      "summary": "Endpoint using predefined response",
+      "operationId": "reference_response",
+      "responses": {
+        "200": {
+          "$ref": "#/components/responses/AResponse"
+        }
+      }
+    }
+  },
+  "/responses/status-codes/default": {
+      "get": {
+        "tags": ["responses"],
+        "summary": "Default Status Code Only",
+        "operationId": "default_status_code",
+        "responses": {
+          "default": {
+            "description": "Default response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/response/status-codes/patterns": {
+      "get": {
+        "tags": ["responses"],
+        "summary": "Status Code Patterns",
+        "operationId": "status_code_patterns",
+        "responses": {
+          "2XX": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["success", "failure"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/response/status-codes/precedence": {
+      "get": {
+        "operationId": "status_code_precedence",
+        "tags": ["responses"],
+        "summary": "Status Codes Precedence",
+        "description": "Verify that specific status codes are always checked first, then ranges, then default",
+        "responses": {
+          "default": {
+            "description": "Default Response Should Be Last",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Pattern should be after specific codes",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
   "/auth/token_with_cookie": {
     "get": {
       "tags": [
@@ -1131,9 +1225,7 @@ info:
   },
   "/tag_with_number": {
     "get": {
-      "tags": [
-        "1"
-      ],
+      "tags": [ "1", "2" ],
       "responses": {
         "200": {
           "description": "Success"
@@ -1619,6 +1711,74 @@ info:
         }
       }
     }
+  },
+  "/models/allof": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aliased": {
+                    "$ref": "#/components/schemas/Aliased"
+                  },
+                  "extended": {
+                    "$ref": "#/components/schemas/Extended"
+                  },
+                  "model": {
+                    "$ref": "#/components/schemas/AModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/models/oneof-with-required-const": {
+    "get": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "alpha"
+                      },
+                      "color": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [ "type" ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "beta"
+                      },
+                      "texture": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [ "type" ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 "components":
@@ -1637,6 +1797,23 @@ info:
         "an_required_field"
       ]
     },
+    "Aliased": {
+      "allOf": [
+        { "$ref": "#/components/schemas/AModel" }
+      ]
+    },
+    "Extended": {
+      "allOf": [
+        { "$ref": "#/components/schemas/Aliased" },
+        { "type": "object",
+          "properties": {
+            "fromExtended": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
     "AModel": {
       "title": "AModel",
       "required": [
@@ -1645,6 +1822,8 @@ info:
         "aCamelDateTime",
         "a_date",
         "a_nullable_date",
+        "a_uuid",
+        "a_nullable_uuid",
         "required_nullable",
         "required_not_nullable",
         "model",
@@ -1654,7 +1833,9 @@ info:
       ],
       "type": "object",
       "properties": {
-        "any_value": { },
+        "any_value": {
+          "default": "default",
+        },
         "an_enum_value": {
           "$ref": "#/components/schemas/AnEnum"
         },
@@ -1667,11 +1848,7 @@ info:
           "default": "overridden_default"
         },
         "an_optional_allof_enum": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/AnAllOfEnum"
-            }
-          ]
+          "$ref": "#/components/schemas/AnAllOfEnum",
         },
         "nested_list_of_enums": {
           "title": "Nested List Of Enums",
@@ -1718,6 +1895,29 @@ info:
           "title": "A Nullable Date",
           "type": "string",
           "format": "date"
+        },
+        "a_uuid": {
+          "title": "A Uuid",
+          "type": "string",
+          "format": "uuid"
+        },
+        "a_nullable_uuid": {
+          "title": "A Nullable Uuid",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid",
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "07EF8B4D-AA09-4FFA-898D-C710796AFF41"
+        },
+        "a_not_required_uuid": {
+          "title": "A Not Required Uuid",
+          "type": "string",
+          "format": "uuid"
         },
         "1_leading_digit": {
           "title": "Leading Digit",
@@ -1808,11 +2008,7 @@ info:
           ]
         },
         "model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "nullable_model": {
           "oneOf": [
@@ -1825,11 +2021,7 @@ info:
           ]
         },
         "not_required_model": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ModelWithUnionProperty"
-            }
-          ]
+          "$ref": "#/components/schemas/ModelWithUnionProperty"
         },
         "not_required_nullable_model": {
           "oneOf": [
@@ -1940,7 +2132,7 @@ info:
           "title": "Some Integer Array",
           "type": "array",
           "items": {
-            "type": ["integer", "null"]
+            "type": [ "integer", "null" ]
           }
         },
         "some_array": {
@@ -2074,6 +2266,7 @@ info:
           "oneOf": [
             {
               "type": "object",
+              "title": "Apples",
               "properties": {
                 "apples": {
                   "type": "string"
@@ -2082,6 +2275,7 @@ info:
             },
             {
               "type": "object",
+              "title": "Bananas",
               "properties": {
                 "bananas": {
                   "type": "string"
@@ -2113,6 +2307,56 @@ info:
         },
         "additionalProperties": { }
       }
+    },
+    "ModelWithMergedProperties": {
+      "title": "ModelWithMergedProperties",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "simpleString": {
+              "type": "string",
+              "description": "base simpleString description"
+            },
+            "stringToEnum": {
+              "type": "string",
+              "default": "a"
+            },
+            "stringToDate": {
+              "type": "string"
+            },
+            "numberToInt": {
+              "type": "number"
+            },
+            "anyToString": { }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "simpleString": {
+              "type": "string",
+              "description": "extended simpleString description",
+              "default": "new default"
+            },
+            "stringToEnum": {
+              "type": "string",
+              "enum": [ "a", "b" ]
+            },
+            "stringToDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "numberToInt": {
+              "type": "integer"
+            },
+            "anyToString": {
+              "type": "string",
+              "default": "x"
+            }
+          }
+        }
+      ]
     },
     "ModelWithPrimitiveAdditionalProperties": {
       "title": "ModelWithPrimitiveAdditionalProperties",
@@ -2180,6 +2424,11 @@ info:
           "$ref": "#/components/schemas/AnotherAllOfSubModel"
         }
       ]
+    },
+    "ModelWithNoProperties": {
+      "type": "object",
+      "properties": { },
+      "additionalProperties": false
     },
     "AllOfSubModel": {
       "title": "AllOfSubModel",
@@ -2793,6 +3042,13 @@ info:
     NestedRef:
       "$ref": "#/components/requestBodies/ARequestBody"
     ARequestBody:
+      content:
+        "application/json":
+          "schema":
+            "$ref": "#/components/schemas/AModel"
+  responses:
+    AResponse:
+      description: OK
       content:
         "application/json":
           "schema":

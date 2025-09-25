@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 from dateutil.parser import isoparse
@@ -19,16 +19,17 @@ def _get_kwargs(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
     model_prop: "ModelWithUnionProperty",
     required_model_prop: "ModelWithUnionProperty",
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    params: dict[str, Any] = {}
 
     params["string_prop"] = string_prop
 
@@ -38,6 +39,8 @@ def _get_kwargs(
     params["date_prop"] = json_date_prop
 
     params["float_prop"] = float_prop
+
+    params["float_with_int"] = float_with_int
 
     params["int_prop"] = int_prop
 
@@ -74,7 +77,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/defaults",
         "params": params,
@@ -86,13 +89,15 @@ def _get_kwargs(
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = response.json()
         return response_200
-    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+
+    if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -117,9 +122,10 @@ def sync_detailed(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -133,9 +139,10 @@ def sync_detailed(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -155,6 +162,7 @@ def sync_detailed(
         string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
+        float_with_int=float_with_int,
         int_prop=int_prop,
         boolean_prop=boolean_prop,
         list_prop=list_prop,
@@ -179,9 +187,10 @@ def sync(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -195,9 +204,10 @@ def sync(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -218,6 +228,7 @@ def sync(
         string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
+        float_with_int=float_with_int,
         int_prop=int_prop,
         boolean_prop=boolean_prop,
         list_prop=list_prop,
@@ -236,9 +247,10 @@ async def asyncio_detailed(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -252,9 +264,10 @@ async def asyncio_detailed(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -274,6 +287,7 @@ async def asyncio_detailed(
         string_with_num=string_with_num,
         date_prop=date_prop,
         float_prop=float_prop,
+        float_with_int=float_with_int,
         int_prop=int_prop,
         boolean_prop=boolean_prop,
         list_prop=list_prop,
@@ -296,9 +310,10 @@ async def asyncio(
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
     float_prop: float = 3.14,
+    float_with_int: float = 3.0,
     int_prop: int = 7,
     boolean_prop: bool = False,
-    list_prop: List[AnEnum],
+    list_prop: list[AnEnum],
     union_prop: Union[float, str] = "not a float",
     union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
     enum_prop: AnEnum,
@@ -312,9 +327,10 @@ async def asyncio(
         string_with_num (str):  Default: '1'.
         date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
         float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
-        list_prop (List[AnEnum]):
+        list_prop (list[AnEnum]):
         union_prop (Union[float, str]):  Default: 'not a float'.
         union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
@@ -336,6 +352,7 @@ async def asyncio(
             string_with_num=string_with_num,
             date_prop=date_prop,
             float_prop=float_prop,
+            float_with_int=float_with_int,
             int_prop=int_prop,
             boolean_prop=boolean_prop,
             list_prop=list_prop,

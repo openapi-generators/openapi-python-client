@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 import httpx
 
@@ -8,8 +8,8 @@ from ...client import AuthenticatedClient, Client
 from ...types import Response
 
 
-def _get_kwargs() -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+def _get_kwargs() -> dict[str, Any]:
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/tests/basic_lists/booleans",
     }
@@ -17,18 +17,19 @@ def _get_kwargs() -> Dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[List[bool]]:
-    if response.status_code == HTTPStatus.OK:
-        response_200 = cast(List[bool], response.json())
+def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[list[bool]]:
+    if response.status_code == 200:
+        response_200 = cast(list[bool], response.json())
 
         return response_200
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[List[bool]]:
+def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[list[bool]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -40,7 +41,7 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[List[bool]]:
+) -> Response[list[bool]]:
     """Get Basic List Of Booleans
 
      Get a list of booleans
@@ -50,7 +51,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[List[bool]]
+        Response[list[bool]]
     """
 
     kwargs = _get_kwargs()
@@ -65,7 +66,7 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[List[bool]]:
+) -> Optional[list[bool]]:
     """Get Basic List Of Booleans
 
      Get a list of booleans
@@ -75,7 +76,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        List[bool]
+        list[bool]
     """
 
     return sync_detailed(
@@ -86,7 +87,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[List[bool]]:
+) -> Response[list[bool]]:
     """Get Basic List Of Booleans
 
      Get a list of booleans
@@ -96,7 +97,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[List[bool]]
+        Response[list[bool]]
     """
 
     kwargs = _get_kwargs()
@@ -109,7 +110,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[List[bool]]:
+) -> Optional[list[bool]]:
     """Get Basic List Of Booleans
 
      Get a list of booleans
@@ -119,7 +120,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        List[bool]
+        list[bool]
     """
 
     return (

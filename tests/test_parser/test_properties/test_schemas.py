@@ -1,18 +1,21 @@
 import pytest
 from attr import evolve
 
+from openapi_python_client.config import ClassOverride
 from openapi_python_client.parser.errors import ParameterError
 from openapi_python_client.parser.properties import Class, Parameters
-from openapi_python_client.parser.properties.schemas import parameter_from_reference
-from openapi_python_client.schema import Parameter, Reference
+from openapi_python_client.parser.properties.schemas import (
+    parameter_from_data,
+    parameter_from_reference,
+    update_parameters_with_data,
+)
+from openapi_python_client.schema import Parameter, ParameterLocation, Reference, Schema
 from openapi_python_client.utils import ClassName
 
 MODULE_NAME = "openapi_python_client.parser.properties.schemas"
 
 
 def test_class_from_string_default_config(config):
-    from openapi_python_client.parser.properties import Class
-
     class_ = Class.from_string(string="#/components/schemas/PingResponse", config=config)
 
     assert class_.name == "PingResponse"
@@ -29,9 +32,6 @@ def test_class_from_string_default_config(config):
     ),
 )
 def test_class_from_string(class_override, module_override, expected_class, expected_module, config):
-    from openapi_python_client.config import ClassOverride
-    from openapi_python_client.parser.properties import Class
-
     ref = "#/components/schemas/MyResponse"
     config = evolve(
         config, class_overrides={"MyResponse": ClassOverride(class_name=class_override, module_name=module_override)}
@@ -44,9 +44,6 @@ def test_class_from_string(class_override, module_override, expected_class, expe
 
 class TestParameterFromData:
     def test_cannot_parse_parameters_by_reference(self, config):
-        from openapi_python_client.parser.properties import Parameters
-        from openapi_python_client.parser.properties.schemas import parameter_from_data
-
         ref = Reference.model_construct(ref="#/components/parameters/a_param")
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(
@@ -56,10 +53,6 @@ class TestParameterFromData:
         assert new_parameters == parameters
 
     def test_parameters_without_schema_are_ignored(self, config):
-        from openapi_python_client.parser.properties import Parameters
-        from openapi_python_client.parser.properties.schemas import parameter_from_data
-        from openapi_python_client.schema import ParameterLocation
-
         param = Parameter(name="a_schemaless_param", param_in=ParameterLocation.QUERY)
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(
@@ -69,10 +62,6 @@ class TestParameterFromData:
         assert new_parameters == parameters
 
     def test_registers_new_parameters(self, config):
-        from openapi_python_client.parser.properties import Parameters
-        from openapi_python_client.parser.properties.schemas import parameter_from_data
-        from openapi_python_client.schema import ParameterLocation, Schema
-
         param = Parameter.model_construct(
             name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
         )
@@ -119,9 +108,6 @@ class TestParameterFromReference:
 
 class TestUpdateParametersFromData:
     def test_reports_parameters_with_errors(self, mocker, config):
-        from openapi_python_client.parser.properties.schemas import update_parameters_with_data
-        from openapi_python_client.schema import ParameterLocation, Schema
-
         parameters = Parameters()
         param = Parameter.model_construct(
             name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
@@ -141,9 +127,6 @@ class TestUpdateParametersFromData:
         )
 
     def test_records_references_to_parameters(self, mocker, config):
-        from openapi_python_client.parser.properties.schemas import update_parameters_with_data
-        from openapi_python_client.schema import ParameterLocation, Schema
-
         parameters = Parameters()
         param = Parameter.model_construct(
             name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()

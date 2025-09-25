@@ -1,4 +1,5 @@
-from typing import Any, cast, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO, TYPE_CHECKING
+from collections.abc import Mapping
+from typing import Any, TypeVar, Optional, BinaryIO, TextIO, TYPE_CHECKING, Generator
 
 {% if model.additional_properties %}
 from typing import List
@@ -9,11 +10,12 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 {% if model.is_multipart_body %}
 import json
+from .. import types
 {% endif %}
 
 from ..types import UNSET, Unset
 
-{% for relative in model.relative_imports %}
+{% for relative in model.relative_imports | sort %}
 {{ relative }}
 {% endfor %}
 
@@ -52,57 +54,79 @@ T = TypeVar("T", bound="{{ class_name }}")
         {{ model.example | string | wordwrap(112) | indent(12) }}
 
     {% endif %}
-    {% if model.required_properties or model.optional_properties %}
+    {% if (not config.docstrings_on_attributes) and (model.required_properties or model.optional_properties) %}
     Attributes:
     {% for property in model.required_properties + model.optional_properties %}
         {{ property.to_docstring() | wordwrap(112) | indent(12) }}
     {% endfor %}{% endif %}
 {% endmacro %}
 
+{% macro declare_property(property) %}
+{%- if config.docstrings_on_attributes and property.description -%}
+{{ property.to_string() }}
+{{ safe_docstring(property.description, omit_if_empty=True) | wordwrap(112) }}
+{%- else -%}
+{{ property.to_string() }}
+{%- endif -%}
+{% endmacro %}
+
 @_attrs_define
 class {{ class_name }}:
-    {{ safe_docstring(class_docstring_content(model)) | indent(4) }}
+    {{ safe_docstring(class_docstring_content(model), omit_if_empty=config.docstrings_on_attributes) | indent(4) }}
 
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
-    {{ property.to_string() }}
+    {{ declare_property(property) | indent(4) }}
     {% endif %}
     {% endfor %}
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is not none or not property.required %}
-    {{ property.to_string() }}
+    {{ declare_property(property) | indent(4) }}
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: Dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
     {% endif %}
 
-{% macro _to_dict(multipart=False) %}
-{% for property in model.required_properties + model.optional_properties %}
+{% macro _transform_property(property, content) %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if multipart %}
-{{ prop_template.transform_multipart(property, "self." + property.python_name, property.python_name) }}
-{% elif prop_template.transform %}
-{{ prop_template.transform(property=property, source="self." + property.python_name, destination=property.python_name) }}
+{%- if prop_template.transform -%}
+{{ prop_template.transform(property=property, source=content, destination=property.python_name) }}
+{%- else -%}
+{{ property.python_name }} = {{ content }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro multipart(property, source, destination) %}
+{% import "property_templates/" + property.template as prop_template %}
+{% if not property.required %}
+if not isinstance({{source}}, Unset):
+    {{ prop_template.multipart(property, source, destination) | indent(4) }}
 {% else %}
-{{ property.python_name }} = self.{{ property.python_name }}
+{{ prop_template.multipart(property, source, destination) }}
 {% endif %}
+{% endmacro %}
 
-{% endfor %}
-
-field_dict: Dict[str, Any] = {}
+{% macro _prepare_field_dict() %}
+field_dict: dict[str, Any] = {}
 {% if model.additional_properties %}
 {% import "property_templates/" + model.additional_properties.template as prop_template %}
-{% if multipart %}
-for prop_name, prop in self.additional_properties.items():
-    {{ prop_template.transform_multipart(model.additional_properties, "prop", "field_dict[prop_name]") | indent(4) }}
-{% elif prop_template.transform %}
+{% if prop_template.transform %}
 for prop_name, prop in self.additional_properties.items():
     {{ prop_template.transform(model.additional_properties, "prop", "field_dict[prop_name]", declare_type=false) | indent(4) }}
 {% else %}
 field_dict.update(self.additional_properties)
-{% endif %}
-{% endif %}
+{%- endif -%}
+{%- endif -%}
+{% endmacro %}
+
+{% macro _to_dict() %}
+{% for property in model.required_properties + model.optional_properties -%}
+{{ _transform_property(property, "self." + property.python_name) }}
+
+{% endfor %}
+
+{{ _prepare_field_dict() }}
 {% if model.required_properties | length > 0 or model.optional_properties | length > 0 %}
 field_dict.update({
     {% for property in model.required_properties + model.optional_properties %}
@@ -122,23 +146,38 @@ if {{ property.python_name }} is not UNSET:
 return field_dict
 {% endmacro %}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
-    def to_multipart(self) -> Dict[str, Any]:
-        {{ _to_dict(multipart=True) | indent(8) }}
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
+
+        {% for property in model.required_properties + model.optional_properties %}
+        {% set destination = "\"" + property.name + "\"" %}
+        {{ multipart(property, "self." + property.python_name, destination) | indent(8) }}
+
+        {% endfor %}
+
+        {% if model.additional_properties %}
+        for prop_name, prop in self.additional_properties.items():
+            {{ multipart(model.additional_properties, "prop", "prop_name") | indent(4) }}
+        {% endif %}
+
+        return files
+
 {% endif %}
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
     {% for lazy_import in model.lazy_imports %}
         {{ lazy_import }}
     {% endfor %}
-        d = src_dict.copy()
+{% if (model.required_properties or model.optional_properties or model.additional_properties) %}
+        d = dict(src_dict)
 {% for property in model.required_properties + model.optional_properties %}
     {% if property.required %}
         {% set property_source = 'd.pop("' + property.name + '")' %}
@@ -153,6 +192,7 @@ return field_dict
     {% endif %}
 
 {% endfor %}
+{% endif %}
         {{ module_name }} = cls(
 {% for property in model.required_properties + model.optional_properties %}
             {{ property.python_name }}={{ property.python_name }},
@@ -186,7 +226,7 @@ return field_dict
 
     {% if model.additional_properties %}
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> {{ additional_property_type }}:

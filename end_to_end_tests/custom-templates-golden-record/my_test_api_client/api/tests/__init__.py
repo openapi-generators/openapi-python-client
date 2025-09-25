@@ -21,7 +21,6 @@ from . import (
     token_with_cookie_auth_token_with_cookie_get,
     unsupported_content_tests_unsupported_content_get,
     upload_file_tests_upload_post,
-    upload_multiple_files_tests_upload_post,
 )
 
 
@@ -81,13 +80,6 @@ class TestsEndpoints:
         Upload a file
         """
         return upload_file_tests_upload_post
-
-    @classmethod
-    def upload_multiple_files_tests_upload_post(cls) -> types.ModuleType:
-        """
-        Upload several files in the same request
-        """
-        return upload_multiple_files_tests_upload_post
 
     @classmethod
     def json_body_tests_json_body_post(cls) -> types.ModuleType:

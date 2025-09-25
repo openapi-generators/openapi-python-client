@@ -49,10 +49,10 @@ You can use an OpenAPI file instead of a URL like `openapi-python-client generat
 
 ### Using custom templates
 
-This feature leverages Jinja2's [ChoiceLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.ChoiceLoader) and [FileSystemLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.FileSystemLoader). This means you do _not_ need to customize every template. Simply copy the template(s) you want to customize from [the default template directory](openapi_python_client/templates) to your own custom template directory (file names _must_ match exactly) and pass the template directory through the `custom-template-path` flag to the `generate` and `update` commands. For instance,
+This feature leverages Jinja2's [ChoiceLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.ChoiceLoader) and [FileSystemLoader](https://jinja.palletsprojects.com/en/2.11.x/api/#jinja2.FileSystemLoader). This means you do _not_ need to customize every template. Simply copy the template(s) you want to customize from [the default template directory](openapi_python_client/templates) to your own custom template directory (file names _must_ match exactly) and pass the template directory through the `custom-template-path` flag to the `generate` command:
 
 ```
-openapi-python-client update \
+openapi-python-client generate \
   --url https://my.api.com/openapi.json \
   --custom-template-path=relative/path/to/mytemplates
 ```
@@ -96,6 +96,37 @@ class_overrides:
 ```
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the `models` folder.
+
+### docstrings_on_attributes
+
+By default, when `openapi-python-client` generates a model class, it includes a list of attributes and their
+descriptions in the docstring for the class. If you set this option to `true`, then the attribute descriptions
+will be put in docstrings for the attributes themselves, and will not be in the class docstring.
+
+```yaml
+docstrings_on_attributes: true
+```
+
+### literal_enums
+
+By default, `openapi-python-client` generates classes inheriting for `Enum` for enums. It can instead use `Literal` 
+values for enums by setting this to `true`:
+
+```yaml
+literal_enums: true
+```
+
+This is especially useful if enum values, when transformed to their Python names, end up conflicting due to case sensitivity or special symbols.
+
+### generate_all_tags
+
+`openapi-python-client` generates module names within the `api` module based on the OpenAPI `tags` of each endpoint. 
+By default, only the _first_ tag is generated. If you want to generate **duplicate** endpoint functions using _every_ tag 
+listed, you can enable this option:
+
+```yaml
+generate_all_tags: true
+```
 
 ### project_name_override and package_name_override
 
@@ -159,6 +190,39 @@ This config tells the generator to treat a given content type like another.
 ```yaml
 content_type_overrides:
   application/zip: application/octet-stream
+```
+
+## Supported Extensions
+
+### x-enum-varnames
+
+This extension has been adopted by similar projects such as [OpenAPI Tools](https://github.com/OpenAPITools/openapi-generator/pull/917).
+It is intended to provide user-friendly names for integer Enum members that get generated.
+It is critical that the length of the array matches that of the enum values.
+
+```
+"Colors": {
+   "type": "integer",
+   "format": "int32",
+   "enum": [
+       0,
+       1,
+       2
+   ], 
+  "x-enum-varnames": [
+      "Red",
+      "Green",
+      "Blue"
+   ]
+}
+```
+
+Results in:
+```
+class Color(IntEnum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
 ```
 
 [changelog.md]: CHANGELOG.md

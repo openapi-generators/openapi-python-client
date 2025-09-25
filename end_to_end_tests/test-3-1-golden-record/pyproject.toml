@@ -5,19 +5,18 @@ description = "A client library for accessing Test 3.1 Features"
 authors = []
 readme = "README.md"
 packages = [
-    {include = "test_3_1_features_client"},
+    { include = "test_3_1_features_client" },
 ]
 include = ["CHANGELOG.md", "test_3_1_features_client/py.typed"]
 
-
 [tool.poetry.dependencies]
-python = "^3.8"
-httpx = ">=0.20.0,<0.28.0"
-attrs = ">=21.3.0"
+python = "^3.9"
+httpx = ">=0.23.0,<0.29.0"
+attrs = ">=22.2.0"
 python-dateutil = "^2.8.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]

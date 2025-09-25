@@ -27,7 +27,7 @@ class ConstProperty(PropertyProtocol):
     def build(
         cls,
         *,
-        const: str | int,
+        const: str | int | float | bool,
         default: Any,
         name: str,
         python_name: PythonIdentifier,
@@ -63,13 +63,13 @@ class ConstProperty(PropertyProtocol):
         return prop
 
     def convert_value(self, value: Any) -> Value | None | PropertyError:
-        if isinstance(value, Value):
-            return value
         value = self._convert_value(value)
         if value is None:
             return value
         if value != self.value:
-            return PropertyError(detail=f"Invalid value for const {self.name}; {value} != {self.value}")
+            return PropertyError(
+                detail=f"Invalid value for const {self.name}; {value.raw_value} != {self.value.raw_value}"
+            )
         return value
 
     @staticmethod
@@ -85,21 +85,18 @@ class ConstProperty(PropertyProtocol):
     def _convert_value(value: Any) -> Value | None:
         if value is None or isinstance(value, Value):
             return value
-        if isinstance(value, Value):
-            return value  # pragma: no cover
         if isinstance(value, str):
             return StringProperty.convert_value(value)
-        return Value(str(value))
+        return Value(python_code=str(value), raw_value=value)
 
     def get_type_string(
         self,
         no_optional: bool = False,
         json: bool = False,
         *,
-        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
-        lit = f"Literal[{self.value}]"
+        lit = f"Literal[{self.value.python_code}]"
         if not no_optional and not self.required:
             return f"Union[{lit}, Unset]"
         return lit
@@ -113,8 +110,8 @@ class ConstProperty(PropertyProtocol):
             back to the root of the generated client.
         """
         if self.required:
-            return {"from typing import Literal"}
+            return {"from typing import Literal, cast"}
         return {
-            "from typing import Literal, Union",
+            "from typing import Literal, Union, cast",
             f"from {prefix}types import UNSET, Unset",
         }

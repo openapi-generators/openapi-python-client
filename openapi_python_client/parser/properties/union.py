@@ -28,7 +28,14 @@ class UnionProperty(PropertyProtocol):
 
     @classmethod
     def build(
-        cls, *, data: oai.Schema, name: str, required: bool, schemas: Schemas, parent_name: str, config: Config
+        cls,
+        *,
+        data: oai.Schema,
+        name: str,
+        required: bool,
+        schemas: Schemas,
+        parent_name: str,
+        config: Config,
     ) -> tuple[UnionProperty | PropertyError, Schemas]:
         """
         Create a `UnionProperty` the right way.
@@ -45,7 +52,7 @@ class UnionProperty(PropertyProtocol):
             `(result, schemas)` where `schemas` is the updated version of the input `schemas` and `result` is the
                 constructed `UnionProperty` or a `PropertyError` describing what went wrong.
         """
-        from . import property_from_data
+        from . import property_from_data  # noqa: PLC0415
 
         sub_properties: list[PropertyProtocol] = []
 
@@ -55,8 +62,19 @@ class UnionProperty(PropertyProtocol):
                 type_list_data.append(data.model_copy(update={"type": _type, "default": None}))
 
         for i, sub_prop_data in enumerate(chain(data.anyOf, data.oneOf, type_list_data)):
+            # If a schema has a unique title property, we can use that to carry forward a descriptive name instead of "type_0"
+            subscript: str
+            if (
+                isinstance(sub_prop_data, oai.Schema)
+                and sub_prop_data.title is not None
+                and sub_prop_data.title != data.title
+            ):
+                subscript = sub_prop_data.title
+            else:
+                subscript = f"type_{i}"
+
             sub_prop, schemas = property_from_data(
-                name=f"{name}_type_{i}",
+                name=f"{name}_{subscript}",
                 required=True,
                 data=sub_prop_data,
                 schemas=schemas,
@@ -64,7 +82,10 @@ class UnionProperty(PropertyProtocol):
                 config=config,
             )
             if isinstance(sub_prop, PropertyError):
-                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data), schemas
+                return (
+                    PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data),
+                    schemas,
+                )
             sub_properties.append(sub_prop)
 
         def flatten_union_properties(sub_properties: list[PropertyProtocol]) -> list[PropertyProtocol]:
@@ -106,9 +127,13 @@ class UnionProperty(PropertyProtocol):
                 return value_or_error
         return value_or_error
 
-    def _get_inner_type_strings(self, json: bool, multipart: bool) -> set[str]:
+    def _get_inner_type_strings(self, json: bool) -> set[str]:
         return {
-            p.get_type_string(no_optional=True, json=json, multipart=multipart, quoted=not p.is_base_type)
+            p.get_type_string(
+                no_optional=True,
+                json=json,
+                quoted=not p.is_base_type,
+            )
             for p in self.inner_properties
         }
 
@@ -119,12 +144,12 @@ class UnionProperty(PropertyProtocol):
         return f"Union[{', '.join(sorted(inner_types))}]"
 
     def get_base_type_string(self, *, quoted: bool = False) -> str:
-        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False, multipart=False))
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
     def get_base_json_type_string(self, *, quoted: bool = False) -> str:
-        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True, multipart=False))
+        return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
-    def get_type_strings_in_union(self, *, no_optional: bool = False, json: bool, multipart: bool) -> set[str]:
+    def get_type_strings_in_union(self, *, no_optional: bool = False, json: bool) -> set[str]:
         """
         Get the set of all the types that should appear within the `Union` representing this property.
 
@@ -133,12 +158,11 @@ class UnionProperty(PropertyProtocol):
         Args:
             no_optional: Do not include `None` or `Unset` in this set.
             json: If True, this returns the JSON types, not the Python types, of this property.
-            multipart: If True, this returns the multipart types, not the Python types, of this property.
 
         Returns:
             A set of strings containing the types that should appear within `Union`.
         """
-        type_strings = self._get_inner_type_strings(json=json, multipart=multipart)
+        type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
         if not self.required:
@@ -150,7 +174,6 @@ class UnionProperty(PropertyProtocol):
         no_optional: bool = False,
         json: bool = False,
         *,
-        multipart: bool = False,
         quoted: bool = False,
     ) -> str:
         """
@@ -158,7 +181,7 @@ class UnionProperty(PropertyProtocol):
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
-        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json, multipart=multipart)
+        type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
         return self._get_type_string_from_inner_type_strings(type_strings_in_union)
 
     def get_imports(self, *, prefix: str) -> set[str]:
@@ -183,7 +206,7 @@ class UnionProperty(PropertyProtocol):
 
     def validate_location(self, location: oai.ParameterLocation) -> ParseError | None:
         """Returns an error if this type of property is not allowed in the given location"""
-        from ..properties import Property
+        from ..properties import Property  # noqa: PLC0415
 
         for inner_prop in self.inner_properties:
             if evolve(cast(Property, inner_prop), required=self.required).validate_location(location) is not None:

@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 import attr
 
@@ -9,6 +9,7 @@ from openapi_python_client.parser.properties import (
     Schemas,
     property_from_data,
 )
+from openapi_python_client.parser.properties.schemas import get_reference_simple_name
 
 from .. import schema as oai
 from ..config import Config
@@ -44,10 +45,10 @@ def body_from_data(
     *,
     data: oai.Operation,
     schemas: Schemas,
-    request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]],
+    request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
     config: Config,
     endpoint_name: str,
-) -> Tuple[List[Union[Body, ParseError]], Schemas]:
+) -> tuple[list[Union[Body, ParseError]], Schemas]:
     """Adds form or JSON body to Endpoint if included in data"""
     body = _resolve_reference(data.request_body, request_bodies)
     if isinstance(body, ParseError):
@@ -55,7 +56,7 @@ def body_from_data(
     if body is None:
         return [], schemas
 
-    bodies: List[Union[Body, ParseError]] = []
+    bodies: list[Union[Body, ParseError]] = []
     body_content = body.content
     prefix_type_names = len(body_content) > 1
 
@@ -117,6 +118,7 @@ def body_from_data(
                     **schemas.classes_by_name,
                     prop.class_info.name: prop,
                 },
+                models_to_process=[*schemas.models_to_process, prop],
             )
         bodies.append(
             Body(
@@ -130,14 +132,14 @@ def body_from_data(
 
 
 def _resolve_reference(
-    body: Union[oai.RequestBody, oai.Reference, None], request_bodies: Dict[str, Union[oai.RequestBody, oai.Reference]]
+    body: Union[oai.RequestBody, oai.Reference, None], request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]]
 ) -> Union[oai.RequestBody, ParseError, None]:
     if body is None:
         return None
     references_seen = []
     while isinstance(body, oai.Reference) and body.ref not in references_seen:
         references_seen.append(body.ref)
-        body = request_bodies.get(body.ref.split("/")[-1])
+        body = request_bodies.get(get_reference_simple_name(body.ref))
     if isinstance(body, oai.Reference):
         return ParseError(detail="Circular $ref in request body", data=body)
     if body is None and references_seen:

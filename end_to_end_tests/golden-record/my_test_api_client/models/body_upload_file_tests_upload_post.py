@@ -1,14 +1,16 @@
 import datetime
 import json
+from collections.abc import Mapping
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
+from .. import types
 from ..models.different_enum import DifferentEnum
-from ..types import UNSET, File, FileJsonType, Unset
+from ..types import UNSET, File, FileTypes, Unset
 
 if TYPE_CHECKING:
     from ..models.a_form_data import AFormData
@@ -41,8 +43,8 @@ class BodyUploadFileTestsUploadPost:
         a_date (Union[Unset, datetime.date]):
         some_number (Union[Unset, float]):
         some_nullable_number (Union[None, Unset, float]):
-        some_int_array (Union[Unset, List[Union[None, int]]]):
-        some_array (Union[List['AFormData'], None, Unset]):
+        some_int_array (Union[Unset, list[Union[None, int]]]):
+        some_array (Union[None, Unset, list['AFormData']]):
         some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
         some_enum (Union[Unset, DifferentEnum]): An enumeration.
     """
@@ -57,15 +59,15 @@ class BodyUploadFileTestsUploadPost:
     a_date: Union[Unset, datetime.date] = UNSET
     some_number: Union[Unset, float] = UNSET
     some_nullable_number: Union[None, Unset, float] = UNSET
-    some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
-    some_array: Union[List["AFormData"], None, Unset] = UNSET
+    some_int_array: Union[Unset, list[Union[None, int]]] = UNSET
+    some_array: Union[None, Unset, list["AFormData"]] = UNSET
     some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
     some_enum: Union[Unset, DifferentEnum] = UNSET
-    additional_properties: Dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
+    additional_properties: dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
         init=False, factory=dict
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
             BodyUploadFileTestsUploadPostSomeNullableObject,
         )
@@ -76,13 +78,13 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = self.some_object.to_dict()
 
-        some_nullable_object: Union[Dict[str, Any], None]
+        some_nullable_object: Union[None, dict[str, Any]]
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = self.some_nullable_object.to_dict()
         else:
             some_nullable_object = self.some_nullable_object
 
-        some_optional_file: Union[Unset, FileJsonType] = UNSET
+        some_optional_file: Union[Unset, FileTypes] = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
@@ -104,7 +106,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_nullable_number = self.some_nullable_number
 
-        some_int_array: Union[Unset, List[Union[None, int]]] = UNSET
+        some_int_array: Union[Unset, list[Union[None, int]]] = UNSET
         if not isinstance(self.some_int_array, Unset):
             some_int_array = []
             for some_int_array_item_data in self.some_int_array:
@@ -112,7 +114,7 @@ class BodyUploadFileTestsUploadPost:
                 some_int_array_item = some_int_array_item_data
                 some_int_array.append(some_int_array_item)
 
-        some_array: Union[List[Dict[str, Any]], None, Unset]
+        some_array: Union[None, Unset, list[dict[str, Any]]]
         if isinstance(self.some_array, Unset):
             some_array = UNSET
         elif isinstance(self.some_array, list):
@@ -124,7 +126,7 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_array = self.some_array
 
-        some_optional_object: Union[Unset, Dict[str, Any]] = UNSET
+        some_optional_object: Union[Unset, dict[str, Any]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = self.some_optional_object.to_dict()
 
@@ -132,9 +134,10 @@ class BodyUploadFileTestsUploadPost:
         if not isinstance(self.some_enum, Unset):
             some_enum = self.some_enum.value
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.to_dict()
+
         field_dict.update(
             {
                 "some_file": some_file,
@@ -166,119 +169,83 @@ class BodyUploadFileTestsUploadPost:
 
         return field_dict
 
-    def to_multipart(self) -> Dict[str, Any]:
-        some_file = self.some_file.to_tuple()
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
-        some_required_number = (None, str(self.some_required_number).encode(), "text/plain")
+        files.append(("some_file", self.some_file.to_tuple()))
 
-        some_object = (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")
+        files.append(("some_required_number", (None, str(self.some_required_number).encode(), "text/plain")))
 
-        some_nullable_object: Tuple[None, bytes, str]
+        files.append(("some_object", (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")))
 
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
-            some_nullable_object = (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json")
+            files.append(
+                (
+                    "some_nullable_object",
+                    (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json"),
+                )
+            )
         else:
-            some_nullable_object = (None, str(self.some_nullable_object).encode(), "text/plain")
+            files.append(("some_nullable_object", (None, str(self.some_nullable_object).encode(), "text/plain")))
 
-        some_optional_file: Union[Unset, FileJsonType] = UNSET
         if not isinstance(self.some_optional_file, Unset):
-            some_optional_file = self.some_optional_file.to_tuple()
+            files.append(("some_optional_file", self.some_optional_file.to_tuple()))
 
-        some_string = (
-            self.some_string
-            if isinstance(self.some_string, Unset)
-            else (None, str(self.some_string).encode(), "text/plain")
-        )
+        if not isinstance(self.some_string, Unset):
+            files.append(("some_string", (None, str(self.some_string).encode(), "text/plain")))
 
-        a_datetime: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_datetime, Unset):
-            a_datetime = self.a_datetime.isoformat().encode()
+            files.append(("a_datetime", (None, self.a_datetime.isoformat().encode(), "text/plain")))
 
-        a_date: Union[Unset, bytes] = UNSET
         if not isinstance(self.a_date, Unset):
-            a_date = self.a_date.isoformat().encode()
+            files.append(("a_date", (None, self.a_date.isoformat().encode(), "text/plain")))
 
-        some_number = (
-            self.some_number
-            if isinstance(self.some_number, Unset)
-            else (None, str(self.some_number).encode(), "text/plain")
-        )
+        if not isinstance(self.some_number, Unset):
+            files.append(("some_number", (None, str(self.some_number).encode(), "text/plain")))
 
-        some_nullable_number: Union[Tuple[None, bytes, str], Unset]
+        if not isinstance(self.some_nullable_number, Unset):
+            if isinstance(self.some_nullable_number, float):
+                files.append(("some_nullable_number", (None, str(self.some_nullable_number).encode(), "text/plain")))
+            else:
+                files.append(("some_nullable_number", (None, str(self.some_nullable_number).encode(), "text/plain")))
 
-        if isinstance(self.some_nullable_number, Unset):
-            some_nullable_number = UNSET
-        elif isinstance(self.some_nullable_number, float):
-            some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
-        else:
-            some_nullable_number = (None, str(self.some_nullable_number).encode(), "text/plain")
-
-        some_int_array: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_int_array, Unset):
-            _temp_some_int_array = []
-            for some_int_array_item_data in self.some_int_array:
-                some_int_array_item: Union[None, int]
-                some_int_array_item = some_int_array_item_data
-                _temp_some_int_array.append(some_int_array_item)
-            some_int_array = (None, json.dumps(_temp_some_int_array).encode(), "application/json")
+            for some_int_array_item_element in self.some_int_array:
+                if isinstance(some_int_array_item_element, int):
+                    files.append(("some_int_array", (None, str(some_int_array_item_element).encode(), "text/plain")))
+                else:
+                    files.append(("some_int_array", (None, str(some_int_array_item_element).encode(), "text/plain")))
 
-        some_array: Union[Tuple[None, bytes, str], Unset]
+        if not isinstance(self.some_array, Unset):
+            if isinstance(self.some_array, list):
+                for some_array_type_0_item_element in self.some_array:
+                    files.append(
+                        (
+                            "some_array",
+                            (None, json.dumps(some_array_type_0_item_element.to_dict()).encode(), "application/json"),
+                        )
+                    )
+            else:
+                files.append(("some_array", (None, str(self.some_array).encode(), "text/plain")))
 
-        if isinstance(self.some_array, Unset):
-            some_array = UNSET
-        elif isinstance(self.some_array, list):
-            _temp_some_array = []
-            for some_array_type_0_item_data in self.some_array:
-                some_array_type_0_item = some_array_type_0_item_data.to_dict()
-                _temp_some_array.append(some_array_type_0_item)
-            some_array = (None, json.dumps(_temp_some_array).encode(), "application/json")
-        else:
-            some_array = (None, str(self.some_array).encode(), "text/plain")
-
-        some_optional_object: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_optional_object, Unset):
-            some_optional_object = (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json")
+            files.append(
+                (
+                    "some_optional_object",
+                    (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json"),
+                )
+            )
 
-        some_enum: Union[Unset, Tuple[None, bytes, str]] = UNSET
         if not isinstance(self.some_enum, Unset):
-            some_enum = (None, str(self.some_enum.value).encode(), "text/plain")
+            files.append(("some_enum", (None, str(self.some_enum.value).encode(), "text/plain")))
 
-        field_dict: Dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = (None, json.dumps(prop.to_dict()).encode(), "application/json")
-        field_dict.update(
-            {
-                "some_file": some_file,
-                "some_required_number": some_required_number,
-                "some_object": some_object,
-                "some_nullable_object": some_nullable_object,
-            }
-        )
-        if some_optional_file is not UNSET:
-            field_dict["some_optional_file"] = some_optional_file
-        if some_string is not UNSET:
-            field_dict["some_string"] = some_string
-        if a_datetime is not UNSET:
-            field_dict["a_datetime"] = a_datetime
-        if a_date is not UNSET:
-            field_dict["a_date"] = a_date
-        if some_number is not UNSET:
-            field_dict["some_number"] = some_number
-        if some_nullable_number is not UNSET:
-            field_dict["some_nullable_number"] = some_nullable_number
-        if some_int_array is not UNSET:
-            field_dict["some_int_array"] = some_int_array
-        if some_array is not UNSET:
-            field_dict["some_array"] = some_array
-        if some_optional_object is not UNSET:
-            field_dict["some_optional_object"] = some_optional_object
-        if some_enum is not UNSET:
-            field_dict["some_enum"] = some_enum
+            files.append((prop_name, (None, json.dumps(prop.to_dict()).encode(), "application/json")))
 
-        return field_dict
+        return files
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.a_form_data import AFormData
         from ..models.body_upload_file_tests_upload_post_additional_property import (
             BodyUploadFileTestsUploadPostAdditionalProperty,
@@ -291,7 +258,7 @@ class BodyUploadFileTestsUploadPost:
             BodyUploadFileTestsUploadPostSomeOptionalObject,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         some_file = File(payload=BytesIO(d.pop("some_file")))
 
         some_required_number = d.pop("some_required_number")
@@ -360,7 +327,7 @@ class BodyUploadFileTestsUploadPost:
 
             some_int_array.append(some_int_array_item)
 
-        def _parse_some_array(data: object) -> Union[List["AFormData"], None, Unset]:
+        def _parse_some_array(data: object) -> Union[None, Unset, list["AFormData"]]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -378,7 +345,7 @@ class BodyUploadFileTestsUploadPost:
                 return some_array_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union[List["AFormData"], None, Unset], data)
+            return cast(Union[None, Unset, list["AFormData"]], data)
 
         some_array = _parse_some_array(d.pop("some_array", UNSET))
 
@@ -423,7 +390,7 @@ class BodyUploadFileTestsUploadPost:
         return body_upload_file_tests_upload_post
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> "BodyUploadFileTestsUploadPostAdditionalProperty":

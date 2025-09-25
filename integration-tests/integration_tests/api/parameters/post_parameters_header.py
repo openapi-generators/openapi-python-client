@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -16,8 +16,8 @@ def _get_kwargs(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     headers["Boolean-Header"] = "true" if boolean_header else "false"
 
     headers["String-Header"] = string_header
@@ -26,7 +26,7 @@ def _get_kwargs(
 
     headers["Integer-Header"] = str(integer_header)
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/parameters/header",
     }
@@ -38,14 +38,16 @@ def _get_kwargs(
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
-    if response.status_code == HTTPStatus.OK:
+    if response.status_code == 200:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
 
         return response_200
-    if response.status_code == HTTPStatus.BAD_REQUEST:
+
+    if response.status_code == 400:
         response_400 = PublicError.from_dict(response.json())
 
         return response_400
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:

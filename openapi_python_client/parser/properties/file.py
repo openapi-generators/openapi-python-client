@@ -22,7 +22,7 @@ class FileProperty(PropertyProtocol):
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
-    _json_type_string: ClassVar[str] = "FileJsonType"
+    _json_type_string: ClassVar[str] = "FileTypes"
     template: ClassVar[str] = "file_property.py.jinja"
 
     @classmethod
@@ -63,5 +63,5 @@ class FileProperty(PropertyProtocol):
             back to the root of the generated client.
         """
         imports = super().get_imports(prefix=prefix)
-        imports.update({f"from {prefix}types import File, FileJsonType", "from io import BytesIO"})
+        imports.update({f"from {prefix}types import File, FileTypes", "from io import BytesIO"})
         return imports

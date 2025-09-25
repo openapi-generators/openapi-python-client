@@ -34,9 +34,13 @@ from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadF
 from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
 from .different_enum import DifferentEnum
+from .extended import Extended
 from .free_form_model import FreeFormModel
 from .get_location_header_types_int_enum_header import GetLocationHeaderTypesIntEnumHeader
 from .get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
+from .get_models_allof_response_200 import GetModelsAllofResponse200
+from .get_models_oneof_with_required_const_response_200_type_0 import GetModelsOneofWithRequiredConstResponse200Type0
+from .get_models_oneof_with_required_const_response_200_type_1 import GetModelsOneofWithRequiredConstResponse200Type1
 from .http_validation_error import HTTPValidationError
 from .import_ import Import
 from .json_like_body import JsonLikeBody
@@ -58,6 +62,9 @@ from .model_with_circular_ref_in_additional_properties_a import ModelWithCircula
 from .model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
 from .model_with_date_time_property import ModelWithDateTimeProperty
 from .model_with_discriminated_union import ModelWithDiscriminatedUnion
+from .model_with_merged_properties import ModelWithMergedProperties
+from .model_with_merged_properties_string_to_enum import ModelWithMergedPropertiesStringToEnum
+from .model_with_no_properties import ModelWithNoProperties
 from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditionalProperties
 from .model_with_primitive_additional_properties_a_date_holder import ModelWithPrimitiveAdditionalPropertiesADateHolder
 from .model_with_property_ref import ModelWithPropertyRef
@@ -65,9 +72,10 @@ from .model_with_recursive_ref import ModelWithRecursiveRef
 from .model_with_recursive_ref_in_additional_properties import ModelWithRecursiveRefInAdditionalProperties
 from .model_with_union_property import ModelWithUnionProperty
 from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
-from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+from .model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
+from .model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 from .none import None_
+from .octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
 from .post_bodies_multiple_data_body import PostBodiesMultipleDataBody
 from .post_bodies_multiple_files_body import PostBodiesMultipleFilesBody
 from .post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
@@ -78,6 +86,9 @@ from .post_responses_unions_simple_before_complex_response_200 import PostRespon
 from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
 )
+from .status_code_patterns_response_2xx import StatusCodePatternsResponse2XX
+from .status_code_patterns_response_2xx_status import StatusCodePatternsResponse2XXStatus
+from .status_code_patterns_response_4xx import StatusCodePatternsResponse4XX
 from .test_inline_objects_body import TestInlineObjectsBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
 from .validation_error import ValidationError
@@ -111,9 +122,13 @@ __all__ = (
     "BodyUploadFileTestsUploadPostSomeObject",
     "BodyUploadFileTestsUploadPostSomeOptionalObject",
     "DifferentEnum",
+    "Extended",
     "FreeFormModel",
     "GetLocationHeaderTypesIntEnumHeader",
     "GetLocationHeaderTypesStringEnumHeader",
+    "GetModelsAllofResponse200",
+    "GetModelsOneofWithRequiredConstResponse200Type0",
+    "GetModelsOneofWithRequiredConstResponse200Type1",
     "HTTPValidationError",
     "Import",
     "JsonLikeBody",
@@ -133,6 +148,9 @@ __all__ = (
     "ModelWithCircularRefInAdditionalPropertiesB",
     "ModelWithDateTimeProperty",
     "ModelWithDiscriminatedUnion",
+    "ModelWithMergedProperties",
+    "ModelWithMergedPropertiesStringToEnum",
+    "ModelWithNoProperties",
     "ModelWithPrimitiveAdditionalProperties",
     "ModelWithPrimitiveAdditionalPropertiesADateHolder",
     "ModelWithPropertyRef",
@@ -140,9 +158,10 @@ __all__ = (
     "ModelWithRecursiveRefInAdditionalProperties",
     "ModelWithUnionProperty",
     "ModelWithUnionPropertyInlined",
-    "ModelWithUnionPropertyInlinedFruitType0",
-    "ModelWithUnionPropertyInlinedFruitType1",
+    "ModelWithUnionPropertyInlinedApples",
+    "ModelWithUnionPropertyInlinedBananas",
     "None_",
+    "OctetStreamTestsOctetStreamPostResponse200",
     "PostBodiesMultipleDataBody",
     "PostBodiesMultipleFilesBody",
     "PostBodiesMultipleJsonBody",
@@ -151,6 +170,9 @@ __all__ = (
     "PostNamingPropertyConflictWithImportResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
+    "StatusCodePatternsResponse2XX",
+    "StatusCodePatternsResponse2XXStatus",
+    "StatusCodePatternsResponse4XX",
     "TestInlineObjectsBody",
     "TestInlineObjectsResponse200",
     "ValidationError",

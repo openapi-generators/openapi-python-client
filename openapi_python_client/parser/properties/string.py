@@ -21,8 +21,6 @@ class StringProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
-    max_length: int | None = None
-    pattern: str | None = None
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
@@ -41,7 +39,6 @@ class StringProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
-        pattern: str | None = None,
     ) -> StringProperty | PropertyError:
         checked_default = cls.convert_value(default)
         return cls(
@@ -51,7 +48,6 @@ class StringProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
-            pattern=pattern,
         )
 
     @classmethod
@@ -69,4 +65,4 @@ class StringProperty(PropertyProtocol):
             return value
         if not isinstance(value, str):
             value = str(value)
-        return Value(repr(utils.remove_string_escapes(value)))
+        return Value(python_code=repr(utils.remove_string_escapes(value)), raw_value=value)

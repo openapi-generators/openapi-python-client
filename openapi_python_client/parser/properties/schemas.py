@@ -1,16 +1,16 @@
 __all__ = [
     "Class",
-    "Schemas",
     "Parameters",
     "ReferencePath",
-    "parse_reference_path",
-    "update_schemas_with_data",
-    "update_parameters_with_data",
-    "parameter_from_reference",
+    "Schemas",
     "parameter_from_data",
+    "parameter_from_reference",
+    "parse_reference_path",
+    "update_parameters_with_data",
+    "update_schemas_with_data",
 ]
 
-from typing import TYPE_CHECKING, Dict, List, NewType, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, NewType, Union, cast
 from urllib.parse import urlparse
 
 from attrs import define, evolve, field
@@ -22,8 +22,10 @@ from ...utils import ClassName, PythonIdentifier
 from ..errors import ParameterError, ParseError, PropertyError
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .model_property import ModelProperty
     from .property import Property
 else:
+    ModelProperty = "ModelProperty"
     Property = "Property"
 
 
@@ -44,6 +46,13 @@ def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
     return cast(ReferencePath, parsed.fragment)
 
 
+def get_reference_simple_name(ref_path: str) -> str:
+    """
+    Takes a path like `/components/schemas/NameOfThing` and returns a string like `NameOfThing`.
+    """
+    return ref_path.split("/")[-1]
+
+
 @define
 class Class:
     """Represents Python class which will be generated from an OpenAPI schema"""
@@ -54,7 +63,7 @@ class Class:
     @staticmethod
     def from_string(*, string: str, config: Config) -> "Class":
         """Get a Class from an arbitrary string"""
-        class_name = string.split("/")[-1]  # Get rid of ref path stuff
+        class_name = get_reference_simple_name(string)  # Get rid of ref path stuff
         class_name = ClassName(class_name, config.field_prefix)
         override = config.class_overrides.get(class_name)
 
@@ -74,12 +83,13 @@ class Class:
 class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
-    classes_by_reference: Dict[ReferencePath, Property] = field(factory=dict)
-    dependencies: Dict[ReferencePath, Set[Union[ReferencePath, ClassName]]] = field(factory=dict)
-    classes_by_name: Dict[ClassName, Property] = field(factory=dict)
-    errors: List[ParseError] = field(factory=list)
+    classes_by_reference: dict[ReferencePath, Property] = field(factory=dict)
+    dependencies: dict[ReferencePath, set[Union[ReferencePath, ClassName]]] = field(factory=dict)
+    classes_by_name: dict[ClassName, Property] = field(factory=dict)
+    models_to_process: list[ModelProperty] = field(factory=list)
+    errors: list[ParseError] = field(factory=list)
 
-    def add_dependencies(self, ref_path: ReferencePath, roots: Set[Union[ReferencePath, ClassName]]) -> None:
+    def add_dependencies(self, ref_path: ReferencePath, roots: set[Union[ReferencePath, ClassName]]) -> None:
         """Record new dependencies on the given ReferencePath
 
         Args:
@@ -108,7 +118,7 @@ def update_schemas_with_data(
     See Also:
         - https://swagger.io/docs/specification/using-ref/
     """
-    from . import property_from_data
+    from . import property_from_data  # noqa: PLC0415
 
     prop: Union[PropertyError, Property]
     prop, schemas = property_from_data(
@@ -140,9 +150,9 @@ def update_schemas_with_data(
 class Parameters:
     """Structure for containing all defined, shareable, and reusable parameters"""
 
-    classes_by_reference: Dict[ReferencePath, Parameter] = field(factory=dict)
-    classes_by_name: Dict[ClassName, Parameter] = field(factory=dict)
-    errors: List[ParseError] = field(factory=list)
+    classes_by_reference: dict[ReferencePath, Parameter] = field(factory=dict)
+    classes_by_name: dict[ClassName, Parameter] = field(factory=dict)
+    errors: list[ParseError] = field(factory=list)
 
 
 def parameter_from_data(
@@ -151,7 +161,7 @@ def parameter_from_data(
     data: Union[oai.Reference, oai.Parameter],
     parameters: Parameters,
     config: Config,
-) -> Tuple[Union[Parameter, ParameterError], Parameters]:
+) -> tuple[Union[Parameter, ParameterError], Parameters]:
     """Generates parameters from an OpenAPI Parameter spec."""
 
     if isinstance(data, oai.Reference):

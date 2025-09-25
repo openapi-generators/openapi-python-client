@@ -14,10 +14,12 @@ from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
 from .list_property import ListProperty
+from .literal_enum_property import LiteralEnumProperty
 from .model_property import ModelProperty
 from .none import NoneProperty
 from .string import StringProperty
 from .union import UnionProperty
+from .uuid import UuidProperty
 
 Property: TypeAlias = Union[
     AnyProperty,
@@ -26,6 +28,7 @@ Property: TypeAlias = Union[
     DateProperty,
     DateTimeProperty,
     EnumProperty,
+    LiteralEnumProperty,
     FileProperty,
     FloatProperty,
     IntProperty,
@@ -34,4 +37,5 @@ Property: TypeAlias = Union[
     NoneProperty,
     StringProperty,
     UnionProperty,
+    UuidProperty,
 ]
