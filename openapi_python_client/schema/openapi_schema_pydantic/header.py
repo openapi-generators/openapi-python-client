@@ -1,6 +1,7 @@
 from pydantic import ConfigDict, Field
 
 from ..parameter_location import ParameterLocation
+from ..style import Style
 from .parameter import Parameter
 
 
@@ -20,6 +21,7 @@ class Header(Parameter):
 
     name: str = Field(default="")
     param_in: ParameterLocation = Field(default=ParameterLocation.HEADER, alias="in")
+    style: Style = Field(default=Style.SIMPLE)
     model_config = ConfigDict(
         # `Parameter` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,
