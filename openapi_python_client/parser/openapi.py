@@ -282,6 +282,7 @@ class Endpoint:
                 schemas=schemas,
                 parent_name=endpoint.name,
                 config=config,
+                explode=param.explode,
             )
 
             if isinstance(prop, ParseError):
