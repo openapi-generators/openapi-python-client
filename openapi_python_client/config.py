@@ -95,12 +95,12 @@ class Config:
             post_hooks = config_file.post_hooks
         elif meta_type == MetaType.NONE:
             post_hooks = [
-                "ruff check . --fix --extend-select=I",
+                "ruff check . --fix-only --extend-select=I",
                 "ruff format .",
             ]
         else:
             post_hooks = [
-                "ruff check --fix .",
+                "ruff check --fix-only .",
                 "ruff format .",
             ]
 

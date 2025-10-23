@@ -166,7 +166,7 @@ In the config file, there's an easy way to tell `openapi-python-client` to run a
 
 ```yaml
 post_hooks:
-   - "ruff check . --fix"
+   - "ruff check . --fix-only"
    - "ruff format ."
 ```
 
