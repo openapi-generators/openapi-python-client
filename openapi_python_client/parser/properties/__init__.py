@@ -147,6 +147,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
     config: Config,
     process_properties: bool = True,
     roots: set[ReferencePath | utils.ClassName] | None = None,
+    explode: bool | None = None,
 ) -> tuple[Property | PropertyError, Schemas]:
     """Generate a Property from the OpenAPI dictionary representation of it"""
     roots = roots or set()
@@ -286,6 +287,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             config=config,
             process_properties=process_properties,
             roots=roots,
+            explode=explode,
         )
     if data.type == oai.DataType.OBJECT or data.allOf or (data.type is None and data.properties):
         return ModelProperty.build(

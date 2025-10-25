@@ -1,8 +1,9 @@
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..parameter_location import ParameterLocation
+from ..style import Style
 from .example import Example
 from .media_type import MediaType
 from .reference import ReferenceOr
@@ -27,13 +28,49 @@ class Parameter(BaseModel):
     required: bool = False
     deprecated: bool = False
     allowEmptyValue: bool = False
-    style: Optional[str] = None
-    explode: bool = False
+    style: Optional[Style] = None
+    explode: Optional[bool] = None
     allowReserved: bool = False
     param_schema: Optional[ReferenceOr[Schema]] = Field(default=None, alias="schema")
     example: Optional[Any] = None
     examples: Optional[dict[str, ReferenceOr[Example]]] = None
     content: Optional[dict[str, MediaType]] = None
+
+    @model_validator(mode="after")
+    @classmethod
+    def validate_dependencies(cls, model: "Parameter") -> "Parameter":
+        param_in = model.param_in
+        explode = model.explode
+
+        if model.style is None:
+            if param_in in [ParameterLocation.PATH, ParameterLocation.HEADER]:
+                model.style = Style.SIMPLE
+            elif param_in in [ParameterLocation.QUERY, ParameterLocation.COOKIE]:
+                model.style = Style.FORM
+
+        # Validate style based on parameter location, not all combinations are valid.
+        # https://swagger.io/docs/specification/v3_0/serialization/
+        if param_in == ParameterLocation.PATH:
+            if model.style not in (Style.SIMPLE, Style.LABEL, Style.MATRIX):
+                raise ValueError(f"Invalid style '{model.style}' for path parameter")
+        elif param_in == ParameterLocation.QUERY:
+            if model.style not in (Style.FORM, Style.SPACE_DELIMITED, Style.PIPE_DELIMITED, Style.DEEP_OBJECT):
+                raise ValueError(f"Invalid style '{model.style}' for query parameter")
+        elif param_in == ParameterLocation.HEADER:
+            if model.style != Style.SIMPLE:
+                raise ValueError(f"Invalid style '{model.style}' for header parameter")
+        elif param_in == ParameterLocation.COOKIE:
+            if model.style != Style.FORM:
+                raise ValueError(f"Invalid style '{model.style}' for cookie parameter")
+
+        if explode is None:
+            if model.style == Style.FORM:
+                model.explode = True
+            else:
+                model.explode = False
+
+        return model
+
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,

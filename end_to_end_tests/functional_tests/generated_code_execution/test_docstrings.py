@@ -111,6 +111,13 @@ paths:
           schema:
             type: boolean
             description: Do you want fries with that?
+        - name: array
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "200":
           description: Success!
@@ -160,4 +167,5 @@ class TestEndpointDocstrings:
             "id (str): Which one.",
             "index (int):",
             "fries (Union[Unset, bool]): Do you want fries with that?",
+            "array (Union[Unset, list[str]]):",
         ]
