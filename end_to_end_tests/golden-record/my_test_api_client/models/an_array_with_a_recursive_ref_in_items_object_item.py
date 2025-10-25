@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -13,14 +15,14 @@ T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectItem")
 class AnArrayWithARecursiveRefInItemsObjectItem:
     """
     Attributes:
-        recursive (Union[Unset, list['AnArrayWithARecursiveRefInItemsObjectItem']]):
+        recursive (list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset):
     """
 
-    recursive: Union[Unset, list["AnArrayWithARecursiveRefInItemsObjectItem"]] = UNSET
+    recursive: list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        recursive: Union[Unset, list[dict[str, Any]]] = UNSET
+        recursive: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.recursive, Unset):
             recursive = []
             for componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data in self.recursive:

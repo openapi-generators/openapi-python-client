@@ -2,7 +2,7 @@ import re
 from collections.abc import Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Protocol
 
 from pydantic import ValidationError
 
@@ -49,8 +49,8 @@ class EndpointCollection:
         data: dict[str, oai.PathItem],
         schemas: Schemas,
         parameters: Parameters,
-        request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
-        responses: dict[str, Union[oai.Response, oai.Reference]],
+        request_bodies: dict[str, oai.RequestBody | oai.Reference],
+        responses: dict[str, oai.Response | oai.Reference],
         config: Config,
     ) -> tuple[dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
@@ -60,7 +60,7 @@ class EndpointCollection:
 
         for path, path_data in data.items():
             for method in methods:
-                operation: Optional[oai.Operation] = getattr(path_data, method)
+                operation: oai.Operation | None = getattr(path_data, method)
                 if operation is None:
                     continue
 
@@ -125,7 +125,7 @@ class RequestBodyParser(Protocol):
 
     def __call__(
         self, *, body: oai.RequestBody, schemas: Schemas, parent_name: str, config: Config
-    ) -> tuple[Union[Property, PropertyError, None], Schemas]: ...  # pragma: no cover
+    ) -> tuple[Property | PropertyError | None, Schemas]: ...  # pragma: no cover
 
 
 @dataclass
@@ -136,11 +136,11 @@ class Endpoint:
 
     path: str
     method: str
-    description: Optional[str]
+    description: str | None
     name: str
     requires_security: bool
     tags: list[PythonIdentifier]
-    summary: Optional[str] = ""
+    summary: str | None = ""
     relative_imports: set[str] = field(default_factory=set)
     query_parameters: list[Property] = field(default_factory=list)
     path_parameters: list[Property] = field(default_factory=list)
@@ -156,7 +156,7 @@ class Endpoint:
         endpoint: "Endpoint",
         data: oai.Responses,
         schemas: Schemas,
-        responses: dict[str, Union[oai.Response, oai.Reference]],
+        responses: dict[str, oai.Response | oai.Reference],
         config: Config,
     ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
@@ -201,11 +201,11 @@ class Endpoint:
     def add_parameters(
         *,
         endpoint: "Endpoint",
-        data: Union[oai.Operation, oai.PathItem],
+        data: oai.Operation | oai.PathItem,
         schemas: Schemas,
         parameters: Parameters,
         config: Config,
-    ) -> tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
+    ) -> tuple["Endpoint | ParseError", Schemas, Parameters]:
         """Process the defined `parameters` for an Endpoint.
 
         Any existing parameters will be ignored, so earlier instances of a parameter take precedence. PathItem
@@ -312,8 +312,8 @@ class Endpoint:
         self,
         *,
         config: Config,
-        previously_modified_params: Optional[set[tuple[oai.ParameterLocation, str]]] = None,
-    ) -> Union["Endpoint", ParseError]:
+        previously_modified_params: set[tuple[oai.ParameterLocation, str]] | None = None,
+    ) -> "Endpoint | ParseError":
         """Check for conflicting parameters
 
         For parameters that have the same python_name but are in different locations, append the location to the
@@ -366,7 +366,7 @@ class Endpoint:
         return self
 
     @staticmethod
-    def sort_parameters(*, endpoint: "Endpoint") -> Union["Endpoint", ParseError]:
+    def sort_parameters(*, endpoint: "Endpoint") -> "Endpoint | ParseError":
         """
         Sorts the path parameters of an `endpoint` so that they match the order declared in `endpoint.path`.
 
@@ -403,10 +403,10 @@ class Endpoint:
         tags: list[PythonIdentifier],
         schemas: Schemas,
         parameters: Parameters,
-        request_bodies: dict[str, Union[oai.RequestBody, oai.Reference]],
-        responses: dict[str, Union[oai.Response, oai.Reference]],
+        request_bodies: dict[str, oai.RequestBody | oai.Reference],
+        responses: dict[str, oai.Response | oai.Reference],
         config: Config,
-    ) -> tuple[Union["Endpoint", ParseError], Schemas, Parameters]:
+    ) -> tuple["Endpoint | ParseError", Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
 
         if data.operationId is None:
@@ -469,12 +469,12 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string(quoted=False) for response in self.responses})
+        types = sorted({response.prop.get_type_string() for response in self.responses})
         if len(types) == 0:
             return "Any"
         if len(types) == 1:
             return types[0]
-        return f"Union[{', '.join(types)}]"
+        return " | ".join(types)
 
     def iter_all_parameters(self) -> Iterator[tuple[oai.ParameterLocation, Property]]:
         """Iterate through all the parameters of this endpoint"""
@@ -499,15 +499,15 @@ class GeneratorData:
     """All the data needed to generate a client"""
 
     title: str
-    description: Optional[str]
+    description: str | None
     version: str
     models: list[ModelProperty]
     errors: list[ParseError]
     endpoint_collections_by_tag: dict[utils.PythonIdentifier, EndpointCollection]
-    enums: list[Union[EnumProperty, LiteralEnumProperty]]
+    enums: list[EnumProperty | LiteralEnumProperty]
 
     @staticmethod
-    def from_dict(data: dict[str, Any], *, config: Config) -> Union["GeneratorData", GeneratorError]:
+    def from_dict(data: dict[str, Any], *, config: Config) -> "GeneratorData | GeneratorError":
         """Create an OpenAPI from dict"""
         try:
             openapi = oai.OpenAPI.model_validate(data)
@@ -540,7 +540,7 @@ class GeneratorData:
         )
 
         enums = [
-            prop for prop in schemas.classes_by_name.values() if isinstance(prop, (EnumProperty, LiteralEnumProperty))
+            prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty | LiteralEnumProperty)
         ]
         models = [prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty)]
 

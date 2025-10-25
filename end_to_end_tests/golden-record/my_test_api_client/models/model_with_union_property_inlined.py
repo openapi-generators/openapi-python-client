@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -17,15 +19,15 @@ T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 class ModelWithUnionPropertyInlined:
     """
     Attributes:
-        fruit (Union['ModelWithUnionPropertyInlinedApples', 'ModelWithUnionPropertyInlinedBananas', Unset]):
+        fruit (ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset):
     """
 
-    fruit: Union["ModelWithUnionPropertyInlinedApples", "ModelWithUnionPropertyInlinedBananas", Unset] = UNSET
+    fruit: ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
 
-        fruit: Union[Unset, dict[str, Any]]
+        fruit: dict[str, Any] | Unset
         if isinstance(self.fruit, Unset):
             fruit = UNSET
         elif isinstance(self.fruit, ModelWithUnionPropertyInlinedApples):
@@ -50,7 +52,7 @@ class ModelWithUnionPropertyInlined:
 
         def _parse_fruit(
             data: object,
-        ) -> Union["ModelWithUnionPropertyInlinedApples", "ModelWithUnionPropertyInlinedBananas", Unset]:
+        ) -> ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset:
             if isinstance(data, Unset):
                 return data
             try:

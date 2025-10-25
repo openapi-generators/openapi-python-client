@@ -1,5 +1,3 @@
-from typing import ForwardRef, Union
-
 from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
     assert_model_property_type_hint,
@@ -23,15 +21,14 @@ components:
 )
 @with_generated_code_imports(
     ".models.MyModel",
-    ".types.Unset"
 )
 class TestSimpleTypeList:
     def test_decode_encode(self, MyModel):
         assert_model_decode_encode(MyModel, {"stringOrIntProp": "a"}, MyModel(string_or_int_prop="a"))
         assert_model_decode_encode(MyModel, {"stringOrIntProp": 1}, MyModel(string_or_int_prop=1))
 
-    def test_type_hints(self, MyModel, Unset):
-        assert_model_property_type_hint(MyModel, "string_or_int_prop", Union[str, int, Unset])
+    def test_type_hints(self, MyModel):
+        assert_model_property_type_hint(MyModel, "string_or_int_prop", "int | str | Unset")
 
 
 @with_generated_client_fixture(
@@ -92,7 +89,6 @@ components:
     ".models.ModelWithRequiredUnion",
     ".models.ModelWithNestedUnion",
     ".models.ModelWithUnionOfOne",
-    ".types.Unset"
 )
 class TestOneOf:
     def test_disambiguate_objects_via_required_properties(self, ThingA, ThingB, ModelWithUnion):
@@ -131,19 +127,19 @@ class TestOneOf:
             ModelWithNestedUnion(thing_or_value=3),
         )
 
-    def test_type_hints(self, ModelWithUnion, ModelWithRequiredUnion, ModelWithUnionOfOne, ThingA, Unset):
+    def test_type_hints(self, ModelWithUnion, ModelWithRequiredUnion, ModelWithUnionOfOne, ThingA):
         assert_model_property_type_hint(
             ModelWithUnion,
             "thing",
-            Union[ForwardRef("ThingA"), ForwardRef("ThingB"), Unset],
+            "ThingA | ThingB | Unset",
         )
         assert_model_property_type_hint(
             ModelWithRequiredUnion,
             "thing",
-            Union[ForwardRef("ThingA"), ForwardRef("ThingB")],
+            "ThingA | ThingB",
         )
         assert_model_property_type_hint(
-            ModelWithUnionOfOne, "thing", Union[ForwardRef("ThingA"), Unset]
+            ModelWithUnionOfOne, "thing", "ThingA | Unset"
         )
         assert_model_property_type_hint(
             ModelWithUnionOfOne, "required_thing", "ThingA"

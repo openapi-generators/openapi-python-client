@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from .oauth_flow import OAuthFlow
@@ -14,8 +12,8 @@ class OAuthFlows(BaseModel):
         - https://swagger.io/docs/specification/authentication/oauth2/
     """
 
-    implicit: Optional[OAuthFlow] = None
-    password: Optional[OAuthFlow] = None
-    clientCredentials: Optional[OAuthFlow] = None
-    authorizationCode: Optional[OAuthFlow] = None
+    implicit: OAuthFlow | None = None
+    password: OAuthFlow | None = None
+    clientCredentials: OAuthFlow | None = None
+    authorizationCode: OAuthFlow | None = None
     model_config = ConfigDict(extra="allow")

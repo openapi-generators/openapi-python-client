@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from .callback import Callback
@@ -25,15 +23,15 @@ class Components(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
-    schemas: Optional[dict[str, ReferenceOr[Schema]]] = None
-    responses: Optional[dict[str, ReferenceOr[Response]]] = None
-    parameters: Optional[dict[str, ReferenceOr[Parameter]]] = None
-    examples: Optional[dict[str, ReferenceOr[Example]]] = None
-    requestBodies: Optional[dict[str, ReferenceOr[RequestBody]]] = None
-    headers: Optional[dict[str, ReferenceOr[Header]]] = None
-    securitySchemes: Optional[dict[str, ReferenceOr[SecurityScheme]]] = None
-    links: Optional[dict[str, ReferenceOr[Link]]] = None
-    callbacks: Optional[dict[str, ReferenceOr[Callback]]] = None
+    schemas: dict[str, ReferenceOr[Schema]] | None = None
+    responses: dict[str, ReferenceOr[Response]] | None = None
+    parameters: dict[str, ReferenceOr[Parameter]] | None = None
+    examples: dict[str, ReferenceOr[Example]] | None = None
+    requestBodies: dict[str, ReferenceOr[RequestBody]] | None = None
+    headers: dict[str, ReferenceOr[Header]] | None = None
+    securitySchemes: dict[str, ReferenceOr[SecurityScheme]] | None = None
+    links: dict[str, ReferenceOr[Link]] | None = None
+    callbacks: dict[str, ReferenceOr[Callback]] | None = None
     model_config = ConfigDict(
         # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
         defer_build=True,

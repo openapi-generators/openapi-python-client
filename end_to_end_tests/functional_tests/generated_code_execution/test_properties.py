@@ -1,5 +1,4 @@
 import datetime
-from typing import Any, ForwardRef, Union
 import uuid
 import pytest
 
@@ -69,9 +68,9 @@ class TestRequiredAndOptionalProperties:
         with pytest.raises(KeyError):
             DerivedModel.from_dict({"req1": "a", "req2": "b"})
 
-    def test_type_hints(self, MyModel, Unset):
-        assert_model_property_type_hint(MyModel, "req1", str)
-        assert_model_property_type_hint(MyModel, "opt", Union[str, Unset])
+    def test_type_hints(self, MyModel):
+        assert_model_property_type_hint(MyModel, "req1", "str")
+        assert_model_property_type_hint(MyModel, "opt", "str | Unset")
 
 
 @with_generated_client_fixture(
@@ -95,7 +94,6 @@ components:
 @with_generated_code_imports(
     ".models.MyModel",
     ".models.AnyObject",
-    ".types.Unset",
 )
 class TestBasicModelProperties:
     def test_decode_encode(self, MyModel, AnyObject):
@@ -135,14 +133,14 @@ class TestBasicModelProperties:
             # very meaningful
             MyModel.from_dict(bad_data)
 
-    def test_type_hints(self, MyModel, Unset):
-        assert_model_property_type_hint(MyModel, "boolean_prop", Union[bool, Unset])
-        assert_model_property_type_hint(MyModel, "string_prop", Union[str, Unset])
-        assert_model_property_type_hint(MyModel, "number_prop", Union[float, Unset])
-        assert_model_property_type_hint(MyModel, "int_prop", Union[int, Unset])
-        assert_model_property_type_hint(MyModel, "any_object_prop", Union[ForwardRef("AnyObject"), Unset])
-        assert_model_property_type_hint(MyModel, "null_prop", Union[None, Unset])
-        assert_model_property_type_hint(MyModel, "any_prop", Union[Any, Unset])
+    def test_type_hints(self, MyModel):
+        assert_model_property_type_hint(MyModel, "boolean_prop", "bool | Unset")
+        assert_model_property_type_hint(MyModel, "string_prop", "str | Unset")
+        assert_model_property_type_hint(MyModel, "number_prop", "float | Unset")
+        assert_model_property_type_hint(MyModel, "int_prop", "int | Unset")
+        assert_model_property_type_hint(MyModel, "any_object_prop", "AnyObject | Unset")
+        assert_model_property_type_hint(MyModel, "null_prop", "None | Unset")
+        assert_model_property_type_hint(MyModel, "any_prop", "Any | Unset")
 
 
 @with_generated_client_fixture(
@@ -160,7 +158,6 @@ components:
 )
 @with_generated_code_imports(
     ".models.MyModel",
-    ".types.Unset",
 )
 class TestSpecialStringFormats:
     def test_date(self, MyModel):
@@ -182,11 +179,11 @@ class TestSpecialStringFormats:
         json_data = {"unknownFormatProp": "whatever"}
         assert_model_decode_encode(MyModel, json_data, MyModel(unknown_format_prop="whatever"))
 
-    def test_type_hints(self, MyModel, Unset):
-        assert_model_property_type_hint(MyModel, "date_prop", Union[datetime.date, Unset])
-        assert_model_property_type_hint(MyModel, "date_time_prop", Union[datetime.datetime, Unset])
-        assert_model_property_type_hint(MyModel, "uuid_prop", Union[uuid.UUID, Unset])
-        assert_model_property_type_hint(MyModel, "unknown_format_prop", Union[str, Unset])
+    def test_type_hints(self, MyModel):
+        assert_model_property_type_hint(MyModel, "date_prop", "datetime.date | Unset")
+        assert_model_property_type_hint(MyModel, "date_time_prop", "datetime.datetime | Unset")
+        assert_model_property_type_hint(MyModel, "uuid_prop", "UUID | Unset")
+        assert_model_property_type_hint(MyModel, "unknown_format_prop", "str | Unset")
 
 
 @with_generated_client_fixture(

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -27,9 +27,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[list["AModel"]]:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[AModel] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -46,9 +44,7 @@ def _parse_response(
         return None
 
 
-def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[list["AModel"]]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,9 +55,9 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostUserListBody,
-) -> Response[list["AModel"]]:
+) -> Response[list[AModel]]:
     """Post List
 
      Post a list of things
@@ -74,7 +70,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list['AModel']]
+        Response[list[AModel]]
     """
 
     kwargs = _get_kwargs(
@@ -90,9 +86,9 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostUserListBody,
-) -> Optional[list["AModel"]]:
+) -> list[AModel] | None:
     """Post List
 
      Post a list of things
@@ -105,7 +101,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list['AModel']
+        list[AModel]
     """
 
     return sync_detailed(
@@ -116,9 +112,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostUserListBody,
-) -> Response[list["AModel"]]:
+) -> Response[list[AModel]]:
     """Post List
 
      Post a list of things
@@ -131,7 +127,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list['AModel']]
+        Response[list[AModel]]
     """
 
     kwargs = _get_kwargs(
@@ -145,9 +141,9 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostUserListBody,
-) -> Optional[list["AModel"]]:
+) -> list[AModel] | None:
     """Post List
 
      Post a list of things
@@ -160,7 +156,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list['AModel']
+        list[AModel]
     """
 
     return (

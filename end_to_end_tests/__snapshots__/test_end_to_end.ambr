@@ -2,8 +2,8 @@
 # name: test_documents_with_errors[bad-status-code]
   '''
   Generating /test-documents-with-errors
-  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   WARNING parsing GET / within default.
   
   Invalid response status code pattern: abcdef, response will be omitted from generated client
@@ -16,8 +16,8 @@
 # name: test_documents_with_errors[circular-body-ref]
   '''
   Generating /test-documents-with-errors
-  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   WARNING parsing POST / within default. Endpoint will not be generated.
   
   Circular $ref in request body
@@ -30,8 +30,8 @@
 # name: test_documents_with_errors[invalid-uuid-defaults]
   '''
   Generating /test-documents-with-errors
-  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   WARNING parsing PUT / within default. Endpoint will not be generated.
   
   cannot parse parameter of endpoint put_: Invalid UUID value: 3
@@ -49,8 +49,8 @@
 # name: test_documents_with_errors[missing-body-ref]
   '''
   Generating /test-documents-with-errors
-  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   WARNING parsing POST / within default. Endpoint will not be generated.
   
   Could not resolve $ref #/components/requestBodies/body in request body
@@ -63,8 +63,8 @@
 # name: test_documents_with_errors[optional-path-param]
   '''
   Generating /test-documents-with-errors
-  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   
+  Warning(s) encountered while generating. Client was generated, but some pieces may be missing
   WARNING parsing GET /{optional} within default. Endpoint will not be generated.
   
   Path parameter must be required

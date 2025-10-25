@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -20,8 +20,8 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX | None:
     if 200 <= response.status_code <= 299:
         response_2xx = StatusCodePatternsResponse2XX.from_dict(response.json())
 
@@ -39,8 +39,8 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -51,8 +51,8 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    client: AuthenticatedClient | Client,
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
     """Status Code Patterns
 
     Raises:
@@ -60,7 +60,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]
+        Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]
     """
 
     kwargs = _get_kwargs()
@@ -74,8 +74,8 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    client: AuthenticatedClient | Client,
+) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX | None:
     """Status Code Patterns
 
     Raises:
@@ -83,7 +83,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]
+        StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX
     """
 
     return sync_detailed(
@@ -93,8 +93,8 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    client: AuthenticatedClient | Client,
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
     """Status Code Patterns
 
     Raises:
@@ -102,7 +102,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]
+        Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]
     """
 
     kwargs = _get_kwargs()
@@ -114,8 +114,8 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]]:
+    client: AuthenticatedClient | Client,
+) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX | None:
     """Status Code Patterns
 
     Raises:
@@ -123,7 +123,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[StatusCodePatternsResponse2XX, StatusCodePatternsResponse4XX]
+        StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX
     """
 
     return (

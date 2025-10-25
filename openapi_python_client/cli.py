@@ -2,7 +2,6 @@ import codecs
 from collections.abc import Sequence
 from pathlib import Path
 from pprint import pformat
-from typing import Optional, Union
 
 import typer
 
@@ -21,15 +20,15 @@ def _version_callback(value: bool) -> None:
 
 def _process_config(
     *,
-    url: Optional[str],
-    path: Optional[Path],
-    config_path: Optional[Path],
+    url: str | None,
+    path: Path | None,
+    config_path: Path | None,
     meta_type: MetaType,
     file_encoding: str,
     overwrite: bool,
-    output_path: Optional[Path],
+    output_path: Path | None,
 ) -> Config:
-    source: Union[Path, str]
+    source: Path | str
     if url and not path:
         source = url
     elif path and not url:
@@ -70,16 +69,16 @@ def cli(
 
 def _print_parser_error(err: GeneratorError, color: str) -> None:
     typer.secho(err.header, bold=True, fg=color, err=True)
-    typer.echo()
+    typer.echo(err=True)
     if err.detail:
         typer.secho(err.detail, fg=color, err=True)
-        typer.echo()
+        typer.echo(err=True)
 
     if isinstance(err, ParseError) and err.data is not None:
         formatted_data = pformat(err.data)
         typer.secho(formatted_data, fg=color, err=True)
 
-    typer.echo()
+    typer.echo(err=True)
 
 
 def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = False) -> None:
@@ -125,9 +124,9 @@ def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = Fals
 
 @app.command()
 def generate(
-    url: Optional[str] = typer.Option(None, help="A URL to read the OpenAPI document from"),
-    path: Optional[Path] = typer.Option(None, help="A path to the OpenAPI document"),
-    custom_template_path: Optional[Path] = typer.Option(
+    url: str | None = typer.Option(None, help="A URL to read the OpenAPI document from"),
+    path: Path | None = typer.Option(None, help="A path to the OpenAPI document"),
+    custom_template_path: Path | None = typer.Option(
         None,
         help="A path to a directory containing custom template(s)",
         file_okay=False,
@@ -140,10 +139,10 @@ def generate(
         help="The type of metadata you want to generate.",
     ),
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config_path: Optional[Path] = typer.Option(None, "--config", help="Path to the config file to use"),
+    config_path: Path | None = typer.Option(None, "--config", help="Path to the config file to use"),
     fail_on_warning: bool = False,
     overwrite: bool = typer.Option(False, help="Overwrite the existing client if it exists"),
-    output_path: Optional[Path] = typer.Option(
+    output_path: Path | None = typer.Option(
         None,
         help="Path to write the generated code to. "
         "Defaults to the OpenAPI document title converted to kebab or snake case (depending on meta type). "

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -14,14 +16,14 @@ T = TypeVar("T", bound="AllOfHasPropertiesButNoType")
 class AllOfHasPropertiesButNoType:
     """
     Attributes:
-        a_sub_property (Union[Unset, str]):
-        type_ (Union[Unset, str]):
-        type_enum (Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum]):
+        a_sub_property (str | Unset):
+        type_ (str | Unset):
+        type_enum (AllOfHasPropertiesButNoTypeTypeEnum | Unset):
     """
 
-    a_sub_property: Union[Unset, str] = UNSET
-    type_: Union[Unset, str] = UNSET
-    type_enum: Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum] = UNSET
+    a_sub_property: str | Unset = UNSET
+    type_: str | Unset = UNSET
+    type_enum: AllOfHasPropertiesButNoTypeTypeEnum | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -29,7 +31,7 @@ class AllOfHasPropertiesButNoType:
 
         type_ = self.type_
 
-        type_enum: Union[Unset, int] = UNSET
+        type_enum: int | Unset = UNSET
         if not isinstance(self.type_enum, Unset):
             type_enum = self.type_enum.value
 
@@ -53,7 +55,7 @@ class AllOfHasPropertiesButNoType:
         type_ = d.pop("type", UNSET)
 
         _type_enum = d.pop("type_enum", UNSET)
-        type_enum: Union[Unset, AllOfHasPropertiesButNoTypeTypeEnum]
+        type_enum: AllOfHasPropertiesButNoTypeTypeEnum | Unset
         if isinstance(_type_enum, Unset):
             type_enum = UNSET
         else:

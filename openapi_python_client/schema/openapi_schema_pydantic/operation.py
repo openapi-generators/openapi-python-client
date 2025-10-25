@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
 
 from .callback import Callback
@@ -20,19 +18,19 @@ class Operation(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
     """
 
-    tags: Optional[list[str]] = None
-    summary: Optional[str] = None
-    description: Optional[str] = None
-    externalDocs: Optional[ExternalDocumentation] = None
-    operationId: Optional[str] = None
-    parameters: Optional[list[ReferenceOr[Parameter]]] = None
-    request_body: Optional[ReferenceOr[RequestBody]] = Field(None, alias="requestBody")
+    tags: list[str] | None = None
+    summary: str | None = None
+    description: str | None = None
+    externalDocs: ExternalDocumentation | None = None
+    operationId: str | None = None
+    parameters: list[ReferenceOr[Parameter]] | None = None
+    request_body: ReferenceOr[RequestBody] | None = Field(None, alias="requestBody")
     responses: Responses
-    callbacks: Optional[dict[str, Callback]] = None
+    callbacks: dict[str, Callback] | None = None
 
     deprecated: bool = False
-    security: Optional[list[SecurityRequirement]] = None
-    servers: Optional[list[Server]] = None
+    security: list[SecurityRequirement] | None = None
+    servers: list[Server] | None = None
     model_config = ConfigDict(
         # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
         defer_build=True,

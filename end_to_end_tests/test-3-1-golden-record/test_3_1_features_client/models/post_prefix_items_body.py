@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, Literal, TypeVar, Union, cast
+from typing import Any, Literal, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -13,28 +15,28 @@ T = TypeVar("T", bound="PostPrefixItemsBody")
 class PostPrefixItemsBody:
     """
     Attributes:
-        prefix_items_and_items (Union[Unset, list[Union[Literal['prefix'], float, str]]]):
-        prefix_items_only (Union[Unset, list[Union[float, str]]]):
+        prefix_items_and_items (list[float | Literal['prefix'] | str] | Unset):
+        prefix_items_only (list[float | str] | Unset):
     """
 
-    prefix_items_and_items: Union[Unset, list[Union[Literal["prefix"], float, str]]] = UNSET
-    prefix_items_only: Union[Unset, list[Union[float, str]]] = UNSET
+    prefix_items_and_items: list[float | Literal["prefix"] | str] | Unset = UNSET
+    prefix_items_only: list[float | str] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        prefix_items_and_items: Union[Unset, list[Union[Literal["prefix"], float, str]]] = UNSET
+        prefix_items_and_items: list[float | Literal["prefix"] | str] | Unset = UNSET
         if not isinstance(self.prefix_items_and_items, Unset):
             prefix_items_and_items = []
             for prefix_items_and_items_item_data in self.prefix_items_and_items:
-                prefix_items_and_items_item: Union[Literal["prefix"], float, str]
+                prefix_items_and_items_item: float | Literal["prefix"] | str
                 prefix_items_and_items_item = prefix_items_and_items_item_data
                 prefix_items_and_items.append(prefix_items_and_items_item)
 
-        prefix_items_only: Union[Unset, list[Union[float, str]]] = UNSET
+        prefix_items_only: list[float | str] | Unset = UNSET
         if not isinstance(self.prefix_items_only, Unset):
             prefix_items_only = []
             for prefix_items_only_item_data in self.prefix_items_only:
-                prefix_items_only_item: Union[float, str]
+                prefix_items_only_item: float | str
                 prefix_items_only_item = prefix_items_only_item_data
                 prefix_items_only.append(prefix_items_only_item)
 
@@ -55,14 +57,14 @@ class PostPrefixItemsBody:
         _prefix_items_and_items = d.pop("prefixItemsAndItems", UNSET)
         for prefix_items_and_items_item_data in _prefix_items_and_items or []:
 
-            def _parse_prefix_items_and_items_item(data: object) -> Union[Literal["prefix"], float, str]:
+            def _parse_prefix_items_and_items_item(data: object) -> float | Literal["prefix"] | str:
                 prefix_items_and_items_item_type_0 = cast(Literal["prefix"], data)
                 if prefix_items_and_items_item_type_0 != "prefix":
                     raise ValueError(
                         f"prefixItemsAndItems_item_type_0 must match const 'prefix', got '{prefix_items_and_items_item_type_0}'"
                     )
                 return prefix_items_and_items_item_type_0
-                return cast(Union[Literal["prefix"], float, str], data)
+                return cast(float | Literal["prefix"] | str, data)
 
             prefix_items_and_items_item = _parse_prefix_items_and_items_item(prefix_items_and_items_item_data)
 
@@ -72,8 +74,8 @@ class PostPrefixItemsBody:
         _prefix_items_only = d.pop("prefixItemsOnly", UNSET)
         for prefix_items_only_item_data in _prefix_items_only or []:
 
-            def _parse_prefix_items_only_item(data: object) -> Union[float, str]:
-                return cast(Union[float, str], data)
+            def _parse_prefix_items_only_item(data: object) -> float | str:
+                return cast(float | str, data)
 
             prefix_items_only_item = _parse_prefix_items_only_item(prefix_items_only_item_data)
 

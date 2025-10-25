@@ -11,7 +11,7 @@ jobs:
   test:
     strategy:
       matrix:
-        python: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        python: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -78,7 +78,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6.0.0
         with:
-          python-version: "3.9"
+          python-version: "3.10"
 
       - name: Get Python Version
         id: get_python_version
@@ -128,15 +128,15 @@ jobs:
 
           # Find all of the downloaded coverage reports and combine them
           .venv/bin/python -m coverage combine
-          
+
           # Create html report
           .venv/bin/python -m coverage html --skip-covered --skip-empty
-          
+
           # Report in Markdown and write to summary.
           .venv/bin/python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
-          
+
           # Report again and fail if under 100%.
-          .venv/bin/python -m coverage report --fail-under=100          
+          .venv/bin/python -m coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v4.6.2
@@ -163,7 +163,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6.0.0
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: Get Python Version
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT

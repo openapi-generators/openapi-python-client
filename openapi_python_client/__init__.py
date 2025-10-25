@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpcore
 import httpx
@@ -42,7 +42,7 @@ class Project:
         *,
         openapi: GeneratorData,
         config: Config,
-        custom_template_path: Optional[Path] = None,
+        custom_template_path: Path | None = None,
     ) -> None:
         self.openapi: GeneratorData = openapi
         self.config = config
@@ -292,8 +292,8 @@ class Project:
 
 def _get_project_for_url_or_path(
     config: Config,
-    custom_template_path: Optional[Path] = None,
-) -> Union[Project, GeneratorError]:
+    custom_template_path: Path | None = None,
+) -> Project | GeneratorError:
     data_dict = _get_document(source=config.document_source, timeout=config.http_timeout)
     if isinstance(data_dict, GeneratorError):
         return data_dict
@@ -310,7 +310,7 @@ def _get_project_for_url_or_path(
 def generate(
     *,
     config: Config,
-    custom_template_path: Optional[Path] = None,
+    custom_template_path: Path | None = None,
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -327,7 +327,7 @@ def generate(
     return project.build()
 
 
-def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[dict[str, Any], GeneratorError]:
+def _load_yaml_or_json(data: bytes, content_type: str | None) -> dict[str, Any] | GeneratorError:
     if content_type == "application/json":
         try:
             return json.loads(data.decode())
@@ -341,9 +341,9 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[dict[s
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
-def _get_document(*, source: Union[str, Path], timeout: int) -> Union[dict[str, Any], GeneratorError]:
+def _get_document(*, source: str | Path, timeout: int) -> dict[str, Any] | GeneratorError:
     yaml_bytes: bytes
-    content_type: Optional[str]
+    content_type: str | None
     if isinstance(source, str):
         try:
             response = httpx.get(source, timeout=timeout)

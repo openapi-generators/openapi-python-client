@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -11,10 +11,10 @@ class Example(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject
     """
 
-    summary: Optional[str] = None
-    description: Optional[str] = None
-    value: Optional[Any] = None
-    externalValue: Optional[str] = None
+    summary: str | None = None
+    description: str | None = None
+    value: Any | None = None
+    externalValue: str | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

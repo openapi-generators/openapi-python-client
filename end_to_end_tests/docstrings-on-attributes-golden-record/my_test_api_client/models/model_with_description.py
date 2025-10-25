@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -13,10 +15,10 @@ T = TypeVar("T", bound="ModelWithDescription")
 class ModelWithDescription:
     """This is a nice model."""
 
-    prop_with_no_desc: Union[Unset, str] = UNSET
-    prop_with_desc: Union[Unset, str] = UNSET
+    prop_with_no_desc: str | Unset = UNSET
+    prop_with_desc: str | Unset = UNSET
     """ This is a nice property. """
-    prop_with_long_desc: Union[Unset, str] = UNSET
+    prop_with_long_desc: str | Unset = UNSET
     """ It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of
     foolishness,
     it was the epoch of belief, it was the epoch of incredulity, it was the season of light, it was the season of

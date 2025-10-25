@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -23,12 +23,12 @@ class Link(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#linkObject
     """
 
-    operationRef: Optional[str] = None
-    operationId: Optional[str] = None
-    parameters: Optional[dict[str, Any]] = None
-    requestBody: Optional[Any] = None
-    description: Optional[str] = None
-    server: Optional[Server] = None
+    operationRef: str | None = None
+    operationId: str | None = None
+    parameters: dict[str, Any] | None = None
+    requestBody: Any | None = None
+    description: str | None = None
+    server: Server | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

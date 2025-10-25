@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -17,14 +19,14 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectBItem")
 class AnArrayWithACircularRefInItemsObjectBItem:
     """
     Attributes:
-        circular (Union[Unset, list['AnArrayWithACircularRefInItemsObjectAItem']]):
+        circular (list[AnArrayWithACircularRefInItemsObjectAItem] | Unset):
     """
 
-    circular: Union[Unset, list["AnArrayWithACircularRefInItemsObjectAItem"]] = UNSET
+    circular: list[AnArrayWithACircularRefInItemsObjectAItem] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        circular: Union[Unset, list[dict[str, Any]]] = UNSET
+        circular: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.circular, Unset):
             circular = []
             for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in self.circular:

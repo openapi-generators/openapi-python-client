@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,7 +9,7 @@ class ServerVariable(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableObject
     """
 
-    enum: Optional[list[str]] = None
+    enum: list[str] | None = None
     default: str
-    description: Optional[str] = None
+    description: str | None = None
     model_config = ConfigDict(extra="allow")

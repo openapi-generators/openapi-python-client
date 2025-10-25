@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 __all__ = ["ErrorLevel", "GeneratorError", "ParameterError", "ParseError", "PropertyError"]
 
@@ -18,7 +17,7 @@ class ErrorLevel(Enum):
 class GeneratorError:
     """Base data struct containing info on an error that occurred"""
 
-    detail: Optional[str] = None
+    detail: str | None = None
     level: ErrorLevel = ErrorLevel.ERROR
     header: str = "Unable to generate the client"
 
@@ -28,7 +27,7 @@ class ParseError(GeneratorError):
     """An error raised when there's a problem parsing an OpenAPI document"""
 
     level: ErrorLevel = ErrorLevel.WARNING
-    data: Optional[BaseModel] = None
+    data: BaseModel | None = None
     header: str = "Unable to parse this part of your OpenAPI document: "
 
 

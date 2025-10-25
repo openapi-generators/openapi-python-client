@@ -1,7 +1,6 @@
-from typing import Annotated, Any, Literal, TypeVar, Union
+from typing import Annotated, Any, Literal, TypeAlias, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
-from typing_extensions import TypeAlias
 
 
 class Reference(BaseModel):
@@ -39,5 +38,5 @@ def _reference_discriminator(obj: Any) -> Literal["ref", "other"]:
 
 
 ReferenceOr: TypeAlias = Annotated[
-    Union[Annotated[Reference, Tag("ref")], Annotated[T, Tag("other")]], Discriminator(_reference_discriminator)
+    Annotated[Reference, Tag("ref")] | Annotated[T, Tag("other")], Discriminator(_reference_discriminator)
 ]

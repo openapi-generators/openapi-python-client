@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
@@ -67,11 +67,11 @@ def _get_kwargs(
 {% if endpoint.responses.default %}
     {% set return_type = return_string %}
 {% else %}
-    {% set return_type = "Optional[" + return_string + "]" %}
+    {% set return_type = return_string + " | None" %}
 {% endif %}
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> {{return_type}}:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> {{return_type}}:
     {% for response in endpoint.responses.patterns %}
     {% set code_range = response.status_code.range %}
     {% if code_range[0] == code_range[1] %}
@@ -91,7 +91,7 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
     {% endif %}
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[{{ return_string }}]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -118,7 +118,7 @@ def sync_detailed(
 {% if parsed_responses %}
 def sync(
     {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+) -> {{ return_string }} | None:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return sync_detailed(
@@ -144,7 +144,7 @@ async def asyncio_detailed(
 {% if parsed_responses %}
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
-) -> Optional[{{ return_string }}]:
+) -> {{ return_string }} | None:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return (await asyncio_detailed(

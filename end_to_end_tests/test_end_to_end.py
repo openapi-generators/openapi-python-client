@@ -1,7 +1,6 @@
 import shutil
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Optional
 
 import pytest
 from click.testing import Result
@@ -16,8 +15,8 @@ from openapi_python_client.cli import app
 def _compare_directories(
     record: Path,
     test_subject: Path,
-    expected_differences: Optional[dict[Path, str]] = None,
-    expected_missing: Optional[set[str]] = None,
+    expected_differences: dict[Path, str] | None = None,
+    expected_missing: set[str] | None = None,
     ignore: list[str] = None,
     depth=0,
 ):
@@ -82,10 +81,10 @@ def _compare_directories(
 def run_e2e_test(
     openapi_document: str,
     extra_args: list[str],
-    expected_differences: Optional[dict[Path, str]] = None,
+    expected_differences: dict[Path, str] | None = None,
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
-    expected_missing: Optional[set[str]] = None,
+    expected_missing: set[str] | None = None,
     specify_output_path_explicitly: bool = True,
 ) -> Result:
     with generate_client(openapi_document, extra_args, output_path, specify_output_path_explicitly=specify_output_path_explicitly) as g:
@@ -146,7 +145,7 @@ def test_literal_enums_end_to_end():
         ("uv", "pyproject.toml", "uv.pyproject.toml"),
     )
 )
-def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[str]):
+def test_meta(meta: str, generated_file: str | None, expected_file: str | None):
     with generate_client(
         "3.1_specific.openapi.yaml",
         extra_args=[f"--meta={meta}"],
@@ -221,7 +220,7 @@ def test_bad_url():
     runner = CliRunner()
     result = runner.invoke(app, ["generate", "--url=not_a_url"])
     assert result.exit_code == 1
-    assert "Could not get OpenAPI document from provided URL" in result.stdout
+    assert "Could not get OpenAPI document from provided URL" in result.stderr
 
 
 ERROR_DOCUMENTS = [path for path in Path(__file__).parent.joinpath("documents_with_errors").iterdir() if path.is_file()]
@@ -237,7 +236,7 @@ def test_documents_with_errors(snapshot, document):
     ) as g:
         result = g.generator_result
         assert result.exit_code == 1
-        output = result.stdout.replace(str(g.output_path), "/test-documents-with-errors")
+        output = (result.stdout + result.stderr).replace(str(g.output_path), "/test-documents-with-errors")
         assert output == snapshot
 
 
@@ -249,7 +248,7 @@ def test_custom_post_hooks():
         raise_on_error=False,
     ) as g:
         assert g.generator_result.exit_code == 1
-        assert "this should fail" in g.generator_result.stdout
+        assert "this should fail" in g.generator_result.stderr
 
 
 def test_generate_dir_already_exists():
@@ -261,7 +260,7 @@ def test_generate_dir_already_exists():
         openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
         result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
         assert result.exit_code == 1
-        assert "Directory already exists" in result.stdout
+        assert "Directory already exists" in result.stderr
     finally:
         shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
 

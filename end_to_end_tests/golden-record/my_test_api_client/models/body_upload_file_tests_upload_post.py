@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import json
 from collections.abc import Mapping
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -36,34 +38,34 @@ class BodyUploadFileTestsUploadPost:
         some_file (File):
         some_required_number (float):
         some_object (BodyUploadFileTestsUploadPostSomeObject):
-        some_nullable_object (Union['BodyUploadFileTestsUploadPostSomeNullableObject', None]):
-        some_optional_file (Union[Unset, File]):
-        some_string (Union[Unset, str]):  Default: 'some_default_string'.
-        a_datetime (Union[Unset, datetime.datetime]):
-        a_date (Union[Unset, datetime.date]):
-        some_number (Union[Unset, float]):
-        some_nullable_number (Union[None, Unset, float]):
-        some_int_array (Union[Unset, list[Union[None, int]]]):
-        some_array (Union[None, Unset, list['AFormData']]):
-        some_optional_object (Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]):
-        some_enum (Union[Unset, DifferentEnum]): An enumeration.
+        some_nullable_object (BodyUploadFileTestsUploadPostSomeNullableObject | None):
+        some_optional_file (File | Unset):
+        some_string (str | Unset):  Default: 'some_default_string'.
+        a_datetime (datetime.datetime | Unset):
+        a_date (datetime.date | Unset):
+        some_number (float | Unset):
+        some_nullable_number (float | None | Unset):
+        some_int_array (list[int | None] | Unset):
+        some_array (list[AFormData] | None | Unset):
+        some_optional_object (BodyUploadFileTestsUploadPostSomeOptionalObject | Unset):
+        some_enum (DifferentEnum | Unset): An enumeration.
     """
 
     some_file: File
     some_required_number: float
-    some_object: "BodyUploadFileTestsUploadPostSomeObject"
-    some_nullable_object: Union["BodyUploadFileTestsUploadPostSomeNullableObject", None]
-    some_optional_file: Union[Unset, File] = UNSET
-    some_string: Union[Unset, str] = "some_default_string"
-    a_datetime: Union[Unset, datetime.datetime] = UNSET
-    a_date: Union[Unset, datetime.date] = UNSET
-    some_number: Union[Unset, float] = UNSET
-    some_nullable_number: Union[None, Unset, float] = UNSET
-    some_int_array: Union[Unset, list[Union[None, int]]] = UNSET
-    some_array: Union[None, Unset, list["AFormData"]] = UNSET
-    some_optional_object: Union[Unset, "BodyUploadFileTestsUploadPostSomeOptionalObject"] = UNSET
-    some_enum: Union[Unset, DifferentEnum] = UNSET
-    additional_properties: dict[str, "BodyUploadFileTestsUploadPostAdditionalProperty"] = _attrs_field(
+    some_object: BodyUploadFileTestsUploadPostSomeObject
+    some_nullable_object: BodyUploadFileTestsUploadPostSomeNullableObject | None
+    some_optional_file: File | Unset = UNSET
+    some_string: str | Unset = "some_default_string"
+    a_datetime: datetime.datetime | Unset = UNSET
+    a_date: datetime.date | Unset = UNSET
+    some_number: float | Unset = UNSET
+    some_nullable_number: float | None | Unset = UNSET
+    some_int_array: list[int | None] | Unset = UNSET
+    some_array: list[AFormData] | None | Unset = UNSET
+    some_optional_object: BodyUploadFileTestsUploadPostSomeOptionalObject | Unset = UNSET
+    some_enum: DifferentEnum | Unset = UNSET
+    additional_properties: dict[str, BodyUploadFileTestsUploadPostAdditionalProperty] = _attrs_field(
         init=False, factory=dict
     )
 
@@ -78,43 +80,43 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = self.some_object.to_dict()
 
-        some_nullable_object: Union[None, dict[str, Any]]
+        some_nullable_object: dict[str, Any] | None
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             some_nullable_object = self.some_nullable_object.to_dict()
         else:
             some_nullable_object = self.some_nullable_object
 
-        some_optional_file: Union[Unset, FileTypes] = UNSET
+        some_optional_file: FileTypes | Unset = UNSET
         if not isinstance(self.some_optional_file, Unset):
             some_optional_file = self.some_optional_file.to_tuple()
 
         some_string = self.some_string
 
-        a_datetime: Union[Unset, str] = UNSET
+        a_datetime: str | Unset = UNSET
         if not isinstance(self.a_datetime, Unset):
             a_datetime = self.a_datetime.isoformat()
 
-        a_date: Union[Unset, str] = UNSET
+        a_date: str | Unset = UNSET
         if not isinstance(self.a_date, Unset):
             a_date = self.a_date.isoformat()
 
         some_number = self.some_number
 
-        some_nullable_number: Union[None, Unset, float]
+        some_nullable_number: float | None | Unset
         if isinstance(self.some_nullable_number, Unset):
             some_nullable_number = UNSET
         else:
             some_nullable_number = self.some_nullable_number
 
-        some_int_array: Union[Unset, list[Union[None, int]]] = UNSET
+        some_int_array: list[int | None] | Unset = UNSET
         if not isinstance(self.some_int_array, Unset):
             some_int_array = []
             for some_int_array_item_data in self.some_int_array:
-                some_int_array_item: Union[None, int]
+                some_int_array_item: int | None
                 some_int_array_item = some_int_array_item_data
                 some_int_array.append(some_int_array_item)
 
-        some_array: Union[None, Unset, list[dict[str, Any]]]
+        some_array: list[dict[str, Any]] | None | Unset
         if isinstance(self.some_array, Unset):
             some_array = UNSET
         elif isinstance(self.some_array, list):
@@ -126,11 +128,11 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_array = self.some_array
 
-        some_optional_object: Union[Unset, dict[str, Any]] = UNSET
+        some_optional_object: dict[str, Any] | Unset = UNSET
         if not isinstance(self.some_optional_object, Unset):
             some_optional_object = self.some_optional_object.to_dict()
 
-        some_enum: Union[Unset, str] = UNSET
+        some_enum: str | Unset = UNSET
         if not isinstance(self.some_enum, Unset):
             some_enum = self.some_enum.value
 
@@ -265,7 +267,7 @@ class BodyUploadFileTestsUploadPost:
 
         some_object = BodyUploadFileTestsUploadPostSomeObject.from_dict(d.pop("some_object"))
 
-        def _parse_some_nullable_object(data: object) -> Union["BodyUploadFileTestsUploadPostSomeNullableObject", None]:
+        def _parse_some_nullable_object(data: object) -> BodyUploadFileTestsUploadPostSomeNullableObject | None:
             if data is None:
                 return data
             try:
@@ -276,12 +278,12 @@ class BodyUploadFileTestsUploadPost:
                 return some_nullable_object_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union["BodyUploadFileTestsUploadPostSomeNullableObject", None], data)
+            return cast(BodyUploadFileTestsUploadPostSomeNullableObject | None, data)
 
         some_nullable_object = _parse_some_nullable_object(d.pop("some_nullable_object"))
 
         _some_optional_file = d.pop("some_optional_file", UNSET)
-        some_optional_file: Union[Unset, File]
+        some_optional_file: File | Unset
         if isinstance(_some_optional_file, Unset):
             some_optional_file = UNSET
         else:
@@ -290,14 +292,14 @@ class BodyUploadFileTestsUploadPost:
         some_string = d.pop("some_string", UNSET)
 
         _a_datetime = d.pop("a_datetime", UNSET)
-        a_datetime: Union[Unset, datetime.datetime]
+        a_datetime: datetime.datetime | Unset
         if isinstance(_a_datetime, Unset):
             a_datetime = UNSET
         else:
             a_datetime = isoparse(_a_datetime)
 
         _a_date = d.pop("a_date", UNSET)
-        a_date: Union[Unset, datetime.date]
+        a_date: datetime.date | Unset
         if isinstance(_a_date, Unset):
             a_date = UNSET
         else:
@@ -305,12 +307,12 @@ class BodyUploadFileTestsUploadPost:
 
         some_number = d.pop("some_number", UNSET)
 
-        def _parse_some_nullable_number(data: object) -> Union[None, Unset, float]:
+        def _parse_some_nullable_number(data: object) -> float | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, float], data)
+            return cast(float | None | Unset, data)
 
         some_nullable_number = _parse_some_nullable_number(d.pop("some_nullable_number", UNSET))
 
@@ -318,16 +320,16 @@ class BodyUploadFileTestsUploadPost:
         _some_int_array = d.pop("some_int_array", UNSET)
         for some_int_array_item_data in _some_int_array or []:
 
-            def _parse_some_int_array_item(data: object) -> Union[None, int]:
+            def _parse_some_int_array_item(data: object) -> int | None:
                 if data is None:
                     return data
-                return cast(Union[None, int], data)
+                return cast(int | None, data)
 
             some_int_array_item = _parse_some_int_array_item(some_int_array_item_data)
 
             some_int_array.append(some_int_array_item)
 
-        def _parse_some_array(data: object) -> Union[None, Unset, list["AFormData"]]:
+        def _parse_some_array(data: object) -> list[AFormData] | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -345,19 +347,19 @@ class BodyUploadFileTestsUploadPost:
                 return some_array_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union[None, Unset, list["AFormData"]], data)
+            return cast(list[AFormData] | None | Unset, data)
 
         some_array = _parse_some_array(d.pop("some_array", UNSET))
 
         _some_optional_object = d.pop("some_optional_object", UNSET)
-        some_optional_object: Union[Unset, BodyUploadFileTestsUploadPostSomeOptionalObject]
+        some_optional_object: BodyUploadFileTestsUploadPostSomeOptionalObject | Unset
         if isinstance(_some_optional_object, Unset):
             some_optional_object = UNSET
         else:
             some_optional_object = BodyUploadFileTestsUploadPostSomeOptionalObject.from_dict(_some_optional_object)
 
         _some_enum = d.pop("some_enum", UNSET)
-        some_enum: Union[Unset, DifferentEnum]
+        some_enum: DifferentEnum | Unset
         if isinstance(_some_enum, Unset):
             some_enum = UNSET
         else:
@@ -393,10 +395,10 @@ class BodyUploadFileTestsUploadPost:
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> "BodyUploadFileTestsUploadPostAdditionalProperty":
+    def __getitem__(self, key: str) -> BodyUploadFileTestsUploadPostAdditionalProperty:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: "BodyUploadFileTestsUploadPostAdditionalProperty") -> None:
+    def __setitem__(self, key: str, value: BodyUploadFileTestsUploadPostAdditionalProperty) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

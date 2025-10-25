@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,9 +9,9 @@ class Contact(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#contactObject
     """
 
-    name: Optional[str] = None
-    url: Optional[str] = None
-    email: Optional[str] = None
+    name: str | None = None
+    url: str | None = None
+    email: str | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

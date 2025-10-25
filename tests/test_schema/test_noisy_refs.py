@@ -11,7 +11,7 @@
 # References:
 #   [1] https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object
 #   [2] https://docs.pydantic.dev/latest/concepts/unions/#smart-mode
-from typing import Annotated, TypeVar, Union, get_args, get_origin
+from typing import Annotated, TypeVar, get_args, get_origin
 
 import pytest
 from pydantic import TypeAdapter
@@ -34,7 +34,7 @@ try:
     from openapi_python_client.schema.openapi_schema_pydantic.reference import ReferenceOr
 except ImportError:
     T = TypeVar("T")
-    ReferenceOr = Union[Reference, T]
+    ReferenceOr = Reference | T
 
 
 def get_example(base_type):

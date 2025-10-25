@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -17,7 +19,7 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalProperties
 class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem:
     """ """
 
-    additional_properties: dict[str, list["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem"]] = (
+    additional_properties: dict[str, list[AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem]] = (
         _attrs_field(init=False, factory=dict)
     )
 
@@ -72,12 +74,10 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem:
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> list["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem"]:
+    def __getitem__(self, key: str) -> list[AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem]:
         return self.additional_properties[key]
 
-    def __setitem__(
-        self, key: str, value: list["AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem"]
-    ) -> None:
+    def __setitem__(self, key: str, value: list[AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem]) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

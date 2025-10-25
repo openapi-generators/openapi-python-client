@@ -43,7 +43,7 @@ class TestSchemaDocstrings:
     def test_model_properties(self, MyModel):
         assert set(DocstringParser(MyModel).get_section("Attributes:")) == {
             "req_str (str): This is necessary.",
-            "opt_str (Union[Unset, str]): This isn't necessary.",
+            "opt_str (str | Unset): This isn't necessary.",
             "undescribed_prop (str):",
         }
 
@@ -146,8 +146,8 @@ class TestEndpointDocstrings:
     def test_response_union_type(self, post_simple_thing_sync):
         returns_line = DocstringParser(post_simple_thing_sync).get_section("Returns:")[0]
         assert returns_line in (
-            "Union[GoodResponse, ErrorResponse]",
-            "Union[ErrorResponse, GoodResponse]",
+            "GoodResponse | ErrorResponse",
+            "ErrorResponse | GoodResponse",
         )
 
     def test_request_body(self, post_simple_thing_sync):
@@ -159,5 +159,5 @@ class TestEndpointDocstrings:
         assert DocstringParser(get_attribute_by_index_sync).get_section("Args:") == [
             "id (str): Which one.",
             "index (int):",
-            "fries (Union[Unset, bool]): Do you want fries with that?",
+            "fries (bool | Unset): Do you want fries with that?",
         ]

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -12,12 +12,12 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    boolean_header: Union[Unset, bool] = UNSET,
-    string_header: Union[Unset, str] = UNSET,
-    number_header: Union[Unset, float] = UNSET,
-    integer_header: Union[Unset, int] = UNSET,
-    int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
-    string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
+    boolean_header: bool | Unset = UNSET,
+    string_header: str | Unset = UNSET,
+    number_header: float | Unset = UNSET,
+    integer_header: int | Unset = UNSET,
+    int_enum_header: GetLocationHeaderTypesIntEnumHeader | Unset = UNSET,
+    string_enum_header: GetLocationHeaderTypesStringEnumHeader | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
     if not isinstance(boolean_header, Unset):
@@ -47,7 +47,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
     if response.status_code == 200:
         return None
 
@@ -57,7 +57,7 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -68,22 +68,22 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    boolean_header: Union[Unset, bool] = UNSET,
-    string_header: Union[Unset, str] = UNSET,
-    number_header: Union[Unset, float] = UNSET,
-    integer_header: Union[Unset, int] = UNSET,
-    int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
-    string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
+    client: AuthenticatedClient | Client,
+    boolean_header: bool | Unset = UNSET,
+    string_header: str | Unset = UNSET,
+    number_header: float | Unset = UNSET,
+    integer_header: int | Unset = UNSET,
+    int_enum_header: GetLocationHeaderTypesIntEnumHeader | Unset = UNSET,
+    string_enum_header: GetLocationHeaderTypesStringEnumHeader | Unset = UNSET,
 ) -> Response[Any]:
     """
     Args:
-        boolean_header (Union[Unset, bool]):
-        string_header (Union[Unset, str]):
-        number_header (Union[Unset, float]):
-        integer_header (Union[Unset, int]):
-        int_enum_header (Union[Unset, GetLocationHeaderTypesIntEnumHeader]):
-        string_enum_header (Union[Unset, GetLocationHeaderTypesStringEnumHeader]):
+        boolean_header (bool | Unset):
+        string_header (str | Unset):
+        number_header (float | Unset):
+        integer_header (int | Unset):
+        int_enum_header (GetLocationHeaderTypesIntEnumHeader | Unset):
+        string_enum_header (GetLocationHeaderTypesStringEnumHeader | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -111,22 +111,22 @@ def sync_detailed(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    boolean_header: Union[Unset, bool] = UNSET,
-    string_header: Union[Unset, str] = UNSET,
-    number_header: Union[Unset, float] = UNSET,
-    integer_header: Union[Unset, int] = UNSET,
-    int_enum_header: Union[Unset, GetLocationHeaderTypesIntEnumHeader] = UNSET,
-    string_enum_header: Union[Unset, GetLocationHeaderTypesStringEnumHeader] = UNSET,
+    client: AuthenticatedClient | Client,
+    boolean_header: bool | Unset = UNSET,
+    string_header: str | Unset = UNSET,
+    number_header: float | Unset = UNSET,
+    integer_header: int | Unset = UNSET,
+    int_enum_header: GetLocationHeaderTypesIntEnumHeader | Unset = UNSET,
+    string_enum_header: GetLocationHeaderTypesStringEnumHeader | Unset = UNSET,
 ) -> Response[Any]:
     """
     Args:
-        boolean_header (Union[Unset, bool]):
-        string_header (Union[Unset, str]):
-        number_header (Union[Unset, float]):
-        integer_header (Union[Unset, int]):
-        int_enum_header (Union[Unset, GetLocationHeaderTypesIntEnumHeader]):
-        string_enum_header (Union[Unset, GetLocationHeaderTypesStringEnumHeader]):
+        boolean_header (bool | Unset):
+        string_header (str | Unset):
+        number_header (float | Unset):
+        integer_header (int | Unset):
+        int_enum_header (GetLocationHeaderTypesIntEnumHeader | Unset):
+        string_enum_header (GetLocationHeaderTypesStringEnumHeader | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

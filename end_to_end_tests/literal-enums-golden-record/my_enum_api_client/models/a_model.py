@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -18,16 +20,16 @@ class AModel:
     Attributes:
         an_enum_value (AnEnum): For testing Enums in all the ways they can be used
         an_allof_enum_with_overridden_default (AnAllOfEnum):  Default: 'overridden_default'.
-        any_value (Union[Unset, Any]):
-        an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
+        any_value (Any | Unset):
+        an_optional_allof_enum (AnAllOfEnum | Unset):
+        nested_list_of_enums (list[list[DifferentEnum]] | Unset):
     """
 
     an_enum_value: AnEnum
     an_allof_enum_with_overridden_default: AnAllOfEnum = "overridden_default"
-    any_value: Union[Unset, Any] = UNSET
-    an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, list[list[DifferentEnum]]] = UNSET
+    any_value: Any | Unset = UNSET
+    an_optional_allof_enum: AnAllOfEnum | Unset = UNSET
+    nested_list_of_enums: list[list[DifferentEnum]] | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         an_enum_value: str = self.an_enum_value
@@ -36,11 +38,11 @@ class AModel:
 
         any_value = self.any_value
 
-        an_optional_allof_enum: Union[Unset, str] = UNSET
+        an_optional_allof_enum: str | Unset = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum
 
-        nested_list_of_enums: Union[Unset, list[list[str]]] = UNSET
+        nested_list_of_enums: list[list[str]] | Unset = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -78,7 +80,7 @@ class AModel:
         any_value = d.pop("any_value", UNSET)
 
         _an_optional_allof_enum = d.pop("an_optional_allof_enum", UNSET)
-        an_optional_allof_enum: Union[Unset, AnAllOfEnum]
+        an_optional_allof_enum: AnAllOfEnum | Unset
         if isinstance(_an_optional_allof_enum, Unset):
             an_optional_allof_enum = UNSET
         else:

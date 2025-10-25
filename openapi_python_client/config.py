@@ -2,7 +2,6 @@ import json
 import mimetypes
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Union
 
 from attr import define
 from pydantic import BaseModel
@@ -15,8 +14,8 @@ class ClassOverride(BaseModel):
     See https://github.com/openapi-generators/openapi-python-client#class_overrides
     """
 
-    class_name: Optional[str] = None
-    module_name: Optional[str] = None
+    class_name: str | None = None
+    module_name: str | None = None
 
 
 class MetaType(str, Enum):
@@ -35,13 +34,13 @@ class ConfigFile(BaseModel):
     See https://github.com/openapi-generators/openapi-python-client#configuration
     """
 
-    class_overrides: Optional[dict[str, ClassOverride]] = None
-    content_type_overrides: Optional[dict[str, str]] = None
-    project_name_override: Optional[str] = None
-    package_name_override: Optional[str] = None
-    package_version_override: Optional[str] = None
+    class_overrides: dict[str, ClassOverride] | None = None
+    content_type_overrides: dict[str, str] | None = None
+    project_name_override: str | None = None
+    package_name_override: str | None = None
+    package_version_override: str | None = None
     use_path_prefixes_for_title_model_names: bool = True
-    post_hooks: Optional[list[str]] = None
+    post_hooks: list[str] | None = None
     docstrings_on_attributes: bool = False
     field_prefix: str = "field_"
     generate_all_tags: bool = False
@@ -67,9 +66,9 @@ class Config:
 
     meta_type: MetaType
     class_overrides: dict[str, ClassOverride]
-    project_name_override: Optional[str]
-    package_name_override: Optional[str]
-    package_version_override: Optional[str]
+    project_name_override: str | None
+    package_name_override: str | None
+    package_version_override: str | None
     use_path_prefixes_for_title_model_names: bool
     post_hooks: list[str]
     docstrings_on_attributes: bool
@@ -77,20 +76,20 @@ class Config:
     generate_all_tags: bool
     http_timeout: int
     literal_enums: bool
-    document_source: Union[Path, str]
+    document_source: Path | str
     file_encoding: str
     content_type_overrides: dict[str, str]
     overwrite: bool
-    output_path: Optional[Path]
+    output_path: Path | None
 
     @staticmethod
     def from_sources(
         config_file: ConfigFile,
         meta_type: MetaType,
-        document_source: Union[Path, str],
+        document_source: Path | str,
         file_encoding: str,
         overwrite: bool,
-        output_path: Optional[Path],
+        output_path: Path | None,
     ) -> "Config":
         if config_file.post_hooks is not None:
             post_hooks = config_file.post_hooks

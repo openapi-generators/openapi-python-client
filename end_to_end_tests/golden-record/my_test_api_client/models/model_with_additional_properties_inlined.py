@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -19,11 +21,11 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesInlined")
 class ModelWithAdditionalPropertiesInlined:
     """
     Attributes:
-        a_number (Union[Unset, float]):
+        a_number (float | Unset):
     """
 
-    a_number: Union[Unset, float] = UNSET
-    additional_properties: dict[str, "ModelWithAdditionalPropertiesInlinedAdditionalProperty"] = _attrs_field(
+    a_number: float | Unset = UNSET
+    additional_properties: dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperty] = _attrs_field(
         init=False, factory=dict
     )
 
@@ -66,10 +68,10 @@ class ModelWithAdditionalPropertiesInlined:
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> "ModelWithAdditionalPropertiesInlinedAdditionalProperty":
+    def __getitem__(self, key: str) -> ModelWithAdditionalPropertiesInlinedAdditionalProperty:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: "ModelWithAdditionalPropertiesInlinedAdditionalProperty") -> None:
+    def __setitem__(self, key: str, value: ModelWithAdditionalPropertiesInlinedAdditionalProperty) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

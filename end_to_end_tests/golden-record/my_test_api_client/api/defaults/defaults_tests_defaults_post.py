@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 from dateutil.parser import isoparse
@@ -23,11 +23,11 @@ def _get_kwargs(
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: list[AnEnum],
-    union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
+    union_prop: float | str = "not a float",
+    union_prop_with_ref: AnEnum | float | Unset = 0.6,
     enum_prop: AnEnum,
-    model_prop: "ModelWithUnionProperty",
-    required_model_prop: "ModelWithUnionProperty",
+    model_prop: ModelWithUnionProperty,
+    required_model_prop: ModelWithUnionProperty,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
@@ -53,11 +53,11 @@ def _get_kwargs(
 
     params["list_prop"] = json_list_prop
 
-    json_union_prop: Union[float, str]
+    json_union_prop: float | str
     json_union_prop = union_prop
     params["union_prop"] = json_union_prop
 
-    json_union_prop_with_ref: Union[Unset, float, str]
+    json_union_prop_with_ref: float | str | Unset
     if isinstance(union_prop_with_ref, Unset):
         json_union_prop_with_ref = UNSET
     elif isinstance(union_prop_with_ref, AnEnum):
@@ -87,8 +87,8 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, HTTPValidationError]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = response.json()
         return response_200
@@ -105,8 +105,8 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, HTTPValidationError]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -117,7 +117,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
@@ -126,12 +126,12 @@ def sync_detailed(
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: list[AnEnum],
-    union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
+    union_prop: float | str = "not a float",
+    union_prop_with_ref: AnEnum | float | Unset = 0.6,
     enum_prop: AnEnum,
-    model_prop: "ModelWithUnionProperty",
-    required_model_prop: "ModelWithUnionProperty",
-) -> Response[Union[Any, HTTPValidationError]]:
+    model_prop: ModelWithUnionProperty,
+    required_model_prop: ModelWithUnionProperty,
+) -> Response[Any | HTTPValidationError]:
     """Defaults
 
     Args:
@@ -143,8 +143,8 @@ def sync_detailed(
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (list[AnEnum]):
-        union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
+        union_prop (float | str):  Default: 'not a float'.
+        union_prop_with_ref (AnEnum | float | Unset):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -154,7 +154,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Any | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -182,7 +182,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
@@ -191,12 +191,12 @@ def sync(
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: list[AnEnum],
-    union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
+    union_prop: float | str = "not a float",
+    union_prop_with_ref: AnEnum | float | Unset = 0.6,
     enum_prop: AnEnum,
-    model_prop: "ModelWithUnionProperty",
-    required_model_prop: "ModelWithUnionProperty",
-) -> Optional[Union[Any, HTTPValidationError]]:
+    model_prop: ModelWithUnionProperty,
+    required_model_prop: ModelWithUnionProperty,
+) -> Any | HTTPValidationError | None:
     """Defaults
 
     Args:
@@ -208,8 +208,8 @@ def sync(
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (list[AnEnum]):
-        union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
+        union_prop (float | str):  Default: 'not a float'.
+        union_prop_with_ref (AnEnum | float | Unset):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -219,7 +219,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Any | HTTPValidationError
     """
 
     return sync_detailed(
@@ -242,7 +242,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
@@ -251,12 +251,12 @@ async def asyncio_detailed(
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: list[AnEnum],
-    union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
+    union_prop: float | str = "not a float",
+    union_prop_with_ref: AnEnum | float | Unset = 0.6,
     enum_prop: AnEnum,
-    model_prop: "ModelWithUnionProperty",
-    required_model_prop: "ModelWithUnionProperty",
-) -> Response[Union[Any, HTTPValidationError]]:
+    model_prop: ModelWithUnionProperty,
+    required_model_prop: ModelWithUnionProperty,
+) -> Response[Any | HTTPValidationError]:
     """Defaults
 
     Args:
@@ -268,8 +268,8 @@ async def asyncio_detailed(
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (list[AnEnum]):
-        union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
+        union_prop (float | str):  Default: 'not a float'.
+        union_prop_with_ref (AnEnum | float | Unset):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -279,7 +279,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Any | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -305,7 +305,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = isoparse("1010-10-10").date(),
@@ -314,12 +314,12 @@ async def asyncio(
     int_prop: int = 7,
     boolean_prop: bool = False,
     list_prop: list[AnEnum],
-    union_prop: Union[float, str] = "not a float",
-    union_prop_with_ref: Union[AnEnum, Unset, float] = 0.6,
+    union_prop: float | str = "not a float",
+    union_prop_with_ref: AnEnum | float | Unset = 0.6,
     enum_prop: AnEnum,
-    model_prop: "ModelWithUnionProperty",
-    required_model_prop: "ModelWithUnionProperty",
-) -> Optional[Union[Any, HTTPValidationError]]:
+    model_prop: ModelWithUnionProperty,
+    required_model_prop: ModelWithUnionProperty,
+) -> Any | HTTPValidationError | None:
     """Defaults
 
     Args:
@@ -331,8 +331,8 @@ async def asyncio(
         int_prop (int):  Default: 7.
         boolean_prop (bool):  Default: False.
         list_prop (list[AnEnum]):
-        union_prop (Union[float, str]):  Default: 'not a float'.
-        union_prop_with_ref (Union[AnEnum, Unset, float]):  Default: 0.6.
+        union_prop (float | str):  Default: 'not a float'.
+        union_prop_with_ref (AnEnum | float | Unset):  Default: 0.6.
         enum_prop (AnEnum): For testing Enums in all the ways they can be used
         model_prop (ModelWithUnionProperty):
         required_model_prop (ModelWithUnionProperty):
@@ -342,7 +342,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Any | HTTPValidationError
     """
 
     return (

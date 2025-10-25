@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -16,29 +18,29 @@ T = TypeVar("T", bound="ModelWithMergedProperties")
 class ModelWithMergedProperties:
     """
     Attributes:
-        simple_string (Union[Unset, str]): extended simpleString description Default: 'new default'.
-        string_to_enum (Union[Unset, ModelWithMergedPropertiesStringToEnum]):  Default:
+        simple_string (str | Unset): extended simpleString description Default: 'new default'.
+        string_to_enum (ModelWithMergedPropertiesStringToEnum | Unset):  Default:
             ModelWithMergedPropertiesStringToEnum.A.
-        string_to_date (Union[Unset, datetime.date]):
-        number_to_int (Union[Unset, int]):
-        any_to_string (Union[Unset, str]):  Default: 'x'.
+        string_to_date (datetime.date | Unset):
+        number_to_int (int | Unset):
+        any_to_string (str | Unset):  Default: 'x'.
     """
 
-    simple_string: Union[Unset, str] = "new default"
-    string_to_enum: Union[Unset, ModelWithMergedPropertiesStringToEnum] = ModelWithMergedPropertiesStringToEnum.A
-    string_to_date: Union[Unset, datetime.date] = UNSET
-    number_to_int: Union[Unset, int] = UNSET
-    any_to_string: Union[Unset, str] = "x"
+    simple_string: str | Unset = "new default"
+    string_to_enum: ModelWithMergedPropertiesStringToEnum | Unset = ModelWithMergedPropertiesStringToEnum.A
+    string_to_date: datetime.date | Unset = UNSET
+    number_to_int: int | Unset = UNSET
+    any_to_string: str | Unset = "x"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         simple_string = self.simple_string
 
-        string_to_enum: Union[Unset, str] = UNSET
+        string_to_enum: str | Unset = UNSET
         if not isinstance(self.string_to_enum, Unset):
             string_to_enum = self.string_to_enum.value
 
-        string_to_date: Union[Unset, str] = UNSET
+        string_to_date: str | Unset = UNSET
         if not isinstance(self.string_to_date, Unset):
             string_to_date = self.string_to_date.isoformat()
 
@@ -68,14 +70,14 @@ class ModelWithMergedProperties:
         simple_string = d.pop("simpleString", UNSET)
 
         _string_to_enum = d.pop("stringToEnum", UNSET)
-        string_to_enum: Union[Unset, ModelWithMergedPropertiesStringToEnum]
+        string_to_enum: ModelWithMergedPropertiesStringToEnum | Unset
         if isinstance(_string_to_enum, Unset):
             string_to_enum = UNSET
         else:
             string_to_enum = ModelWithMergedPropertiesStringToEnum(_string_to_enum)
 
         _string_to_date = d.pop("stringToDate", UNSET)
-        string_to_date: Union[Unset, datetime.date]
+        string_to_date: datetime.date | Unset
         if isinstance(_string_to_date, Unset):
             string_to_date = UNSET
         else:

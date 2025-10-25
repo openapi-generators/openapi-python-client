@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -15,7 +17,7 @@ T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesA")
 class ModelWithCircularRefInAdditionalPropertiesA:
     """ """
 
-    additional_properties: dict[str, "ModelWithCircularRefInAdditionalPropertiesB"] = _attrs_field(
+    additional_properties: dict[str, ModelWithCircularRefInAdditionalPropertiesB] = _attrs_field(
         init=False, factory=dict
     )
 
@@ -48,10 +50,10 @@ class ModelWithCircularRefInAdditionalPropertiesA:
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> "ModelWithCircularRefInAdditionalPropertiesB":
+    def __getitem__(self, key: str) -> ModelWithCircularRefInAdditionalPropertiesB:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: "ModelWithCircularRefInAdditionalPropertiesB") -> None:
+    def __setitem__(self, key: str, value: ModelWithCircularRefInAdditionalPropertiesB) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

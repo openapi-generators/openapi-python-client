@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, Literal, TypeVar, Union, cast
+from typing import Any, Literal, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -14,11 +16,11 @@ class GetModelsOneofWithRequiredConstResponse200Type1:
     """
     Attributes:
         type_ (Literal['beta']):
-        texture (Union[Unset, str]):
+        texture (str | Unset):
     """
 
     type_: Literal["beta"]
-    texture: Union[Unset, str] = UNSET
+    texture: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

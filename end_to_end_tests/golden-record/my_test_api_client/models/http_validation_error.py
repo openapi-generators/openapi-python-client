@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -16,13 +18,13 @@ T = TypeVar("T", bound="HTTPValidationError")
 class HTTPValidationError:
     """
     Attributes:
-        detail (Union[Unset, list['ValidationError']]):
+        detail (list[ValidationError] | Unset):
     """
 
-    detail: Union[Unset, list["ValidationError"]] = UNSET
+    detail: list[ValidationError] | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        detail: Union[Unset, list[dict[str, Any]]] = UNSET
+        detail: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.detail, Unset):
             detail = []
             for detail_item_data in self.detail:

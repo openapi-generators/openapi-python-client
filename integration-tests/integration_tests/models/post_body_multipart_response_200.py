@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
@@ -20,16 +22,16 @@ class PostBodyMultipartResponse200:
     Attributes:
         a_string (str): Echo of the 'a_string' input parameter from the form.
         description (str): Echo of the 'description' input parameter from the form.
-        files (list['File']):
+        files (list[File]):
         times (list[datetime.datetime]):
-        objects (list['AnObject']):
+        objects (list[AnObject]):
     """
 
     a_string: str
     description: str
-    files: list["File"]
+    files: list[File]
     times: list[datetime.datetime]
-    objects: list["AnObject"]
+    objects: list[AnObject]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
@@ -11,7 +13,7 @@ T = TypeVar("T", bound="ModelWithRecursiveRefInAdditionalProperties")
 class ModelWithRecursiveRefInAdditionalProperties:
     """ """
 
-    additional_properties: dict[str, "ModelWithRecursiveRefInAdditionalProperties"] = _attrs_field(
+    additional_properties: dict[str, ModelWithRecursiveRefInAdditionalProperties] = _attrs_field(
         init=False, factory=dict
     )
 
@@ -40,10 +42,10 @@ class ModelWithRecursiveRefInAdditionalProperties:
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> "ModelWithRecursiveRefInAdditionalProperties":
+    def __getitem__(self, key: str) -> ModelWithRecursiveRefInAdditionalProperties:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: "ModelWithRecursiveRefInAdditionalProperties") -> None:
+    def __setitem__(self, key: str, value: ModelWithRecursiveRefInAdditionalProperties) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

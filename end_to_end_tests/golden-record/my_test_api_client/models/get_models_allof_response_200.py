@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -18,26 +20,26 @@ T = TypeVar("T", bound="GetModelsAllofResponse200")
 class GetModelsAllofResponse200:
     """
     Attributes:
-        aliased (Union[Unset, AModel]): A Model for testing all the ways custom objects can be used
-        extended (Union[Unset, Extended]):
-        model (Union[Unset, AModel]): A Model for testing all the ways custom objects can be used
+        aliased (AModel | Unset): A Model for testing all the ways custom objects can be used
+        extended (Extended | Unset):
+        model (AModel | Unset): A Model for testing all the ways custom objects can be used
     """
 
-    aliased: Union[Unset, "AModel"] = UNSET
-    extended: Union[Unset, "Extended"] = UNSET
-    model: Union[Unset, "AModel"] = UNSET
+    aliased: AModel | Unset = UNSET
+    extended: Extended | Unset = UNSET
+    model: AModel | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        aliased: Union[Unset, dict[str, Any]] = UNSET
+        aliased: dict[str, Any] | Unset = UNSET
         if not isinstance(self.aliased, Unset):
             aliased = self.aliased.to_dict()
 
-        extended: Union[Unset, dict[str, Any]] = UNSET
+        extended: dict[str, Any] | Unset = UNSET
         if not isinstance(self.extended, Unset):
             extended = self.extended.to_dict()
 
-        model: Union[Unset, dict[str, Any]] = UNSET
+        model: dict[str, Any] | Unset = UNSET
         if not isinstance(self.model, Unset):
             model = self.model.to_dict()
 
@@ -60,21 +62,21 @@ class GetModelsAllofResponse200:
 
         d = dict(src_dict)
         _aliased = d.pop("aliased", UNSET)
-        aliased: Union[Unset, AModel]
+        aliased: AModel | Unset
         if isinstance(_aliased, Unset):
             aliased = UNSET
         else:
             aliased = AModel.from_dict(_aliased)
 
         _extended = d.pop("extended", UNSET)
-        extended: Union[Unset, Extended]
+        extended: Extended | Unset
         if isinstance(_extended, Unset):
             extended = UNSET
         else:
             extended = Extended.from_dict(_extended)
 
         _model = d.pop("model", UNSET)
-        model: Union[Unset, AModel]
+        model: AModel | Unset
         if isinstance(_model, Unset):
             model = UNSET
         else:

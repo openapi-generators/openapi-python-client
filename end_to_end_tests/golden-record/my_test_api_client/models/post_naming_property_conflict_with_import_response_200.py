@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -13,12 +15,12 @@ T = TypeVar("T", bound="PostNamingPropertyConflictWithImportResponse200")
 class PostNamingPropertyConflictWithImportResponse200:
     """
     Attributes:
-        field (Union[Unset, str]): A python_name of field should not interfere with attrs field
-        define (Union[Unset, str]): A python_name of define should not interfere with attrs define
+        field (str | Unset): A python_name of field should not interfere with attrs field
+        define (str | Unset): A python_name of define should not interfere with attrs define
     """
 
-    field: Union[Unset, str] = UNSET
-    define: Union[Unset, str] = UNSET
+    field: str | Unset = UNSET
+    define: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
