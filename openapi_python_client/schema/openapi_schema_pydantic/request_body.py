@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from .media_type import MediaType
@@ -13,7 +11,7 @@ class RequestBody(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject
     """
 
-    description: Optional[str] = None
+    description: str | None = None
     content: dict[str, MediaType]
     required: bool = False
     model_config = ConfigDict(

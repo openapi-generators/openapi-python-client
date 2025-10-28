@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from .contact import Contact
@@ -18,10 +16,10 @@ class Info(BaseModel):
     """
 
     title: str
-    description: Optional[str] = None
-    termsOfService: Optional[str] = None
-    contact: Optional[Contact] = None
-    license: Optional[License] = None
+    description: str | None = None
+    termsOfService: str | None = None
+    contact: Contact | None = None
+    license: License | None = None
     version: str
     model_config = ConfigDict(
         extra="allow",

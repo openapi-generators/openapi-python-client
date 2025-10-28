@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, model_validator
 
@@ -20,43 +20,43 @@ class Schema(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject
     """
 
-    title: Optional[str] = None
-    multipleOf: Optional[float] = Field(default=None, gt=0.0)
-    maximum: Optional[float] = None
-    exclusiveMaximum: Optional[Union[bool, float]] = None
-    minimum: Optional[float] = None
-    exclusiveMinimum: Optional[Union[bool, float]] = None
-    maxLength: Optional[int] = Field(default=None, ge=0)
-    minLength: Optional[int] = Field(default=None, ge=0)
-    pattern: Optional[str] = None
-    maxItems: Optional[int] = Field(default=None, ge=0)
-    minItems: Optional[int] = Field(default=None, ge=0)
-    uniqueItems: Optional[bool] = None
-    maxProperties: Optional[int] = Field(default=None, ge=0)
-    minProperties: Optional[int] = Field(default=None, ge=0)
-    required: Optional[list[str]] = Field(default=None)
-    enum: Union[None, list[Any]] = Field(default=None, min_length=1)
-    const: Union[None, StrictStr, StrictInt, StrictFloat, StrictBool] = None
-    type: Union[DataType, list[DataType], None] = Field(default=None)
+    title: str | None = None
+    multipleOf: float | None = Field(default=None, gt=0.0)
+    maximum: float | None = None
+    exclusiveMaximum: bool | float | None = None
+    minimum: float | None = None
+    exclusiveMinimum: bool | float | None = None
+    maxLength: int | None = Field(default=None, ge=0)
+    minLength: int | None = Field(default=None, ge=0)
+    pattern: str | None = None
+    maxItems: int | None = Field(default=None, ge=0)
+    minItems: int | None = Field(default=None, ge=0)
+    uniqueItems: bool | None = None
+    maxProperties: int | None = Field(default=None, ge=0)
+    minProperties: int | None = Field(default=None, ge=0)
+    required: list[str] | None = Field(default=None)
+    enum: None | list[Any] = Field(default=None, min_length=1)
+    const: None | StrictStr | StrictInt | StrictFloat | StrictBool = None
+    type: DataType | list[DataType] | None = Field(default=None)
     allOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
     oneOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
     anyOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
-    schema_not: Optional[ReferenceOr["Schema"]] = Field(default=None, alias="not")
-    items: Optional[ReferenceOr["Schema"]] = None
+    schema_not: ReferenceOr["Schema"] | None = Field(default=None, alias="not")
+    items: ReferenceOr["Schema"] | None = None
     prefixItems: list[ReferenceOr["Schema"]] = Field(default_factory=list)
-    properties: Optional[dict[str, ReferenceOr["Schema"]]] = None
-    additionalProperties: Optional[Union[bool, ReferenceOr["Schema"]]] = None
-    description: Optional[str] = None
-    schema_format: Optional[str] = Field(default=None, alias="format")
-    default: Optional[Any] = None
+    properties: dict[str, ReferenceOr["Schema"]] | None = None
+    additionalProperties: bool | ReferenceOr["Schema"] | None = None
+    description: str | None = None
+    schema_format: str | None = Field(default=None, alias="format")
+    default: Any | None = None
     nullable: bool = Field(default=False)
-    discriminator: Optional[Discriminator] = None
-    readOnly: Optional[bool] = None
-    writeOnly: Optional[bool] = None
-    xml: Optional[XML] = None
-    externalDocs: Optional[ExternalDocumentation] = None
-    example: Optional[Any] = None
-    deprecated: Optional[bool] = None
+    discriminator: Discriminator | None = None
+    readOnly: bool | None = None
+    writeOnly: bool | None = None
+    xml: XML | None = None
+    externalDocs: ExternalDocumentation | None = None
+    example: Any | None = None
+    deprecated: bool | None = None
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,

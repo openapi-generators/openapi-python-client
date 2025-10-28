@@ -132,7 +132,6 @@ class UnionProperty(PropertyProtocol):
             p.get_type_string(
                 no_optional=True,
                 json=json,
-                quoted=not p.is_base_type,
             )
             for p in self.inner_properties
         }
@@ -141,12 +140,12 @@ class UnionProperty(PropertyProtocol):
     def _get_type_string_from_inner_type_strings(inner_types: set[str]) -> str:
         if len(inner_types) == 1:
             return inner_types.pop()
-        return f"Union[{', '.join(sorted(inner_types))}]"
+        return " | ".join(sorted(inner_types, key=lambda x: x.lower()))
 
-    def get_base_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
-    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_json_type_string(self) -> str:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
     def get_type_strings_in_union(self, *, no_optional: bool = False, json: bool) -> set[str]:
@@ -173,8 +172,6 @@ class UnionProperty(PropertyProtocol):
         self,
         no_optional: bool = False,
         json: bool = False,
-        *,
-        quoted: bool = False,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property.
@@ -195,7 +192,7 @@ class UnionProperty(PropertyProtocol):
         imports = super().get_imports(prefix=prefix)
         for inner_prop in self.inner_properties:
             imports.update(inner_prop.get_imports(prefix=prefix))
-        imports.add("from typing import cast, Union")
+        imports.add("from typing import cast")
         return imports
 
     def get_lazy_imports(self, *, prefix: str) -> set[str]:

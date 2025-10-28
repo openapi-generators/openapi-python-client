@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from typing import Any, Union
+from typing import Any
 
 import pytest
 
@@ -40,7 +40,7 @@ body = PostBodyMultipartBody(
 )
 
 
-def check_response(response: Response[Union[PostBodyMultipartResponse200, PublicError]]) -> None:
+def check_response(response: Response[PostBodyMultipartResponse200 | PublicError]) -> None:
     content = response.parsed
     if not isinstance(content, PostBodyMultipartResponse200):
         raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")

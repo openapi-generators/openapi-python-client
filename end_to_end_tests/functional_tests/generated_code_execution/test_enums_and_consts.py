@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal
 import pytest
 
 from end_to_end_tests.functional_tests.helpers import (
@@ -32,7 +32,6 @@ components:
     ".models.MyModel",
     ".models.MyModelInlineEnumProp",
     ".models.MyModelWithRequired",
-    ".types.Unset",
 )
 class TestStringEnumClass:
     @pytest.mark.parametrize(
@@ -58,10 +57,10 @@ class TestStringEnumClass:
             MyModel(inline_enum_prop=MyModelInlineEnumProp.A),
         )
 
-    def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum, Unset):
-        optional_type = Union[Unset, MyEnum]
+    def test_type_hints(self, MyModel, MyModelWithRequired):
+        optional_type = "MyEnum | Unset"
         assert_model_property_type_hint(MyModel,"enum_prop", optional_type)
-        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", MyEnum)
+        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
 
     def test_invalid_values(self, MyModel):
         with pytest.raises(ValueError):
@@ -95,7 +94,6 @@ components:
     ".models.MyModel",
     ".models.MyModelInlineEnumProp",
     ".models.MyModelWithRequired",
-    ".types.Unset",
 )
 class TestIntEnumClass:
     @pytest.mark.parametrize(
@@ -117,10 +115,10 @@ class TestIntEnumClass:
             MyModel(inline_enum_prop=MyModelInlineEnumProp.VALUE_2),
         )
 
-    def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum, Unset):
-        optional_type = Union[Unset, MyEnum]
+    def test_type_hints(self, MyModel, MyModelWithRequired):
+        optional_type = "MyEnum | Unset"
         assert_model_property_type_hint(MyModel,"enum_prop", optional_type)
-        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", MyEnum)
+        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
 
     def test_invalid_values(self, MyModel):
         with pytest.raises(ValueError):
@@ -183,7 +181,6 @@ components:
     ".models.MyEnum",
     ".models.MyEnumIncludingNullType1", # see comment in test_nullable_enum_prop
     ".models.MyModel",
-    ".types.Unset",
 )
 class TestNullableEnums:
     def test_nullable_enum_prop(self, MyModel, MyEnum, MyEnumIncludingNullType1):
@@ -199,8 +196,8 @@ class TestNullableEnums:
         assert_model_decode_encode( MyModel, {"enumIncludingNullProp": None}, MyModel(enum_including_null_prop=None))
         assert_model_decode_encode(MyModel, {"nullOnlyEnumProp": None}, MyModel(null_only_enum_prop=None))
     
-    def test_type_hints(self, MyModel, MyEnum, Unset):
-        expected_type = Union[MyEnum, None, Unset]
+    def test_type_hints(self, MyModel):
+        expected_type = "MyEnum | None | Unset"
         assert_model_property_type_hint(MyModel, "nullable_enum_prop", expected_type)
     
 
@@ -267,7 +264,7 @@ components:
 @with_generated_code_imports(
     ".models.MyModel",
     ".models.MyModelWithRequired",
-    ".types.Unset",
+    ".models.MyEnum",
 )
 class TestStringLiteralEnum:
     def test_enum_prop(self, MyModel):
@@ -275,11 +272,11 @@ class TestStringLiteralEnum:
         assert_model_decode_encode(MyModel, {"enumProp": "A"}, MyModel(enum_prop="A"))
         assert_model_decode_encode(MyModel, {"inlineEnumProp": "a"}, MyModel(inline_enum_prop="a"))
     
-    def test_type_hints(self, MyModel, MyModelWithRequired, Unset):
-        literal_type = Literal["a", "A", "b"]
-        optional_type = Union[Unset, literal_type]
+    def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum):
+        optional_type = "MyEnum | Unset"
         assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
-        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", literal_type)
+        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
+        assert MyEnum == Literal["a", "A", "b"]
 
     def test_invalid_values(self, MyModel):
         with pytest.raises(TypeError):
@@ -311,7 +308,7 @@ components:
 @with_generated_code_imports(
     ".models.MyModel",
     ".models.MyModelWithRequired",
-    ".types.Unset",
+    ".models.MyEnum",
 )
 class TestIntLiteralEnum:
     def test_enum_prop(self, MyModel):
@@ -319,11 +316,11 @@ class TestIntLiteralEnum:
         assert_model_decode_encode(MyModel, {"enumProp": -4}, MyModel(enum_prop=-4))
         assert_model_decode_encode(MyModel, {"inlineEnumProp": 2}, MyModel(inline_enum_prop=2))
     
-    def test_type_hints(self, MyModel, MyModelWithRequired, Unset):
-        literal_type = Literal[2, 3, -4]
-        optional_type = Union[Unset, literal_type]
+    def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum):
+        optional_type = "MyEnum | Unset"
         assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
-        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", literal_type)
+        assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
+        assert MyEnum == Literal[2, 3, -4]
 
     def test_invalid_values(self, MyModel):
         with pytest.raises(TypeError):

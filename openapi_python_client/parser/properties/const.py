@@ -93,12 +93,10 @@ class ConstProperty(PropertyProtocol):
         self,
         no_optional: bool = False,
         json: bool = False,
-        *,
-        quoted: bool = False,
     ) -> str:
         lit = f"Literal[{self.value.python_code}]"
         if not no_optional and not self.required:
-            return f"Union[{lit}, Unset]"
+            return f"{lit} | Unset"
         return lit
 
     def get_imports(self, *, prefix: str) -> set[str]:
@@ -112,6 +110,6 @@ class ConstProperty(PropertyProtocol):
         if self.required:
             return {"from typing import Literal, cast"}
         return {
-            "from typing import Literal, Union, cast",
+            "from typing import Literal, cast",
             f"from {prefix}types import UNSET, Unset",
         }

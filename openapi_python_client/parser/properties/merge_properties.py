@@ -105,9 +105,9 @@ def _merge_string_with_format(prop1: Property, prop2: Property) -> Property | No
 
 def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None | PropertyError:
     """Merge IntProperty with FloatProperty"""
-    if isinstance(prop1, IntProperty) and isinstance(prop2, (IntProperty, FloatProperty)):
+    if isinstance(prop1, IntProperty) and isinstance(prop2, IntProperty | FloatProperty):
         return _merge_common_attributes(prop1, prop2)
-    elif isinstance(prop2, IntProperty) and isinstance(prop1, (IntProperty, FloatProperty)):
+    elif isinstance(prop2, IntProperty) and isinstance(prop1, IntProperty | FloatProperty):
         # Use the IntProperty as a base since it's more restrictive, but keep the correct override order
         return _merge_common_attributes(prop2, prop1, prop2)
     else:

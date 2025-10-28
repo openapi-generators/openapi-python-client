@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 from collections.abc import Mapping
@@ -25,14 +27,14 @@ class PostBodyMultipartBody:
         a_string (str):
         files (list[File]):
         description (str):
-        objects (list['AnObject']):
+        objects (list[AnObject]):
         times (list[datetime.datetime]):
     """
 
     a_string: str
     files: list[File]
     description: str
-    objects: list["AnObject"]
+    objects: list[AnObject]
     times: list[datetime.datetime]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 

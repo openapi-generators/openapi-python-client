@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union, cast
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -18,54 +20,54 @@ T = TypeVar("T", bound="PostUserListBody")
 class PostUserListBody:
     """
     Attributes:
-        an_enum_value (Union[Unset, list[AnEnum]]):
-        an_enum_value_with_null (Union[Unset, list[Union[AnEnumWithNull, None]]]):
-        an_enum_value_with_only_null (Union[Unset, list[None]]):
-        an_allof_enum_with_overridden_default (Union[Unset, AnAllOfEnum]):  Default: 'overridden_default'.
-        an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, list[list[DifferentEnum]]]):
+        an_enum_value (list[AnEnum] | Unset):
+        an_enum_value_with_null (list[AnEnumWithNull | None] | Unset):
+        an_enum_value_with_only_null (list[None] | Unset):
+        an_allof_enum_with_overridden_default (AnAllOfEnum | Unset):  Default: 'overridden_default'.
+        an_optional_allof_enum (AnAllOfEnum | Unset):
+        nested_list_of_enums (list[list[DifferentEnum]] | Unset):
     """
 
-    an_enum_value: Union[Unset, list[AnEnum]] = UNSET
-    an_enum_value_with_null: Union[Unset, list[Union[AnEnumWithNull, None]]] = UNSET
-    an_enum_value_with_only_null: Union[Unset, list[None]] = UNSET
-    an_allof_enum_with_overridden_default: Union[Unset, AnAllOfEnum] = "overridden_default"
-    an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, list[list[DifferentEnum]]] = UNSET
+    an_enum_value: list[AnEnum] | Unset = UNSET
+    an_enum_value_with_null: list[AnEnumWithNull | None] | Unset = UNSET
+    an_enum_value_with_only_null: list[None] | Unset = UNSET
+    an_allof_enum_with_overridden_default: AnAllOfEnum | Unset = "overridden_default"
+    an_optional_allof_enum: AnAllOfEnum | Unset = UNSET
+    nested_list_of_enums: list[list[DifferentEnum]] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        an_enum_value: Union[Unset, list[str]] = UNSET
+        an_enum_value: list[str] | Unset = UNSET
         if not isinstance(self.an_enum_value, Unset):
             an_enum_value = []
             for an_enum_value_item_data in self.an_enum_value:
                 an_enum_value_item: str = an_enum_value_item_data
                 an_enum_value.append(an_enum_value_item)
 
-        an_enum_value_with_null: Union[Unset, list[Union[None, str]]] = UNSET
+        an_enum_value_with_null: list[None | str] | Unset = UNSET
         if not isinstance(self.an_enum_value_with_null, Unset):
             an_enum_value_with_null = []
             for an_enum_value_with_null_item_data in self.an_enum_value_with_null:
-                an_enum_value_with_null_item: Union[None, str]
+                an_enum_value_with_null_item: None | str
                 if isinstance(an_enum_value_with_null_item_data, str):
                     an_enum_value_with_null_item = an_enum_value_with_null_item_data
                 else:
                     an_enum_value_with_null_item = an_enum_value_with_null_item_data
                 an_enum_value_with_null.append(an_enum_value_with_null_item)
 
-        an_enum_value_with_only_null: Union[Unset, list[None]] = UNSET
+        an_enum_value_with_only_null: list[None] | Unset = UNSET
         if not isinstance(self.an_enum_value_with_only_null, Unset):
             an_enum_value_with_only_null = self.an_enum_value_with_only_null
 
-        an_allof_enum_with_overridden_default: Union[Unset, str] = UNSET
+        an_allof_enum_with_overridden_default: str | Unset = UNSET
         if not isinstance(self.an_allof_enum_with_overridden_default, Unset):
             an_allof_enum_with_overridden_default = self.an_allof_enum_with_overridden_default
 
-        an_optional_allof_enum: Union[Unset, str] = UNSET
+        an_optional_allof_enum: str | Unset = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum
 
-        nested_list_of_enums: Union[Unset, list[list[str]]] = UNSET
+        nested_list_of_enums: list[list[str]] | Unset = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -167,7 +169,7 @@ class PostUserListBody:
         _an_enum_value_with_null = d.pop("an_enum_value_with_null", UNSET)
         for an_enum_value_with_null_item_data in _an_enum_value_with_null or []:
 
-            def _parse_an_enum_value_with_null_item(data: object) -> Union[AnEnumWithNull, None]:
+            def _parse_an_enum_value_with_null_item(data: object) -> AnEnumWithNull | None:
                 if data is None:
                     return data
                 try:
@@ -178,7 +180,7 @@ class PostUserListBody:
                     return componentsschemas_an_enum_with_null_type_1
                 except:  # noqa: E722
                     pass
-                return cast(Union[AnEnumWithNull, None], data)
+                return cast(AnEnumWithNull | None, data)
 
             an_enum_value_with_null_item = _parse_an_enum_value_with_null_item(an_enum_value_with_null_item_data)
 
@@ -187,14 +189,14 @@ class PostUserListBody:
         an_enum_value_with_only_null = cast(list[None], d.pop("an_enum_value_with_only_null", UNSET))
 
         _an_allof_enum_with_overridden_default = d.pop("an_allof_enum_with_overridden_default", UNSET)
-        an_allof_enum_with_overridden_default: Union[Unset, AnAllOfEnum]
+        an_allof_enum_with_overridden_default: AnAllOfEnum | Unset
         if isinstance(_an_allof_enum_with_overridden_default, Unset):
             an_allof_enum_with_overridden_default = UNSET
         else:
             an_allof_enum_with_overridden_default = check_an_all_of_enum(_an_allof_enum_with_overridden_default)
 
         _an_optional_allof_enum = d.pop("an_optional_allof_enum", UNSET)
-        an_optional_allof_enum: Union[Unset, AnAllOfEnum]
+        an_optional_allof_enum: AnAllOfEnum | Unset
         if isinstance(_an_optional_allof_enum, Unset):
             an_optional_allof_enum = UNSET
         else:

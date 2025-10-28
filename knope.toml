@@ -1,6 +1,9 @@
 [package]
 versioned_files = ["pyproject.toml"]
 changelog = "CHANGELOG.md"
+extra_changelog_sections = [
+    { name = "Notes", types = ["note"] }
+]
 
 [github]
 owner = "openapi-generators"

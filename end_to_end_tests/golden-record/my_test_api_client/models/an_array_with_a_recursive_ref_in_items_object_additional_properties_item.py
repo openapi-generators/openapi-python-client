@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
@@ -11,7 +13,7 @@ T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectAdditionalPropertie
 class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     """ """
 
-    additional_properties: dict[str, list["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]] = (
+    additional_properties: dict[str, list[AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem]] = (
         _attrs_field(init=False, factory=dict)
     )
 
@@ -60,12 +62,10 @@ class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> list["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]:
+    def __getitem__(self, key: str) -> list[AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem]:
         return self.additional_properties[key]
 
-    def __setitem__(
-        self, key: str, value: list["AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem"]
-    ) -> None:
+    def __setitem__(self, key: str, value: list[AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem]) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

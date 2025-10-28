@@ -2,7 +2,6 @@
 import filecmp
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from typer.testing import CliRunner
 
@@ -13,9 +12,9 @@ def _regenerate(
     *,
     spec_file_name: str,
     output_dir: str = "my-test-api-client",
-    golden_record_dir: Optional[str] = None,
+    golden_record_dir: str | None = None,
     config_file_name: str = "config.yml",
-    extra_args: Optional[list[str]] = None
+    extra_args: list[str] | None = None
 ) -> None:
     end_to_end_tests_base_path = Path(__file__).parent
     project_base_path = end_to_end_tests_base_path.parent
@@ -38,7 +37,7 @@ def _regenerate(
     if result.stdout:
         print(result.stdout)
     if result.exception:
-        raise result.exception
+        raise Exception(f"{result.exception} {result.stderr}")
     if golden_record_dir:
         gr_path = end_to_end_tests_base_path / golden_record_dir
         shutil.rmtree(gr_path, ignore_errors=True)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __all__ = ["LiteralEnumProperty"]
 
-from typing import Any, ClassVar, Union, cast
+from typing import Any, ClassVar, cast
 
 from attr import evolve
 from attrs import define
@@ -16,7 +16,7 @@ from .protocol import PropertyProtocol, Value
 from .schemas import Class, Schemas
 from .union import UnionProperty
 
-ValueType = Union[str, int]
+ValueType = str | int
 
 
 @define
@@ -97,9 +97,7 @@ class LiteralEnumProperty(PropertyProtocol):
         value_type = next(iter(value_types))
         if value_type not in (str, int):
             return PropertyError(header=f"Unsupported enum type {value_type}", data=data), schemas
-        value_list = cast(
-            Union[list[int], list[str]], unchecked_value_list
-        )  # We checked this with all the value_types stuff
+        value_list = cast(list[int] | list[str], unchecked_value_list)  # We checked this with all the value_types stuff
 
         if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union
             data.oneOf = [
@@ -162,10 +160,10 @@ class LiteralEnumProperty(PropertyProtocol):
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
 
-    def get_base_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         return self.class_info.name
 
-    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_json_type_string(self) -> str:
         return self.value_type.__name__
 
     def get_instance_type_string(self) -> str:

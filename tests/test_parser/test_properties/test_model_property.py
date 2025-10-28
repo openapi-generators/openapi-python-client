@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 from attr import evolve
 
@@ -18,32 +16,26 @@ MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 
 class TestModelProperty:
     @pytest.mark.parametrize(
-        "no_optional,required,json,quoted,expected",
+        "no_optional,required,json,expected",
         [
-            (False, False, False, False, "Union[Unset, MyClass]"),
-            (False, True, False, False, "MyClass"),
-            (True, False, False, False, "MyClass"),
-            (True, True, False, False, "MyClass"),
-            (False, True, True, False, "dict[str, Any]"),
-            (False, False, False, True, "Union[Unset, 'MyClass']"),
-            (False, True, False, True, "'MyClass'"),
-            (True, False, False, True, "'MyClass'"),
-            (True, True, False, True, "'MyClass'"),
-            (False, True, True, True, "dict[str, Any]"),
+            (False, False, False, "MyClass | Unset"),
+            (False, True, False, "MyClass"),
+            (True, False, False, "MyClass"),
+            (True, True, False, "MyClass"),
+            (False, True, True, "dict[str, Any]"),
         ],
     )
-    def test_get_type_string(self, no_optional, required, json, expected, model_property_factory, quoted):
+    def test_get_type_string(self, no_optional, required, json, expected, model_property_factory):
         prop = model_property_factory(
             required=required,
         )
 
-        assert prop.get_type_string(no_optional=no_optional, json=json, quoted=quoted) == expected
+        assert prop.get_type_string(no_optional=no_optional, json=json) == expected
 
     def test_get_imports(self, model_property_factory):
         prop = model_property_factory(required=False)
 
         assert prop.get_imports(prefix="..") == {
-            "from typing import Union",
             "from ..types import UNSET, Unset",
             "from typing import cast",
         }
@@ -55,19 +47,9 @@ class TestModelProperty:
             "from ..models.my_module import MyClass",
         }
 
-    def test_is_base_type(self, model_property_factory):
-        assert model_property_factory().is_base_type is False
-
-    @pytest.mark.parametrize(
-        "quoted,expected",
-        [
-            (False, "MyClass"),
-            (True, '"MyClass"'),
-        ],
-    )
-    def test_get_base_type_string(self, quoted, expected, model_property_factory):
+    def test_get_base_type_string(self, model_property_factory):
         m = model_property_factory()
-        assert m.get_base_type_string(quoted=quoted) == expected
+        assert m.get_base_type_string() == "MyClass"
 
 
 class TestBuild:
@@ -160,7 +142,6 @@ class TestBuild:
                 "from typing import cast",
                 "import datetime",
                 "from ..types import UNSET, Unset",
-                "from typing import Union",
             },
             lazy_imports=set(),
             additional_properties=ANY_ADDITIONAL_PROPERTY,
@@ -206,8 +187,8 @@ class TestBuild:
     def test_model_naming(
         self,
         name: str,
-        title: Optional[str],
-        parent_name: Optional[str],
+        title: str | None,
+        parent_name: str | None,
         use_title_prefixing: bool,
         expected: str,
         config,

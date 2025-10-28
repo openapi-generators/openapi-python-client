@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -24,17 +24,13 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1 | None:
     if response.status_code == 200:
 
         def _parse_response_200(
             data: object,
-        ) -> Union[
-            "GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"
-        ]:
+        ) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
@@ -60,10 +56,8 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,17 +68,15 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Response[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+    client: AuthenticatedClient | Client,
+) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']]
+        Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]
     """
 
     kwargs = _get_kwargs()
@@ -98,17 +90,15 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+    client: AuthenticatedClient | Client,
+) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1 | None:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']
+        GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1
     """
 
     return sync_detailed(
@@ -118,17 +108,15 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Response[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+    client: AuthenticatedClient | Client,
+) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']]
+        Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]
     """
 
     kwargs = _get_kwargs()
@@ -140,17 +128,15 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[
-    Union["GetModelsOneofWithRequiredConstResponse200Type0", "GetModelsOneofWithRequiredConstResponse200Type1"]
-]:
+    client: AuthenticatedClient | Client,
+) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1 | None:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union['GetModelsOneofWithRequiredConstResponse200Type0', 'GetModelsOneofWithRequiredConstResponse200Type1']
+        GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1
     """
 
     return (

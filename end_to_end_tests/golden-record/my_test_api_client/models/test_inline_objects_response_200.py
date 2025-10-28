@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -12,10 +14,10 @@ T = TypeVar("T", bound="TestInlineObjectsResponse200")
 class TestInlineObjectsResponse200:
     """
     Attributes:
-        a_property (Union[Unset, str]):
+        a_property (str | Unset):
     """
 
-    a_property: Union[Unset, str] = UNSET
+    a_property: str | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         a_property = self.a_property

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import httpx
 
@@ -17,7 +17,7 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[list[int]]:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[int] | None:
     if response.status_code == 200:
         response_200 = cast(list[int], response.json())
 
@@ -29,7 +29,7 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[list[int]]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[int]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -40,7 +40,7 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
 ) -> Response[list[int]]:
     """Get Basic List Of Integers
 
@@ -65,8 +65,8 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[list[int]]:
+    client: AuthenticatedClient | Client,
+) -> list[int] | None:
     """Get Basic List Of Integers
 
      Get a list of integers
@@ -86,7 +86,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
 ) -> Response[list[int]]:
     """Get Basic List Of Integers
 
@@ -109,8 +109,8 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[list[int]]:
+    client: AuthenticatedClient | Client,
+) -> list[int] | None:
     """Get Basic List Of Integers
 
      Get a list of integers

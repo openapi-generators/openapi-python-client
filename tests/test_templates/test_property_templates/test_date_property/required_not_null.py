@@ -1,5 +1,4 @@
 from datetime import date
-from typing import cast, Union
 
 from dateutil.parser import isoparse
 some_source = date(2020, 10, 12)

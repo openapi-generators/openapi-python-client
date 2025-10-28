@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -17,14 +19,14 @@ T = TypeVar("T", bound="ModelWithCircularRefB")
 class ModelWithCircularRefB:
     """
     Attributes:
-        circular (Union[Unset, ModelWithCircularRefA]):
+        circular (ModelWithCircularRefA | Unset):
     """
 
-    circular: Union[Unset, "ModelWithCircularRefA"] = UNSET
+    circular: ModelWithCircularRefA | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        circular: Union[Unset, dict[str, Any]] = UNSET
+        circular: dict[str, Any] | Unset = UNSET
         if not isinstance(self.circular, Unset):
             circular = self.circular.to_dict()
 
@@ -42,7 +44,7 @@ class ModelWithCircularRefB:
 
         d = dict(src_dict)
         _circular = d.pop("circular", UNSET)
-        circular: Union[Unset, ModelWithCircularRefA]
+        circular: ModelWithCircularRefA | Unset
         if isinstance(_circular, Unset):
             circular = UNSET
         else:

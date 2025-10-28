@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
@@ -16,9 +16,9 @@ class Encoding(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject
     """
 
-    contentType: Optional[str] = None
-    headers: Optional[dict[str, ReferenceOr["Header"]]] = None
-    style: Optional[str] = None
+    contentType: str | None = None
+    headers: dict[str, ReferenceOr["Header"]] | None = None
+    style: str | None = None
     explode: bool = False
     allowReserved: bool = False
     model_config = ConfigDict(

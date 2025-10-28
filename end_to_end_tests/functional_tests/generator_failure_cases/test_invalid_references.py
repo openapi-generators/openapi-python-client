@@ -26,4 +26,4 @@ components:
 )
 class TestReferenceSchemaProperties:
     def test_decode_encode(self, generated_client):
-        assert "Circular schema references found" in generated_client.generator_result.stdout
+        assert "Circular schema references found" in generated_client.generator_result.stderr

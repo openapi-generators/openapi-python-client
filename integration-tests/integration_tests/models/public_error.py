@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -17,35 +19,35 @@ T = TypeVar("T", bound="PublicError")
 class PublicError:
     """
     Attributes:
-        errors (Union[Unset, list[str]]):
-        extra_parameters (Union[Unset, list[str]]):
-        invalid_parameters (Union[Unset, list['Problem']]):
-        missing_parameters (Union[Unset, list[str]]):
+        errors (list[str] | Unset):
+        extra_parameters (list[str] | Unset):
+        invalid_parameters (list[Problem] | Unset):
+        missing_parameters (list[str] | Unset):
     """
 
-    errors: Union[Unset, list[str]] = UNSET
-    extra_parameters: Union[Unset, list[str]] = UNSET
-    invalid_parameters: Union[Unset, list["Problem"]] = UNSET
-    missing_parameters: Union[Unset, list[str]] = UNSET
+    errors: list[str] | Unset = UNSET
+    extra_parameters: list[str] | Unset = UNSET
+    invalid_parameters: list[Problem] | Unset = UNSET
+    missing_parameters: list[str] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        errors: Union[Unset, list[str]] = UNSET
+        errors: list[str] | Unset = UNSET
         if not isinstance(self.errors, Unset):
             errors = self.errors
 
-        extra_parameters: Union[Unset, list[str]] = UNSET
+        extra_parameters: list[str] | Unset = UNSET
         if not isinstance(self.extra_parameters, Unset):
             extra_parameters = self.extra_parameters
 
-        invalid_parameters: Union[Unset, list[dict[str, Any]]] = UNSET
+        invalid_parameters: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.invalid_parameters, Unset):
             invalid_parameters = []
             for invalid_parameters_item_data in self.invalid_parameters:
                 invalid_parameters_item = invalid_parameters_item_data.to_dict()
                 invalid_parameters.append(invalid_parameters_item)
 
-        missing_parameters: Union[Unset, list[str]] = UNSET
+        missing_parameters: list[str] | Unset = UNSET
         if not isinstance(self.missing_parameters, Unset):
             missing_parameters = self.missing_parameters
 

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, Literal, TypeVar, Union, cast
+from typing import Any, Literal, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -14,19 +16,19 @@ class PostConstPathBody:
     """
     Attributes:
         required (Literal['this always goes in the body']):
-        nullable (Union[Literal['this or null goes in the body'], None]):
-        optional (Union[Literal['this sometimes goes in the body'], Unset]):
+        nullable (Literal['this or null goes in the body'] | None):
+        optional (Literal['this sometimes goes in the body'] | Unset):
     """
 
     required: Literal["this always goes in the body"]
-    nullable: Union[Literal["this or null goes in the body"], None]
-    optional: Union[Literal["this sometimes goes in the body"], Unset] = UNSET
+    nullable: Literal["this or null goes in the body"] | None
+    optional: Literal["this sometimes goes in the body"] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         required = self.required
 
-        nullable: Union[Literal["this or null goes in the body"], None]
+        nullable: Literal["this or null goes in the body"] | None
         nullable = self.nullable
 
         optional = self.optional
@@ -51,7 +53,7 @@ class PostConstPathBody:
         if required != "this always goes in the body":
             raise ValueError(f"required must match const 'this always goes in the body', got '{required}'")
 
-        def _parse_nullable(data: object) -> Union[Literal["this or null goes in the body"], None]:
+        def _parse_nullable(data: object) -> Literal["this or null goes in the body"] | None:
             if data is None:
                 return data
             nullable_type_1 = cast(Literal["this or null goes in the body"], data)
@@ -60,11 +62,11 @@ class PostConstPathBody:
                     f"nullable_type_1 must match const 'this or null goes in the body', got '{nullable_type_1}'"
                 )
             return nullable_type_1
-            return cast(Union[Literal["this or null goes in the body"], None], data)
+            return cast(Literal["this or null goes in the body"] | None, data)
 
         nullable = _parse_nullable(d.pop("nullable"))
 
-        optional = cast(Union[Literal["this sometimes goes in the body"], Unset], d.pop("optional", UNSET))
+        optional = cast(Literal["this sometimes goes in the body"] | Unset, d.pop("optional", UNSET))
         if optional != "this sometimes goes in the body" and not isinstance(optional, Unset):
             raise ValueError(f"optional must match const 'this sometimes goes in the body', got '{optional}'")
 

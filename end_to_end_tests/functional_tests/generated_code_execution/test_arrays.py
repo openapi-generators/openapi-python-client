@@ -1,5 +1,3 @@
-from typing import Any, ForwardRef, Union
-
 from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
     assert_model_property_type_hint,
@@ -37,7 +35,6 @@ components:
     ".models.ModelWithArrayOfInts",
     ".models.ModelWithArrayOfObjects",
     ".models.SimpleObject",
-    ".types.Unset",
 )
 class TestArraySchemas:
     def test_array_of_any(self, ModelWithArrayOfAny):
@@ -53,9 +50,6 @@ class TestArraySchemas:
             {"arrayProp": [1, 2]},
             ModelWithArrayOfInts(array_prop=[1, 2]),
         )
-        # Note, currently arrays of simple types are not validated, so the following assertion would fail:
-        # with pytest.raises(TypeError):
-        #    ModelWithArrayOfInt.from_dict({"arrayProp": [1, "a"]})
 
     def test_array_of_object(self, ModelWithArrayOfObjects, SimpleObject):
         assert_model_decode_encode(
@@ -64,10 +58,10 @@ class TestArraySchemas:
             ModelWithArrayOfObjects(array_prop=[SimpleObject(name="a"), SimpleObject(name="b")]),
         )
 
-    def test_type_hints(self, ModelWithArrayOfAny, ModelWithArrayOfInts, ModelWithArrayOfObjects, Unset):
-        assert_model_property_type_hint(ModelWithArrayOfAny, "array_prop", Union[list[Any], Unset])
-        assert_model_property_type_hint(ModelWithArrayOfInts, "array_prop", Union[list[int], Unset])
-        assert_model_property_type_hint(ModelWithArrayOfObjects, "array_prop", Union[list["SimpleObject"], Unset])
+    def test_type_hints(self, ModelWithArrayOfAny, ModelWithArrayOfInts, ModelWithArrayOfObjects):
+        assert_model_property_type_hint(ModelWithArrayOfAny, "array_prop", "list[Any] | Unset")
+        assert_model_property_type_hint(ModelWithArrayOfInts, "array_prop", "list[int] | Unset")
+        assert_model_property_type_hint(ModelWithArrayOfObjects, "array_prop", "list[SimpleObject] | Unset")
 
 
 @with_generated_client_fixture(
@@ -108,7 +102,6 @@ components:
     ".models.ModelWithPrefixItems",
     ".models.ModelWithMixedItems",
     ".models.SimpleObject",
-    ".types.Unset",
 )
 class TestArraysWithPrefixItems:
     def test_single_prefix_item(self, ModelWithSinglePrefixItem):
@@ -132,17 +125,17 @@ class TestArraysWithPrefixItems:
             ModelWithMixedItems(array_prop=[SimpleObject(name="a"), "b"]),
         )
 
-    def test_type_hints(self, ModelWithSinglePrefixItem, ModelWithPrefixItems, ModelWithMixedItems, Unset):
-        assert_model_property_type_hint(ModelWithSinglePrefixItem, "array_prop", Union[list[str], Unset])
+    def test_type_hints(self, ModelWithSinglePrefixItem, ModelWithPrefixItems, ModelWithMixedItems):
+        assert_model_property_type_hint(ModelWithSinglePrefixItem, "array_prop", "list[str] | Unset")
         assert_model_property_type_hint(
             ModelWithPrefixItems,
             "array_prop",
-            Union[list[Union[ForwardRef("SimpleObject"), str]], Unset],
+            "list[SimpleObject | str] | Unset",
         )
         assert_model_property_type_hint(
             ModelWithMixedItems,
             "array_prop",
-            Union[list[Union[ForwardRef("SimpleObject"), str]], Unset],
+            "list[SimpleObject | str] | Unset",
         )
         # Note, this test is asserting the current behavior which, due to limitations of the implementation
         # (see: https://github.com/openapi-generators/openapi-python-client/pull/1130), is not really doing

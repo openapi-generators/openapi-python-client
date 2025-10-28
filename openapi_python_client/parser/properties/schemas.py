@@ -10,7 +10,7 @@ __all__ = [
     "update_schemas_with_data",
 ]
 
-from typing import TYPE_CHECKING, NewType, Union, cast
+from typing import TYPE_CHECKING, NewType, cast
 from urllib.parse import urlparse
 
 from attrs import define, evolve, field
@@ -32,7 +32,7 @@ else:
 ReferencePath = NewType("ReferencePath", str)
 
 
-def parse_reference_path(ref_path_raw: str) -> Union[ReferencePath, ParseError]:
+def parse_reference_path(ref_path_raw: str) -> ReferencePath | ParseError:
     """
     Takes a raw string provided in a `$ref` and turns it into a validated `_ReferencePath` or a `ParseError` if
     validation fails.
@@ -84,12 +84,12 @@ class Schemas:
     """Structure for containing all defined, shareable, and reusable schemas (attr classes and Enums)"""
 
     classes_by_reference: dict[ReferencePath, Property] = field(factory=dict)
-    dependencies: dict[ReferencePath, set[Union[ReferencePath, ClassName]]] = field(factory=dict)
+    dependencies: dict[ReferencePath, set[ReferencePath | ClassName]] = field(factory=dict)
     classes_by_name: dict[ClassName, Property] = field(factory=dict)
     models_to_process: list[ModelProperty] = field(factory=list)
     errors: list[ParseError] = field(factory=list)
 
-    def add_dependencies(self, ref_path: ReferencePath, roots: set[Union[ReferencePath, ClassName]]) -> None:
+    def add_dependencies(self, ref_path: ReferencePath, roots: set[ReferencePath | ClassName]) -> None:
         """Record new dependencies on the given ReferencePath
 
         Args:
@@ -102,7 +102,7 @@ class Schemas:
 
 def update_schemas_with_data(
     *, ref_path: ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
-) -> Union[Schemas, PropertyError]:
+) -> Schemas | PropertyError:
     """
     Update a `Schemas` using some new reference.
 
@@ -120,7 +120,7 @@ def update_schemas_with_data(
     """
     from . import property_from_data  # noqa: PLC0415
 
-    prop: Union[PropertyError, Property]
+    prop: PropertyError | Property
     prop, schemas = property_from_data(
         data=data,
         name=ref_path,
@@ -158,10 +158,10 @@ class Parameters:
 def parameter_from_data(
     *,
     name: str,
-    data: Union[oai.Reference, oai.Parameter],
+    data: oai.Reference | oai.Parameter,
     parameters: Parameters,
     config: Config,
-) -> tuple[Union[Parameter, ParameterError], Parameters]:
+) -> tuple[Parameter | ParameterError, Parameters]:
     """Generates parameters from an OpenAPI Parameter spec."""
 
     if isinstance(data, oai.Reference):
@@ -186,7 +186,7 @@ def parameter_from_data(
 
 def update_parameters_with_data(
     *, ref_path: ReferencePath, data: oai.Parameter, parameters: Parameters, config: Config
-) -> Union[Parameters, ParameterError]:
+) -> Parameters | ParameterError:
     """
     Update a `Parameters` using some new reference.
 
@@ -219,9 +219,9 @@ def update_parameters_with_data(
 
 def parameter_from_reference(
     *,
-    param: Union[oai.Reference, Parameter],
+    param: oai.Reference | Parameter,
     parameters: Parameters,
-) -> Union[Parameter, ParameterError]:
+) -> Parameter | ParameterError:
     """
     Returns a Parameter from a Reference or the Parameter itself if one was provided.
 

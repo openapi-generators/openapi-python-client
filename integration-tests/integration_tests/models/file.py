@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -13,14 +15,14 @@ T = TypeVar("T", bound="File")
 class File:
     """
     Attributes:
-        data (Union[Unset, str]): Echo of content of the 'file' input parameter from the form.
-        name (Union[Unset, str]): The name of the file uploaded.
-        content_type (Union[Unset, str]): The content type of the file uploaded.
+        data (str | Unset): Echo of content of the 'file' input parameter from the form.
+        name (str | Unset): The name of the file uploaded.
+        content_type (str | Unset): The content type of the file uploaded.
     """
 
-    data: Union[Unset, str] = UNSET
-    name: Union[Unset, str] = UNSET
-    content_type: Union[Unset, str] = UNSET
+    data: str | Unset = UNSET
+    name: str | Unset = UNSET
+    content_type: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

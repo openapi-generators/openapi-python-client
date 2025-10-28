@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -19,14 +21,14 @@ T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
 class ModelWithPrimitiveAdditionalProperties:
     """
     Attributes:
-        a_date_holder (Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]):
+        a_date_holder (ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset):
     """
 
-    a_date_holder: Union[Unset, "ModelWithPrimitiveAdditionalPropertiesADateHolder"] = UNSET
+    a_date_holder: ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset = UNSET
     additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        a_date_holder: Union[Unset, dict[str, Any]] = UNSET
+        a_date_holder: dict[str, Any] | Unset = UNSET
         if not isinstance(self.a_date_holder, Unset):
             a_date_holder = self.a_date_holder.to_dict()
 
@@ -46,7 +48,7 @@ class ModelWithPrimitiveAdditionalProperties:
 
         d = dict(src_dict)
         _a_date_holder = d.pop("a_date_holder", UNSET)
-        a_date_holder: Union[Unset, ModelWithPrimitiveAdditionalPropertiesADateHolder]
+        a_date_holder: ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset
         if isinstance(_a_date_holder, Unset):
             a_date_holder = UNSET
         else:

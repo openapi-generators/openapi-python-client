@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -18,17 +20,17 @@ T = TypeVar("T", bound="ModelWithDiscriminatedUnion")
 class ModelWithDiscriminatedUnion:
     """
     Attributes:
-        discriminated_union (Union['ADiscriminatedUnionType1', 'ADiscriminatedUnionType2', None, Unset]):
+        discriminated_union (ADiscriminatedUnionType1 | ADiscriminatedUnionType2 | None | Unset):
     """
 
-    discriminated_union: Union["ADiscriminatedUnionType1", "ADiscriminatedUnionType2", None, Unset] = UNSET
+    discriminated_union: ADiscriminatedUnionType1 | ADiscriminatedUnionType2 | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
         from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
 
-        discriminated_union: Union[None, Unset, dict[str, Any]]
+        discriminated_union: dict[str, Any] | None | Unset
         if isinstance(self.discriminated_union, Unset):
             discriminated_union = UNSET
         elif isinstance(self.discriminated_union, ADiscriminatedUnionType1):
@@ -55,7 +57,7 @@ class ModelWithDiscriminatedUnion:
 
         def _parse_discriminated_union(
             data: object,
-        ) -> Union["ADiscriminatedUnionType1", "ADiscriminatedUnionType2", None, Unset]:
+        ) -> ADiscriminatedUnionType1 | ADiscriminatedUnionType2 | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -76,7 +78,7 @@ class ModelWithDiscriminatedUnion:
                 return componentsschemas_a_discriminated_union_type_1
             except:  # noqa: E722
                 pass
-            return cast(Union["ADiscriminatedUnionType1", "ADiscriminatedUnionType2", None, Unset], data)
+            return cast(ADiscriminatedUnionType1 | ADiscriminatedUnionType2 | None | Unset, data)
 
         discriminated_union = _parse_discriminated_union(d.pop("discriminated_union", UNSET))
 

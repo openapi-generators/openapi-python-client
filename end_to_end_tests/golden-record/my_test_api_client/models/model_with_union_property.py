@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -14,13 +16,13 @@ T = TypeVar("T", bound="ModelWithUnionProperty")
 class ModelWithUnionProperty:
     """
     Attributes:
-        a_property (Union[AnEnum, AnIntEnum, Unset]):
+        a_property (AnEnum | AnIntEnum | Unset):
     """
 
-    a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
+    a_property: AnEnum | AnIntEnum | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        a_property: Union[Unset, int, str]
+        a_property: int | str | Unset
         if isinstance(self.a_property, Unset):
             a_property = UNSET
         elif isinstance(self.a_property, AnEnum):
@@ -40,7 +42,7 @@ class ModelWithUnionProperty:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
 
-        def _parse_a_property(data: object) -> Union[AnEnum, AnIntEnum, Unset]:
+        def _parse_a_property(data: object) -> AnEnum | AnIntEnum | Unset:
             if isinstance(data, Unset):
                 return data
             try:

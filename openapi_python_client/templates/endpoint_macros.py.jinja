@@ -102,18 +102,18 @@ _kwargs["json"] = {{ property.python_name }}
 {% if endpoint.requires_security %}
 client: AuthenticatedClient,
 {% else %}
-client: Union[AuthenticatedClient, Client],
+client: AuthenticatedClient | Client,
 {% endif %}
 {% endif %}
 {# Any allowed bodies #}
 {% if endpoint.bodies | length == 1 %}
 body: {{ endpoint.bodies[0].prop.get_type_string() }},
 {% elif endpoint.bodies | length > 1 %}
-body: Union[
-    {% for body in endpoint.bodies %}
-    {{ body.prop.get_type_string() }},
-    {% endfor %}
-],
+body:
+    {%- for body in endpoint.bodies -%}
+    {{ body.prop.get_type_string() }} {% if not loop.last %} | {% endif %}
+    {%- endfor -%}
+,
 {% endif %}
 {# query parameters #}
 {% for parameter in endpoint.query_parameters %}

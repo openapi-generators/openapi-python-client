@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -23,17 +23,17 @@ class Parameter(BaseModel):
 
     name: str
     param_in: ParameterLocation = Field(alias="in")
-    description: Optional[str] = None
+    description: str | None = None
     required: bool = False
     deprecated: bool = False
     allowEmptyValue: bool = False
-    style: Optional[str] = None
+    style: str | None = None
     explode: bool = False
     allowReserved: bool = False
-    param_schema: Optional[ReferenceOr[Schema]] = Field(default=None, alias="schema")
-    example: Optional[Any] = None
-    examples: Optional[dict[str, ReferenceOr[Example]]] = None
-    content: Optional[dict[str, MediaType]] = None
+    param_schema: ReferenceOr[Schema] | None = Field(default=None, alias="schema")
+    example: Any | None = None
+    examples: dict[str, ReferenceOr[Example]] | None = None
+    content: dict[str, MediaType] | None = None
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,

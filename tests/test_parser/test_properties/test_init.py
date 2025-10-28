@@ -24,9 +24,6 @@ MODULE_NAME = "openapi_python_client.parser.properties"
 
 
 class TestFileProperty:
-    def test_is_base_type(self, file_property_factory):
-        assert file_property_factory().is_base_type is True
-
     @pytest.mark.parametrize("required", (True, False))
     def test_get_imports(self, file_property_factory, required):
         p = file_property_factory(required=required)
@@ -37,7 +34,6 @@ class TestFileProperty:
         }
         if not required:
             expected |= {
-                "from typing import Union",
                 "from ...types import UNSET, Unset",
             }
 
@@ -45,9 +41,6 @@ class TestFileProperty:
 
 
 class TestUnionProperty:
-    def test_is_base_type(self, union_property_factory):
-        assert union_property_factory().is_base_type is False
-
     def test_get_lazy_import_base_inner(self, union_property_factory):
         p = union_property_factory()
         assert p.get_lazy_imports(prefix="..") == set()
@@ -60,11 +53,11 @@ class TestUnionProperty:
     @pytest.mark.parametrize(
         "required,no_optional,json,expected",
         [
-            (False, False, False, "Union[Unset, datetime.datetime, str]"),
-            (False, True, False, "Union[datetime.datetime, str]"),
-            (True, False, False, "Union[datetime.datetime, str]"),
-            (True, True, False, "Union[datetime.datetime, str]"),
-            (False, False, True, "Union[Unset, str]"),
+            (False, False, False, "datetime.datetime | str | Unset"),
+            (False, True, False, "datetime.datetime | str"),
+            (True, False, False, "datetime.datetime | str"),
+            (True, True, False, "datetime.datetime | str"),
+            (False, False, True, "str | Unset"),
             (False, True, True, "str"),
             (True, False, True, "str"),
             (True, True, True, "str"),
@@ -85,7 +78,7 @@ class TestUnionProperty:
             inner_properties=[date_time_property_factory(), string_property_factory()],
         )
 
-        assert p.get_base_type_string() == "Union[datetime.datetime, str]"
+        assert p.get_base_type_string() == "datetime.datetime | str"
 
         assert p.get_type_string(no_optional=no_optional, json=json) == expected
 
@@ -94,7 +87,7 @@ class TestUnionProperty:
     ):
         p = union_property_factory(inner_properties=[date_time_property_factory(), string_property_factory()])
 
-        assert p.get_base_type_string() == "Union[datetime.datetime, str]"
+        assert p.get_base_type_string() == "datetime.datetime | str"
 
     def test_get_base_type_string_one_base_inner(self, union_property_factory, date_time_property_factory):
         p = union_property_factory(
@@ -108,14 +101,14 @@ class TestUnionProperty:
             inner_properties=[model_property_factory()],
         )
 
-        assert p.get_base_type_string() == "'MyClass'"
+        assert p.get_base_type_string() == "MyClass"
 
     def test_get_base_type_string_model_inners(
         self, union_property_factory, date_time_property_factory, model_property_factory
     ):
         p = union_property_factory(inner_properties=[date_time_property_factory(), model_property_factory()])
 
-        assert p.get_base_type_string() == "Union['MyClass', datetime.datetime]"
+        assert p.get_base_type_string() == "datetime.datetime | MyClass"
 
     def test_get_base_json_type_string(self, union_property_factory, date_time_property_factory):
         p = union_property_factory(
@@ -134,11 +127,9 @@ class TestUnionProperty:
             "import datetime",
             "from typing import cast",
             "from dateutil.parser import isoparse",
-            "from typing import cast, Union",
         }
         if not required:
             expected |= {
-                "from typing import Union",
                 "from ...types import UNSET, Unset",
             }
 

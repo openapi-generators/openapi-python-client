@@ -1,8 +1,7 @@
 __all__ = ["Property"]
 
-from typing import Union
 
-from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 from .any import AnyProperty
 from .boolean import BooleanProperty
@@ -21,21 +20,21 @@ from .string import StringProperty
 from .union import UnionProperty
 from .uuid import UuidProperty
 
-Property: TypeAlias = Union[
-    AnyProperty,
-    BooleanProperty,
-    ConstProperty,
-    DateProperty,
-    DateTimeProperty,
-    EnumProperty,
-    LiteralEnumProperty,
-    FileProperty,
-    FloatProperty,
-    IntProperty,
-    ListProperty,
-    ModelProperty,
-    NoneProperty,
-    StringProperty,
-    UnionProperty,
-    UuidProperty,
-]
+Property: TypeAlias = (
+    AnyProperty
+    | BooleanProperty
+    | ConstProperty
+    | DateProperty
+    | DateTimeProperty
+    | EnumProperty
+    | LiteralEnumProperty
+    | FileProperty
+    | FloatProperty
+    | IntProperty
+    | ListProperty
+    | ModelProperty
+    | NoneProperty
+    | StringProperty
+    | UnionProperty
+    | UuidProperty
+)

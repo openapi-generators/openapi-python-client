@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -12,23 +12,23 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     not_null_required: datetime.datetime,
-    null_required: Union[None, datetime.datetime],
-    null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
-    not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
+    null_required: datetime.datetime | None,
+    null_not_required: datetime.datetime | None | Unset = UNSET,
+    not_null_not_required: datetime.datetime | Unset = UNSET,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
     json_not_null_required = not_null_required.isoformat()
     params["not_null_required"] = json_not_null_required
 
-    json_null_required: Union[None, str]
+    json_null_required: None | str
     if isinstance(null_required, datetime.datetime):
         json_null_required = null_required.isoformat()
     else:
         json_null_required = null_required
     params["null_required"] = json_null_required
 
-    json_null_not_required: Union[None, Unset, str]
+    json_null_not_required: None | str | Unset
     if isinstance(null_not_required, Unset):
         json_null_not_required = UNSET
     elif isinstance(null_not_required, datetime.datetime):
@@ -37,7 +37,7 @@ def _get_kwargs(
         json_null_not_required = null_not_required
     params["null_not_required"] = json_null_not_required
 
-    json_not_null_not_required: Union[Unset, str] = UNSET
+    json_not_null_not_required: str | Unset = UNSET
     if not isinstance(not_null_not_required, Unset):
         json_not_null_not_required = not_null_not_required.isoformat()
     params["not_null_not_required"] = json_not_null_not_required
@@ -53,7 +53,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
     if response.status_code == 200:
         return None
 
@@ -63,7 +63,7 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,18 +74,18 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     not_null_required: datetime.datetime,
-    null_required: Union[None, datetime.datetime],
-    null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
-    not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
+    null_required: datetime.datetime | None,
+    null_not_required: datetime.datetime | None | Unset = UNSET,
+    not_null_not_required: datetime.datetime | Unset = UNSET,
 ) -> Response[Any]:
     """
     Args:
         not_null_required (datetime.datetime):
-        null_required (Union[None, datetime.datetime]):
-        null_not_required (Union[None, Unset, datetime.datetime]):
-        not_null_not_required (Union[Unset, datetime.datetime]):
+        null_required (datetime.datetime | None):
+        null_not_required (datetime.datetime | None | Unset):
+        not_null_not_required (datetime.datetime | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -111,18 +111,18 @@ def sync_detailed(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     not_null_required: datetime.datetime,
-    null_required: Union[None, datetime.datetime],
-    null_not_required: Union[None, Unset, datetime.datetime] = UNSET,
-    not_null_not_required: Union[Unset, datetime.datetime] = UNSET,
+    null_required: datetime.datetime | None,
+    null_not_required: datetime.datetime | None | Unset = UNSET,
+    not_null_not_required: datetime.datetime | Unset = UNSET,
 ) -> Response[Any]:
     """
     Args:
         not_null_required (datetime.datetime):
-        null_required (Union[None, datetime.datetime]):
-        null_not_required (Union[None, Unset, datetime.datetime]):
-        not_null_not_required (Union[Unset, datetime.datetime]):
+        null_required (datetime.datetime | None):
+        null_not_required (datetime.datetime | None | Unset):
+        not_null_not_required (datetime.datetime | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

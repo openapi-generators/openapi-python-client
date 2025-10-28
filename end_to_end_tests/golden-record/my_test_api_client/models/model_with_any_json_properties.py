@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -18,7 +20,7 @@ class ModelWithAnyJsonProperties:
     """ """
 
     additional_properties: dict[
-        str, Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", bool, float, int, list[str], str]
+        str, bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str
     ] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -52,7 +54,7 @@ class ModelWithAnyJsonProperties:
 
             def _parse_additional_property(
                 data: object,
-            ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", bool, float, int, list[str], str]:
+            ) -> bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
@@ -70,7 +72,7 @@ class ModelWithAnyJsonProperties:
                 except:  # noqa: E722
                     pass
                 return cast(
-                    Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", bool, float, int, list[str], str], data
+                    bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str, data
                 )
 
             additional_property = _parse_additional_property(prop_dict)
@@ -86,13 +88,11 @@ class ModelWithAnyJsonProperties:
 
     def __getitem__(
         self, key: str
-    ) -> Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", bool, float, int, list[str], str]:
+    ) -> bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str:
         return self.additional_properties[key]
 
     def __setitem__(
-        self,
-        key: str,
-        value: Union["ModelWithAnyJsonPropertiesAdditionalPropertyType0", bool, float, int, list[str], str],
+        self, key: str, value: bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str
     ) -> None:
         self.additional_properties[key] = value
 

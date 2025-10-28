@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -22,19 +22,19 @@ class PathItem(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject
     """
 
-    ref: Optional[str] = Field(default=None, alias="$ref")
-    summary: Optional[str] = None
-    description: Optional[str] = None
-    get: Optional["Operation"] = None
-    put: Optional["Operation"] = None
-    post: Optional["Operation"] = None
-    delete: Optional["Operation"] = None
-    options: Optional["Operation"] = None
-    head: Optional["Operation"] = None
-    patch: Optional["Operation"] = None
-    trace: Optional["Operation"] = None
-    servers: Optional[list[Server]] = None
-    parameters: Optional[list[ReferenceOr[Parameter]]] = None
+    ref: str | None = Field(default=None, alias="$ref")
+    summary: str | None = None
+    description: str | None = None
+    get: "Operation | None" = None
+    put: "Operation | None" = None
+    post: "Operation | None" = None
+    delete: "Operation | None" = None
+    options: "Operation | None" = None
+    head: "Operation | None" = None
+    patch: "Operation | None" = None
+    trace: "Operation | None" = None
+    servers: list[Server] | None = None
+    parameters: list[ReferenceOr[Parameter]] | None = None
     model_config = ConfigDict(
         # `Operation` is an unresolvable forward reference, will rebuild in `__init__.py`:
         defer_build=True,

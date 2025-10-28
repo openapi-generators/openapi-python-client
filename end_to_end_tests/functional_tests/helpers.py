@@ -1,6 +1,5 @@
 from typing import Any, Dict
 import re
-from typing import Optional
 
 from click.testing import Result
 import pytest
@@ -15,7 +14,7 @@ def with_generated_client_fixture(
     extra_args: list[str] = [],
 ):
     """Decorator to apply to a test class to create a fixture inside it called 'generated_client'.
-    
+
     The fixture value will be a GeneratedClientContext created by calling
     generate_client_from_inline_spec().
     """
@@ -31,9 +30,9 @@ def with_generated_client_fixture(
     return _decorator
 
 
-def with_generated_code_import(import_path: str, alias: Optional[str] = None):
+def with_generated_code_import(import_path: str, alias: str | None = None):
     """Decorator to apply to a test class to create a fixture from a generated code import.
-    
+
     The 'generated_client' fixture must also be present.
 
     If import_path is "a.b.c", then the fixture's value is equal to "from a.b import c", and
@@ -48,12 +47,12 @@ def with_generated_code_import(import_path: str, alias: Optional[str] = None):
 
         def _func(self, generated_client):
             return generated_client.import_symbol(module_name, import_name)
-        
+
         alias = alias or import_name
         _func.__name__ = alias
         setattr(cls, alias, pytest.fixture(scope="class")(_func))
         return cls
-    
+
     return _decorator
 
 
@@ -85,7 +84,7 @@ def inline_spec_should_fail(
     add_missing_sections = True,
 ) -> Result:
     """Asserts that the generator could not process the spec.
-    
+
     Returns the command result, which could include stdout data or an exception.
     """
     with generate_client_from_inline_spec(
@@ -118,7 +117,7 @@ class _GeneratorWarningsParser:
         """Runs the generator, asserts that it printed warnings, and parses the warnings."""
 
         assert generated_client.generator_result.exit_code == 0
-        output = generated_client.generator_result.stdout
+        output = generated_client.generator_result.stdout + generated_client.generator_result.stderr
         assert "Warning(s) encountered while generating" in output
         self.by_schema = {}
         self.output = output

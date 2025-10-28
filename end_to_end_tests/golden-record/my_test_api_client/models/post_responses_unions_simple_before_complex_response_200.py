@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -17,10 +19,10 @@ T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200")
 class PostResponsesUnionsSimpleBeforeComplexResponse200:
     """
     Attributes:
-        a (Union['PostResponsesUnionsSimpleBeforeComplexResponse200AType1', str]):
+        a (PostResponsesUnionsSimpleBeforeComplexResponse200AType1 | str):
     """
 
-    a: Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str]
+    a: PostResponsesUnionsSimpleBeforeComplexResponse200AType1 | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -28,7 +30,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
             PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
         )
 
-        a: Union[dict[str, Any], str]
+        a: dict[str, Any] | str
         if isinstance(self.a, PostResponsesUnionsSimpleBeforeComplexResponse200AType1):
             a = self.a.to_dict()
         else:
@@ -52,7 +54,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
 
         d = dict(src_dict)
 
-        def _parse_a(data: object) -> Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str]:
+        def _parse_a(data: object) -> PostResponsesUnionsSimpleBeforeComplexResponse200AType1 | str:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
@@ -61,7 +63,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
                 return a_type_1
             except:  # noqa: E722
                 pass
-            return cast(Union["PostResponsesUnionsSimpleBeforeComplexResponse200AType1", str], data)
+            return cast(PostResponsesUnionsSimpleBeforeComplexResponse200AType1 | str, data)
 
         a = _parse_a(d.pop("a"))
 

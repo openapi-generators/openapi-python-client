@@ -1,7 +1,7 @@
 __all__ = ["HTTPStatusPattern", "Response", "Responses", "response_from_data"]
 
 from collections.abc import Iterator
-from typing import Optional, TypedDict, Union
+from typing import TypedDict
 
 from attrs import define
 
@@ -18,7 +18,7 @@ from .properties import AnyProperty, Property, Schemas, property_from_data
 @define
 class Responses:
     patterns: list["Response"]
-    default: Optional["Response"]
+    default: "Response | None"
 
     def __iter__(self) -> Iterator["Response"]:
         yield from self.patterns
@@ -52,15 +52,15 @@ class HTTPStatusPattern:
     """
 
     pattern: str
-    range: Optional[tuple[int, int]]
+    range: tuple[int, int] | None
 
-    def __init__(self, *, pattern: str, code_range: Optional[tuple[int, int]]):
+    def __init__(self, *, pattern: str, code_range: tuple[int, int] | None):
         """Initialize with a range of status codes or None for the default case."""
         self.pattern = pattern
         self.range = code_range
 
     @staticmethod
-    def parse(pattern: str) -> Union["HTTPStatusPattern", ParseError]:
+    def parse(pattern: str) -> "HTTPStatusPattern | ParseError":
         """Parse a status code pattern such as 2XX or 404"""
         if pattern == "default":
             return HTTPStatusPattern(pattern=pattern, code_range=None)
@@ -118,7 +118,7 @@ class Response:
     status_code: HTTPStatusPattern
     prop: Property
     source: _ResponseSource
-    data: Union[oai.Response, oai.Reference]  # Original data which created this response, useful for custom templates
+    data: oai.Response | oai.Reference  # Original data which created this response, useful for custom templates
 
     def is_default(self) -> bool:
         return self.status_code.range is None
@@ -128,7 +128,7 @@ class Response:
         return self.status_code < other.status_code
 
 
-def _source_by_content_type(content_type: str, config: Config) -> Optional[_ResponseSource]:
+def _source_by_content_type(content_type: str, config: Config) -> _ResponseSource | None:
     parsed_content_type = utils.get_content_type(content_type, config)
     if parsed_content_type is None:
         return None
@@ -152,7 +152,7 @@ def empty_response(
     status_code: HTTPStatusPattern,
     response_name: str,
     config: Config,
-    data: Union[oai.Response, oai.Reference],
+    data: oai.Response | oai.Reference,
 ) -> Response:
     """Return an untyped response, for when no response type is defined"""
     return Response(
@@ -173,12 +173,12 @@ def empty_response(
 def response_from_data(  # noqa: PLR0911
     *,
     status_code: HTTPStatusPattern,
-    data: Union[oai.Response, oai.Reference],
+    data: oai.Response | oai.Reference,
     schemas: Schemas,
-    responses: dict[str, Union[oai.Response, oai.Reference]],
+    responses: dict[str, oai.Response | oai.Reference],
     parent_name: str,
     config: Config,
-) -> tuple[Union[Response, ParseError], Schemas]:
+) -> tuple[Response | ParseError, Schemas]:
     """Generate a Response from the OpenAPI dictionary representation of it"""
 
     response_name = f"response_{status_code.pattern}"

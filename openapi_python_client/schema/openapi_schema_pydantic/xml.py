@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -16,9 +14,9 @@ class XML(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xmlObject
     """
 
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    prefix: Optional[str] = None
+    name: str | None = None
+    namespace: str | None = None
+    prefix: str | None = None
     attribute: bool = False
     wrapped: bool = False
     model_config = ConfigDict(
