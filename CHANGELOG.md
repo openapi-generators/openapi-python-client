@@ -13,6 +13,40 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.27.0 (2025-10-28)
+
+### Breaking Changes
+
+#### Drop support for Python 3.9
+
+Both `openapi-python-client` itself and any generated clients no longer support Python 3.9.
+
+#### Generated models now use `from __future__ import annotations`
+
+This simplifies using forward references with the newer union syntax.
+
+### Features
+
+#### Upgrade generated clients to 3.10 union syntax
+
+All generated types now use the `A | B` syntax instead of `Union[A, B]` or `Optional[A]`.
+
+### Fixes
+
+- Drop generated `requires-python` upper bounds for uv and PDM (#1329)
+
+#### Change default Ruff hook to `--fix-only`
+
+This should enable `openapi-python-client` to keep auto-fixing lints (like removing unused imports) but _not_ fail to 
+generate when unfixable lints are violated.
+
+Since it's now unlikely for breaking changes to affect our usage (and by popular request), the upper bound of `ruff` 
+has been lifted. Newer versions of `openapi-python-client` should no longer be required to support newer versions of `ruff`.
+
+### Notes
+
+- Minimum Typer version is now 0.16
+
 ## 0.26.2 (2025-10-06)
 
 ### Fixes
