@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [
     { include = "test_3_1_features_client" },
 ]
-include = ["CHANGELOG.md", "test_3_1_features_client/py.typed"]
+include = ["test_3_1_features_client/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.10"

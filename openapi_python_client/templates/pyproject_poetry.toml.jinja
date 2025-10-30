@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [
     { include = "{{ package_name }}" },
 ]
-include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
+include = ["{{ package_name }}/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
