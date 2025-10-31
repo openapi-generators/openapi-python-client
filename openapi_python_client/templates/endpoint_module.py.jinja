@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import Any, cast
+from urllib.parse import quote
 
 import httpx
 
@@ -31,7 +32,7 @@ def _get_kwargs(
         {% if endpoint.path_parameters %}
         "url": "{{ endpoint.path }}".format(
         {%- for parameter in endpoint.path_parameters -%}
-        {{parameter.python_name}}={{parameter.python_name}},
+        {{parameter.python_name}}=quote(str({{parameter.python_name}}), safe=""),
         {%- endfor -%}
         ),
         {% else %}
