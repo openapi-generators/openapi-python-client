@@ -74,12 +74,14 @@ class PublicError:
 
         extra_parameters = cast(list[str], d.pop("extra_parameters", UNSET))
 
-        invalid_parameters = []
         _invalid_parameters = d.pop("invalid_parameters", UNSET)
-        for invalid_parameters_item_data in _invalid_parameters or []:
-            invalid_parameters_item = Problem.from_dict(invalid_parameters_item_data)
+        invalid_parameters: list[Problem] | Unset = UNSET
+        if _invalid_parameters is not UNSET:
+            invalid_parameters = []
+            for invalid_parameters_item_data in _invalid_parameters:
+                invalid_parameters_item = Problem.from_dict(invalid_parameters_item_data)
 
-            invalid_parameters.append(invalid_parameters_item)
+                invalid_parameters.append(invalid_parameters_item)
 
         missing_parameters = cast(list[str], d.pop("missing_parameters", UNSET))
 

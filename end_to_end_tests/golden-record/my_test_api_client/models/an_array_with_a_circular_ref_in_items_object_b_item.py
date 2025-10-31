@@ -50,16 +50,18 @@ class AnArrayWithACircularRefInItemsObjectBItem:
         )
 
         d = dict(src_dict)
-        circular = []
         _circular = d.pop("circular", UNSET)
-        for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in _circular or []:
-            componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item = (
-                AnArrayWithACircularRefInItemsObjectAItem.from_dict(
-                    componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data
+        circular: list[AnArrayWithACircularRefInItemsObjectAItem] | Unset = UNSET
+        if _circular is not UNSET:
+            circular = []
+            for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in _circular:
+                componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item = (
+                    AnArrayWithACircularRefInItemsObjectAItem.from_dict(
+                        componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data
+                    )
                 )
-            )
 
-            circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
+                circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
 
         an_array_with_a_circular_ref_in_items_object_b_item = cls(
             circular=circular,
