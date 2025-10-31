@@ -37,7 +37,7 @@ def _parse_response(
                 response_200_type_0 = GetModelsOneofWithRequiredConstResponse200Type0.from_dict(data)
 
                 return response_200_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, dict):
                 raise TypeError()

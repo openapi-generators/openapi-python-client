@@ -51,7 +51,7 @@ class ModelWithUnionProperty:
                 a_property_type_0 = AnEnum(data)
 
                 return a_property_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, int):
                 raise TypeError()

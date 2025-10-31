@@ -61,7 +61,7 @@ class ModelWithAnyJsonProperties:
                     additional_property_type_0 = ModelWithAnyJsonPropertiesAdditionalPropertyType0.from_dict(data)
 
                     return additional_property_type_0
-                except:  # noqa: E722
+                except (TypeError, ValueError, AttributeError, KeyError):
                     pass
                 try:
                     if not isinstance(data, list):
@@ -69,7 +69,7 @@ class ModelWithAnyJsonProperties:
                     additional_property_type_1 = cast(list[str], data)
 
                     return additional_property_type_1
-                except:  # noqa: E722
+                except (TypeError, ValueError, AttributeError, KeyError):
                     pass
                 return cast(
                     bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str, data
