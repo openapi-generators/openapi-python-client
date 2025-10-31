@@ -68,7 +68,7 @@ class ModelWithDiscriminatedUnion:
                 componentsschemas_a_discriminated_union_type_0 = ADiscriminatedUnionType1.from_dict(data)
 
                 return componentsschemas_a_discriminated_union_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -76,7 +76,7 @@ class ModelWithDiscriminatedUnion:
                 componentsschemas_a_discriminated_union_type_1 = ADiscriminatedUnionType2.from_dict(data)
 
                 return componentsschemas_a_discriminated_union_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(ADiscriminatedUnionType1 | ADiscriminatedUnionType2 | None | Unset, data)
 

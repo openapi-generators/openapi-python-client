@@ -21,7 +21,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
             raise TypeError()
         {{ inner_template.construct(inner_property, "data") | indent(8) }}
         return {{ inner_property.python_name }}
-    except: # noqa: E722
+    except (TypeError, ValueError, AttributeError, KeyError):
         pass
     {% else  %}{# Don't do try/except for the last one nor any properties with no type checking #}
     {% if inner_template.check_type_for_construct %}

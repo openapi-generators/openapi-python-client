@@ -272,7 +272,7 @@ class AModel:
                 a_camel_date_time_type_0 = isoparse(data)
 
                 return a_camel_date_time_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, str):
                 raise TypeError()
@@ -293,7 +293,7 @@ class AModel:
                 a_nullable_date_type_0 = isoparse(data).date()
 
                 return a_nullable_date_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(datetime.date | None, data)
 
@@ -310,7 +310,7 @@ class AModel:
                 a_nullable_uuid_type_0 = UUID(data)
 
                 return a_nullable_uuid_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(None | UUID, data)
 
@@ -332,7 +332,7 @@ class AModel:
                 one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -340,7 +340,7 @@ class AModel:
                 one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return one_of_models_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(Any | FreeFormModel | ModelWithUnionProperty, data)
 
@@ -355,7 +355,7 @@ class AModel:
                 nullable_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return nullable_one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -363,7 +363,7 @@ class AModel:
                 nullable_one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return nullable_one_of_models_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(FreeFormModel | ModelWithUnionProperty | None, data)
 
@@ -380,7 +380,7 @@ class AModel:
                 nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return nullable_model_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(ModelWithUnionProperty | None, data)
 
@@ -447,7 +447,7 @@ class AModel:
                 not_required_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return not_required_one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
@@ -470,7 +470,7 @@ class AModel:
                 not_required_nullable_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return not_required_nullable_one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -478,7 +478,7 @@ class AModel:
                 not_required_nullable_one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return not_required_nullable_one_of_models_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(FreeFormModel | ModelWithUnionProperty | None | str | Unset, data)
 
@@ -504,7 +504,7 @@ class AModel:
                 not_required_nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return not_required_nullable_model_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(ModelWithUnionProperty | None | Unset, data)
 

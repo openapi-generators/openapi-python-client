@@ -182,7 +182,7 @@ class PostUserListBody:
                         componentsschemas_an_enum_with_null_type_1 = check_an_enum_with_null(data)
 
                         return componentsschemas_an_enum_with_null_type_1
-                    except:  # noqa: E722
+                    except (TypeError, ValueError, AttributeError, KeyError):
                         pass
                     return cast(AnEnumWithNull | None, data)
 

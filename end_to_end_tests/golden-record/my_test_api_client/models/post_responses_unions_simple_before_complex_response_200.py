@@ -61,7 +61,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
                 a_type_1 = PostResponsesUnionsSimpleBeforeComplexResponse200AType1.from_dict(data)
 
                 return a_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(PostResponsesUnionsSimpleBeforeComplexResponse200AType1 | str, data)
 

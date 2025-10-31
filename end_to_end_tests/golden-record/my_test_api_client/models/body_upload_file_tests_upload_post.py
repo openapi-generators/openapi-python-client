@@ -276,7 +276,7 @@ class BodyUploadFileTestsUploadPost:
                 some_nullable_object_type_0 = BodyUploadFileTestsUploadPostSomeNullableObject.from_dict(data)
 
                 return some_nullable_object_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(BodyUploadFileTestsUploadPostSomeNullableObject | None, data)
 
@@ -347,7 +347,7 @@ class BodyUploadFileTestsUploadPost:
                     some_array_type_0.append(some_array_type_0_item)
 
                 return some_array_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(list[AFormData] | None | Unset, data)
 

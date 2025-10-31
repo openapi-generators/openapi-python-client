@@ -61,7 +61,7 @@ class ModelWithUnionPropertyInlined:
                 fruit_apples = ModelWithUnionPropertyInlinedApples.from_dict(data)
 
                 return fruit_apples
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
