@@ -53,33 +53,37 @@ class PostPrefixItemsBody:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        prefix_items_and_items = []
         _prefix_items_and_items = d.pop("prefixItemsAndItems", UNSET)
-        for prefix_items_and_items_item_data in _prefix_items_and_items or []:
+        prefix_items_and_items: list[float | Literal["prefix"] | str] | Unset = UNSET
+        if _prefix_items_and_items is not UNSET:
+            prefix_items_and_items = []
+            for prefix_items_and_items_item_data in _prefix_items_and_items:
 
-            def _parse_prefix_items_and_items_item(data: object) -> float | Literal["prefix"] | str:
-                prefix_items_and_items_item_type_0 = cast(Literal["prefix"], data)
-                if prefix_items_and_items_item_type_0 != "prefix":
-                    raise ValueError(
-                        f"prefixItemsAndItems_item_type_0 must match const 'prefix', got '{prefix_items_and_items_item_type_0}'"
-                    )
-                return prefix_items_and_items_item_type_0
-                return cast(float | Literal["prefix"] | str, data)
+                def _parse_prefix_items_and_items_item(data: object) -> float | Literal["prefix"] | str:
+                    prefix_items_and_items_item_type_0 = cast(Literal["prefix"], data)
+                    if prefix_items_and_items_item_type_0 != "prefix":
+                        raise ValueError(
+                            f"prefixItemsAndItems_item_type_0 must match const 'prefix', got '{prefix_items_and_items_item_type_0}'"
+                        )
+                    return prefix_items_and_items_item_type_0
+                    return cast(float | Literal["prefix"] | str, data)
 
-            prefix_items_and_items_item = _parse_prefix_items_and_items_item(prefix_items_and_items_item_data)
+                prefix_items_and_items_item = _parse_prefix_items_and_items_item(prefix_items_and_items_item_data)
 
-            prefix_items_and_items.append(prefix_items_and_items_item)
+                prefix_items_and_items.append(prefix_items_and_items_item)
 
-        prefix_items_only = []
         _prefix_items_only = d.pop("prefixItemsOnly", UNSET)
-        for prefix_items_only_item_data in _prefix_items_only or []:
+        prefix_items_only: list[float | str] | Unset = UNSET
+        if _prefix_items_only is not UNSET:
+            prefix_items_only = []
+            for prefix_items_only_item_data in _prefix_items_only:
 
-            def _parse_prefix_items_only_item(data: object) -> float | str:
-                return cast(float | str, data)
+                def _parse_prefix_items_only_item(data: object) -> float | str:
+                    return cast(float | str, data)
 
-            prefix_items_only_item = _parse_prefix_items_only_item(prefix_items_only_item_data)
+                prefix_items_only_item = _parse_prefix_items_only_item(prefix_items_only_item_data)
 
-            prefix_items_only.append(prefix_items_only_item)
+                prefix_items_only.append(prefix_items_only_item)
 
         post_prefix_items_body = cls(
             prefix_items_and_items=prefix_items_and_items,

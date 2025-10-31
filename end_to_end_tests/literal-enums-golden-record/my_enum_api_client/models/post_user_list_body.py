@@ -158,33 +158,37 @@ class PostUserListBody:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        an_enum_value = []
         _an_enum_value = d.pop("an_enum_value", UNSET)
-        for an_enum_value_item_data in _an_enum_value or []:
-            an_enum_value_item = check_an_enum(an_enum_value_item_data)
+        an_enum_value: list[AnEnum] | Unset = UNSET
+        if _an_enum_value is not UNSET:
+            an_enum_value = []
+            for an_enum_value_item_data in _an_enum_value:
+                an_enum_value_item = check_an_enum(an_enum_value_item_data)
 
-            an_enum_value.append(an_enum_value_item)
+                an_enum_value.append(an_enum_value_item)
 
-        an_enum_value_with_null = []
         _an_enum_value_with_null = d.pop("an_enum_value_with_null", UNSET)
-        for an_enum_value_with_null_item_data in _an_enum_value_with_null or []:
+        an_enum_value_with_null: list[AnEnumWithNull | None] | Unset = UNSET
+        if _an_enum_value_with_null is not UNSET:
+            an_enum_value_with_null = []
+            for an_enum_value_with_null_item_data in _an_enum_value_with_null:
 
-            def _parse_an_enum_value_with_null_item(data: object) -> AnEnumWithNull | None:
-                if data is None:
-                    return data
-                try:
-                    if not isinstance(data, str):
-                        raise TypeError()
-                    componentsschemas_an_enum_with_null_type_1 = check_an_enum_with_null(data)
+                def _parse_an_enum_value_with_null_item(data: object) -> AnEnumWithNull | None:
+                    if data is None:
+                        return data
+                    try:
+                        if not isinstance(data, str):
+                            raise TypeError()
+                        componentsschemas_an_enum_with_null_type_1 = check_an_enum_with_null(data)
 
-                    return componentsschemas_an_enum_with_null_type_1
-                except:  # noqa: E722
-                    pass
-                return cast(AnEnumWithNull | None, data)
+                        return componentsschemas_an_enum_with_null_type_1
+                    except:  # noqa: E722
+                        pass
+                    return cast(AnEnumWithNull | None, data)
 
-            an_enum_value_with_null_item = _parse_an_enum_value_with_null_item(an_enum_value_with_null_item_data)
+                an_enum_value_with_null_item = _parse_an_enum_value_with_null_item(an_enum_value_with_null_item_data)
 
-            an_enum_value_with_null.append(an_enum_value_with_null_item)
+                an_enum_value_with_null.append(an_enum_value_with_null_item)
 
         an_enum_value_with_only_null = cast(list[None], d.pop("an_enum_value_with_only_null", UNSET))
 
@@ -202,17 +206,19 @@ class PostUserListBody:
         else:
             an_optional_allof_enum = check_an_all_of_enum(_an_optional_allof_enum)
 
-        nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
-        for nested_list_of_enums_item_data in _nested_list_of_enums or []:
-            nested_list_of_enums_item = []
-            _nested_list_of_enums_item = nested_list_of_enums_item_data
-            for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
-                nested_list_of_enums_item_item = check_different_enum(nested_list_of_enums_item_item_data)
+        nested_list_of_enums: list[list[DifferentEnum]] | Unset = UNSET
+        if _nested_list_of_enums is not UNSET:
+            nested_list_of_enums = []
+            for nested_list_of_enums_item_data in _nested_list_of_enums:
+                nested_list_of_enums_item = []
+                _nested_list_of_enums_item = nested_list_of_enums_item_data
+                for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
+                    nested_list_of_enums_item_item = check_different_enum(nested_list_of_enums_item_item_data)
 
-                nested_list_of_enums_item.append(nested_list_of_enums_item_item)
+                    nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
-            nested_list_of_enums.append(nested_list_of_enums_item)
+                nested_list_of_enums.append(nested_list_of_enums_item)
 
         post_user_list_body = cls(
             an_enum_value=an_enum_value,

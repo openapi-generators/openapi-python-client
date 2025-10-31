@@ -3,15 +3,21 @@
 {% import "property_templates/" + inner_property.template as inner_template %}
 {% if inner_template.construct %}
 {% set inner_source = inner_property.python_name + "_data" %}
+{% if property.required %}
 {{ property.python_name }} = []
 _{{ property.python_name }} = {{ source }}
-{% if property.required %}
 for {{ inner_source }} in (_{{ property.python_name }}):
-{% else %}
-for {{ inner_source }} in (_{{ property.python_name }} or []):
-{% endif %}
     {{ inner_template.construct(inner_property, inner_source) | indent(4) }}
     {{ property.python_name }}.append({{ inner_property.python_name }})
+{% else %}
+_{{ property.python_name }} = {{ source }}
+{{ property.python_name }}: {{ property.get_type_string() }} = UNSET
+if _{{ property.python_name }} is not UNSET:
+    {{ property.python_name }} = []
+    for {{ inner_source }} in _{{ property.python_name }}:
+        {{ inner_template.construct(inner_property, inner_source) | indent(8) }}
+        {{ property.python_name }}.append({{ inner_property.python_name }})
+{% endif %}
 {% else %}
 {{ property.python_name }} = cast({{ property.get_type_string(no_optional=True) }}, {{ source }})
 {% endif %}
