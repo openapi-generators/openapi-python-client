@@ -42,16 +42,18 @@ class AnArrayWithARecursiveRefInItemsObjectItem:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        recursive = []
         _recursive = d.pop("recursive", UNSET)
-        for componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data in _recursive or []:
-            componentsschemas_an_array_with_a_recursive_ref_in_items_object_item = (
-                AnArrayWithARecursiveRefInItemsObjectItem.from_dict(
-                    componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data
+        recursive: list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset = UNSET
+        if _recursive is not UNSET:
+            recursive = []
+            for componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data in _recursive:
+                componentsschemas_an_array_with_a_recursive_ref_in_items_object_item = (
+                    AnArrayWithARecursiveRefInItemsObjectItem.from_dict(
+                        componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data
+                    )
                 )
-            )
 
-            recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
+                recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
 
         an_array_with_a_recursive_ref_in_items_object_item = cls(
             recursive=recursive,
