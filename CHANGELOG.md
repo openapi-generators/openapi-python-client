@@ -13,6 +13,21 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.27.1 (2025-11-03)
+
+### Fixes
+
+- Remove non-existent CHANGELOG.md references from UV and Poetry templates (#1344)
+- Initialize optional lists as UNSET, not [] (#1346)
+- Correct docstring typos in client template (#1347)
+- Replace bare except blocks with specific exception types (#1348)
+
+#### Update `uv_build` to 0.9
+
+##1352 by @johnthagen
+
+`uv` has been in the `0.9.x` release cycle for a while, so update templates to use the corresponding `uv_build` range.
+
 ## 0.27.0 (2025-10-28)
 
 ### Breaking Changes
