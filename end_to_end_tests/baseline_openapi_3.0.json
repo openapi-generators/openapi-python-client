@@ -104,6 +104,30 @@
         }
       }
     },
+    "/bodies/optional": {
+      "post": {
+        "tags": [
+          "bodies"
+        ],
+        "description": "Test optional request body",
+        "operationId": "optional-body",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/tests/": {
       "get": {
         "tags": [
@@ -1805,6 +1829,47 @@
                       "required": [
                         "type"
                       ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/types/unions/duplicate-types": {
+      "post": {
+        "title": "duplicate union members",
+        "requestBody": {
+          "description": "The request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AModel"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AModel"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AModel"
                     }
                   ]
                 }

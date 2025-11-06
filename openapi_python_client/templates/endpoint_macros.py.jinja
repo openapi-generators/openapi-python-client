@@ -60,13 +60,23 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
 {% macro body_to_kwarg(body) %}
 {% if body.body_type == "data" %}
+  {% if body.prop.required %}
 _kwargs["data"] = body.to_dict()
+  {% else %}
+if not isinstance(body, Unset):
+    _kwargs["data"] = body.to_dict()
+  {% endif %}
 {% elif body.body_type == "files"%}
 {{ multipart_body(body) }}
 {% elif body.body_type == "json" %}
 {{ json_body(body) }}
 {% elif body.body_type == "content" %}
+    {% if body.prop.required %}
 _kwargs["content"] = body.payload
+    {% else %}
+if not isinstance(body, Unset):
+    _kwargs["content"] = body.payload
+    {% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -74,9 +84,12 @@ _kwargs["content"] = body.payload
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]") }}
-{% else %}
+{{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]", skip_unset=True, declare_type=False) }}
+{% elif property.required %}
 _kwargs["json"] = {{ property.python_name }}
+{% else %}
+if not isinstance({{property.python_name}}, Unset):
+    _kwargs["json"] = {{ property.python_name }}
 {% endif %}
 {% endmacro %}
 
@@ -107,12 +120,12 @@ client: AuthenticatedClient | Client,
 {% endif %}
 {# Any allowed bodies #}
 {% if endpoint.bodies | length == 1 %}
-body: {{ endpoint.bodies[0].prop.get_type_string() }},
+body: {{ endpoint.bodies[0].prop.get_type_string() }}{% if not endpoint.bodies[0].prop.required %} = UNSET{% endif %},
 {% elif endpoint.bodies | length > 1 %}
 body:
-    {%- for body in endpoint.bodies -%}
-    {{ body.prop.get_type_string() }} {% if not loop.last %} | {% endif %}
-    {%- endfor -%}
+    {%- for body in endpoint.bodies -%}{% set body_required = body_required and body.prop.required %}
+    {{ body.prop.get_type_string(no_optional=True) }} {% if not loop.last %} | {% endif %}
+    {%- endfor -%}{% if not body_required %} | Unset = UNSET{% endif %}
 ,
 {% endif %}
 {# query parameters #}

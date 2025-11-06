@@ -2,7 +2,7 @@
 
 import types
 
-from . import json_like, post_bodies_multiple, refs
+from . import json_like, optional_body, post_bodies_multiple, refs
 
 
 class BodiesEndpoints:
@@ -26,3 +26,10 @@ class BodiesEndpoints:
         Test request body defined via ref
         """
         return refs
+
+    @classmethod
+    def optional_body(cls) -> types.ModuleType:
+        """
+        Test optional request body
+        """
+        return optional_body

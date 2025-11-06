@@ -152,7 +152,7 @@ class TestEndpointDocstrings:
 
     def test_request_body(self, post_simple_thing_sync):
         assert DocstringParser(post_simple_thing_sync).get_section("Args:") == [
-            "body (Thing): The thing."
+            "body (Thing | Unset): The thing."
         ]
 
     def test_params(self, get_attribute_by_index_sync):

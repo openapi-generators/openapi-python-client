@@ -8,12 +8,12 @@ from ...client import AuthenticatedClient, Client
 from ...models.post_bodies_multiple_data_body import PostBodiesMultipleDataBody
 from ...models.post_bodies_multiple_files_body import PostBodiesMultipleFilesBody
 from ...models.post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
-from ...types import File, Response
+from ...types import UNSET, File, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody,
+    body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -23,19 +23,23 @@ def _get_kwargs(
     }
 
     if isinstance(body, PostBodiesMultipleJsonBody):
-        _kwargs["json"] = body.to_dict()
+        if not isinstance(body, Unset):
+            _kwargs["json"] = body.to_dict()
 
         headers["Content-Type"] = "application/json"
     if isinstance(body, File):
-        _kwargs["content"] = body.payload
+        if not isinstance(body, Unset):
+            _kwargs["content"] = body.payload
 
         headers["Content-Type"] = "application/octet-stream"
     if isinstance(body, PostBodiesMultipleDataBody):
-        _kwargs["data"] = body.to_dict()
+        if not isinstance(body, Unset):
+            _kwargs["data"] = body.to_dict()
 
         headers["Content-Type"] = "application/x-www-form-urlencoded"
     if isinstance(body, PostBodiesMultipleFilesBody):
-        _kwargs["files"] = body.to_multipart()
+        if not isinstance(body, Unset):
+            _kwargs["files"] = body.to_multipart()
 
         headers["Content-Type"] = "multipart/form-data"
 
@@ -65,15 +69,15 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody,
+    body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody | Unset = UNSET,
 ) -> Response[Any]:
     """Test multiple bodies
 
     Args:
-        body (PostBodiesMultipleJsonBody):
-        body (File):
-        body (PostBodiesMultipleDataBody):
-        body (PostBodiesMultipleFilesBody):
+        body (PostBodiesMultipleJsonBody | Unset):
+        body (File | Unset):
+        body (PostBodiesMultipleDataBody | Unset):
+        body (PostBodiesMultipleFilesBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -97,15 +101,15 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody,
+    body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody | Unset = UNSET,
 ) -> Response[Any]:
     """Test multiple bodies
 
     Args:
-        body (PostBodiesMultipleJsonBody):
-        body (File):
-        body (PostBodiesMultipleDataBody):
-        body (PostBodiesMultipleFilesBody):
+        body (PostBodiesMultipleJsonBody | Unset):
+        body (File | Unset):
+        body (PostBodiesMultipleDataBody | Unset):
+        body (PostBodiesMultipleFilesBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

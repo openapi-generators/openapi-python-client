@@ -9,12 +9,12 @@ from ...models.post_naming_property_conflict_with_import_body import PostNamingP
 from ...models.post_naming_property_conflict_with_import_response_200 import (
     PostNamingPropertyConflictWithImportResponse200,
 )
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: PostNamingPropertyConflictWithImportBody,
+    body: PostNamingPropertyConflictWithImportBody | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -23,7 +23,8 @@ def _get_kwargs(
         "url": "/naming/property-conflict-with-import",
     }
 
-    _kwargs["json"] = body.to_dict()
+    if not isinstance(body, Unset):
+        _kwargs["json"] = body.to_dict()
 
     headers["Content-Type"] = "application/json"
 
@@ -59,11 +60,11 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: PostNamingPropertyConflictWithImportBody,
+    body: PostNamingPropertyConflictWithImportBody | Unset = UNSET,
 ) -> Response[PostNamingPropertyConflictWithImportResponse200]:
     """
     Args:
-        body (PostNamingPropertyConflictWithImportBody):
+        body (PostNamingPropertyConflictWithImportBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -87,11 +88,11 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    body: PostNamingPropertyConflictWithImportBody,
+    body: PostNamingPropertyConflictWithImportBody | Unset = UNSET,
 ) -> PostNamingPropertyConflictWithImportResponse200 | None:
     """
     Args:
-        body (PostNamingPropertyConflictWithImportBody):
+        body (PostNamingPropertyConflictWithImportBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -110,11 +111,11 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: PostNamingPropertyConflictWithImportBody,
+    body: PostNamingPropertyConflictWithImportBody | Unset = UNSET,
 ) -> Response[PostNamingPropertyConflictWithImportResponse200]:
     """
     Args:
-        body (PostNamingPropertyConflictWithImportBody):
+        body (PostNamingPropertyConflictWithImportBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -136,11 +137,11 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    body: PostNamingPropertyConflictWithImportBody,
+    body: PostNamingPropertyConflictWithImportBody | Unset = UNSET,
 ) -> PostNamingPropertyConflictWithImportResponse200 | None:
     """
     Args:
-        body (PostNamingPropertyConflictWithImportBody):
+        body (PostNamingPropertyConflictWithImportBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

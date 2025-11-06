@@ -5,43 +5,43 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.http_validation_error import HTTPValidationError
-from ...models.octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
-from ...types import UNSET, File, Response, Unset
+from ...models.a_model import AModel
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: File | Unset = UNSET,
+    body: AModel | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/tests/octet_stream",
+        "url": "/types/unions/duplicate-types",
     }
 
-    if not isinstance(body, Unset):
-        _kwargs["content"] = body.payload
+    if isinstance(body, AModel):
+        _kwargs["json"] = body.to_dict()
 
-    headers["Content-Type"] = "application/octet-stream"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
 
 
-def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200 | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> AModel | None:
     if response.status_code == 200:
-        response_200 = OctetStreamTestsOctetStreamPostResponse200.from_dict(response.json())
+
+        def _parse_response_200(data: object) -> AModel:
+            if not isinstance(data, dict):
+                raise TypeError()
+            response_200_type_0 = AModel.from_dict(data)
+
+            return response_200_type_0
+
+        response_200 = _parse_response_200(response.json())
 
         return response_200
-
-    if response.status_code == 422:
-        response_422 = HTTPValidationError.from_dict(response.json())
-
-        return response_422
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -49,9 +49,7 @@ def _parse_response(
         return None
 
 
-def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[AModel]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -63,19 +61,18 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: File | Unset = UNSET,
-) -> Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]:
-    """Binary (octet stream) request body
-
+    body: AModel | Unset = UNSET,
+) -> Response[AModel]:
+    """
     Args:
-        body (File | Unset): A file to upload
+        body (AModel | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]
+        Response[AModel]
     """
 
     kwargs = _get_kwargs(
@@ -92,19 +89,18 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    body: File | Unset = UNSET,
-) -> HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200 | None:
-    """Binary (octet stream) request body
-
+    body: AModel | Unset = UNSET,
+) -> AModel | None:
+    """
     Args:
-        body (File | Unset): A file to upload
+        body (AModel | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200
+        AModel
     """
 
     return sync_detailed(
@@ -116,19 +112,18 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: File | Unset = UNSET,
-) -> Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]:
-    """Binary (octet stream) request body
-
+    body: AModel | Unset = UNSET,
+) -> Response[AModel]:
+    """
     Args:
-        body (File | Unset): A file to upload
+        body (AModel | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]
+        Response[AModel]
     """
 
     kwargs = _get_kwargs(
@@ -143,19 +138,18 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    body: File | Unset = UNSET,
-) -> HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200 | None:
-    """Binary (octet stream) request body
-
+    body: AModel | Unset = UNSET,
+) -> AModel | None:
+    """
     Args:
-        body (File | Unset): A file to upload
+        body (AModel | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200
+        AModel
     """
 
     return (
