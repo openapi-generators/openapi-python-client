@@ -39,11 +39,11 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
 {% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
 {% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) }}{% endif %}
 
-{% if not property.required %}
+{% if not property.required and not skip_unset %}
 if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
     {% set ns.has_if = true %}

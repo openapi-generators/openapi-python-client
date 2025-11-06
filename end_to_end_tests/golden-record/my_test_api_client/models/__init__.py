@@ -76,6 +76,7 @@ from .model_with_union_property_inlined_apples import ModelWithUnionPropertyInli
 from .model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 from .none import None_
 from .octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
+from .optional_body_body import OptionalBodyBody
 from .post_bodies_multiple_data_body import PostBodiesMultipleDataBody
 from .post_bodies_multiple_files_body import PostBodiesMultipleFilesBody
 from .post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
@@ -162,6 +163,7 @@ __all__ = (
     "ModelWithUnionPropertyInlinedBananas",
     "None_",
     "OctetStreamTestsOctetStreamPostResponse200",
+    "OptionalBodyBody",
     "PostBodiesMultipleDataBody",
     "PostBodiesMultipleFilesBody",
     "PostBodiesMultipleJsonBody",

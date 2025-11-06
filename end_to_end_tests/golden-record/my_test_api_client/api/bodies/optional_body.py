@@ -5,25 +5,25 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.json_like_body import JsonLikeBody
+from ...models.optional_body_body import OptionalBodyBody
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: JsonLikeBody | Unset = UNSET,
+    body: OptionalBodyBody | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/bodies/json-like",
+        "url": "/bodies/optional",
     }
 
     if not isinstance(body, Unset):
         _kwargs["json"] = body.to_dict()
 
-    headers["Content-Type"] = "application/vnd+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -51,12 +51,12 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: JsonLikeBody | Unset = UNSET,
+    body: OptionalBodyBody | Unset = UNSET,
 ) -> Response[Any]:
-    """A content type that works like json but isn't application/json
+    """Test optional request body
 
     Args:
-        body (JsonLikeBody | Unset):
+        body (OptionalBodyBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -80,12 +80,12 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: JsonLikeBody | Unset = UNSET,
+    body: OptionalBodyBody | Unset = UNSET,
 ) -> Response[Any]:
-    """A content type that works like json but isn't application/json
+    """Test optional request body
 
     Args:
-        body (JsonLikeBody | Unset):
+        body (OptionalBodyBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

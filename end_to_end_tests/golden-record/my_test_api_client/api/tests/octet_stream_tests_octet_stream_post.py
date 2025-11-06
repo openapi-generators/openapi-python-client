@@ -7,12 +7,12 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
-from ...types import File, Response
+from ...types import UNSET, File, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: File,
+    body: File | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -21,7 +21,8 @@ def _get_kwargs(
         "url": "/tests/octet_stream",
     }
 
-    _kwargs["content"] = body.payload
+    if not isinstance(body, Unset):
+        _kwargs["content"] = body.payload
 
     headers["Content-Type"] = "application/octet-stream"
 
@@ -62,12 +63,12 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: File,
+    body: File | Unset = UNSET,
 ) -> Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]:
     """Binary (octet stream) request body
 
     Args:
-        body (File): A file to upload
+        body (File | Unset): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -91,12 +92,12 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    body: File,
+    body: File | Unset = UNSET,
 ) -> HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200 | None:
     """Binary (octet stream) request body
 
     Args:
-        body (File): A file to upload
+        body (File | Unset): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -115,12 +116,12 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: File,
+    body: File | Unset = UNSET,
 ) -> Response[HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200]:
     """Binary (octet stream) request body
 
     Args:
-        body (File): A file to upload
+        body (File | Unset): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -142,12 +143,12 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    body: File,
+    body: File | Unset = UNSET,
 ) -> HTTPValidationError | OctetStreamTestsOctetStreamPostResponse200 | None:
     """Binary (octet stream) request body
 
     Args:
-        body (File): A file to upload
+        body (File | Unset): A file to upload
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

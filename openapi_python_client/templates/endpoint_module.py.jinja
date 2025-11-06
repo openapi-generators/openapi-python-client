@@ -48,7 +48,7 @@ def _get_kwargs(
 
 {% if endpoint.bodies | length > 1 %}
 {% for body in endpoint.bodies %}
-    if isinstance(body, {{body.prop.get_type_string() }}):
+    if isinstance(body, {{body.prop.get_type_string(no_optional=True) }}):
         {{ body_to_kwarg(body) | indent(8) }}
         headers["Content-Type"] = "{{ body.content_type }}"
 {% endfor %}

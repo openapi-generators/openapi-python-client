@@ -10,13 +10,13 @@
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.value_type.__name__ }}){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set transformed = source + ".value" %}
 {% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
-{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
+{% if not skip_unset %}{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET{% endif +%}
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}
 {% endif %}
