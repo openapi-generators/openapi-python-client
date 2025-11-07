@@ -10,16 +10,18 @@ UUID({{ source }})
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set transformed = "str(" + source + ")" %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
-{% if declare_type %}
-{% set type_annotation = property.get_type_string(json=True) %}
+{% if not skip_unset %}
+    {% if declare_type %}
+    {% set type_annotation = property.get_type_string(json=True) %}
 {{ destination }}: {{ type_annotation }} = UNSET
-{% else %}
+    {% else %}
 {{ destination }} = UNSET
+    {% endif %}
 {% endif %}
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}

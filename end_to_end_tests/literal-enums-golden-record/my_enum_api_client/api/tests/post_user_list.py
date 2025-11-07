@@ -7,12 +7,12 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
 from ...models.post_user_list_body import PostUserListBody
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: PostUserListBody,
+    body: PostUserListBody | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -21,7 +21,8 @@ def _get_kwargs(
         "url": "/tests/",
     }
 
-    _kwargs["files"] = body.to_multipart()
+    if not isinstance(body, Unset):
+        _kwargs["files"] = body.to_multipart()
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -56,14 +57,14 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: PostUserListBody,
+    body: PostUserListBody | Unset = UNSET,
 ) -> Response[list[AModel]]:
     """Post List
 
      Post a list of things
 
     Args:
-        body (PostUserListBody):
+        body (PostUserListBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -87,14 +88,14 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    body: PostUserListBody,
+    body: PostUserListBody | Unset = UNSET,
 ) -> list[AModel] | None:
     """Post List
 
      Post a list of things
 
     Args:
-        body (PostUserListBody):
+        body (PostUserListBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -113,14 +114,14 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: PostUserListBody,
+    body: PostUserListBody | Unset = UNSET,
 ) -> Response[list[AModel]]:
     """Post List
 
      Post a list of things
 
     Args:
-        body (PostUserListBody):
+        body (PostUserListBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -142,14 +143,14 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    body: PostUserListBody,
+    body: PostUserListBody | Unset = UNSET,
 ) -> list[AModel] | None:
     """Post List
 
      Post a list of things
 
     Args:
-        body (PostUserListBody):
+        body (PostUserListBody | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

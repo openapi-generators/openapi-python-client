@@ -104,6 +104,30 @@
         }
       }
     },
+    "/bodies/optional": {
+      "post": {
+        "tags": [
+          "bodies"
+        ],
+        "description": "Test optional request body",
+        "operationId": "optional-body",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/tests/": {
       "get": {
         "tags": [
