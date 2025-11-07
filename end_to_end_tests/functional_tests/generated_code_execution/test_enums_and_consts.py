@@ -72,6 +72,35 @@ class TestStringEnumClass:
 
 
 @with_generated_client_fixture(
+    """
+    components:
+      schemas:
+        MyStrEnum:
+          type: string
+          enum: ["a", "b", "c"]
+          x-enum-varnames: [
+            "One",
+            "More than OnE",
+            "not_quite_four"
+          ]
+    """)
+@with_generated_code_imports(
+    ".models.MyStrEnum",
+)
+class TestStrEnumVarNameExtensions:
+    @pytest.mark.parametrize(
+        "expected_name,expected_value",
+        [
+            ("ONE", "a"),
+            ("MORE_THAN_ON_E", "b"),
+            ("NOT_QUITE_FOUR", "c"),
+        ],
+    )
+    def test_enum_values(self, MyStrEnum, expected_name, expected_value):
+        assert getattr(MyStrEnum, expected_name) == MyStrEnum(expected_value)
+
+
+@with_generated_client_fixture(
 """
 components:
   schemas:
