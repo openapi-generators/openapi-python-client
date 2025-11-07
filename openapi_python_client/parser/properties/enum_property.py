@@ -201,7 +201,9 @@ class EnumProperty(PropertyProtocol):
                 else:
                     output[f"VALUE_{value}"] = value
                 continue
-            if value and value[0].isalpha():
+            if use_var_names:
+                key = var_names[i]
+            elif value and value[0].isalpha():
                 key = value.upper()
             else:
                 key = f"VALUE_{i}"
