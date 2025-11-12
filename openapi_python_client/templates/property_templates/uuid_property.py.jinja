@@ -27,5 +27,5 @@ if not isinstance({{ source }}, Unset):
 {% endmacro %}
 
 {% macro multipart(property, source, name) %}
-files.append(({{ name }}, (None, str({{ source }}), "text/plain"))
+files.append(({{ name }}, (None, str({{ source }}), "text/plain")))
 {% endmacro %}

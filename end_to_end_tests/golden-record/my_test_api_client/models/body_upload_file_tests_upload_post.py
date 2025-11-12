@@ -172,6 +172,10 @@ class BodyUploadFileTestsUploadPost:
         return field_dict
 
     def to_multipart(self) -> types.RequestFiles:
+        from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
+            BodyUploadFileTestsUploadPostSomeNullableObject,
+        )
+
         files: types.RequestFiles = []
 
         files.append(("some_file", self.some_file.to_tuple()))
