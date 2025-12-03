@@ -151,6 +151,9 @@ return field_dict
 
 {% if model.is_multipart_body %}
     def to_multipart(self) -> types.RequestFiles:
+    {% for lazy_import in model.lazy_imports %}
+        {{ lazy_import }}
+    {% endfor %}
         files: types.RequestFiles = []
 
         {% for property in model.required_properties + model.optional_properties %}
