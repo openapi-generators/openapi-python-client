@@ -13,6 +13,34 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.28.0 (2025-12-03)
+
+### Breaking Changes
+
+- URL-encode path parameters in generated endpoints (#1349)
+
+### Fixes
+
+#### Fix bad code generation
+
+##1360 by @EricAtORS
+
+This fixes:
+- missing parenthesis in to_multipart
+ #1338 #1318
+- missing imports in the lazy eval in to_multipart:
+##931 and #1051
+
+#### Fix optional bodies
+
+If a body is not required (the default), it will now:
+
+1. Have `Unset` as part of its type annotation.
+2. Default to a value of `UNSET`
+3. Not be included in the request if it is `UNSET`
+
+Thanks @orelmaliach for the report! Fixes #1354
+
 ## 0.27.1 (2025-11-03)
 
 ### Fixes
