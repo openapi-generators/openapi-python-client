@@ -99,7 +99,7 @@ def body_from_data(
             continue
         prop, schemas = property_from_data(
             name="body",
-            required=True,
+            required=body.required,
             data=media_type_schema,
             schemas=schemas,
             parent_name=f"{endpoint_name}_{body_type}" if prefix_type_names else endpoint_name,

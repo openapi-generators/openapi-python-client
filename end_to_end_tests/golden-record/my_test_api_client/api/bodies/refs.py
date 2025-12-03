@@ -6,12 +6,12 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: AModel,
+    body: AModel | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -20,7 +20,8 @@ def _get_kwargs(
         "url": "/bodies/refs",
     }
 
-    _kwargs["json"] = body.to_dict()
+    if not isinstance(body, Unset):
+        _kwargs["json"] = body.to_dict()
 
     headers["Content-Type"] = "application/json"
 
@@ -50,12 +51,12 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: AModel,
+    body: AModel | Unset = UNSET,
 ) -> Response[Any]:
     """Test request body defined via ref
 
     Args:
-        body (AModel): A Model for testing all the ways custom objects can be used
+        body (AModel | Unset): A Model for testing all the ways custom objects can be used
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -79,12 +80,12 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: AModel,
+    body: AModel | Unset = UNSET,
 ) -> Response[Any]:
     """Test request body defined via ref
 
     Args:
-        body (AModel): A Model for testing all the ways custom objects can be used
+        body (AModel | Unset): A Model for testing all the ways custom objects can be used
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

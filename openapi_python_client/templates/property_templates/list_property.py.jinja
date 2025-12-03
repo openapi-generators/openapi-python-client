@@ -39,13 +39,13 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, list){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set inner_property = property.inner_property %}
 {% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
 {{ _transform(property, source, destination, "to_dict") }}
 {% else %}
-{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET
+{% if not skip_unset %}{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET{% endif +%}
 if not isinstance({{ source }}, Unset):
     {{ _transform(property, source, destination, "to_dict") | indent(4)}}
 {% endif %}

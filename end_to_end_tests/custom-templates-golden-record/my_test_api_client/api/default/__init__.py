@@ -7,6 +7,7 @@ from . import (
     get_models_allof,
     get_models_oneof_with_required_const,
     post_common_parameters,
+    post_types_unions_duplicate_types,
     reserved_parameters,
 )
 
@@ -31,3 +32,7 @@ class DefaultEndpoints:
     @classmethod
     def get_models_oneof_with_required_const(cls) -> types.ModuleType:
         return get_models_oneof_with_required_const
+
+    @classmethod
+    def post_types_unions_duplicate_types(cls) -> types.ModuleType:
+        return post_types_unions_duplicate_types

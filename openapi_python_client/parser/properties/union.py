@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from itertools import chain
 from typing import Any, ClassVar, cast
 
@@ -88,22 +89,26 @@ class UnionProperty(PropertyProtocol):
                 )
             sub_properties.append(sub_prop)
 
-        def flatten_union_properties(sub_properties: list[PropertyProtocol]) -> list[PropertyProtocol]:
-            flattened = []
-            for sub_prop in sub_properties:
-                if isinstance(sub_prop, UnionProperty):
-                    flattened.extend(flatten_union_properties(sub_prop.inner_properties))
+        def flatten_union_properties(possibly_nested: list[PropertyProtocol]) -> Iterator[PropertyProtocol]:
+            for to_flatten in possibly_nested:
+                if isinstance(to_flatten, UnionProperty):
+                    yield from flatten_union_properties(to_flatten.inner_properties)
                 else:
-                    flattened.append(sub_prop)
-            return flattened
+                    yield to_flatten
 
-        sub_properties = flatten_union_properties(sub_properties)
+        seen_types = set()
+        inner_properties: list[PropertyProtocol] = []
+        for flattened in flatten_union_properties(sub_properties):
+            type_string = flattened.get_type_string(no_optional=True)
+            if type_string not in seen_types:
+                seen_types.add(type_string)
+                inner_properties.append(flattened)
 
         prop = UnionProperty(
             name=name,
             required=required,
             default=None,
-            inner_properties=sub_properties,
+            inner_properties=inner_properties,
             python_name=PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,

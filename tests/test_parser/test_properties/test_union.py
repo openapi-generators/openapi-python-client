@@ -31,13 +31,19 @@ def test_not_required_in_path(config):
 
 
 def test_union_oneOf_descriptive_type_name(
-    union_property_factory, date_time_property_factory, string_property_factory, config
+    union_property_factory,
+    date_time_property_factory,
+    string_property_factory,
+    boolean_property_factory,
+    date_property_factory,
+    int_property_factory,
+    float_property_factory,
+    config,
 ):
     nested_schema_variant_A = oai.Schema(type=DataType.STRING, title="A")
-    nested_schema_variant_B = oai.Schema(type=DataType.STRING, title="B")
-    nested_schema_variant_2 = oai.Schema(type=DataType.STRING)
-    nested_schema_variant_C = oai.Schema(type=DataType.STRING, title="C")
-    nested_schema_variant_4 = oai.Schema(type=DataType.STRING)
+    nested_schema_variant_B = oai.Schema(type=DataType.INTEGER, title="B")
+    nested_schema_variant_2 = oai.Schema(type=DataType.NUMBER)
+    nested_schema_variant_C = oai.Schema(type=DataType.BOOLEAN, title="C")
 
     name = "union_prop"
     required = True
@@ -45,7 +51,7 @@ def test_union_oneOf_descriptive_type_name(
         anyOf=[
             # AnyOf retains the old naming convention
             nested_schema_variant_C,
-            nested_schema_variant_4,
+            oai.Schema(type=DataType.STRING, schema_format="date"),
         ],
         oneOf=[
             # OneOf fields that define their own titles will have those titles as their Type names
@@ -59,11 +65,11 @@ def test_union_oneOf_descriptive_type_name(
         name=name,
         required=required,
         inner_properties=[
-            string_property_factory(name=f"{name}_C"),
-            string_property_factory(name=f"{name}_type_1"),
+            boolean_property_factory(name=f"{name}_C"),
+            date_property_factory(name=f"{name}_type_1"),
             string_property_factory(name=f"{name}_A"),
-            string_property_factory(name=f"{name}_B"),
-            string_property_factory(name=f"{name}_type_4"),
+            int_property_factory(name=f"{name}_B"),
+            float_property_factory(name=f"{name}_type_4"),
             date_time_property_factory(name=f"{name}_type_5"),
         ],
     )

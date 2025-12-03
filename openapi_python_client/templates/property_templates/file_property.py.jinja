@@ -12,11 +12,11 @@ File(
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, bytes){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True) %}
+{% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% if property.required %}
 {{ destination }} = {{ source }}.to_tuple()
 {% else %}
-{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET
+{% if not skip_unset %}{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET{% endif +%}
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ source }}.to_tuple()
 {% endif %}
