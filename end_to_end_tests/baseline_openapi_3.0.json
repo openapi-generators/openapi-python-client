@@ -1918,6 +1918,30 @@
           }
         ]
       },
+      "AllOfRequiredBase": {
+        "type": "object",
+        "properties": {
+          "bar": {
+            "type": "string",
+            "description": "The bar property"
+          },
+          "baz": {
+            "type": "string",
+            "description": "The baz property"
+          }
+        }
+      },
+      "AllOfRequiredDerived": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AllOfRequiredBase"
+          },
+          {
+            "type": "object",
+            "required": ["bar"]
+          }
+        ]
+      },
       "AModel": {
         "title": "AModel",
         "required": [
