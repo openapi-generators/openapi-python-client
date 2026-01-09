@@ -543,6 +543,44 @@ class TestProcessProperties:
 
         assert result.optional_props == [prop], "There should only be one copy of duplicate properties"
 
+    def test_allof_required_override(self, model_property_factory, string_property_factory, config):
+        """Test that required field can be overridden in allOf schemas"""
+        # Simulates:
+        # FooBase:
+        #   type: object
+        #   properties:
+        #     bar: {type: string}
+        #     baz: {type: string}
+        # FooCreate:
+        #   allOf:
+        #     - $ref: '#/components/schemas/FooBase'
+        #     - type: object
+        #       required: [bar]
+        bar_prop = string_property_factory(name="bar", required=False)
+        baz_prop = string_property_factory(name="baz", required=False)
+        
+        data = oai.Schema.model_construct(
+            allOf=[
+                oai.Reference.model_construct(ref="#/FooBase"),
+                oai.Schema.model_construct(type="object", required=["bar"]),
+            ]
+        )
+        schemas = Schemas(
+            classes_by_reference={
+                "/FooBase": model_property_factory(
+                    required_properties=[], optional_properties=[bar_prop, baz_prop]
+                ),
+            }
+        )
+
+        result = _process_properties(data=data, schemas=schemas, class_name="FooCreate", config=config, roots={"root"})
+
+        # bar should now be required, baz should remain optional
+        assert len(result.required_props) == 1
+        assert result.required_props[0].name == "bar"
+        assert len(result.optional_props) == 1
+        assert result.optional_props[0].name == "baz"
+
     @pytest.mark.parametrize("first_required", [True, False])
     @pytest.mark.parametrize("second_required", [True, False])
     def test_mixed_requirements(
