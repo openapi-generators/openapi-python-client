@@ -16,7 +16,7 @@ from ..types import UNSET, Unset
 {{ relative }}
 {% endfor %}
 
-{% for lazy_import in model.lazy_imports %}
+{% for lazy_import in model.lazy_imports | sort %}
 {% if loop.first %}
 if TYPE_CHECKING:
 {% endif %}
@@ -173,7 +173,7 @@ return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-    {% for lazy_import in model.lazy_imports %}
+    {% for lazy_import in model.lazy_imports | sort %}
         {{ lazy_import }}
     {% endfor %}
 {% if (model.required_properties or model.optional_properties or model.additional_properties) %}
