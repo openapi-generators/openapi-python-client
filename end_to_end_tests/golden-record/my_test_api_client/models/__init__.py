@@ -7,6 +7,8 @@ from .a_model import AModel
 from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
 from .all_of_has_properties_but_no_type import AllOfHasPropertiesButNoType
 from .all_of_has_properties_but_no_type_type_enum import AllOfHasPropertiesButNoTypeTypeEnum
+from .all_of_required_base import AllOfRequiredBase
+from .all_of_required_derived import AllOfRequiredDerived
 from .all_of_sub_model import AllOfSubModel
 from .all_of_sub_model_type_enum import AllOfSubModelTypeEnum
 from .an_all_of_enum import AnAllOfEnum
@@ -100,6 +102,8 @@ __all__ = (
     "AFormData",
     "AllOfHasPropertiesButNoType",
     "AllOfHasPropertiesButNoTypeTypeEnum",
+    "AllOfRequiredBase",
+    "AllOfRequiredDerived",
     "AllOfSubModel",
     "AllOfSubModelTypeEnum",
     "AModel",

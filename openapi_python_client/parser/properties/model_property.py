@@ -292,6 +292,11 @@ def _process_properties(  # noqa: PLR0912, PLR0911
             unprocessed_props.extend(sub_prop.properties.items() if sub_prop.properties else [])
             required_set.update(sub_prop.required or [])
 
+    # Update properties that are marked as required in the schema
+    for prop_name in required_set:
+        if prop_name in properties and not properties[prop_name].required:
+            properties[prop_name] = evolve(properties[prop_name], required=True)
+
     for key, value in unprocessed_props:
         prop_required = key in required_set
         prop_or_error: Property | (PropertyError | None)
