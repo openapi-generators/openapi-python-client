@@ -558,7 +558,7 @@ class TestProcessProperties:
         #       required: [bar]
         bar_prop = string_property_factory(name="bar", required=False)
         baz_prop = string_property_factory(name="baz", required=False)
-        
+
         data = oai.Schema.model_construct(
             allOf=[
                 oai.Reference.model_construct(ref="#/FooBase"),
@@ -567,9 +567,7 @@ class TestProcessProperties:
         )
         schemas = Schemas(
             classes_by_reference={
-                "/FooBase": model_property_factory(
-                    required_properties=[], optional_properties=[bar_prop, baz_prop]
-                ),
+                "/FooBase": model_property_factory(required_properties=[], optional_properties=[bar_prop, baz_prop]),
             }
         )
 
