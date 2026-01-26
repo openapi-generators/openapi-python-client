@@ -12,7 +12,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Install Hatchling
         run: pip install --upgrade hatchling
       - name: Build
