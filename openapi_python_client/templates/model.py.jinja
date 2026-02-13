@@ -144,14 +144,14 @@ return field_dict
 {% endmacro %}
 
     def to_dict(self) -> dict[str, Any]:
-    {% for lazy_import in model.lazy_imports %}
+    {% for lazy_import in model.lazy_imports | sort %}
         {{ lazy_import }}
     {% endfor %}
         {{ _to_dict() | indent(8) }}
 
 {% if model.is_multipart_body %}
     def to_multipart(self) -> types.RequestFiles:
-    {% for lazy_import in model.lazy_imports %}
+    {% for lazy_import in model.lazy_imports | sort %}
         {{ lazy_import }}
     {% endfor %}
         files: types.RequestFiles = []
@@ -204,7 +204,7 @@ return field_dict
         {% import "property_templates/" + model.additional_properties.template as prop_template %}
 
 {% if model.additional_properties.lazy_imports %}
-    {% for lazy_import in model.additional_properties.lazy_imports %}
+    {% for lazy_import in model.additional_properties.lazy_imports | sort %}
         {{ lazy_import }}
     {% endfor %}
 {% endif %}
