@@ -12,3 +12,4 @@ field_prefix: attr_
 content_type_overrides:
    openapi/python/client: application/json
 generate_all_tags: true
+allow_int_response_codes: true
