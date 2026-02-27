@@ -11,11 +11,12 @@ from ... import errors
 {{ relative }}
 {% endfor %}
 
-{% if endpoint.responses|list|length == 0 or endpoint.responses|map(attribute="status_code")|map(attribute="is_official")|all %}
+{% set all_standard_response_codes = endpoint.responses|map(attribute="status_code")|map(attribute="is_official")|all %}
+{% if config.allow_int_response_codes and not all_standard_response_codes %}
+HTTPStatus = int
+{% else %}
 import http
 HTTPStatus = http.HTTPStatus
-{% else %}
-HTTPStatus = int
 {% endif %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
