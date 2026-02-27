@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -9,6 +9,8 @@ from ...models.post_responses_unions_simple_before_complex_response_200 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200,
 )
 from ...types import Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -36,7 +38,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200]:
+) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -48,7 +50,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200]:
+) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200, HTTPStatus]:
     """Regression test for #603
 
     Raises:
@@ -90,7 +92,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200]:
+) -> Response[PostResponsesUnionsSimpleBeforeComplexResponse200, HTTPStatus]:
     """Regression test for #603
 
     Raises:

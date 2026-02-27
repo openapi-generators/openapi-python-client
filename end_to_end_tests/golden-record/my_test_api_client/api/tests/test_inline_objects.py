@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -8,6 +8,8 @@ from ...client import AuthenticatedClient, Client
 from ...models.test_inline_objects_body import TestInlineObjectsBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -45,7 +47,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[TestInlineObjectsResponse200]:
+) -> Response[TestInlineObjectsResponse200, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -58,7 +60,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
-) -> Response[TestInlineObjectsResponse200]:
+) -> Response[TestInlineObjectsResponse200, HTTPStatus]:
     """Test Inline Objects
 
     Args:
@@ -111,7 +113,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
-) -> Response[TestInlineObjectsResponse200]:
+) -> Response[TestInlineObjectsResponse200, HTTPStatus]:
     """Test Inline Objects
 
     Args:

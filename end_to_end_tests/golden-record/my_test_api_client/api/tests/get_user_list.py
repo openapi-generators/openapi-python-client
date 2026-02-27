@@ -1,5 +1,5 @@
 import datetime
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -11,6 +11,8 @@ from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -94,7 +96,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | list[AModel]]:
+) -> Response[HTTPValidationError | list[AModel], HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -110,7 +112,7 @@ def sync_detailed(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
-) -> Response[HTTPValidationError | list[AModel]]:
+) -> Response[HTTPValidationError | list[AModel], HTTPStatus]:
     """Get List
 
      Get a list of things
@@ -185,7 +187,7 @@ async def asyncio_detailed(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
-) -> Response[HTTPValidationError | list[AModel]]:
+) -> Response[HTTPValidationError | list[AModel], HTTPStatus]:
     """Get List
 
      Get a list of things

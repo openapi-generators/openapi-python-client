@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any, cast
 
 import httpx
@@ -7,6 +7,8 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.post_prefix_items_body import PostPrefixItemsBody
 from ...types import Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -39,7 +41,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -52,7 +54,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostPrefixItemsBody,
-) -> Response[str]:
+) -> Response[str, HTTPStatus]:
     """
     Args:
         body (PostPrefixItemsBody):
@@ -103,7 +105,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostPrefixItemsBody,
-) -> Response[str]:
+) -> Response[str, HTTPStatus]:
     """
     Args:
         body (PostPrefixItemsBody):

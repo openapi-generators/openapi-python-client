@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from io import BytesIO
 from typing import Any
 
@@ -7,6 +7,8 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...types import File, Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -30,7 +32,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[File]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[File, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -42,7 +44,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[File]:
+) -> Response[File, HTTPStatus]:
     """Octet Stream
 
     Raises:
@@ -84,7 +86,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[File]:
+) -> Response[File, HTTPStatus]:
     """Octet Stream
 
     Raises:

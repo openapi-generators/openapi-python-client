@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -6,6 +6,8 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...types import Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -28,7 +30,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -40,7 +42,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[str]:
+) -> Response[str, HTTPStatus]:
     """Text Response
 
     Raises:
@@ -82,7 +84,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[str]:
+) -> Response[str, HTTPStatus]:
     """Text Response
 
     Raises:

@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any, cast
 
 import httpx
@@ -6,6 +6,8 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...types import UNSET, Response, Unset
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -39,7 +41,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -52,7 +54,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: str | Unset = UNSET,
-) -> Response[str]:
+) -> Response[str, HTTPStatus]:
     """Content Type Override
 
     Args:
@@ -105,7 +107,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: str | Unset = UNSET,
-) -> Response[str]:
+) -> Response[str, HTTPStatus]:
     """Content Type Override
 
     Args:

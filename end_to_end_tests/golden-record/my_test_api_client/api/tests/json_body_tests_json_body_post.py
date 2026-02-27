@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -8,6 +8,8 @@ from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -49,7 +51,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -62,7 +64,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: AModel,
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, HTTPStatus]:
     """Json Body
 
      Try sending a JSON body
@@ -119,7 +121,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: AModel,
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, HTTPStatus]:
     """Json Body
 
      Try sending a JSON body

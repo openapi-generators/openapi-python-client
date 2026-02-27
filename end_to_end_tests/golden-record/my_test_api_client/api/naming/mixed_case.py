@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -7,6 +7,8 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.mixed_case_response_200 import MixedCaseResponse200
 from ...types import UNSET, Response
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -45,7 +47,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[MixedCaseResponse200]:
+) -> Response[MixedCaseResponse200, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,7 +61,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> Response[MixedCaseResponse200]:
+) -> Response[MixedCaseResponse200, HTTPStatus]:
     """
     Args:
         mixed_case (str):
@@ -116,7 +118,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> Response[MixedCaseResponse200]:
+) -> Response[MixedCaseResponse200, HTTPStatus]:
     """
     Args:
         mixed_case (str):

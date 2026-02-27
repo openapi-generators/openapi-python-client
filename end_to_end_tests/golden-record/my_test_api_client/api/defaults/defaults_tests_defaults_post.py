@@ -1,5 +1,5 @@
 import datetime
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -11,6 +11,8 @@ from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
 from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
+
+HTTPStatus = http.HTTPStatus
 
 
 def _get_kwargs(
@@ -106,7 +108,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, HTTPStatus]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -131,7 +133,7 @@ def sync_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, HTTPStatus]:
     """Defaults
 
     Args:
@@ -256,7 +258,7 @@ async def asyncio_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, HTTPStatus]:
     """Defaults
 
     Args:
