@@ -1,3 +1,7 @@
+---
+default: minor
+---
+
 # Summary
 
 Added support for responses with non-standard HTTP Status Codes. Off by default, enabled with `allow_int_response_codes`.
