@@ -295,10 +295,10 @@ def test_http_status_pattern_lt(pattern1: str, pattern2: str, result: bool) -> N
 @pytest.mark.parametrize(
     "pattern,result",
     [
-        (str(HTTPStatus.OK), True),
-        (str(HTTPStatus.NOT_FOUND), True),
-        (str(HTTPStatus.CONFLICT), True),
-        (str(HTTPStatus.INTERNAL_SERVER_ERROR), True),
+        (str(HTTPStatus.OK.value), True),
+        (str(HTTPStatus.NOT_FOUND.value), True),
+        (str(HTTPStatus.CONFLICT.value), True),
+        (str(HTTPStatus.INTERNAL_SERVER_ERROR.value), True),
         ("2XX", False),
         ("1", False),
         ("99999", False),
