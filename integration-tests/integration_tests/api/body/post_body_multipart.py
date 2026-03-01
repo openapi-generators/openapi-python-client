@@ -10,8 +10,6 @@ from ...models.post_body_multipart_response_200 import PostBodyMultipartResponse
 from ...models.public_error import PublicError
 from ...types import UNSET, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -52,9 +50,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostBodyMultipartResponse200 | PublicError, HTTPStatus]:
+) -> Response[PostBodyMultipartResponse200 | PublicError, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -65,7 +63,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostBodyMultipartBody | Unset = UNSET,
-) -> Response[PostBodyMultipartResponse200 | PublicError, HTTPStatus]:
+) -> Response[PostBodyMultipartResponse200 | PublicError, http.HTTPStatus]:
     """
     Args:
         body (PostBodyMultipartBody | Unset):
@@ -116,7 +114,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostBodyMultipartBody | Unset = UNSET,
-) -> Response[PostBodyMultipartResponse200 | PublicError, HTTPStatus]:
+) -> Response[PostBodyMultipartResponse200 | PublicError, http.HTTPStatus]:
     """
     Args:
         body (PostBodyMultipartBody | Unset):

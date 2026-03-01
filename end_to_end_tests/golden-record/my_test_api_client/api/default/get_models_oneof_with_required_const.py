@@ -13,8 +13,6 @@ from ...models.get_models_oneof_with_required_const_response_200_type_1 import (
 )
 from ...types import Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
@@ -60,10 +58,10 @@ def _parse_response(
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[
-    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, HTTPStatus
+    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, http.HTTPStatus
 ]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -74,7 +72,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[
-    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, HTTPStatus
+    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, http.HTTPStatus
 ]:
     """
     Raises:
@@ -116,7 +114,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[
-    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, HTTPStatus
+    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, http.HTTPStatus
 ]:
     """
     Raises:

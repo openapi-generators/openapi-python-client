@@ -12,8 +12,6 @@ from ...models.get_user_list_int_enum_header import GetUserListIntEnumHeader
 from ...models.get_user_list_string_enum_header import GetUserListStringEnumHeader
 from ...types import UNSET, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -85,9 +83,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[list[AModel], HTTPStatus]:
+) -> Response[list[AModel], http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -102,7 +100,7 @@ def sync_detailed(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel], HTTPStatus]:
+) -> Response[list[AModel], http.HTTPStatus]:
     """Get List
 
      Get a list of things
@@ -183,7 +181,7 @@ async def asyncio_detailed(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel], HTTPStatus]:
+) -> Response[list[AModel], http.HTTPStatus]:
     """Get List
 
      Get a list of things

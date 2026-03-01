@@ -9,8 +9,6 @@ from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUplo
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -49,9 +47,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError, HTTPStatus]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -62,7 +60,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: BodyUploadFileTestsUploadPost,
-) -> Response[Any | HTTPValidationError, HTTPStatus]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     """Upload File
 
      Upload a file
@@ -119,7 +117,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: BodyUploadFileTestsUploadPost,
-) -> Response[Any | HTTPValidationError, HTTPStatus]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     """Upload File
 
      Upload a file

@@ -5,8 +5,6 @@ import httpx
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
-HTTPStatus = int
-
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
@@ -34,9 +32,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     return response_default
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str, HTTPStatus]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str, int]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=int(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -46,7 +44,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[str, HTTPStatus]:
+) -> Response[str, int]:
     """Status Codes Precedence
 
      Verify that specific status codes are always checked first, then ranges, then default
@@ -92,7 +90,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[str, HTTPStatus]:
+) -> Response[str, int]:
     """Status Codes Precedence
 
      Verify that specific status codes are always checked first, then ranges, then default

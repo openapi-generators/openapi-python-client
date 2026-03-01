@@ -9,8 +9,6 @@ from ...models.post_parameters_header_response_200 import PostParametersHeaderRe
 from ...models.public_error import PublicError
 from ...types import Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -58,9 +56,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostParametersHeaderResponse200 | PublicError, HTTPStatus]:
+) -> Response[PostParametersHeaderResponse200 | PublicError, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -74,7 +72,7 @@ def sync_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError, HTTPStatus]:
+) -> Response[PostParametersHeaderResponse200 | PublicError, http.HTTPStatus]:
     """
     Args:
         boolean_header (bool):
@@ -143,7 +141,7 @@ async def asyncio_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError, HTTPStatus]:
+) -> Response[PostParametersHeaderResponse200 | PublicError, http.HTTPStatus]:
     """
     Args:
         boolean_header (bool):

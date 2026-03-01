@@ -10,8 +10,6 @@ from ...models.post_bodies_multiple_files_body import PostBodiesMultipleFilesBod
 from ...models.post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
 from ...types import UNSET, File, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -59,9 +57,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any, HTTPStatus]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -72,7 +72,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """Test multiple bodies
 
     Args:
@@ -104,7 +104,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostBodiesMultipleJsonBody | File | PostBodiesMultipleDataBody | PostBodiesMultipleFilesBody | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """Test multiple bodies
 
     Args:

@@ -8,8 +8,6 @@ from ...client import AuthenticatedClient, Client
 from ...models.get_models_allof_response_200 import GetModelsAllofResponse200
 from ...types import Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
@@ -36,9 +34,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetModelsAllofResponse200, HTTPStatus]:
+) -> Response[GetModelsAllofResponse200, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -48,7 +46,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetModelsAllofResponse200, HTTPStatus]:
+) -> Response[GetModelsAllofResponse200, http.HTTPStatus]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -88,7 +86,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetModelsAllofResponse200, HTTPStatus]:
+) -> Response[GetModelsAllofResponse200, http.HTTPStatus]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

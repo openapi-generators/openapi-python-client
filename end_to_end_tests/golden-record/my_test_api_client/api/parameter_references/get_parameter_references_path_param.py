@@ -8,8 +8,6 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...types import UNSET, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     path_param: str,
@@ -58,9 +56,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any, HTTPStatus]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -75,7 +75,7 @@ def sync_detailed(
     integer_param: int | Unset = 0,
     header_param: None | str | Unset = UNSET,
     cookie_param: str | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """Test different types of parameter references
 
     Args:
@@ -116,7 +116,7 @@ async def asyncio_detailed(
     integer_param: int | Unset = 0,
     header_param: None | str | Unset = UNSET,
     cookie_param: str | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """Test different types of parameter references
 
     Args:

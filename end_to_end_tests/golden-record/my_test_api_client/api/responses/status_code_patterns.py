@@ -8,8 +8,6 @@ from ...models.status_code_patterns_response_2xx import StatusCodePatternsRespon
 from ...models.status_code_patterns_response_4xx import StatusCodePatternsResponse4XX
 from ...types import Response
 
-HTTPStatus = int
-
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
@@ -41,9 +39,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, HTTPStatus]:
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, int]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=int(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -53,7 +51,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, HTTPStatus]:
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, int]:
     """Status Code Patterns
 
     Raises:
@@ -95,7 +93,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, HTTPStatus]:
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, int]:
     """Status Code Patterns
 
     Raises:

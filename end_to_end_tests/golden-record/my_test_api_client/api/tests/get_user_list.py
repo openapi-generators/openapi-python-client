@@ -12,8 +12,6 @@ from ...models.an_enum_with_null import AnEnumWithNull
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -96,9 +94,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | list[AModel], HTTPStatus]:
+) -> Response[HTTPValidationError | list[AModel], http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -112,7 +110,7 @@ def sync_detailed(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
-) -> Response[HTTPValidationError | list[AModel], HTTPStatus]:
+) -> Response[HTTPValidationError | list[AModel], http.HTTPStatus]:
     """Get List
 
      Get a list of things
@@ -187,7 +185,7 @@ async def asyncio_detailed(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
-) -> Response[HTTPValidationError | list[AModel], HTTPStatus]:
+) -> Response[HTTPValidationError | list[AModel], http.HTTPStatus]:
     """Get List
 
      Get a list of things

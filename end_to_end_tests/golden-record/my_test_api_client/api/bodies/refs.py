@@ -8,8 +8,6 @@ from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
 from ...types import UNSET, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -41,9 +39,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any, HTTPStatus]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -54,7 +54,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: AModel | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """Test request body defined via ref
 
     Args:
@@ -83,7 +83,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: AModel | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """Test request body defined via ref
 
     Args:

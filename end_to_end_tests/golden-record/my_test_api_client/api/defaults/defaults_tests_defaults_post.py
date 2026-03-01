@@ -12,8 +12,6 @@ from ...models.http_validation_error import HTTPValidationError
 from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -108,9 +106,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError, HTTPStatus]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -133,7 +131,7 @@ def sync_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError, HTTPStatus]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     """Defaults
 
     Args:
@@ -258,7 +256,7 @@ async def asyncio_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError, HTTPStatus]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     """Defaults
 
     Args:

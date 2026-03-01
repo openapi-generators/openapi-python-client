@@ -9,8 +9,6 @@ from ...models.test_inline_objects_body import TestInlineObjectsBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -47,9 +45,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[TestInlineObjectsResponse200, HTTPStatus]:
+) -> Response[TestInlineObjectsResponse200, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -60,7 +58,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
-) -> Response[TestInlineObjectsResponse200, HTTPStatus]:
+) -> Response[TestInlineObjectsResponse200, http.HTTPStatus]:
     """Test Inline Objects
 
     Args:
@@ -113,7 +111,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
-) -> Response[TestInlineObjectsResponse200, HTTPStatus]:
+) -> Response[TestInlineObjectsResponse200, http.HTTPStatus]:
     """Test Inline Objects
 
     Args:

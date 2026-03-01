@@ -9,8 +9,6 @@ from ...models.get_location_header_types_int_enum_header import GetLocationHeade
 from ...models.get_location_header_types_string_enum_header import GetLocationHeaderTypesStringEnumHeader
 from ...types import UNSET, Response, Unset
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs(
     *,
@@ -59,9 +57,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any, HTTPStatus]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -77,7 +77,7 @@ def sync_detailed(
     integer_header: int | Unset = UNSET,
     int_enum_header: GetLocationHeaderTypesIntEnumHeader | Unset = UNSET,
     string_enum_header: GetLocationHeaderTypesStringEnumHeader | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """
     Args:
         boolean_header (bool | Unset):
@@ -120,7 +120,7 @@ async def asyncio_detailed(
     integer_header: int | Unset = UNSET,
     int_enum_header: GetLocationHeaderTypesIntEnumHeader | Unset = UNSET,
     string_enum_header: GetLocationHeaderTypesStringEnumHeader | Unset = UNSET,
-) -> Response[Any, HTTPStatus]:
+) -> Response[Any, http.HTTPStatus]:
     """
     Args:
         boolean_header (bool | Unset):

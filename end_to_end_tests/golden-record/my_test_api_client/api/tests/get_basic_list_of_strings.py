@@ -7,8 +7,6 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
-HTTPStatus = http.HTTPStatus
-
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
@@ -33,9 +31,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[list[str], HTTPStatus]:
+) -> Response[list[str], http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -45,7 +43,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[list[str], HTTPStatus]:
+) -> Response[list[str], http.HTTPStatus]:
     """Get Basic List Of Strings
 
      Get a list of strings
@@ -91,7 +89,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[list[str], HTTPStatus]:
+) -> Response[list[str], http.HTTPStatus]:
     """Get Basic List Of Strings
 
      Get a list of strings
