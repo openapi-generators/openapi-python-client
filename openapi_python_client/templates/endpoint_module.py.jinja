@@ -11,12 +11,11 @@ from ... import errors
 {{ relative }}
 {% endfor %}
 
-{% set all_standard_response_codes = endpoint.responses|map(attribute="status_code")|map(attribute="is_official")|all %}
-{% if config.allow_int_response_codes and not all_standard_response_codes %}
-HTTPStatus = int
+{% if config.allow_int_response_codes and not endpoint.responses|map(attribute="status_code")|map(attribute="is_official")|all %}
+{% set http_status_type = "int" %}
 {% else %}
 import http
-HTTPStatus = http.HTTPStatus
+{% set http_status_type = "http.HTTPStatus" %}
 {% endif %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
@@ -99,9 +98,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     {% endif %}
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string }}, HTTPStatus]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string }}, {{ http_status_type }}]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code={{ http_status_type }}(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -110,7 +109,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}, HTTPStatus]:
+) -> Response[{{ return_string }}, {{ http_status_type }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
@@ -136,7 +135,7 @@ def sync(
 
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}, HTTPStatus]:
+) -> Response[{{ return_string }}, {{ http_status_type }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(

@@ -14,6 +14,8 @@ from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
 
+_STATUS_CODES = set(status.value for status in HTTPStatus)
+
 
 @define
 class Responses:
@@ -60,7 +62,7 @@ class HTTPStatusPattern:
         self.pattern = pattern
         self.range = code_range
         self.is_official = self.range is None or all(
-            code in HTTPStatus for code in range(self.range[0], self.range[1] + 1)
+            code in _STATUS_CODES for code in range(self.range[0], self.range[1] + 1)
         )
 
     @staticmethod

@@ -124,6 +124,6 @@ class Config:
             file_encoding=file_encoding,
             overwrite=overwrite,
             output_path=output_path,
-            allow_int_response_codes=config_file.allow_int_response_codes
+            allow_int_response_codes=config_file.allow_int_response_codes,
         )
         return config
