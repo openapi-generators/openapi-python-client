@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -45,9 +45,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[MixedCaseResponse200]:
+) -> Response[MixedCaseResponse200, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -59,7 +59,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> Response[MixedCaseResponse200]:
+) -> Response[MixedCaseResponse200, http.HTTPStatus]:
     """
     Args:
         mixed_case (str):
@@ -116,7 +116,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> Response[MixedCaseResponse200]:
+) -> Response[MixedCaseResponse200, http.HTTPStatus]:
     """
     Args:
         mixed_case (str):

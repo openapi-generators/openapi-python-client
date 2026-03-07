@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from unittest.mock import MagicMock
 
 import pytest
@@ -289,3 +290,21 @@ def test_http_status_pattern_lt(pattern1: str, pattern2: str, result: bool) -> N
     assert isinstance(first, HTTPStatusPattern)
     assert isinstance(second, HTTPStatusPattern)
     assert (first < second) == result
+
+
+@pytest.mark.parametrize(
+    "pattern,result",
+    [
+        (str(HTTPStatus.OK.value), True),
+        (str(HTTPStatus.NOT_FOUND.value), True),
+        (str(HTTPStatus.CONFLICT.value), True),
+        (str(HTTPStatus.INTERNAL_SERVER_ERROR.value), True),
+        ("2XX", False),
+        ("1", False),
+        ("99999", False),
+    ],
+)
+def test_http_status_pattern_is_official(pattern: str, result: bool) -> None:
+    parsed = HTTPStatusPattern.parse(pattern)
+    assert isinstance(parsed, HTTPStatusPattern)
+    assert parsed.is_official == result

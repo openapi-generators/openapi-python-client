@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -9,9 +9,7 @@ from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
 from ...models.get_user_list_int_enum_header import GetUserListIntEnumHeader
-from ...models.get_user_list_string_enum_header import (
-    GetUserListStringEnumHeader,
-)
+from ...models.get_user_list_string_enum_header import GetUserListStringEnumHeader
 from ...types import UNSET, Response, Unset
 
 
@@ -83,9 +81,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[list[AModel], http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -100,7 +100,7 @@ def sync_detailed(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> Response[list[AModel], http.HTTPStatus]:
     """Get List
 
      Get a list of things
@@ -181,7 +181,7 @@ async def asyncio_detailed(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> Response[list[AModel], http.HTTPStatus]:
     """Get List
 
      Get a list of things

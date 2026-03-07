@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from http import HTTPStatus
 from io import BytesIO
 from typing import Any
 
@@ -40,7 +41,7 @@ body = PostBodyMultipartBody(
 )
 
 
-def check_response(response: Response[PostBodyMultipartResponse200 | PublicError]) -> None:
+def check_response(response: Response[PostBodyMultipartResponse200 | PublicError, HTTPStatus]) -> None:
     content = response.parsed
     if not isinstance(content, PostBodyMultipartResponse200):
         raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")

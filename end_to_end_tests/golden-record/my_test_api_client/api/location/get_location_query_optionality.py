@@ -1,5 +1,5 @@
 import datetime
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -63,9 +63,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -79,7 +81,7 @@ def sync_detailed(
     null_required: datetime.datetime | None,
     null_not_required: datetime.datetime | None | Unset = UNSET,
     not_null_not_required: datetime.datetime | Unset = UNSET,
-) -> Response[Any]:
+) -> Response[Any, http.HTTPStatus]:
     """
     Args:
         not_null_required (datetime.datetime):
@@ -116,7 +118,7 @@ async def asyncio_detailed(
     null_required: datetime.datetime | None,
     null_not_required: datetime.datetime | None | Unset = UNSET,
     not_null_not_required: datetime.datetime | Unset = UNSET,
-) -> Response[Any]:
+) -> Response[Any, http.HTTPStatus]:
     """
     Args:
         not_null_required (datetime.datetime):

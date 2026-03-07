@@ -1,4 +1,3 @@
-from http import HTTPStatus
 from typing import Any
 
 import httpx
@@ -40,9 +39,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, int]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=int(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -52,7 +51,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, int]:
     """Status Code Patterns
 
     Raises:
@@ -94,7 +93,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
+) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX, int]:
     """Status Code Patterns
 
     Raises:
