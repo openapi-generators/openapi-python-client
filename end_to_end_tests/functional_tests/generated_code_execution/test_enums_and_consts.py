@@ -72,18 +72,18 @@ class TestStringEnumClass:
 
 
 @with_generated_client_fixture(
-    """
-    components:
-      schemas:
-        MyStrEnum:
-          type: string
-          enum: ["a", "b", "c"]
-          x-enum-varnames: [
-            "One",
-            "More than OnE",
-            "not_quite_four"
-          ]
-    """)
+"""
+components:
+  schemas:
+    MyStrEnum:
+      type: string
+      enum: ["a", "b", "c"]
+      x-enum-varnames: [
+        "One",
+        "More than OnE",
+        "not_quite_four"
+      ]
+""")
 @with_generated_code_imports(
     ".models.MyStrEnum",
 )
