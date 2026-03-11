@@ -126,7 +126,7 @@ class Project:
             self._run_command(command)
 
     def _run_command(self, cmd: str) -> None:
-        cmd_name = cmd.split(" ")[0]
+        cmd_name = cmd.split(" ", maxsplit=1)[0]
         command_exists = shutil.which(cmd_name)
         if not command_exists:
             self.errors.append(

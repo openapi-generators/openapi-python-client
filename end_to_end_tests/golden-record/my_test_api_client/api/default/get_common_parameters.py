@@ -12,6 +12,7 @@ def _get_kwargs(
     *,
     common: str | Unset = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["common"] = common
