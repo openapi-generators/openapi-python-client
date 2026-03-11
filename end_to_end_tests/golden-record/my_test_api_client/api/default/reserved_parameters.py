@@ -13,6 +13,7 @@ def _get_kwargs(
     client_query: str,
     url_query: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["client"] = client_query

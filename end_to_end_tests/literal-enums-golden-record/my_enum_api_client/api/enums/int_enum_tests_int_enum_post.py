@@ -13,6 +13,7 @@ def _get_kwargs(
     *,
     int_enum: AnIntEnum,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     json_int_enum: int = int_enum
