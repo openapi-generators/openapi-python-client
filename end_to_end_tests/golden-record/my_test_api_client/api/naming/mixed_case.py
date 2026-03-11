@@ -14,6 +14,7 @@ def _get_kwargs(
     mixed_case: str,
     mixedCase: str,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["mixed_case"] = mixed_case
