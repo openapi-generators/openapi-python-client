@@ -13,6 +13,16 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.28.4 (2026-03-12)
+
+### Features
+
+#### Add support for x-enum-varnames to string enums
+
+##1358 by @mbbush
+
+You can now customize the variable names of the generated string enumerations using the x-enum-varnames openapi extension. Previously, this was only possible for integer enumerations.
+
 ## 0.28.3 (2026-02-17)
 
 ### Fixes
