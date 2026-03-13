@@ -141,6 +141,7 @@ class Endpoint:
     requires_security: bool
     tags: list[PythonIdentifier]
     summary: str | None = ""
+    deprecated: bool = False
     relative_imports: set[str] = field(default_factory=set)
     query_parameters: list[Property] = field(default_factory=list)
     path_parameters: list[Property] = field(default_factory=list)
@@ -422,6 +423,7 @@ class Endpoint:
             name=name,
             requires_security=bool(data.security),
             tags=tags,
+            deprecated=data.deprecated,
         )
 
         result, schemas, parameters = Endpoint.add_parameters(
