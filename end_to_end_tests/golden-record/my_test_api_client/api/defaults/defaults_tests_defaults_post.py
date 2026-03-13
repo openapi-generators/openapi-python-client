@@ -1,5 +1,5 @@
 import datetime
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -107,9 +107,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -132,7 +132,7 @@ def sync_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     """Defaults
 
     Args:
@@ -257,7 +257,7 @@ async def asyncio_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError]:
+) -> Response[Any | HTTPValidationError, http.HTTPStatus]:
     """Defaults
 
     Args:

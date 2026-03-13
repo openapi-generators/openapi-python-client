@@ -31,6 +31,7 @@ TEMPLATE_FILTERS = {
     "kebabcase": utils.kebab_case,
     "pascalcase": utils.pascal_case,
     "any": any,
+    "all": all,
 }
 
 

@@ -1706,6 +1706,27 @@ info:
       }
     }
   },
+  "/tests/nonstandard-response-code": {
+      "get": {
+        "tags": [
+          "tests"
+        ],
+        "summary": "Test nonstandard response code",
+        "description": "Test endpoint with nonstandard response code",
+        "operationId": "nonstandard_response_code",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "499": {
+            "description": "Nonstandard response code"
+          },
+          "99999": {
+            "description": "Nonstandard response code"
+          }
+        }
+      }
+    },
   "/config/content-type-override": {
     "post": {
       "tags": [
