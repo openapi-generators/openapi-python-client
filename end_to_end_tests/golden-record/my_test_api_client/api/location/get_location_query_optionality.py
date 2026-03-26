@@ -80,6 +80,9 @@ def sync_detailed(
     null_required: datetime.datetime | None,
     null_not_required: datetime.datetime | None | Unset = UNSET,
     not_null_not_required: datetime.datetime | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """
     Args:
@@ -102,6 +105,12 @@ def sync_detailed(
         null_not_required=null_not_required,
         not_null_not_required=not_null_not_required,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -117,6 +126,9 @@ async def asyncio_detailed(
     null_required: datetime.datetime | None,
     null_not_required: datetime.datetime | None | Unset = UNSET,
     not_null_not_required: datetime.datetime | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """
     Args:
@@ -139,6 +151,12 @@ async def asyncio_detailed(
         null_not_required=null_not_required,
         not_null_not_required=not_null_not_required,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
