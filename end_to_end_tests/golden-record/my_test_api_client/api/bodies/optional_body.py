@@ -52,6 +52,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: OptionalBodyBody | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """Test optional request body
 
@@ -69,6 +72,12 @@ def sync_detailed(
     kwargs = _get_kwargs(
         body=body,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -81,6 +90,9 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: OptionalBodyBody | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """Test optional request body
 
@@ -98,6 +110,12 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         body=body,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 

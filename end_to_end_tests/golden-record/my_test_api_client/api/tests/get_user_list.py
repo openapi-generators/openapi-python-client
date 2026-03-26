@@ -10,7 +10,7 @@ from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -111,6 +111,9 @@ def sync_detailed(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[HTTPValidationError | list[AModel]]:
     """Get List
 
@@ -136,6 +139,12 @@ def sync_detailed(
         an_enum_value_with_only_null=an_enum_value_with_only_null,
         some_date=some_date,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -151,6 +160,9 @@ def sync(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> HTTPValidationError | list[AModel] | None:
     """Get List
 
@@ -176,6 +188,9 @@ def sync(
         an_enum_value_with_null=an_enum_value_with_null,
         an_enum_value_with_only_null=an_enum_value_with_only_null,
         some_date=some_date,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -186,6 +201,9 @@ async def asyncio_detailed(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[HTTPValidationError | list[AModel]]:
     """Get List
 
@@ -211,6 +229,12 @@ async def asyncio_detailed(
         an_enum_value_with_only_null=an_enum_value_with_only_null,
         some_date=some_date,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -224,6 +248,9 @@ async def asyncio(
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> HTTPValidationError | list[AModel] | None:
     """Get List
 
@@ -250,5 +277,8 @@ async def asyncio(
             an_enum_value_with_null=an_enum_value_with_null,
             an_enum_value_with_only_null=an_enum_value_with_only_null,
             some_date=some_date,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

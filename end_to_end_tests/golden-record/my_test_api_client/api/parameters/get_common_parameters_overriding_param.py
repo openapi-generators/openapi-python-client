@@ -6,7 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...types import UNSET, Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -56,6 +56,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     param_query: str = "overridden_in_GET",
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
 
@@ -76,6 +79,12 @@ def sync_detailed(
         param_path=param_path,
         param_query=param_query,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -89,6 +98,9 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     param_query: str = "overridden_in_GET",
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
 
@@ -109,6 +121,12 @@ async def asyncio_detailed(
         param_path=param_path,
         param_query=param_query,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 

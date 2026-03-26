@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -61,6 +61,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[HTTPValidationError | str]:
     """Json Body Which is String
 
@@ -78,6 +81,12 @@ def sync_detailed(
     kwargs = _get_kwargs(
         body=body,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -90,6 +99,9 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> HTTPValidationError | str | None:
     """Json Body Which is String
 
@@ -107,6 +119,9 @@ def sync(
     return sync_detailed(
         client=client,
         body=body,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -114,6 +129,9 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[HTTPValidationError | str]:
     """Json Body Which is String
 
@@ -131,6 +149,12 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         body=body,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -141,6 +165,9 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> HTTPValidationError | str | None:
     """Json Body Which is String
 
@@ -159,5 +186,8 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             body=body,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

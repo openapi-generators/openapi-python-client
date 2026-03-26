@@ -100,6 +100,9 @@ def sync_detailed(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[list[AModel]]:
     """Get List
 
@@ -127,6 +130,12 @@ def sync_detailed(
         int_enum_header=int_enum_header,
         string_enum_header=string_enum_header,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -143,6 +152,9 @@ def sync(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> list[AModel] | None:
     """Get List
 
@@ -170,6 +182,9 @@ def sync(
         an_enum_value_with_only_null=an_enum_value_with_only_null,
         int_enum_header=int_enum_header,
         string_enum_header=string_enum_header,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -181,6 +196,9 @@ async def asyncio_detailed(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[list[AModel]]:
     """Get List
 
@@ -208,6 +226,12 @@ async def asyncio_detailed(
         int_enum_header=int_enum_header,
         string_enum_header=string_enum_header,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -222,6 +246,9 @@ async def asyncio(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> list[AModel] | None:
     """Get List
 
@@ -250,5 +277,8 @@ async def asyncio(
             an_enum_value_with_only_null=an_enum_value_with_only_null,
             int_enum_header=int_enum_header,
             string_enum_header=string_enum_header,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

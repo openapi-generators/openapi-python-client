@@ -7,7 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.test_inline_objects_body import TestInlineObjectsBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -58,6 +58,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
@@ -75,6 +78,12 @@ def sync_detailed(
     kwargs = _get_kwargs(
         body=body,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -87,6 +96,9 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> TestInlineObjectsResponse200 | None:
     """Test Inline Objects
 
@@ -104,6 +116,9 @@ def sync(
     return sync_detailed(
         client=client,
         body=body,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -111,6 +126,9 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
@@ -128,6 +146,12 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         body=body,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -138,6 +162,9 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: TestInlineObjectsBody,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> TestInlineObjectsResponse200 | None:
     """Test Inline Objects
 
@@ -156,5 +183,8 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             body=body,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed
