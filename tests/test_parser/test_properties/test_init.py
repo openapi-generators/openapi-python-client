@@ -17,6 +17,7 @@ from openapi_python_client.parser.properties import (
     build_schemas,
     property_from_data,
 )
+from openapi_python_client.parser.properties.string import StringProperty
 from openapi_python_client.schema import Parameter, Reference, Schema
 from openapi_python_client.utils import ClassName, PythonIdentifier
 
@@ -223,6 +224,35 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
         assert p == file_property_factory(name=name, required=required)
+
+    @pytest.mark.parametrize(
+        "content_media_type,schema_format",
+        [
+            pytest.param("application/octet-stream", None, id="content-media-type-only"),
+            pytest.param("application/octet-stream", "binary", id="both-content-media-type-and-binary-format"),
+        ],
+    )
+    def test__string_based_property_content_media_type(
+        self, file_property_factory, config, content_media_type, schema_format
+    ):
+        name = "file_prop"
+        required = True
+        data = oai.Schema(type="string", contentMediaType=content_media_type, format=schema_format)
+
+        p, _ = property_from_data(
+            name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
+        )
+        assert p == file_property_factory(name=name, required=required)
+
+    def test__string_based_property_non_binary_content_media_type_ignored(self, config):
+        name = "text_prop"
+        required = True
+        data = oai.Schema(type="string", contentMediaType="text/plain")
+
+        p, _ = property_from_data(
+            name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
+        )
+        assert isinstance(p, StringProperty)
 
 
 class TestCreateSchemas:

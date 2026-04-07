@@ -74,7 +74,7 @@ def _string_based_property(
             description=data.description,
             example=data.example,
         )
-    if string_format == "binary":
+    if string_format == "binary" or data.content_media_type == "application/octet-stream":
         return FileProperty.build(
             name=name,
             required=required,

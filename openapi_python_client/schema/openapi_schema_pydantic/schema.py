@@ -48,6 +48,7 @@ class Schema(BaseModel):
     additionalProperties: bool | ReferenceOr["Schema"] | None = None
     description: str | None = None
     schema_format: str | None = Field(default=None, alias="format")
+    content_media_type: str | None = Field(default=None, alias="contentMediaType")
     default: Any | None = None
     nullable: bool = Field(default=False)
     discriminator: Discriminator | None = None
