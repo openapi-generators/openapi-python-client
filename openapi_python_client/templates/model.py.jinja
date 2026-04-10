@@ -5,6 +5,7 @@ from typing import Any, TypeVar, BinaryIO, TextIO, TYPE_CHECKING, Generator
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
 {% if model.is_multipart_body %}
 import json
 from .. import types
@@ -23,6 +24,14 @@ if TYPE_CHECKING:
   {{ lazy_import }}
 {% endfor %}
 
+
+def json_aware_cast(typ, val):
+    # json does not distinguish between float and int, but the scheme carries this information.
+    # So cast it here, to actually get correct types.
+    # https://json-schema.org/understanding-json-schema/reference/numeric
+    if issubclass(float, typ) and not issubclass(int, typ) and isinstance(val, int):
+        val = float(val)
+    return cast(typ, val)
 
 {% if model.additional_properties %}
 {% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
