@@ -22,6 +22,7 @@ class Reference(BaseModel):
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,
+        serialize_by_alias=True,
         json_schema_extra={
             "examples": [{"$ref": "#/components/schemas/Pet"}, {"$ref": "Pet.json"}, {"$ref": "definitions.json#/Pet"}]
         },

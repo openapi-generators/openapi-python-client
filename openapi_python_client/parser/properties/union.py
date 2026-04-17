@@ -5,6 +5,7 @@ from itertools import chain
 from typing import Any, ClassVar, cast
 
 from attr import define, evolve
+from deepmerge import always_merger
 
 from ... import Config
 from ... import schema as oai
@@ -73,6 +74,17 @@ class UnionProperty(PropertyProtocol):
                 subscript = sub_prop_data.title
             else:
                 subscript = f"type_{i}"
+
+            if isinstance(sub_prop_data, oai.Schema):
+                merged_data = oai.Schema.model_validate(always_merger.merge(
+                    data.model_dump(exclude_unset=True),
+                    sub_prop_data.model_dump(exclude_unset=True),
+                ))
+                merged_data.oneOf = sub_prop_data.oneOf
+                merged_data.anyOf = sub_prop_data.anyOf
+                if getattr(sub_prop_data, 'type', None) is not None:
+                    merged_data.type = sub_prop_data.type
+                sub_prop_data = merged_data
 
             sub_prop, schemas = property_from_data(
                 name=f"{name}_{subscript}",
@@ -144,7 +156,7 @@ class UnionProperty(PropertyProtocol):
     @staticmethod
     def _get_type_string_from_inner_type_strings(inner_types: set[str]) -> str:
         if len(inner_types) == 1:
-            return inner_types.pop()
+            return next(iter(inner_types))
         return " | ".join(sorted(inner_types, key=lambda x: x.lower()))
 
     def get_base_type_string(self) -> str:
