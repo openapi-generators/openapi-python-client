@@ -64,6 +64,7 @@ def _string_based_property(
             python_name=python_name,
             description=data.description,
             example=data.example,
+            data=data,
         )
     if string_format == "date":
         return DateProperty.build(
@@ -73,6 +74,7 @@ def _string_based_property(
             python_name=python_name,
             description=data.description,
             example=data.example,
+            data=data,
         )
     if string_format == "binary":
         return FileProperty.build(
@@ -82,6 +84,7 @@ def _string_based_property(
             python_name=python_name,
             description=data.description,
             example=data.example,
+            data=data,
         )
     if string_format == "uuid":
         return UuidProperty.build(
@@ -91,6 +94,7 @@ def _string_based_property(
             python_name=python_name,
             description=data.description,
             example=data.example,
+            data=data,
         )
     return StringProperty.build(
         name=name,
@@ -99,6 +103,7 @@ def _string_based_property(
         python_name=python_name,
         description=data.description,
         example=data.example,
+        data=data,
     )
 
 
@@ -193,6 +198,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
+                data=data,
             ),
             schemas,
         )
@@ -232,6 +238,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 const=data.const,
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
+                data=data,
             ),
             schemas,
         )
@@ -249,6 +256,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
+                data=data,
             ),
             schemas,
         )
@@ -261,6 +269,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
+                data=data,
             ),
             schemas,
         )
@@ -273,6 +282,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
+                data=data,
             ),
             schemas,
         )

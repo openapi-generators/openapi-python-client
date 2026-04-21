@@ -5,6 +5,7 @@ from typing import Any, ClassVar, overload
 from attr import define
 
 from ...utils import PythonIdentifier
+from ... import schema as oai
 from ..errors import PropertyError
 from .protocol import PropertyProtocol, Value
 from .string import StringProperty
@@ -21,6 +22,7 @@ class ConstProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: None
+    data: oai.Schema
     template: ClassVar[str] = "const_property.py.jinja"
 
     @classmethod
@@ -33,6 +35,7 @@ class ConstProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         required: bool,
         description: str | None,
+        data: oai.Schema,
     ) -> ConstProperty | PropertyError:
         """
         Create a `ConstProperty` the right way.
@@ -55,6 +58,7 @@ class ConstProperty(PropertyProtocol):
             default=None,
             description=description,
             example=None,
+            data=data,
         )
         converted_default = prop.convert_value(default)
         if isinstance(converted_default, PropertyError):
