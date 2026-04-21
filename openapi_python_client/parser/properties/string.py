@@ -21,6 +21,7 @@ class StringProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
@@ -39,6 +40,7 @@ class StringProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
+        data: oai.Schema,
     ) -> StringProperty | PropertyError:
         checked_default = cls.convert_value(default)
         return cls(
@@ -48,6 +50,7 @@ class StringProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
+            data=data,
         )
 
     @classmethod

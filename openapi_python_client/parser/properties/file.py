@@ -5,6 +5,7 @@ from typing import Any, ClassVar
 from attr import define
 
 from ...utils import PythonIdentifier
+from ... import schema as oai
 from ..errors import PropertyError
 from .protocol import PropertyProtocol
 
@@ -19,6 +20,7 @@ class FileProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
@@ -34,6 +36,7 @@ class FileProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
+        data: oai.Schema,
     ) -> FileProperty | PropertyError:
         default_or_err = cls.convert_value(default)
         if isinstance(default_or_err, PropertyError):
@@ -46,6 +49,7 @@ class FileProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
+            data=data,
         )
 
     @classmethod

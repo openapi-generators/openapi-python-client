@@ -5,6 +5,7 @@ from typing import Any, ClassVar
 from attr import define
 
 from ...utils import PythonIdentifier
+from ... import schema as oai
 from .protocol import PropertyProtocol, Value
 
 
