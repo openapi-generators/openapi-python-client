@@ -20,7 +20,6 @@ def _get_kwargs(
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     json_an_enum_value = []

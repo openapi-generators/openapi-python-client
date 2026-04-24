@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 if TYPE_CHECKING:
     from ..models.an_object import AnObject
@@ -88,7 +87,7 @@ class PostBodyMultipartResponse200:
         times = []
         _times = d.pop("times")
         for times_item_data in _times:
-            times_item = isoparse(times_item_data)
+            times_item = datetime.datetime.fromisoformat(times_item_data.replace("Z", "+00:00"))
 
             times.append(times_item)
 

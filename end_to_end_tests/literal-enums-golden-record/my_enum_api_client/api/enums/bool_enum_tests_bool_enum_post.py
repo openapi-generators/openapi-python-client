@@ -12,7 +12,6 @@ def _get_kwargs(
     *,
     bool_enum: bool,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["bool_enum"] = bool_enum

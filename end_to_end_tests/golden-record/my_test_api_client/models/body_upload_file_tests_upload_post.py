@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from .. import types
 from ..models.different_enum import DifferentEnum
@@ -300,14 +299,14 @@ class BodyUploadFileTestsUploadPost:
         if isinstance(_a_datetime, Unset):
             a_datetime = UNSET
         else:
-            a_datetime = isoparse(_a_datetime)
+            a_datetime = datetime.datetime.fromisoformat(_a_datetime.replace("Z", "+00:00"))
 
         _a_date = d.pop("a_date", UNSET)
         a_date: datetime.date | Unset
         if isinstance(_a_date, Unset):
             a_date = UNSET
         else:
-            a_date = isoparse(_a_date).date()
+            a_date = datetime.date.fromisoformat(_a_date)
 
         some_number = d.pop("some_number", UNSET)
 
