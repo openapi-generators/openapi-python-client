@@ -3,7 +3,6 @@ from http import HTTPStatus
 from typing import Any
 
 import httpx
-from dateutil.parser import isoparse
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
@@ -17,7 +16,7 @@ def _get_kwargs(
     *,
     string_prop: str = "the default string",
     string_with_num: str = "1",
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
+    date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
     float_prop: float = 3.14,
     float_with_int: float = 3.0,
     int_prop: int = 7,
@@ -29,7 +28,6 @@ def _get_kwargs(
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["string_prop"] = string_prop
@@ -121,7 +119,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
+    date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
     float_prop: float = 3.14,
     float_with_int: float = 3.0,
     int_prop: int = 7,
@@ -138,7 +136,7 @@ def sync_detailed(
     Args:
         string_prop (str):  Default: 'the default string'.
         string_with_num (str):  Default: '1'.
-        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        date_prop (datetime.date):  Default: datetime.date.fromisoformat('1010-10-10').
         float_prop (float):  Default: 3.14.
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
@@ -186,7 +184,7 @@ def sync(
     client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
+    date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
     float_prop: float = 3.14,
     float_with_int: float = 3.0,
     int_prop: int = 7,
@@ -203,7 +201,7 @@ def sync(
     Args:
         string_prop (str):  Default: 'the default string'.
         string_with_num (str):  Default: '1'.
-        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        date_prop (datetime.date):  Default: datetime.date.fromisoformat('1010-10-10').
         float_prop (float):  Default: 3.14.
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
@@ -246,7 +244,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
+    date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
     float_prop: float = 3.14,
     float_with_int: float = 3.0,
     int_prop: int = 7,
@@ -263,7 +261,7 @@ async def asyncio_detailed(
     Args:
         string_prop (str):  Default: 'the default string'.
         string_with_num (str):  Default: '1'.
-        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        date_prop (datetime.date):  Default: datetime.date.fromisoformat('1010-10-10').
         float_prop (float):  Default: 3.14.
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.
@@ -309,7 +307,7 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
-    date_prop: datetime.date = isoparse("1010-10-10").date(),
+    date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
     float_prop: float = 3.14,
     float_with_int: float = 3.0,
     int_prop: int = 7,
@@ -326,7 +324,7 @@ async def asyncio(
     Args:
         string_prop (str):  Default: 'the default string'.
         string_with_num (str):  Default: '1'.
-        date_prop (datetime.date):  Default: isoparse('1010-10-10').date().
+        date_prop (datetime.date):  Default: datetime.date.fromisoformat('1010-10-10').
         float_prop (float):  Default: 3.14.
         float_with_int (float):  Default: 3.0.
         int_prop (int):  Default: 7.

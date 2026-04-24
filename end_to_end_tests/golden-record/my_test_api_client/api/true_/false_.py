@@ -12,7 +12,6 @@ def _get_kwargs(
     *,
     import_: str,
 ) -> dict[str, Any]:
-
     params: dict[str, Any] = {}
 
     params["import"] = import_

@@ -12,7 +12,6 @@ from ...types import Response
 def _get_kwargs(
     hyphen_in_path: str,
 ) -> dict[str, Any]:
-
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/naming/{hyphen_in_path}".format(

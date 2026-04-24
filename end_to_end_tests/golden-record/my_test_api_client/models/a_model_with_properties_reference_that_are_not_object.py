@@ -7,7 +7,6 @@ from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.an_enum import AnEnum
 from ..types import File
@@ -230,17 +229,17 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         date_properties_ref = []
         _date_properties_ref = d.pop("date_properties_ref")
         for componentsschemas_an_other_array_of_date_item_data in _date_properties_ref:
-            componentsschemas_an_other_array_of_date_item = isoparse(
+            componentsschemas_an_other_array_of_date_item = datetime.date.fromisoformat(
                 componentsschemas_an_other_array_of_date_item_data
-            ).date()
+            )
 
             date_properties_ref.append(componentsschemas_an_other_array_of_date_item)
 
         datetime_properties_ref = []
         _datetime_properties_ref = d.pop("datetime_properties_ref")
         for componentsschemas_an_other_array_of_date_time_item_data in _datetime_properties_ref:
-            componentsschemas_an_other_array_of_date_time_item = isoparse(
-                componentsschemas_an_other_array_of_date_time_item_data
+            componentsschemas_an_other_array_of_date_time_item = datetime.datetime.fromisoformat(
+                componentsschemas_an_other_array_of_date_time_item_data.replace("Z", "+00:00")
             )
 
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
@@ -276,14 +275,18 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         date_properties = []
         _date_properties = d.pop("date_properties")
         for componentsschemas_an_array_of_date_item_data in _date_properties:
-            componentsschemas_an_array_of_date_item = isoparse(componentsschemas_an_array_of_date_item_data).date()
+            componentsschemas_an_array_of_date_item = datetime.date.fromisoformat(
+                componentsschemas_an_array_of_date_item_data
+            )
 
             date_properties.append(componentsschemas_an_array_of_date_item)
 
         datetime_properties = []
         _datetime_properties = d.pop("datetime_properties")
         for componentsschemas_an_array_of_date_time_item_data in _datetime_properties:
-            componentsschemas_an_array_of_date_time_item = isoparse(componentsschemas_an_array_of_date_time_item_data)
+            componentsschemas_an_array_of_date_time_item = datetime.datetime.fromisoformat(
+                componentsschemas_an_array_of_date_time_item_data.replace("Z", "+00:00")
+            )
 
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
 
@@ -310,9 +313,9 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         str_property_ref = d.pop("str_property_ref")
 
-        date_property_ref = isoparse(d.pop("date_property_ref")).date()
+        date_property_ref = datetime.date.fromisoformat(d.pop("date_property_ref"))
 
-        datetime_property_ref = isoparse(d.pop("datetime_property_ref"))
+        datetime_property_ref = datetime.datetime.fromisoformat(d.pop("datetime_property_ref").replace("Z", "+00:00"))
 
         int32_property_ref = d.pop("int32_property_ref")
 

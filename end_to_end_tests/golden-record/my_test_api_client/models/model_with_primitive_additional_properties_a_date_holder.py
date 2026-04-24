@@ -6,7 +6,6 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 T = TypeVar("T", bound="ModelWithPrimitiveAdditionalPropertiesADateHolder")
 
@@ -18,7 +17,6 @@ class ModelWithPrimitiveAdditionalPropertiesADateHolder:
     additional_properties: dict[str, datetime.datetime] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-
         field_dict: dict[str, Any] = {}
         for prop_name, prop in self.additional_properties.items():
             field_dict[prop_name] = prop.isoformat()
@@ -32,7 +30,7 @@ class ModelWithPrimitiveAdditionalPropertiesADateHolder:
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_property = isoparse(prop_dict)
+            additional_property = datetime.datetime.fromisoformat(prop_dict.replace("Z", "+00:00"))
 
             additional_properties[prop_name] = additional_property
 

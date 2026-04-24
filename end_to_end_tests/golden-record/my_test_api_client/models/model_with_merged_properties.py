@@ -6,7 +6,6 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.model_with_merged_properties_string_to_enum import ModelWithMergedPropertiesStringToEnum
 from ..types import UNSET, Unset
@@ -81,7 +80,7 @@ class ModelWithMergedProperties:
         if isinstance(_string_to_date, Unset):
             string_to_date = UNSET
         else:
-            string_to_date = isoparse(_string_to_date).date()
+            string_to_date = datetime.date.fromisoformat(_string_to_date)
 
         number_to_int = d.pop("numberToInt", UNSET)
 

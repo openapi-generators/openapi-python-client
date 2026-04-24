@@ -6,7 +6,6 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
@@ -44,7 +43,7 @@ class ModelWithDateTimeProperty:
         if isinstance(_datetime_, Unset):
             datetime_ = UNSET
         else:
-            datetime_ = isoparse(_datetime_)
+            datetime_ = datetime.datetime.fromisoformat(_datetime_.replace("Z", "+00:00"))
 
         model_with_date_time_property = cls(
             datetime_=datetime_,

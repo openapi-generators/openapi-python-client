@@ -12,7 +12,6 @@ def _get_kwargs(
     *,
     my_token: str,
 ) -> dict[str, Any]:
-
     cookies = {}
     cookies["MyToken"] = my_token
 

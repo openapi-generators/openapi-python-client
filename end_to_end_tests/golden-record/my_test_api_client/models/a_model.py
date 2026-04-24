@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
-from dateutil.parser import isoparse
 
 from ..models.an_all_of_enum import AnAllOfEnum
 from ..models.an_enum import AnEnum
@@ -269,20 +268,20 @@ class AModel:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                a_camel_date_time_type_0 = isoparse(data)
+                a_camel_date_time_type_0 = datetime.datetime.fromisoformat(data.replace("Z", "+00:00"))
 
                 return a_camel_date_time_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, str):
                 raise TypeError()
-            a_camel_date_time_type_1 = isoparse(data).date()
+            a_camel_date_time_type_1 = datetime.date.fromisoformat(data)
 
             return a_camel_date_time_type_1
 
         a_camel_date_time = _parse_a_camel_date_time(d.pop("aCamelDateTime"))
 
-        a_date = isoparse(d.pop("a_date")).date()
+        a_date = datetime.date.fromisoformat(d.pop("a_date"))
 
         def _parse_a_nullable_date(data: object) -> datetime.date | None:
             if data is None:
@@ -290,7 +289,7 @@ class AModel:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                a_nullable_date_type_0 = isoparse(data).date()
+                a_nullable_date_type_0 = datetime.date.fromisoformat(data)
 
                 return a_nullable_date_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
@@ -414,7 +413,7 @@ class AModel:
         if isinstance(_a_not_required_date, Unset):
             a_not_required_date = UNSET
         else:
-            a_not_required_date = isoparse(_a_not_required_date).date()
+            a_not_required_date = datetime.date.fromisoformat(_a_not_required_date)
 
         _a_not_required_uuid = d.pop("a_not_required_uuid", UNSET)
         a_not_required_uuid: UUID | Unset
