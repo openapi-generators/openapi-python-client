@@ -9,12 +9,12 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT }}
       - name: Install Knope
-        uses: knope-dev/action@v1
+        uses: knope-dev/action@f694bf4663f7c20743102e732728d676b2ab95db # v1
         with:
           version: 0.6.2
       - run: knope release --dry-run

@@ -14,9 +14,9 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4.9.1
         with:
           python-version: ${{ matrix.python }}
 
@@ -25,7 +25,7 @@ jobs:
         run: echo "::set-output name=python_version::$(python --version)"
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
@@ -67,7 +67,7 @@ jobs:
         shell: bash
         run: poetry run coverage xml
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
         with:
           files: ./coverage.xml
 
@@ -80,16 +80,16 @@ jobs:
         ports:
           - "3000:3000"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4.9.1
         with:
           python-version: "3.10"
       - name: Get Python Version
         id: get_python_version
         run: echo "::set-output name=python_version::$(python --version)"
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         with:
           path: .venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-dependencies-${{ hashFiles('**/poetry.lock') }}
@@ -107,7 +107,7 @@ jobs:
       - name: Check for any file changes
         run: python .github/check_for_changes.py
       - name: Cache Generated Client Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         with:
           path: integration-tests/.venv
           key: ${{ runner.os }}-${{ steps.get_python_version.outputs.python_version }}-integration-dependencies-${{ hashFiles('**/poetry.lock') }}
