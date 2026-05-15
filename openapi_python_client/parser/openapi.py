@@ -483,14 +483,46 @@ class Endpoint:
         yield from ((oai.ParameterLocation.HEADER, param) for param in self.header_parameters)
         yield from ((oai.ParameterLocation.COOKIE, param) for param in self.cookie_parameters)
 
+    @property
+    def bodies_with_content_type_dispatch(self) -> bool:
+        """True when multiple bodies share the same Python type, making isinstance dispatch non-functional.
+
+        When all content types reference the same $ref schema they resolve to the same Python type.
+        isinstance checks would all pass, causing every branch to execute (last one wins).
+        In this case the generated code uses a ``body_content_type`` string parameter instead.
+        """
+        type_strings = [body.prop.get_type_string() for body in self.bodies]
+        return len(type_strings) != len(set(type_strings))
+
+    @property
+    def unique_body_types(self) -> list[Body]:
+        """Bodies with duplicate Python types removed (first occurrence kept).
+
+        Used for type annotations when bodies_with_content_type_dispatch is True.
+        """
+        seen: set[str] = set()
+        result = []
+        for body in self.bodies:
+            ts = body.prop.get_type_string()
+            if ts not in seen:
+                seen.add(ts)
+                result.append(body)
+        return result
+
     def list_all_parameters(self) -> list[Property]:
         """Return a list of all the parameters of this endpoint"""
+        body_props: list[Property]
+        if self.bodies_with_content_type_dispatch:
+            # Deduplicate: multiple bodies share a type, only emit each unique type once
+            body_props = [body.prop for body in self.unique_body_types]
+        else:
+            body_props = [body.prop for body in self.bodies]
         return (
             self.path_parameters
             + self.query_parameters
             + self.header_parameters
             + self.cookie_parameters
-            + [body.prop for body in self.bodies]
+            + body_props
         )
 
 

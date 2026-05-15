@@ -47,11 +47,19 @@ def _get_kwargs(
     }
 
 {% if endpoint.bodies | length > 1 %}
+{% if endpoint.bodies_with_content_type_dispatch %}
+{% for body in endpoint.bodies %}
+    {{ "if" if loop.first else "elif" }} body_content_type == "{{ body.content_type }}":
+        {{ body_to_kwarg(body) | indent(8) }}
+        headers["Content-Type"] = "{{ body.content_type }}"
+{% endfor %}
+{% else %}
 {% for body in endpoint.bodies %}
     if isinstance(body, {{body.prop.get_type_string(no_optional=True) }}):
         {{ body_to_kwarg(body) | indent(8) }}
         headers["Content-Type"] = "{{ body.content_type }}"
 {% endfor %}
+{% endif %}
 {% elif endpoint.bodies | length == 1 %}
 {% set body = endpoint.bodies[0] %}
     {{ body_to_kwarg(body) | indent(4) }}
