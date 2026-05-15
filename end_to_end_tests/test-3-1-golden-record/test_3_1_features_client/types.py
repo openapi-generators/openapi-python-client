@@ -39,13 +39,14 @@ class File:
 
 
 T = TypeVar("T")
+S = TypeVar("S", bound=HTTPStatus | int)
 
 
 @define
-class Response(Generic[T]):
+class Response(Generic[T, S]):
     """A response from an endpoint"""
 
-    status_code: HTTPStatus
+    status_code: S
     content: bytes
     headers: MutableMapping[str, str]
     parsed: T | None

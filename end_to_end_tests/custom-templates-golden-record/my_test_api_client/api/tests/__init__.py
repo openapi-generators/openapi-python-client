@@ -12,6 +12,7 @@ from . import (
     get_user_list,
     json_body_tests_json_body_post,
     no_response_tests_no_response_get,
+    nonstandard_response_code,
     octet_stream_tests_octet_stream_get,
     octet_stream_tests_octet_stream_post,
     post_form_data,
@@ -150,3 +151,10 @@ class TestsEndpoints:
             Test description with \
         """
         return description_with_backslash
+
+    @classmethod
+    def nonstandard_response_code(cls) -> types.ModuleType:
+        """
+        Test endpoint with nonstandard response code
+        """
+        return nonstandard_response_code

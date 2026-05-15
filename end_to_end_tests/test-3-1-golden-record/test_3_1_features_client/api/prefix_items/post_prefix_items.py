@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any, cast
 
 import httpx
@@ -39,9 +39,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[str, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -52,7 +54,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostPrefixItemsBody,
-) -> Response[str]:
+) -> Response[str, http.HTTPStatus]:
     """
     Args:
         body (PostPrefixItemsBody):
@@ -103,7 +105,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostPrefixItemsBody,
-) -> Response[str]:
+) -> Response[str, http.HTTPStatus]:
     """
     Args:
         body (PostPrefixItemsBody):

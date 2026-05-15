@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -45,9 +45,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[list[AModel], http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -58,7 +60,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostUserListBody | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> Response[list[AModel], http.HTTPStatus]:
     """Post List
 
      Post a list of things
@@ -115,7 +117,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostUserListBody | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> Response[list[AModel], http.HTTPStatus]:
     """Post List
 
      Post a list of things

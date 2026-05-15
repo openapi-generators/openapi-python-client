@@ -1,6 +1,6 @@
 __all__ = ["HTTPStatusPattern", "Response", "Responses", "response_from_data"]
-
 from collections.abc import Iterator
+from http import HTTPStatus
 from typing import TypedDict
 
 from attrs import define
@@ -13,6 +13,8 @@ from .. import schema as oai
 from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
+
+_STATUS_CODES = set(status.value for status in HTTPStatus)
 
 
 @define
@@ -53,11 +55,15 @@ class HTTPStatusPattern:
 
     pattern: str
     range: tuple[int, int] | None
+    is_official: bool
 
     def __init__(self, *, pattern: str, code_range: tuple[int, int] | None):
         """Initialize with a range of status codes or None for the default case."""
         self.pattern = pattern
         self.range = code_range
+        self.is_official = self.range is None or all(
+            code in _STATUS_CODES for code in range(self.range[0], self.range[1] + 1)
+        )
 
     @staticmethod
     def parse(pattern: str) -> "HTTPStatusPattern | ParseError":

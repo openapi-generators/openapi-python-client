@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -56,9 +56,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> Response[PostParametersHeaderResponse200 | PublicError, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -72,7 +72,7 @@ def sync_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> Response[PostParametersHeaderResponse200 | PublicError, http.HTTPStatus]:
     """
     Args:
         boolean_header (bool):
@@ -141,7 +141,7 @@ async def asyncio_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> Response[PostParametersHeaderResponse200 | PublicError, http.HTTPStatus]:
     """
     Args:
         boolean_header (bool):
