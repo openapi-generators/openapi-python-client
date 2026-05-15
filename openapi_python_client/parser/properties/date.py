@@ -6,6 +6,7 @@ from attr import define
 from dateutil.parser import isoparse
 
 from ...utils import PythonIdentifier
+from ... import schema as oai
 from ..errors import PropertyError
 from .protocol import PropertyProtocol, Value
 
@@ -20,6 +21,7 @@ class DateProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
 
     _type_string: ClassVar[str] = "datetime.date"
     _json_type_string: ClassVar[str] = "str"
@@ -34,6 +36,7 @@ class DateProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
+        data: oai.Schema
     ) -> DateProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -46,6 +49,7 @@ class DateProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
+            data=data,
         )
 
     @classmethod

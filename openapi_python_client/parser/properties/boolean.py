@@ -20,6 +20,7 @@ class BooleanProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
 
     _type_string: ClassVar[str] = "bool"
     _json_type_string: ClassVar[str] = "bool"
@@ -40,6 +41,7 @@ class BooleanProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
+        data: oai.Schema,
     ) -> BooleanProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -51,6 +53,7 @@ class BooleanProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
+            data=data,
         )
 
     @classmethod
