@@ -555,6 +555,38 @@ class TestEndpoint:
             config=config,
         )
 
+    def test_from_data_deprecated(self, mocker, config):
+        path = mocker.MagicMock()
+        method = mocker.MagicMock()
+        add_parameters = mocker.patch.object(
+            Endpoint, "add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock(), mocker.MagicMock())
+        )
+        mocker.patch.object(Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock()))
+        data = oai.Operation.model_construct(
+            description=mocker.MagicMock(),
+            operationId=mocker.MagicMock(),
+            security={"blah": "bloo"},
+            responses=mocker.MagicMock(),
+            deprecated=True,
+        )
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
+
+        Endpoint.from_data(
+            data=data,
+            path=path,
+            method=method,
+            tags=["default"],
+            schemas=mocker.MagicMock(),
+            responses={},
+            parameters=mocker.MagicMock(),
+            config=config,
+            request_bodies={},
+        )
+
+        add_parameters.assert_called_once()
+        endpoint_arg = add_parameters.call_args.kwargs["endpoint"]
+        assert endpoint_arg.deprecated is True
+
     def test_from_data_some_bad_bodies(self, config):
         endpoint, _, _ = Endpoint.from_data(
             data=oai.Operation(
