@@ -132,6 +132,9 @@ def sync_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any | HTTPValidationError]:
     """Defaults
 
@@ -173,6 +176,12 @@ def sync_detailed(
         model_prop=model_prop,
         required_model_prop=required_model_prop,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -197,6 +206,9 @@ def sync(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Any | HTTPValidationError | None:
     """Defaults
 
@@ -238,6 +250,9 @@ def sync(
         enum_prop=enum_prop,
         model_prop=model_prop,
         required_model_prop=required_model_prop,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -257,6 +272,9 @@ async def asyncio_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any | HTTPValidationError]:
     """Defaults
 
@@ -298,6 +316,12 @@ async def asyncio_detailed(
         model_prop=model_prop,
         required_model_prop=required_model_prop,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -320,6 +344,9 @@ async def asyncio(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Any | HTTPValidationError | None:
     """Defaults
 
@@ -362,5 +389,8 @@ async def asyncio(
             enum_prop=enum_prop,
             model_prop=model_prop,
             required_model_prop=required_model_prop,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

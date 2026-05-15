@@ -4,7 +4,7 @@ from typing import Any
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -46,6 +46,9 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[str]:
     """Status Codes Precedence
 
@@ -60,6 +63,12 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs()
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -71,6 +80,9 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> str | None:
     """Status Codes Precedence
 
@@ -86,12 +98,18 @@ def sync(
 
     return sync_detailed(
         client=client,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[str]:
     """Status Codes Precedence
 
@@ -106,6 +124,12 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs()
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -115,6 +139,9 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> str | None:
     """Status Codes Precedence
 
@@ -131,5 +158,8 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

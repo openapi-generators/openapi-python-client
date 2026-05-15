@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.mixed_case_response_200 import MixedCaseResponse200
-from ...types import UNSET, Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -60,6 +60,9 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[MixedCaseResponse200]:
     """
     Args:
@@ -78,6 +81,12 @@ def sync_detailed(
         mixed_case=mixed_case,
         mixedCase=mixedCase,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -91,6 +100,9 @@ def sync(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> MixedCaseResponse200 | None:
     """
     Args:
@@ -109,6 +121,9 @@ def sync(
         client=client,
         mixed_case=mixed_case,
         mixedCase=mixedCase,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -117,6 +132,9 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[MixedCaseResponse200]:
     """
     Args:
@@ -135,6 +153,12 @@ async def asyncio_detailed(
         mixed_case=mixed_case,
         mixedCase=mixedCase,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -146,6 +170,9 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> MixedCaseResponse200 | None:
     """
     Args:
@@ -165,5 +192,8 @@ async def asyncio(
             client=client,
             mixed_case=mixed_case,
             mixedCase=mixedCase,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

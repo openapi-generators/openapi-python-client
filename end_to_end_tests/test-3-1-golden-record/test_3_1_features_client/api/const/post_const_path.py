@@ -78,6 +78,9 @@ def sync_detailed(
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
@@ -100,6 +103,12 @@ def sync_detailed(
         required_query=required_query,
         optional_query=optional_query,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -115,6 +124,9 @@ def sync(
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Literal["Why have a fixed response? I dunno"] | None:
     """
     Args:
@@ -137,6 +149,9 @@ def sync(
         body=body,
         required_query=required_query,
         optional_query=optional_query,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -147,6 +162,9 @@ async def asyncio_detailed(
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
@@ -169,6 +187,12 @@ async def asyncio_detailed(
         required_query=required_query,
         optional_query=optional_query,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -182,6 +206,9 @@ async def asyncio(
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Literal["Why have a fixed response? I dunno"] | None:
     """
     Args:
@@ -205,5 +232,8 @@ async def asyncio(
             body=body,
             required_query=required_query,
             optional_query=optional_query,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

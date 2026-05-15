@@ -7,7 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.post_parameters_header_response_200 import PostParametersHeaderResponse200
 from ...models.public_error import PublicError
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
@@ -72,6 +72,9 @@ def sync_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[PostParametersHeaderResponse200 | PublicError]:
     """
     Args:
@@ -94,6 +97,12 @@ def sync_detailed(
         number_header=number_header,
         integer_header=integer_header,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -109,6 +118,9 @@ def sync(
     string_header: str,
     number_header: float,
     integer_header: int,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> PostParametersHeaderResponse200 | PublicError | None:
     """
     Args:
@@ -131,6 +143,9 @@ def sync(
         string_header=string_header,
         number_header=number_header,
         integer_header=integer_header,
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
     ).parsed
 
 
@@ -141,6 +156,9 @@ async def asyncio_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[PostParametersHeaderResponse200 | PublicError]:
     """
     Args:
@@ -163,6 +181,12 @@ async def asyncio_detailed(
         number_header=number_header,
         integer_header=integer_header,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -176,6 +200,9 @@ async def asyncio(
     string_header: str,
     number_header: float,
     integer_header: int,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> PostParametersHeaderResponse200 | PublicError | None:
     """
     Args:
@@ -199,5 +226,8 @@ async def asyncio(
             string_header=string_header,
             number_header=number_header,
             integer_header=integer_header,
+            headers=headers,
+            timeout=timeout,
+            auth=auth,
         )
     ).parsed

@@ -73,6 +73,9 @@ def sync_detailed(
     integer_param: int | Unset = 0,
     header_param: None | str | Unset = UNSET,
     cookie_param: str | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
@@ -98,6 +101,12 @@ def sync_detailed(
         header_param=header_param,
         cookie_param=cookie_param,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -114,6 +123,9 @@ async def asyncio_detailed(
     integer_param: int | Unset = 0,
     header_param: None | str | Unset = UNSET,
     cookie_param: str | Unset = UNSET,
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None | Unset = UNSET,
+    auth: httpx.Auth | None | Unset = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
@@ -139,6 +151,12 @@ async def asyncio_detailed(
         header_param=header_param,
         cookie_param=cookie_param,
     )
+    if headers is not None:
+        kwargs["headers"] = {**kwargs.get("headers", {}), **headers}
+    if not isinstance(timeout, Unset):
+        kwargs["timeout"] = timeout
+    if not isinstance(auth, Unset):
+        kwargs["auth"] = auth
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
