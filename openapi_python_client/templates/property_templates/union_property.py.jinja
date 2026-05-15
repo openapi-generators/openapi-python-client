@@ -33,7 +33,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     {% endif %}
     {% endfor %}
     {% if ns.contains_unmodified_properties %}
-    return cast({{ property.get_type_string() }}, data)
+    return json_aware_cast({{ property.get_type_string() }}, data)
     {% endif %}
 
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
