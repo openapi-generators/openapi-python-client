@@ -55,6 +55,7 @@ class DateTimeProperty(PropertyProtocol):
         if value is None or isinstance(value, Value):
             return value
         if isinstance(value, str):
+            # TODO(py3.10): fromisoformat() rejects "Z". Remove when 3.10 support ends.
             normalized = value.replace("Z", "+00:00")
             try:
                 datetime.datetime.fromisoformat(normalized)  # make sure it's a valid value
