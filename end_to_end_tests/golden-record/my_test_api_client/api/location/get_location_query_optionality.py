@@ -16,6 +16,7 @@ def _get_kwargs(
     null_not_required: datetime.datetime | None | Unset = UNSET,
     not_null_not_required: datetime.datetime | Unset = UNSET,
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     json_not_null_required = not_null_required.isoformat()

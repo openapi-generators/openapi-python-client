@@ -14,6 +14,7 @@ def _get_kwargs(
     *,
     param_query: str = "overridden_in_GET",
 ) -> dict[str, Any]:
+
     params: dict[str, Any] = {}
 
     params["param"] = param_query
