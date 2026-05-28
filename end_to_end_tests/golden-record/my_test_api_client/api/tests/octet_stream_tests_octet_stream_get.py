@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from io import BytesIO
 from typing import Any
 
@@ -31,9 +31,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[File]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[File, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -43,7 +45,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[File]:
+) -> Response[File, http.HTTPStatus]:
     """Octet Stream
 
     Raises:
@@ -85,7 +87,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[File]:
+) -> Response[File, http.HTTPStatus]:
     """Octet Stream
 
     Raises:

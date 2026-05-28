@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 from urllib.parse import quote
 
@@ -42,9 +42,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any, http.HTTPStatus]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -56,7 +58,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     param_query: str = "overridden_in_GET",
-) -> Response[Any]:
+) -> Response[Any, http.HTTPStatus]:
     """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
 
     Args:
@@ -89,7 +91,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     param_query: str = "overridden_in_GET",
-) -> Response[Any]:
+) -> Response[Any, http.HTTPStatus]:
     """Test that if you have an overriding property from `PathItem` in `Operation`, it produces valid code
 
     Args:

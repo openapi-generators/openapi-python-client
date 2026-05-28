@@ -1,4 +1,4 @@
-from http import HTTPStatus
+import http
 from typing import Any
 
 import httpx
@@ -58,9 +58,11 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
+) -> Response[
+    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, http.HTTPStatus
+]:
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=http.HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -70,7 +72,9 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
+) -> Response[
+    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, http.HTTPStatus
+]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -110,7 +114,9 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
+) -> Response[
+    GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1, http.HTTPStatus
+]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
