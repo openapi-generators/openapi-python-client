@@ -1,5 +1,6 @@
 {% macro construct_function(property, source) %}
-isoparse({{ source }})
+{# TODO(py3.10): fromisoformat() rejects "Z". Remove when 3.10 support ends. #}
+datetime.datetime.fromisoformat({{ source }}.replace("Z", "+00:00"))
 {% endmacro %}
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}
@@ -10,22 +11,24 @@ isoparse({{ source }})
 
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, str){% endmacro %}
 
-{% macro transform(property, source, destination, declare_type=True, multipart=False) %}
+{% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set transformed = source + ".isoformat()" %}
-{% if multipart %}{# Multipart data must be bytes, not str #}
-{% set transformed = transformed + ".encode()" %}
-{% endif %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
 {%- else %}
-{% if declare_type %}
-{% set type_annotation = property.get_type_string(json=True) %}
-{% if multipart %}{% set type_annotation = type_annotation | replace("str", "bytes") %}{% endif %}
+    {% if not skip_unset %}
+        {% if declare_type %}
+        {% set type_annotation = property.get_type_string(json=True) %}
 {{ destination }}: {{ type_annotation }} = UNSET
-{% else %}
+        {% else %}
 {{ destination }} = UNSET
-{% endif %}
+        {% endif %}
+    {% endif %}
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}
 {%- endif %}
+{% endmacro %}
+
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, {{ source }}.isoformat().encode(), "text/plain")))
 {% endmacro %}

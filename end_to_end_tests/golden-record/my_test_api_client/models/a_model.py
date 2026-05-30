@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
-from dateutil.parser import isoparse
 
 from ..models.an_all_of_enum import AnAllOfEnum
 from ..models.an_enum import AnEnum
@@ -24,54 +27,60 @@ class AModel:
     Attributes:
         an_enum_value (AnEnum): For testing Enums in all the ways they can be used
         an_allof_enum_with_overridden_default (AnAllOfEnum):  Default: AnAllOfEnum.OVERRIDDEN_DEFAULT.
-        a_camel_date_time (Union[datetime.date, datetime.datetime]):
+        a_camel_date_time (datetime.date | datetime.datetime):
         a_date (datetime.date):
-        a_nullable_date (Union[None, datetime.date]):
-        required_nullable (Union[None, str]):
+        a_nullable_date (datetime.date | None):
+        a_uuid (UUID):
+        a_nullable_uuid (None | UUID):  Default: UUID('07EF8B4D-AA09-4FFA-898D-C710796AFF41').
+        required_nullable (None | str):
         required_not_nullable (str):
-        one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', Any]):
-        nullable_one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', None]):
+        one_of_models (Any | FreeFormModel | ModelWithUnionProperty):
+        nullable_one_of_models (FreeFormModel | ModelWithUnionProperty | None):
         model (ModelWithUnionProperty):
-        nullable_model (Union['ModelWithUnionProperty', None]):
-        any_value (Union[Unset, Any]):
-        an_optional_allof_enum (Union[Unset, AnAllOfEnum]):
-        nested_list_of_enums (Union[Unset, List[List[DifferentEnum]]]):
-        a_not_required_date (Union[Unset, datetime.date]):
-        attr_1_leading_digit (Union[Unset, str]):
-        attr_leading_underscore (Union[Unset, str]):
-        not_required_nullable (Union[None, Unset, str]):
-        not_required_not_nullable (Union[Unset, str]):
-        not_required_one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', Unset]):
-        not_required_nullable_one_of_models (Union['FreeFormModel', 'ModelWithUnionProperty', None, Unset, str]):
-        not_required_model (Union[Unset, ModelWithUnionProperty]):
-        not_required_nullable_model (Union['ModelWithUnionProperty', None, Unset]):
+        nullable_model (ModelWithUnionProperty | None):
+        any_value (Any | Unset):  Default: 'default'.
+        an_optional_allof_enum (AnAllOfEnum | Unset):
+        nested_list_of_enums (list[list[DifferentEnum]] | Unset):
+        a_not_required_date (datetime.date | Unset):
+        a_not_required_uuid (UUID | Unset):
+        attr_1_leading_digit (str | Unset):
+        attr_leading_underscore (str | Unset):
+        not_required_nullable (None | str | Unset):
+        not_required_not_nullable (str | Unset):
+        not_required_one_of_models (FreeFormModel | ModelWithUnionProperty | Unset):
+        not_required_nullable_one_of_models (FreeFormModel | ModelWithUnionProperty | None | str | Unset):
+        not_required_model (ModelWithUnionProperty | Unset):
+        not_required_nullable_model (ModelWithUnionProperty | None | Unset):
     """
 
     an_enum_value: AnEnum
-    a_camel_date_time: Union[datetime.date, datetime.datetime]
+    a_camel_date_time: datetime.date | datetime.datetime
     a_date: datetime.date
-    a_nullable_date: Union[None, datetime.date]
-    required_nullable: Union[None, str]
+    a_nullable_date: datetime.date | None
+    a_uuid: UUID
+    required_nullable: None | str
     required_not_nullable: str
-    one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", Any]
-    nullable_one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", None]
-    model: "ModelWithUnionProperty"
-    nullable_model: Union["ModelWithUnionProperty", None]
+    one_of_models: Any | FreeFormModel | ModelWithUnionProperty
+    nullable_one_of_models: FreeFormModel | ModelWithUnionProperty | None
+    model: ModelWithUnionProperty
+    nullable_model: ModelWithUnionProperty | None
     an_allof_enum_with_overridden_default: AnAllOfEnum = AnAllOfEnum.OVERRIDDEN_DEFAULT
-    any_value: Union[Unset, Any] = UNSET
-    an_optional_allof_enum: Union[Unset, AnAllOfEnum] = UNSET
-    nested_list_of_enums: Union[Unset, List[List[DifferentEnum]]] = UNSET
-    a_not_required_date: Union[Unset, datetime.date] = UNSET
-    attr_1_leading_digit: Union[Unset, str] = UNSET
-    attr_leading_underscore: Union[Unset, str] = UNSET
-    not_required_nullable: Union[None, Unset, str] = UNSET
-    not_required_not_nullable: Union[Unset, str] = UNSET
-    not_required_one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", Unset] = UNSET
-    not_required_nullable_one_of_models: Union["FreeFormModel", "ModelWithUnionProperty", None, Unset, str] = UNSET
-    not_required_model: Union[Unset, "ModelWithUnionProperty"] = UNSET
-    not_required_nullable_model: Union["ModelWithUnionProperty", None, Unset] = UNSET
+    a_nullable_uuid: None | UUID = UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41")
+    any_value: Any | Unset = "default"
+    an_optional_allof_enum: AnAllOfEnum | Unset = UNSET
+    nested_list_of_enums: list[list[DifferentEnum]] | Unset = UNSET
+    a_not_required_date: datetime.date | Unset = UNSET
+    a_not_required_uuid: UUID | Unset = UNSET
+    attr_1_leading_digit: str | Unset = UNSET
+    attr_leading_underscore: str | Unset = UNSET
+    not_required_nullable: None | str | Unset = UNSET
+    not_required_not_nullable: str | Unset = UNSET
+    not_required_one_of_models: FreeFormModel | ModelWithUnionProperty | Unset = UNSET
+    not_required_nullable_one_of_models: FreeFormModel | ModelWithUnionProperty | None | str | Unset = UNSET
+    not_required_model: ModelWithUnionProperty | Unset = UNSET
+    not_required_nullable_model: ModelWithUnionProperty | None | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
@@ -87,18 +96,26 @@ class AModel:
 
         a_date = self.a_date.isoformat()
 
-        a_nullable_date: Union[None, str]
+        a_nullable_date: None | str
         if isinstance(self.a_nullable_date, datetime.date):
             a_nullable_date = self.a_nullable_date.isoformat()
         else:
             a_nullable_date = self.a_nullable_date
 
-        required_nullable: Union[None, str]
+        a_uuid = str(self.a_uuid)
+
+        a_nullable_uuid: None | str
+        if isinstance(self.a_nullable_uuid, UUID):
+            a_nullable_uuid = str(self.a_nullable_uuid)
+        else:
+            a_nullable_uuid = self.a_nullable_uuid
+
+        required_nullable: None | str
         required_nullable = self.required_nullable
 
         required_not_nullable = self.required_not_nullable
 
-        one_of_models: Union[Any, Dict[str, Any]]
+        one_of_models: Any | dict[str, Any]
         if isinstance(self.one_of_models, FreeFormModel):
             one_of_models = self.one_of_models.to_dict()
         elif isinstance(self.one_of_models, ModelWithUnionProperty):
@@ -106,7 +123,7 @@ class AModel:
         else:
             one_of_models = self.one_of_models
 
-        nullable_one_of_models: Union[Dict[str, Any], None]
+        nullable_one_of_models: dict[str, Any] | None
         if isinstance(self.nullable_one_of_models, FreeFormModel):
             nullable_one_of_models = self.nullable_one_of_models.to_dict()
         elif isinstance(self.nullable_one_of_models, ModelWithUnionProperty):
@@ -116,7 +133,7 @@ class AModel:
 
         model = self.model.to_dict()
 
-        nullable_model: Union[Dict[str, Any], None]
+        nullable_model: dict[str, Any] | None
         if isinstance(self.nullable_model, ModelWithUnionProperty):
             nullable_model = self.nullable_model.to_dict()
         else:
@@ -124,11 +141,11 @@ class AModel:
 
         any_value = self.any_value
 
-        an_optional_allof_enum: Union[Unset, str] = UNSET
+        an_optional_allof_enum: str | Unset = UNSET
         if not isinstance(self.an_optional_allof_enum, Unset):
             an_optional_allof_enum = self.an_optional_allof_enum.value
 
-        nested_list_of_enums: Union[Unset, List[List[str]]] = UNSET
+        nested_list_of_enums: list[list[str]] | Unset = UNSET
         if not isinstance(self.nested_list_of_enums, Unset):
             nested_list_of_enums = []
             for nested_list_of_enums_item_data in self.nested_list_of_enums:
@@ -139,15 +156,19 @@ class AModel:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
-        a_not_required_date: Union[Unset, str] = UNSET
+        a_not_required_date: str | Unset = UNSET
         if not isinstance(self.a_not_required_date, Unset):
             a_not_required_date = self.a_not_required_date.isoformat()
+
+        a_not_required_uuid: str | Unset = UNSET
+        if not isinstance(self.a_not_required_uuid, Unset):
+            a_not_required_uuid = str(self.a_not_required_uuid)
 
         attr_1_leading_digit = self.attr_1_leading_digit
 
         attr_leading_underscore = self.attr_leading_underscore
 
-        not_required_nullable: Union[None, Unset, str]
+        not_required_nullable: None | str | Unset
         if isinstance(self.not_required_nullable, Unset):
             not_required_nullable = UNSET
         else:
@@ -155,7 +176,7 @@ class AModel:
 
         not_required_not_nullable = self.not_required_not_nullable
 
-        not_required_one_of_models: Union[Dict[str, Any], Unset]
+        not_required_one_of_models: dict[str, Any] | Unset
         if isinstance(self.not_required_one_of_models, Unset):
             not_required_one_of_models = UNSET
         elif isinstance(self.not_required_one_of_models, FreeFormModel):
@@ -163,7 +184,7 @@ class AModel:
         else:
             not_required_one_of_models = self.not_required_one_of_models.to_dict()
 
-        not_required_nullable_one_of_models: Union[Dict[str, Any], None, Unset, str]
+        not_required_nullable_one_of_models: dict[str, Any] | None | str | Unset
         if isinstance(self.not_required_nullable_one_of_models, Unset):
             not_required_nullable_one_of_models = UNSET
         elif isinstance(self.not_required_nullable_one_of_models, FreeFormModel):
@@ -173,11 +194,11 @@ class AModel:
         else:
             not_required_nullable_one_of_models = self.not_required_nullable_one_of_models
 
-        not_required_model: Union[Unset, Dict[str, Any]] = UNSET
+        not_required_model: dict[str, Any] | Unset = UNSET
         if not isinstance(self.not_required_model, Unset):
             not_required_model = self.not_required_model.to_dict()
 
-        not_required_nullable_model: Union[Dict[str, Any], None, Unset]
+        not_required_nullable_model: dict[str, Any] | None | Unset
         if isinstance(self.not_required_nullable_model, Unset):
             not_required_nullable_model = UNSET
         elif isinstance(self.not_required_nullable_model, ModelWithUnionProperty):
@@ -185,7 +206,8 @@ class AModel:
         else:
             not_required_nullable_model = self.not_required_nullable_model
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "an_enum_value": an_enum_value,
@@ -193,6 +215,8 @@ class AModel:
                 "aCamelDateTime": a_camel_date_time,
                 "a_date": a_date,
                 "a_nullable_date": a_nullable_date,
+                "a_uuid": a_uuid,
+                "a_nullable_uuid": a_nullable_uuid,
                 "required_nullable": required_nullable,
                 "required_not_nullable": required_not_nullable,
                 "one_of_models": one_of_models,
@@ -209,6 +233,8 @@ class AModel:
             field_dict["nested_list_of_enums"] = nested_list_of_enums
         if a_not_required_date is not UNSET:
             field_dict["a_not_required_date"] = a_not_required_date
+        if a_not_required_uuid is not UNSET:
+            field_dict["a_not_required_uuid"] = a_not_required_uuid
         if attr_1_leading_digit is not UNSET:
             field_dict["1_leading_digit"] = attr_1_leading_digit
         if attr_leading_underscore is not UNSET:
@@ -229,66 +255,83 @@ class AModel:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.free_form_model import FreeFormModel
         from ..models.model_with_union_property import ModelWithUnionProperty
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         an_enum_value = AnEnum(d.pop("an_enum_value"))
 
         an_allof_enum_with_overridden_default = AnAllOfEnum(d.pop("an_allof_enum_with_overridden_default"))
 
-        def _parse_a_camel_date_time(data: object) -> Union[datetime.date, datetime.datetime]:
+        def _parse_a_camel_date_time(data: object) -> datetime.date | datetime.datetime:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                a_camel_date_time_type_0 = isoparse(data)
+                a_camel_date_time_type_0 = datetime.datetime.fromisoformat(data.replace("Z", "+00:00"))
 
                 return a_camel_date_time_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, str):
                 raise TypeError()
-            a_camel_date_time_type_1 = isoparse(data).date()
+            a_camel_date_time_type_1 = datetime.date.fromisoformat(data)
 
             return a_camel_date_time_type_1
 
         a_camel_date_time = _parse_a_camel_date_time(d.pop("aCamelDateTime"))
 
-        a_date = isoparse(d.pop("a_date")).date()
+        a_date = datetime.date.fromisoformat(d.pop("a_date"))
 
-        def _parse_a_nullable_date(data: object) -> Union[None, datetime.date]:
+        def _parse_a_nullable_date(data: object) -> datetime.date | None:
             if data is None:
                 return data
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                a_nullable_date_type_0 = isoparse(data).date()
+                a_nullable_date_type_0 = datetime.date.fromisoformat(data)
 
                 return a_nullable_date_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union[None, datetime.date], data)
+            return cast(datetime.date | None, data)
 
         a_nullable_date = _parse_a_nullable_date(d.pop("a_nullable_date"))
 
-        def _parse_required_nullable(data: object) -> Union[None, str]:
+        a_uuid = UUID(d.pop("a_uuid"))
+
+        def _parse_a_nullable_uuid(data: object) -> None | UUID:
             if data is None:
                 return data
-            return cast(Union[None, str], data)
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                a_nullable_uuid_type_0 = UUID(data)
+
+                return a_nullable_uuid_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | UUID, data)
+
+        a_nullable_uuid = _parse_a_nullable_uuid(d.pop("a_nullable_uuid"))
+
+        def _parse_required_nullable(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
 
         required_nullable = _parse_required_nullable(d.pop("required_nullable"))
 
         required_not_nullable = d.pop("required_not_nullable")
 
-        def _parse_one_of_models(data: object) -> Union["FreeFormModel", "ModelWithUnionProperty", Any]:
+        def _parse_one_of_models(data: object) -> Any | FreeFormModel | ModelWithUnionProperty:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
                 one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -296,13 +339,13 @@ class AModel:
                 one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return one_of_models_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["FreeFormModel", "ModelWithUnionProperty", Any], data)
+            return cast(Any | FreeFormModel | ModelWithUnionProperty, data)
 
         one_of_models = _parse_one_of_models(d.pop("one_of_models"))
 
-        def _parse_nullable_one_of_models(data: object) -> Union["FreeFormModel", "ModelWithUnionProperty", None]:
+        def _parse_nullable_one_of_models(data: object) -> FreeFormModel | ModelWithUnionProperty | None:
             if data is None:
                 return data
             try:
@@ -311,7 +354,7 @@ class AModel:
                 nullable_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return nullable_one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -319,15 +362,15 @@ class AModel:
                 nullable_one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return nullable_one_of_models_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["FreeFormModel", "ModelWithUnionProperty", None], data)
+            return cast(FreeFormModel | ModelWithUnionProperty | None, data)
 
         nullable_one_of_models = _parse_nullable_one_of_models(d.pop("nullable_one_of_models"))
 
         model = ModelWithUnionProperty.from_dict(d.pop("model"))
 
-        def _parse_nullable_model(data: object) -> Union["ModelWithUnionProperty", None]:
+        def _parse_nullable_model(data: object) -> ModelWithUnionProperty | None:
             if data is None:
                 return data
             try:
@@ -336,56 +379,65 @@ class AModel:
                 nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return nullable_model_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["ModelWithUnionProperty", None], data)
+            return cast(ModelWithUnionProperty | None, data)
 
         nullable_model = _parse_nullable_model(d.pop("nullable_model"))
 
         any_value = d.pop("any_value", UNSET)
 
         _an_optional_allof_enum = d.pop("an_optional_allof_enum", UNSET)
-        an_optional_allof_enum: Union[Unset, AnAllOfEnum]
+        an_optional_allof_enum: AnAllOfEnum | Unset
         if isinstance(_an_optional_allof_enum, Unset):
             an_optional_allof_enum = UNSET
         else:
             an_optional_allof_enum = AnAllOfEnum(_an_optional_allof_enum)
 
-        nested_list_of_enums = []
         _nested_list_of_enums = d.pop("nested_list_of_enums", UNSET)
-        for nested_list_of_enums_item_data in _nested_list_of_enums or []:
-            nested_list_of_enums_item = []
-            _nested_list_of_enums_item = nested_list_of_enums_item_data
-            for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
-                nested_list_of_enums_item_item = DifferentEnum(nested_list_of_enums_item_item_data)
+        nested_list_of_enums: list[list[DifferentEnum]] | Unset = UNSET
+        if _nested_list_of_enums is not UNSET:
+            nested_list_of_enums = []
+            for nested_list_of_enums_item_data in _nested_list_of_enums:
+                nested_list_of_enums_item = []
+                _nested_list_of_enums_item = nested_list_of_enums_item_data
+                for nested_list_of_enums_item_item_data in _nested_list_of_enums_item:
+                    nested_list_of_enums_item_item = DifferentEnum(nested_list_of_enums_item_item_data)
 
-                nested_list_of_enums_item.append(nested_list_of_enums_item_item)
+                    nested_list_of_enums_item.append(nested_list_of_enums_item_item)
 
-            nested_list_of_enums.append(nested_list_of_enums_item)
+                nested_list_of_enums.append(nested_list_of_enums_item)
 
         _a_not_required_date = d.pop("a_not_required_date", UNSET)
-        a_not_required_date: Union[Unset, datetime.date]
+        a_not_required_date: datetime.date | Unset
         if isinstance(_a_not_required_date, Unset):
             a_not_required_date = UNSET
         else:
-            a_not_required_date = isoparse(_a_not_required_date).date()
+            a_not_required_date = datetime.date.fromisoformat(_a_not_required_date)
+
+        _a_not_required_uuid = d.pop("a_not_required_uuid", UNSET)
+        a_not_required_uuid: UUID | Unset
+        if isinstance(_a_not_required_uuid, Unset):
+            a_not_required_uuid = UNSET
+        else:
+            a_not_required_uuid = UUID(_a_not_required_uuid)
 
         attr_1_leading_digit = d.pop("1_leading_digit", UNSET)
 
         attr_leading_underscore = d.pop("_leading_underscore", UNSET)
 
-        def _parse_not_required_nullable(data: object) -> Union[None, Unset, str]:
+        def _parse_not_required_nullable(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         not_required_nullable = _parse_not_required_nullable(d.pop("not_required_nullable", UNSET))
 
         not_required_not_nullable = d.pop("not_required_not_nullable", UNSET)
 
-        def _parse_not_required_one_of_models(data: object) -> Union["FreeFormModel", "ModelWithUnionProperty", Unset]:
+        def _parse_not_required_one_of_models(data: object) -> FreeFormModel | ModelWithUnionProperty | Unset:
             if isinstance(data, Unset):
                 return data
             try:
@@ -394,7 +446,7 @@ class AModel:
                 not_required_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return not_required_one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
@@ -406,7 +458,7 @@ class AModel:
 
         def _parse_not_required_nullable_one_of_models(
             data: object,
-        ) -> Union["FreeFormModel", "ModelWithUnionProperty", None, Unset, str]:
+        ) -> FreeFormModel | ModelWithUnionProperty | None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -417,7 +469,7 @@ class AModel:
                 not_required_nullable_one_of_models_type_0 = FreeFormModel.from_dict(data)
 
                 return not_required_nullable_one_of_models_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
@@ -425,22 +477,22 @@ class AModel:
                 not_required_nullable_one_of_models_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return not_required_nullable_one_of_models_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["FreeFormModel", "ModelWithUnionProperty", None, Unset, str], data)
+            return cast(FreeFormModel | ModelWithUnionProperty | None | str | Unset, data)
 
         not_required_nullable_one_of_models = _parse_not_required_nullable_one_of_models(
             d.pop("not_required_nullable_one_of_models", UNSET)
         )
 
         _not_required_model = d.pop("not_required_model", UNSET)
-        not_required_model: Union[Unset, ModelWithUnionProperty]
+        not_required_model: ModelWithUnionProperty | Unset
         if isinstance(_not_required_model, Unset):
             not_required_model = UNSET
         else:
             not_required_model = ModelWithUnionProperty.from_dict(_not_required_model)
 
-        def _parse_not_required_nullable_model(data: object) -> Union["ModelWithUnionProperty", None, Unset]:
+        def _parse_not_required_nullable_model(data: object) -> ModelWithUnionProperty | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -451,9 +503,9 @@ class AModel:
                 not_required_nullable_model_type_1 = ModelWithUnionProperty.from_dict(data)
 
                 return not_required_nullable_model_type_1
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["ModelWithUnionProperty", None, Unset], data)
+            return cast(ModelWithUnionProperty | None | Unset, data)
 
         not_required_nullable_model = _parse_not_required_nullable_model(d.pop("not_required_nullable_model", UNSET))
 
@@ -463,6 +515,8 @@ class AModel:
             a_camel_date_time=a_camel_date_time,
             a_date=a_date,
             a_nullable_date=a_nullable_date,
+            a_uuid=a_uuid,
+            a_nullable_uuid=a_nullable_uuid,
             required_nullable=required_nullable,
             required_not_nullable=required_not_nullable,
             one_of_models=one_of_models,
@@ -473,6 +527,7 @@ class AModel:
             an_optional_allof_enum=an_optional_allof_enum,
             nested_list_of_enums=nested_list_of_enums,
             a_not_required_date=a_not_required_date,
+            a_not_required_uuid=a_not_required_uuid,
             attr_1_leading_digit=attr_1_leading_digit,
             attr_leading_underscore=attr_leading_underscore,
             not_required_nullable=not_required_nullable,

@@ -27,7 +27,7 @@ def test_required():
         lstrip_blocks=True
     )
 
-    template = env.get_template("date_property_template.py")
+    template = env.get_template("date_property_template.py.jinja")
     content = template.render(property=prop)
     expected = here / "required_not_null.py"
     assert content == expected.read_text()

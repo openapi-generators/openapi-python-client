@@ -1,7 +1,8 @@
 """Contains some shared types for properties"""
 
+from collections.abc import Mapping, MutableMapping
 from http import HTTPStatus
-from typing import BinaryIO, Generic, Literal, MutableMapping, Optional, Tuple, TypeVar
+from typing import IO, BinaryIO, Generic, Literal, TypeVar
 
 from attrs import define
 
@@ -13,7 +14,15 @@ class Unset:
 
 UNSET: Unset = Unset()
 
-FileJsonType = Tuple[Optional[str], BinaryIO, Optional[str]]
+# The types that `httpx.Client(files=)` can accept, copied from that library.
+FileContent = IO[bytes] | bytes | str
+FileTypes = (
+    # (filename, file (or bytes), content_type)
+    tuple[str | None, FileContent, str | None]
+    # (filename, file (or bytes), content_type, headers)
+    | tuple[str | None, FileContent, str | None, Mapping[str, str]]
+)
+RequestFiles = list[tuple[str, FileTypes]]
 
 
 @define
@@ -21,10 +30,10 @@ class File:
     """Contains information for file uploads"""
 
     payload: BinaryIO
-    file_name: Optional[str] = None
-    mime_type: Optional[str] = None
+    file_name: str | None = None
+    mime_type: str | None = None
 
-    def to_tuple(self) -> FileJsonType:
+    def to_tuple(self) -> FileTypes:
         """Return a tuple representation that httpx will accept for multipart/form-data"""
         return self.file_name, self.payload, self.mime_type
 
@@ -39,7 +48,7 @@ class Response(Generic[T]):
     status_code: HTTPStatus
     content: bytes
     headers: MutableMapping[str, str]
-    parsed: Optional[T]
+    parsed: T | None
 
 
-__all__ = ["File", "Response", "FileJsonType", "Unset", "UNSET"]
+__all__ = ["UNSET", "File", "FileTypes", "RequestFiles", "Response", "Unset"]

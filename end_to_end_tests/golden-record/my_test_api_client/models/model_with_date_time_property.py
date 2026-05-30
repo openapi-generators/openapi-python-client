@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import datetime
-from typing import Any, Dict, List, Type, TypeVar, Union
+from collections.abc import Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
@@ -14,18 +16,18 @@ T = TypeVar("T", bound="ModelWithDateTimeProperty")
 class ModelWithDateTimeProperty:
     """
     Attributes:
-        datetime_ (Union[Unset, datetime.datetime]):
+        datetime_ (datetime.datetime | Unset):
     """
 
-    datetime_: Union[Unset, datetime.datetime] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    datetime_: datetime.datetime | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        datetime_: Union[Unset, str] = UNSET
+    def to_dict(self) -> dict[str, Any]:
+        datetime_: str | Unset = UNSET
         if not isinstance(self.datetime_, Unset):
             datetime_ = self.datetime_.isoformat()
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if datetime_ is not UNSET:
@@ -34,14 +36,14 @@ class ModelWithDateTimeProperty:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         _datetime_ = d.pop("datetime", UNSET)
-        datetime_: Union[Unset, datetime.datetime]
+        datetime_: datetime.datetime | Unset
         if isinstance(_datetime_, Unset):
             datetime_ = UNSET
         else:
-            datetime_ = isoparse(_datetime_)
+            datetime_ = datetime.datetime.fromisoformat(_datetime_.replace("Z", "+00:00"))
 
         model_with_date_time_property = cls(
             datetime_=datetime_,
@@ -51,7 +53,7 @@ class ModelWithDateTimeProperty:
         return model_with_date_time_property
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

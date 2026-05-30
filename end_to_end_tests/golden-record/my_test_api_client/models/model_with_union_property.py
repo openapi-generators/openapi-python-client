@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -13,13 +16,13 @@ T = TypeVar("T", bound="ModelWithUnionProperty")
 class ModelWithUnionProperty:
     """
     Attributes:
-        a_property (Union[AnEnum, AnIntEnum, Unset]):
+        a_property (AnEnum | AnIntEnum | Unset):
     """
 
-    a_property: Union[AnEnum, AnIntEnum, Unset] = UNSET
+    a_property: AnEnum | AnIntEnum | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
-        a_property: Union[Unset, int, str]
+    def to_dict(self) -> dict[str, Any]:
+        a_property: int | str | Unset
         if isinstance(self.a_property, Unset):
             a_property = UNSET
         elif isinstance(self.a_property, AnEnum):
@@ -27,7 +30,8 @@ class ModelWithUnionProperty:
         else:
             a_property = self.a_property.value
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if a_property is not UNSET:
             field_dict["a_property"] = a_property
@@ -35,10 +39,10 @@ class ModelWithUnionProperty:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
 
-        def _parse_a_property(data: object) -> Union[AnEnum, AnIntEnum, Unset]:
+        def _parse_a_property(data: object) -> AnEnum | AnIntEnum | Unset:
             if isinstance(data, Unset):
                 return data
             try:
@@ -47,7 +51,7 @@ class ModelWithUnionProperty:
                 a_property_type_0 = AnEnum(data)
 
                 return a_property_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, int):
                 raise TypeError()

@@ -1,10 +1,13 @@
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .parameter import Parameter
-from .reference import Reference
+from .reference import ReferenceOr
 from .server import Server
+
+if TYPE_CHECKING:
+    from .operation import Operation  # pragma: no cover
 
 
 class PathItem(BaseModel):
@@ -19,20 +22,22 @@ class PathItem(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject
     """
 
-    ref: Optional[str] = Field(default=None, alias="$ref")
-    summary: Optional[str] = None
-    description: Optional[str] = None
-    get: Optional["Operation"] = None
-    put: Optional["Operation"] = None
-    post: Optional["Operation"] = None
-    delete: Optional["Operation"] = None
-    options: Optional["Operation"] = None
-    head: Optional["Operation"] = None
-    patch: Optional["Operation"] = None
-    trace: Optional["Operation"] = None
-    servers: Optional[List[Server]] = None
-    parameters: Optional[List[Union[Parameter, Reference]]] = None
+    ref: str | None = Field(default=None, alias="$ref")
+    summary: str | None = None
+    description: str | None = None
+    get: "Operation | None" = None
+    put: "Operation | None" = None
+    post: "Operation | None" = None
+    delete: "Operation | None" = None
+    options: "Operation | None" = None
+    head: "Operation | None" = None
+    patch: "Operation | None" = None
+    trace: "Operation | None" = None
+    servers: list[Server] | None = None
+    parameters: list[ReferenceOr[Parameter]] | None = None
     model_config = ConfigDict(
+        # `Operation` is an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={
@@ -69,9 +74,3 @@ class PathItem(BaseModel):
             ]
         },
     )
-
-
-# Operation uses PathItem via Callback, so we need late import and to update forward refs due to circular dependency
-from .operation import Operation  # noqa: E402
-
-PathItem.model_rebuild()

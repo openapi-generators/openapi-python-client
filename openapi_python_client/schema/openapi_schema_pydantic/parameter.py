@@ -1,11 +1,11 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..parameter_location import ParameterLocation
 from .example import Example
 from .media_type import MediaType
-from .reference import Reference
+from .reference import ReferenceOr
 from .schema import Schema
 
 
@@ -23,18 +23,20 @@ class Parameter(BaseModel):
 
     name: str
     param_in: ParameterLocation = Field(alias="in")
-    description: Optional[str] = None
+    description: str | None = None
     required: bool = False
     deprecated: bool = False
     allowEmptyValue: bool = False
-    style: Optional[str] = None
+    style: str | None = None
     explode: bool = False
     allowReserved: bool = False
-    param_schema: Optional[Union[Reference, Schema]] = Field(default=None, alias="schema")
-    example: Optional[Any] = None
-    examples: Optional[Dict[str, Union[Example, Reference]]] = None
-    content: Optional[Dict[str, MediaType]] = None
+    param_schema: ReferenceOr[Schema] | None = Field(default=None, alias="schema")
+    example: Any | None = None
+    examples: dict[str, ReferenceOr[Example]] | None = None
+    content: dict[str, MediaType] | None = None
     model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={

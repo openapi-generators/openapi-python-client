@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Literal, Optional, Union, cast
+from typing import Any, Literal, cast
+from urllib.parse import quote
 
 import httpx
 
@@ -14,11 +15,11 @@ def _get_kwargs(
     *,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
-    optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
 
     params["required query"] = required_query
 
@@ -26,15 +27,16 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": f"/const/{path}",
+        "url": "/const/{path}".format(
+            path=quote(str(path), safe=""),
+        ),
         "params": params,
     }
 
-    _body = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-    _kwargs["json"] = _body
     headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
@@ -42,15 +44,16 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Literal["Why have a fixed response? I dunno"]]:
-    if response.status_code == HTTPStatus.OK:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Literal["Why have a fixed response? I dunno"] | None:
+    if response.status_code == 200:
         response_200 = cast(Literal["Why have a fixed response? I dunno"], response.json())
         if response_200 != "Why have a fixed response? I dunno":
             raise ValueError(
                 f"response_200 must match const 'Why have a fixed response? I dunno', got '{response_200}'"
             )
         return response_200
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -58,7 +61,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
+    *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -71,16 +74,16 @@ def _build_response(
 def sync_detailed(
     path: Literal["this goes in the path"],
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
-    optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
+    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
-        optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        optional_query (Literal['this sometimes goes in the query'] | Unset):
         body (PostConstPathBody):
 
     Raises:
@@ -108,16 +111,16 @@ def sync_detailed(
 def sync(
     path: Literal["this goes in the path"],
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
-    optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
-) -> Optional[Literal["Why have a fixed response? I dunno"]]:
+    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+) -> Literal["Why have a fixed response? I dunno"] | None:
     """
     Args:
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
-        optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        optional_query (Literal['this sometimes goes in the query'] | Unset):
         body (PostConstPathBody):
 
     Raises:
@@ -140,16 +143,16 @@ def sync(
 async def asyncio_detailed(
     path: Literal["this goes in the path"],
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
-    optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
+    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
 ) -> Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
-        optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        optional_query (Literal['this sometimes goes in the query'] | Unset):
         body (PostConstPathBody):
 
     Raises:
@@ -175,16 +178,16 @@ async def asyncio_detailed(
 async def asyncio(
     path: Literal["this goes in the path"],
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
-    optional_query: Union[Literal["this sometimes goes in the query"], Unset] = UNSET,
-) -> Optional[Literal["Why have a fixed response? I dunno"]]:
+    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
+) -> Literal["Why have a fixed response? I dunno"] | None:
     """
     Args:
         path (Literal['this goes in the path']):
         required_query (Literal['this always goes in the query']):
-        optional_query (Union[Literal['this sometimes goes in the query'], Unset]):
+        optional_query (Literal['this sometimes goes in the query'] | Unset):
         body (PostConstPathBody):
 
     Raises:

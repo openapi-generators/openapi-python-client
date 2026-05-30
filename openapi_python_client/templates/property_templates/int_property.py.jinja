@@ -1,3 +1,7 @@
 {% macro transform_header(source) %}
 str({{ source }})
 {% endmacro %}
+
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, str({{source}}).encode(), "text/plain")))
+{% endmacro %}

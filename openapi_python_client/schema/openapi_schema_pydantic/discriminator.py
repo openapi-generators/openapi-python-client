@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -19,7 +17,7 @@ class Discriminator(BaseModel):
     """
 
     propertyName: str
-    mapping: Optional[Dict[str, str]] = None
+    mapping: dict[str, str] | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

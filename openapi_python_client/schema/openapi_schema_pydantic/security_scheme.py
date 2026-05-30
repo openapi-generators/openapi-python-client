@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
 
 from .oauth_flows import OAuthFlows
@@ -20,13 +18,13 @@ class SecurityScheme(BaseModel):
     """
 
     type: str
-    description: Optional[str] = None
-    name: Optional[str] = None
-    security_scheme_in: Optional[str] = Field(default=None, alias="in")
-    scheme: Optional[str] = None
-    bearerFormat: Optional[str] = None
-    flows: Optional[OAuthFlows] = None
-    openIdConnectUrl: Optional[str] = None
+    description: str | None = None
+    name: str | None = None
+    security_scheme_in: str | None = Field(default=None, alias="in")
+    scheme: str | None = None
+    bearerFormat: str | None = None
+    flows: OAuthFlows | None = None
+    openIdConnectUrl: str | None = None
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,

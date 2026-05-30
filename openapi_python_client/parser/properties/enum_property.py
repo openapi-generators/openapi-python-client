@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-__all__ = ["EnumProperty"]
+__all__ = ["EnumProperty", "ValueType"]
 
-from typing import Any, ClassVar, List, Union, cast
+from typing import Any, ClassVar, cast
 
 from attr import evolve
 from attrs import define
@@ -16,7 +16,7 @@ from .protocol import PropertyProtocol, Value
 from .schemas import Class, Schemas
 from .union import UnionProperty
 
-ValueType = Union[str, int]
+ValueType = str | int
 
 
 @define
@@ -98,9 +98,7 @@ class EnumProperty(PropertyProtocol):
         value_type = next(iter(value_types))
         if value_type not in (str, int):
             return PropertyError(header=f"Unsupported enum type {value_type}", data=data), schemas
-        value_list = cast(
-            Union[List[int], List[str]], unchecked_value_list
-        )  # We checked this with all the value_types stuff
+        value_list = cast(list[int] | list[str], unchecked_value_list)  # We checked this with all the value_types stuff
 
         if len(value_list) < len(enum):  # Only one of the values was None, that becomes a union
             data.oneOf = [
@@ -121,7 +119,8 @@ class EnumProperty(PropertyProtocol):
         if parent_name:
             class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
-        values = EnumProperty.values_from_list(value_list)
+        var_names = data.model_extra.get("x-enum-varnames", []) if data.model_extra else []
+        values = EnumProperty.values_from_list(value_list, class_info, var_names)
 
         if class_info.name in schemas.classes_by_name:
             existing = schemas.classes_by_name[class_info.name]
@@ -159,15 +158,15 @@ class EnumProperty(PropertyProtocol):
         if isinstance(value, self.value_type):
             inverse_values = {v: k for k, v in self.values.items()}
             try:
-                return Value(f"{self.class_info.name}.{inverse_values[value]}")
+                return Value(python_code=f"{self.class_info.name}.{inverse_values[value]}", raw_value=value)
             except KeyError:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
 
-    def get_base_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         return self.class_info.name
 
-    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_json_type_string(self) -> str:
         return self.value_type.__name__
 
     def get_imports(self, *, prefix: str) -> set[str]:
@@ -183,24 +182,36 @@ class EnumProperty(PropertyProtocol):
         return imports
 
     @staticmethod
-    def values_from_list(values: list[str] | list[int]) -> dict[str, ValueType]:
+    def values_from_list(
+        values: list[str] | list[int], class_info: Class, var_names: list[str]
+    ) -> dict[str, ValueType]:
         """Convert a list of values into dict of {name: value}, where value can sometimes be None"""
         output: dict[str, ValueType] = {}
+        use_var_names = len(var_names) == len(values)
 
         for i, value in enumerate(values):
-            value = cast(Union[str, int], value)
+            value = cast(str | int, value)
             if isinstance(value, int):
-                if value < 0:
+                if use_var_names:
+                    key = var_names[i]
+                    sanitized_key = utils.snake_case(key).upper()
+                    output[sanitized_key] = value
+                elif value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value
                 else:
                     output[f"VALUE_{value}"] = value
                 continue
-            if value and value[0].isalpha():
+            if use_var_names:
+                key = var_names[i]
+            elif value and value[0].isalpha():
                 key = value.upper()
             else:
                 key = f"VALUE_{i}"
             if key in output:
-                raise ValueError(f"Duplicate key {key} in Enum")
+                raise ValueError(
+                    f"Duplicate key {key} in enum {class_info.module_name}.{class_info.name}; "
+                    f"consider setting literal_enums in your config"
+                )
             sanitized_key = utils.snake_case(key).upper()
             output[sanitized_key] = utils.remove_string_escapes(value)
         return output

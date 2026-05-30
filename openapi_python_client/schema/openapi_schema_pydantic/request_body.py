@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from .media_type import MediaType
@@ -13,10 +11,12 @@ class RequestBody(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject
     """
 
-    description: Optional[str] = None
-    content: Dict[str, MediaType]
+    description: str | None = None
+    content: dict[str, MediaType]
     required: bool = False
     model_config = ConfigDict(
+        # `MediaType` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

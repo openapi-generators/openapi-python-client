@@ -1,0 +1,33 @@
+
+# Testing that we can access model-related information via Jinja variables.
+
+# To avoid having to update this file in the golden record every time the test specs are changed,
+# we won't include all the classes in this output - we'll just look for one of them.
+
+# Using "alls"
+{% for name in alls %}
+{% if name == "AModel" %}
+#   {{ name }}
+{% endif %}
+{% endfor %}
+
+# Using "imports"
+{% for import in imports %}
+{% if import.endswith("import AModel") %}
+#   {{ import }}
+{% endif %}
+{% endfor %}
+
+# Using "openapi.models"
+{% for model in openapi.models %}
+{% if model.class_info.name == "AModel" %}
+#   {{ model.class_info.name }} ({{ model.class_info.module_name }})
+{% endif %}
+{% endfor %}
+
+# Using "openapi.enums"
+{% for enum in openapi.enums %}
+{% if enum.class_info.name == "AnEnum" %}
+#   {{ enum.class_info.name }} ({{ enum.class_info.module_name }})
+{% endif %}
+{% endfor %}

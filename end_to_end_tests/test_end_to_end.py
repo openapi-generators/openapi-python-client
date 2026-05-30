@@ -1,21 +1,25 @@
 import shutil
+import subprocess
+import sys
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 import pytest
 from click.testing import Result
 from typer.testing import CliRunner
 
+from end_to_end_tests.generated_client import (
+    _run_command, generate_client, generate_client_from_inline_spec,
+)
 from openapi_python_client.cli import app
 
 
 def _compare_directories(
     record: Path,
     test_subject: Path,
-    expected_differences: Dict[Path, str],
-    expected_missing: Optional[Set[str]] = None,
-    ignore: List[str] = None,
+    expected_differences: dict[Path, str] | None = None,
+    expected_missing: set[str] | None = None,
+    ignore: list[str] = None,
     depth=0,
 ):
     """
@@ -78,56 +82,33 @@ def _compare_directories(
 
 def run_e2e_test(
     openapi_document: str,
-    extra_args: List[str],
-    expected_differences: Optional[Dict[Path, str]] = None,
+    extra_args: list[str],
+    expected_differences: dict[Path, str] | None = None,
     golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
-    expected_missing: Optional[Set[str]] = None,
+    expected_missing: set[str] | None = None,
+    specify_output_path_explicitly: bool = True,
 ) -> Result:
-    output_path = Path.cwd() / output_path
-    shutil.rmtree(output_path, ignore_errors=True)
-    result = generate(extra_args, openapi_document)
-    gr_path = Path(__file__).parent / golden_record_path
+    with generate_client(openapi_document, extra_args, output_path, specify_output_path_explicitly=specify_output_path_explicitly) as g:
+        gr_path = Path(__file__).parent / golden_record_path
 
-    expected_differences = expected_differences or {}
-    # Use absolute paths for expected differences for easier comparisons
-    expected_differences = {
-        output_path.joinpath(key): value for key, value in expected_differences.items()
-    }
-    _compare_directories(
-        gr_path, output_path, expected_differences=expected_differences, expected_missing=expected_missing
-    )
+        expected_differences = expected_differences or {}
+        # Use absolute paths for expected differences for easier comparisons
+        expected_differences = {
+            g.output_path.joinpath(key): value for key, value in expected_differences.items()
+        }
+        _compare_directories(
+            gr_path, g.output_path, expected_differences=expected_differences, expected_missing=expected_missing
+        )
 
-    import mypy.api
+        result = subprocess.run(
+            [sys.executable, "-m", "mypy", str(g.output_path), "--strict"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"Type checking client failed: {result.stdout}"
 
-    out, err, status = mypy.api.run([str(output_path), "--strict"])
-    assert status == 0, f"Type checking client failed: {out}"
-
-    shutil.rmtree(output_path)
-    return result
-
-
-def generate(extra_args: Optional[List[str]], openapi_document: str) -> Result:
-    """Generate a client from an OpenAPI document and return the path to the generated code"""
-    _run_command("generate", extra_args, openapi_document)
-
-
-def _run_command(command: str, extra_args: Optional[List[str]] = None, openapi_document: Optional[str] = None, url: Optional[str] = None, config_path: Optional[Path] = None) -> Result:
-    """Generate a client from an OpenAPI document and return the path to the generated code"""
-    runner = CliRunner()
-    if openapi_document is not None:
-        openapi_path = Path(__file__).parent / openapi_document
-        source_arg = f"--path={openapi_path}"
-    else:
-        source_arg = f"--url={url}"
-    config_path = config_path or (Path(__file__).parent / "config.yml")
-    args = [command, f"--config={config_path}", source_arg]
-    if extra_args:
-        args.extend(extra_args)
-    result = runner.invoke(app, args)
-    if result.exit_code != 0:
-        raise Exception(result.stdout)
-    return result
+        return g.generator_result
 
 
 def test_baseline_end_to_end_3_0():
@@ -148,27 +129,38 @@ def test_3_1_specific_features():
     )
 
 
+def test_literal_enums_end_to_end():
+    config_path = Path(__file__).parent / "literal_enums.config.yml"
+    run_e2e_test(
+        "openapi_3.1_enums.yaml",
+        [f"--config={config_path}"],
+        {},
+        "literal-enums-golden-record",
+        "my-enum-api-client"
+    )
+
+
 @pytest.mark.parametrize(
     "meta,generated_file,expected_file",
     (
         ("setup", "setup.py", "setup.py"),
         ("pdm", "pyproject.toml", "pdm.pyproject.toml"),
         ("poetry", "pyproject.toml", "poetry.pyproject.toml"),
+        ("uv", "pyproject.toml", "uv.pyproject.toml"),
     )
 )
-def test_meta(meta: str, generated_file: Optional[str], expected_file: Optional[str]):
-    output_path = Path.cwd() / "test-3-1-features-client"
-    shutil.rmtree(output_path, ignore_errors=True)
-    generate([f"--meta={meta}"], "3.1_specific.openapi.yaml")
-
-    if generated_file and expected_file:
-        assert (output_path / generated_file).exists()
-        assert (
-            (output_path / generated_file).read_text() ==
-            (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
-        )
-
-    shutil.rmtree(output_path)
+def test_meta(meta: str, generated_file: str | None, expected_file: str | None):
+    with generate_client(
+        "3.1_specific.openapi.yaml",
+        extra_args=[f"--meta={meta}"],
+        output_path="test-3-1-features-client",
+    ) as g:
+        if generated_file and expected_file:
+            assert (g.output_path / generated_file).exists()
+            assert (
+                (g.output_path / generated_file).read_text() ==
+                (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
+            )
 
 
 def test_none_meta():
@@ -178,6 +170,17 @@ def test_none_meta():
         golden_record_path="test-3-1-golden-record/test_3_1_features_client",
         output_path="test_3_1_features_client",
         expected_missing={"py.typed"},
+        specify_output_path_explicitly=False,
+    )
+
+
+def test_docstrings_on_attributes():
+    config_path = Path(__file__).parent / "docstrings_on_attributes.config.yml"
+    run_e2e_test(
+        "docstrings_on_attributes.yml",
+        [f"--config={config_path}"],
+        {},
+        "docstrings-on-attributes-golden-record",
     )
 
 
@@ -186,6 +189,7 @@ def test_custom_templates():
         {}
     )  # key: path relative to generated directory, value: expected generated content
     api_dir = Path("my_test_api_client").joinpath("api")
+    models_dir = Path("my_test_api_client").joinpath("models")
     golden_tpls_root_dir = Path(__file__).parent.joinpath(
         "custom-templates-golden-record"
     )
@@ -193,6 +197,7 @@ def test_custom_templates():
     expected_difference_paths = [
         Path("README.md"),
         api_dir.joinpath("__init__.py"),
+        models_dir.joinpath("__init__.py"),
     ]
 
     for expected_difference_path in expected_difference_paths:
@@ -215,74 +220,77 @@ def test_custom_templates():
     )
 
 
-@pytest.mark.parametrize(
-    "command", ("generate", "update")
-)
-def test_bad_url(command: str):
+def test_bad_url():
     runner = CliRunner()
-    result = runner.invoke(app, [command, "--url=not_a_url"])
+    result = runner.invoke(app, ["generate", "--url=not_a_url"])
     assert result.exit_code == 1
-    assert "Could not get OpenAPI document from provided URL" in result.stdout
+    assert "Could not get OpenAPI document from provided URL" in result.stderr
+
+
+ERROR_DOCUMENTS = [path for path in Path(__file__).parent.joinpath("documents_with_errors").iterdir() if path.is_file()]
+
+
+@pytest.mark.parametrize("document", ERROR_DOCUMENTS, ids=[path.stem for path in ERROR_DOCUMENTS])
+def test_documents_with_errors(snapshot, document):
+    with generate_client(
+        document,
+        extra_args=["--fail-on-warning"],
+        output_path="test-documents-with-errors",
+        raise_on_error=False,
+    ) as g:
+        result = g.generator_result
+        assert result.exit_code == 1
+        output = (result.stdout + result.stderr).replace(str(g.output_path), "/test-documents-with-errors")
+        assert output == snapshot
 
 
 def test_custom_post_hooks():
-    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
-    runner = CliRunner()
-    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
     config_path = Path(__file__).parent / "custom_post_hooks.config.yml"
-    result = runner.invoke(app, ["generate", f"--path={openapi_document}", f"--config={config_path}"])
-    assert result.exit_code == 1
-    assert "this should fail" in result.stdout
-    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
+    with generate_client(
+        "baseline_openapi_3.0.json",
+        [f"--config={config_path}"],
+        raise_on_error=False,
+    ) as g:
+        assert g.generator_result.exit_code == 1
+        assert "this should fail" in g.generator_result.stderr
 
 
 def test_generate_dir_already_exists():
     project_dir = Path.cwd() / "my-test-api-client"
     if not project_dir.exists():
         project_dir.mkdir()
-    runner = CliRunner()
-    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
-    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
-    assert result.exit_code == 1
-    assert "Directory already exists" in result.stdout
-    shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
-
-
-def test_update_dir_not_found():
-    project_dir = Path.cwd() / "my-test-api-client"
-    shutil.rmtree(project_dir, ignore_errors=True)
-    runner = CliRunner()
-    openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
-    result = runner.invoke(app, ["update", f"--path={openapi_document}"])
-    assert result.exit_code == 1
-    assert str(project_dir) in result.stdout
-
-
-@pytest.mark.parametrize(
-    ("file_name", "content", "expected_error"),
-    (
-        ("invalid_openapi.yaml", "not a valid openapi document", "Failed to parse OpenAPI document"),
-        ("invalid_json.json", "Invalid JSON", "Invalid JSON"),
-        ("invalid_yaml.yaml", "{", "Invalid YAML"),
-    ),
-    ids=("invalid_openapi", "invalid_json", "invalid_yaml")
-)
-def test_invalid_openapi_document(file_name, content, expected_error):
-    runner = CliRunner()
-    openapi_document = Path.cwd() / file_name
-    openapi_document.write_text(content)
-    result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
-    assert result.exit_code == 1
-    assert expected_error in result.stdout
-    openapi_document.unlink()
+    try:
+        runner = CliRunner()
+        openapi_document = Path(__file__).parent / "baseline_openapi_3.0.json"
+        result = runner.invoke(app, ["generate", f"--path={openapi_document}"])
+        assert result.exit_code == 1
+        assert "Directory already exists" in result.stderr
+    finally:
+        shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
 
 
 def test_update_integration_tests():
-    url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/main/openapi.json"
+    url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/refs/tags/v0.2.1/openapi.yaml"
     source_path = Path(__file__).parent.parent / "integration-tests"
-    project_path = Path.cwd() / "integration-tests"
-    if source_path != project_path:  # Just in case someone runs this from root dir
-        shutil.copytree(source_path, project_path)
-    config_path = project_path / "config.yaml"
-    _run_command("update", url=url, config_path=config_path)
-    _compare_directories(source_path, project_path, expected_differences={})
+    temp_dir = Path.cwd() / "test_update_integration_tests"
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+    try:
+        shutil.copytree(source_path, temp_dir)
+        config_path = source_path / "config.yaml"
+        _run_command(
+            "generate",
+            extra_args=["--overwrite", "--meta=pdm", f"--output-path={temp_dir}"],
+            url=url,
+            config_path=config_path
+        )
+        _compare_directories(source_path, temp_dir, ignore=["pyproject.toml"])
+        result = subprocess.run(
+            [sys.executable, "-m", "mypy", str(temp_dir), "--strict"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"Type checking client failed: {result.stdout=} {result.stderr=}"
+
+    finally:
+        shutil.rmtree(temp_dir)

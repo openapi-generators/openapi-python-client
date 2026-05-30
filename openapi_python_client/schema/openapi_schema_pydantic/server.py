@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from .server_variable import ServerVariable
@@ -14,8 +12,8 @@ class Server(BaseModel):
     """
 
     url: str
-    description: Optional[str] = None
-    variables: Optional[Dict[str, ServerVariable]] = None
+    description: str | None = None
+    variables: dict[str, ServerVariable] | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

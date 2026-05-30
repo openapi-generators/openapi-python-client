@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -15,12 +15,13 @@ from ...types import UNSET, Response
 
 def _get_kwargs(
     *,
-    an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
-    an_enum_value_with_only_null: List[None],
-    some_date: Union[datetime.date, datetime.datetime],
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+    an_enum_value: list[AnEnum],
+    an_enum_value_with_null: list[AnEnumWithNull | None],
+    an_enum_value_with_only_null: list[None],
+    some_date: datetime.date | datetime.datetime,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
 
     json_an_enum_value = []
     for an_enum_value_item_data in an_enum_value:
@@ -31,7 +32,7 @@ def _get_kwargs(
 
     json_an_enum_value_with_null = []
     for an_enum_value_with_null_item_data in an_enum_value_with_null:
-        an_enum_value_with_null_item: Union[None, str]
+        an_enum_value_with_null_item: None | str
         if isinstance(an_enum_value_with_null_item_data, AnEnumWithNull):
             an_enum_value_with_null_item = an_enum_value_with_null_item_data.value
         else:
@@ -54,7 +55,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/tests/",
         "params": params,
@@ -64,9 +65,9 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
-    if response.status_code == HTTPStatus.OK:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> HTTPValidationError | list[AModel] | None:
+    if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
         for response_200_item_data in _response_200:
@@ -75,14 +76,17 @@ def _parse_response(
             response_200.append(response_200_item)
 
         return response_200
-    if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+
+    if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
-    if response.status_code == HTTPStatus.LOCKED:
+
+    if response.status_code == 423:
         response_423 = HTTPValidationError.from_dict(response.json())
 
         return response_423
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -90,8 +94,8 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[HTTPValidationError, List["AModel"]]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[HTTPValidationError | list[AModel]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -102,28 +106,28 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
-    an_enum_value_with_only_null: List[None],
-    some_date: Union[datetime.date, datetime.datetime],
-) -> Response[Union[HTTPValidationError, List["AModel"]]]:
+    client: AuthenticatedClient | Client,
+    an_enum_value: list[AnEnum],
+    an_enum_value_with_null: list[AnEnumWithNull | None],
+    an_enum_value_with_only_null: list[None],
+    some_date: datetime.date | datetime.datetime,
+) -> Response[HTTPValidationError | list[AModel]]:
     """Get List
 
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
-        an_enum_value_with_only_null (List[None]):
-        some_date (Union[datetime.date, datetime.datetime]):
+        an_enum_value (list[AnEnum]):
+        an_enum_value_with_null (list[AnEnumWithNull | None]):
+        an_enum_value_with_only_null (list[None]):
+        some_date (datetime.date | datetime.datetime):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, List['AModel']]]
+        Response[HTTPValidationError | list[AModel]]
     """
 
     kwargs = _get_kwargs(
@@ -142,28 +146,28 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-    an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
-    an_enum_value_with_only_null: List[None],
-    some_date: Union[datetime.date, datetime.datetime],
-) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
+    client: AuthenticatedClient | Client,
+    an_enum_value: list[AnEnum],
+    an_enum_value_with_null: list[AnEnumWithNull | None],
+    an_enum_value_with_only_null: list[None],
+    some_date: datetime.date | datetime.datetime,
+) -> HTTPValidationError | list[AModel] | None:
     """Get List
 
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
-        an_enum_value_with_only_null (List[None]):
-        some_date (Union[datetime.date, datetime.datetime]):
+        an_enum_value (list[AnEnum]):
+        an_enum_value_with_null (list[AnEnumWithNull | None]):
+        an_enum_value_with_only_null (list[None]):
+        some_date (datetime.date | datetime.datetime):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, List['AModel']]
+        HTTPValidationError | list[AModel]
     """
 
     return sync_detailed(
@@ -177,28 +181,28 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
-    an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
-    an_enum_value_with_only_null: List[None],
-    some_date: Union[datetime.date, datetime.datetime],
-) -> Response[Union[HTTPValidationError, List["AModel"]]]:
+    client: AuthenticatedClient | Client,
+    an_enum_value: list[AnEnum],
+    an_enum_value_with_null: list[AnEnumWithNull | None],
+    an_enum_value_with_only_null: list[None],
+    some_date: datetime.date | datetime.datetime,
+) -> Response[HTTPValidationError | list[AModel]]:
     """Get List
 
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
-        an_enum_value_with_only_null (List[None]):
-        some_date (Union[datetime.date, datetime.datetime]):
+        an_enum_value (list[AnEnum]):
+        an_enum_value_with_null (list[AnEnumWithNull | None]):
+        an_enum_value_with_only_null (list[None]):
+        some_date (datetime.date | datetime.datetime):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, List['AModel']]]
+        Response[HTTPValidationError | list[AModel]]
     """
 
     kwargs = _get_kwargs(
@@ -215,28 +219,28 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-    an_enum_value: List[AnEnum],
-    an_enum_value_with_null: List[Union[AnEnumWithNull, None]],
-    an_enum_value_with_only_null: List[None],
-    some_date: Union[datetime.date, datetime.datetime],
-) -> Optional[Union[HTTPValidationError, List["AModel"]]]:
+    client: AuthenticatedClient | Client,
+    an_enum_value: list[AnEnum],
+    an_enum_value_with_null: list[AnEnumWithNull | None],
+    an_enum_value_with_only_null: list[None],
+    some_date: datetime.date | datetime.datetime,
+) -> HTTPValidationError | list[AModel] | None:
     """Get List
 
      Get a list of things
 
     Args:
-        an_enum_value (List[AnEnum]):
-        an_enum_value_with_null (List[Union[AnEnumWithNull, None]]):
-        an_enum_value_with_only_null (List[None]):
-        some_date (Union[datetime.date, datetime.datetime]):
+        an_enum_value (list[AnEnum]):
+        an_enum_value_with_null (list[AnEnumWithNull | None]):
+        an_enum_value_with_only_null (list[None]):
+        some_date (datetime.date | datetime.datetime):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, List['AModel']]
+        HTTPValidationError | list[AModel]
     """
 
     return (

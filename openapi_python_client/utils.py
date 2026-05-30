@@ -57,7 +57,6 @@ def split_words(value: str) -> list[str]:
 
 
 RESERVED_WORDS = (set(dir(builtins)) | {"self", "true", "false", "datetime"}) - {
-    "type",
     "id",
 }
 

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -12,7 +10,7 @@ class License(BaseModel):
     """
 
     name: str
-    url: Optional[str] = None
+    url: str | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -10,7 +8,7 @@ class ExternalDocumentation(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#externalDocumentationObject
     """
 
-    description: Optional[str] = None
+    description: str | None = None
     url: str
     model_config = ConfigDict(
         extra="allow",

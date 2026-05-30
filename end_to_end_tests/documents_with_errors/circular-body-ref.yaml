@@ -1,0 +1,20 @@
+openapi: "3.1.0"
+info:
+  title: "Circular Body Ref"
+  version: "0.1.0"
+paths:
+  /:
+    post:
+      requestBody:
+        $ref: "#/components/requestBodies/body"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                const: "Why have a fixed response? I dunno"
+components:
+    requestBodies:
+        body:
+          $ref: "#/components/requestBodies/body"

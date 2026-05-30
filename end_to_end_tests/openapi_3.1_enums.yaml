@@ -1,0 +1,226 @@
+openapi: 3.1.0
+info:
+  title: My Enum API
+  description: An API for testing enum handling in openapi-python-client
+  version: 0.1.0
+paths:
+  /tests/:
+    get:
+      tags:
+        - tests
+      summary: Get List
+      description: 'Get a list of things '
+      operationId: getUserList
+      parameters:
+        - required: true
+          schema:
+            title: An Enum Value
+            type: array
+            items:
+              $ref: '#/components/schemas/AnEnum'
+          name: an_enum_value
+          in: query
+        - required: true
+          schema:
+            title: An Enum Value With Null And String Values
+            type: array
+            items:
+              $ref: '#/components/schemas/AnEnumWithNull'
+          name: an_enum_value_with_null
+          in: query
+        - required: true
+          schema:
+            title: An Enum Value With Only Null Values
+            type: array
+            items:
+              $ref: '#/components/schemas/AnEnumWithOnlyNull'
+          name: an_enum_value_with_only_null
+          in: query
+        - in: header
+          name: Int-Enum-Header
+          required: false
+          schema:
+            type: integer
+            enum:
+              - 1
+              - 2
+              - 3
+        - in: header
+          name: String-Enum-Header
+          required: false
+          schema:
+            type: string
+            enum:
+              - one
+              - two
+              - three
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get List Tests  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/AModel'
+    post:
+      tags:
+        - tests
+      summary: Post List
+      description: 'Post a list of things '
+      operationId: postUserList
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                an_enum_value:
+                  title: An Enum Value
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnEnum'
+                an_enum_value_with_null:
+                  title: An Enum Value With Null And String Values
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnEnumWithNull'
+                an_enum_value_with_only_null:
+                  title: An Enum Value With Only Null Values
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnEnumWithOnlyNull'
+                an_allof_enum_with_overridden_default:
+                  title: An AllOf Enum With Overridden Default
+                  allOf:
+                    - $ref: '#/components/schemas/AnAllOfEnum'
+                  default: overridden_default
+                an_optional_allof_enum:
+                  title: An Optional AllOf Enum
+                  $ref: '#/components/schemas/AnAllOfEnum'
+                nested_list_of_enums:
+                  title: Nested List Of Enums
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DifferentEnum'
+                  default: []
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get List Tests  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/AModel'
+  /enum/int:
+    post:
+      tags:
+        - enums
+      summary: Int Enum
+      operationId: int_enum_tests_int_enum_post
+      parameters:
+        - required: true
+          schema:
+            $ref: '#/components/schemas/AnIntEnum'
+          name: int_enum
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /enum/bool:
+    post:
+      tags:
+        - enums
+      summary: Bool Enum
+      operationId: bool_enum_tests_bool_enum_post
+      parameters:
+        - required: true
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+          name: bool_enum
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    AModel:
+      title: AModel
+      required:
+        - an_enum_value
+        - an_allof_enum_with_overridden_default
+      type: object
+      properties:
+        any_value: {}
+        an_enum_value:
+          $ref: '#/components/schemas/AnEnum'
+        an_allof_enum_with_overridden_default:
+          allOf:
+            - $ref: '#/components/schemas/AnAllOfEnum'
+          default: overridden_default
+        an_optional_allof_enum:
+          $ref: '#/components/schemas/AnAllOfEnum'
+        nested_list_of_enums:
+          title: Nested List Of Enums
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DifferentEnum'
+          default: []
+      description: 'A Model for testing all the ways enums can be used '
+      additionalProperties: false
+    AnEnum:
+      title: AnEnum
+      enum:
+        - FIRST_VALUE
+        - SECOND_VALUE
+      description: 'For testing Enums in all the ways they can be used '
+    AnEnumWithNull:
+      title: AnEnumWithNull
+      enum:
+        - FIRST_VALUE
+        - SECOND_VALUE
+        - null
+      description: 'For testing Enums with mixed string / null values '
+    AnEnumWithOnlyNull:
+      title: AnEnumWithOnlyNull
+      enum:
+        - null
+      description: 'For testing Enums with only null values '
+    AnAllOfEnum:
+      title: AnAllOfEnum
+      enum:
+        - foo
+        - bar
+        - a_default
+        - overridden_default
+      default: a_default
+    AnIntEnum:
+      title: AnIntEnum
+      enum:
+        - -1
+        - 1
+        - 2
+      type: integer
+      description: An enumeration.
+    DifferentEnum:
+      title: DifferentEnum
+      enum:
+        - DIFFERENT
+        - OTHER
+      description: An enumeration.

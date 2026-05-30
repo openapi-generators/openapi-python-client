@@ -57,5 +57,5 @@ class NoneProperty(PropertyProtocol):
             return value
         if isinstance(value, str):
             if value == "None":
-                return Value(value)
+                return Value(python_code=value, raw_value=value)
         return PropertyError(f"Value {value} is not valid, only None is allowed")

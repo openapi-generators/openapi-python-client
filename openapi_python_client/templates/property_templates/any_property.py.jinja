@@ -1,0 +1,3 @@
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, str({{source}}).encode(), "text/plain")))
+{% endmacro %}

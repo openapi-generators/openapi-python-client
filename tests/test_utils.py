@@ -99,7 +99,7 @@ def test_no_string_escapes():
         ("int", "int_"),
         ("dict", "dict_"),
         ("not_reserved", "not_reserved"),
-        ("type", "type"),
+        ("type", "type_"),
         ("id", "id"),
         ("None", "None_"),
     ],

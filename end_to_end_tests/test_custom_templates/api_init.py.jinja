@@ -1,6 +1,5 @@
 """ Contains methods for accessing the API """
 
-from typing import Type
 {% for tag in endpoint_collections_by_tag.keys() %}
 from .{{ tag }} import {{ class_name(tag) }}Endpoints
 {% endfor %}
@@ -8,6 +7,6 @@ from .{{ tag }} import {{ class_name(tag) }}Endpoints
 class {{ class_name(package_name) }}Api:
 {% for tag in endpoint_collections_by_tag.keys() %}
     @classmethod
-    def {{ tag }}(cls) -> Type[{{ class_name(tag) }}Endpoints]:
+    def {{ tag }}(cls) -> type[{{ class_name(tag) }}Endpoints]:
         return {{ class_name(tag) }}Endpoints
 {% endfor %}

@@ -1,5 +1,3 @@
-from typing import Dict, Optional, Union
-
 from pydantic import BaseModel, ConfigDict
 
 from .callback import Callback
@@ -7,7 +5,7 @@ from .example import Example
 from .header import Header
 from .link import Link
 from .parameter import Parameter
-from .reference import Reference
+from .reference import ReferenceOr
 from .request_body import RequestBody
 from .response import Response
 from .schema import Schema
@@ -25,16 +23,18 @@ class Components(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
-    schemas: Optional[Dict[str, Union[Schema, Reference]]] = None
-    responses: Optional[Dict[str, Union[Response, Reference]]] = None
-    parameters: Optional[Dict[str, Union[Parameter, Reference]]] = None
-    examples: Optional[Dict[str, Union[Example, Reference]]] = None
-    requestBodies: Optional[Dict[str, Union[RequestBody, Reference]]] = None
-    headers: Optional[Dict[str, Union[Header, Reference]]] = None
-    securitySchemes: Optional[Dict[str, Union[SecurityScheme, Reference]]] = None
-    links: Optional[Dict[str, Union[Link, Reference]]] = None
-    callbacks: Optional[Dict[str, Union[Callback, Reference]]] = None
+    schemas: dict[str, ReferenceOr[Schema]] | None = None
+    responses: dict[str, ReferenceOr[Response]] | None = None
+    parameters: dict[str, ReferenceOr[Parameter]] | None = None
+    examples: dict[str, ReferenceOr[Example]] | None = None
+    requestBodies: dict[str, ReferenceOr[RequestBody]] | None = None
+    headers: dict[str, ReferenceOr[Header]] | None = None
+    securitySchemes: dict[str, ReferenceOr[SecurityScheme]] | None = None
+    links: dict[str, ReferenceOr[Link]] | None = None
+    callbacks: dict[str, ReferenceOr[Callback]] | None = None
     model_config = ConfigDict(
+        # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         json_schema_extra={
             "examples": [

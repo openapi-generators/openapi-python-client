@@ -1,8 +1,10 @@
-{% macro safe_docstring(content) %}
+{% macro safe_docstring(content, omit_if_empty=False) %}
 {# This macro returns the provided content as a docstring, set to a raw string if it contains a backslash #}
+{% if (not omit_if_empty) or (content | trim) %}
 {% if '\\' in content -%}
 r""" {{ content }} """
 {%- else -%}
 """ {{ content }} """
 {%- endif -%}
+{% endif %}
 {% endmacro %}

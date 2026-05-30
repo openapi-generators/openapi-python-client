@@ -1,3 +1,7 @@
 {% macro transform_header(source) %}
 "true" if {{ source }} else "false"
 {% endmacro %}
+
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, str({{source}}).encode(), "text/plain")))
+{% endmacro %}

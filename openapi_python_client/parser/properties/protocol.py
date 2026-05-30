@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = ["PropertyProtocol", "Value"]
 
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar
 
 from ... import Config
@@ -16,8 +17,15 @@ else:
     ModelProperty = "ModelProperty"
 
 
-class Value(str):
-    """Represents a valid (converted) value for a property"""
+@dataclass
+class Value:
+    """
+    Some literal values in OpenAPI documents (like defaults) have to be converted into Python code safely
+    (with string escaping, for example). We still keep the `raw_value` around for merging `allOf`.
+    """
+
+    python_code: str
+    raw_value: Any
 
 
 PropertyType = TypeVar("PropertyType", bound="PropertyProtocol")
@@ -80,21 +88,18 @@ class PropertyProtocol(Protocol):
             PythonIdentifier(value=new_name, prefix=config.field_prefix, skip_snake_case=skip_snake_case),
         )
 
-    def get_base_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_type_string(self) -> str:
         """Get the string describing the Python type of this property. Base types no require quoting."""
-        return f'"{self._type_string}"' if not self.is_base_type and quoted else self._type_string
+        return self._type_string
 
-    def get_base_json_type_string(self, *, quoted: bool = False) -> str:
+    def get_base_json_type_string(self) -> str:
         """Get the string describing the JSON type of this property. Base types no require quoting."""
-        return f'"{self._json_type_string}"' if not self.is_base_type and quoted else self._json_type_string
+        return self._json_type_string
 
     def get_type_string(
         self,
         no_optional: bool = False,
         json: bool = False,
-        *,
-        multipart: bool = False,
-        quoted: bool = False,
     ) -> str:
         """
         Get a string representation of type that should be used when declaring this property
@@ -102,21 +107,19 @@ class PropertyProtocol(Protocol):
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
             json: True if the type refers to the property after JSON serialization
-            multipart: True if the type should be used in a multipart request
-            quoted: True if the type should be wrapped in quotes (if not a base type)
         """
         if json:
-            type_string = self.get_base_json_type_string(quoted=quoted)
+            type_string = self.get_base_json_type_string()
         else:
-            type_string = self.get_base_type_string(quoted=quoted)
+            type_string = self.get_base_type_string()
 
         if no_optional or self.required:
             return type_string
-        return f"Union[Unset, {type_string}]"
+        return f"{type_string} | Unset"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
-        return self.get_type_string(no_optional=True, quoted=False)
+        return self.get_type_string(no_optional=True)
 
     # noinspection PyUnusedLocal
     def get_imports(self, *, prefix: str) -> set[str]:
@@ -129,7 +132,6 @@ class PropertyProtocol(Protocol):
         """
         imports = set()
         if not self.required:
-            imports.add("from typing import Union")
             imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 
@@ -146,32 +148,21 @@ class PropertyProtocol(Protocol):
         """How this should be declared in a dataclass"""
         default: str | None
         if self.default is not None:
-            default = self.default
+            default = self.default.python_code
         elif not self.required:
             default = "UNSET"
         else:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string(quoted=True)} = {default}"
-        return f"{self.python_name}: {self.get_type_string(quoted=True)}"
+            return f"{self.python_name}: {self.get_type_string()} = {default}"
+        return f"{self.python_name}: {self.get_type_string()}"
 
     def to_docstring(self) -> str:
         """Returns property docstring"""
         doc = f"{self.python_name} ({self.get_type_string()}): {self.description or ''}"
         if self.default:
-            doc += f" Default: {self.default}."
+            doc += f" Default: {self.default.python_code}."
         if self.example:
             doc += f" Example: {self.example}."
         return doc
-
-    @property
-    def is_base_type(self) -> bool:
-        """Base types, represented by any other of `Property` than `ModelProperty` should not be quoted."""
-        from . import ListProperty, ModelProperty, UnionProperty
-
-        return self.__class__.__name__ not in {
-            ModelProperty.__name__,
-            ListProperty.__name__,
-            UnionProperty.__name__,
-        }

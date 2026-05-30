@@ -7,6 +7,8 @@ https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#table
 """
 
 __all__ = [
+    "XML",
+    "Callback",
     "Components",
     "Contact",
     "Discriminator",
@@ -35,8 +37,6 @@ __all__ = [
     "Server",
     "ServerVariable",
     "Tag",
-    "XML",
-    "Callback",
 ]
 
 
@@ -70,3 +70,14 @@ from .server import Server
 from .server_variable import ServerVariable
 from .tag import Tag
 from .xml import XML
+
+PathItem.model_rebuild()
+Operation.model_rebuild()
+Components.model_rebuild()
+Encoding.model_rebuild()
+MediaType.model_rebuild()
+OpenAPI.model_rebuild()
+Parameter.model_rebuild()
+Header.model_rebuild()
+RequestBody.model_rebuild()
+Response.model_rebuild()

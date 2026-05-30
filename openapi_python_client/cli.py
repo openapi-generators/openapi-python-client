@@ -1,29 +1,34 @@
 import codecs
+from collections.abc import Sequence
 from pathlib import Path
 from pprint import pformat
-from typing import Optional, Sequence, Union
 
 import typer
 
-from openapi_python_client import MetaType
+from openapi_python_client import MetaType, __version__
 from openapi_python_client.config import Config, ConfigFile
 from openapi_python_client.parser.errors import ErrorLevel, GeneratorError, ParseError
 
-app = typer.Typer()
+app = typer.Typer(name="openapi-python-client")
 
 
 def _version_callback(value: bool) -> None:
-    from openapi_python_client import __version__
-
     if value:
         typer.echo(f"openapi-python-client version: {__version__}")
         raise typer.Exit()
 
 
 def _process_config(
-    *, url: Optional[str], path: Optional[Path], config_path: Optional[Path], meta_type: MetaType, file_encoding: str
+    *,
+    url: str | None,
+    path: Path | None,
+    config_path: Path | None,
+    meta_type: MetaType,
+    file_encoding: str,
+    overwrite: bool,
+    output_path: Path | None,
 ) -> Config:
-    source: Union[Path, str]
+    source: Path | str
     if url and not path:
         source = url
     elif path and not url:
@@ -49,13 +54,13 @@ def _process_config(
         except Exception as err:
             raise typer.BadParameter("Unable to parse config") from err
 
-    return Config.from_sources(config_file, meta_type, source, file_encoding)
+    return Config.from_sources(config_file, meta_type, source, file_encoding, overwrite, output_path=output_path)
 
 
 # noinspection PyUnusedLocal
 
 
-@app.callback(name="openapi-python-client")
+@app.callback()
 def cli(
     version: bool = typer.Option(False, "--version", callback=_version_callback, help="Print the version and exit"),
 ) -> None:
@@ -64,16 +69,16 @@ def cli(
 
 def _print_parser_error(err: GeneratorError, color: str) -> None:
     typer.secho(err.header, bold=True, fg=color, err=True)
-    typer.echo()
+    typer.echo(err=True)
     if err.detail:
         typer.secho(err.detail, fg=color, err=True)
-        typer.echo()
+        typer.echo(err=True)
 
     if isinstance(err, ParseError) and err.data is not None:
         formatted_data = pformat(err.data)
         typer.secho(formatted_data, fg=color, err=True)
 
-    typer.echo()
+    typer.echo(err=True)
 
 
 def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = False) -> None:
@@ -117,62 +122,46 @@ def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = Fals
         raise typer.Exit(code=1)
 
 
-custom_template_path_options = {
-    "help": "A path to a directory containing custom template(s)",
-    "file_okay": False,
-    "dir_okay": True,
-    "readable": True,
-    "resolve_path": True,
-}
-
-_meta_option = typer.Option(
-    MetaType.POETRY,
-    help="The type of metadata you want to generate.",
-)
-
-CONFIG_OPTION = typer.Option(None, "--config", help="Path to the config file to use")
-
-
 @app.command()
 def generate(
-    url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
-    path: Optional[Path] = typer.Option(None, help="A path to the JSON file"),
-    custom_template_path: Optional[Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
-    meta: MetaType = _meta_option,
+    url: str | None = typer.Option(None, help="A URL to read the OpenAPI document from"),
+    path: Path | None = typer.Option(None, help="A path to the OpenAPI document"),
+    custom_template_path: Path | None = typer.Option(
+        None,
+        help="A path to a directory containing custom template(s)",
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+    ),  # type: ignore
+    meta: MetaType = typer.Option(
+        MetaType.POETRY,
+        help="The type of metadata you want to generate.",
+    ),
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config_path: Optional[Path] = CONFIG_OPTION,
+    config_path: Path | None = typer.Option(None, "--config", help="Path to the config file to use"),
     fail_on_warning: bool = False,
+    overwrite: bool = typer.Option(False, help="Overwrite the existing client if it exists"),
+    output_path: Path | None = typer.Option(
+        None,
+        help="Path to write the generated code to. "
+        "Defaults to the OpenAPI document title converted to kebab or snake case (depending on meta type). "
+        "Can also be overridden with `project_name_override` or `package_name_override` in config.",
+    ),
 ) -> None:
     """Generate a new OpenAPI Client library"""
-    from . import create_new_client
+    from . import generate  # noqa: PLC0415
 
-    config = _process_config(url=url, path=path, config_path=config_path, meta_type=meta, file_encoding=file_encoding)
-    errors = create_new_client(
-        custom_template_path=custom_template_path,
-        config=config,
+    config = _process_config(
+        url=url,
+        path=path,
+        config_path=config_path,
+        meta_type=meta,
+        file_encoding=file_encoding,
+        overwrite=overwrite,
+        output_path=output_path,
     )
-    handle_errors(errors, fail_on_warning)
-
-
-@app.command()
-def update(
-    url: Optional[str] = typer.Option(None, help="A URL to read the JSON from"),
-    path: Optional[Path] = typer.Option(None, help="A path to the JSON file"),
-    custom_template_path: Optional[Path] = typer.Option(None, **custom_template_path_options),  # type: ignore
-    meta: MetaType = _meta_option,
-    file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),
-    config_path: Optional[Path] = CONFIG_OPTION,
-    fail_on_warning: bool = False,
-) -> None:
-    """Update an existing OpenAPI Client library
-
-    The update command performs the same operations as generate except it does not overwrite specific metadata for the
-    generated client such as the README.md, .gitignore, and pyproject.toml.
-    """
-    from . import update_existing_client
-
-    config = _process_config(config_path=config_path, meta_type=meta, url=url, path=path, file_encoding=file_encoding)
-    errors = update_existing_client(
+    errors = generate(
         custom_template_path=custom_template_path,
         config=config,
     )

@@ -1,10 +1,10 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .encoding import Encoding
 from .example import Example
-from .reference import Reference
+from .reference import ReferenceOr
 from .schema import Schema
 
 
@@ -16,11 +16,13 @@ class MediaType(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject
     """
 
-    media_type_schema: Optional[Union[Reference, Schema]] = Field(default=None, alias="schema")
-    example: Optional[Any] = None
-    examples: Optional[Dict[str, Union[Example, Reference]]] = None
-    encoding: Optional[Dict[str, Encoding]] = None
+    media_type_schema: ReferenceOr[Schema] | None = Field(default=None, alias="schema")
+    example: Any | None = None
+    examples: dict[str, ReferenceOr[Example]] | None = None
+    encoding: dict[str, Encoding] | None = None
     model_config = ConfigDict(
+        # `Encoding` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={

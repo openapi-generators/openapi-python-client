@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -11,12 +12,12 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     path_param: str,
     *,
-    string_param: Union[Unset, str] = UNSET,
-    integer_param: Union[Unset, int] = 0,
-    header_param: Union[None, Unset, str] = UNSET,
-    cookie_param: Union[Unset, str] = UNSET,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+    string_param: str | Unset = UNSET,
+    integer_param: int | Unset = 0,
+    header_param: None | str | Unset = UNSET,
+    cookie_param: str | Unset = UNSET,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     if not isinstance(header_param, Unset):
         headers["header param"] = header_param
 
@@ -24,7 +25,7 @@ def _get_kwargs(
     if cookie_param is not UNSET:
         cookies["cookie param"] = cookie_param
 
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
 
     params["string param"] = string_param
 
@@ -32,9 +33,11 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": f"/parameter-references/{path_param}",
+        "url": "/parameter-references/{path_param}".format(
+            path_param=quote(str(path_param), safe=""),
+        ),
         "params": params,
         "cookies": cookies,
     }
@@ -43,16 +46,17 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[Any]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
+    if response.status_code == 200:
         return None
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,20 +68,20 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     path_param: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, str] = UNSET,
-    integer_param: Union[Unset, int] = 0,
-    header_param: Union[None, Unset, str] = UNSET,
-    cookie_param: Union[Unset, str] = UNSET,
+    client: AuthenticatedClient | Client,
+    string_param: str | Unset = UNSET,
+    integer_param: int | Unset = 0,
+    header_param: None | str | Unset = UNSET,
+    cookie_param: str | Unset = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, str]):
-        integer_param (Union[Unset, int]):  Default: 0.
-        header_param (Union[None, Unset, str]):
-        cookie_param (Union[Unset, str]):
+        string_param (str | Unset):
+        integer_param (int | Unset):  Default: 0.
+        header_param (None | str | Unset):
+        cookie_param (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -105,20 +109,20 @@ def sync_detailed(
 async def asyncio_detailed(
     path_param: str,
     *,
-    client: Union[AuthenticatedClient, Client],
-    string_param: Union[Unset, str] = UNSET,
-    integer_param: Union[Unset, int] = 0,
-    header_param: Union[None, Unset, str] = UNSET,
-    cookie_param: Union[Unset, str] = UNSET,
+    client: AuthenticatedClient | Client,
+    string_param: str | Unset = UNSET,
+    integer_param: int | Unset = 0,
+    header_param: None | str | Unset = UNSET,
+    cookie_param: str | Unset = UNSET,
 ) -> Response[Any]:
     """Test different types of parameter references
 
     Args:
         path_param (str):
-        string_param (Union[Unset, str]):
-        integer_param (Union[Unset, int]):  Default: 0.
-        header_param (Union[None, Unset, str]):
-        cookie_param (Union[Unset, str]):
+        string_param (str | Unset):
+        integer_param (int | Unset):  Default: 0.
+        header_param (None | str | Unset):
+        cookie_param (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

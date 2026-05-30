@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -13,8 +13,9 @@ def _get_kwargs(
     *,
     mixed_case: str,
     mixedCase: str,
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
 
     params["mixed_case"] = mixed_case
 
@@ -22,7 +23,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/naming/mixed-case",
         "params": params,
@@ -31,13 +32,12 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[MixedCaseResponse200]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> MixedCaseResponse200 | None:
+    if response.status_code == 200:
         response_200 = MixedCaseResponse200.from_dict(response.json())
 
         return response_200
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -45,7 +45,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
+    *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[MixedCaseResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -57,7 +57,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
 ) -> Response[MixedCaseResponse200]:
@@ -88,10 +88,10 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> Optional[MixedCaseResponse200]:
+) -> MixedCaseResponse200 | None:
     """
     Args:
         mixed_case (str):
@@ -114,7 +114,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
 ) -> Response[MixedCaseResponse200]:
@@ -143,10 +143,10 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> Optional[MixedCaseResponse200]:
+) -> MixedCaseResponse200 | None:
     """
     Args:
         mixed_case (str):

@@ -1,0 +1,32 @@
+openapi: 3.1.0
+info:
+  title: My Test API
+  description: An API for testing docstrings_on_attributes behavior
+  version: 0.1.0
+paths:
+  {}
+components:
+  schemas:
+    ModelWithDescription:
+      type: object
+      description: This is a nice model.
+      properties:
+        propWithNoDesc:
+          type: string
+        propWithDesc:
+          type: string
+          description: This is a nice property.
+        propWithLongDesc:
+          type: string
+          description: |
+            It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness,
+            it was the epoch of belief, it was the epoch of incredulity, it was the season of light, it was the season of
+            darkness, it was the spring of hope, it was the winter of despair.
+    ModelWithNoDescription:
+      type: object
+      properties:
+        propWithNoDesc:
+          type: string
+        propWithDesc:
+          type: string
+          description: This is a nice property.

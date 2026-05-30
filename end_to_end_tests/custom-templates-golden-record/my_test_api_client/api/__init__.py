@@ -1,7 +1,5 @@
 """Contains methods for accessing the API"""
 
-from typing import Type
-
 from .bodies import BodiesEndpoints
 from .config import ConfigEndpoints
 from .default import DefaultEndpoints
@@ -13,59 +11,64 @@ from .parameter_references import ParameterReferencesEndpoints
 from .parameters import ParametersEndpoints
 from .responses import ResponsesEndpoints
 from .tag1 import Tag1Endpoints
+from .tag2 import Tag2Endpoints
 from .tests import TestsEndpoints
 from .true_ import True_Endpoints
 
 
 class MyTestApiClientApi:
     @classmethod
-    def bodies(cls) -> Type[BodiesEndpoints]:
+    def bodies(cls) -> type[BodiesEndpoints]:
         return BodiesEndpoints
 
     @classmethod
-    def tests(cls) -> Type[TestsEndpoints]:
+    def tests(cls) -> type[TestsEndpoints]:
         return TestsEndpoints
 
     @classmethod
-    def defaults(cls) -> Type[DefaultsEndpoints]:
+    def defaults(cls) -> type[DefaultsEndpoints]:
         return DefaultsEndpoints
 
     @classmethod
-    def enums(cls) -> Type[EnumsEndpoints]:
+    def enums(cls) -> type[EnumsEndpoints]:
         return EnumsEndpoints
 
     @classmethod
-    def responses(cls) -> Type[ResponsesEndpoints]:
+    def responses(cls) -> type[ResponsesEndpoints]:
         return ResponsesEndpoints
 
     @classmethod
-    def default(cls) -> Type[DefaultEndpoints]:
+    def default(cls) -> type[DefaultEndpoints]:
         return DefaultEndpoints
 
     @classmethod
-    def parameters(cls) -> Type[ParametersEndpoints]:
+    def parameters(cls) -> type[ParametersEndpoints]:
         return ParametersEndpoints
 
     @classmethod
-    def tag1(cls) -> Type[Tag1Endpoints]:
+    def tag1(cls) -> type[Tag1Endpoints]:
         return Tag1Endpoints
 
     @classmethod
-    def location(cls) -> Type[LocationEndpoints]:
+    def tag2(cls) -> type[Tag2Endpoints]:
+        return Tag2Endpoints
+
+    @classmethod
+    def location(cls) -> type[LocationEndpoints]:
         return LocationEndpoints
 
     @classmethod
-    def true_(cls) -> Type[True_Endpoints]:
+    def true_(cls) -> type[True_Endpoints]:
         return True_Endpoints
 
     @classmethod
-    def naming(cls) -> Type[NamingEndpoints]:
+    def naming(cls) -> type[NamingEndpoints]:
         return NamingEndpoints
 
     @classmethod
-    def parameter_references(cls) -> Type[ParameterReferencesEndpoints]:
+    def parameter_references(cls) -> type[ParameterReferencesEndpoints]:
         return ParameterReferencesEndpoints
 
     @classmethod
-    def config(cls) -> Type[ConfigEndpoints]:
+    def config(cls) -> type[ConfigEndpoints]:
         return ConfigEndpoints

@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -16,39 +19,39 @@ T = TypeVar("T", bound="PublicError")
 class PublicError:
     """
     Attributes:
-        errors (Union[Unset, List[str]]):
-        extra_parameters (Union[Unset, List[str]]):
-        invalid_parameters (Union[Unset, List['Problem']]):
-        missing_parameters (Union[Unset, List[str]]):
+        errors (list[str] | Unset):
+        extra_parameters (list[str] | Unset):
+        invalid_parameters (list[Problem] | Unset):
+        missing_parameters (list[str] | Unset):
     """
 
-    errors: Union[Unset, List[str]] = UNSET
-    extra_parameters: Union[Unset, List[str]] = UNSET
-    invalid_parameters: Union[Unset, List["Problem"]] = UNSET
-    missing_parameters: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    errors: list[str] | Unset = UNSET
+    extra_parameters: list[str] | Unset = UNSET
+    invalid_parameters: list[Problem] | Unset = UNSET
+    missing_parameters: list[str] | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        errors: Union[Unset, List[str]] = UNSET
+    def to_dict(self) -> dict[str, Any]:
+        errors: list[str] | Unset = UNSET
         if not isinstance(self.errors, Unset):
             errors = self.errors
 
-        extra_parameters: Union[Unset, List[str]] = UNSET
+        extra_parameters: list[str] | Unset = UNSET
         if not isinstance(self.extra_parameters, Unset):
             extra_parameters = self.extra_parameters
 
-        invalid_parameters: Union[Unset, List[Dict[str, Any]]] = UNSET
+        invalid_parameters: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.invalid_parameters, Unset):
             invalid_parameters = []
             for invalid_parameters_item_data in self.invalid_parameters:
                 invalid_parameters_item = invalid_parameters_item_data.to_dict()
                 invalid_parameters.append(invalid_parameters_item)
 
-        missing_parameters: Union[Unset, List[str]] = UNSET
+        missing_parameters: list[str] | Unset = UNSET
         if not isinstance(self.missing_parameters, Unset):
             missing_parameters = self.missing_parameters
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if errors is not UNSET:
@@ -63,22 +66,24 @@ class PublicError:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.problem import Problem
 
-        d = src_dict.copy()
-        errors = cast(List[str], d.pop("errors", UNSET))
+        d = dict(src_dict)
+        errors = cast(list[str], d.pop("errors", UNSET))
 
-        extra_parameters = cast(List[str], d.pop("extra_parameters", UNSET))
+        extra_parameters = cast(list[str], d.pop("extra_parameters", UNSET))
 
-        invalid_parameters = []
         _invalid_parameters = d.pop("invalid_parameters", UNSET)
-        for invalid_parameters_item_data in _invalid_parameters or []:
-            invalid_parameters_item = Problem.from_dict(invalid_parameters_item_data)
+        invalid_parameters: list[Problem] | Unset = UNSET
+        if _invalid_parameters is not UNSET:
+            invalid_parameters = []
+            for invalid_parameters_item_data in _invalid_parameters:
+                invalid_parameters_item = Problem.from_dict(invalid_parameters_item_data)
 
-            invalid_parameters.append(invalid_parameters_item)
+                invalid_parameters.append(invalid_parameters_item)
 
-        missing_parameters = cast(List[str], d.pop("missing_parameters", UNSET))
+        missing_parameters = cast(list[str], d.pop("missing_parameters", UNSET))
 
         public_error = cls(
             errors=errors,
@@ -91,7 +96,7 @@ class PublicError:
         return public_error
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

@@ -1,0 +1,19 @@
+openapi: "3.1.0"
+info:
+  title: "There's something wrong with me"
+  version: "0.1.0"
+paths:
+  "/{optional}":
+    get:
+      parameters:
+        - in: "path"
+          name: "optional"
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                const: "Why have a fixed response? I dunno"

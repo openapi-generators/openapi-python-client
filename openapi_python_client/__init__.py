@@ -4,10 +4,11 @@ import json
 import mimetypes
 import shutil
 import subprocess
+from collections.abc import Sequence
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any
 
 import httpcore
 import httpx
@@ -20,6 +21,7 @@ from openapi_python_client import utils
 from .config import Config, MetaType
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
+from .parser.properties import LiteralEnumProperty
 
 __version__ = version(__package__)
 
@@ -40,7 +42,7 @@ class Project:
         *,
         openapi: GeneratorData,
         config: Config,
-        custom_template_path: Optional[Path] = None,
+        custom_template_path: Path | None = None,
     ) -> None:
         self.openapi: GeneratorData = openapi
         self.config = config
@@ -65,12 +67,22 @@ class Project:
         )
 
         self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
-        self.project_dir: Path = Path.cwd()
-        if config.meta_type != MetaType.NONE:
-            self.project_dir /= self.project_name
-
         self.package_name: str = config.package_name_override or self.project_name.replace("-", "_")
-        self.package_dir: Path = self.project_dir / self.package_name
+        self.project_dir: Path  # Where the generated code will be placed
+        self.package_dir: Path  # Where the generated Python module will be placed (same as project_dir if no meta)
+
+        if config.output_path is not None:
+            self.project_dir = config.output_path
+        elif config.meta_type == MetaType.NONE:
+            self.project_dir = Path.cwd() / self.package_name
+        else:
+            self.project_dir = Path.cwd() / self.project_name
+
+        if config.meta_type == MetaType.NONE:
+            self.package_dir = self.project_dir
+        else:
+            self.package_dir = self.project_dir / self.package_name
+
         self.package_description: str = utils.remove_string_escapes(
             f"A client library for accessing {self.openapi.title}"
         )
@@ -78,6 +90,7 @@ class Project:
 
         self.env.filters.update(TEMPLATE_FILTERS)
         self.env.globals.update(
+            config=config,
             utils=utils,
             python_identifier=lambda x: utils.PythonIdentifier(x, config.field_prefix),
             class_name=lambda x: utils.ClassName(x, config.field_prefix),
@@ -90,34 +103,19 @@ class Project:
             openapi=self.openapi,
             endpoint_collections_by_tag=self.openapi.endpoint_collections_by_tag,
         )
-        self.errors: List[GeneratorError] = []
+        self.errors: list[GeneratorError] = []
 
     def build(self) -> Sequence[GeneratorError]:
         """Create the project from templates"""
 
-        if self.config.meta_type == MetaType.NONE:
-            print(f"Generating {self.package_name}")
-        else:
-            print(f"Generating {self.project_name}")
-            try:
-                self.project_dir.mkdir()
-            except FileExistsError:
-                return [GeneratorError(detail="Directory already exists. Delete it or use the update command.")]
+        print(f"Generating {self.project_dir}")
+        try:
+            self.project_dir.mkdir()
+        except FileExistsError:
+            if not self.config.overwrite:
+                return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
         self._create_package()
         self._build_metadata()
-        self._build_models()
-        self._build_api()
-        self._run_post_hooks()
-        return self._get_errors()
-
-    def update(self) -> Sequence[GeneratorError]:
-        """Update an existing project"""
-
-        if not self.package_dir.is_dir():
-            return [GeneratorError(detail=f"Directory {self.package_dir} not found")]
-        print(f"Updating {self.package_name}")
-        shutil.rmtree(self.package_dir)
-        self._create_package()
         self._build_models()
         self._build_api()
         self._run_post_hooks()
@@ -128,7 +126,7 @@ class Project:
             self._run_command(command)
 
     def _run_command(self, cmd: str) -> None:
-        cmd_name = cmd.split(" ")[0]
+        cmd_name = cmd.split(" ", maxsplit=1)[0]
         command_exists = shutil.which(cmd_name)
         if not command_exists:
             self.errors.append(
@@ -138,7 +136,7 @@ class Project:
             )
             return
         try:
-            cwd = self.package_dir if self.config.meta_type == MetaType.NONE else self.project_dir
+            cwd = self.project_dir
             subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, check=True)
         except CalledProcessError as err:
             self.errors.append(
@@ -149,8 +147,8 @@ class Project:
                 )
             )
 
-    def _get_errors(self) -> List[GeneratorError]:
-        errors: List[GeneratorError] = []
+    def _get_errors(self) -> list[GeneratorError]:
+        errors: list[GeneratorError] = []
         for collection in self.openapi.endpoint_collections_by_tag.values():
             errors.extend(collection.parse_errors)
         errors.extend(self.openapi.errors)
@@ -158,7 +156,8 @@ class Project:
         return errors
 
     def _create_package(self) -> None:
-        self.package_dir.mkdir()
+        if self.package_dir != self.project_dir:
+            self.package_dir.mkdir(exist_ok=True)
         # Package __init__.py
         package_init = self.package_dir / "__init__.py"
 
@@ -185,7 +184,7 @@ class Project:
         readme = self.project_dir / "README.md"
         readme_template = self.env.get_template("README.md.jinja")
         readme.write_text(
-            readme_template.render(poetry=self.config.meta_type == MetaType.POETRY),
+            readme_template.render(meta=self.config.meta_type),
             encoding=self.config.file_encoding,
         )
 
@@ -214,6 +213,7 @@ class Project:
     def _build_models(self) -> None:
         # Generate models
         models_dir = self.package_dir / "models"
+        shutil.rmtree(models_dir, ignore_errors=True)
         models_dir.mkdir()
         models_init = models_dir / "__init__.py"
         imports = []
@@ -229,9 +229,12 @@ class Project:
         # Generate enums
         str_enum_template = self.env.get_template("str_enum.py.jinja")
         int_enum_template = self.env.get_template("int_enum.py.jinja")
+        literal_enum_template = self.env.get_template("literal_enum.py.jinja")
         for enum in self.openapi.enums:
             module_path = models_dir / f"{enum.class_info.module_name}.py"
-            if enum.value_type is int:
+            if isinstance(enum, LiteralEnumProperty):
+                module_path.write_text(literal_enum_template.render(enum=enum), encoding=self.config.file_encoding)
+            elif enum.value_type is int:
                 module_path.write_text(int_enum_template.render(enum=enum), encoding=self.config.file_encoding)
             else:
                 module_path.write_text(str_enum_template.render(enum=enum), encoding=self.config.file_encoding)
@@ -256,6 +259,7 @@ class Project:
 
         # Generate endpoints
         api_dir = self.package_dir / "api"
+        shutil.rmtree(api_dir, ignore_errors=True)
         api_dir.mkdir()
         api_init_path = api_dir / "__init__.py"
         api_init_template = self.env.get_template("api_init.py.jinja")
@@ -288,8 +292,8 @@ class Project:
 
 def _get_project_for_url_or_path(
     config: Config,
-    custom_template_path: Optional[Path] = None,
-) -> Union[Project, GeneratorError]:
+    custom_template_path: Path | None = None,
+) -> Project | GeneratorError:
     data_dict = _get_document(source=config.document_source, timeout=config.http_timeout)
     if isinstance(data_dict, GeneratorError):
         return data_dict
@@ -303,10 +307,10 @@ def _get_project_for_url_or_path(
     )
 
 
-def create_new_client(
+def generate(
     *,
     config: Config,
-    custom_template_path: Optional[Path] = None,
+    custom_template_path: Path | None = None,
 ) -> Sequence[GeneratorError]:
     """
     Generate the client library
@@ -323,27 +327,7 @@ def create_new_client(
     return project.build()
 
 
-def update_existing_client(
-    *,
-    config: Config,
-    custom_template_path: Optional[Path] = None,
-) -> Sequence[GeneratorError]:
-    """
-    Update an existing client library
-
-    Returns:
-         A list containing any errors encountered when generating.
-    """
-    project = _get_project_for_url_or_path(
-        custom_template_path=custom_template_path,
-        config=config,
-    )
-    if isinstance(project, GeneratorError):
-        return [project]
-    return project.update()
-
-
-def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[str, Any], GeneratorError]:
+def _load_yaml_or_json(data: bytes, content_type: str | None) -> dict[str, Any] | GeneratorError:
     if content_type == "application/json":
         try:
             return json.loads(data.decode())
@@ -357,9 +341,9 @@ def _load_yaml_or_json(data: bytes, content_type: Optional[str]) -> Union[Dict[s
             return GeneratorError(header=f"Invalid YAML from provided source: {err}")
 
 
-def _get_document(*, source: Union[str, Path], timeout: int) -> Union[Dict[str, Any], GeneratorError]:
+def _get_document(*, source: str | Path, timeout: int) -> dict[str, Any] | GeneratorError:
     yaml_bytes: bytes
-    content_type: Optional[str]
+    content_type: str | None
     if isinstance(source, str):
         try:
             response = httpx.get(source, timeout=timeout)

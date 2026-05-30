@@ -4,16 +4,17 @@ __all__ = [
     "AnyProperty",
     "Class",
     "EnumProperty",
+    "LiteralEnumProperty",
     "ModelProperty",
     "Parameters",
     "Property",
     "Schemas",
-    "build_schemas",
     "build_parameters",
+    "build_schemas",
     "property_from_data",
 ]
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from attrs import evolve
 
@@ -30,6 +31,7 @@ from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
 from .list_property import ListProperty
+from .literal_enum_property import LiteralEnumProperty
 from .model_property import ModelProperty, process_model
 from .none import NoneProperty
 from .property import Property
@@ -38,17 +40,19 @@ from .schemas import (
     Parameters,
     ReferencePath,
     Schemas,
+    get_reference_simple_name,
     parse_reference_path,
     update_parameters_with_data,
     update_schemas_with_data,
 )
 from .string import StringProperty
 from .union import UnionProperty
+from .uuid import UuidProperty
 
 
 def _string_based_property(
     name: str, required: bool, data: oai.Schema, config: Config
-) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | PropertyError:
+) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | PropertyError:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
     python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
@@ -79,11 +83,19 @@ def _string_based_property(
             description=data.description,
             example=data.example,
         )
+    if string_format == "uuid":
+        return UuidProperty.build(
+            name=name,
+            required=required,
+            default=data.default,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
+        )
     return StringProperty.build(
         name=name,
         default=data.default,
         required=required,
-        pattern=data.pattern,
         python_name=python_name,
         description=data.description,
         example=data.example,
@@ -126,7 +138,7 @@ def _property_from_ref(
     return prop, schemas
 
 
-def property_from_data(  # noqa: PLR0911
+def property_from_data(  # noqa: PLR0911, PLR0912
     name: str,
     required: bool,
     data: oai.Reference | oai.Schema,
@@ -153,7 +165,7 @@ def property_from_data(  # noqa: PLR0911
     sub_data: list[oai.Schema | oai.Reference] = data.allOf + data.anyOf + data.oneOf
     # A union of a single reference should just be passed through to that reference (don't create copy class)
     if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
-        return _property_from_ref(
+        prop, schemas = _property_from_ref(
             name=name,
             required=required,
             parent=data,
@@ -162,6 +174,16 @@ def property_from_data(  # noqa: PLR0911
             config=config,
             roots=roots,
         )
+        # We won't be generating a separate Python class for this schema - references to it will just use
+        # the class for the schema it's referencing - so we don't add it to classes_by_name; but we do
+        # add it to models_to_process, if it's a model, because its properties still need to be resolved.
+        if isinstance(prop, ModelProperty):
+            schemas = evolve(
+                schemas,
+                models_to_process=[*schemas.models_to_process, prop],
+            )
+        return prop, schemas
+
     if data.type == oai.DataType.BOOLEAN:
         return (
             BooleanProperty.build(
@@ -175,6 +197,15 @@ def property_from_data(  # noqa: PLR0911
             schemas,
         )
     if data.enum:
+        if config.literal_enums:
+            return LiteralEnumProperty.build(
+                data=data,
+                name=name,
+                required=required,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+            )
         return EnumProperty.build(
             data=data,
             name=name,
@@ -271,7 +302,7 @@ def property_from_data(  # noqa: PLR0911
         AnyProperty.build(
             name=name,
             required=required,
-            default=None,
+            default=data.default,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
@@ -294,17 +325,30 @@ def _create_schemas(
     while still_making_progress:
         still_making_progress = False
         errors = []
-        next_round = []
+        next_round: list[tuple[str, oai.Reference | oai.Schema]] = []
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
-            if isinstance(data, oai.Reference):
-                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
-                continue
+            schema_data: oai.Reference | oai.Schema | None = data
             ref_path = parse_reference_path(f"#/components/schemas/{name}")
             if isinstance(ref_path, ParseError):
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
-            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+            if isinstance(data, oai.Reference):
+                # Fully dereference reference schemas
+                seen = [name]
+                while isinstance(schema_data, oai.Reference):
+                    data_ref_schema = get_reference_simple_name(schema_data.ref)
+                    if data_ref_schema in seen:
+                        schemas.errors.append(PropertyError(detail="Circular schema references found", data=data))
+                        break
+                    # use derefenced schema definition for this schema
+                    schema_data = components.get(data_ref_schema)
+            if isinstance(schema_data, oai.Schema):
+                schemas_or_err = update_schemas_with_data(
+                    ref_path=ref_path, data=schema_data, schemas=schemas, config=config
+                )
+            else:
+                schemas.errors.append(PropertyError(detail="Referent schema not found", data=data))
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
                 errors.append(schemas_or_err)
@@ -341,7 +385,7 @@ def _process_model_errors(
 
 
 def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
-    to_process = (prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty))
+    to_process = schemas.models_to_process
     still_making_progress = True
     final_model_errors: list[tuple[ModelProperty, PropertyError]] = []
     latest_model_errors: list[tuple[ModelProperty, PropertyError]] = []
@@ -368,12 +412,11 @@ def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
                 continue
             schemas = schemas_or_err
             still_making_progress = True
-        to_process = (prop for prop in next_round)
+        to_process = next_round
 
     final_model_errors.extend(latest_model_errors)
     errors = _process_model_errors(final_model_errors, schemas=schemas)
-    schemas.errors.extend(errors)
-    return schemas
+    return evolve(schemas, errors=[*schemas.errors, *errors], models_to_process=to_process)
 
 
 def build_schemas(

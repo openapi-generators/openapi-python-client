@@ -21,6 +21,8 @@ class Header(Parameter):
     name: str = Field(default="")
     param_in: ParameterLocation = Field(default=ParameterLocation.HEADER, alias="in")
     model_config = ConfigDict(
+        # `Parameter` is not build yet, will rebuild in `__init__.py`:
+        defer_build=True,
         extra="allow",
         populate_by_name=True,
         json_schema_extra={

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated, Any, Literal, TypeAlias, TypeVar
+
+from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
 
 
 class Reference(BaseModel):
@@ -24,3 +26,17 @@ class Reference(BaseModel):
             "examples": [{"$ref": "#/components/schemas/Pet"}, {"$ref": "Pet.json"}, {"$ref": "definitions.json#/Pet"}]
         },
     )
+
+
+T = TypeVar("T")
+
+
+def _reference_discriminator(obj: Any) -> Literal["ref", "other"]:
+    if isinstance(obj, dict):
+        return "ref" if "$ref" in obj else "other"
+    return "ref" if isinstance(obj, Reference) else "other"
+
+
+ReferenceOr: TypeAlias = Annotated[
+    Annotated[Reference, Tag("ref")] | Annotated[T, Tag("other")], Discriminator(_reference_discriminator)
+]

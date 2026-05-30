@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -16,8 +16,8 @@ def _get_kwargs(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     headers["Boolean-Header"] = "true" if boolean_header else "false"
 
     headers["String-Header"] = string_header
@@ -26,7 +26,7 @@ def _get_kwargs(
 
     headers["Integer-Header"] = str(integer_header)
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/parameters/header",
     }
@@ -36,16 +36,18 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
-    if response.status_code == HTTPStatus.OK:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> PostParametersHeaderResponse200 | PublicError | None:
+    if response.status_code == 200:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
 
         return response_200
-    if response.status_code == HTTPStatus.BAD_REQUEST:
+
+    if response.status_code == 400:
         response_400 = PublicError.from_dict(response.json())
 
         return response_400
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -53,8 +55,8 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[PostParametersHeaderResponse200 | PublicError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,12 +67,12 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
+) -> Response[PostParametersHeaderResponse200 | PublicError]:
     """
     Args:
         boolean_header (bool):
@@ -83,7 +85,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[PostParametersHeaderResponse200, PublicError]]
+        Response[PostParametersHeaderResponse200 | PublicError]
     """
 
     kwargs = _get_kwargs(
@@ -102,12 +104,12 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
+) -> PostParametersHeaderResponse200 | PublicError | None:
     """
     Args:
         boolean_header (bool):
@@ -120,7 +122,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[PostParametersHeaderResponse200, PublicError]
+        PostParametersHeaderResponse200 | PublicError
     """
 
     return sync_detailed(
@@ -134,12 +136,12 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[Union[PostParametersHeaderResponse200, PublicError]]:
+) -> Response[PostParametersHeaderResponse200 | PublicError]:
     """
     Args:
         boolean_header (bool):
@@ -152,7 +154,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[PostParametersHeaderResponse200, PublicError]]
+        Response[PostParametersHeaderResponse200 | PublicError]
     """
 
     kwargs = _get_kwargs(
@@ -169,12 +171,12 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Optional[Union[PostParametersHeaderResponse200, PublicError]]:
+) -> PostParametersHeaderResponse200 | PublicError | None:
     """
     Args:
         boolean_header (bool):
@@ -187,7 +189,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[PostParametersHeaderResponse200, PublicError]
+        PostParametersHeaderResponse200 | PublicError
     """
 
     return (

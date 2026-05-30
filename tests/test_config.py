@@ -1,16 +1,26 @@
 import json
 import os
+from io import StringIO
 from pathlib import Path
+from typing import Any
 
 import pytest
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML as _YAML
 
 from openapi_python_client.config import ConfigFile
+
+
+class YAML(_YAML):
+    def dump_to_string(self, data: Any, **kwargs: Any) -> str:
+        stream = StringIO()
+        self.dump(data=data, stream=stream, **kwargs)
+        return stream.getvalue()
+
 
 yaml = YAML(typ=["safe", "string"])
 
 
-def json_with_tabs(d):
+def json_with_tabs(d: dict) -> str:
     return json.dumps(d, indent=4).replace("    ", "\t")
 
 
@@ -24,7 +34,7 @@ def json_with_tabs(d):
     ],
 )
 @pytest.mark.parametrize("relative", (True, False), ids=("relative", "absolute"))
-def test_load_from_path(tmp_path: Path, filename, dump, relative):
+def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
     yml_file = tmp_path.joinpath(filename)
     if relative:
         if not os.getenv("TEST_RELATIVE"):
