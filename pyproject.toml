@@ -16,7 +16,7 @@ dependencies = [
     "ruff>=0.2",
 ]
 name = "openapi-python-client"
-version = "0.28.4"
+version = "0.29.0"
 description = "Generate modern Python clients from OpenAPI"
 keywords = [
     "OpenAPI",
