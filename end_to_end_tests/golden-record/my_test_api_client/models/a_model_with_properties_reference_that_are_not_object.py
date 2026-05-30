@@ -239,7 +239,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         _datetime_properties_ref = d.pop("datetime_properties_ref")
         for componentsschemas_an_other_array_of_date_time_item_data in _datetime_properties_ref:
             componentsschemas_an_other_array_of_date_time_item = datetime.datetime.fromisoformat(
-                componentsschemas_an_other_array_of_date_time_item_data.replace("Z", "+00:00")
+                componentsschemas_an_other_array_of_date_time_item_data
             )
 
             datetime_properties_ref.append(componentsschemas_an_other_array_of_date_time_item)
@@ -285,7 +285,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
         _datetime_properties = d.pop("datetime_properties")
         for componentsschemas_an_array_of_date_time_item_data in _datetime_properties:
             componentsschemas_an_array_of_date_time_item = datetime.datetime.fromisoformat(
-                componentsschemas_an_array_of_date_time_item_data.replace("Z", "+00:00")
+                componentsschemas_an_array_of_date_time_item_data
             )
 
             datetime_properties.append(componentsschemas_an_array_of_date_time_item)
@@ -315,7 +315,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         date_property_ref = datetime.date.fromisoformat(d.pop("date_property_ref"))
 
-        datetime_property_ref = datetime.datetime.fromisoformat(d.pop("datetime_property_ref").replace("Z", "+00:00"))
+        datetime_property_ref = datetime.datetime.fromisoformat(d.pop("datetime_property_ref"))
 
         int32_property_ref = d.pop("int32_property_ref")
 

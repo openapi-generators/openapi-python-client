@@ -275,7 +275,7 @@ class Extended:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                a_camel_date_time_type_0 = datetime.datetime.fromisoformat(data.replace("Z", "+00:00"))
+                a_camel_date_time_type_0 = datetime.datetime.fromisoformat(data)
 
                 return a_camel_date_time_type_0
             except (TypeError, ValueError, AttributeError, KeyError):

@@ -51,7 +51,7 @@ class TestSimpleDefaults:
             number_prop=1.5,
             int_prop=2,
             date_prop=datetime.date(2024, 1, 2),
-            date_time_prop=datetime.datetime(2024, 1, 2, 3, 4, 5, tzinfo=datetime.timezone.utc),
+            date_time_prop=datetime.datetime(2024, 1, 2, 3, 4, 5, tzinfo=datetime.UTC),
             uuid_prop=uuid.UUID("07EF8B4D-AA09-4FFA-898D-C710796AFF41"),
             any_prop_with_string="b",
             any_prop_with_int=3,

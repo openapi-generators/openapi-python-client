@@ -1,6 +1,5 @@
 {% macro construct_function(property, source) %}
-{# TODO(py3.10): fromisoformat() rejects "Z". Remove when 3.10 support ends. #}
-datetime.datetime.fromisoformat({{ source }}.replace("Z", "+00:00"))
+datetime.datetime.fromisoformat({{ source }})
 {% endmacro %}
 
 {% from "property_templates/property_macros.py.jinja" import construct_template %}

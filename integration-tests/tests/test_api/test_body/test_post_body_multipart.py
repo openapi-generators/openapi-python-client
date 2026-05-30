@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from typing import Any
 
@@ -26,7 +26,7 @@ body = PostBodyMultipartBody(
             mime_type=None,
         ),
     ],
-    times=[datetime.now(timezone.utc) - timedelta(days=1), datetime.now(timezone.utc)],
+    times=[datetime.now(UTC) - timedelta(days=1), datetime.now(UTC)],
     objects=[
         AnObject(
             an_int=1,
