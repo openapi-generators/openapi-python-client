@@ -31,7 +31,7 @@ class ModelWithPrimitiveAdditionalPropertiesADateHolder:
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_property = datetime.datetime.fromisoformat(prop_dict.replace("Z", "+00:00"))
+            additional_property = datetime.datetime.fromisoformat(prop_dict)
 
             additional_properties[prop_name] = additional_property
 

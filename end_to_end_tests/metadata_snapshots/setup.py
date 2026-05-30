@@ -12,7 +12,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    python_requires=">=3.10, <4",
+    python_requires=">=3.11, <4",
     install_requires=["httpx >= 0.23.1, < 0.29.0", "attrs >= 22.2.0"],
     package_data={"test_3_1_features_client": ["py.typed"]},
 )

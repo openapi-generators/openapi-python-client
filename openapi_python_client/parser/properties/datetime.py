@@ -55,13 +55,11 @@ class DateTimeProperty(PropertyProtocol):
         if value is None or isinstance(value, Value):
             return value
         if isinstance(value, str):
-            # TODO(py3.10): fromisoformat() rejects "Z". Remove when 3.10 support ends.
-            normalized = value.replace("Z", "+00:00")
             try:
-                datetime.datetime.fromisoformat(normalized)  # make sure it's a valid value
+                datetime.datetime.fromisoformat(value)  # make sure it's a valid value
             except ValueError as e:
                 return PropertyError(f"Invalid datetime: {e}")
-            return Value(python_code=f"datetime.datetime.fromisoformat({normalized!r})", raw_value=value)
+            return Value(python_code=f"datetime.datetime.fromisoformat({value!r})", raw_value=value)
         return PropertyError(f"Cannot convert {value} to a datetime")
 
     def get_imports(self, *, prefix: str) -> set[str]:

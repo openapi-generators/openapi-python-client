@@ -1,6 +1,6 @@
 import json
 import mimetypes
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 from attr import define
@@ -18,7 +18,7 @@ class ClassOverride(BaseModel):
     module_name: str | None = None
 
 
-class MetaType(str, Enum):
+class MetaType(StrEnum):
     """The types of metadata supported for project generation."""
 
     NONE = "none"

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataType(str, Enum):
+class DataType(StrEnum):
     """The data type of a schema is defined by the type keyword
 
     References:

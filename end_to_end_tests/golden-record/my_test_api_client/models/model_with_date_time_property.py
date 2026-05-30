@@ -43,7 +43,7 @@ class ModelWithDateTimeProperty:
         if isinstance(_datetime_, Unset):
             datetime_ = UNSET
         else:
-            datetime_ = datetime.datetime.fromisoformat(_datetime_.replace("Z", "+00:00"))
+            datetime_ = datetime.datetime.fromisoformat(_datetime_)
 
         model_with_date_time_property = cls(
             datetime_=datetime_,

@@ -3,6 +3,6 @@ from datetime import date
 
 some_source = date(2020, 10, 12)
 some_destination = some_source.isoformat()
-a_prop = datetime.datetime.fromisoformat(some_destination.replace("Z", "+00:00"))
+a_prop = datetime.datetime.fromisoformat(some_destination)
 
 

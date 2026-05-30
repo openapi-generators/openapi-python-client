@@ -87,7 +87,7 @@ class PostBodyMultipartResponse200:
         times = []
         _times = d.pop("times")
         for times_item_data in _times:
-            times_item = datetime.datetime.fromisoformat(times_item_data.replace("Z", "+00:00"))
+            times_item = datetime.datetime.fromisoformat(times_item_data)
 
             times.append(times_item)
 

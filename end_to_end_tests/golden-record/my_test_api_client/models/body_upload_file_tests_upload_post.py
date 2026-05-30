@@ -299,7 +299,7 @@ class BodyUploadFileTestsUploadPost:
         if isinstance(_a_datetime, Unset):
             a_datetime = UNSET
         else:
-            a_datetime = datetime.datetime.fromisoformat(_a_datetime.replace("Z", "+00:00"))
+            a_datetime = datetime.datetime.fromisoformat(_a_datetime)
 
         _a_date = d.pop("a_date", UNSET)
         a_date: datetime.date | Unset

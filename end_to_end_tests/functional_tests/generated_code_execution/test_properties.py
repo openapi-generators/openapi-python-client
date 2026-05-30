@@ -166,7 +166,7 @@ class TestSpecialStringFormats:
         assert_model_decode_encode(MyModel, json_data, MyModel(date_prop=date_value))
 
     def test_date_time(self, MyModel):
-        date_time_value = datetime.datetime.now(datetime.timezone.utc)
+        date_time_value = datetime.datetime.now(datetime.UTC)
         json_data = {"dateTimeProp": date_time_value.isoformat()}
         assert_model_decode_encode(MyModel, json_data, MyModel(date_time_prop=date_time_value))
 
