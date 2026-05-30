@@ -27,21 +27,24 @@ def _get_kwargs(
             _kwargs["json"] = body.to_dict()
 
         headers["Content-Type"] = "application/json"
+
     if isinstance(body, File):
         if not isinstance(body, Unset):
             _kwargs["content"] = body.payload
 
         headers["Content-Type"] = "application/octet-stream"
+
     if isinstance(body, PostBodiesMultipleDataBody):
         if not isinstance(body, Unset):
             _kwargs["data"] = body.to_dict()
 
         headers["Content-Type"] = "application/x-www-form-urlencoded"
+
     if isinstance(body, PostBodiesMultipleFilesBody):
         if not isinstance(body, Unset):
             _kwargs["files"] = body.to_multipart()
 
-        headers["Content-Type"] = "multipart/form-data"
+        headers["Content-Type"] = "multipart/form-data; boundary=+++"
 
     _kwargs["headers"] = headers
     return _kwargs
