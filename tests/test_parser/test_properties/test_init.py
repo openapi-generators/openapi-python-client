@@ -126,7 +126,6 @@ class TestUnionProperty:
         expected = {
             "import datetime",
             "from typing import cast",
-            "from dateutil.parser import isoparse",
         }
         if not required:
             expected |= {
