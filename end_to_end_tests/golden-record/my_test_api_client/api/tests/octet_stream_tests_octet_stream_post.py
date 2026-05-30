@@ -23,7 +23,6 @@ def _get_kwargs(
 
     if not isinstance(body, Unset):
         _kwargs["content"] = body.payload
-
     headers["Content-Type"] = "application/octet-stream"
 
     _kwargs["headers"] = headers
