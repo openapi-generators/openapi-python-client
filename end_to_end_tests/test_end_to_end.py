@@ -5,8 +5,7 @@ from filecmp import cmpfiles, dircmp
 from pathlib import Path
 
 import pytest
-from click.testing import Result
-from typer.testing import CliRunner
+from typer.testing import CliRunner, Result
 
 from end_to_end_tests.generated_client import (
     _run_command, generate_client, generate_client_from_inline_spec,

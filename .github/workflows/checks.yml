@@ -37,7 +37,7 @@ jobs:
         run: pip install pdm
 
       - name: Install Dependencies
-        run: pdm install
+        run: pdm sync --clean
 
       - name: Check formatting
         run: pdm run ruff format . --check
@@ -96,7 +96,7 @@ jobs:
         run: pip install pdm
 
       - name: Install minimum dependencies
-        run: pdm install -L pdm.minimal.lock
+        run: pdm sync --clean -L pdm.minimal.lock
 
       - name: Run mypy
         run: pdm mypy --show-error-codes
@@ -178,7 +178,7 @@ jobs:
         run: |
           cd integration-tests
           pip install pdm
-          pdm install -L ${{ matrix.lockfile }}
+          pdm sync --clean -L ${{ matrix.lockfile }}
       - name: Run Tests
         run: |
           cd integration-tests

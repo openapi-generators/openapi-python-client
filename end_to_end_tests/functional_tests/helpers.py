@@ -1,7 +1,7 @@
 from typing import Any, Dict
 import re
 
-from click.testing import Result
+from typer.testing import Result
 import pytest
 
 from end_to_end_tests.generated_client import generate_client_from_inline_spec, GeneratedClientContext
