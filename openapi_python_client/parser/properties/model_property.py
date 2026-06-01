@@ -10,8 +10,14 @@ from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
+from .branded_string import parse_brand_format
 from .protocol import PropertyProtocol, Value
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
+
+_DEFAULT_BASE_CLASS = "BaseModel"
+_BRAND_BASE_CLASSES: dict[str, str] = {
+    "tandem_platform.schema.protected": "ProtectedModel",
+}
 
 
 @define
@@ -32,6 +38,8 @@ class ModelProperty(PropertyProtocol):
     relative_imports: set[str] | None
     lazy_imports: set[str] | None
     additional_properties: Property | None
+    base_class_module: str = "tandem_platform.schema.protected"
+    base_class_name: str = _DEFAULT_BASE_CLASS
     _json_type_string: ClassVar[str] = "dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
@@ -96,6 +104,16 @@ class ModelProperty(PropertyProtocol):
                     continue
                 schemas.add_dependencies(root, {class_info.name})
 
+        base_class_module = "tandem_platform.schema.protected"
+        base_class_name = _DEFAULT_BASE_CLASS
+        brand = parse_brand_format(data.schema_format)
+        if brand is not None:
+            brand_module, _brand_type = brand
+            branded_base = _BRAND_BASE_CLASSES.get(brand_module)
+            if branded_base is not None:
+                base_class_module = brand_module
+                base_class_name = branded_base
+
         prop = ModelProperty(
             class_info=class_info,
             data=data,
@@ -111,6 +129,8 @@ class ModelProperty(PropertyProtocol):
             name=name,
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             example=data.example,
+            base_class_module=base_class_module,
+            base_class_name=base_class_name,
         )
         if class_info.name in schemas.classes_by_name:
             error = PropertyError(

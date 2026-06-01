@@ -1,8 +1,4 @@
-{% if meta == "poetry" %}
-{% include "pyproject_poetry.toml.jinja" %}
-{% elif meta == "pdm" %}
-{% include "pyproject_pdm.toml.jinja" %}
-{% elif meta == "uv" %}
+{% if meta == "uv" %}
 {% include "pyproject_uv.toml.jinja" %}
 {% endif %}
 

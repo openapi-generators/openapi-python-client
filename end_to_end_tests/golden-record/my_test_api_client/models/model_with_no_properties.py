@@ -3,23 +3,20 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="ModelWithNoProperties")
 
 
-@_attrs_define
-class ModelWithNoProperties:
+class ModelWithNoProperties(BaseModel):
     """ """
 
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
     def to_dict(self) -> dict[str, Any]:
-
-        field_dict: dict[str, Any] = {}
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        model_with_no_properties = cls()
-
-        return model_with_no_properties
+        return cls.model_validate(src_dict)

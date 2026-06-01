@@ -8,6 +8,7 @@ from .boolean import BooleanProperty
 from .const import ConstProperty
 from .date import DateProperty
 from .datetime import DateTimeProperty
+from .dict_property import DictProperty
 from .enum_property import EnumProperty
 from .file import FileProperty
 from .float import FloatProperty
@@ -26,6 +27,7 @@ Property: TypeAlias = (
     | ConstProperty
     | DateProperty
     | DateTimeProperty
+    | DictProperty
     | EnumProperty
     | LiteralEnumProperty
     | FileProperty

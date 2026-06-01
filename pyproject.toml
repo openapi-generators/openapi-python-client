@@ -16,7 +16,7 @@ dependencies = [
     "ruff>=0.2",
 ]
 name = "openapi-python-client"
-version = "0.29.0"
+version = "0.29.5"
 description = "Generate modern Python clients from OpenAPI"
 keywords = [
     "OpenAPI",
@@ -92,6 +92,12 @@ dev = [
     "types-PyYAML<7.0.0,>=6.0.3",
     "types-certifi<2021.10.9,>=2020.0.0",
     "syrupy>=4",
+    # Runtime deps of the generated clients, needed so the test suite can import
+    # and mypy-check generated code (JSONL parsing uses orjson; every model
+    # subclasses tandem_platform.schema.protected.BaseModel). The latter is a
+    # test-only shim under test_support/ — see its pyproject for details.
+    "orjson",
+    "tandem-platform @ {root:uri}/test_support/tandem-platform",
 ]
 
 [tool.pdm.build]

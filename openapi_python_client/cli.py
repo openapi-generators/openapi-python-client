@@ -135,7 +135,7 @@ def generate(
         resolve_path=True,
     ),  # type: ignore
     meta: MetaType = typer.Option(
-        MetaType.POETRY,
+        MetaType.UV,
         help="The type of metadata you want to generate.",
     ),
     file_encoding: str = typer.Option("utf-8", help="Encoding used when writing generated"),

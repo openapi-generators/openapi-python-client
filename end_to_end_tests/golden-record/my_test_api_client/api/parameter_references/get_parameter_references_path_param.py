@@ -46,14 +46,12 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any:
+    response.raise_for_status()
     if response.status_code == 200:
         return None
 
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
@@ -65,48 +63,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    path_param: str,
-    *,
-    client: AuthenticatedClient | Client,
-    string_param: str | Unset = UNSET,
-    integer_param: int | Unset = 0,
-    header_param: None | str | Unset = UNSET,
-    cookie_param: str | Unset = UNSET,
-) -> Response[Any]:
-    """Test different types of parameter references
-
-    Args:
-        path_param (str):
-        string_param (str | Unset):
-        integer_param (int | Unset):  Default: 0.
-        header_param (None | str | Unset):
-        cookie_param (str | Unset):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[Any]
-    """
-
-    kwargs = _get_kwargs(
-        path_param=path_param,
-        string_param=string_param,
-        integer_param=integer_param,
-        header_param=header_param,
-        cookie_param=cookie_param,
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     path_param: str,
     *,
     client: AuthenticatedClient | Client,

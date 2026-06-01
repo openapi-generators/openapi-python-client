@@ -3,40 +3,25 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="TestInlineObjectsBody")
 
 
-@_attrs_define
-class TestInlineObjectsBody:
+class TestInlineObjectsBody(BaseModel):
     """
     Attributes:
         a_property (str | Unset):
     """
 
-    a_property: str | Unset = UNSET
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    a_property: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        a_property = self.a_property
-
-        field_dict: dict[str, Any] = {}
-
-        field_dict.update({})
-        if a_property is not UNSET:
-            field_dict["a_property"] = a_property
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        a_property = d.pop("a_property", UNSET)
-
-        test_inline_objects_body = cls(
-            a_property=a_property,
-        )
-
-        return test_inline_objects_body
+        return cls.model_validate(src_dict)

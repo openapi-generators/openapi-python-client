@@ -1938,7 +1938,9 @@
           },
           {
             "type": "object",
-            "required": ["bar"]
+            "required": [
+              "bar"
+            ]
           }
         ]
       },
@@ -3086,6 +3088,26 @@
         "properties": {
           "modelType": {
             "type": "string"
+          }
+        }
+      },
+      "ProtectedBrandedModel": {
+        "type": "object",
+        "format": "brand::protected::ProtectedBrandedModel",
+        "title": "ProtectedBrandedModel",
+        "required": [
+          "protected_field",
+          "public_field"
+        ],
+        "properties": {
+          "protected_field": {
+            "type": "string",
+            "format": "brand::protected::ProtectedString",
+            "title": "Protected Field"
+          },
+          "public_field": {
+            "type": "string",
+            "title": "Public Field"
           }
         }
       }

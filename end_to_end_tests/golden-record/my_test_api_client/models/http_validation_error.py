@@ -3,9 +3,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from attrs import define as _attrs_define
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 if TYPE_CHECKING:
     from ..models.validation_error import ValidationError
@@ -14,47 +13,24 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="HTTPValidationError")
 
 
-@_attrs_define
-class HTTPValidationError:
+class HTTPValidationError(BaseModel):
     """
     Attributes:
         detail (list[ValidationError] | Unset):
     """
 
-    detail: list[ValidationError] | Unset = UNSET
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    detail: list[ValidationError] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        detail: list[dict[str, Any]] | Unset = UNSET
-        if not isinstance(self.detail, Unset):
-            detail = []
-            for detail_item_data in self.detail:
-                detail_item = detail_item_data.to_dict()
-                detail.append(detail_item)
-
-        field_dict: dict[str, Any] = {}
-
-        field_dict.update({})
-        if detail is not UNSET:
-            field_dict["detail"] = detail
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.validation_error import ValidationError
+        return cls.model_validate(src_dict)
 
-        d = dict(src_dict)
-        _detail = d.pop("detail", UNSET)
-        detail: list[ValidationError] | Unset = UNSET
-        if _detail is not UNSET:
-            detail = []
-            for detail_item_data in _detail:
-                detail_item = ValidationError.from_dict(detail_item_data)
 
-                detail.append(detail_item)
+from ..models.validation_error import ValidationError
 
-        http_validation_error = cls(
-            detail=detail,
-        )
-
-        return http_validation_error
+HTTPValidationError.model_rebuild()

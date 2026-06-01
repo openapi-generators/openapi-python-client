@@ -3,77 +3,25 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectItem")
 
 
-@_attrs_define
-class AnArrayWithARecursiveRefInItemsObjectItem:
+class AnArrayWithARecursiveRefInItemsObjectItem(BaseModel):
     """
     Attributes:
         recursive (list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset):
     """
 
-    recursive: list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    recursive: list[AnArrayWithARecursiveRefInItemsObjectItem] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        recursive: list[dict[str, Any]] | Unset = UNSET
-        if not isinstance(self.recursive, Unset):
-            recursive = []
-            for componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data in self.recursive:
-                componentsschemas_an_array_with_a_recursive_ref_in_items_object_item = (
-                    componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data.to_dict()
-                )
-                recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if recursive is not UNSET:
-            field_dict["recursive"] = recursive
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        _recursive = d.pop("recursive", UNSET)
-        recursive: list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset = UNSET
-        if _recursive is not UNSET:
-            recursive = []
-            for componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data in _recursive:
-                componentsschemas_an_array_with_a_recursive_ref_in_items_object_item = (
-                    AnArrayWithARecursiveRefInItemsObjectItem.from_dict(
-                        componentsschemas_an_array_with_a_recursive_ref_in_items_object_item_data
-                    )
-                )
-
-                recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
-
-        an_array_with_a_recursive_ref_in_items_object_item = cls(
-            recursive=recursive,
-        )
-
-        an_array_with_a_recursive_ref_in_items_object_item.additional_properties = d
-        return an_array_with_a_recursive_ref_in_items_object_item
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

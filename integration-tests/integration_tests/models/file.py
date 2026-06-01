@@ -3,16 +3,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="File")
 
 
-@_attrs_define
-class File:
+class File(BaseModel):
     """
     Attributes:
         data (str | Unset): Echo of content of the 'file' input parameter from the form.
@@ -20,60 +17,15 @@ class File:
         content_type (str | Unset): The content type of the file uploaded.
     """
 
-    data: str | Unset = UNSET
-    name: str | Unset = UNSET
-    content_type: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    data: str | None = None
+    name: str | None = None
+    content_type: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        data = self.data
-
-        name = self.name
-
-        content_type = self.content_type
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if data is not UNSET:
-            field_dict["data"] = data
-        if name is not UNSET:
-            field_dict["name"] = name
-        if content_type is not UNSET:
-            field_dict["content_type"] = content_type
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        data = d.pop("data", UNSET)
-
-        name = d.pop("name", UNSET)
-
-        content_type = d.pop("content_type", UNSET)
-
-        file = cls(
-            data=data,
-            name=name,
-            content_type=content_type,
-        )
-
-        file.additional_properties = d
-        return file
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

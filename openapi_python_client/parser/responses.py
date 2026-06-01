@@ -13,6 +13,7 @@ from .. import schema as oai
 from ..utils import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
+from .properties.jsonl_property import JsonlProperty
 
 
 @define
@@ -139,6 +140,7 @@ def _source_by_content_type(content_type: str, config: Config) -> _ResponseSourc
     known_content_types = {
         "application/json": JSON_SOURCE,
         "application/octet-stream": BYTES_SOURCE,
+        "application/jsonl": TEXT_SOURCE,
     }
     source = known_content_types.get(parsed_content_type)
     if source is None and parsed_content_type.endswith("+json"):
@@ -207,10 +209,23 @@ def response_from_data(  # noqa: PLR0911
             schemas,
         )
 
+    is_jsonl = False
     for content_type, media_type in content.items():
         source = _source_by_content_type(content_type, config)
         if source is not None:
-            schema_data = media_type.media_type_schema
+            parsed_content_type = utils.get_content_type(content_type, config)
+            if parsed_content_type == "application/jsonl":
+                is_jsonl = True
+                item_schema_raw = (media_type.model_extra or {}).get("itemSchema")
+                if item_schema_raw is not None:
+                    if isinstance(item_schema_raw, dict) and "$ref" in item_schema_raw:
+                        schema_data: oai.Reference | oai.Schema | None = oai.Reference.model_validate(item_schema_raw)
+                    else:
+                        schema_data = oai.Schema.model_validate(item_schema_raw)
+                else:
+                    schema_data = media_type.media_type_schema
+            else:
+                schema_data = media_type.media_type_schema
             break
     else:
         return (
@@ -230,7 +245,7 @@ def response_from_data(  # noqa: PLR0911
         )
 
     prop, schemas = property_from_data(
-        name=response_name,
+        name=f"{response_name}_item" if is_jsonl else response_name,
         required=True,
         data=schema_data,
         schemas=schemas,
@@ -240,5 +255,16 @@ def response_from_data(  # noqa: PLR0911
 
     if isinstance(prop, PropertyError):
         return prop, schemas
+
+    if is_jsonl:
+        prop = JsonlProperty(
+            name=response_name,
+            required=True,
+            default=None,
+            inner_property=prop,
+            python_name=PythonIdentifier(value=response_name, prefix=config.field_prefix),
+            description=None,
+            example=None,
+        )
 
     return Response(status_code=status_code, prop=prop, source=source, data=data), schemas

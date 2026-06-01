@@ -15,7 +15,7 @@ from ... import errors
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
     arguments, client, kwargs, parse_response, docstring, body_to_kwarg %}
 
-{% set return_string = endpoint.response_type() %}
+{% set return_string = endpoint.response_type().split('|') | map('trim') | reject('equalto', 'HTTPValidationError') | join(' | ') %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
 def _get_kwargs(
@@ -71,30 +71,68 @@ def _get_kwargs(
 {% endif %}
     return _kwargs
 
-{% if endpoint.responses.default %}
-    {% set return_type = return_string %}
+{% if endpoint.is_jsonl_streaming %}
+{# ===== Streaming JSONL endpoint ===== #}
+{% set item_type = endpoint.jsonl_item_type() %}
+{% import "property_templates/jsonl_property.py.jinja" as jsonl_template %}
+
+async def stream(
+    {{ arguments(endpoint) | indent(4) }}
+) -> AsyncGenerator[{{ item_type }}, None]:
+    {{ docstring(endpoint, "AsyncGenerator[" + item_type + ", None]", is_detailed=false) | indent(4) }}
+
+    kwargs = _get_kwargs(
+        {{ kwargs(endpoint, include_client=False) }}
+    )
+
+    async with client.get_async_httpx_client().stream(**kwargs) as response:
+        {% for resp in endpoint.responses.patterns %}
+        {% set code_range = resp.status_code.range %}
+        {% if loop.first %}
+        {% if code_range[0] == code_range[1] %}
+        if response.status_code == {{ code_range[0] }}:
+        {% else %}
+        if {{ code_range[0] }} <= response.status_code <= {{ code_range[1] }}:
+        {% endif %}
+        {% else %}
+        {% if code_range[0] == code_range[1] %}
+        elif response.status_code == {{ code_range[0] }}:
+        {% else %}
+        elif {{ code_range[0] }} <= response.status_code <= {{ code_range[1] }}:
+        {% endif %}
+        {% endif %}
+        {% if resp.prop.template == "jsonl_property.py.jinja" %}
+            {{ jsonl_template.construct_async_stream(resp.prop) | indent(12) }}
+        {% else %}
+            await response.aread()
+            raise errors.UnexpectedStatus(response.status_code, response.content)
+        {% endif %}
+        {% endfor %}
+        else:
+            await response.aread()
+            if client.raise_on_unexpected_status:
+                raise errors.UnexpectedStatus(response.status_code, response.content)
+
 {% else %}
-    {% set return_type = return_string + " | None" %}
-{% endif %}
+{# ===== Standard (non-streaming) endpoint ===== #}
 
-
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> {{return_type}}:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> {{return_string}}:
+    response.raise_for_status()
     {% for response in endpoint.responses.patterns %}
     {% set code_range = response.status_code.range %}
-    {% if code_range[0] == code_range[1] %}
+    {% if code_range[0] >= 200 and code_range[0] < 300 %}
+        {% if code_range[0] == code_range[1] %}
     if response.status_code == {{ code_range[0] }}:
-    {% else %}
+        {% else %}
     if {{ code_range[0] }} <= response.status_code <= {{ code_range[1] }}:
-    {% endif %}
+        {% endif %}
         {{ parse_response(parsed_responses, response) | indent(8) }}
+    {% endif %}
     {% endfor %}
     {% if endpoint.responses.default %}
     {{ parse_response(parsed_responses, endpoint.responses.default) | indent(4) }}
     {% else %}
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
     {% endif %}
 
 
@@ -107,33 +145,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}]:
-    {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
-
-    kwargs = _get_kwargs(
-        {{ kwargs(endpoint, include_client=False) }}
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-{% if parsed_responses %}
-def sync(
-    {{ arguments(endpoint) | indent(4) }}
-) -> {{ return_string }} | None:
-    {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
-
-    return sync_detailed(
-        {{ kwargs(endpoint) }}
-    ).parsed
-{% endif %}
-
-async def asyncio_detailed(
+async def _request_detailed(
     {{ arguments(endpoint) | indent(4) }}
 ) -> Response[{{ return_string }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
@@ -149,12 +161,14 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 {% if parsed_responses %}
-async def asyncio(
+async def request (
     {{ arguments(endpoint) | indent(4) }}
-) -> {{ return_string }} | None:
+) -> {{ return_string }}:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
-    return (await asyncio_detailed(
+    return (await _request_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
+{% endif %}
+
 {% endif %}

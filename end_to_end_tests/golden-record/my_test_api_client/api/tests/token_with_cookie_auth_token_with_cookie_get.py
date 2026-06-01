@@ -25,17 +25,12 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any:
+    response.raise_for_status()
     if response.status_code == 200:
         return None
 
-    if response.status_code == 401:
-        return None
-
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
@@ -47,38 +42,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-    my_token: str,
-) -> Response[Any]:
-    """TOKEN_WITH_COOKIE
-
-     Test optional cookie parameters
-
-    Args:
-        my_token (str):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[Any]
-    """
-
-    kwargs = _get_kwargs(
-        my_token=my_token,
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
     my_token: str,

@@ -32,16 +32,14 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> MixedCaseResponse200 | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> MixedCaseResponse200:
+    response.raise_for_status()
     if response.status_code == 200:
         response_200 = MixedCaseResponse200.from_dict(response.json())
 
         return response_200
 
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(
@@ -55,64 +53,7 @@ def _build_response(
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-    mixed_case: str,
-    mixedCase: str,
-) -> Response[MixedCaseResponse200]:
-    """
-    Args:
-        mixed_case (str):
-        mixedCase (str):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[MixedCaseResponse200]
-    """
-
-    kwargs = _get_kwargs(
-        mixed_case=mixed_case,
-        mixedCase=mixedCase,
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-    mixed_case: str,
-    mixedCase: str,
-) -> MixedCaseResponse200 | None:
-    """
-    Args:
-        mixed_case (str):
-        mixedCase (str):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        MixedCaseResponse200
-    """
-
-    return sync_detailed(
-        client=client,
-        mixed_case=mixed_case,
-        mixedCase=mixedCase,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
     mixed_case: str,
@@ -141,12 +82,12 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
     mixed_case: str,
     mixedCase: str,
-) -> MixedCaseResponse200 | None:
+) -> MixedCaseResponse200:
     """
     Args:
         mixed_case (str):
@@ -161,7 +102,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
             mixed_case=mixed_case,
             mixedCase=mixedCase,

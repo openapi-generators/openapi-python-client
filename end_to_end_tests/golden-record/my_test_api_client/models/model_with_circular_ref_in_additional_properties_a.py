@@ -3,62 +3,27 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 if TYPE_CHECKING:
-    from ..models.model_with_circular_ref_in_additional_properties_b import ModelWithCircularRefInAdditionalPropertiesB
+    pass
 
 
 T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesA")
 
 
-@_attrs_define
-class ModelWithCircularRefInAdditionalPropertiesA:
+class ModelWithCircularRefInAdditionalPropertiesA(BaseModel):
     """ """
 
-    additional_properties: dict[str, ModelWithCircularRefInAdditionalPropertiesB] = _attrs_field(
-        init=False, factory=dict
-    )
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     def to_dict(self) -> dict[str, Any]:
-
-        field_dict: dict[str, Any] = {}
-        for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = prop.to_dict()
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_with_circular_ref_in_additional_properties_b import (
-            ModelWithCircularRefInAdditionalPropertiesB,
-        )
+        return cls.model_validate(src_dict)
 
-        d = dict(src_dict)
-        model_with_circular_ref_in_additional_properties_a = cls()
 
-        additional_properties = {}
-        for prop_name, prop_dict in d.items():
-            additional_property = ModelWithCircularRefInAdditionalPropertiesB.from_dict(prop_dict)
-
-            additional_properties[prop_name] = additional_property
-
-        model_with_circular_ref_in_additional_properties_a.additional_properties = additional_properties
-        return model_with_circular_ref_in_additional_properties_a
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> ModelWithCircularRefInAdditionalPropertiesB:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: ModelWithCircularRefInAdditionalPropertiesB) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+ModelWithCircularRefInAdditionalPropertiesA.model_rebuild()

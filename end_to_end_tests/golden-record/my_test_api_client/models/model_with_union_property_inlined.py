@@ -3,9 +3,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from attrs import define as _attrs_define
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 if TYPE_CHECKING:
     from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
@@ -15,64 +14,25 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 
 
-@_attrs_define
-class ModelWithUnionPropertyInlined:
+class ModelWithUnionPropertyInlined(BaseModel):
     """
     Attributes:
         fruit (ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset):
     """
 
-    fruit: ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset = UNSET
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    fruit: ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
-
-        fruit: dict[str, Any] | Unset
-        if isinstance(self.fruit, Unset):
-            fruit = UNSET
-        elif isinstance(self.fruit, ModelWithUnionPropertyInlinedApples):
-            fruit = self.fruit.to_dict()
-        else:
-            fruit = self.fruit.to_dict()
-
-        field_dict: dict[str, Any] = {}
-
-        field_dict.update({})
-        if fruit is not UNSET:
-            field_dict["fruit"] = fruit
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
-        from ..models.model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
+        return cls.model_validate(src_dict)
 
-        d = dict(src_dict)
 
-        def _parse_fruit(
-            data: object,
-        ) -> ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset:
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                fruit_apples = ModelWithUnionPropertyInlinedApples.from_dict(data)
+from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
+from ..models.model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 
-                return fruit_apples
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            if not isinstance(data, dict):
-                raise TypeError()
-            fruit_bananas = ModelWithUnionPropertyInlinedBananas.from_dict(data)
-
-            return fruit_bananas
-
-        fruit = _parse_fruit(d.pop("fruit", UNSET))
-
-        model_with_union_property_inlined = cls(
-            fruit=fruit,
-        )
-
-        return model_with_union_property_inlined
+ModelWithUnionPropertyInlined.model_rebuild()

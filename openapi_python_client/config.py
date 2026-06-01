@@ -22,9 +22,7 @@ class MetaType(StrEnum):
     """The types of metadata supported for project generation."""
 
     NONE = "none"
-    POETRY = "poetry"
     SETUP = "setup"
-    PDM = "pdm"
     UV = "uv"
 
 

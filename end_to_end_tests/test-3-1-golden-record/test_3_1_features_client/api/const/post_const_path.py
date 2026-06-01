@@ -45,7 +45,8 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Literal["Why have a fixed response? I dunno"] | None:
+) -> Literal["Why have a fixed response? I dunno"]:
+    response.raise_for_status()
     if response.status_code == 200:
         response_200 = cast(Literal["Why have a fixed response? I dunno"], response.json())
         if response_200 != "Why have a fixed response? I dunno":
@@ -54,10 +55,7 @@ def _parse_response(
             )
         return response_200
 
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(
@@ -71,76 +69,7 @@ def _build_response(
     )
 
 
-def sync_detailed(
-    path: Literal["this goes in the path"],
-    *,
-    client: AuthenticatedClient | Client,
-    body: PostConstPathBody,
-    required_query: Literal["this always goes in the query"],
-    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
-) -> Response[Literal["Why have a fixed response? I dunno"]]:
-    """
-    Args:
-        path (Literal['this goes in the path']):
-        required_query (Literal['this always goes in the query']):
-        optional_query (Literal['this sometimes goes in the query'] | Unset):
-        body (PostConstPathBody):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[Literal['Why have a fixed response? I dunno']]
-    """
-
-    kwargs = _get_kwargs(
-        path=path,
-        body=body,
-        required_query=required_query,
-        optional_query=optional_query,
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    path: Literal["this goes in the path"],
-    *,
-    client: AuthenticatedClient | Client,
-    body: PostConstPathBody,
-    required_query: Literal["this always goes in the query"],
-    optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
-) -> Literal["Why have a fixed response? I dunno"] | None:
-    """
-    Args:
-        path (Literal['this goes in the path']):
-        required_query (Literal['this always goes in the query']):
-        optional_query (Literal['this sometimes goes in the query'] | Unset):
-        body (PostConstPathBody):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Literal['Why have a fixed response? I dunno']
-    """
-
-    return sync_detailed(
-        path=path,
-        client=client,
-        body=body,
-        required_query=required_query,
-        optional_query=optional_query,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     path: Literal["this goes in the path"],
     *,
     client: AuthenticatedClient | Client,
@@ -175,14 +104,14 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     path: Literal["this goes in the path"],
     *,
     client: AuthenticatedClient | Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
-) -> Literal["Why have a fixed response? I dunno"] | None:
+) -> Literal["Why have a fixed response? I dunno"]:
     """
     Args:
         path (Literal['this goes in the path']):
@@ -199,7 +128,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             path=path,
             client=client,
             body=body,

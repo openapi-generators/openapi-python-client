@@ -1,0 +1,5 @@
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, dict){% endmacro %}
+
+{% macro multipart(property, source, name) %}
+files.append(({{ name }}, (None, json.dumps({{ source }}).encode(), "application/json")))
+{% endmacro %}

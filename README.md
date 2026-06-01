@@ -61,7 +61,7 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
 
 ## What You Get
 
-1. A `pyproject.toml` file, optionally with [Poetry] metadata (default), [PDM] (with `--meta=pdm`), or only [Ruff] config.
+1. A `pyproject.toml` file with [uv] metadata (default) and [Ruff] config.
 2. A `README.md` you'll most definitely need to update with your project's details
 3. A Python module named just like the auto-generated project name (e.g. "my_api_client") which contains:
    1. A `client` module which will have both a `Client` class and an `AuthenticatedClient` class. You'll need these
@@ -69,7 +69,7 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
    2. An `api` module which will contain one module for each tag in your OpenAPI spec, as well as a `default` module
       for endpoints without a tag. Each of these modules in turn contains one function for calling each endpoint.
    3. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
-4. A `setup.py` file _if_ you use `--meta=setup` (default is `--meta=poetry`)
+4. A `setup.py` file _if_ you use `--meta=setup` (default is `--meta=uv`)
 
 For a full example you can look at the `end_to_end_tests` directory which has `baseline_openapi_3.0.json` and `baseline_openapi_3.1.yaml` files.
 The "golden-record" in that same directory is the generated client from either of those OpenAPI documents.
@@ -226,6 +226,5 @@ class Color(IntEnum):
 ```
 
 [changelog.md]: CHANGELOG.md
-[poetry]: https://python-poetry.org/
-[PDM]: https://pdm-project.org/latest/
+[uv]: https://docs.astral.sh/uv/
 [Ruff]: https://docs.astral.sh/ruff/

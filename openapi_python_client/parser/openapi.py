@@ -467,6 +467,22 @@ class Endpoint:
 
         return result, schemas, parameters
 
+    @property
+    def is_jsonl_streaming(self) -> bool:
+        """Check if this endpoint has a JSONL streaming response"""
+        from .properties.jsonl_property import JsonlProperty
+
+        return any(isinstance(r.prop, JsonlProperty) for r in self.responses)
+
+    def jsonl_item_type(self) -> str:
+        """Get the JSONL item type string for streaming return type annotations"""
+        from .properties.jsonl_property import JsonlProperty
+
+        for r in self.responses:
+            if isinstance(r.prop, JsonlProperty):
+                return r.prop.inner_property.get_type_string()
+        return "Any"
+
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
         types = sorted({response.prop.get_type_string() for response in self.responses})

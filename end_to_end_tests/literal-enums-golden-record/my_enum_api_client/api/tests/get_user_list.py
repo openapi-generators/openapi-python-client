@@ -66,7 +66,8 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[AModel] | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[AModel]:
+    response.raise_for_status()
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -77,10 +78,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
@@ -92,88 +90,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-    an_enum_value: list[AnEnum],
-    an_enum_value_with_null: list[AnEnumWithNull | None],
-    an_enum_value_with_only_null: list[None],
-    int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
-    string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel]]:
-    """Get List
-
-     Get a list of things
-
-    Args:
-        an_enum_value (list[AnEnum]):
-        an_enum_value_with_null (list[AnEnumWithNull | None]):
-        an_enum_value_with_only_null (list[None]):
-        int_enum_header (GetUserListIntEnumHeader | Unset):
-        string_enum_header (GetUserListStringEnumHeader | Unset):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[list[AModel]]
-    """
-
-    kwargs = _get_kwargs(
-        an_enum_value=an_enum_value,
-        an_enum_value_with_null=an_enum_value_with_null,
-        an_enum_value_with_only_null=an_enum_value_with_only_null,
-        int_enum_header=int_enum_header,
-        string_enum_header=string_enum_header,
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-    an_enum_value: list[AnEnum],
-    an_enum_value_with_null: list[AnEnumWithNull | None],
-    an_enum_value_with_only_null: list[None],
-    int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
-    string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> list[AModel] | None:
-    """Get List
-
-     Get a list of things
-
-    Args:
-        an_enum_value (list[AnEnum]):
-        an_enum_value_with_null (list[AnEnumWithNull | None]):
-        an_enum_value_with_only_null (list[None]):
-        int_enum_header (GetUserListIntEnumHeader | Unset):
-        string_enum_header (GetUserListStringEnumHeader | Unset):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        list[AModel]
-    """
-
-    return sync_detailed(
-        client=client,
-        an_enum_value=an_enum_value,
-        an_enum_value_with_null=an_enum_value_with_null,
-        an_enum_value_with_only_null=an_enum_value_with_only_null,
-        int_enum_header=int_enum_header,
-        string_enum_header=string_enum_header,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
     an_enum_value: list[AnEnum],
@@ -214,7 +131,7 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
     an_enum_value: list[AnEnum],
@@ -222,7 +139,7 @@ async def asyncio(
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> list[AModel] | None:
+) -> list[AModel]:
     """Get List
 
      Get a list of things
@@ -243,7 +160,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
             an_enum_value=an_enum_value,
             an_enum_value_with_null=an_enum_value_with_null,

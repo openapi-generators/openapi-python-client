@@ -22,21 +22,14 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX | None:
+) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX:
+    response.raise_for_status()
     if 200 <= response.status_code <= 299:
         response_2xx = StatusCodePatternsResponse2XX.from_dict(response.json())
 
         return response_2xx
 
-    if 400 <= response.status_code <= 499:
-        response_4xx = StatusCodePatternsResponse4XX.from_dict(response.json())
-
-        return response_4xx
-
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(
@@ -50,49 +43,7 @@ def _build_response(
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
-    """Status Code Patterns
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]
-    """
-
-    kwargs = _get_kwargs()
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX | None:
-    """Status Code Patterns
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX
-    """
-
-    return sync_detailed(
-        client=client,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
@@ -113,10 +64,10 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
-) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX | None:
+) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX:
     """Status Code Patterns
 
     Raises:
@@ -128,7 +79,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
         )
     ).parsed

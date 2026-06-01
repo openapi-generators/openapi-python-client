@@ -72,7 +72,7 @@ def regen_metadata_snapshots():
     output_path = Path.cwd() / "test-3-1-features-client"
     snapshots_dir = Path(__file__).parent / "metadata_snapshots"
 
-    for (meta, file, rename_to) in (("setup", "setup.py", "setup.py"), ("pdm", "pyproject.toml", "pdm.pyproject.toml"), ("poetry", "pyproject.toml", "poetry.pyproject.toml"), ("uv", "pyproject.toml", "uv.pyproject.toml")):
+    for (meta, file, rename_to) in (("setup", "setup.py", "setup.py"), ("uv", "pyproject.toml", "uv.pyproject.toml")):
         _regenerate(
             spec_file_name="3.1_specific.openapi.yaml",
             output_dir="test-3-1-features-client",

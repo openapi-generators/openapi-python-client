@@ -18,16 +18,14 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[float] | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[float]:
+    response.raise_for_status()
     if response.status_code == 200:
         response_200 = cast(list[float], response.json())
 
         return response_200
 
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[float]]:
@@ -39,53 +37,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-) -> Response[list[float]]:
-    """Get Basic List Of Floats
-
-     Get a list of floats
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[list[float]]
-    """
-
-    kwargs = _get_kwargs()
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-) -> list[float] | None:
-    """Get Basic List Of Floats
-
-     Get a list of floats
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        list[float]
-    """
-
-    return sync_detailed(
-        client=client,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[list[float]]:
@@ -108,10 +60,10 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
-) -> list[float] | None:
+) -> list[float]:
     """Get Basic List Of Floats
 
      Get a list of floats
@@ -125,7 +77,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
         )
     ).parsed

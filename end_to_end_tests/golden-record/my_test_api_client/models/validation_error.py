@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
+from pydantic import ConfigDict, Field
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="ValidationError")
 
 
-@_attrs_define
-class ValidationError:
+class ValidationError(BaseModel):
     """
     Attributes:
         loc (list[str]):
@@ -17,42 +17,15 @@ class ValidationError:
         type_ (str):
     """
 
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
     loc: list[str]
     msg: str
-    type_: str
+    type_: str = Field(alias="type")
 
     def to_dict(self) -> dict[str, Any]:
-        loc = self.loc
-
-        msg = self.msg
-
-        type_ = self.type_
-
-        field_dict: dict[str, Any] = {}
-
-        field_dict.update(
-            {
-                "loc": loc,
-                "msg": msg,
-                "type": type_,
-            }
-        )
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        loc = cast(list[str], d.pop("loc"))
-
-        msg = d.pop("msg")
-
-        type_ = d.pop("type")
-
-        validation_error = cls(
-            loc=loc,
-            msg=msg,
-            type_=type_,
-        )
-
-        return validation_error
+        return cls.model_validate(src_dict)

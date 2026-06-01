@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = [
     "AnyProperty",
     "Class",
+    "DictProperty",
     "EnumProperty",
     "LiteralEnumProperty",
     "ModelProperty",
@@ -23,9 +24,11 @@ from ... import schema as oai
 from ..errors import ParameterError, ParseError, PropertyError
 from .any import AnyProperty
 from .boolean import BooleanProperty
+from .branded_string import BrandedStringProperty, parse_brand_format
 from .const import ConstProperty
 from .date import DateProperty
 from .datetime import DateTimeProperty
+from .dict_property import DictProperty
 from .enum_property import EnumProperty
 from .file import FileProperty
 from .float import FloatProperty
@@ -52,10 +55,25 @@ from .uuid import UuidProperty
 
 def _string_based_property(
     name: str, required: bool, data: oai.Schema, config: Config
-) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | PropertyError:
+) -> (
+    StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | BrandedStringProperty | PropertyError
+):
     """Construct a Property from the type "string" """
     string_format = data.schema_format
     python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
+    brand = parse_brand_format(string_format)
+    if brand is not None:
+        brand_module, brand_type = brand
+        return BrandedStringProperty.build(
+            name=name,
+            required=required,
+            default=data.default,
+            python_name=python_name,
+            description=data.description,
+            example=data.example,
+            brand_module=brand_module,
+            brand_type=brand_type,
+        )
     if string_format == "date-time":
         return DateTimeProperty.build(
             name=name,
@@ -100,6 +118,32 @@ def _string_based_property(
         description=data.description,
         example=data.example,
     )
+
+
+def _is_typed_dict_schema(data: oai.Schema) -> bool:
+    """Check if a schema should be represented as ``dict[str, T]``.
+
+    True when the schema only describes a map via ``additionalProperties`` with a
+    concrete item schema, i.e. no regular ``properties``, no ``allOf``, and
+    ``additionalProperties`` is a schema (not ``True``/``False``/``None``).
+    """
+    additional = data.additionalProperties
+    if additional is None or isinstance(additional, bool):
+        return False
+    if data.properties:
+        return False
+    if data.allOf:
+        return False
+    if isinstance(additional, oai.Schema) and _schema_is_empty(additional):
+        return False
+    return True
+
+
+def _schema_is_empty(schema: oai.Schema) -> bool:
+    for value in schema.model_dump().values():
+        if value:
+            return False
+    return True
 
 
 def _property_from_ref(
@@ -288,6 +332,17 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             roots=roots,
         )
     if data.type == oai.DataType.OBJECT or data.allOf or (data.type is None and data.properties):
+        if _is_typed_dict_schema(data) and parent_name:
+            return DictProperty.build(
+                data=data,
+                name=name,
+                required=required,
+                schemas=schemas,
+                parent_name=parent_name,
+                config=config,
+                process_properties=process_properties,
+                roots=roots,
+            )
         return ModelProperty.build(
             data=data,
             name=name,

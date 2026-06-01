@@ -48,7 +48,7 @@ class Response(Generic[T]):
     status_code: HTTPStatus
     content: bytes
     headers: MutableMapping[str, str]
-    parsed: T | None
+    parsed: T
 
 
 __all__ = ["UNSET", "File", "FileTypes", "RequestFiles", "Response", "Unset"]

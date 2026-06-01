@@ -3,59 +3,25 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPostAdditionalProperty")
 
 
-@_attrs_define
-class BodyUploadFileTestsUploadPostAdditionalProperty:
+class BodyUploadFileTestsUploadPostAdditionalProperty(BaseModel):
     """
     Attributes:
         foo (str | Unset):
     """
 
-    foo: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    foo: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        foo = self.foo
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if foo is not UNSET:
-            field_dict["foo"] = foo
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        foo = d.pop("foo", UNSET)
-
-        body_upload_file_tests_upload_post_additional_property = cls(
-            foo=foo,
-        )
-
-        body_upload_file_tests_upload_post_additional_property.additional_properties = d
-        return body_upload_file_tests_upload_post_additional_property
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

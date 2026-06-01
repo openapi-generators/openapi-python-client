@@ -3,54 +3,20 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="ModelWithRecursiveRefInAdditionalProperties")
 
 
-@_attrs_define
-class ModelWithRecursiveRefInAdditionalProperties:
+class ModelWithRecursiveRefInAdditionalProperties(BaseModel):
     """ """
 
-    additional_properties: dict[str, ModelWithRecursiveRefInAdditionalProperties] = _attrs_field(
-        init=False, factory=dict
-    )
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     def to_dict(self) -> dict[str, Any]:
-
-        field_dict: dict[str, Any] = {}
-        for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = prop.to_dict()
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        model_with_recursive_ref_in_additional_properties = cls()
-
-        additional_properties = {}
-        for prop_name, prop_dict in d.items():
-            additional_property = ModelWithRecursiveRefInAdditionalProperties.from_dict(prop_dict)
-
-            additional_properties[prop_name] = additional_property
-
-        model_with_recursive_ref_in_additional_properties.additional_properties = additional_properties
-        return model_with_recursive_ref_in_additional_properties
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> ModelWithRecursiveRefInAdditionalProperties:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: ModelWithRecursiveRefInAdditionalProperties) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

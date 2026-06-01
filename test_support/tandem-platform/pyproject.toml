@@ -1,0 +1,15 @@
+[project]
+name = "tandem-platform"
+version = "0.0.0"
+description = "Test-only shim of the private tandem_platform package. Mirrors the public surface that generated clients depend on so this generator's own test suite can import and type-check generated code without the internal package or its cloudsmith index. NOT the real implementation — do not publish."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.10,<3.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["tandem_platform"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

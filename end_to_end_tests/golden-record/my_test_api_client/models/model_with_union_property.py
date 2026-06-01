@@ -3,66 +3,28 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 from ..models.an_enum import AnEnum
 from ..models.an_int_enum import AnIntEnum
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ModelWithUnionProperty")
 
 
-@_attrs_define
-class ModelWithUnionProperty:
+class ModelWithUnionProperty(BaseModel):
     """
     Attributes:
         a_property (AnEnum | AnIntEnum | Unset):
     """
 
-    a_property: AnEnum | AnIntEnum | Unset = UNSET
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    a_property: AnEnum | AnIntEnum | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        a_property: int | str | Unset
-        if isinstance(self.a_property, Unset):
-            a_property = UNSET
-        elif isinstance(self.a_property, AnEnum):
-            a_property = self.a_property.value
-        else:
-            a_property = self.a_property.value
-
-        field_dict: dict[str, Any] = {}
-
-        field_dict.update({})
-        if a_property is not UNSET:
-            field_dict["a_property"] = a_property
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-
-        def _parse_a_property(data: object) -> AnEnum | AnIntEnum | Unset:
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                a_property_type_0 = AnEnum(data)
-
-                return a_property_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            if not isinstance(data, int):
-                raise TypeError()
-            a_property_type_1 = AnIntEnum(data)
-
-            return a_property_type_1
-
-        a_property = _parse_a_property(d.pop("a_property", UNSET))
-
-        model_with_union_property = cls(
-            a_property=a_property,
-        )
-
-        return model_with_union_property
+        return cls.model_validate(src_dict)

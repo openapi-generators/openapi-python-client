@@ -3,45 +3,20 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200AType1")
 
 
-@_attrs_define
-class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
+class PostResponsesUnionsSimpleBeforeComplexResponse200AType1(BaseModel):
     """ """
 
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     def to_dict(self) -> dict[str, Any]:
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        post_responses_unions_simple_before_complex_response_200a_type_1 = cls()
-
-        post_responses_unions_simple_before_complex_response_200a_type_1.additional_properties = d
-        return post_responses_unions_simple_before_complex_response_200a_type_1
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

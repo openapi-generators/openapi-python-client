@@ -37,21 +37,14 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> PostParametersHeaderResponse200 | PublicError | None:
+) -> PostParametersHeaderResponse200 | PublicError:
+    response.raise_for_status()
     if response.status_code == 200:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
 
         return response_200
 
-    if response.status_code == 400:
-        response_400 = PublicError.from_dict(response.json())
-
-        return response_400
-
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(response.status_code, response.content)
-    else:
-        return None
+    raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
 def _build_response(
@@ -65,76 +58,7 @@ def _build_response(
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-    boolean_header: bool,
-    string_header: str,
-    number_header: float,
-    integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
-    """
-    Args:
-        boolean_header (bool):
-        string_header (str):
-        number_header (float):
-        integer_header (int):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[PostParametersHeaderResponse200 | PublicError]
-    """
-
-    kwargs = _get_kwargs(
-        boolean_header=boolean_header,
-        string_header=string_header,
-        number_header=number_header,
-        integer_header=integer_header,
-    )
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-    boolean_header: bool,
-    string_header: str,
-    number_header: float,
-    integer_header: int,
-) -> PostParametersHeaderResponse200 | PublicError | None:
-    """
-    Args:
-        boolean_header (bool):
-        string_header (str):
-        number_header (float):
-        integer_header (int):
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        PostParametersHeaderResponse200 | PublicError
-    """
-
-    return sync_detailed(
-        client=client,
-        boolean_header=boolean_header,
-        string_header=string_header,
-        number_header=number_header,
-        integer_header=integer_header,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
     boolean_header: bool,
@@ -169,14 +93,14 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> PostParametersHeaderResponse200 | PublicError | None:
+) -> PostParametersHeaderResponse200 | PublicError:
     """
     Args:
         boolean_header (bool):
@@ -193,7 +117,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
             boolean_header=boolean_header,
             string_header=string_header,

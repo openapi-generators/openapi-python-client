@@ -3,59 +3,25 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="ModelWithUnionPropertyInlinedApples")
 
 
-@_attrs_define
-class ModelWithUnionPropertyInlinedApples:
+class ModelWithUnionPropertyInlinedApples(BaseModel):
     """
     Attributes:
         apples (str | Unset):
     """
 
-    apples: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    apples: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        apples = self.apples
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if apples is not UNSET:
-            field_dict["apples"] = apples
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        apples = d.pop("apples", UNSET)
-
-        model_with_union_property_inlined_apples = cls(
-            apples=apples,
-        )
-
-        model_with_union_property_inlined_apples.additional_properties = d
-        return model_with_union_property_inlined_apples
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

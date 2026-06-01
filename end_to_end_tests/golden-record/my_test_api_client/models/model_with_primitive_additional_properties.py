@@ -1,78 +1,28 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
-
-if TYPE_CHECKING:
-    from ..models.model_with_primitive_additional_properties_a_date_holder import (
-        ModelWithPrimitiveAdditionalPropertiesADateHolder,
-    )
-
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 T = TypeVar("T", bound="ModelWithPrimitiveAdditionalProperties")
 
 
-@_attrs_define
-class ModelWithPrimitiveAdditionalProperties:
+class ModelWithPrimitiveAdditionalProperties(BaseModel):
     """
     Attributes:
-        a_date_holder (ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset):
+        a_date_holder (dict[str, datetime.datetime] | Unset):
     """
 
-    a_date_holder: ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset = UNSET
-    additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    a_date_holder: dict[str, datetime.datetime] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        a_date_holder: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.a_date_holder, Unset):
-            a_date_holder = self.a_date_holder.to_dict()
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if a_date_holder is not UNSET:
-            field_dict["a_date_holder"] = a_date_holder
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_with_primitive_additional_properties_a_date_holder import (
-            ModelWithPrimitiveAdditionalPropertiesADateHolder,
-        )
-
-        d = dict(src_dict)
-        _a_date_holder = d.pop("a_date_holder", UNSET)
-        a_date_holder: ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset
-        if isinstance(_a_date_holder, Unset):
-            a_date_holder = UNSET
-        else:
-            a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(_a_date_holder)
-
-        model_with_primitive_additional_properties = cls(
-            a_date_holder=a_date_holder,
-        )
-
-        model_with_primitive_additional_properties.additional_properties = d
-        return model_with_primitive_additional_properties
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> str:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: str) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+        return cls.model_validate(src_dict)

@@ -3,10 +3,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
+from pydantic import ConfigDict
+from tandem_platform.schema.protected import BaseModel
 
 if TYPE_CHECKING:
     from ..models.an_array_with_a_circular_ref_in_items_object_a_item import AnArrayWithACircularRefInItemsObjectAItem
@@ -15,73 +13,24 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectBItem")
 
 
-@_attrs_define
-class AnArrayWithACircularRefInItemsObjectBItem:
+class AnArrayWithACircularRefInItemsObjectBItem(BaseModel):
     """
     Attributes:
         circular (list[AnArrayWithACircularRefInItemsObjectAItem] | Unset):
     """
 
-    circular: list[AnArrayWithACircularRefInItemsObjectAItem] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    circular: list[AnArrayWithACircularRefInItemsObjectAItem] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        circular: list[dict[str, Any]] | Unset = UNSET
-        if not isinstance(self.circular, Unset):
-            circular = []
-            for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in self.circular:
-                componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item = (
-                    componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data.to_dict()
-                )
-                circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
-
-        field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if circular is not UNSET:
-            field_dict["circular"] = circular
-
-        return field_dict
+        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.an_array_with_a_circular_ref_in_items_object_a_item import (
-            AnArrayWithACircularRefInItemsObjectAItem,
-        )
+        return cls.model_validate(src_dict)
 
-        d = dict(src_dict)
-        _circular = d.pop("circular", UNSET)
-        circular: list[AnArrayWithACircularRefInItemsObjectAItem] | Unset = UNSET
-        if _circular is not UNSET:
-            circular = []
-            for componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data in _circular:
-                componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item = (
-                    AnArrayWithACircularRefInItemsObjectAItem.from_dict(
-                        componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item_data
-                    )
-                )
 
-                circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
+from ..models.an_array_with_a_circular_ref_in_items_object_a_item import AnArrayWithACircularRefInItemsObjectAItem
 
-        an_array_with_a_circular_ref_in_items_object_b_item = cls(
-            circular=circular,
-        )
-
-        an_array_with_a_circular_ref_in_items_object_b_item.additional_properties = d
-        return an_array_with_a_circular_ref_in_items_object_b_item
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
+AnArrayWithACircularRefInItemsObjectBItem.model_rebuild()

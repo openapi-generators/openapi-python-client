@@ -18,6 +18,7 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> str:
+    response.raise_for_status()
     response_default = response.text
     return response_default
 
@@ -31,49 +32,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-) -> Response[str]:
-    """Default Status Code Only
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[str]
-    """
-
-    kwargs = _get_kwargs()
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-) -> str | None:
-    """Default Status Code Only
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        str
-    """
-
-    return sync_detailed(
-        client=client,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[str]:
@@ -94,10 +53,10 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
-) -> str | None:
+) -> str:
     """Default Status Code Only
 
     Raises:
@@ -109,7 +68,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
         )
     ).parsed

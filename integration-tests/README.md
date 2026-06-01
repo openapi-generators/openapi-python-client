@@ -109,3 +109,15 @@ client = Client(
 client.set_httpx_client(httpx.Client(base_url="https://api.example.com", proxies="http://localhost:8030"))
 ```
 
+## Building / publishing this package
+This project uses [uv](https://github.com/astral-sh/uv) to manage dependencies and packaging. Here are the basics:
+1. Update the metadata in `pyproject.toml` (e.g. authors, version).
+2. If you're using a private repository: https://docs.astral.sh/uv/guides/integration/alternative-indexes/
+3. Build a distribution with `uv build`, builds `sdist` and `wheel` by default.
+1. Publish the client with `uv publish`, see documentation for publishing to private indexes.
+
+If you want to install this client into another project without publishing it (e.g. for development) then:
+1. If that project **is using uv**, you can simply do `uv add <path-to-this-client>` from that project
+1. If that project is not using uv:
+    1. Build a wheel with `uv build --wheel`.
+    1. Install that wheel from the other project `pip install <path-to-wheel>`.

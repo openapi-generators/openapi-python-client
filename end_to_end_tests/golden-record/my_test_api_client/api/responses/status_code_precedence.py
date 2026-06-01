@@ -18,17 +18,10 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> str:
+    response.raise_for_status()
     if response.status_code == 200:
         response_200 = response.text
         return response_200
-
-    if response.status_code == 404:
-        response_404 = response.text
-        return response_404
-
-    if 400 <= response.status_code <= 499:
-        response_4xx = response.text
-        return response_4xx
 
     response_default = response.text
     return response_default
@@ -43,53 +36,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     )
 
 
-def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
-) -> Response[str]:
-    """Status Codes Precedence
-
-     Verify that specific status codes are always checked first, then ranges, then default
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        Response[str]
-    """
-
-    kwargs = _get_kwargs()
-
-    response = client.get_httpx_client().request(
-        **kwargs,
-    )
-
-    return _build_response(client=client, response=response)
-
-
-def sync(
-    *,
-    client: AuthenticatedClient | Client,
-) -> str | None:
-    """Status Codes Precedence
-
-     Verify that specific status codes are always checked first, then ranges, then default
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        str
-    """
-
-    return sync_detailed(
-        client=client,
-    ).parsed
-
-
-async def asyncio_detailed(
+async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[str]:
@@ -112,10 +59,10 @@ async def asyncio_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio(
+async def request(
     *,
     client: AuthenticatedClient | Client,
-) -> str | None:
+) -> str:
     """Status Codes Precedence
 
      Verify that specific status codes are always checked first, then ranges, then default
@@ -129,7 +76,7 @@ async def asyncio(
     """
 
     return (
-        await asyncio_detailed(
+        await _request_detailed(
             client=client,
         )
     ).parsed

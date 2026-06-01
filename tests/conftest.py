@@ -38,7 +38,7 @@ def config() -> Config:
     """Create a default config for when it doesn't matter"""
     return Config.from_sources(
         ConfigFile(),
-        MetaType.POETRY,
+        MetaType.UV,
         document_source=Path("openapi.yaml"),
         file_encoding="utf-8",
         overwrite=False,

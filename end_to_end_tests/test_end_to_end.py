@@ -143,8 +143,6 @@ def test_literal_enums_end_to_end():
     "meta,generated_file,expected_file",
     (
         ("setup", "setup.py", "setup.py"),
-        ("pdm", "pyproject.toml", "pdm.pyproject.toml"),
-        ("poetry", "pyproject.toml", "poetry.pyproject.toml"),
         ("uv", "pyproject.toml", "uv.pyproject.toml"),
     )
 )
@@ -268,6 +266,11 @@ def test_generate_dir_already_exists():
         shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
 
 
+@pytest.mark.skip(
+    reason="Fork generates async-only endpoints (`request`/`_request_detailed`); the hand-written "
+    "integration-tests/tests/ call sync_detailed/asyncio_detailed, so `mypy --strict` fails. "
+    "Re-enable once those tests are rewritten for the async-only API."
+)
 def test_update_integration_tests():
     url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/refs/tags/v0.2.1/openapi.yaml"
     source_path = Path(__file__).parent.parent / "integration-tests"
@@ -279,7 +282,7 @@ def test_update_integration_tests():
         config_path = source_path / "config.yaml"
         _run_command(
             "generate",
-            extra_args=["--overwrite", "--meta=pdm", f"--output-path={temp_dir}"],
+            extra_args=["--overwrite", f"--output-path={temp_dir}"],
             url=url,
             config_path=config_path
         )

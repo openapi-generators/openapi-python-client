@@ -56,7 +56,6 @@ from .model_with_additional_properties_inlined_additional_property import (
 )
 from .model_with_additional_properties_refed import ModelWithAdditionalPropertiesRefed
 from .model_with_any_json_properties import ModelWithAnyJsonProperties
-from .model_with_any_json_properties_additional_property_type_0 import ModelWithAnyJsonPropertiesAdditionalPropertyType0
 from .model_with_backslash_in_description import ModelWithBackslashInDescription
 from .model_with_circular_ref_a import ModelWithCircularRefA
 from .model_with_circular_ref_b import ModelWithCircularRefB
@@ -68,7 +67,6 @@ from .model_with_merged_properties import ModelWithMergedProperties
 from .model_with_merged_properties_string_to_enum import ModelWithMergedPropertiesStringToEnum
 from .model_with_no_properties import ModelWithNoProperties
 from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditionalProperties
-from .model_with_primitive_additional_properties_a_date_holder import ModelWithPrimitiveAdditionalPropertiesADateHolder
 from .model_with_property_ref import ModelWithPropertyRef
 from .model_with_recursive_ref import ModelWithRecursiveRef
 from .model_with_recursive_ref_in_additional_properties import ModelWithRecursiveRefInAdditionalProperties
@@ -89,6 +87,7 @@ from .post_responses_unions_simple_before_complex_response_200 import PostRespon
 from .post_responses_unions_simple_before_complex_response_200a_type_1 import (
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
 )
+from .protected_branded_model import ProtectedBrandedModel
 from .status_code_patterns_response_2xx import StatusCodePatternsResponse2XX
 from .status_code_patterns_response_2xx_status import StatusCodePatternsResponse2XXStatus
 from .status_code_patterns_response_4xx import StatusCodePatternsResponse4XX
@@ -145,7 +144,6 @@ __all__ = (
     "ModelWithAdditionalPropertiesInlinedAdditionalProperty",
     "ModelWithAdditionalPropertiesRefed",
     "ModelWithAnyJsonProperties",
-    "ModelWithAnyJsonPropertiesAdditionalPropertyType0",
     "ModelWithBackslashInDescription",
     "ModelWithCircularRefA",
     "ModelWithCircularRefB",
@@ -157,7 +155,6 @@ __all__ = (
     "ModelWithMergedPropertiesStringToEnum",
     "ModelWithNoProperties",
     "ModelWithPrimitiveAdditionalProperties",
-    "ModelWithPrimitiveAdditionalPropertiesADateHolder",
     "ModelWithPropertyRef",
     "ModelWithRecursiveRef",
     "ModelWithRecursiveRefInAdditionalProperties",
@@ -176,6 +173,7 @@ __all__ = (
     "PostNamingPropertyConflictWithImportResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200",
     "PostResponsesUnionsSimpleBeforeComplexResponse200AType1",
+    "ProtectedBrandedModel",
     "StatusCodePatternsResponse2XX",
     "StatusCodePatternsResponse2XXStatus",
     "StatusCodePatternsResponse4XX",
