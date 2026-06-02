@@ -228,3 +228,10 @@ class Color(IntEnum):
 [changelog.md]: CHANGELOG.md
 [uv]: https://docs.astral.sh/uv/
 [Ruff]: https://docs.astral.sh/ruff/
+
+
+## Publish to internal Tandem repository
+
+`pdm publish --repository https://python.cloudsmith.io/tandem/artifacts-internal/`
+Username: `__token__`
+Password: Personal API key from https://app.cloudsmith.com/settings/api-keys
