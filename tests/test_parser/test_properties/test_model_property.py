@@ -40,6 +40,15 @@ class TestModelProperty:
             "from typing import cast",
         }
 
+    def test_get_imports_with_default(self, model_property_factory):
+        prop = model_property_factory(required=False, default="default")
+
+        assert prop.get_imports(prefix="..") == {
+            "from ..types import UNSET, Unset",
+            "from typing import cast",
+            "from ..models.my_module import MyClass",
+        }
+
     def test_get_lazy_imports(self, model_property_factory):
         prop = model_property_factory(required=False)
 
@@ -47,9 +56,51 @@ class TestModelProperty:
             "from ..models.my_module import MyClass",
         }
 
+    def test_get_lazy_imports_with_default(self, model_property_factory):
+        prop = model_property_factory(required=False, default="default")
+
+        assert prop.get_lazy_imports(prefix="..") == set()
+
     def test_get_base_type_string(self, model_property_factory):
         m = model_property_factory()
         assert m.get_base_type_string() == "MyClass"
+
+    def test_convert_value(self, model_property_factory):
+        prop = model_property_factory(
+            required_properties=["prop1"],
+        )
+        assert isinstance(prop.convert_value({}), PropertyError)
+        assert prop.convert_value(None) is None
+
+        empty_prop = model_property_factory(
+            required_properties=[],
+            optional_properties=[],
+        )
+        assert empty_prop.convert_value(None) is None
+        val = empty_prop.convert_value({})
+        assert val.python_code == "MyClass()"
+        assert val.raw_value == {}
+
+    def test_convert_value_unprocessed(self, model_property_factory):
+        # When required_properties is None, it should check self.data (unprocessed)
+        # 1. Schema with properties
+        prop_with_data = model_property_factory(
+            required_properties=None,
+            optional_properties=None,
+            data=oai.Schema.model_construct(properties={"prop1": oai.Schema.model_construct()}),
+        )
+        assert isinstance(prop_with_data.convert_value({}), PropertyError)
+
+        # 2. Empty Schema (freeform)
+        empty_prop_with_data = model_property_factory(
+            required_properties=None,
+            optional_properties=None,
+            data=oai.Schema.model_construct(),
+        )
+        assert empty_prop_with_data.convert_value(None) is None
+        val = empty_prop_with_data.convert_value({})
+        assert val.python_code == "MyClass()"
+        assert val.raw_value == {}
 
 
 class TestBuild:
