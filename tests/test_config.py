@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 from ruamel.yaml import YAML as _YAML
 
+from openapi_python_client import Config, MetaType
 from openapi_python_client.config import ConfigFile
 
 
@@ -59,3 +60,24 @@ def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
     assert config.project_name_override == "project-name"
     assert config.package_name_override == "package_name"
     assert config.package_version_override == "package_version"
+
+
+def _config_from_sources(config_file: ConfigFile) -> Config:
+    return Config.from_sources(
+        config_file,
+        MetaType.NONE,
+        document_source=Path("openapi.yaml"),
+        file_encoding="utf-8",
+        overwrite=False,
+        output_path=None,
+    )
+
+
+def test_config_from_sources_normalizes_tag_filters() -> None:
+    defaults = _config_from_sources(ConfigFile())
+    assert defaults.include_tags == []
+    assert defaults.exclude_tags == []
+
+    both = _config_from_sources(ConfigFile(include_tags=["billing"], exclude_tags=["admin"]))
+    assert both.include_tags == ["billing"]
+    assert both.exclude_tags == ["admin"]

@@ -2,11 +2,17 @@ from unittest.mock import MagicMock
 
 import pydantic
 import pytest
+from attr import evolve
 
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection, import_string_from_class
-from openapi_python_client.parser.properties import Class, IntProperty, Parameters, Schemas
+from openapi_python_client.parser.properties import (
+    Class,
+    IntProperty,
+    Parameters,
+    Schemas,
+)
 from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
@@ -661,3 +667,98 @@ class TestEndpointCollection:
         )
         collection: EndpointCollection = collections["default"]
         assert isinstance(collection.endpoints[0].query_parameters[0], IntProperty)
+
+    @staticmethod
+    def _tagged_data() -> dict:
+        def _op(tags: list[str] | None) -> oai.Operation:
+            return oai.Operation.model_construct(
+                tags=tags,
+                responses={"200": oai.Response.model_construct(description="ok")},
+            )
+
+        return {
+            "/billing": oai.PathItem.model_construct(get=_op(["billing"])),
+            "/admin": oai.PathItem.model_construct(get=_op(["admin"])),
+            "/users": oai.PathItem.model_construct(get=_op(["users"])),
+            "/untagged": oai.PathItem.model_construct(get=_op(None)),
+        }
+
+    def _collect(self, data: dict, config) -> dict:
+        collections, _schemas, _parameters = EndpointCollection.from_data(
+            data=data,
+            schemas=Schemas(),
+            parameters=Parameters(),
+            config=config,
+            request_bodies={},
+            responses={},
+        )
+        return collections
+
+    def test_from_data_no_filter_keeps_every_tag(self, config):
+        collections = self._collect(self._tagged_data(), config)
+        assert set(collections.keys()) == {"billing", "admin", "users", "default"}
+
+    def test_from_data_include_tags_keeps_only_included(self, config):
+        collections = self._collect(self._tagged_data(), evolve(config, include_tags=["billing"]))
+        assert set(collections.keys()) == {"billing"}
+
+    def test_from_data_exclude_tags_drops_excluded(self, config):
+        collections = self._collect(self._tagged_data(), evolve(config, exclude_tags=["admin"]))
+        assert "admin" not in collections
+        assert {"billing", "users", "default"} == set(collections.keys())
+
+    def test_from_data_untagged_excluded_when_default_not_included(self, config):
+        collections = self._collect(self._tagged_data(), evolve(config, include_tags=["billing"]))
+        assert "default" not in collections
+
+    def test_from_data_include_default_keeps_untagged(self, config):
+        collections = self._collect(self._tagged_data(), evolve(config, include_tags=["default"]))
+        assert set(collections.keys()) == {"default"}
+
+    def test_from_data_filters_before_first_tag_truncation(self, config):
+        data = {
+            "/multi": oai.PathItem.model_construct(
+                get=oai.Operation.model_construct(
+                    tags=["admin", "billing"],
+                    responses={"200": oai.Response.model_construct(description="ok")},
+                ),
+            ),
+        }
+        collections = self._collect(data, evolve(config, include_tags=["billing"]))
+        assert set(collections.keys()) == {"billing"}
+
+    def test_from_data_generate_all_tags_keeps_only_surviving_tags(self, config):
+        data = {
+            "/multi": oai.PathItem.model_construct(
+                get=oai.Operation.model_construct(
+                    tags=["admin", "billing", "users"],
+                    responses={"200": oai.Response.model_construct(description="ok")},
+                ),
+            ),
+        }
+        collections = self._collect(data, evolve(config, include_tags=["billing", "users"], generate_all_tags=True))
+        assert set(collections.keys()) == {"billing", "users"}
+
+    def test_from_data_exclude_tags_with_generate_all_tags(self, config):
+        data = {
+            "/multi": oai.PathItem.model_construct(
+                get=oai.Operation.model_construct(
+                    tags=["admin", "billing", "users"],
+                    responses={"200": oai.Response.model_construct(description="ok")},
+                ),
+            ),
+        }
+        collections = self._collect(data, evolve(config, exclude_tags=["admin"], generate_all_tags=True))
+        assert set(collections.keys()) == {"billing", "users"}
+
+    def test_from_data_tag_matching_is_case_sensitive(self, config):
+        data = {
+            "/billing": oai.PathItem.model_construct(
+                get=oai.Operation.model_construct(
+                    tags=["Billing"],
+                    responses={"200": oai.Response.model_construct(description="ok")},
+                ),
+            ),
+        }
+        collections = self._collect(data, evolve(config, include_tags=["billing"]))
+        assert collections == {}
