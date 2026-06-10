@@ -78,30 +78,30 @@ def test_response_from_data_no_content_schema(any_property_factory):
     config.content_type_overrides = {}
     response, _schemas = response_from_data(
         status_code=status_code,
-         data=data,
-         schemas=Schemas(),
-         responses={},
-         parent_name="parent",
-         config=config,
-     )
- 
+        data=data,
+        schemas=Schemas(),
+        responses={},
+        parent_name="parent",
+        config=config,
+    )
+
     assert response == Response(
         status_code=status_code,
-       content=[
-           MediaType(
-               content_type="application/vnd.api+json; version=2.2",
-               prop=any_property_factory(
-                   name="response_200",
-                   default=None,
-                   required=True,
-                   description=data.description,
-               ),
-               source=JSON_SOURCE,
-               data=data.content["application/vnd.api+json; version=2.2"],
-           )
-       ],
-       data=data,
-   )
+        content=[
+            MediaType(
+                content_type="application/vnd.api+json; version=2.2",
+                prop=any_property_factory(
+                    name="response_200",
+                    default=None,
+                    required=True,
+                    description=data.description,
+                ),
+                source=JSON_SOURCE,
+                data=data.content["application/vnd.api+json; version=2.2"],
+            )
+        ],
+        data=data,
+    )
 
 
 def test_response_from_data_property_error(mocker):
