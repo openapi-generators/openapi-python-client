@@ -1,8 +1,8 @@
+import datetime
 from datetime import date
 
-from dateutil.parser import isoparse
 some_source = date(2020, 10, 12)
 some_destination = some_source.isoformat()
-a_prop = isoparse(some_destination).date()
+a_prop = datetime.date.fromisoformat(some_destination)
 
 

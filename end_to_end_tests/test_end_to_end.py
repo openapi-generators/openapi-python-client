@@ -1,10 +1,11 @@
 import shutil
+import subprocess
+import sys
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
 
 import pytest
-from click.testing import Result
-from typer.testing import CliRunner
+from typer.testing import CliRunner, Result
 
 from end_to_end_tests.generated_client import (
     _run_command, generate_client, generate_client_from_inline_spec,
@@ -99,10 +100,12 @@ def run_e2e_test(
             gr_path, g.output_path, expected_differences=expected_differences, expected_missing=expected_missing
         )
 
-        import mypy.api
-
-        out, err, status = mypy.api.run([str(g.output_path), "--strict"])
-        assert status == 0, f"Type checking client failed: {out}"
+        result = subprocess.run(
+            [sys.executable, "-m", "mypy", str(g.output_path), "--strict"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"Type checking client failed: {result.stdout}"
 
         return g.generator_result
 
@@ -281,10 +284,12 @@ def test_update_integration_tests():
             config_path=config_path
         )
         _compare_directories(source_path, temp_dir, ignore=["pyproject.toml"])
-        import mypy.api
-
-        out, err, status = mypy.api.run([str(temp_dir), "--strict"])
-        assert status == 0, f"Type checking client failed: {out=} {err=}"
+        result = subprocess.run(
+            [sys.executable, "-m", "mypy", str(temp_dir), "--strict"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"Type checking client failed: {result.stdout=} {result.stderr=}"
 
     finally:
         shutil.rmtree(temp_dir)

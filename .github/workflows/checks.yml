@@ -11,7 +11,7 @@ jobs:
   test:
     strategy:
       matrix:
-        python: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+        python: [ "3.11", "3.12", "3.13", "3.14" ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -37,7 +37,7 @@ jobs:
         run: pip install pdm
 
       - name: Install Dependencies
-        run: pdm install
+        run: pdm sync --clean
 
       - name: Check formatting
         run: pdm run ruff format . --check
@@ -60,7 +60,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Store coverage report
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage-${{ matrix.python }}
@@ -78,7 +78,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6.2.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Get Python Version
         id: get_python_version
@@ -96,7 +96,7 @@ jobs:
         run: pip install pdm
 
       - name: Install minimum dependencies
-        run: pdm install -L pdm.minimal.lock
+        run: pdm sync --clean -L pdm.minimal.lock
 
       - name: Run mypy
         run: pdm mypy --show-error-codes
@@ -139,7 +139,7 @@ jobs:
           .venv/bin/python -m coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: html-report
           path: htmlcov
@@ -163,7 +163,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6.2.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - name: Get Python Version
         id: get_python_version
         run: echo "python_version=$(python --version)" >> $GITHUB_OUTPUT
@@ -178,7 +178,7 @@ jobs:
         run: |
           cd integration-tests
           pip install pdm
-          pdm install -L ${{ matrix.lockfile }}
+          pdm sync --clean -L ${{ matrix.lockfile }}
       - name: Run Tests
         run: |
           cd integration-tests

@@ -13,6 +13,34 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.29.0 (2026-05-30)
+
+### Breaking Changes
+
+- Drop support for Python 3.10
+- Raise minimum httpx version to 0.23.1
+
+### Features
+
+- replace python-dateutil with stdlib datetime.fromisoformat (#1429)
+
+### Fixes
+
+- Remove some generated casts that aren't necessary with mypy v2 (#1436)
+- Explicitly set boundary for multipart/form-data (#1005)
+
+## 0.28.4 (2026-05-11)
+
+### Features
+
+- Update `uv_build` to 0.11 when using `--meta=uv` (#1434)
+
+#### Add support for x-enum-varnames to string enums
+
+##1358 by @mbbush
+
+You can now customize the variable names of the generated string enumerations using the x-enum-varnames openapi extension. Previously, this was only possible for integer enumerations.
+
 ## 0.28.3 (2026-02-17)
 
 ### Fixes

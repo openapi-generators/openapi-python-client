@@ -9,8 +9,7 @@ from typing import Any
 
 from attrs import define
 import pytest
-from click.testing import Result
-from typer.testing import CliRunner
+from typer.testing import CliRunner, Result
 
 from openapi_python_client.cli import app
 
