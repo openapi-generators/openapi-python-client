@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from end_to_end_tests.functional_tests.helpers import (

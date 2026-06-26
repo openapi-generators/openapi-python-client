@@ -2,7 +2,11 @@ import ssl
 from typing import Any
 
 from attrs import define, field, evolve
+{% if config.httpx_version > 1 %}
+import httpx2 as httpx
+{% else %}
 import httpx
+{% endif %}
 
 
 {% set attrs_info = {

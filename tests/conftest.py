@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from mypy.semanal_shared import Protocol
 
-from openapi_python_client import Config, MetaType, utils
+from openapi_python_client import Config, HTTPXVersion, MetaType, utils
 from openapi_python_client import schema as oai
 from openapi_python_client.config import ConfigFile
 from openapi_python_client.parser.properties import (
@@ -39,6 +39,7 @@ def config() -> Config:
     return Config.from_sources(
         ConfigFile(),
         MetaType.POETRY,
+        HTTPXVersion.HTTPX2,
         document_source=Path("openapi.yaml"),
         file_encoding="utf-8",
         overwrite=False,
