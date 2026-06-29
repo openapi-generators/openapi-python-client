@@ -30,7 +30,7 @@ class Responses:
 
 
 class _ResponseSource(TypedDict):
-    """What data should be pulled from the httpx Response object"""
+    """What data should be pulled from the httpx(2) Response object"""
 
     attribute: str
     return_type: str

@@ -1,6 +1,6 @@
 import json
 import mimetypes
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from pathlib import Path
 
 from attr import define
@@ -26,6 +26,18 @@ class MetaType(StrEnum):
     SETUP = "setup"
     PDM = "pdm"
     UV = "uv"
+
+
+class HTTPXVersion(IntEnum):
+    """Version of HTTPX to use."""
+
+    HTTPX2 = 2
+    HTTPX = 1
+
+    # default to httpx2 if not set
+    @classmethod
+    def _missing_(cls, value):
+        return cls.HTTPX2
 
 
 class ConfigFile(BaseModel):
@@ -65,6 +77,7 @@ class Config:
     """Contains all the config values for the generator, from files, defaults, and CLI arguments."""
 
     meta_type: MetaType
+    httpx_version: HTTPXVersion
     class_overrides: dict[str, ClassOverride]
     project_name_override: str | None
     package_name_override: str | None
@@ -86,6 +99,7 @@ class Config:
     def from_sources(
         config_file: ConfigFile,
         meta_type: MetaType,
+        httpx_version: HTTPXVersion,
         document_source: Path | str,
         file_encoding: str,
         overwrite: bool,
@@ -106,6 +120,7 @@ class Config:
 
         config = Config(
             meta_type=meta_type,
+            httpx_version=httpx_version,
             class_overrides=config_file.class_overrides or {},
             content_type_overrides=config_file.content_type_overrides or {},
             project_name_override=config_file.project_name_override,
