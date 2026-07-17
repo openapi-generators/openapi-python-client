@@ -4,6 +4,25 @@ info:
   description: "Test new OpenAPI 3.1 features"
   version: "0.1.0"
 paths:
+  "/content/{item_id}":
+    get:
+      tags: [ "content" ]
+      parameters:
+        - name: "item_id"
+          in: "path"
+          required: true
+          content:
+            "application/json":
+              schema:
+                type: string
+                enum: ["a", "b", "c"]
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                type: string
   "/const/{path}":
     post:
       tags: [ "const" ]
