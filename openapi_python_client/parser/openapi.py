@@ -249,7 +249,12 @@ class Endpoint:
                 return param_or_error, schemas, parameters
             param = param_or_error  # noqa: PLW2901
 
-            if param.param_schema is None:
+            param_schema = param.param_schema
+            if param_schema is None and param.content:
+                first_media_type = next(iter(param.content.values()))
+                param_schema = first_media_type.media_type_schema
+
+            if param_schema is None:
                 continue
 
             unique_param = (param.name, param.param_in)
@@ -278,7 +283,7 @@ class Endpoint:
             prop, new_schemas = property_from_data(
                 name=param.name,
                 required=param.required,
-                data=param.param_schema,
+                data=param_schema,
                 schemas=schemas,
                 parent_name=endpoint.name,
                 config=config,
