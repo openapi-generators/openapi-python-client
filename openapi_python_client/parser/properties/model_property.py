@@ -74,6 +74,10 @@ class ModelProperty(PropertyProtocol):
             else:
                 class_string = title
         class_info = Class.from_string(string=class_string, config=config)
+        if class_info.name in schemas.classes_by_name and data.title and name:
+            fallback_class_info = Class.from_string(string=name, config=config)
+            if fallback_class_info.name not in schemas.classes_by_name:
+                class_info = fallback_class_info
         model_roots = {*roots, class_info.name}
         required_properties: list[Property] | None = None
         optional_properties: list[Property] | None = None
