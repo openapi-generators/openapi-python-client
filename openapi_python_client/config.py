@@ -46,6 +46,7 @@ class ConfigFile(BaseModel):
     generate_all_tags: bool = False
     http_timeout: int = 5
     literal_enums: bool = False
+    multiple_media_types: bool = False
 
     @staticmethod
     def load_from_path(path: Path) -> "ConfigFile":
@@ -76,6 +77,7 @@ class Config:
     generate_all_tags: bool
     http_timeout: int
     literal_enums: bool
+    multiple_media_types: bool
     document_source: Path | str
     file_encoding: str
     content_type_overrides: dict[str, str]
@@ -118,6 +120,7 @@ class Config:
             generate_all_tags=config_file.generate_all_tags,
             http_timeout=config_file.http_timeout,
             literal_enums=config_file.literal_enums,
+            multiple_media_types=config_file.multiple_media_types,
             document_source=document_source,
             file_encoding=file_encoding,
             overwrite=overwrite,

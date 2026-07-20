@@ -1,0 +1,51 @@
+openapi: "3.1.0"
+info:
+  title: "Multiple media types"
+  description: "Test multiple response media types"
+  version: "0.1.0"
+paths:
+  "/":
+    post:
+      tags: [ "multiple_media_types" ]
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                const: "Why have a fixed response? I dunno"
+            "application/octet-stream": {}
+        "404":
+          description: "Not Found"
+          content:
+            "text/plain": {}
+        "503":
+          description: "Server Not Available"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+            "text/plain": {}
+components:
+  schemas: 
+    ErrorResponse:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Error category code
+        message:
+          type: string
+          title: Message
+          description: Human-readable error message
+        detail:
+          type: object
+          title: Detail
+          description: Error detail
+      additionalProperties: false
+      type: object
+      required:
+        - code
+        - message
+        - detail
+      title: ErrorResponse
