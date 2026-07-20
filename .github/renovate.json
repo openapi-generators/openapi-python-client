@@ -1,10 +1,12 @@
 {
   "extends": [
-    "config:base",
-    ":semanticCommitTypeAll(chore)"
+    "config:recommended",
+    ":semanticCommitTypeAll(chore)",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
   "rangeStrategy": "widen",
   "lockFileMaintenance": { "enabled": true, "automerge": true },
+  "minimumReleaseAge": "7 days",
   "regexManagers": [
     {
       "fileMatch": [
