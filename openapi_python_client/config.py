@@ -46,6 +46,8 @@ class ConfigFile(BaseModel):
     generate_all_tags: bool = False
     http_timeout: int = 5
     literal_enums: bool = False
+    include_tags: list[str] | None = None
+    exclude_tags: list[str] | None = None
 
     @staticmethod
     def load_from_path(path: Path) -> "ConfigFile":
@@ -76,6 +78,8 @@ class Config:
     generate_all_tags: bool
     http_timeout: int
     literal_enums: bool
+    include_tags: list[str]
+    exclude_tags: list[str]
     document_source: Path | str
     file_encoding: str
     content_type_overrides: dict[str, str]
@@ -118,6 +122,8 @@ class Config:
             generate_all_tags=config_file.generate_all_tags,
             http_timeout=config_file.http_timeout,
             literal_enums=config_file.literal_enums,
+            include_tags=(config_file.include_tags or []),
+            exclude_tags=(config_file.exclude_tags or []),
             document_source=document_source,
             file_encoding=file_encoding,
             overwrite=overwrite,

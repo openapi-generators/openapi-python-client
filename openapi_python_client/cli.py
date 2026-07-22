@@ -18,6 +18,27 @@ def _version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
+def _split_comma_separated(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _load_config_file(
+    *,
+    config_path: Path | None,
+) -> ConfigFile:
+    if not config_path:
+        config_file = ConfigFile()
+    else:
+        try:
+            config_file = ConfigFile.load_from_path(path=config_path)
+        except Exception as err:
+            raise typer.BadParameter("Unable to parse config") from err
+
+    return config_file
+
+
 def _process_config(
     *,
     url: str | None,
@@ -27,6 +48,8 @@ def _process_config(
     file_encoding: str,
     overwrite: bool,
     output_path: Path | None,
+    include_tags: str | None = None,
+    exclude_tags: str | None = None,
 ) -> Config:
     source: Path | str
     if url and not path:
@@ -46,13 +69,16 @@ def _process_config(
         typer.secho(f"Unknown encoding : {file_encoding}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from err
 
-    if not config_path:
-        config_file = ConfigFile()
-    else:
-        try:
-            config_file = ConfigFile.load_from_path(path=config_path)
-        except Exception as err:
-            raise typer.BadParameter("Unable to parse config") from err
+    config_file = _load_config_file(config_path=config_path)
+
+    if include_tags is not None:
+        config_file.include_tags = _split_comma_separated(include_tags)
+    if exclude_tags is not None:
+        config_file.exclude_tags = _split_comma_separated(exclude_tags)
+
+    if config_file.include_tags and config_file.exclude_tags:
+        typer.secho("Provide either include_tags or exclude_tags, not both", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     return Config.from_sources(config_file, meta_type, source, file_encoding, overwrite, output_path=output_path)
 
@@ -148,6 +174,20 @@ def generate(
         "Defaults to the OpenAPI document title converted to kebab or snake case (depending on meta type). "
         "Can also be overridden with `project_name_override` or `package_name_override` in config.",
     ),
+    include_tags: str | None = typer.Option(
+        None,
+        "--include-tags",
+        help="Comma-separated tags to generate. "
+        "Keeps matching endpoints, drops the rest, prunes unused schemas. "
+        "Case-sensitive. Overrides config. Can't combine with --exclude-tags.",
+    ),
+    exclude_tags: str | None = typer.Option(
+        None,
+        "--exclude-tags",
+        help="Comma-separated tags to skip. "
+        "Drops matching endpoints, keeps the rest, prunes unused schemas. "
+        "Case-sensitive. Overrides config. Can't combine with --include-tags.",
+    ),
 ) -> None:
     """Generate a new OpenAPI Client library"""
     from . import generate  # noqa: PLC0415
@@ -160,6 +200,8 @@ def generate(
         file_encoding=file_encoding,
         overwrite=overwrite,
         output_path=output_path,
+        include_tags=include_tags,
+        exclude_tags=exclude_tags,
     )
     errors = generate(
         custom_template_path=custom_template_path,

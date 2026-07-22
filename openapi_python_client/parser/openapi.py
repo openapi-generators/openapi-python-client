@@ -10,6 +10,7 @@ from .. import schema as oai
 from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier
+from ._pruning import get_reachable_classes
 from .bodies import Body, body_from_data
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
@@ -33,6 +34,14 @@ _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
     """Create a string which is used to import a reference"""
     return f"from {prefix}.{class_.module_name} import {class_.name}"
+
+
+def _filter_tags(tags: list[str], config: Config) -> list[str]:
+    if config.include_tags:
+        return [tag for tag in tags if tag in config.include_tags]
+    if config.exclude_tags:
+        return [tag for tag in tags if tag not in config.exclude_tags]
+    return tags
 
 
 @dataclass
@@ -64,7 +73,11 @@ class EndpointCollection:
                 if operation is None:
                     continue
 
-                tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in operation.tags or ["default"]]
+                filtered_tags = _filter_tags(operation.tags or ["default"], config)
+                if not filtered_tags:
+                    continue
+
+                tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in filtered_tags]
                 if not config.generate_all_tags:
                     tags = tags[:1]
 
@@ -543,6 +556,16 @@ class GeneratorData:
             prop for prop in schemas.classes_by_name.values() if isinstance(prop, EnumProperty | LiteralEnumProperty)
         ]
         models = [prop for prop in schemas.classes_by_name.values() if isinstance(prop, ModelProperty)]
+
+        if config.include_tags or config.exclude_tags:
+            reachable = get_reachable_classes(
+                endpoints=(
+                    endpoint for collection in endpoint_collections_by_tag.values() for endpoint in collection.endpoints
+                ),
+                classes_by_name=schemas.classes_by_name,
+            )
+            models = [model for model in models if model.class_info.name in reachable]
+            enums = [enum for enum in enums if enum.class_info.name in reachable]
 
         return GeneratorData(
             title=openapi.info.title,
