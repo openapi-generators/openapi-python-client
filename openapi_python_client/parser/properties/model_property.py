@@ -125,10 +125,18 @@ class ModelProperty(PropertyProtocol):
         )
         return prop, schemas
 
-    @classmethod
-    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+    def convert_value(self, value: Any) -> Value | None | PropertyError:
         if value is not None:
-            return PropertyError(detail="ModelProperty cannot have a default value")  # pragma: no cover
+            is_empty_dict = isinstance(value, dict) and not value
+            if self.required_properties is not None or self.optional_properties is not None:
+                has_no_props = not self.required_properties and not self.optional_properties
+            else:
+                has_no_props = (
+                    not self.data.properties and not self.data.allOf and not self.data.anyOf and not self.data.oneOf
+                )
+            if is_empty_dict and has_no_props:
+                return Value(python_code=f"{self.class_info.name}()", raw_value=value)
+            return PropertyError(detail="ModelProperty cannot have a default value")
         return None
 
     def __attrs_post_init__(self) -> None:
@@ -157,6 +165,8 @@ class ModelProperty(PropertyProtocol):
                 "from typing import cast",
             }
         )
+        if self.default is not None:
+            imports.add(f"from {prefix}{self.self_import}")
         return imports
 
     def get_lazy_imports(self, *, prefix: str) -> set[str]:
@@ -166,6 +176,8 @@ class ModelProperty(PropertyProtocol):
             prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
             back to the root of the generated client.
         """
+        if self.default is not None:
+            return set()
         return {f"from {prefix}{self.self_import}"}
 
     def set_relative_imports(self, relative_imports: set[str]) -> None:
