@@ -183,6 +183,31 @@ class TestEndpoint:
         assert isinstance(endpoint, Endpoint)
         assert len(endpoint.path_parameters) == 0
 
+    def test__add_parameters_uses_content_schema_when_param_schema_missing(self, config):
+        endpoint = self.make_endpoint()
+        data = oai.Operation.model_construct(
+            parameters=[
+                oai.Parameter.model_construct(
+                    name="item_id",
+                    required=True,
+                    param_in=oai.ParameterLocation.PATH,
+                    content={
+                        "application/json": oai.MediaType.model_construct(
+                            media_type_schema=oai.Schema.model_construct(type="string")
+                        )
+                    },
+                ),
+            ]
+        )
+
+        (endpoint, _, _) = endpoint.add_parameters(
+            endpoint=endpoint, data=data, schemas=Schemas(), parameters=Parameters(), config=config
+        )
+
+        assert isinstance(endpoint, Endpoint)
+        assert len(endpoint.path_parameters) == 1
+        assert endpoint.path_parameters[0].name == "item_id"
+
     def test__add_parameters_same_identifier_conflict(self, config):
         endpoint = self.make_endpoint()
         data = oai.Operation.model_construct(
