@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from ..untrusted_string import UntrustedString
 from .components import Components
 from .external_documentation import ExternalDocumentation
 from .info import Info
@@ -26,7 +27,7 @@ class OpenAPI(BaseModel):
     security: list[SecurityRequirement] | None = None
     tags: list[Tag] | None = None
     externalDocs: ExternalDocumentation | None = None
-    openapi: str
+    openapi: UntrustedString
     model_config = ConfigDict(
         # `Components` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,
@@ -35,8 +36,9 @@ class OpenAPI(BaseModel):
 
     @field_validator("openapi")
     @classmethod
-    def check_openapi_version(cls, value: str) -> str:
+    def check_openapi_version(cls, untrusted: UntrustedString) -> UntrustedString:
         """Validates that the declared OpenAPI version is a supported one"""
+        value = untrusted.get_untrusted_value()
         parts = value.split(".")
         if len(parts) != NUM_SEMVER_PARTS:
             raise ValueError(f"Invalid OpenAPI version {value}")
@@ -44,4 +46,4 @@ class OpenAPI(BaseModel):
             raise ValueError(f"Only OpenAPI versions 3.* are supported, got {value}")
         if int(parts[1]) > 1:
             raise ValueError(f"Only OpenAPI versions 3.1.* are supported, got {value}")
-        return value
+        return untrusted

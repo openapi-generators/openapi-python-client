@@ -3,6 +3,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..parameter_location import ParameterLocation
+from ..untrusted_string import UntrustedString
 from .example import Example
 from .media_type import MediaType
 from .reference import ReferenceOr
@@ -21,19 +22,19 @@ class Parameter(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterObject
     """
 
-    name: str
+    name: UntrustedString
     param_in: ParameterLocation = Field(alias="in")
-    description: str | None = None
+    description: UntrustedString | None = None
     required: bool = False
     deprecated: bool = False
     allowEmptyValue: bool = False
-    style: str | None = None
+    style: UntrustedString | None = None
     explode: bool = False
     allowReserved: bool = False
     param_schema: ReferenceOr[Schema] | None = Field(default=None, alias="schema")
     example: Any | None = None
-    examples: dict[str, ReferenceOr[Example]] | None = None
-    content: dict[str, MediaType] | None = None
+    examples: dict[UntrustedString, ReferenceOr[Example]] | None = None
+    content: dict[UntrustedString, MediaType] | None = None
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,

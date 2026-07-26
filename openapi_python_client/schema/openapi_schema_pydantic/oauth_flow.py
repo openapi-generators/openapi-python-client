@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
+
 
 class OAuthFlow(BaseModel):
     """
@@ -10,10 +12,10 @@ class OAuthFlow(BaseModel):
         - https://swagger.io/docs/specification/authentication/oauth2/
     """
 
-    authorizationUrl: str | None = None
-    tokenUrl: str | None = None
-    refreshUrl: str | None = None
-    scopes: dict[str, str]
+    authorizationUrl: UntrustedString | None = None
+    tokenUrl: UntrustedString | None = None
+    refreshUrl: UntrustedString | None = None
+    scopes: dict[UntrustedString, UntrustedString]
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

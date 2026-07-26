@@ -3,6 +3,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, model_validator
 
 from ..data_type import DataType
+from ..untrusted_string import UntrustedString
 from .discriminator import Discriminator
 from .external_documentation import ExternalDocumentation
 from .reference import ReferenceOr
@@ -20,7 +21,7 @@ class Schema(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject
     """
 
-    title: str | None = None
+    title: UntrustedString | None = None
     multipleOf: float | None = Field(default=None, gt=0.0)
     maximum: float | None = None
     exclusiveMaximum: bool | float | None = None
@@ -28,13 +29,13 @@ class Schema(BaseModel):
     exclusiveMinimum: bool | float | None = None
     maxLength: int | None = Field(default=None, ge=0)
     minLength: int | None = Field(default=None, ge=0)
-    pattern: str | None = None
+    pattern: UntrustedString | None = None
     maxItems: int | None = Field(default=None, ge=0)
     minItems: int | None = Field(default=None, ge=0)
     uniqueItems: bool | None = None
     maxProperties: int | None = Field(default=None, ge=0)
     minProperties: int | None = Field(default=None, ge=0)
-    required: list[str] | None = Field(default=None)
+    required: list[UntrustedString] | None = Field(default=None)
     enum: None | list[Any] = Field(default=None, min_length=1)
     const: None | StrictStr | StrictInt | StrictFloat | StrictBool = None
     type: DataType | list[DataType] | None = Field(default=None)
@@ -44,10 +45,10 @@ class Schema(BaseModel):
     schema_not: ReferenceOr["Schema"] | None = Field(default=None, alias="not")
     items: ReferenceOr["Schema"] | None = None
     prefixItems: list[ReferenceOr["Schema"]] = Field(default_factory=list)
-    properties: dict[str, ReferenceOr["Schema"]] | None = None
+    properties: dict[UntrustedString, ReferenceOr["Schema"]] | None = None
     additionalProperties: bool | ReferenceOr["Schema"] | None = None
-    description: str | None = None
-    schema_format: str | None = Field(default=None, alias="format")
+    description: UntrustedString | None = None
+    schema_format: UntrustedString | None = Field(default=None, alias="format")
     default: Any | None = None
     nullable: bool = Field(default=False)
     discriminator: Discriminator | None = None

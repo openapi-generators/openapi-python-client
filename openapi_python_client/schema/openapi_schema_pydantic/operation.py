@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..untrusted_string import UntrustedString
 from .callback import Callback
 from .external_documentation import ExternalDocumentation
 from .parameter import Parameter
@@ -18,15 +19,15 @@ class Operation(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
     """
 
-    tags: list[str] | None = None
-    summary: str | None = None
-    description: str | None = None
+    tags: list[UntrustedString] | None = None
+    summary: UntrustedString | None = None
+    description: UntrustedString | None = None
     externalDocs: ExternalDocumentation | None = None
-    operationId: str | None = None
+    operationId: UntrustedString | None = None
     parameters: list[ReferenceOr[Parameter]] | None = None
     request_body: ReferenceOr[RequestBody] | None = Field(None, alias="requestBody")
     responses: Responses
-    callbacks: dict[str, Callback] | None = None
+    callbacks: dict[UntrustedString, Callback] | None = None
 
     deprecated: bool = False
     security: list[SecurityRequirement] | None = None

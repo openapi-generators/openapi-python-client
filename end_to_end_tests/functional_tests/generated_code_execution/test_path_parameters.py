@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock
 
 import httpx
-import pytest
 
 from end_to_end_tests.functional_tests.helpers import (
     with_generated_client_fixture,
@@ -10,7 +9,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 paths:
   "/items/{item_id}/details/{detail_id}":
     get:
@@ -36,7 +35,8 @@ paths:
                 properties:
                   id:
                     type: string
-""")
+"""
+)
 @with_generated_code_import(".api.default.get_item_detail.sync_detailed")
 @with_generated_code_import(".client.Client")
 class TestPathParameterEncoding:

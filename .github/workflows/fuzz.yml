@@ -1,0 +1,33 @@
+name: Fuzz code generation
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: "23 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAPI_PYTHON_CLIENT_FUZZ_EXAMPLES: ${{ github.event_name == 'schedule' && '1000' || '100' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Install PDM
+        run: pip install pdm
+      - name: Install dependencies
+        run: pdm sync --clean
+      - name: Fuzz generated Python
+        run: pdm fuzz

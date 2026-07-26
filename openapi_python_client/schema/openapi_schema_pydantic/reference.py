@@ -2,6 +2,8 @@ from typing import Annotated, Any, Literal, TypeAlias, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
 
+from openapi_python_client.schema.ref import Ref
+
 
 class Reference(BaseModel):
     """
@@ -18,7 +20,7 @@ class Reference(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#referenceObject
     """
 
-    ref: str = Field(alias="$ref")
+    ref: Ref = Field(alias="$ref")
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,

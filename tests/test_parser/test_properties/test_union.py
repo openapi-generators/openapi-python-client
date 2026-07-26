@@ -1,4 +1,5 @@
 import openapi_python_client.schema as oai
+from openapi_python_client import UntrustedString
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.properties import Schemas, UnionProperty, property_from_data
 from openapi_python_client.schema import DataType, ParameterLocation
@@ -10,7 +11,7 @@ def test_invalid_location(config):
     )
 
     prop, _ = UnionProperty.build(
-        data=data, required=True, schemas=Schemas(), parent_name="parent", name="name", config=config
+        data=data, required=True, schemas=Schemas(), parent_name="parent", name=UntrustedString("name"), config=config
     )
 
     err = prop.validate_location(ParameterLocation.PATH)
@@ -23,7 +24,7 @@ def test_not_required_in_path(config):
     )
 
     prop, _ = UnionProperty.build(
-        data=data, required=False, schemas=Schemas(), parent_name="parent", name="name", config=config
+        data=data, required=False, schemas=Schemas(), parent_name="parent", name=UntrustedString("name"), config=config
     )
 
     err = prop.validate_location(ParameterLocation.PATH)
@@ -75,7 +76,7 @@ def test_union_oneOf_descriptive_type_name(
     )
 
     p, s = property_from_data(
-        name=name, required=required, data=data, schemas=Schemas(), parent_name="parent", config=config
+        name=UntrustedString(name), required=required, data=data, schemas=Schemas(), parent_name="parent", config=config
     )
 
     assert p == expected

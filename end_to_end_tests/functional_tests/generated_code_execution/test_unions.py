@@ -7,7 +7,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     StringOrInt:
@@ -32,7 +32,7 @@ class TestSimpleTypeList:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     ThingA:
@@ -81,7 +81,8 @@ components:
           oneOf:
             - $ref: "#/components/schemas/ThingA"
       required: ["requiredThing"]
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.ThingA",
     ".models.ThingB",
@@ -114,7 +115,7 @@ class TestOneOf:
             {"thingOrString": "x"},
             ModelWithUnion(thing_or_string="x"),
         )
-    
+
     def test_disambiguate_nested_union(self, ThingA, ThingB, ModelWithNestedUnion):
         assert_model_decode_encode(
             ModelWithNestedUnion,
@@ -138,9 +139,5 @@ class TestOneOf:
             "thing",
             "ThingA | ThingB",
         )
-        assert_model_property_type_hint(
-            ModelWithUnionOfOne, "thing", "ThingA | Unset"
-        )
-        assert_model_property_type_hint(
-            ModelWithUnionOfOne, "required_thing", "ThingA"
-        )
+        assert_model_property_type_hint(ModelWithUnionOfOne, "thing", "ThingA | Unset")
+        assert_model_property_type_hint(ModelWithUnionOfOne, "required_thing", "ThingA")

@@ -1,4 +1,5 @@
-""" Regenerate golden-record """
+"""Regenerate golden-record"""
+
 import filecmp
 import shutil
 from pathlib import Path
@@ -11,20 +12,19 @@ from openapi_python_client.cli import app
 def _regenerate(
     *,
     spec_file_name: str,
-    output_dir: str = "my-test-api-client",
-    golden_record_dir: str | None = None,
+    output_dir: str,
+    capture_golden_record: bool = False,
     config_file_name: str = "config.yml",
-    extra_args: list[str] | None = None
+    extra_args: list[str] | None = None,
 ) -> None:
     end_to_end_tests_base_path = Path(__file__).parent
-    project_base_path = end_to_end_tests_base_path.parent
     runner = CliRunner()
     openapi_path = end_to_end_tests_base_path / spec_file_name
 
-    output_path = project_base_path / output_dir
+    output_path = end_to_end_tests_base_path / "tmp" / output_dir
     shutil.rmtree(output_path, ignore_errors=True)
 
-    args = ["generate", f"--path={openapi_path}"]
+    args = ["generate", f"--path={openapi_path}", f"--output-path={output_path}"]
     if config_file_name:
         config_path = end_to_end_tests_base_path / config_file_name
         args.append(f"--config={config_path}")
@@ -38,8 +38,8 @@ def _regenerate(
         print(result.stdout)
     if result.exception:
         raise Exception(f"{result.exception} {result.stderr}")
-    if golden_record_dir:
-        gr_path = end_to_end_tests_base_path / golden_record_dir
+    if capture_golden_record:
+        gr_path = end_to_end_tests_base_path / "golden-records" / output_dir
         shutil.rmtree(gr_path, ignore_errors=True)
         output_path.rename(gr_path)
 
@@ -47,7 +47,8 @@ def _regenerate(
 def regen_golden_record():
     _regenerate(
         spec_file_name="baseline_openapi_3.0.json",
-        golden_record_dir="golden-record",
+        output_dir="my-test-api-client",
+        capture_golden_record=True,
     )
 
 
@@ -55,7 +56,7 @@ def regen_golden_record_3_1_features():
     _regenerate(
         spec_file_name="3.1_specific.openapi.yaml",
         output_dir="test-3-1-features-client",
-        golden_record_dir="test-3-1-golden-record",
+        capture_golden_record=True,
     )
 
 
@@ -63,16 +64,29 @@ def regen_literal_enums_golden_record():
     _regenerate(
         spec_file_name="openapi_3.1_enums.yaml",
         output_dir="my-enum-api-client",
-        golden_record_dir="literal-enums-golden-record",
+        capture_golden_record=True,
         config_file_name="literal_enums.config.yml",
     )
 
 
+def regen_escapes_golden_record():
+    _regenerate(
+        spec_file_name="escapes.openapi.yaml",
+        output_dir="escapes-client",
+        capture_golden_record=True,
+    )
+
+
 def regen_metadata_snapshots():
-    output_path = Path.cwd() / "test-3-1-features-client"
+    output_path = Path(__file__).parent / "tmp" / "test-3-1-features-client"
     snapshots_dir = Path(__file__).parent / "metadata_snapshots"
 
-    for (meta, file, rename_to) in (("setup", "setup.py", "setup.py"), ("pdm", "pyproject.toml", "pdm.pyproject.toml"), ("poetry", "pyproject.toml", "poetry.pyproject.toml"), ("uv", "pyproject.toml", "uv.pyproject.toml")):
+    for meta, file, rename_to in (
+        ("setup", "setup.py", "setup.py"),
+        ("pdm", "pyproject.toml", "pdm.pyproject.toml"),
+        ("poetry", "pyproject.toml", "poetry.pyproject.toml"),
+        ("uv", "pyproject.toml", "uv.pyproject.toml"),
+    ):
         _regenerate(
             spec_file_name="3.1_specific.openapi.yaml",
             output_dir="test-3-1-features-client",
@@ -86,7 +100,8 @@ def regen_metadata_snapshots():
 def regen_docstrings_on_attributes_golden_record():
     _regenerate(
         spec_file_name="docstrings_on_attributes.yml",
-        golden_record_dir="docstrings-on-attributes-golden-record",
+        output_dir="docstrings-on-attributes-golden-record",
+        capture_golden_record=True,
         config_file_name="docstrings_on_attributes.config.yml",
     )
 
@@ -96,13 +111,14 @@ def regen_custom_template_golden_record():
     openapi_path = Path(__file__).parent / "baseline_openapi_3.0.json"
     tpl_dir = Path(__file__).parent / "test_custom_templates"
 
-    gr_path = Path(__file__).parent / "golden-record"
-    tpl_gr_path = Path(__file__).parent / "custom-templates-golden-record"
+    gr_path = Path(__file__).parent / "golden-records" / "my-test-api-client"
+    tpl_gr_path = Path(__file__).parent / "golden-records" / "custom-templates"
 
-    output_path = Path.cwd() / "my-test-api-client"
+    output_path = Path(__file__).parent / "tmp" / "my-test-api-client"
     config_path = Path(__file__).parent / "config.yml"
 
     shutil.rmtree(tpl_gr_path, ignore_errors=True)
+    shutil.rmtree(output_path, ignore_errors=True)
 
     result = runner.invoke(
         app,
@@ -111,6 +127,7 @@ def regen_custom_template_golden_record():
             f"--config={config_path}",
             f"--path={openapi_path}",
             f"--custom-template-path={tpl_dir}",
+            f"--output-path={output_path}",
         ],
     )
 
@@ -146,3 +163,4 @@ if __name__ == "__main__":
     regen_docstrings_on_attributes_golden_record()
     regen_custom_template_golden_record()
     regen_literal_enums_golden_record()
+    regen_escapes_golden_record()

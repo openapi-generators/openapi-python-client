@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
+
 
 class Discriminator(BaseModel):
     """
@@ -16,8 +18,8 @@ class Discriminator(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminatorObject
     """
 
-    propertyName: str
-    mapping: dict[str, str] | None = None
+    propertyName: UntrustedString
+    mapping: dict[UntrustedString, UntrustedString] | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..ref import Ref
+from ..untrusted_string import UntrustedString
 from .parameter import Parameter
 from .reference import ReferenceOr
 from .server import Server
@@ -22,9 +24,9 @@ class PathItem(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject
     """
 
-    ref: str | None = Field(default=None, alias="$ref")
-    summary: str | None = None
-    description: str | None = None
+    ref: Ref | None = Field(default=None, alias="$ref")
+    summary: UntrustedString | None = None
+    description: UntrustedString | None = None
     get: "Operation | None" = None
     put: "Operation | None" = None
     post: "Operation | None" = None

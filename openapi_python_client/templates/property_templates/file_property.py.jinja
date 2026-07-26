@@ -16,7 +16,7 @@ File(
 {% if property.required %}
 {{ destination }} = {{ source }}.to_tuple()
 {% else %}
-{% if not skip_unset %}{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) }}{% endif %} = UNSET{% endif +%}
+{% if not skip_unset %}{{ destination }}{% if declare_type %}: {{ property.get_type_string(json=True) | as_unembedded_code }}{% endif %} = UNSET{% endif +%}
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ source }}.to_tuple()
 {% endif %}

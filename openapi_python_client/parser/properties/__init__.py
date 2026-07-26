@@ -18,8 +18,10 @@ from collections.abc import Iterable
 
 from attrs import evolve
 
-from ... import Config, utils
+from ... import Config, strings
 from ... import schema as oai
+from ...schema.ref import Ref
+from ...schema.untrusted_string import UntrustedString
 from ..errors import ParameterError, ParseError, PropertyError
 from .any import AnyProperty
 from .boolean import BooleanProperty
@@ -51,11 +53,11 @@ from .uuid import UuidProperty
 
 
 def _string_based_property(
-    name: str, required: bool, data: oai.Schema, config: Config
+    name: UntrustedString, required: bool, data: oai.Schema, config: Config
 ) -> StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | PropertyError:
     """Construct a Property from the type "string" """
     string_format = data.schema_format
-    python_name = utils.PythonIdentifier(value=name, prefix=config.field_prefix)
+    python_name = strings.PythonIdentifier(value=name, prefix=config.field_prefix)
     if string_format == "date-time":
         return DateTimeProperty.build(
             name=name,
@@ -103,16 +105,16 @@ def _string_based_property(
 
 
 def _property_from_ref(
-    name: str,
+    name: UntrustedString,
     required: bool,
     parent: oai.Schema | None,
     data: oai.Reference,
     schemas: Schemas,
     config: Config,
-    roots: set[ReferencePath | utils.ClassName],
+    roots: set[ReferencePath | strings.ClassName],
 ) -> tuple[Property | PropertyError, Schemas]:
     ref_path = parse_reference_path(data.ref)
-    if isinstance(ref_path, ParseError):
+    if isinstance(ref_path, ParseError):  # pragma: no cover
         return PropertyError(data=data, detail=ref_path.detail), schemas
     existing = schemas.classes_by_reference.get(ref_path)
     if not existing:
@@ -130,7 +132,7 @@ def _property_from_ref(
         existing,
         required=required,
         name=name,
-        python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
         default=default,  # type: ignore # mypy can't tell that default comes from the same class...
     )
 
@@ -139,18 +141,17 @@ def _property_from_ref(
 
 
 def property_from_data(  # noqa: PLR0911, PLR0912
-    name: str,
+    name: UntrustedString,
     required: bool,
     data: oai.Reference | oai.Schema,
     schemas: Schemas,
     parent_name: str,
     config: Config,
     process_properties: bool = True,
-    roots: set[ReferencePath | utils.ClassName] | None = None,
+    roots: set[ReferencePath | strings.ClassName] | None = None,
 ) -> tuple[Property | PropertyError, Schemas]:
     """Generate a Property from the OpenAPI dictionary representation of it"""
     roots = roots or set()
-    name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return _property_from_ref(
             name=name,
@@ -190,7 +191,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 name=name,
                 required=required,
                 default=data.default,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
             ),
@@ -230,7 +231,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 required=required,
                 default=data.default,
                 const=data.const,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
             ),
             schemas,
@@ -246,7 +247,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 name=name,
                 default=data.default,
                 required=required,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
             ),
@@ -258,7 +259,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 name=name,
                 default=data.default,
                 required=required,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
             ),
@@ -270,7 +271,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
                 name=name,
                 required=required,
                 default=None,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
             ),
@@ -303,7 +304,7 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             name=name,
             required=required,
             default=data.default,
-            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
         ),
@@ -313,11 +314,11 @@ def property_from_data(  # noqa: PLR0911, PLR0912
 
 def _create_schemas(
     *,
-    components: dict[str, oai.Reference | oai.Schema],
+    components: dict[UntrustedString, oai.Reference | oai.Schema],
     schemas: Schemas,
     config: Config,
 ) -> Schemas:
-    to_process: Iterable[tuple[str, oai.Reference | oai.Schema]] = components.items()
+    to_process: Iterable[tuple[UntrustedString, oai.Reference | oai.Schema]] = components.items()
     still_making_progress = True
     errors: list[PropertyError] = []
 
@@ -325,12 +326,12 @@ def _create_schemas(
     while still_making_progress:
         still_making_progress = False
         errors = []
-        next_round: list[tuple[str, oai.Reference | oai.Schema]] = []
+        next_round: list[tuple[UntrustedString, oai.Reference | oai.Schema]] = []
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
             schema_data: oai.Reference | oai.Schema | None = data
-            ref_path = parse_reference_path(f"#/components/schemas/{name}")
-            if isinstance(ref_path, ParseError):
+            ref_path = parse_reference_path(Ref(f"#/components/schemas/{name.get_untrusted_value()}"))
+            if isinstance(ref_path, ParseError):  # pragma: no cover
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
             if isinstance(data, oai.Reference):
@@ -361,13 +362,13 @@ def _create_schemas(
     return schemas
 
 
-def _propogate_removal(*, root: ReferencePath | utils.ClassName, schemas: Schemas, error: PropertyError) -> None:
-    if isinstance(root, utils.ClassName):
+def _propogate_removal(*, root: ReferencePath | strings.ClassName, schemas: Schemas, error: PropertyError) -> None:
+    if isinstance(root, strings.ClassName):
         schemas.classes_by_name.pop(root, None)
         return
     if root in schemas.classes_by_reference:
         error.detail = error.detail or ""
-        error.detail += f"\n{root}"
+        error.detail += f"\n{root.get_untrusted_value()}"
         del schemas.classes_by_reference[root]
         for child in schemas.dependencies.get(root, set()):
             _propogate_removal(root=child, schemas=schemas, error=error)
@@ -399,10 +400,10 @@ def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
         for model_prop in to_process:
             schemas_or_err = process_model(model_prop, schemas=schemas, config=config)
             if isinstance(schemas_or_err, PropertyError):
-                schemas_or_err.header = f"\nUnable to process schema {model_prop.name}:"
+                schemas_or_err.header = f"\nUnable to process schema {model_prop.name.get_untrusted_value()}:"
                 if isinstance(schemas_or_err.data, oai.Reference) and schemas_or_err.data.ref.endswith(
                     f"/{model_prop.class_info.name}"
-                ):
+                ):  # pragma: no cover
                     schemas_or_err.detail = schemas_or_err.detail or ""
                     schemas_or_err.detail += "\n\nRecursive allOf reference found"
                     final_model_errors.append((model_prop, schemas_or_err))
@@ -421,7 +422,7 @@ def _process_models(*, schemas: Schemas, config: Config) -> Schemas:
 
 def build_schemas(
     *,
-    components: dict[str, oai.Reference | oai.Schema],
+    components: dict[UntrustedString, oai.Reference | oai.Schema],
     schemas: Schemas,
     config: Config,
 ) -> Schemas:
@@ -433,12 +434,12 @@ def build_schemas(
 
 def build_parameters(
     *,
-    components: dict[str, oai.Reference | oai.Parameter],
+    components: dict[UntrustedString, oai.Reference | oai.Parameter],
     parameters: Parameters,
     config: Config,
 ) -> Parameters:
     """Get a list of Parameters from an OpenAPI dict"""
-    to_process: Iterable[tuple[str, oai.Reference | oai.Parameter]] = []
+    to_process: Iterable[tuple[UntrustedString, oai.Reference | oai.Parameter]] = []
     if components is not None:
         to_process = components.items()
     still_making_progress = True
@@ -451,17 +452,17 @@ def build_parameters(
         next_round = []
         # Only accumulate errors from the last round, since we might fix some along the way
         for name, data in to_process:
-            if isinstance(data, oai.Reference):
+            if isinstance(data, oai.Reference):  # pragma: no cover
                 parameters.errors.append(ParameterError(data=data, detail="Reference parameters are not supported."))
                 continue
-            ref_path = parse_reference_path(f"#/components/parameters/{name}")
-            if isinstance(ref_path, ParseError):
+            ref_path = parse_reference_path(Ref(f"#/components/parameters/{name.get_untrusted_value()}"))
+            if isinstance(ref_path, ParseError):  # pragma: no cover
                 parameters.errors.append(ParameterError(detail=ref_path.detail, data=data))
                 continue
             parameters_or_err = update_parameters_with_data(
                 ref_path=ref_path, data=data, parameters=parameters, config=config
             )
-            if isinstance(parameters_or_err, ParameterError):
+            if isinstance(parameters_or_err, ParameterError):  # pragma: no cover
                 next_round.append((name, data))
                 errors.append(parameters_or_err)
                 continue

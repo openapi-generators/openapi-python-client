@@ -7,7 +7,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     SimpleObject:
@@ -29,7 +29,8 @@ components:
         arrayProp:
           type: array
           items: {"$ref": "#/components/schemas/SimpleObject"}
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.ModelWithArrayOfAny",
     ".models.ModelWithArrayOfInts",
@@ -65,7 +66,7 @@ class TestArraySchemas:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     SimpleObject:
@@ -96,7 +97,8 @@ components:
             - $ref: "#/components/schemas/SimpleObject"
           items:
             type: string
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.ModelWithSinglePrefixItem",
     ".models.ModelWithPrefixItems",

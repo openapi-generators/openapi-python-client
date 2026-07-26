@@ -2,6 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .server import Server
 
 
@@ -23,11 +24,11 @@ class Link(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#linkObject
     """
 
-    operationRef: str | None = None
-    operationId: str | None = None
-    parameters: dict[str, Any] | None = None
+    operationRef: UntrustedString | None = None
+    operationId: UntrustedString | None = None
+    parameters: dict[UntrustedString, Any] | None = None
     requestBody: Any | None = None
-    description: str | None = None
+    description: UntrustedString | None = None
     server: Server | None = None
     model_config = ConfigDict(
         extra="allow",

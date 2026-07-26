@@ -1,5 +1,6 @@
 import datetime
 import uuid
+
 import pytest
 
 from end_to_end_tests.functional_tests.helpers import (
@@ -127,7 +128,7 @@ class TestBasicModelProperties:
         ["a", True, 2, None],
     )
     def test_decode_error_not_object(self, bad_data, MyModel):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             # Exception is overly broad, but unfortunately in the current implementation, the error
             # being raised is AttributeError (because it tries to call bad_data.copy()) which isn't
             # very meaningful
@@ -239,4 +240,27 @@ class TestReferenceSchemaProperties:
                 null_prop=None,
                 any_prop="e",
             ),
+        )
+
+
+@with_generated_client_fixture(
+    """
+components:
+  schemas:
+    MyModel:
+      type: object
+      properties:
+        foo-bar: {"type": "string"}
+        fooBar: {"type": "string"}
+"""
+)
+@with_generated_code_imports(".models.MyModel")
+class TestConflictingPropertyNames:
+    def test_conflicting_names_stay_valid_identifiers(self, MyModel):
+        # Both names snake_case to `foo_bar`, so the conflict is resolved by keeping the
+        # original names, minus any characters that are invalid in Python identifiers
+        assert_model_decode_encode(
+            MyModel,
+            {"foo-bar": "a", "fooBar": "b"},
+            MyModel(foobar="a", fooBar="b"),
         )

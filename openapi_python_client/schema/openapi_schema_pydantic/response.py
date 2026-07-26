@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .header import Header
 from .link import Link
 from .media_type import MediaType
@@ -16,10 +17,10 @@ class Response(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject
     """
 
-    description: str
-    headers: dict[str, ReferenceOr[Header]] | None = None
-    content: dict[str, MediaType] | None = None
-    links: dict[str, ReferenceOr[Link]] | None = None
+    description: UntrustedString
+    headers: dict[UntrustedString, ReferenceOr[Header]] | None = None
+    content: dict[UntrustedString, MediaType] | None = None
+    links: dict[UntrustedString, ReferenceOr[Link]] | None = None
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,

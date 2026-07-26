@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
+
 
 class XML(BaseModel):
     """
@@ -14,9 +16,9 @@ class XML(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xmlObject
     """
 
-    name: str | None = None
-    namespace: str | None = None
-    prefix: str | None = None
+    name: UntrustedString | None = None
+    namespace: UntrustedString | None = None
+    prefix: UntrustedString | None = None
     attribute: bool = False
     wrapped: bool = False
     model_config = ConfigDict(

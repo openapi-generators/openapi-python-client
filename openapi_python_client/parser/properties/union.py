@@ -4,13 +4,13 @@ from collections.abc import Iterator
 from itertools import chain
 from typing import Any, ClassVar, cast
 
-from attr import define, evolve
+from attr import define, evolve, field
 
-from ... import Config
+from ... import Config, strings
 from ... import schema as oai
-from ...utils import PythonIdentifier
+from ...strings import PythonIdentifier
 from ..errors import ParseError, PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 from .schemas import Schemas
 
 
@@ -18,12 +18,12 @@ from .schemas import Schemas
 class UnionProperty(PropertyProtocol):
     """A property representing a Union (anyOf) of other properties"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
     inner_properties: list[PropertyProtocol]
     template: ClassVar[str] = "union_property.py.jinja"
 
@@ -32,7 +32,7 @@ class UnionProperty(PropertyProtocol):
         cls,
         *,
         data: oai.Schema,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         schemas: Schemas,
         parent_name: str,
@@ -70,12 +70,12 @@ class UnionProperty(PropertyProtocol):
                 and sub_prop_data.title is not None
                 and sub_prop_data.title != data.title
             ):
-                subscript = sub_prop_data.title
+                subscript = sub_prop_data.title.get_untrusted_value()
             else:
                 subscript = f"type_{i}"
 
             sub_prop, schemas = property_from_data(
-                name=f"{name}_{subscript}",
+                name=oai.UntrustedString(f"{name.get_untrusted_value()}_{subscript}"),
                 required=True,
                 data=sub_prop_data,
                 schemas=schemas,
@@ -120,7 +120,7 @@ class UnionProperty(PropertyProtocol):
         prop = evolve(prop, default=default_or_error)
         return prop, schemas
 
-    def convert_value(self, value: Any) -> Value | None | PropertyError:
+    def convert_value(self, value: Any) -> Value | PropertyError | None:
         if value is None or isinstance(value, Value):
             return None
         value_or_error: Value | PropertyError | None = PropertyError(
@@ -132,7 +132,7 @@ class UnionProperty(PropertyProtocol):
                 return value_or_error
         return value_or_error
 
-    def _get_inner_type_strings(self, json: bool) -> set[str]:
+    def _get_inner_type_strings(self, json: bool) -> set[strings.PythonCode]:
         return {
             p.get_type_string(
                 no_optional=True,
@@ -142,18 +142,19 @@ class UnionProperty(PropertyProtocol):
         }
 
     @staticmethod
-    def _get_type_string_from_inner_type_strings(inner_types: set[str]) -> str:
+    def _get_type_string_from_inner_type_strings(inner_types: set[strings.PythonCode]) -> strings.PythonCode:
         if len(inner_types) == 1:
             return inner_types.pop()
-        return " | ".join(sorted(inner_types, key=lambda x: x.lower()))
+        joined = " | ".join(sorted((t.as_unembedded_code() for t in inner_types), key=str.lower))
+        return strings.PythonCode(joined)
 
-    def get_base_type_string(self) -> str:
+    def get_base_type_string(self) -> strings.PythonCode:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=False))
 
-    def get_base_json_type_string(self) -> str:
+    def get_base_json_type_string(self) -> strings.PythonCode:
         return self._get_type_string_from_inner_type_strings(self._get_inner_type_strings(json=True))
 
-    def get_type_strings_in_union(self, *, no_optional: bool = False, json: bool) -> set[str]:
+    def get_type_strings_in_union(self, *, no_optional: bool = False, json: bool) -> set[strings.PythonCode]:
         """
         Get the set of all the types that should appear within the `Union` representing this property.
 
@@ -164,22 +165,22 @@ class UnionProperty(PropertyProtocol):
             json: If True, this returns the JSON types, not the Python types, of this property.
 
         Returns:
-            A set of strings containing the types that should appear within `Union`.
+            A set of code snippets containing the types that should appear within `Union`.
         """
         type_strings = self._get_inner_type_strings(json=json)
         if no_optional:
             return type_strings
         if not self.required:
-            type_strings.add("Unset")
+            type_strings.add(strings.PythonCode("Unset"))
         return type_strings
 
     def get_type_string(
         self,
         no_optional: bool = False,
         json: bool = False,
-    ) -> str:
+    ) -> strings.PythonCode:
         """
-        Get a string representation of type that should be used when declaring this property.
+        Get a Python code representation of type that should be used when declaring this property.
         This implementation differs slightly from `Property.get_type_string` in order to collapse
         nested union types.
         """
@@ -212,5 +213,6 @@ class UnionProperty(PropertyProtocol):
 
         for inner_prop in self.inner_properties:
             if evolve(cast(Property, inner_prop), required=self.required).validate_location(location) is not None:
-                return ParseError(detail=f"{self.get_type_string()} is not allowed in {location}")
+                type_string = self.get_type_string().as_unembedded_code()
+                return ParseError(detail=f"{type_string} is not allowed in {location}")
         return None

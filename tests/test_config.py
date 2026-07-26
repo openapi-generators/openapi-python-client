@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from ruamel.yaml import YAML as _YAML
 
-from openapi_python_client.config import ConfigFile
+from openapi_python_client.config import ClassOverride, ConfigFile
 
 
 class YAML(_YAML):
@@ -54,8 +54,8 @@ def test_load_from_path(tmp_path: Path, filename, dump, relative) -> None:
 
     config = ConfigFile.load_from_path(yml_file)
     assert config.field_prefix == "blah"
-    assert config.class_overrides["Class1"].model_dump() == override1
-    assert config.class_overrides["Class2"].model_dump() == override2
+    assert config.class_overrides["Class1"] == ClassOverride.model_validate(override1)
+    assert config.class_overrides["Class2"] == ClassOverride.model_validate(override2)
     assert config.project_name_override == "project-name"
     assert config.package_name_override == "package_name"
     assert config.package_version_override == "package_version"

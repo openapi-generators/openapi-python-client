@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from attr import define
+from attr import define, field
 
-from ... import Config, utils
+from ... import Config, strings
 from ... import schema as oai
 from ..errors import PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 from .schemas import ReferencePath, Schemas
 
 
@@ -15,12 +15,12 @@ from .schemas import ReferencePath, Schemas
 class ListProperty(PropertyProtocol):
     """A property representing a list (array) of other properties"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
-    python_name: utils.PythonIdentifier
-    description: str | None
-    example: str | None
+    python_name: strings.PythonIdentifier
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
     inner_property: PropertyProtocol
     template: ClassVar[str] = "list_property.py.jinja"
 
@@ -29,13 +29,13 @@ class ListProperty(PropertyProtocol):
         cls,
         *,
         data: oai.Schema,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         schemas: Schemas,
         parent_name: str,
         config: Config,
         process_properties: bool,
-        roots: set[ReferencePath | utils.ClassName],
+        roots: set[ReferencePath | strings.ClassName],
     ) -> tuple[ListProperty | PropertyError, Schemas]:
         """
         Build a ListProperty the right way, use this instead of the normal constructor.
@@ -77,7 +77,7 @@ class ListProperty(PropertyProtocol):
             inner_schema = oai.Schema(anyOf=items)
 
         inner_prop, schemas = property_from_data(
-            name=f"{name}_item",
+            name=oai.UntrustedString(f"{name.get_untrusted_value()}_item"),
             required=True,
             data=inner_schema,
             schemas=schemas,
@@ -95,25 +95,25 @@ class ListProperty(PropertyProtocol):
                 required=required,
                 default=None,
                 inner_property=inner_prop,
-                python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
             ),
             schemas,
         )
 
-    def convert_value(self, value: Any) -> Value | None | PropertyError:
+    def convert_value(self, value: Any) -> Value | PropertyError | None:
         return None  # pragma: no cover
 
-    def get_base_type_string(self) -> str:
-        return f"list[{self.inner_property.get_type_string()}]"
+    def get_base_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(f"list[{self.inner_property.get_type_string().as_unembedded_code()}]")
 
-    def get_base_json_type_string(self) -> str:
-        return f"list[{self.inner_property.get_type_string(json=True)}]"
+    def get_base_json_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(f"list[{self.inner_property.get_type_string(json=True).as_unembedded_code()}]")
 
-    def get_instance_type_string(self) -> str:
-        """Get a string representation of runtime type that should be used for `isinstance` checks"""
-        return "list"
+    def get_instance_type_string(self) -> strings.PythonCode:
+        """Get a code representation of runtime type that should be used for `isinstance` checks"""
+        return strings.PythonCode("list")
 
     def get_imports(self, *, prefix: str) -> set[str]:
         """
@@ -137,9 +137,9 @@ class ListProperty(PropertyProtocol):
         self,
         no_optional: bool = False,
         json: bool = False,
-    ) -> str:
+    ) -> strings.PythonCode:
         """
-        Get a string representation of type that should be used when declaring this property
+        Get a Python code representation of type that should be used when declaring this property
 
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
@@ -152,4 +152,4 @@ class ListProperty(PropertyProtocol):
 
         if no_optional or self.required:
             return type_string
-        return f"{type_string} | Unset"
+        return strings.PythonCode(f"{type_string.as_unembedded_code()} | Unset")

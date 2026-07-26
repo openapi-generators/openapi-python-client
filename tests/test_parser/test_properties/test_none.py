@@ -1,7 +1,7 @@
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import NoneProperty
 from openapi_python_client.parser.properties.protocol import Value
-from openapi_python_client.utils import PythonIdentifier
+from openapi_python_client.strings import PythonIdentifier
 
 
 def test_default():

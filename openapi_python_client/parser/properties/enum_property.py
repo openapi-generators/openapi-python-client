@@ -5,14 +5,14 @@ __all__ = ["EnumProperty", "ValueType"]
 from typing import Any, ClassVar, cast
 
 from attr import evolve
-from attrs import define
+from attrs import define, field
 
-from ... import Config, utils
+from ... import Config, strings
 from ... import schema as oai
 from ...schema import DataType
 from ..errors import PropertyError
 from .none import NoneProperty
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 from .schemas import Class, Schemas
 from .union import UnionProperty
 
@@ -23,12 +23,12 @@ ValueType = str | int
 class EnumProperty(PropertyProtocol):
     """A property that should use an enum"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
-    python_name: utils.PythonIdentifier
-    description: str | None
-    example: str | None
+    python_name: strings.PythonIdentifier
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
     values: dict[str, ValueType]
     class_info: Class
     value_type: type[ValueType]
@@ -47,7 +47,7 @@ class EnumProperty(PropertyProtocol):
         cls,
         *,
         data: oai.Schema,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         schemas: Schemas,
         parent_name: str,
@@ -83,7 +83,7 @@ class EnumProperty(PropertyProtocol):
                     name=name,
                     required=required,
                     default="None",
-                    python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                    python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                     description=None,
                     example=None,
                 ),
@@ -115,9 +115,9 @@ class EnumProperty(PropertyProtocol):
                 config=config,
             )
 
-        class_name = data.title or name
+        class_name: str | oai.UntrustedString = data.title or name
         if parent_name:
-            class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
+            class_name = f"{strings.pascal_case(parent_name)}{strings.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
         var_names = data.model_extra.get("x-enum-varnames", []) if data.model_extra else []
         values = EnumProperty.values_from_list(value_list, class_info, var_names)
@@ -139,7 +139,7 @@ class EnumProperty(PropertyProtocol):
             values=values,
             value_type=value_type,
             default=None,
-            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
         )
@@ -158,16 +158,19 @@ class EnumProperty(PropertyProtocol):
         if isinstance(value, self.value_type):
             inverse_values = {v: k for k, v in self.values.items()}
             try:
-                return Value(python_code=f"{self.class_info.name}.{inverse_values[value]}", raw_value=value)
+                return Value(
+                    python_code=strings.PythonCode(f"{self.class_info.name}.{inverse_values[value]}"),
+                    raw_value=value,
+                )
             except KeyError:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
 
-    def get_base_type_string(self) -> str:
-        return self.class_info.name
+    def get_base_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(self.class_info.name)
 
-    def get_base_json_type_string(self) -> str:
-        return self.value_type.__name__
+    def get_base_json_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(self.value_type.__name__)
 
     def get_imports(self, *, prefix: str) -> set[str]:
         """
@@ -194,7 +197,7 @@ class EnumProperty(PropertyProtocol):
             if isinstance(value, int):
                 if use_var_names:
                     key = var_names[i]
-                    sanitized_key = utils.snake_case(key).upper()
+                    sanitized_key = strings.snake_case(key).upper()
                     output[sanitized_key] = value
                 elif value < 0:
                     output[f"VALUE_NEGATIVE_{-value}"] = value
@@ -212,6 +215,6 @@ class EnumProperty(PropertyProtocol):
                     f"Duplicate key {key} in enum {class_info.module_name}.{class_info.name}; "
                     f"consider setting literal_enums in your config"
                 )
-            sanitized_key = utils.snake_case(key).upper()
-            output[sanitized_key] = utils.remove_string_escapes(value)
+            sanitized_key = strings.snake_case(key).upper()
+            output[sanitized_key] = strings.in_double_quote_literal(value)
         return output

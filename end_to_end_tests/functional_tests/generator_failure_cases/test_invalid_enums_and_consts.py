@@ -6,7 +6,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     WithBadDefaultValue:
@@ -32,7 +32,7 @@ components:
       properties:
         "2":
           enum: ["c", "d"]
-"""    
+"""
 )
 class TestEnumAndConstInvalidSchemas:
     def test_enum_bad_default_value(self, generated_client):
@@ -51,12 +51,15 @@ class TestEnumAndConstInvalidSchemas:
         assert_bad_schema(generated_client, "DefaultNotMatchingConst", "Invalid value for const")
 
     def test_conflicting_inline_class_names(self, generated_client):
-        assert "Found conflicting enums named WithConflictingInlineNames12 with incompatible values" in generated_client.generator_result.output
+        assert (
+            "Found conflicting enums named WithConflictingInlineNames12 with incompatible values"
+            in generated_client.generator_result.output
+        )
 
     def test_enum_duplicate_values(self):
         # This one currently causes a full generator failure rather than a warning
         result = inline_spec_should_fail(
-"""
+            """
 components:
   schemas:
     WithDuplicateValues:
@@ -67,7 +70,7 @@ components:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     WithBadDefaultValue:
@@ -94,7 +97,7 @@ components:
         "2":
           enum: ["c", "d"]
 """,
-    config="literal_enums: true",    
+    config="literal_enums: true",
 )
 class TestLiteralEnumInvalidSchemas:
     def test_literal_enum_bad_default_value(self, generated_client):
@@ -113,12 +116,15 @@ class TestLiteralEnumInvalidSchemas:
         assert_bad_schema(generated_client, "DefaultNotMatchingConst", "Invalid value for const")
 
     def test_conflicting_inline_literal_enum_names(self, generated_client):
-        assert "Found conflicting enums named WithConflictingInlineNames12 with incompatible values" in generated_client.generator_result.output
+        assert (
+            "Found conflicting enums named WithConflictingInlineNames12 with incompatible values"
+            in generated_client.generator_result.output
+        )
 
     def test_literal_enum_duplicate_values(self):
         # This one currently causes a full generator failure rather than a warning
         result = inline_spec_should_fail(
-"""
+            """
 components:
   schemas:
     WithDuplicateValues:

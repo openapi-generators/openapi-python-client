@@ -4,7 +4,7 @@ import json
 import mimetypes
 import shutil
 import subprocess
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -16,7 +16,7 @@ from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, Pack
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
-from openapi_python_client import utils
+from openapi_python_client import strings
 
 from .config import Config, MetaType
 from .parser import GeneratorData, import_string_from_class
@@ -25,11 +25,16 @@ from .parser.properties import LiteralEnumProperty
 
 __version__ = version(__package__)
 
+from .schema.untrusted_string import UntrustedString
 
-TEMPLATE_FILTERS = {
-    "snakecase": utils.snake_case,
-    "kebabcase": utils.kebab_case,
-    "pascalcase": utils.pascal_case,
+TEMPLATE_FILTERS: dict[str, Callable[..., object]] = {
+    "snakecase": strings.snake_case,
+    "kebabcase": strings.kebab_case,
+    "pascalcase": strings.pascal_case,
+    "safe_for_docstring": strings.safe_for_docstring,
+    "in_double_quote_literal": strings.in_double_quote_literal,
+    "in_f_string_literal": strings.in_f_string_literal,
+    "as_unembedded_code": strings.PythonCode.as_unembedded_code,
     "any": any,
 }
 
@@ -66,14 +71,14 @@ class Project:
             keep_trailing_newline=True,
         )
 
-        self.project_name: str = config.project_name_override or f"{utils.kebab_case(openapi.title).lower()}-client"
+        self.project_name: str = config.project_name_override or f"{strings.kebab_case(openapi.title).lower()}-client"
         self.package_name: str = config.package_name_override or self.project_name.replace("-", "_")
         self.project_dir: Path  # Where the generated code will be placed
         self.package_dir: Path  # Where the generated Python module will be placed (same as project_dir if no meta)
 
         if config.output_path is not None:
             self.project_dir = config.output_path
-        elif config.meta_type == MetaType.NONE:
+        elif config.meta_type == MetaType.NONE:  # pragma: no cover
             self.project_dir = Path.cwd() / self.package_name
         else:
             self.project_dir = Path.cwd() / self.project_name
@@ -83,17 +88,20 @@ class Project:
         else:
             self.package_dir = self.project_dir / self.package_name
 
-        self.package_description: str = utils.remove_string_escapes(
-            f"A client library for accessing {self.openapi.title}"
+        self.package_description = UntrustedString(
+            f"A client library for accessing {self.openapi.title.get_untrusted_value()}"
         )
-        self.version: str = config.package_version_override or openapi.version
+        self.version: UntrustedString = (
+            UntrustedString(config.package_version_override) if config.package_version_override else openapi.version
+        )
 
         self.env.filters.update(TEMPLATE_FILTERS)
         self.env.globals.update(
             config=config,
-            utils=utils,
-            python_identifier=lambda x: utils.PythonIdentifier(x, config.field_prefix),
-            class_name=lambda x: utils.ClassName(x, config.field_prefix),
+            strings=strings,
+            PythonCode=strings.PythonCode,
+            python_identifier=lambda x: strings.PythonIdentifier(x, config.field_prefix),
+            class_name=lambda x: strings.ClassName(x, config.field_prefix),
             package_name=self.package_name,
             package_dir=self.package_dir,
             package_description=self.package_description,
@@ -110,7 +118,7 @@ class Project:
 
         print(f"Generating {self.project_dir}")
         try:
-            self.project_dir.mkdir()
+            self.project_dir.mkdir(parents=True)
         except FileExistsError:
             if not self.config.overwrite:
                 return [GeneratorError(detail="Directory already exists. Delete it or use the --overwrite option.")]
@@ -267,7 +275,8 @@ class Project:
 
         endpoint_collections_by_tag = self.openapi.endpoint_collections_by_tag
         endpoint_template = self.env.get_template(
-            "endpoint_module.py.jinja", globals={"isbool": lambda obj: obj.get_base_type_string() == "bool"}
+            "endpoint_module.py.jinja",
+            globals={"isbool": lambda obj: obj.get_base_type_string() == strings.PythonCode("bool")},
         )
         for tag, collection in endpoint_collections_by_tag.items():
             tag_dir = api_dir / tag
@@ -281,7 +290,7 @@ class Project:
             )
 
             for endpoint in collection.endpoints:
-                module_path = tag_dir / f"{utils.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
+                module_path = tag_dir / f"{strings.PythonIdentifier(endpoint.name, self.config.field_prefix)}.py"
                 module_path.write_text(
                     endpoint_template.render(
                         endpoint=endpoint,

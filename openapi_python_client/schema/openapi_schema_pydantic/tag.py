@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .external_documentation import ExternalDocumentation
 
 
@@ -13,8 +14,8 @@ class Tag(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tagObject
     """
 
-    name: str
-    description: str | None = None
+    name: UntrustedString
+    description: UntrustedString | None = None
     externalDocs: ExternalDocumentation | None = None
     model_config = ConfigDict(
         extra="allow", json_schema_extra={"examples": [{"name": "pet", "description": "Pets operations"}]}

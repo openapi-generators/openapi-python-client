@@ -1,8 +1,8 @@
 from typing import Any
 
 from end_to_end_tests.functional_tests.helpers import (
-    with_generated_code_import,
     with_generated_client_fixture,
+    with_generated_code_import,
 )
 
 
@@ -13,12 +13,12 @@ class DocstringParser:
         self.lines = [line.lstrip() for line in item.__doc__.split("\n")]
 
     def get_section(self, header_line: str) -> list[str]:
-        lines = self.lines[self.lines.index(header_line)+1:]
-        return lines[0:lines.index("")]
+        lines = self.lines[self.lines.index(header_line) + 1 :]
+        return lines[0 : lines.index("")]
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
@@ -34,7 +34,8 @@ components:
         undescribedProp:
           type: string
       required: ["reqStr", "undescribedProp"]
-""")
+"""
+)
 @with_generated_code_import(".models.MyModel")
 class TestSchemaDocstrings:
     def test_model_description(self, MyModel):
@@ -49,7 +50,7 @@ class TestSchemaDocstrings:
 
 
 @with_generated_client_fixture(
-"""
+    """
 tags:
     - name: service1
 paths:
@@ -130,7 +131,8 @@ components:
     Thing:
       type: object
       description: The thing.
-""")
+"""
+)
 @with_generated_code_import(".api.service1.get_simple_thing.sync", alias="get_simple_thing_sync")
 @with_generated_code_import(".api.service1.post_simple_thing.sync", alias="post_simple_thing_sync")
 @with_generated_code_import(".api.service1.get_attribute_by_index.sync", alias="get_attribute_by_index_sync")
@@ -151,9 +153,7 @@ class TestEndpointDocstrings:
         )
 
     def test_request_body(self, post_simple_thing_sync):
-        assert DocstringParser(post_simple_thing_sync).get_section("Args:") == [
-            "body (Thing | Unset): The thing."
-        ]
+        assert DocstringParser(post_simple_thing_sync).get_section("Args:") == ["body (Thing | Unset): The thing."]
 
     def test_params(self, get_attribute_by_index_sync):
         assert DocstringParser(get_attribute_by_index_sync).get_section("Args:") == [

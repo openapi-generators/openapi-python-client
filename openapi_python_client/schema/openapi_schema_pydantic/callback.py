@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
 
+from ..untrusted_string import UntrustedString
+
 if TYPE_CHECKING:  # pragma: no cover
     from .path_item import PathItem
 else:
     PathItem = "PathItem"
 
-Callback = dict[str, PathItem]
+Callback = dict[UntrustedString, PathItem]
 """
 A map of possible out-of band callbacks related to the parent operation.
 Each value in the map is a [Path Item Object](#pathItemObject)

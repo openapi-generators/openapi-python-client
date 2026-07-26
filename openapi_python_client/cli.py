@@ -1,7 +1,6 @@
 import codecs
 from collections.abc import Sequence
 from pathlib import Path
-from pprint import pformat
 
 import typer
 
@@ -75,7 +74,7 @@ def _print_parser_error(err: GeneratorError, color: str) -> None:
         typer.echo(err=True)
 
     if isinstance(err, ParseError) and err.data is not None:
-        formatted_data = pformat(err.data)
+        formatted_data = err.data.model_dump_json(indent=2, exclude_unset=True, by_alias=True)
         typer.secho(formatted_data, fg=color, err=True)
 
     typer.echo(err=True)

@@ -1,25 +1,31 @@
-from typing import Any, Dict
 import re
+from typing import Any
 
-from typer.testing import Result
 import pytest
+from typer.testing import Result
 
-from end_to_end_tests.generated_client import generate_client_from_inline_spec, GeneratedClientContext
+from end_to_end_tests.generated_client import GeneratedClientContext, generate_client_from_inline_spec
 
 
 def with_generated_client_fixture(
     openapi_spec: str,
-    name: str="generated_client",
-    config: str="",
-    extra_args: list[str] = [],
+    name: str = "generated_client",
+    config: str = "",
+    extra_args=None,
 ):
     """Decorator to apply to a test class to create a fixture inside it called 'generated_client'.
 
     The fixture value will be a GeneratedClientContext created by calling
     generate_client_from_inline_spec().
     """
+
+    if extra_args is None:
+        extra_args = []
+
     def _decorator(cls):
-        def generated_client(self):
+        # noinspection decorator
+        @classmethod
+        def generated_client(_cls):
             with generate_client_from_inline_spec(openapi_spec, extra_args=extra_args, config=config) as g:
                 print(g.generator_result.stdout)  # so we'll see the output if a test failed
                 yield g
@@ -50,7 +56,8 @@ def with_generated_code_import(import_path: str, alias: str | None = None):
 
         alias = alias or import_name
         _func.__name__ = alias
-        setattr(cls, alias, pytest.fixture(scope="class")(_func))
+        # noinspection bad-argument-type
+        setattr(cls, alias, pytest.fixture(scope="class")(classmethod(_func)))
         return cls
 
     return _decorator
@@ -78,15 +85,17 @@ def assert_model_property_type_hint(model_class: Any, name: str, expected_type_h
 
 def inline_spec_should_fail(
     openapi_spec: str,
-    extra_args: list[str] = [],
+    extra_args=None,
     config: str = "",
     filename_suffix: str = "",
-    add_missing_sections = True,
+    add_missing_sections=True,
 ) -> Result:
     """Asserts that the generator could not process the spec.
 
     Returns the command result, which could include stdout data or an exception.
     """
+    if extra_args is None:
+        extra_args = []
     with generate_client_from_inline_spec(
         openapi_spec,
         extra_args,
@@ -105,13 +114,15 @@ def assert_bad_schema(
     expected_message_str: str,
 ) -> None:
     warnings = _GeneratorWarningsParser(generated_client)
-    assert schema_name in warnings.by_schema, f"Did not find warning for schema {schema_name} in output: {warnings.output}"
+    assert schema_name in warnings.by_schema, (
+        f"Did not find warning for schema {schema_name} in output: {warnings.output}"
+    )
     assert expected_message_str in warnings.by_schema[schema_name]
 
 
 class _GeneratorWarningsParser:
     output: str
-    by_schema: Dict[str, str]
+    by_schema: dict[str, str]
 
     def __init__(self, generated_client: GeneratedClientContext) -> None:
         """Runs the generator, asserts that it printed warnings, and parses the warnings."""
@@ -127,8 +138,8 @@ class _GeneratorWarningsParser:
             if not (match := re.search(bad_schema_regex, output)):
                 break
             if last_name:
-                self.by_schema[last_name] = output[0:match.start()]
-            output = output[match.end():]
+                self.by_schema[last_name] = output[0 : match.start()]
+            output = output[match.end() :]
             last_name = match.group(2)
         if last_name:
             self.by_schema[last_name] = output

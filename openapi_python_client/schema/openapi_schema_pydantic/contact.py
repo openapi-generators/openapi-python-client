@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
+from openapi_python_client.schema.untrusted_string import UntrustedString
+
 
 class Contact(BaseModel):
     """
@@ -9,9 +11,9 @@ class Contact(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#contactObject
     """
 
-    name: str | None = None
-    url: str | None = None
-    email: str | None = None
+    name: UntrustedString | None = None
+    url: UntrustedString | None = None
+    email: UntrustedString | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

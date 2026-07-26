@@ -16,7 +16,7 @@ from ... import errors
     arguments, client, kwargs, parse_response, docstring, body_to_kwarg %}
 
 {% set return_string = endpoint.response_type() %}
-{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
+{% set parsed_responses = (endpoint.responses | length > 0) and return_string != PythonCode("Any") %}
 
 def _get_kwargs(
     {{ arguments(endpoint, include_client=False) | indent(4) }}
@@ -30,13 +30,13 @@ def _get_kwargs(
     _kwargs: dict[str, Any] = {
         "method": "{{ endpoint.method }}",
         {% if endpoint.path_parameters %}
-        "url": "{{ endpoint.path }}".format(
+        "url": "{{ endpoint.path | in_double_quote_literal }}".format(
         {%- for parameter in endpoint.path_parameters -%}
         {{parameter.python_name}}=quote(str({{parameter.python_name}}), safe=""),
         {%- endfor -%}
         ),
         {% else %}
-        "url": "{{ endpoint.path }}",
+        "url": "{{ endpoint.path | in_double_quote_literal }}",
         {% endif %}
         {% if endpoint.query_parameters %}
         "params": params,
@@ -48,12 +48,12 @@ def _get_kwargs(
 
 {% if endpoint.bodies | length > 1 %}
 {% for body in endpoint.bodies %}
-    if isinstance(body, {{body.prop.get_type_string(no_optional=True) }}):
+    if isinstance(body, {{body.prop.get_type_string(no_optional=True) | as_unembedded_code }}):
         {{ body_to_kwarg(body) | indent(8) }}
         {%- if body.content_type == "multipart/form-data" %}
         headers["Content-Type"] = "multipart/form-data; boundary=+++"
         {% else %}
-        headers["Content-Type"] = "{{ body.content_type }}"
+        headers["Content-Type"] = "{{ body.content_type | in_double_quote_literal }}"
         {% endif %}
 {% endfor %}
 {% elif endpoint.bodies | length == 1 %}
@@ -62,7 +62,7 @@ def _get_kwargs(
     {%- if body.content_type == "multipart/form-data" %}
     headers["Content-Type"] = "multipart/form-data; boundary=+++"
     {% else %}
-    headers["Content-Type"] = "{{ body.content_type }}"
+    headers["Content-Type"] = "{{ body.content_type | in_double_quote_literal }}"
     {% endif %}
 {% endif %}
 
@@ -72,9 +72,9 @@ def _get_kwargs(
     return _kwargs
 
 {% if endpoint.responses.default %}
-    {% set return_type = return_string %}
+    {% set return_type = return_string | as_unembedded_code %}
 {% else %}
-    {% set return_type = return_string + " | None" %}
+    {% set return_type = (return_string | as_unembedded_code) + " | None" %}
 {% endif %}
 
 
@@ -98,7 +98,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     {% endif %}
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string }}]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string | as_unembedded_code }}]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -109,7 +109,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}]:
+) -> Response[{{ return_string | as_unembedded_code }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
@@ -125,7 +125,7 @@ def sync_detailed(
 {% if parsed_responses %}
 def sync(
     {{ arguments(endpoint) | indent(4) }}
-) -> {{ return_string }} | None:
+) -> {{ return_string | as_unembedded_code }} | None:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return sync_detailed(
@@ -135,7 +135,7 @@ def sync(
 
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string }}]:
+) -> Response[{{ return_string | as_unembedded_code }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
@@ -151,7 +151,7 @@ async def asyncio_detailed(
 {% if parsed_responses %}
 async def asyncio(
     {{ arguments(endpoint) | indent(4) }}
-) -> {{ return_string }} | None:
+) -> {{ return_string | as_unembedded_code }} | None:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
     return (await asyncio_detailed(

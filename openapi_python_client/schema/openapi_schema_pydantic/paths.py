@@ -1,6 +1,7 @@
+from ..untrusted_string import UntrustedString
 from .path_item import PathItem
 
-Paths = dict[str, PathItem]
+Paths = dict[UntrustedString, PathItem]
 """
 Holds the relative paths to the individual endpoints and their operations.
 The path is appended to the URL from the [`Server Object`](#serverObject) in order to construct the full URL.

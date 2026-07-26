@@ -8,7 +8,7 @@ import jinja2
 import pytest
 
 from openapi_python_client.parser.properties import UuidProperty
-from openapi_python_client.utils import PythonIdentifier
+from openapi_python_client.strings import PythonIdentifier
 
 
 def uuid_property(required: bool = True, default: Any = None) -> UuidProperty:

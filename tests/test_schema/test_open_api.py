@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from openapi_python_client.schema import OpenAPI
+from openapi_python_client.schema.untrusted_string import UntrustedString
 
 
 @pytest.mark.parametrize(
@@ -40,6 +41,6 @@ def test_parse_with_callback():
     }
 
     open_api = OpenAPI.model_validate(data)
-    create_endpoint = open_api.paths["/create"]
+    create_endpoint = open_api.paths[UntrustedString("/create")]
     assert "200" in create_endpoint.post.responses
     assert "200" in create_endpoint.post.callbacks["event"]["callback"].post.responses

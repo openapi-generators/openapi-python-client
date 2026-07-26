@@ -27,14 +27,15 @@ Example:
 
 ```python
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
       type: object
       properties:
         stringProp: {"type": "string"}
-""")
+"""
+)
 @with_generated_code_import(".models.MyModel")
 class TestSimpleJsonObject:
     def test_encoding(self, MyModel):
@@ -50,12 +51,13 @@ For warning conditions, each test class uses `@with_generated_client_fixture` as
 
 ```python
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
       # some kind of invalid schema
-""")
+"""
+)
 class TestBadSchema:
     def test_encoding(self, generated_client):
         assert_bad_schema(generated_client, "MyModel", "some expected warning text")

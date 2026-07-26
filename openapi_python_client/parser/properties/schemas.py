@@ -10,7 +10,7 @@ __all__ = [
     "update_schemas_with_data",
 ]
 
-from typing import TYPE_CHECKING, NewType, cast
+from typing import TYPE_CHECKING, NewType
 from urllib.parse import urlparse
 
 from attrs import define, evolve, field
@@ -18,7 +18,9 @@ from attrs import define, evolve, field
 from ... import Config
 from ... import schema as oai
 from ...schema.openapi_schema_pydantic import Parameter
-from ...utils import ClassName, PythonIdentifier
+from ...schema.ref import Ref
+from ...schema.untrusted_string import UntrustedString
+from ...strings import ClassName, PythonIdentifier
 from ..errors import ParameterError, ParseError, PropertyError
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -29,10 +31,10 @@ else:
     Property = "Property"
 
 
-ReferencePath = NewType("ReferencePath", str)
+ReferencePath = NewType("ReferencePath", UntrustedString)
 
 
-def parse_reference_path(ref_path_raw: str) -> ReferencePath | ParseError:
+def parse_reference_path(ref_path_raw: Ref) -> ReferencePath | ParseError:
     """
     Takes a raw string provided in a `$ref` and turns it into a validated `_ReferencePath` or a `ParseError` if
     validation fails.
@@ -40,17 +42,17 @@ def parse_reference_path(ref_path_raw: str) -> ReferencePath | ParseError:
     See Also:
         - https://swagger.io/docs/specification/using-ref/
     """
-    parsed = urlparse(ref_path_raw)
+    parsed = urlparse(ref_path_raw.get_untrusted_value())
     if parsed.scheme or parsed.path:
-        return ParseError(detail=f"Remote references such as {ref_path_raw} are not supported yet.")
-    return cast(ReferencePath, parsed.fragment)
+        return ParseError(detail=f"Remote references such as {parsed} are not supported yet.")
+    return ReferencePath(UntrustedString(parsed.fragment))
 
 
-def get_reference_simple_name(ref_path: str) -> str:
+def get_reference_simple_name(ref_path: Ref | UntrustedString) -> UntrustedString:
     """
     Takes a path like `/components/schemas/NameOfThing` and returns a string like `NameOfThing`.
     """
-    return ref_path.rsplit("/", maxsplit=1)[-1]
+    return UntrustedString(ref_path.get_untrusted_value().rsplit("/", maxsplit=1)[-1])
 
 
 @define
@@ -61,10 +63,10 @@ class Class:
     module_name: PythonIdentifier
 
     @staticmethod
-    def from_string(*, string: str, config: Config) -> "Class":
+    def from_string(*, string: str | UntrustedString, config: Config) -> "Class":
         """Get a Class from an arbitrary string"""
-        class_name = get_reference_simple_name(string)  # Get rid of ref path stuff
-        class_name = ClassName(class_name, config.field_prefix)
+        untrusted_class_name = get_reference_simple_name(Ref(string))  # Get rid of ref path stuff
+        class_name = ClassName(untrusted_class_name, config.field_prefix)
         override = config.class_overrides.get(class_name)
 
         if override is not None and override.class_name is not None:
@@ -134,12 +136,15 @@ def update_schemas_with_data(
     )
 
     if isinstance(prop, PropertyError):
-        prop.detail = f"{prop.header}: {prop.detail}"
-        prop.header = f"Unable to parse schema {ref_path}"
-        if isinstance(prop.data, oai.Reference) and prop.data.ref.endswith(ref_path):  # pragma: nocover
-            prop.detail += (
+        detail = f"{prop.header}: {prop.detail}" if prop.detail is not None else prop.header
+        prop.header = f"Unable to parse schema {ref_path.get_untrusted_value()}"
+        if isinstance(prop.data, oai.Reference) and prop.data.ref.endswith(
+            ref_path.get_untrusted_value()
+        ):  # pragma: nocover
+            detail += (
                 "\n\nRecursive and circular references are not supported directly in an array schema's 'items' section"
             )
+        prop.detail = detail
         return prop
 
     schemas = evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})
@@ -157,7 +162,7 @@ class Parameters:
 
 def parameter_from_data(
     *,
-    name: str,
+    name: UntrustedString,
     data: oai.Reference | oai.Parameter,
     parameters: Parameters,
     config: Config,
@@ -171,10 +176,10 @@ def parameter_from_data(
         return ParameterError("Parameter has no schema"), parameters
 
     new_param = Parameter(
-        name=name,
+        name=name.get_untrusted_value(),
         required=data.required,
         explode=data.explode,
-        style=data.style,
+        style=data.style.get_untrusted_value() if data.style is not None else None,
         param_schema=data.param_schema,
         param_in=data.param_in,
     )
@@ -203,10 +208,12 @@ def update_parameters_with_data(
     """
     param, parameters = parameter_from_data(data=data, name=data.name, parameters=parameters, config=config)
 
-    if isinstance(param, ParameterError):
+    if isinstance(param, ParameterError):  # pragma: no cover
         param.detail = f"{param.header}: {param.detail}"
-        param.header = f"Unable to parse parameter {ref_path}"
-        if isinstance(param.data, oai.Reference) and param.data.ref.endswith(ref_path):  # pragma: nocover
+        param.header = f"Unable to parse parameter {ref_path.get_untrusted_value()}"
+        if isinstance(param.data, oai.Reference) and param.data.ref.endswith(
+            ref_path.get_untrusted_value()
+        ):  # pragma: nocover
             param.detail += (
                 "\n\nRecursive and circular references are not supported. "
                 "See https://github.com/openapi-generators/openapi-python-client/issues/466"
@@ -245,5 +252,5 @@ def parameter_from_reference(
 
     _resolved_parameter_class = parameters.classes_by_reference.get(ref_path, None)
     if _resolved_parameter_class is None:
-        return ParameterError(detail=f"Reference `{ref_path}` not found.")
+        return ParameterError(detail=f"Reference `{ref_path.get_untrusted_value()}` not found.")
     return _resolved_parameter_class

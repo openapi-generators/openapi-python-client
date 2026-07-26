@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .callback import Callback
 from .example import Example
 from .header import Header
@@ -23,15 +24,15 @@ class Components(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
-    schemas: dict[str, ReferenceOr[Schema]] | None = None
-    responses: dict[str, ReferenceOr[Response]] | None = None
-    parameters: dict[str, ReferenceOr[Parameter]] | None = None
-    examples: dict[str, ReferenceOr[Example]] | None = None
-    requestBodies: dict[str, ReferenceOr[RequestBody]] | None = None
-    headers: dict[str, ReferenceOr[Header]] | None = None
-    securitySchemes: dict[str, ReferenceOr[SecurityScheme]] | None = None
-    links: dict[str, ReferenceOr[Link]] | None = None
-    callbacks: dict[str, ReferenceOr[Callback]] | None = None
+    schemas: dict[UntrustedString, ReferenceOr[Schema]] | None = None
+    responses: dict[UntrustedString, ReferenceOr[Response]] | None = None
+    parameters: dict[UntrustedString, ReferenceOr[Parameter]] | None = None
+    examples: dict[UntrustedString, ReferenceOr[Example]] | None = None
+    requestBodies: dict[UntrustedString, ReferenceOr[RequestBody]] | None = None
+    headers: dict[UntrustedString, ReferenceOr[Header]] | None = None
+    securitySchemes: dict[UntrustedString, ReferenceOr[SecurityScheme]] | None = None
+    links: dict[UntrustedString, ReferenceOr[Link]] | None = None
+    callbacks: dict[UntrustedString, ReferenceOr[Callback]] | None = None
     model_config = ConfigDict(
         # `Callback` contains an unresolvable forward reference, will rebuild in `__init__.py`:
         defer_build=True,

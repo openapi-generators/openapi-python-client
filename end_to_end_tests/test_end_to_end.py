@@ -8,7 +8,8 @@ import pytest
 from typer.testing import CliRunner, Result
 
 from end_to_end_tests.generated_client import (
-    _run_command, generate_client, generate_client_from_inline_spec,
+    _run_command,
+    generate_client,
 )
 from openapi_python_client.cli import app
 
@@ -18,7 +19,7 @@ def _compare_directories(
     test_subject: Path,
     expected_differences: dict[Path, str] | None = None,
     expected_missing: set[str] | None = None,
-    ignore: list[str] = None,
+    ignore: list[str] | None = None,
     depth=0,
 ):
     """
@@ -41,9 +42,7 @@ def _compare_directories(
         )
 
     expected_differences = expected_differences or {}
-    _, mismatches, errors = cmpfiles(
-        record, test_subject, dc.common_files, shallow=False
-    )
+    _, mismatches, _errors = cmpfiles(record, test_subject, dc.common_files, shallow=False)
     mismatches = set(mismatches)
 
     for file_name in mismatches:
@@ -56,9 +55,7 @@ def _compare_directories(
             expected_content = (record / file_name).read_text()
 
         generated_content = (test_subject / file_name).read_text()
-        assert (
-            generated_content == expected_content
-        ), f"Unexpected output in {mismatch_file_path}"
+        assert generated_content == expected_content, f"Unexpected output in {mismatch_file_path}"
 
     for sub_path in dc.common_dirs:
         _compare_directories(
@@ -70,12 +67,7 @@ def _compare_directories(
         )
 
     if depth == 0 and len(expected_differences.keys()) > 0:
-        failure = "\n".join(
-            [
-                f"Expected {path} to be different but it was not"
-                for path in expected_differences.keys()
-            ]
-        )
+        failure = "\n".join([f"Expected {path} to be different but it was not" for path in expected_differences.keys()])
         pytest.fail(failure, pytrace=False)
 
 
@@ -83,19 +75,20 @@ def run_e2e_test(
     openapi_document: str,
     extra_args: list[str],
     expected_differences: dict[Path, str] | None = None,
-    golden_record_path: str = "golden-record",
     output_path: str = "my-test-api-client",
     expected_missing: set[str] | None = None,
-    specify_output_path_explicitly: bool = True,
+    *,
+    golden_record_path: str | None = None,
 ) -> Result:
-    with generate_client(openapi_document, extra_args, output_path, specify_output_path_explicitly=specify_output_path_explicitly) as g:
-        gr_path = Path(__file__).parent / golden_record_path
+    with generate_client(openapi_document, extra_args, output_path) as g:
+        if golden_record_path:
+            gr_path = Path(__file__).parent / "golden-records" / golden_record_path
+        else:
+            gr_path = Path(__file__).parent / "golden-records" / output_path
 
         expected_differences = expected_differences or {}
         # Use absolute paths for expected differences for easier comparisons
-        expected_differences = {
-            g.output_path.joinpath(key): value for key, value in expected_differences.items()
-        }
+        expected_differences = {g.output_path.joinpath(key): value for key, value in expected_differences.items()}
         _compare_directories(
             gr_path, g.output_path, expected_differences=expected_differences, expected_missing=expected_missing
         )
@@ -104,6 +97,7 @@ def run_e2e_test(
             [sys.executable, "-m", "mypy", str(g.output_path), "--strict"],
             capture_output=True,
             text=True,
+            check=True,
         )
         assert result.returncode == 0, f"Type checking client failed: {result.stdout}"
 
@@ -123,19 +117,21 @@ def test_3_1_specific_features():
         "3.1_specific.openapi.yaml",
         [],
         {},
-        "test-3-1-golden-record",
         "test-3-1-features-client",
     )
 
 
 def test_literal_enums_end_to_end():
     config_path = Path(__file__).parent / "literal_enums.config.yml"
+    run_e2e_test("openapi_3.1_enums.yaml", [f"--config={config_path}"], {}, "my-enum-api-client")
+
+
+def test_escapes_end_to_end():
     run_e2e_test(
-        "openapi_3.1_enums.yaml",
-        [f"--config={config_path}"],
+        "escapes.openapi.yaml",
+        [],
         {},
-        "literal-enums-golden-record",
-        "my-enum-api-client"
+        "escapes-client",
     )
 
 
@@ -146,7 +142,7 @@ def test_literal_enums_end_to_end():
         ("pdm", "pyproject.toml", "pdm.pyproject.toml"),
         ("poetry", "pyproject.toml", "poetry.pyproject.toml"),
         ("uv", "pyproject.toml", "uv.pyproject.toml"),
-    )
+    ),
 )
 def test_meta(meta: str, generated_file: str | None, expected_file: str | None):
     with generate_client(
@@ -156,20 +152,18 @@ def test_meta(meta: str, generated_file: str | None, expected_file: str | None):
     ) as g:
         if generated_file and expected_file:
             assert (g.output_path / generated_file).exists()
-            assert (
-                (g.output_path / generated_file).read_text() ==
-                (Path(__file__).parent / "metadata_snapshots" / expected_file).read_text()
-            )
+            assert (g.output_path / generated_file).read_text() == (
+                Path(__file__).parent / "metadata_snapshots" / expected_file
+            ).read_text()
 
 
 def test_none_meta():
     run_e2e_test(
         "3.1_specific.openapi.yaml",
         ["--meta=none"],
-        golden_record_path="test-3-1-golden-record/test_3_1_features_client",
+        golden_record_path="test-3-1-features-client/test_3_1_features_client",
         output_path="test_3_1_features_client",
         expected_missing={"py.typed"},
-        specify_output_path_explicitly=False,
     )
 
 
@@ -184,14 +178,10 @@ def test_docstrings_on_attributes():
 
 
 def test_custom_templates():
-    expected_differences = (
-        {}
-    )  # key: path relative to generated directory, value: expected generated content
+    expected_differences = {}  # key: path relative to generated directory, value: expected generated content
     api_dir = Path("my_test_api_client").joinpath("api")
     models_dir = Path("my_test_api_client").joinpath("models")
-    golden_tpls_root_dir = Path(__file__).parent.joinpath(
-        "custom-templates-golden-record"
-    )
+    golden_tpls_root_dir = Path(__file__).parent / "golden-records" / "custom-templates"
 
     expected_difference_paths = [
         Path("README.md"),
@@ -200,9 +190,7 @@ def test_custom_templates():
     ]
 
     for expected_difference_path in expected_difference_paths:
-        expected_differences[expected_difference_path] = (
-            golden_tpls_root_dir / expected_difference_path
-        ).read_text()
+        expected_differences[expected_difference_path] = (golden_tpls_root_dir / expected_difference_path).read_text()
 
     # Each API module (defined by tag) has a custom __init__.py in it now.
     for endpoint_mod in golden_tpls_root_dir.joinpath(api_dir).iterdir():
@@ -281,13 +269,14 @@ def test_update_integration_tests():
             "generate",
             extra_args=["--overwrite", "--meta=pdm", f"--output-path={temp_dir}"],
             url=url,
-            config_path=config_path
+            config_path=config_path,
         )
         _compare_directories(source_path, temp_dir, ignore=["pyproject.toml"])
         result = subprocess.run(
             [sys.executable, "-m", "mypy", str(temp_dir), "--strict"],
             capture_output=True,
             text=True,
+            check=True,
         )
         assert result.returncode == 0, f"Type checking client failed: {result.stdout=} {result.stderr=}"
 

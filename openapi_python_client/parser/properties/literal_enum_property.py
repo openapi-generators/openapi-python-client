@@ -5,14 +5,14 @@ __all__ = ["LiteralEnumProperty"]
 from typing import Any, ClassVar, cast
 
 from attr import evolve
-from attrs import define
+from attrs import define, field
 
-from ... import Config, utils
+from ... import Config, strings
 from ... import schema as oai
 from ...schema import DataType
 from ..errors import PropertyError
 from .none import NoneProperty
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 from .schemas import Class, Schemas
 from .union import UnionProperty
 
@@ -23,12 +23,12 @@ ValueType = str | int
 class LiteralEnumProperty(PropertyProtocol):
     """A property that should use a literal enum"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
-    python_name: utils.PythonIdentifier
-    description: str | None
-    example: str | None
+    python_name: strings.PythonIdentifier
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
     values: set[ValueType]
     class_info: Class
     value_type: type[ValueType]
@@ -47,7 +47,7 @@ class LiteralEnumProperty(PropertyProtocol):
         cls,
         *,
         data: oai.Schema,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         schemas: Schemas,
         parent_name: str,
@@ -82,7 +82,7 @@ class LiteralEnumProperty(PropertyProtocol):
                     name=name,
                     required=required,
                     default="None",
-                    python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+                    python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
                     description=None,
                     example=None,
                 ),
@@ -114,9 +114,9 @@ class LiteralEnumProperty(PropertyProtocol):
                 config=config,
             )
 
-        class_name = data.title or name
+        class_name: str | oai.UntrustedString = data.title or name
         if parent_name:
-            class_name = f"{utils.pascal_case(parent_name)}{utils.pascal_case(class_name)}"
+            class_name = f"{strings.pascal_case(parent_name)}{strings.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
         values: set[str | int] = set(value_list)
 
@@ -137,7 +137,7 @@ class LiteralEnumProperty(PropertyProtocol):
             values=values,
             value_type=value_type,
             default=None,
-            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
         )
@@ -155,19 +155,19 @@ class LiteralEnumProperty(PropertyProtocol):
             return value
         if isinstance(value, self.value_type):
             if value in self.values:
-                return Value(python_code=repr(value), raw_value=value)
+                return Value(python_code=strings.PythonCode(repr(value)), raw_value=value)
             else:
                 return PropertyError(detail=f"Value {value} is not valid for enum {self.name}")
         return PropertyError(detail=f"Cannot convert {value} to enum {self.name} of type {self.value_type}")
 
-    def get_base_type_string(self) -> str:
-        return self.class_info.name
+    def get_base_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(self.class_info.name)
 
-    def get_base_json_type_string(self) -> str:
-        return self.value_type.__name__
+    def get_base_json_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(self.value_type.__name__)
 
-    def get_instance_type_string(self) -> str:
-        return self.value_type.__name__
+    def get_instance_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(self.value_type.__name__)
 
     def get_imports(self, *, prefix: str) -> set[str]:
         """
@@ -186,4 +186,4 @@ class LiteralEnumProperty(PropertyProtocol):
         return imports
 
     def get_class_name_snake_case(self) -> str:
-        return utils.snake_case(self.class_info.name)
+        return strings.snake_case(self.class_info.name)

@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
+
 
 class ServerVariable(BaseModel):
     """An object representing a Server Variable for server URL template substitution.
@@ -9,7 +11,7 @@ class ServerVariable(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableObject
     """
 
-    enum: list[str] | None = None
-    default: str
-    description: str | None = None
+    enum: list[UntrustedString] | None = None
+    default: UntrustedString
+    description: UntrustedString | None = None
     model_config = ConfigDict(extra="allow")

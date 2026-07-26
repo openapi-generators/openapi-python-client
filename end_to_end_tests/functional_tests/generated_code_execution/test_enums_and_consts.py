@@ -1,4 +1,5 @@
 from typing import Literal
+
 import pytest
 
 from end_to_end_tests.functional_tests.helpers import (
@@ -10,7 +11,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -26,7 +27,8 @@ components:
       properties:
         enumProp: {"$ref": "#/components/schemas/MyEnum"}
       required: ["enumProp"]
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyEnum",
     ".models.MyModel",
@@ -45,7 +47,7 @@ class TestStringEnumClass:
             ("A_THING_WITH_SPACES", "a Thing WIth spaces"),
             ("VALUE_6", ""),
         ],
-    )   
+    )
     def test_enum_values(self, MyEnum, expected_name, expected_value):
         assert getattr(MyEnum, expected_name) == MyEnum(expected_value)
 
@@ -59,7 +61,7 @@ class TestStringEnumClass:
 
     def test_type_hints(self, MyModel, MyModelWithRequired):
         optional_type = "MyEnum | Unset"
-        assert_model_property_type_hint(MyModel,"enum_prop", optional_type)
+        assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
         assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
 
     def test_invalid_values(self, MyModel):
@@ -72,7 +74,7 @@ class TestStringEnumClass:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyStrEnum:
@@ -83,7 +85,8 @@ components:
         "More than OnE",
         "not_quite_four"
       ]
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyStrEnum",
 )
@@ -101,7 +104,7 @@ class TestStrEnumVarNameExtensions:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -117,7 +120,8 @@ components:
       properties:
         enumProp: {"$ref": "#/components/schemas/MyEnum"}
       required: ["enumProp"]
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyEnum",
     ".models.MyModel",
@@ -132,7 +136,7 @@ class TestIntEnumClass:
             ("VALUE_3", 3),
             ("VALUE_NEGATIVE_4", -4),
         ],
-    )   
+    )
     def test_enum_values(self, MyEnum, expected_name, expected_value):
         assert getattr(MyEnum, expected_name) == MyEnum(expected_value)
 
@@ -146,7 +150,7 @@ class TestIntEnumClass:
 
     def test_type_hints(self, MyModel, MyModelWithRequired):
         optional_type = "MyEnum | Unset"
-        assert_model_property_type_hint(MyModel,"enum_prop", optional_type)
+        assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
         assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
 
     def test_invalid_values(self, MyModel):
@@ -157,7 +161,7 @@ class TestIntEnumClass:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -168,7 +172,8 @@ components:
         "Three",
         "Negative Four"
       ]
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyEnum",
 )
@@ -186,7 +191,7 @@ class TestIntEnumVarNameExtensions:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -205,10 +210,11 @@ components:
             - type: "null"
         enumIncludingNullProp: {"$ref": "#/components/schemas/MyEnumIncludingNull"}
         nullOnlyEnumProp: {"$ref": "#/components/schemas/MyNullOnlyEnum"}
-""")
+"""
+)
 @with_generated_code_imports(
     ".models.MyEnum",
-    ".models.MyEnumIncludingNullType1", # see comment in test_nullable_enum_prop
+    ".models.MyEnumIncludingNullType1",  # see comment in test_nullable_enum_prop
     ".models.MyModel",
 )
 class TestNullableEnums:
@@ -222,16 +228,16 @@ class TestNullableEnums:
             {"enumIncludingNullProp": "a"},
             MyModel(enum_including_null_prop=MyEnumIncludingNullType1.A),
         )
-        assert_model_decode_encode( MyModel, {"enumIncludingNullProp": None}, MyModel(enum_including_null_prop=None))
+        assert_model_decode_encode(MyModel, {"enumIncludingNullProp": None}, MyModel(enum_including_null_prop=None))
         assert_model_decode_encode(MyModel, {"nullOnlyEnumProp": None}, MyModel(null_only_enum_prop=None))
-    
+
     def test_type_hints(self, MyModel):
         expected_type = "MyEnum | None | Unset"
         assert_model_property_type_hint(MyModel, "nullable_enum_prop", expected_type)
-    
+
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
@@ -270,8 +276,9 @@ class TestConst:
 # The following tests of literal enums use basically the same specs as the tests above, but
 # the "literal_enums" option is enabled in the test configuration.
 
+
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -300,7 +307,7 @@ class TestStringLiteralEnum:
         assert_model_decode_encode(MyModel, {"enumProp": "a"}, MyModel(enum_prop="a"))
         assert_model_decode_encode(MyModel, {"enumProp": "A"}, MyModel(enum_prop="A"))
         assert_model_decode_encode(MyModel, {"inlineEnumProp": "a"}, MyModel(inline_enum_prop="a"))
-    
+
     def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum):
         optional_type = "MyEnum | Unset"
         assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
@@ -315,7 +322,7 @@ class TestStringLiteralEnum:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -344,7 +351,7 @@ class TestIntLiteralEnum:
         assert_model_decode_encode(MyModel, {"enumProp": 2}, MyModel(enum_prop=2))
         assert_model_decode_encode(MyModel, {"enumProp": -4}, MyModel(enum_prop=-4))
         assert_model_decode_encode(MyModel, {"inlineEnumProp": 2}, MyModel(inline_enum_prop=2))
-    
+
     def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum):
         optional_type = "MyEnum | Unset"
         assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
@@ -359,7 +366,7 @@ class TestIntLiteralEnum:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:

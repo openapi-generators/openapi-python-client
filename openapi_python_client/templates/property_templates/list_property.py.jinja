@@ -11,7 +11,7 @@ for {{ inner_source }} in (_{{ property.python_name }}):
     {{ property.python_name }}.append({{ inner_property.python_name }})
 {% else %}
 _{{ property.python_name }} = {{ source }}
-{{ property.python_name }}: {{ property.get_type_string() }} = UNSET
+{{ property.python_name }}: {{ property.get_type_string() | as_unembedded_code }} = UNSET
 if _{{ property.python_name }} is not UNSET:
     {{ property.python_name }} = []
     for {{ inner_source }} in _{{ property.python_name }}:
@@ -19,7 +19,7 @@ if _{{ property.python_name }} is not UNSET:
         {{ property.python_name }}.append({{ inner_property.python_name }})
 {% endif %}
 {% else %}
-{{ property.python_name }} = cast({{ property.get_type_string(no_optional=True) }}, {{ source }})
+{{ property.python_name }} = cast({{ property.get_type_string(no_optional=True) | as_unembedded_code }}, {{ source }})
 {% endif %}
 {% endmacro %}
 
@@ -41,7 +41,7 @@ for {{ inner_source }} in {{ source }}:
 
 {% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set inner_property = property.inner_property %}
-{% set type_string = property.get_type_string(json=True) %}
+{% set type_string = property.get_type_string(json=True) | as_unembedded_code %}
 {% if property.required %}
 {{ _transform(property, source, destination, "to_dict") }}
 {% else %}

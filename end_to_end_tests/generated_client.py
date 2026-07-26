@@ -2,13 +2,13 @@ import importlib
 import os
 import re
 import shutil
-from pathlib import Path
 import sys
 import tempfile
+from pathlib import Path
 from typing import Any, Self
 
-from attrs import define
 import pytest
+from attrs import define
 from typer.testing import CliRunner, Result
 
 from openapi_python_client.cli import app
@@ -17,7 +17,7 @@ from openapi_python_client.cli import app
 @define
 class GeneratedClientContext:
     """A context manager with helpers for tests that run against generated client code.
-    
+
     On entering this context, sys.path is changed to include the root directory of the
     generated code, so its modules can be imported. On exit, the original sys.path is
     restored, and any modules that were loaded within the context are removed.
@@ -48,18 +48,19 @@ class GeneratedClientContext:
         module = self.import_module(module_path)
         try:
             return getattr(module, name)
-        except AttributeError:
+        except AttributeError as e:
             existing = ", ".join(name for name in dir(module) if not name.startswith("_"))
-            assert False, (
-                f"Couldn't find import \"{name}\" in \"{self.base_module}{module_path}\".\n"
+            raise AssertionError(
+                f'Couldn\'t find import "{name}" in "{self.base_module}{module_path}".\n'
                 f"Available imports in that module are: {existing}\n"
                 f"Output from generator was: {self.generator_result.stdout}"
-            )
+            ) from e
+
 
 def _run_command(
     command: str,
     extra_args: list[str] | None = None,
-    openapi_document: str | None = None,
+    openapi_document: str | Path | None = None,
     url: str | None = None,
     config_path: Path | None = None,
     raise_on_error: bool = True,
@@ -83,23 +84,24 @@ def _run_command(
 
 
 def generate_client(
-    openapi_document: str,
-    extra_args: list[str] = [],
+    openapi_document: str | Path,
+    extra_args: list[str] | None = None,
     output_path: str = "my-test-api-client",
     base_module: str = "my_test_api_client",
-    specify_output_path_explicitly: bool = True,
     overwrite: bool = True,
     raise_on_error: bool = True,
 ) -> GeneratedClientContext:
     """Run the generator and return a GeneratedClientContext for accessing the generated code."""
-    full_output_path = Path.cwd() / output_path
+    args = []
+    if extra_args is not None:
+        args = list(extra_args)
+    full_output_path = Path(__file__).parent / "tmp" / output_path
+
     if not overwrite:
         shutil.rmtree(full_output_path, ignore_errors=True)
-    args = extra_args
-    if specify_output_path_explicitly:
-        args = [*args, "--output-path", str(full_output_path)]
+    args.extend(["--output-path", str(full_output_path)])
     if overwrite:
-        args = [*args, "--overwrite"]
+        args.append("--overwrite")
     generator_result = _run_command("generate", args, openapi_document, raise_on_error=raise_on_error)
     return GeneratedClientContext(
         full_output_path,
@@ -111,17 +113,19 @@ def generate_client(
 
 def generate_client_from_inline_spec(
     openapi_spec: str,
-    extra_args: list[str] = [],
+    extra_args: list[str] | None = None,
     config: str = "",
     filename_suffix: str | None = None,
     base_module: str = "testapi_client",
-    add_missing_sections = True,
+    add_missing_sections=True,
     raise_on_error: bool = True,
 ) -> GeneratedClientContext:
     """Run the generator on a temporary file created with the specified contents.
-    
+
     You can also optionally tell it to create a temporary config file.
     """
+    if extra_args is None:
+        extra_args = []
     if add_missing_sections:
         if not re.search("^openapi:", openapi_spec, re.MULTILINE):
             openapi_spec += "\nopenapi: '3.1.0'\n"
@@ -132,12 +136,12 @@ def generate_client_from_inline_spec(
 
     output_path = tempfile.mkdtemp()
     file = tempfile.NamedTemporaryFile(suffix=filename_suffix, delete=False)
-    file.write(openapi_spec.encode('utf-8'))
+    file.write(openapi_spec.encode("utf-8"))
     file.close()
 
     if config:
         config_file = tempfile.NamedTemporaryFile(delete=False)
-        config_file.write(config.encode('utf-8'))
+        config_file.write(config.encode("utf-8"))
         config_file.close()
         extra_args = [*extra_args, "--config", config_file.name]
 

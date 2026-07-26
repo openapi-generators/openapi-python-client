@@ -1,4 +1,6 @@
-SecurityRequirement = dict[str, list[str]]
+from ..untrusted_string import UntrustedString
+
+SecurityRequirement = dict[UntrustedString, list[UntrustedString]]
 """
 Lists the required security schemes to execute this operation.
 The name used for each property MUST correspond to a security scheme declared in the

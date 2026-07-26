@@ -3,14 +3,14 @@ from __future__ import annotations
 from itertools import chain
 from typing import Any, ClassVar, NamedTuple
 
-from attrs import define, evolve
+from attrs import define, evolve, field
 
-from ... import Config, utils
+from ... import Config, strings
 from ... import schema as oai
-from ...utils import PythonIdentifier
+from ...strings import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 
 
@@ -18,15 +18,15 @@ from .schemas import Class, ReferencePath, Schemas, parse_reference_path
 class ModelProperty(PropertyProtocol):
     """A property which refers to another Schema"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
-    python_name: utils.PythonIdentifier
-    example: str | None
+    python_name: strings.PythonIdentifier
+    example: oai.UntrustedString | None = field(converter=convert_example)
     class_info: Class
     data: oai.Schema
-    description: str
-    roots: set[ReferencePath | utils.ClassName]
+    description: oai.UntrustedString | None
+    roots: set[ReferencePath | strings.ClassName]
     required_properties: list[Property] | None
     optional_properties: list[Property] | None
     relative_imports: set[str] | None
@@ -43,13 +43,13 @@ class ModelProperty(PropertyProtocol):
         cls,
         *,
         data: oai.Schema,
-        name: str,
+        name: oai.UntrustedString,
         schemas: Schemas,
         required: bool,
         parent_name: str | None,
         config: Config,
         process_properties: bool,
-        roots: set[ReferencePath | utils.ClassName],
+        roots: set[ReferencePath | strings.ClassName],
     ) -> tuple[ModelProperty | PropertyError, Schemas]:
         """
         A single ModelProperty from its OAI data
@@ -65,12 +65,13 @@ class ModelProperty(PropertyProtocol):
             roots: Set of strings that identify schema objects on which the new ModelProperty will depend
             process_properties: Determines whether the new ModelProperty will be initialized with property data
         """
+        class_string: str | oai.UntrustedString
         if not config.use_path_prefixes_for_title_model_names and data.title:
             class_string = data.title
         else:
             title = data.title or name
             if parent_name:
-                class_string = f"{utils.pascal_case(parent_name)}{utils.pascal_case(title)}"
+                class_string = f"{strings.pascal_case(parent_name)}{strings.pascal_case(title)}"
             else:
                 class_string = title
         class_info = Class.from_string(string=class_string, config=config)
@@ -92,7 +93,7 @@ class ModelProperty(PropertyProtocol):
             relative_imports = property_data.relative_imports
             lazy_imports = property_data.lazy_imports
             for root in roots:
-                if isinstance(root, utils.ClassName):
+                if isinstance(root, strings.ClassName):
                     continue
                 schemas.add_dependencies(root, {class_info.name})
 
@@ -105,11 +106,11 @@ class ModelProperty(PropertyProtocol):
             relative_imports=relative_imports,
             lazy_imports=lazy_imports,
             additional_properties=additional_properties,
-            description=data.description or "",
+            description=data.description,
             default=None,
             required=required,
             name=name,
-            python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+            python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
             example=data.example,
         )
         if class_info.name in schemas.classes_by_name:
@@ -126,7 +127,7 @@ class ModelProperty(PropertyProtocol):
         return prop, schemas
 
     @classmethod
-    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | PropertyError | None:
         if value is not None:
             return PropertyError(detail="ModelProperty cannot have a default value")  # pragma: no cover
         return None
@@ -140,8 +141,8 @@ class ModelProperty(PropertyProtocol):
         """Constructs a self import statement from this ModelProperty's attributes"""
         return f"models.{self.class_info.module_name} import {self.class_info.name}"
 
-    def get_base_type_string(self) -> str:
-        return self.class_info.name
+    def get_base_type_string(self) -> strings.PythonCode:
+        return strings.PythonCode(self.class_info.name)
 
     def get_imports(self, *, prefix: str) -> set[str]:
         """
@@ -188,9 +189,9 @@ class ModelProperty(PropertyProtocol):
         self,
         no_optional: bool = False,
         json: bool = False,
-    ) -> str:
+    ) -> strings.PythonCode:
         """
-        Get a string representation of type that should be used when declaring this property
+        Get a Python code representation of type that should be used when declaring this property
 
         Args:
             no_optional: Do not include Optional or Unset even if the value is optional (needed for isinstance checks)
@@ -203,7 +204,7 @@ class ModelProperty(PropertyProtocol):
 
         if no_optional or self.required:
             return type_string
-        return f"{type_string} | Unset"
+        return strings.PythonCode(f"{type_string.as_unembedded_code()} | Unset")
 
 
 from .property import Property  # noqa: E402
@@ -232,14 +233,14 @@ def _process_properties(  # noqa: PLR0912, PLR0911
     *,
     data: oai.Schema,
     schemas: Schemas,
-    class_name: utils.ClassName,
+    class_name: strings.ClassName,
     config: Config,
-    roots: set[ReferencePath | utils.ClassName],
+    roots: set[ReferencePath | strings.ClassName],
 ) -> _PropertyData | PropertyError:
     from . import property_from_data  # noqa: PLC0415
     from .merge_properties import merge_properties  # noqa: PLC0415
 
-    properties: dict[str, Property] = {}
+    properties: dict[oai.UntrustedString, Property] = {}
     relative_imports: set[str] = set()
     lazy_imports: set[str] = set()
     required_set = set(data.required or [])
@@ -265,7 +266,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
         properties[merged_prop.name] = merged_prop
         return None
 
-    unprocessed_props: list[tuple[str, oai.Reference | oai.Schema]] = (
+    unprocessed_props: list[tuple[oai.UntrustedString, oai.Reference | oai.Schema]] = (
         list(data.properties.items()) if data.properties else []
     )
     for sub_prop in data.allOf:
@@ -275,7 +276,7 @@ def _process_properties(  # noqa: PLR0912, PLR0911
                 return PropertyError(detail=ref_path.detail, data=sub_prop)
             sub_model = schemas.classes_by_reference.get(ref_path)
             if sub_model is None:
-                return PropertyError(f"Reference {sub_prop.ref} not found")
+                return PropertyError(f"Reference {sub_prop.ref.get_untrusted_value()} not found")
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
             # Properties of allOf references first should be processed first
@@ -335,10 +336,10 @@ def _process_properties(  # noqa: PLR0912, PLR0911
 
 
 ANY_ADDITIONAL_PROPERTY = AnyProperty.build(
-    name="additional",
+    name=oai.UntrustedString("additional"),
     required=True,
     default=None,
-    description="",
+    description=None,
     python_name=PythonIdentifier(value="additional", prefix=""),
     example=None,
 )
@@ -348,10 +349,10 @@ def _get_additional_properties(
     *,
     schema_additional: None | (bool | (oai.Reference | oai.Schema)),
     schemas: Schemas,
-    class_name: utils.ClassName,
+    class_name: strings.ClassName,
     config: Config,
-    roots: set[ReferencePath | utils.ClassName],
-) -> tuple[Property | None | PropertyError, Schemas]:
+    roots: set[ReferencePath | strings.ClassName],
+) -> tuple[Property | PropertyError | None, Schemas]:
     from . import property_from_data  # noqa: PLC0415
 
     if schema_additional is None:
@@ -367,7 +368,7 @@ def _get_additional_properties(
         return ANY_ADDITIONAL_PROPERTY, schemas
 
     additional_properties, schemas = property_from_data(
-        name="AdditionalProperty",
+        name=oai.UntrustedString("AdditionalProperty"),
         required=True,  # in the sense that if present in the dict will not be None
         data=schema_additional,
         schemas=schemas,
@@ -384,7 +385,7 @@ def _process_property_data(
     schemas: Schemas,
     class_info: Class,
     config: Config,
-    roots: set[ReferencePath | utils.ClassName],
+    roots: set[ReferencePath | strings.ClassName],
 ) -> tuple[tuple[_PropertyData, Property | None] | PropertyError, Schemas]:
     property_data = _process_properties(
         data=data, schemas=schemas, class_name=class_info.name, config=config, roots=roots

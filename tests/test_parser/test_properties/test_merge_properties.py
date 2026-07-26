@@ -10,6 +10,7 @@ from openapi_python_client.parser.properties.merge_properties import merge_prope
 from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.parser.properties.schemas import Class
 from openapi_python_client.parser.properties.string import StringProperty
+from openapi_python_client.strings import PythonCode
 
 MODULE_NAME = "openapi_python_client.parser.properties.merge_properties"
 
@@ -23,9 +24,9 @@ def test_merge_basic_attributes_same_type(
     model_property_factory,
 ):
     basic_props = [
-        boolean_property_factory(default=Value(python_code="True", raw_value="True")),
-        int_property_factory(default=Value("1", 1)),
-        float_property_factory(default=Value("1.5", 1.5)),
+        boolean_property_factory(default=Value(python_code=PythonCode("True"), raw_value="True")),
+        int_property_factory(default=Value(PythonCode("1"), 1)),
+        float_property_factory(default=Value(PythonCode("1.5"), 1.5)),
         string_property_factory(default=StringProperty.convert_value("x")),
         list_property_factory(),
         model_property_factory(),
@@ -70,14 +71,14 @@ def test_incompatible_types(
 
 def test_merge_int_with_float(int_property_factory, float_property_factory):
     int_prop = int_property_factory(description="desc1")
-    float_prop = float_property_factory(default=Value("2", 2), description="desc2")
+    float_prop = float_property_factory(default=Value(PythonCode("2"), 2), description="desc2")
 
     assert merge_properties(int_prop, float_prop) == (
-        evolve(int_prop, default=Value("2", 2), description=float_prop.description)
+        evolve(int_prop, default=Value(PythonCode("2"), 2), description=float_prop.description)
     )
-    assert merge_properties(float_prop, int_prop) == evolve(int_prop, default=Value("2", 2))
+    assert merge_properties(float_prop, int_prop) == evolve(int_prop, default=Value(PythonCode("2"), 2))
 
-    float_prop_with_non_int_default = evolve(float_prop, default=Value("2.5", 2.5))
+    float_prop_with_non_int_default = evolve(float_prop, default=Value(PythonCode("2.5"), 2.5))
     error = merge_properties(int_prop, float_prop_with_non_int_default)
     assert isinstance(error, PropertyError), "Expected invalid default to error"
     assert error.detail == "Invalid int value: 2.5"
@@ -93,9 +94,9 @@ def test_merge_with_any(
 ):
     original_desc = "description"
     props = [
-        boolean_property_factory(default=Value("True", "True"), description=original_desc),
-        int_property_factory(default=Value("1", "1"), description=original_desc),
-        float_property_factory(default=Value("1.5", "1.5"), description=original_desc),
+        boolean_property_factory(default=Value(PythonCode("True"), "True"), description=original_desc),
+        int_property_factory(default=Value(PythonCode("1"), "1"), description=original_desc),
+        float_property_factory(default=Value(PythonCode("1.5"), "1.5"), description=original_desc),
         string_property_factory(default=StringProperty.convert_value("x"), description=original_desc),
         model_property_factory(description=original_desc),
     ]
@@ -151,10 +152,10 @@ def test_merge_enums(literal_enums, enum_property_factory, literal_enum_property
 def test_merge_string_with_string_enum(
     literal_enums, string_property_factory, enum_property_factory, literal_enum_property_factory
 ):
-    string_prop = string_property_factory(default=Value("A", "A"), description="desc1", example="example1")
+    string_prop = string_property_factory(default=Value(PythonCode("A"), "A"), description="desc1", example="example1")
     enum_prop = (
         literal_enum_property_factory(
-            default=Value("'B'", "B"),
+            default=Value(PythonCode("'B'"), "B"),
             description="desc2",
             example="example2",
             values={"A", "B"},
@@ -162,7 +163,7 @@ def test_merge_string_with_string_enum(
         )
         if literal_enums
         else enum_property_factory(
-            default=Value("test.B", "B"),
+            default=Value(PythonCode("Test.B"), "B"),
             description="desc2",
             example="example2",
             values={"A": "A", "B": "B"},
@@ -174,7 +175,7 @@ def test_merge_string_with_string_enum(
     assert merge_properties(enum_prop, string_prop) == evolve(
         enum_prop,
         required=True,
-        default=Value("'A'" if literal_enums else "test.A", "A"),
+        default=Value(PythonCode("'A'") if literal_enums else PythonCode("Test.A"), "A"),
         description=string_prop.description,
         example=string_prop.example,
     )
@@ -184,10 +185,10 @@ def test_merge_string_with_string_enum(
 def test_merge_int_with_int_enum(
     literal_enums, int_property_factory, enum_property_factory, literal_enum_property_factory
 ):
-    int_prop = int_property_factory(default=Value("1", 1), description="desc1", example="example1")
+    int_prop = int_property_factory(default=Value(PythonCode("1"), 1), description="desc1", example="example1")
     enum_prop = (
         literal_enum_property_factory(
-            default=Value("1", 1),
+            default=Value(PythonCode("1"), 1),
             description="desc2",
             example="example2",
             values={1, 2},
@@ -195,7 +196,7 @@ def test_merge_int_with_int_enum(
         )
         if literal_enums
         else enum_property_factory(
-            default=Value("test.VALUE_1", 1),
+            default=Value(PythonCode("Test.VALUE_1"), 1),
             description="desc2",
             example="example2",
             values={"VALUE_1": 1, "VALUE_2": 2},

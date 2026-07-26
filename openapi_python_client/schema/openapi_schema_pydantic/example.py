@@ -2,6 +2,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
+
 
 class Example(BaseModel):
     """Examples added to parameters / components to help clarify usage.
@@ -11,10 +13,10 @@ class Example(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject
     """
 
-    summary: str | None = None
-    description: str | None = None
+    summary: UntrustedString | None = None
+    description: UntrustedString | None = None
     value: Any | None = None
-    externalValue: str | None = None
+    externalValue: UntrustedString | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={
