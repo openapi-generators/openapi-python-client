@@ -43,7 +43,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> None:
     response.raise_for_status()
     if response.status_code == 200:
         return None
@@ -51,12 +51,15 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[None]:
+    # Called for the status check alone -- it raises on an undocumented code and has no
+    # value to hand back.
+    _parse_response(client=client, response=response)
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=None,
     )
 
 
@@ -67,7 +70,7 @@ async def _request_detailed(
     param_query: str | Unset = UNSET,
     param_header: str | Unset = UNSET,
     param_cookie: str | Unset = UNSET,
-) -> Response[Any]:
+) -> Response[None]:
     """
     Args:
         param_path (str):
@@ -80,7 +83,7 @@ async def _request_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
@@ -93,3 +96,35 @@ async def _request_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def request(
+    param_path: str,
+    *,
+    client: AuthenticatedClient | Client,
+    param_query: str | Unset = UNSET,
+    param_header: str | Unset = UNSET,
+    param_cookie: str | Unset = UNSET,
+) -> None:
+    """
+    Args:
+        param_path (str):
+        param_query (str | Unset):
+        param_header (str | Unset):
+        param_cookie (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        None
+    """
+
+    await _request_detailed(
+        param_path=param_path,
+        client=client,
+        param_query=param_query,
+        param_header=param_header,
+        param_cookie=param_cookie,
+    )

@@ -85,7 +85,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> None:
     response.raise_for_status()
     if response.status_code == 200:
         return None
@@ -93,12 +93,15 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[None]:
+    # Called for the status check alone -- it raises on an undocumented code and has no
+    # value to hand back.
+    _parse_response(client=client, response=response)
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=None,
     )
 
 
@@ -118,7 +121,7 @@ async def _request_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any]:
+) -> Response[None]:
     """Defaults
 
     Args:
@@ -141,7 +144,7 @@ async def _request_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
@@ -163,3 +166,63 @@ async def _request_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def request(
+    *,
+    client: AuthenticatedClient | Client,
+    string_prop: str = "the default string",
+    string_with_num: str = "1",
+    date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
+    float_prop: float = 3.14,
+    float_with_int: float = 3.0,
+    int_prop: int = 7,
+    boolean_prop: bool = False,
+    list_prop: list[AnEnum],
+    union_prop: float | str = "not a float",
+    union_prop_with_ref: AnEnum | float | Unset = 0.6,
+    enum_prop: AnEnum,
+    model_prop: ModelWithUnionProperty,
+    required_model_prop: ModelWithUnionProperty,
+) -> None:
+    """Defaults
+
+    Args:
+        string_prop (str):  Default: 'the default string'.
+        string_with_num (str):  Default: '1'.
+        date_prop (datetime.date):  Default: datetime.date.fromisoformat('1010-10-10').
+        float_prop (float):  Default: 3.14.
+        float_with_int (float):  Default: 3.0.
+        int_prop (int):  Default: 7.
+        boolean_prop (bool):  Default: False.
+        list_prop (list[AnEnum]):
+        union_prop (float | str):  Default: 'not a float'.
+        union_prop_with_ref (AnEnum | float | Unset):  Default: 0.6.
+        enum_prop (AnEnum): For testing Enums in all the ways they can be used
+        model_prop (ModelWithUnionProperty):
+        required_model_prop (ModelWithUnionProperty):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        None
+    """
+
+    await _request_detailed(
+        client=client,
+        string_prop=string_prop,
+        string_with_num=string_with_num,
+        date_prop=date_prop,
+        float_prop=float_prop,
+        float_with_int=float_with_int,
+        int_prop=int_prop,
+        boolean_prop=boolean_prop,
+        list_prop=list_prop,
+        union_prop=union_prop,
+        union_prop_with_ref=union_prop_with_ref,
+        enum_prop=enum_prop,
+        model_prop=model_prop,
+        required_model_prop=required_model_prop,
+    )

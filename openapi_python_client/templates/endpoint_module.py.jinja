@@ -15,8 +15,12 @@ from ... import errors
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
     arguments, client, kwargs, parse_response, docstring, body_to_kwarg %}
 
-{% set return_string = endpoint.response_type().split('|') | map('trim') | reject('equalto', 'HTTPValidationError') | join(' | ') %}
-{% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
+{% set parsed_type = endpoint.response_type().split('|') | map('trim') | reject('equalto', 'HTTPValidationError') | join(' | ') %}
+{% set parsed_responses = (endpoint.responses | length > 0) and parsed_type != "Any" %}
+{# With nothing to parse -- no declared responses, or a schema-less body such as the one
+   FastAPI emits for `-> None` -- every branch of `_parse_response` either returns None or
+   raises. `None` says that; `Any` would only suggest a value that never arrives. #}
+{% set return_string = parsed_type if parsed_responses else "None" %}
 
 def _get_kwargs(
     {{ arguments(endpoint, include_client=False) | indent(4) }}
@@ -137,11 +141,20 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string }}]:
+    {% if not parsed_responses %}
+    # Called for the status check alone -- it raises on an undocumented code and has no
+    # value to hand back.
+    _parse_response(client=client, response=response)
+    {% endif %}
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
+        {% if parsed_responses %}
         parsed=_parse_response(client=client, response=response),
+        {% else %}
+        parsed=None,
+        {% endif %}
     )
 
 
@@ -160,15 +173,23 @@ async def _request_detailed(
 
     return _build_response(client=client, response=response)
 
-{% if parsed_responses %}
+{# Always generated: `request` is the module's only public entry point, so gating it on
+   having something to parse would leave an endpoint with no callable API at all. When
+   there is no parsed body -- a 204, or FastAPI's `-> None` (an empty response schema) --
+   it returns None and is called for its effect. #}
 async def request (
     {{ arguments(endpoint) | indent(4) }}
 ) -> {{ return_string }}:
     {{ docstring(endpoint, return_string, is_detailed=false) | indent(4) }}
 
+    {% if parsed_responses %}
     return (await _request_detailed(
         {{ kwargs(endpoint) }}
     )).parsed
-{% endif %}
+    {% else %}
+    await _request_detailed(
+        {{ kwargs(endpoint) }}
+    )
+    {% endif %}
 
 {% endif %}

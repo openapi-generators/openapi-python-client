@@ -54,7 +54,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> None:
     response.raise_for_status()
     if response.status_code == 200:
         return None
@@ -62,12 +62,15 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     raise errors.UnexpectedStatus(response.status_code, response.content)
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[None]:
+    # Called for the status check alone -- it raises on an undocumented code and has no
+    # value to hand back.
+    _parse_response(client=client, response=response)
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
+        parsed=None,
     )
 
 
@@ -78,7 +81,7 @@ async def _request_detailed(
     null_required: datetime.datetime | None,
     null_not_required: datetime.datetime | None | Unset = UNSET,
     not_null_not_required: datetime.datetime | Unset = UNSET,
-) -> Response[Any]:
+) -> Response[None]:
     """
     Args:
         not_null_required (datetime.datetime):
@@ -91,7 +94,7 @@ async def _request_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[None]
     """
 
     kwargs = _get_kwargs(
@@ -104,3 +107,35 @@ async def _request_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def request(
+    *,
+    client: AuthenticatedClient | Client,
+    not_null_required: datetime.datetime,
+    null_required: datetime.datetime | None,
+    null_not_required: datetime.datetime | None | Unset = UNSET,
+    not_null_not_required: datetime.datetime | Unset = UNSET,
+) -> None:
+    """
+    Args:
+        not_null_required (datetime.datetime):
+        null_required (datetime.datetime | None):
+        null_not_required (datetime.datetime | None | Unset):
+        not_null_not_required (datetime.datetime | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        None
+    """
+
+    await _request_detailed(
+        client=client,
+        not_null_required=not_null_required,
+        null_required=null_required,
+        null_not_required=null_not_required,
+        not_null_not_required=not_null_not_required,
+    )

@@ -62,7 +62,7 @@ def parse_multipart(content_type: str, body: bytes) -> tuple[dict[str, bytes], d
     return fields, files
 
 
-def send_and_capture(Client: Any, request_detailed: Any, **kwargs: Any) -> httpx.Request:
+def send_and_capture(Client: Any, endpoint: Any, **kwargs: Any) -> httpx.Request:
     """Run a generated endpoint against a mock transport and return the sent request."""
     captured: list[httpx.Request] = []
 
@@ -74,7 +74,7 @@ def send_and_capture(Client: Any, request_detailed: Any, **kwargs: Any) -> httpx
     client.set_async_httpx_client(
         httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.com")
     )
-    asyncio.run(request_detailed(client=client, **kwargs))
+    asyncio.run(endpoint(client=client, **kwargs))
     return captured[0]
 
 
@@ -362,3 +362,77 @@ class TestJsonBodyBinaryPropertiesStayStrings:
 
     def test_json_body_serialises(self, StoreBody):
         assert StoreBody(blob="aGVsbG8=").to_dict() == {"blob": "aGVsbG8="}
+
+
+@with_generated_client_fixture(
+    """
+paths:
+  "/multipart-file":
+    post:
+      operationId: demoFileUpload
+      parameters:
+        - in: query
+          name: id_parameter
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+        - in: query
+          name: foo_param
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/BodyDemoFileUpload"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    BodyDemoFileUpload:
+      type: object
+      properties:
+        audio_file:
+          type: string
+          contentMediaType: application/octet-stream
+      required: ["audio_file"]
+"""
+)
+@with_generated_code_imports(".models.BodyDemoFileUpload", ".types.File", ".client.Client")
+@with_generated_code_import(".api.default.demo_file_upload.request", alias="upload")
+class TestUploadEndpointReturningNothing:
+    """A FastAPI route annotated ``-> None`` alongside query parameters.
+
+    FastAPI describes that response as an empty schema, which the generator resolves to
+    ``Any``. The public ``request`` function must still exist: it is the only public name
+    in the module, so gating it on having a body to parse leaves the endpoint uncallable.
+    """
+
+    def test_public_request_function_exists(self, upload):
+        assert callable(upload)
+
+    def test_upload_with_query_parameters(self, Client, upload, BodyDemoFileUpload, File):
+        body = BodyDemoFileUpload(
+            audio_file=File(payload=BytesIO(WAV_BYTES), file_name="audio.wav", mime_type="audio/wav")
+        )
+        sent = send_and_capture(Client, upload, body=body, id_parameter="abc", foo_param="xyz")
+
+        assert dict(sent.url.params) == {"id_parameter": "abc", "foo_param": "xyz"}
+        _, files = parse_multipart(sent.headers["content-type"], sent.content)
+        assert files["audio_file"] == ("audio.wav", WAV_BYTES)
+
+    def test_omitted_query_parameters_are_dropped(self, Client, upload, BodyDemoFileUpload, File):
+        body = BodyDemoFileUpload(audio_file=File(payload=BytesIO(WAV_BYTES), file_name="audio.wav"))
+        sent = send_and_capture(Client, upload, body=body)
+
+        assert dict(sent.url.params) == {}
