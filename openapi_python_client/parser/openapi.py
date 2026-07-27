@@ -10,7 +10,7 @@ from .. import schema as oai
 from .. import utils
 from ..config import Config
 from ..utils import PythonIdentifier
-from .bodies import Body, body_from_data
+from .bodies import Body, body_from_data, mark_multipart_file_properties
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
     Class,
@@ -525,6 +525,7 @@ class GeneratorData:
     @staticmethod
     def from_dict(data: dict[str, Any], *, config: Config) -> "GeneratorData | GeneratorError":
         """Create an OpenAPI from dict"""
+        mark_multipart_file_properties(data)
         try:
             openapi = oai.OpenAPI.model_validate(data)
         except ValidationError as err:

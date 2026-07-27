@@ -3,6 +3,7 @@ import subprocess
 import sys
 from filecmp import cmpfiles, dircmp
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
 from typer.testing import CliRunner, Result
@@ -204,7 +205,7 @@ def test_custom_templates():
 
     # Each API module (defined by tag) has a custom __init__.py in it now.
     for endpoint_mod in golden_tpls_root_dir.joinpath(api_dir).iterdir():
-        if not endpoint_mod.is_dir():
+        if not endpoint_mod.is_dir() or endpoint_mod.name == "__pycache__":
             continue
         relative_path = api_dir.joinpath(endpoint_mod.name, "__init__.py")
         expected_text = endpoint_mod.joinpath("__init__.py").read_text()
@@ -215,6 +216,51 @@ def test_custom_templates():
         extra_args=["--custom-template-path=end_to_end_tests/test_custom_templates/"],
         expected_differences=expected_differences,
     )
+
+
+GOLDEN_RECORDS = [
+    ("golden-record", "my_test_api_client"),
+    ("test-3-1-golden-record", "test_3_1_features_client"),
+    ("literal-enums-golden-record", "my_enum_api_client"),
+    ("docstrings-on-attributes-golden-record", "my_test_api_client"),
+]
+
+
+@pytest.mark.parametrize(
+    ("golden_record_dir", "package"), GOLDEN_RECORDS, ids=[directory for directory, _ in GOLDEN_RECORDS]
+)
+def test_golden_record_is_importable(golden_record_dir: str, package: str):
+    """Import every module of a golden record.
+
+    Comparing generated source to a recorded copy says nothing about whether that source
+    runs. Pydantic builds a model's schema at class-creation time, so a field of a type
+    it cannot handle -- `types.File` was one -- raises on import and takes the eagerly
+    re-exporting `models/__init__.py` down with it, all while the golden record stays
+    byte-identical and green.
+
+    Runs in a subprocess because two golden records share a package name.
+    """
+    script = dedent(
+        f"""
+        import importlib, pkgutil
+
+        def reraise(name):
+            raise
+
+        base = importlib.import_module({package!r})
+        for module in pkgutil.walk_packages(base.__path__, {package!r} + ".", onerror=reraise):
+            importlib.import_module(module.name)
+        """
+    )
+    result = subprocess.run(
+        # -B: a __pycache__ left inside a golden record shows up as an unexpected
+        # directory in the comparison tests.
+        [sys.executable, "-B", "-c", script],
+        cwd=Path(__file__).parent / golden_record_dir,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_bad_url():

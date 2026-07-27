@@ -2,8 +2,10 @@
 
 from .post_const_path_body import PostConstPathBody
 from .post_prefix_items_body import PostPrefixItemsBody
+from .post_upload_body import PostUploadBody
 
 __all__ = (
     "PostConstPathBody",
     "PostPrefixItemsBody",
+    "PostUploadBody",
 )

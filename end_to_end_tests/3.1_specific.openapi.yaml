@@ -47,6 +47,37 @@ paths:
             "application/json":
               schema:
                 const: "Why have a fixed response? I dunno"
+  # In 3.1 a binary part is spelled with contentMediaType.
+  # This is what FastAPI emits for an UploadFile.
+  "/upload":
+    post:
+      tags: [ "upload" ]
+      requestBody:
+        required: true
+        content:
+          "multipart/form-data":
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  contentMediaType: "application/octet-stream"
+                files:
+                  type: array
+                  items:
+                    type: string
+                    contentMediaType: "application/octet-stream"
+                description:
+                  type: string
+              required:
+                - file
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            "application/json":
+              schema:
+                type: string
   "/prefixItems":
     post:
       tags: [ "prefixItems" ]
