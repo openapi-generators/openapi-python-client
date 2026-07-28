@@ -44,7 +44,7 @@ T = TypeVar("T")
 class Response(Generic[T]):
     """ A response from an endpoint """
 
-    status_code: HTTPStatus
+    status_code: HTTPStatus | int
     content: bytes
     headers: MutableMapping[str, str]
     parsed: T | None
