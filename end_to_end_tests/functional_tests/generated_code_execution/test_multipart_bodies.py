@@ -15,6 +15,12 @@ catch:
 3. ``to_multipart()`` has to produce parts that a real parser reads back as *files* --
    carrying a filename and the declared content type -- rather than as text fields.
    ``python_multipart`` is the parser FastAPI itself uses, so we assert against it.
+4. Whatever Pydantic coerces into a ``File`` has to be sendable. A part with no
+   filename is a text field as far as the server is concerned, and a missing content
+   type is guessed from the extension -- ``mimetypes`` answers ``audio/x-wav`` for
+   ``.wav``, which a server matching on ``audio/wav`` refuses. Neither can be inferred
+   from bare bytes, so that input is rejected outright instead of failing at the
+   server; a file-like input keeps the name it already has.
 
 The scoping guard in :class:`TestJsonBodyBinaryPropertiesStayStrings` is the other half
 of point 1: the exact same property schema means "a file" in a multipart body and "a
@@ -60,6 +66,21 @@ def parse_multipart(content_type: str, body: bytes) -> tuple[dict[str, bytes], d
 
     python_multipart.parse_form({"Content-Type": content_type}, BytesIO(body), on_field, on_file)
     return fields, files
+
+
+def part_headers(request: httpx.Request, name: str) -> str:
+    """Return the raw header block of one part of an encoded multipart body.
+
+    ``python_multipart`` normalises what it parses, so it cannot show whether the
+    ``Content-Type`` header was emitted at all -- and that header is what the server
+    matches on. This reads the bytes httpx actually put on the wire.
+    """
+    boundary = request.headers["content-type"].partition("boundary=")[2]
+    for section in request.content.split(f"--{boundary}".encode()):
+        headers = section.split(b"\r\n\r\n", 1)[0].decode()
+        if f'name="{name}"' in headers:
+            return headers
+    raise AssertionError(f"no part named {name!r} in {request.content!r}")
 
 
 def send_and_capture(Client: Any, endpoint: Any, **kwargs: Any) -> httpx.Request:
@@ -173,6 +194,37 @@ class MultipartBodyContract:
         assert "audio_file" in files, f"audio_file was parsed as a text field, not a file: {fields}"
         assert files["audio_file"] == ("audio.wav", WAV_BYTES)
         assert fields["language"] == b"sv"
+
+    def test_encoded_part_carries_filename_and_content_type(
+        self, Client, request_detailed, BodyTranscribeRecording, File
+    ):
+        """Both headers have to reach the wire, and neither may be left to inference.
+
+        Without ``filename`` the part is a text field, not a file. And ``Content-Type``
+        cannot be left off either: httpx would guess it from the extension, and
+        ``mimetypes`` answers ``audio/x-wav`` for ``.wav``, which a server matching on
+        ``audio/wav`` rejects.
+        """
+        body = BodyTranscribeRecording(
+            audio_file=File(payload=BytesIO(WAV_BYTES), file_name="audio.wav", mime_type="audio/wav")
+        )
+        headers = part_headers(send_and_capture(Client, request_detailed, body=body), "audio_file")
+
+        assert 'filename="audio.wav"' in headers
+        assert "Content-Type: audio/wav" in headers
+
+    def test_bare_bytes_are_rejected_with_an_actionable_message(self, BodyTranscribeRecording):
+        """``Body(audio_file=b"...")`` is the obvious thing to write and cannot work.
+
+        The resulting part would have no filename and no content type, so the server
+        rejects it -- far from the line that caused it. Name both fields here instead.
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            BodyTranscribeRecording(audio_file=WAV_BYTES)
+
+        message = str(exc_info.value)
+        assert "file name" in message
+        assert "content type" in message
 
     def test_declared_boundary_matches_the_encoded_body(self, Client, request_detailed, BodyTranscribeRecording, File):
         """The generator pins ``boundary=+++`` in the header; httpx must encode with it.
@@ -297,13 +349,51 @@ class TestBinaryPropertiesOutsideMultipartBodies:
         response = DownloadResponse(attachments=[File(payload=BytesIO(b"one")), File(payload=BytesIO(b"two"))])
         assert [attachment.payload.getvalue() for attachment in response.attachments] == [b"one", b"two"]
 
-    def test_raw_bytes_are_wrapped(self, DownloadResponse, File):
-        """JSON cannot carry a stream, so decoding a binary property has to accept bytes."""
-        assert DownloadResponse.from_dict({"data": b"raw"}).data.payload.read() == b"raw"
+    def test_raw_bytes_are_rejected(self, DownloadResponse):
+        """Bare bytes carry neither a file name nor a content type, so coercing them
+        would build a File that cannot be uploaded. Fail here, with both fields named,
+        rather than in the server's 422."""
+        with pytest.raises(ValidationError) as exc_info:
+            DownloadResponse.from_dict({"data": b"raw"})
+
+        message = str(exc_info.value)
+        assert "file name" in message
+        assert "content type" in message
 
     def test_non_binary_input_is_rejected(self, DownloadResponse):
         with pytest.raises(ValidationError):
             DownloadResponse.from_dict({"data": 123})
+
+    def test_dict_round_trip(self, DownloadResponse, File):
+        """``from_dict`` has to accept what ``to_dict`` produced."""
+        original = DownloadResponse(data=File(payload=BytesIO(b"audio"), file_name="a.wav", mime_type="audio/wav"))
+        restored = DownloadResponse.from_dict(original.to_dict())
+
+        assert restored.data.file_name == "a.wav"
+        assert restored.data.mime_type == "audio/wav"
+        # The payload has no JSON form, so only the metadata survives the trip.
+        assert restored.data.payload.read() == b""
+
+    def test_unknown_mapping_keys_are_rejected(self, DownloadResponse):
+        with pytest.raises(ValidationError):
+            DownloadResponse.from_dict({"data": {"file_name": "a.wav", "payload": "raw"}})
+
+    def test_file_like_keeps_its_name(self, DownloadResponse, tmp_path):
+        """An open file already knows what it is called; dropping that leaves a nameless
+        part, which a server reads as a text field instead of a file."""
+        path = tmp_path / "recording.wav"
+        path.write_bytes(WAV_BYTES)
+
+        with path.open("rb") as stream:
+            response = DownloadResponse(data=stream)
+
+        # The basename only -- the full path would leak the caller's directory layout.
+        assert response.data.file_name == "recording.wav"
+
+    def test_nameless_stream_is_allowed(self, DownloadResponse):
+        """A stream with no ``name`` (a BytesIO) still validates; there is simply
+        nothing to preserve."""
+        assert DownloadResponse(data=BytesIO(b"x")).data.file_name is None
 
     def test_to_dict_emits_metadata_and_leaves_the_stream_unread(self, DownloadResponse, File):
         """Serialising must never drain the payload -- it is usually about to be uploaded."""

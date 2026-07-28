@@ -3,6 +3,7 @@
 from collections.abc import Mapping, MutableMapping
 from http import HTTPStatus
 from io import BytesIO
+from pathlib import Path
 from typing import Any, BinaryIO, Generic, TypeVar, Literal, IO
 
 from attrs import define
@@ -43,11 +44,23 @@ class File:
     def _validate(cls, value: Any) -> "File":
         if isinstance(value, File):
             return value
+        if isinstance(value, Mapping):
+            # The shape `_serialize` emits in JSON mode, for `to_dict` -> `from_dict` round-trips.
+            unexpected = set(value) - {"file_name", "mime_type"}
+            if unexpected:
+                raise ValueError(f"unexpected keys for a File: {', '.join(sorted(unexpected))}")
+            return cls(payload=BytesIO(), file_name=value.get("file_name"), mime_type=value.get("mime_type"))
         if isinstance(value, (bytes, bytearray)):
-            return cls(payload=BytesIO(bytes(value)))
+            raise ValueError(
+                "cannot build a File from bare bytes: an upload needs a file name and a content type, "
+                "which raw bytes do not carry. Pass an explicit "
+                'File(payload=BytesIO(...), file_name="...", mime_type="...") instead.'
+            )
         if hasattr(value, "read"):
-            return cls(payload=value)
-        raise ValueError(f"expected a File or binary data, got {type(value).__name__}")
+            # An open file (`open("recording.wav", "rb")`) exposes the path it was opened from.
+            name = getattr(value, "name", None)
+            return cls(payload=value, file_name=(Path(name).name or None) if isinstance(name, str) else None)
+        raise ValueError(f"expected a File, got {type(value).__name__}")
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
