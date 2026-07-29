@@ -68,6 +68,7 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
       for calling the functions in the `api` module.
    2. An `api` module which will contain one module for each tag in your OpenAPI spec, as well as a `default` module
       for endpoints without a tag. Each of these modules in turn contains one function for calling each endpoint.
+      You can limit which tags are generated with [`include_tags` / `exclude_tags`](#include_tags-and-exclude_tags).
    3. A `models` module which has all the classes defined by the various schemas in your OpenAPI spec
 4. A `setup.py` file _if_ you use `--meta=setup` (default is `--meta=poetry`)
 
@@ -127,6 +128,21 @@ listed, you can enable this option:
 ```yaml
 generate_all_tags: true
 ```
+
+### include_tags and exclude_tags
+
+Generate only part of a large API, by tag. Unused schemas are pruned automatically.
+
+```yaml
+include_tags: [billing, users]  # keep only these
+# or
+exclude_tags: [admin]  # drop these
+```
+
+On the CLI, pass them comma-separated: `--include-tags billing,users`. A CLI flag overrides the matching config key.
+
+- `include_tags` and `exclude_tags` are mutually exclusive — use one, not both.
+- Tags match the spec exactly (case-sensitive). Untagged endpoints count as `default`.
 
 ### project_name_override and package_name_override
 
