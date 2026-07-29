@@ -192,6 +192,13 @@ content_type_overrides:
   application/zip: application/octet-stream
 ```
 
+### multiple_media_types
+
+OpenAPI documents may have more than one media type for a response.  By default, `openapi-python-client` only generates a response body parser for the first one it encounters.
+This config tells the generator to check the `Content-Type` header of the response and parse the response accordingly.
+
+For example, this might be useful if an OpenAPI document models a service that returns 503 with a JSON error description when a downstream service fails, but is behind a load balancer that returns 503 with plain text when overloaded.
+
 ## Supported Extensions
 
 ### x-enum-varnames
