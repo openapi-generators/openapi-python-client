@@ -19,11 +19,12 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> None:
-    response.raise_for_status()
     if response.status_code == 200:
         return None
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return None
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[None]:
@@ -47,7 +48,9 @@ async def _request_detailed(
      Test description with \
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -70,7 +73,9 @@ async def request(
      Test description with \
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

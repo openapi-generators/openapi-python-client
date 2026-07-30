@@ -1001,6 +1001,36 @@ info:
         }
       }
     },
+    "/responses/jsonl-stream": {
+      "get": {
+        "tags": ["responses"],
+        "summary": "JSONL Stream",
+        "description": "A streaming response, plus a documented error status the stream can end on instead.",
+        "operationId": "jsonl_stream",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/jsonl": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/StreamEvent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/response/status-codes/patterns": {
       "get": {
         "tags": ["responses"],
@@ -2288,6 +2318,18 @@ info:
           "items": {
             "$ref": "#/components/schemas/ValidationError"
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "StreamEvent": {
+      "title": "StreamEvent",
+      "required": ["delta"],
+      "type": "object",
+      "properties": {
+        "delta": {
+          "title": "Delta",
+          "type": "string"
         }
       },
       "additionalProperties": false

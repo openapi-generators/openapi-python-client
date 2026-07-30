@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.http_validation_error import HTTPValidationError
 from ...models.octet_stream_tests_octet_stream_post_response_200 import OctetStreamTestsOctetStreamPostResponse200
 from ...types import UNSET, File, Response, Unset
 
@@ -31,13 +32,26 @@ def _get_kwargs(
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> OctetStreamTestsOctetStreamPostResponse200:
-    response.raise_for_status()
     if response.status_code == 200:
         response_200 = OctetStreamTestsOctetStreamPostResponse200.from_dict(response.json())
 
         return response_200
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if response.status_code == 422:
+        if client.raise_on_unexpected_status:
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_422,
+            )
+
+        return cast(OctetStreamTestsOctetStreamPostResponse200, None)
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return cast(OctetStreamTestsOctetStreamPostResponse200, None)
 
 
 def _build_response(
@@ -62,7 +76,9 @@ async def _request_detailed(
         body (File | Unset): A file to upload
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -89,7 +105,9 @@ async def request(
         body (File | Unset): A file to upload
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

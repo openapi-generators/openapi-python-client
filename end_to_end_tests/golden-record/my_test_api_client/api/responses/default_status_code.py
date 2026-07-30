@@ -18,7 +18,6 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> str:
-    response.raise_for_status()
     response_default = response.text
     return response_default
 
@@ -39,7 +38,9 @@ async def _request_detailed(
     """Default Status Code Only
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -60,7 +61,9 @@ async def request(
     """Default Status Code Only
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

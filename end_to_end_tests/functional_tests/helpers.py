@@ -1,10 +1,65 @@
 from typing import Any, Dict
+import asyncio
 import re
 
+import httpx
 from typer.testing import Result
 import pytest
 
 from end_to_end_tests.generated_client import generate_client_from_inline_spec, GeneratedClientContext
+
+
+def mock_client(
+    Client: Any,
+    *,
+    status_code: int = 200,
+    json: Any = None,
+    content: bytes | None = None,
+    lines: list[str] | None = None,
+    **client_kwargs: Any,
+) -> Any:
+    """Build a generated Client whose async httpx client answers every request the same way.
+
+    A real `httpx.AsyncClient` over a `MockTransport` rather than a `MagicMock`, so the generated code's
+    `aread()`/`json()`/`text`/`aiter_lines()` all behave as they would against a live server -- which matters for the
+    streaming endpoints, where the error path reads a response it was streaming.
+
+    `lines` builds a JSONL body; pass the lines already serialized.
+    """
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if lines is not None:
+            return httpx.Response(status_code, content="\n".join(lines).encode())
+        if content is not None:
+            return httpx.Response(status_code, content=content)
+        if json is None:
+            return httpx.Response(status_code)
+        return httpx.Response(status_code, json=json)
+
+    client = Client(base_url="https://example.com", **client_kwargs)
+    client.set_async_httpx_client(
+        httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.com")
+    )
+    return client
+
+
+def call(Client: Any, endpoint: Any, *, status_code: int = 200, json: Any = None, **kwargs: Any) -> Any:
+    """Call a generated async endpoint function against a canned response."""
+    client_kwargs = {}
+    if "raise_on_unexpected_status" in kwargs:
+        client_kwargs["raise_on_unexpected_status"] = kwargs.pop("raise_on_unexpected_status")
+    client = mock_client(Client, status_code=status_code, json=json, **client_kwargs)
+    return asyncio.run(endpoint(client=client, **kwargs))
+
+
+def drain(Client: Any, stream_endpoint: Any, **mock_client_kwargs: Any) -> list[Any]:
+    """Consume a generated `stream` endpoint to exhaustion and return everything it yielded."""
+    client = mock_client(Client, **mock_client_kwargs)
+
+    async def _consume() -> list[Any]:
+        return [item async for item in stream_endpoint(client=client)]
+
+    return asyncio.run(_consume())
 
 
 def with_generated_client_fixture(

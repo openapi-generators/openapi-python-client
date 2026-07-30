@@ -1,5 +1,5 @@
 import re
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -25,7 +25,7 @@ from .properties import (
     property_from_data,
 )
 from .properties.schemas import parameter_from_reference
-from .responses import HTTPStatusPattern, Responses, response_from_data
+from .responses import HTTPStatusPattern, Response, Responses, response_from_data
 
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
@@ -485,7 +485,19 @@ class Endpoint:
 
     def response_type(self) -> str:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        return self._union_of(self.responses)
+
+    def success_response_type(self) -> str:
+        """Get the Python type of the responses this endpoint returns.
+
+        Non-2XX responses are raised as `errors.UnexpectedStatus` rather than returned, so they are excluded. The
+        `default` response stays in: it is the catch-all for statuses no other pattern matched, and is still returned.
+        """
+        return self._union_of(response for response in self.responses if response.is_default() or response.is_success())
+
+    @staticmethod
+    def _union_of(responses: Iterable[Response]) -> str:
+        types = sorted({response.prop.get_type_string() for response in responses})
         if len(types) == 0:
             return "Any"
         if len(types) == 1:

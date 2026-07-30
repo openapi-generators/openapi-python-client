@@ -4,6 +4,7 @@ import types
 
 from . import (
     default_status_code,
+    jsonl_stream,
     post_responses_unions_simple_before_complex,
     reference_response,
     status_code_patterns,
@@ -40,6 +41,13 @@ class ResponsesEndpoints:
         Default Status Code Only
         """
         return default_status_code
+
+    @classmethod
+    def jsonl_stream(cls) -> types.ModuleType:
+        """
+        A streaming response, plus a documented error status the stream can end on instead.
+        """
+        return jsonl_stream
 
     @classmethod
     def status_code_patterns(cls) -> types.ModuleType:

@@ -84,6 +84,14 @@ class HTTPStatusPattern:
         """Check if this is a range of status codes, such as 2XX"""
         return self.range is not None and self.range[0] != self.range[1]
 
+    def is_success(self) -> bool:
+        """Check whether every status this pattern matches is a 2XX.
+
+        `default` is not a success pattern: it is the catch-all for statuses no other pattern matched, and stays on
+        the return path. 1XX and 3XX are not successes either -- there is no value to hand back, so they are raised.
+        """
+        return self.range is not None and 200 <= self.range[0] < 300
+
     def __lt__(self, other: "HTTPStatusPattern") -> bool:
         """Compare two HTTPStatusPattern objects based on the order they should be applied in"""
         if self.range is None:
@@ -123,6 +131,18 @@ class Response:
 
     def is_default(self) -> bool:
         return self.status_code.range is None
+
+    def is_success(self) -> bool:
+        """Whether this response is returned to the caller rather than raised as an error"""
+        return self.status_code.is_success()
+
+    def has_content(self) -> bool:
+        """Whether this response declares a body that can be parsed.
+
+        A response with no `content`, or content with no schema, is built by `empty_response` with `NONE_SOURCE`;
+        there is nothing to give `UnexpectedStatus(parsed=...)`.
+        """
+        return self.source != NONE_SOURCE
 
     def __lt__(self, other: "Response") -> bool:
         """Compare two responses based on the order in which they should be applied in"""

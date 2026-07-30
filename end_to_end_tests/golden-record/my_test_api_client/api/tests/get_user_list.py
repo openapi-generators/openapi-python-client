@@ -1,6 +1,6 @@
 import datetime
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -9,6 +9,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
+from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
 
 
@@ -64,7 +65,6 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[AModel]:
-    response.raise_for_status()
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -75,7 +75,33 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if response.status_code == 422:
+        if client.raise_on_unexpected_status:
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_422,
+            )
+
+        return cast(list[AModel], None)
+
+    if response.status_code == 423:
+        if client.raise_on_unexpected_status:
+            response_423 = HTTPValidationError.from_dict(response.json())
+
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_423,
+            )
+
+        return cast(list[AModel], None)
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return cast(list[AModel], None)
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
@@ -106,7 +132,9 @@ async def _request_detailed(
         some_date (datetime.date | datetime.datetime):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -144,7 +172,9 @@ async def request(
         some_date (datetime.date | datetime.datetime):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

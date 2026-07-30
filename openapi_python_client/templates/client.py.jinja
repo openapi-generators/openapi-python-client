@@ -8,10 +8,11 @@ import httpx
 {% set attrs_info = {
     "raise_on_unexpected_status": namespace(
         type="bool",
-        default="field(default=False, kw_only=True)",
-        docstring="Whether or not to raise an errors.UnexpectedStatus if the API returns a status code"
-            " that was not documented in the source OpenAPI document. Can also be provided as a keyword"
-            " argument to the constructor."
+        default="field(default=True, kw_only=True)",
+        docstring="Whether or not to raise an errors.UnexpectedStatus when the API returns a status code that is"
+            " not a documented success. A documented error response carries its parsed body on"
+            " UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising."
+            " Can also be provided as a keyword argument to the constructor."
     ),
     "token": namespace(type="str", default="", docstring="The token to use for authentication"),
     "prefix": namespace(type="str", default='"Bearer"', docstring="The prefix to use for the Authorization header"),

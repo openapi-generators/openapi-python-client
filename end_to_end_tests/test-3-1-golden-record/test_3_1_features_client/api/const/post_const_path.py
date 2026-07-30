@@ -46,7 +46,6 @@ def _get_kwargs(
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Literal["Why have a fixed response? I dunno"]:
-    response.raise_for_status()
     if response.status_code == 200:
         response_200 = cast(Literal["Why have a fixed response? I dunno"], response.json())
         if response_200 != "Why have a fixed response? I dunno":
@@ -55,7 +54,9 @@ def _parse_response(
             )
         return response_200
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return cast(Literal["Why have a fixed response? I dunno"], None)
 
 
 def _build_response(
@@ -85,7 +86,9 @@ async def _request_detailed(
         body (PostConstPathBody):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -120,7 +123,9 @@ async def request(
         body (PostConstPathBody):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

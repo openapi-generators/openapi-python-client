@@ -91,6 +91,7 @@ from .protected_branded_model import ProtectedBrandedModel
 from .status_code_patterns_response_2xx import StatusCodePatternsResponse2XX
 from .status_code_patterns_response_2xx_status import StatusCodePatternsResponse2XXStatus
 from .status_code_patterns_response_4xx import StatusCodePatternsResponse4XX
+from .stream_event import StreamEvent
 from .test_inline_objects_body import TestInlineObjectsBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
 from .validation_error import ValidationError
@@ -177,6 +178,7 @@ __all__ = (
     "StatusCodePatternsResponse2XX",
     "StatusCodePatternsResponse2XXStatus",
     "StatusCodePatternsResponse4XX",
+    "StreamEvent",
     "TestInlineObjectsBody",
     "TestInlineObjectsResponse200",
     "ValidationError",

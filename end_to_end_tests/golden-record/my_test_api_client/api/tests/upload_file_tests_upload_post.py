@@ -6,6 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
+from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
@@ -29,11 +30,24 @@ def _get_kwargs(
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> None:
-    response.raise_for_status()
     if response.status_code == 200:
         return None
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if response.status_code == 422:
+        if client.raise_on_unexpected_status:
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_422,
+            )
+
+        return None
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return None
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[None]:
@@ -61,7 +75,9 @@ async def _request_detailed(
         body (BodyUploadFileTestsUploadPost):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -90,7 +106,9 @@ async def request(
         body (BodyUploadFileTestsUploadPost):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

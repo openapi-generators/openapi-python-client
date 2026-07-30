@@ -27,7 +27,6 @@ import pytest
 # Bucket 1 — whole classes error at fixture setup; skip the entire class.
 _SKIP_ASYNC_ONLY_ENDPOINTS = (
     "test_docstrings.py::TestEndpointDocstrings",
-    "test_jsonl_responses.py::TestJsonlResponse",
     "test_path_parameters.py::TestPathParameterEncoding",
 )
 

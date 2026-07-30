@@ -289,3 +289,72 @@ def test_http_status_pattern_lt(pattern1: str, pattern2: str, result: bool) -> N
     assert isinstance(first, HTTPStatusPattern)
     assert isinstance(second, HTTPStatusPattern)
     assert (first < second) == result
+
+
+@pytest.mark.parametrize(
+    "pattern, expected",
+    [
+        ("200", True),
+        ("204", True),
+        ("299", True),
+        ("2XX", True),
+        # `default` is the catch-all for unmatched statuses and stays on the return path, so it is not a success
+        # pattern; 1XX and 3XX have no value to hand back, so they are raised rather than returned.
+        ("default", False),
+        ("1XX", False),
+        ("3XX", False),
+        ("400", False),
+        ("404", False),
+        ("4XX", False),
+        ("500", False),
+    ],
+)
+def test_http_status_pattern_is_success(pattern: str, expected: bool) -> None:
+    parsed = HTTPStatusPattern.parse(pattern)
+    assert isinstance(parsed, HTTPStatusPattern)
+    assert parsed.is_success() is expected
+
+
+@pytest.mark.parametrize("pattern, expected", [("200", True), ("422", False)])
+def test_response_is_success_delegates_to_its_pattern(pattern, expected, any_property_factory) -> None:
+    response = Response(
+        status_code=HTTPStatusPattern.parse(pattern),
+        prop=any_property_factory(name=f"response_{pattern}"),
+        source=JSON_SOURCE,
+        data=oai.Response.model_construct(description=""),
+    )
+
+    assert response.is_success() is expected
+
+
+def test_response_has_content(any_property_factory) -> None:
+    data = oai.Response.model_construct(description="")
+    prop = any_property_factory(name="response_200")
+
+    assert Response(status_code=status_code, prop=prop, source=JSON_SOURCE, data=data).has_content() is True
+    assert Response(status_code=status_code, prop=prop, source=NONE_SOURCE, data=data).has_content() is False
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        pytest.param(None, id="no content at all"),
+        pytest.param({"application/json": oai.MediaType.model_construct()}, id="content with no schema"),
+    ],
+)
+def test_response_from_data_without_a_body_has_no_content(content) -> None:
+    """Both shapes go through `empty_response`, so neither can supply `UnexpectedStatus(parsed=...)`."""
+    config = MagicMock()
+    config.content_type_overrides = {}
+
+    response, _schemas = response_from_data(
+        status_code=HTTPStatusPattern.parse("404"),
+        data=oai.Response.model_construct(description="", content=content),
+        schemas=Schemas(),
+        responses={},
+        parent_name="parent",
+        config=config,
+    )
+
+    assert isinstance(response, Response)
+    assert response.has_content() is False

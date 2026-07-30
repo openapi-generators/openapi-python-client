@@ -10,30 +10,14 @@ The case that made this visible: a FastAPI route annotated ``-> None`` is descri
 200 with an empty schema, which the generator resolves to ``Any``.
 """
 
-import asyncio
 import inspect
-from typing import Any
-
-import httpx
 
 from end_to_end_tests.functional_tests.helpers import (
+    call,
     with_generated_client_fixture,
     with_generated_code_import,
     with_generated_code_imports,
 )
-
-
-def call(Client: Any, endpoint: Any, status_code: int = 200, json: Any = None, **kwargs: Any) -> Any:
-    def handler(request: httpx.Request) -> httpx.Response:
-        if json is None:
-            return httpx.Response(status_code)
-        return httpx.Response(status_code, json=json)
-
-    client = Client(base_url="https://example.com")
-    client.set_async_httpx_client(
-        httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.com")
-    )
-    return asyncio.run(endpoint(client=client, **kwargs))
 
 
 @with_generated_client_fixture(

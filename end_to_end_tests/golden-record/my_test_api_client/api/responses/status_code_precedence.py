@@ -1,8 +1,9 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
+from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
@@ -18,10 +19,31 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> str:
-    response.raise_for_status()
     if response.status_code == 200:
         response_200 = response.text
         return response_200
+
+    if response.status_code == 404:
+        if client.raise_on_unexpected_status:
+            response_404 = response.text
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_404,
+            )
+
+        return cast(str, None)
+
+    if 400 <= response.status_code <= 499:
+        if client.raise_on_unexpected_status:
+            response_4xx = response.text
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_4xx,
+            )
+
+        return cast(str, None)
 
     response_default = response.text
     return response_default
@@ -45,7 +67,9 @@ async def _request_detailed(
      Verify that specific status codes are always checked first, then ranges, then default
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -68,7 +92,9 @@ async def request(
      Verify that specific status codes are always checked first, then ranges, then default
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

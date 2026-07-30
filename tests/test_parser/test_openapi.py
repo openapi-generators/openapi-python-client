@@ -7,6 +7,7 @@ import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection, import_string_from_class
 from openapi_python_client.parser.properties import Class, IntProperty, Parameters, Schemas
+from openapi_python_client.parser.responses import HTTPStatusPattern, Response
 from openapi_python_client.schema import DataType
 
 MODULE_NAME = "openapi_python_client.parser.openapi"
@@ -614,6 +615,41 @@ class TestEndpoint:
             endpoint.responses.patterns.append(mock_response)
 
         assert endpoint.response_type() == expected
+
+    @staticmethod
+    def _response(pattern: str, type_string: str) -> Response:
+        status_code = HTTPStatusPattern.parse(pattern)
+        assert isinstance(status_code, HTTPStatusPattern)
+        prop = MagicMock()
+        prop.get_type_string.return_value = type_string
+        return Response(status_code=status_code, prop=prop, source=MagicMock(), data=MagicMock())
+
+    @pytest.mark.parametrize(
+        "patterns, expected",
+        (
+            pytest.param([], "Any", id="no responses"),
+            pytest.param([("200", "Something")], "Something", id="single success"),
+            pytest.param([("200", "Something"), ("422", "HTTPValidationError")], "Something", id="error excluded"),
+            pytest.param([("422", "HTTPValidationError")], "Any", id="only errors"),
+            pytest.param([("2XX", "Ok"), ("4XX", "Bad")], "Ok", id="ranges"),
+            pytest.param([("200", "Second"), ("201", "First")], "First | Second", id="two successes are sorted"),
+            pytest.param([("200", "Same"), ("201", "Same")], "Same", id="duplicate types collapse"),
+        ),
+    )
+    def test_success_response_type(self, patterns, expected):
+        endpoint = self.make_endpoint()
+        endpoint.responses.patterns = [self._response(pattern, type_string) for pattern, type_string in patterns]
+
+        assert endpoint.success_response_type() == expected
+
+    def test_success_response_type_includes_the_default_response(self):
+        """`default` is the catch-all for statuses no pattern matched, and is still returned rather than raised."""
+        endpoint = self.make_endpoint()
+        endpoint.responses.patterns = [self._response("200", "Ok"), self._response("4XX", "Bad")]
+        endpoint.responses.default = self._response("default", "Fallback")
+
+        assert endpoint.success_response_type() == "Fallback | Ok"
+        assert endpoint.response_type() == "Bad | Fallback | Ok"
 
 
 class TestImportStringFromReference:

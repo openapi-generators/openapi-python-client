@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -20,21 +20,32 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX:
-    response.raise_for_status()
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> StatusCodePatternsResponse2XX:
     if 200 <= response.status_code <= 299:
         response_2xx = StatusCodePatternsResponse2XX.from_dict(response.json())
 
         return response_2xx
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if 400 <= response.status_code <= 499:
+        if client.raise_on_unexpected_status:
+            response_4xx = StatusCodePatternsResponse4XX.from_dict(response.json())
+
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_4xx,
+            )
+
+        return cast(StatusCodePatternsResponse2XX, None)
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return cast(StatusCodePatternsResponse2XX, None)
 
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
+) -> Response[StatusCodePatternsResponse2XX]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -46,15 +57,17 @@ def _build_response(
 async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]:
+) -> Response[StatusCodePatternsResponse2XX]:
     """Status Code Patterns
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX]
+        Response[StatusCodePatternsResponse2XX]
     """
 
     kwargs = _get_kwargs()
@@ -67,15 +80,17 @@ async def _request_detailed(
 async def request(
     *,
     client: AuthenticatedClient | Client,
-) -> StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX:
+) -> StatusCodePatternsResponse2XX:
     """Status Code Patterns
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
+            undocumented status code raises only when Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        StatusCodePatternsResponse2XX | StatusCodePatternsResponse4XX
+        StatusCodePatternsResponse2XX
     """
 
     return (

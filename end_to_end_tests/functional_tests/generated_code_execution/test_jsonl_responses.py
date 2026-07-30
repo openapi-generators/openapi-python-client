@@ -1,41 +1,30 @@
-import asyncio as _asyncio
-import json
-from contextlib import asynccontextmanager, contextmanager
-from unittest.mock import MagicMock
+"""An `application/jsonl` response generates `stream`, an async generator of parsed items.
 
-import httpx
+This file previously drove `sync`/`asyncio`, which the fork no longer generates, and was skipped wholesale in
+`conftest.py`. It now drives `stream` against a real `httpx.AsyncClient` over a `MockTransport`, which means the
+error paths exercise the same `aread()`/`json()` a live response would.
+
+The error path deliberately diverges from the non-streaming one: a documented non-2xx raises whether or not
+`raise_on_unexpected_status` is set, because an async generator has nothing to hand back in its place -- suppressing
+would silently produce an empty stream, which reads as "the server had nothing to say".
+"""
+
+import json
+
+import pytest
 
 from end_to_end_tests.functional_tests.helpers import (
+    drain,
     with_generated_client_fixture,
     with_generated_code_import,
     with_generated_code_imports,
 )
 
-
-def _make_mock_stream_response(status_code, lines):
-    """Create a mock httpx.Response that supports iter_lines/aiter_lines for streaming."""
-    mock_response = MagicMock(spec=httpx.Response)
-    mock_response.status_code = status_code
-    mock_response.headers = {}
-    mock_response.content = "\n".join(lines).encode()
-
-    def iter_lines():
-        for line in lines:
-            yield line
-
-    mock_response.iter_lines = iter_lines
-
-    async def aiter_lines():
-        for line in lines:
-            yield line
-
-    mock_response.aiter_lines = aiter_lines
-
-    return mock_response
+ERROR_BODY = {"message": "nope"}
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     GenerationEvent:
@@ -52,6 +41,12 @@ components:
         url:
           type: string
       required: ["citation_id", "url"]
+    ApiError:
+      type: object
+      properties:
+        message:
+          type: string
+      required: ["message"]
 paths:
   "/events":
     get:
@@ -66,36 +61,46 @@ paths:
                   - $ref: "#/components/schemas/GenerationEvent"
                   - $ref: "#/components/schemas/CitationEvent"
                 title: StreamItem Get Events
-""")
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema: {"$ref": "#/components/schemas/ApiError"}
+  "/bare-events":
+    get:
+      operationId: getBareEvents
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/jsonl:
+              itemSchema:
+                $ref: "#/components/schemas/GenerationEvent"
+        "503":
+          description: Unavailable
+"""
+)
 @with_generated_code_imports(
-    ".api.default.get_events.sync",
     ".models.GenerationEvent",
     ".models.CitationEvent",
+    ".models.ApiError",
     ".client.Client",
+    ".errors.UnexpectedStatus",
 )
-@with_generated_code_import(".api.default.get_events.asyncio", alias="asyncio_func")
+@with_generated_code_import(".api.default.get_events.stream", alias="stream_events")
+@with_generated_code_import(".api.default.get_bare_events.stream", alias="stream_bare_events")
 class TestJsonlResponse:
-    """Test that application/jsonl responses generate streaming client methods yielding parsed items per line"""
+    """An `application/jsonl` response yields one parsed item per line."""
 
-    def _make_jsonl_lines(self):
+    def _lines(self):
         return [
             json.dumps({"delta": "Hello"}),
             json.dumps({"citation_id": "ref-1", "url": "https://example.com"}),
             json.dumps({"delta": "World"}),
         ]
 
-    def test_sync_yields_parsed_items(self, sync, GenerationEvent, CitationEvent, Client):
-        """The sync function should yield parsed objects via streaming, one per JSONL line"""
-        lines = self._make_jsonl_lines()
-        mock_response = _make_mock_stream_response(200, lines)
-
-        mock_httpx_client = MagicMock(spec=httpx.Client)
-        mock_httpx_client.stream = MagicMock(return_value=contextmanager(lambda: (yield mock_response))())
-
-        client = Client(base_url="https://api.example.com")
-        client.set_httpx_client(mock_httpx_client)
-
-        items = list(sync(client=client))
+    def test_yields_parsed_items(self, Client, stream_events, GenerationEvent, CitationEvent):
+        items = drain(Client, stream_events, lines=self._lines())
 
         assert len(items) == 3
 
@@ -109,63 +114,53 @@ class TestJsonlResponse:
         assert isinstance(items[2], GenerationEvent)
         assert items[2].delta == "World"
 
-    def test_sync_handles_empty_lines(self, sync, GenerationEvent, Client):
-        """Empty lines in JSONL output should be skipped"""
-        lines = [
-            json.dumps({"delta": "Hello"}),
-            "",
-            json.dumps({"delta": "World"}),
-            "",
-        ]
-        mock_response = _make_mock_stream_response(200, lines)
+    def test_skips_empty_lines(self, Client, stream_events, GenerationEvent):
+        lines = [json.dumps({"delta": "Hello"}), "", json.dumps({"delta": "World"}), ""]
 
-        mock_httpx_client = MagicMock(spec=httpx.Client)
-        mock_httpx_client.stream = MagicMock(return_value=contextmanager(lambda: (yield mock_response))())
+        items = drain(Client, stream_events, lines=lines)
 
-        client = Client(base_url="https://api.example.com")
-        client.set_httpx_client(mock_httpx_client)
+        assert [item.delta for item in items] == ["Hello", "World"]
+        assert all(isinstance(item, GenerationEvent) for item in items)
 
-        items = list(sync(client=client))
+    def test_documented_error_raises_with_parsed_body(self, Client, stream_events, ApiError, UnexpectedStatus):
+        """The body used to be dropped: the branch read the response and raised with no `parsed`."""
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            drain(Client, stream_events, status_code=422, json=ERROR_BODY)
 
-        assert len(items) == 2
-        assert isinstance(items[0], GenerationEvent)
-        assert items[0].delta == "Hello"
-        assert isinstance(items[1], GenerationEvent)
-        assert items[1].delta == "World"
+        exc = exc_info.value
+        assert exc.status_code == 422
+        assert isinstance(exc.parsed, ApiError)
+        assert exc.parsed.message == "nope"
 
-    def test_async_yields_parsed_items(self, asyncio_func, GenerationEvent, CitationEvent, Client):
-        """The async function should yield parsed items via streaming for each JSONL line"""
-        lines = self._make_jsonl_lines()
-        mock_response = _make_mock_stream_response(200, lines)
+    def test_documented_error_raises_even_with_raising_suppressed(self, Client, stream_events, UnexpectedStatus):
+        """Unlike the non-streaming path -- there is no None to return from an async generator, and yielding nothing
+        would hide the error completely."""
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            drain(
+                Client,
+                stream_events,
+                status_code=422,
+                json=ERROR_BODY,
+                raise_on_unexpected_status=False,
+            )
 
-        mock_async_client = MagicMock(spec=httpx.AsyncClient)
-        mock_async_client.stream = MagicMock(
-            return_value=asynccontextmanager(async_yield(mock_response))()
-        )
+        assert exc_info.value.parsed is not None
 
-        client = Client(base_url="https://api.example.com")
-        client.set_async_httpx_client(mock_async_client)
+    def test_documented_error_without_a_body_has_no_parsed(self, Client, stream_bare_events, UnexpectedStatus):
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            drain(Client, stream_bare_events, status_code=503)
 
-        async def collect():
-            return [item async for item in asyncio_func(client=client)]
+        assert exc_info.value.status_code == 503
+        assert exc_info.value.parsed is None
 
-        items = _asyncio.run(collect())
+    def test_undocumented_status_raises_by_default(self, Client, stream_events, UnexpectedStatus):
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            drain(Client, stream_events, status_code=500)
 
-        assert len(items) == 3
+        assert exc_info.value.status_code == 500
+        assert exc_info.value.parsed is None
 
-        assert isinstance(items[0], GenerationEvent)
-        assert items[0].delta == "Hello"
-
-        assert isinstance(items[1], CitationEvent)
-        assert items[1].citation_id == "ref-1"
-        assert items[1].url == "https://example.com"
-
-        assert isinstance(items[2], GenerationEvent)
-        assert items[2].delta == "World"
-
-
-def async_yield(value):
-    """Helper to create an async context manager that yields a value."""
-    async def _inner():
-        yield value
-    return _inner
+    def test_undocumented_status_yields_nothing_when_suppressed(self, Client, stream_events):
+        """The one place the flag still applies to a stream: with no schema for the status there is nothing to raise
+        with, so the generator just ends."""
+        assert drain(Client, stream_events, status_code=500, raise_on_unexpected_status=False) == []

@@ -29,12 +29,13 @@ class Client:
 
 
     Attributes:
-        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
-            status code that was not documented in the source OpenAPI document. Can also be provided as a keyword
-            argument to the constructor.
+        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus when the API returns a
+            status code that is not a documented success. A documented error response carries its parsed body on
+            UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising. Can
+            also be provided as a keyword argument to the constructor.
     """
 
-    raise_on_unexpected_status: bool = field(default=False, kw_only=True)
+    raise_on_unexpected_status: bool = field(default=True, kw_only=True)
     _base_url: str = field(alias="base_url")
     _cookies: dict[str, str] = field(factory=dict, kw_only=True, alias="cookies")
     _headers: dict[str, str] = field(factory=dict, kw_only=True, alias="headers")
@@ -156,15 +157,16 @@ class AuthenticatedClient:
 
 
     Attributes:
-        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus if the API returns a
-            status code that was not documented in the source OpenAPI document. Can also be provided as a keyword
-            argument to the constructor.
+        raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus when the API returns a
+            status code that is not a documented success. A documented error response carries its parsed body on
+            UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising. Can
+            also be provided as a keyword argument to the constructor.
         token: The token to use for authentication
         prefix: The prefix to use for the Authorization header
         auth_header_name: The name of the Authorization header
     """
 
-    raise_on_unexpected_status: bool = field(default=False, kw_only=True)
+    raise_on_unexpected_status: bool = field(default=True, kw_only=True)
     _base_url: str = field(alias="base_url")
     _cookies: dict[str, str] = field(factory=dict, kw_only=True, alias="cookies")
     _headers: dict[str, str] = field(factory=dict, kw_only=True, alias="headers")

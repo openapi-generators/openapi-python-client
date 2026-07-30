@@ -13,9 +13,11 @@ from ... import errors
 {% endfor %}
 
 {% from "endpoint_macros.py.jinja" import header_params, cookie_params, query_params,
-    arguments, client, kwargs, parse_response, docstring, body_to_kwarg %}
+    arguments, client, kwargs, parse_response, raise_error_response, docstring, body_to_kwarg %}
 
-{% set parsed_type = endpoint.response_type().split('|') | map('trim') | reject('equalto', 'HTTPValidationError') | join(' | ') %}
+{# Documented non-2xx responses are raised as errors.UnexpectedStatus, never returned, so they are not part of the
+   parsed type. `success_response_type()` does that split on status code. #}
+{% set parsed_type = endpoint.success_response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and parsed_type != "Any" %}
 {# With nothing to parse -- no declared responses, or a schema-less body such as the one
    FastAPI emits for `-> None` -- every branch of `_parse_response` either returns None or
@@ -108,8 +110,11 @@ async def stream(
         {% if resp.prop.template == "jsonl_property.py.jinja" %}
             {{ jsonl_template.construct_async_stream(resp.prop) | indent(12) }}
         {% else %}
+            {# Nothing to stream on this status, so raise -- unconditionally, unlike the non-streaming path. An async
+               generator has no None to hand back, so honoring raise_on_unexpected_status here would silently yield an
+               empty stream instead. Undocumented statuses still honor it, in the else below. #}
             await response.aread()
-            raise errors.UnexpectedStatus(response.status_code, response.content)
+            {{ raise_error_response(resp) | indent(12) }}
         {% endif %}
         {% endfor %}
         else:
@@ -120,23 +125,39 @@ async def stream(
 {% else %}
 {# ===== Standard (non-streaming) endpoint ===== #}
 
+{# `cast(..., None)` rather than widening the signature to `| None`: a caller that leaves
+   raise_on_unexpected_status alone never reaches these returns, having an Optional in every call site sucks.
+   With nothing to parse `return_string` is already the literal "None", where a cast is redundant. #}
+{% macro suppressed_error_return() %}
+{% if parsed_responses %}
+return cast({{ return_string }}, None)
+{% else %}
+return None
+{% endif %}
+{% endmacro %}
+
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> {{return_string}}:
-    response.raise_for_status()
     {% for response in endpoint.responses.patterns %}
     {% set code_range = response.status_code.range %}
-    {% if code_range[0] >= 200 and code_range[0] < 300 %}
-        {% if code_range[0] == code_range[1] %}
+    {% if code_range[0] == code_range[1] %}
     if response.status_code == {{ code_range[0] }}:
-        {% else %}
+    {% else %}
     if {{ code_range[0] }} <= response.status_code <= {{ code_range[1] }}:
-        {% endif %}
+    {% endif %}
+    {% if response.is_success() %}
         {{ parse_response(parsed_responses, response) | indent(8) }}
+    {% else %}
+        if client.raise_on_unexpected_status:
+            {{ raise_error_response(response) | indent(12) }}
+        {{ suppressed_error_return() | indent(8) }}
     {% endif %}
     {% endfor %}
     {% if endpoint.responses.default %}
     {{ parse_response(parsed_responses, endpoint.responses.default) | indent(4) }}
     {% else %}
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    {{ suppressed_error_return() | indent(4) }}
     {% endif %}
 
 
