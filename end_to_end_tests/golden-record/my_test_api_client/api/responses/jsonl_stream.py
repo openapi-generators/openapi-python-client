@@ -29,8 +29,9 @@ async def stream(
 
     Raises:
         errors.UnexpectedStatus: If the server returns a status code that is not a documented
-            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
-            undocumented status code raises only when Client.raise_on_unexpected_status is True.
+            success. A documented error response is parsed onto UnexpectedStatus.parsed and raises
+            regardless of Client.raise_on_unexpected_status; an undocumented status code raises only
+            when that flag is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

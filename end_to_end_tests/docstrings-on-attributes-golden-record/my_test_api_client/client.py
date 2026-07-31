@@ -30,7 +30,7 @@ class Client:
     """
 
     raise_on_unexpected_status: bool = field(default=True, kw_only=True)
-    """Whether or not to raise an errors.UnexpectedStatus when the API returns a status code that is not a documented success. A documented error response carries its parsed body on UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising. Can also be provided as a keyword argument to the constructor."""
+    """Whether or not to raise an errors.UnexpectedStatus when the API returns a status code that is not a documented success. A documented error response carries its parsed body on UnexpectedStatus.parsed. Set to False to have non-streaming endpoints return None instead of raising; streaming endpoints raise on a documented error status either way, since a generator has no None to hand back. Can also be provided as a keyword argument to the constructor."""
     _base_url: str = field(alias="base_url")
     _cookies: dict[str, str] = field(factory=dict, kw_only=True, alias="cookies")
     _headers: dict[str, str] = field(factory=dict, kw_only=True, alias="headers")
@@ -153,7 +153,7 @@ class AuthenticatedClient:
     """
 
     raise_on_unexpected_status: bool = field(default=True, kw_only=True)
-    """Whether or not to raise an errors.UnexpectedStatus when the API returns a status code that is not a documented success. A documented error response carries its parsed body on UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising. Can also be provided as a keyword argument to the constructor."""
+    """Whether or not to raise an errors.UnexpectedStatus when the API returns a status code that is not a documented success. A documented error response carries its parsed body on UnexpectedStatus.parsed. Set to False to have non-streaming endpoints return None instead of raising; streaming endpoints raise on a documented error status either way, since a generator has no None to hand back. Can also be provided as a keyword argument to the constructor."""
     _base_url: str = field(alias="base_url")
     _cookies: dict[str, str] = field(factory=dict, kw_only=True, alias="cookies")
     _headers: dict[str, str] = field(factory=dict, kw_only=True, alias="headers")

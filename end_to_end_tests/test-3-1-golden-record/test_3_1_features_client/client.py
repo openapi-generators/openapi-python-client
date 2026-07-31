@@ -31,8 +31,9 @@ class Client:
     Attributes:
         raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus when the API returns a
             status code that is not a documented success. A documented error response carries its parsed body on
-            UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising. Can
-            also be provided as a keyword argument to the constructor.
+            UnexpectedStatus.parsed. Set to False to have non-streaming endpoints return None instead of raising;
+            streaming endpoints raise on a documented error status either way, since a generator has no None to
+            hand back. Can also be provided as a keyword argument to the constructor.
     """
 
     raise_on_unexpected_status: bool = field(default=True, kw_only=True)
@@ -159,8 +160,9 @@ class AuthenticatedClient:
     Attributes:
         raise_on_unexpected_status: Whether or not to raise an errors.UnexpectedStatus when the API returns a
             status code that is not a documented success. A documented error response carries its parsed body on
-            UnexpectedStatus.parsed. Set to False to have those endpoints return None instead of raising. Can
-            also be provided as a keyword argument to the constructor.
+            UnexpectedStatus.parsed. Set to False to have non-streaming endpoints return None instead of raising;
+            streaming endpoints raise on a documented error status either way, since a generator has no None to
+            hand back. Can also be provided as a keyword argument to the constructor.
         token: The token to use for authentication
         prefix: The prefix to use for the Authorization header
         auth_header_name: The name of the Authorization header

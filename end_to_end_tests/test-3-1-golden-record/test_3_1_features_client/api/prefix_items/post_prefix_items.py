@@ -58,8 +58,9 @@ async def _request_detailed(
 
     Raises:
         errors.UnexpectedStatus: If the server returns a status code that is not a documented
-            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
-            undocumented status code raises only when Client.raise_on_unexpected_status is True.
+            success and Client.raise_on_unexpected_status is True. A documented error response is
+            parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
+            None instead of raising.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -86,8 +87,9 @@ async def request(
 
     Raises:
         errors.UnexpectedStatus: If the server returns a status code that is not a documented
-            success. A documented error response is parsed onto UnexpectedStatus.parsed. An
-            undocumented status code raises only when Client.raise_on_unexpected_status is True.
+            success and Client.raise_on_unexpected_status is True. A documented error response is
+            parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
+            None instead of raising.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
