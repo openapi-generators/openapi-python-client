@@ -21,6 +21,7 @@ class ListProperty(PropertyProtocol):
     python_name: utils.PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
     inner_property: PropertyProtocol
     template: ClassVar[str] = "list_property.py.jinja"
 
@@ -98,6 +99,7 @@ class ListProperty(PropertyProtocol):
                 python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
                 description=data.description,
                 example=data.example,
+                data=data,
             ),
             schemas,
         )
