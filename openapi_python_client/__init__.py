@@ -276,7 +276,11 @@ class Project:
             endpoint_init_path = tag_dir / "__init__.py"
             endpoint_init_template = self.env.get_template("endpoint_init.py.jinja")
             endpoint_init_path.write_text(
-                endpoint_init_template.render(endpoint_collection=collection),
+                endpoint_init_template.render(
+                    endpoint_collection=collection,
+                    modules=(utils.PythonIdentifier(endpoint.name, self.config.field_prefix) \
+                             for endpoint in collection.endpoints),
+                ),
                 encoding=self.config.file_encoding,
             )
 
