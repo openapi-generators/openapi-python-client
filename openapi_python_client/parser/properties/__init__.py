@@ -121,10 +121,18 @@ def _property_from_ref(
             schemas,
         )
 
-    default = existing.convert_value(parent.default) if parent is not None else None
-    if isinstance(default, PropertyError):
-        default.data = parent or data
-        return default, schemas
+    if hasattr(data, 'default'):
+        default = existing.convert_value(data.default)
+        if isinstance(default, PropertyError):
+            default.data = data
+            return default, schemas
+    elif parent is not None:
+        default = existing.convert_value(parent.default)
+        if isinstance(default, PropertyError):
+            default.data = parent
+            return default, schemas
+    else:
+        default = None
 
     prop = evolve(
         existing,

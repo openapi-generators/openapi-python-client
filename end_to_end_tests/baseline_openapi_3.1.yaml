@@ -2705,6 +2705,15 @@ info:
         }
       }
     },
+    "AModelWithOptionalPropertyRefAndDefaultValue": {
+      "type": "object",
+      "properties": {
+        "enum_property_ref": {
+          "$ref": "#/components/schemas/AnEnum",
+          "default": "FIRST_VALUE"
+        }
+      }
+    },
     "ModelWithDateTimeProperty": {
       "type": "object",
       "properties": {
