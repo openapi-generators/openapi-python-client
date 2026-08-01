@@ -1,4 +1,14 @@
-__all__ = ["HTTPStatusPattern", "Response", "Responses", "response_from_data"]
+__all__ = [
+    "BYTES_SOURCE",
+    "HTTPStatusPattern",
+    "JSON_SOURCE",
+    "NONE_SOURCE",
+    "Response",
+    "response_from_data",
+    "Responses",
+    "source_by_content_type",
+    "TEXT_SOURCE",
+]
 
 from collections.abc import Iterator
 from typing import TypedDict
@@ -128,7 +138,7 @@ class Response:
         return self.status_code < other.status_code
 
 
-def _source_by_content_type(content_type: str, config: Config) -> _ResponseSource | None:
+def source_by_content_type(content_type: str, config: Config) -> _ResponseSource | None:
     parsed_content_type = utils.get_content_type(content_type, config)
     if parsed_content_type is None:
         return None
@@ -207,18 +217,35 @@ def response_from_data(  # noqa: PLR0911
             schemas,
         )
 
+    schemas_ = []
+    source = None
+
     for content_type, media_type in content.items():
-        source = _source_by_content_type(content_type, config)
-        if source is not None:
-            schema_data = media_type.media_type_schema
-            break
-    else:
+        source_ = source_by_content_type(content_type, config)
+
+        if source_ is None:
+            continue
+
+        if source is not None and source_ != source:
+            return (
+                ParseError(
+                    data=data,
+                    detail="Multiple response content types with different attributes are not supported",
+                ),
+                schemas,
+            )
+        source = source_
+
+        if media_type.media_type_schema is not None:
+            schemas_.append(media_type.media_type_schema)
+
+    if source is None:
         return (
-            ParseError(data=data, detail=f"Unsupported content_type {content}"),
+            ParseError(data=data, detail=f"Unsupported content_type(s) {content}"),
             schemas,
         )
 
-    if schema_data is None:
+    if not schemas_:
         return (
             empty_response(
                 status_code=status_code,
@@ -228,6 +255,11 @@ def response_from_data(  # noqa: PLR0911
             ),
             schemas,
         )
+
+    if len(schemas_) == 1:
+        schema_data = schemas_[0]
+    else:
+        schema_data = oai.Schema(oneOf=schemas_)
 
     prop, schemas = property_from_data(
         name=response_name,
