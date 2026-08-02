@@ -40,7 +40,7 @@ class ModelWithCircularRefB:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_with_circular_ref_a import ModelWithCircularRefA
+        from ..models.model_with_circular_ref_a import ModelWithCircularRefA  # noqa: PLC0415
 
         d = dict(src_dict)
         _circular = d.pop("circular", UNSET)

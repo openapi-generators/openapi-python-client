@@ -40,7 +40,7 @@ class ModelWithPropertyRef:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_name import ModelName
+        from ..models.model_name import ModelName  # noqa: PLC0415
 
         d = dict(src_dict)
         _inner = d.pop("inner", UNSET)

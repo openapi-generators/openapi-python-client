@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class GetLocationHeaderTypesStringEnumHeader(str, Enum):
+class GetLocationHeaderTypesStringEnumHeader(StrEnum):
     ONE = "one"
     THREE = "three"
     TWO = "two"

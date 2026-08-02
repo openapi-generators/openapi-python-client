@@ -43,7 +43,7 @@ class ModelWithPrimitiveAdditionalProperties:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_primitive_additional_properties_a_date_holder import (
-            ModelWithPrimitiveAdditionalPropertiesADateHolder,
+            ModelWithPrimitiveAdditionalPropertiesADateHolder,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

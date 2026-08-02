@@ -67,7 +67,7 @@ class PublicError:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.problem import Problem
+        from ..models.problem import Problem  # noqa: PLC0415
 
         d = dict(src_dict)
         errors = cast(list[str], d.pop("errors", UNSET))

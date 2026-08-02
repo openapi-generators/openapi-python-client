@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ModelWithMergedPropertiesStringToEnum(str, Enum):
+class ModelWithMergedPropertiesStringToEnum(StrEnum):
     A = "a"
     B = "b"
 

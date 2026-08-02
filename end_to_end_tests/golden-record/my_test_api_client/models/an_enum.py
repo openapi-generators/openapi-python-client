@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AnEnum(str, Enum):
+class AnEnum(StrEnum):
     FIRST_VALUE = "FIRST_VALUE"
     SECOND_VALUE = "SECOND_VALUE"
 

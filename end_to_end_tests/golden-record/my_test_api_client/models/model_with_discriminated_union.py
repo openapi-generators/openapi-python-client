@@ -27,8 +27,8 @@ class ModelWithDiscriminatedUnion:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
-        from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
+        from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1  # noqa: PLC0415
+        from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2  # noqa: PLC0415
 
         discriminated_union: dict[str, Any] | None | Unset
         if isinstance(self.discriminated_union, Unset):
@@ -50,8 +50,8 @@ class ModelWithDiscriminatedUnion:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
-        from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
+        from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1  # noqa: PLC0415
+        from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2  # noqa: PLC0415
 
         d = dict(src_dict)
 

@@ -46,7 +46,7 @@ class AnArrayWithACircularRefInItemsObjectAItem:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.an_array_with_a_circular_ref_in_items_object_b_item import (
-            AnArrayWithACircularRefInItemsObjectBItem,
+            AnArrayWithACircularRefInItemsObjectBItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

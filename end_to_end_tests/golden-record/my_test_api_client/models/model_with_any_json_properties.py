@@ -25,7 +25,7 @@ class ModelWithAnyJsonProperties:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.model_with_any_json_properties_additional_property_type_0 import (
-            ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+            ModelWithAnyJsonPropertiesAdditionalPropertyType0,  # noqa: PLC0415
         )
 
         field_dict: dict[str, Any] = {}
@@ -43,7 +43,7 @@ class ModelWithAnyJsonProperties:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_any_json_properties_additional_property_type_0 import (
-            ModelWithAnyJsonPropertiesAdditionalPropertyType0,
+            ModelWithAnyJsonPropertiesAdditionalPropertyType0,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

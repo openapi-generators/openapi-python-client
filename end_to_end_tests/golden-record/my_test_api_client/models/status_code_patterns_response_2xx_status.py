@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusCodePatternsResponse2XXStatus(str, Enum):
+class StatusCodePatternsResponse2XXStatus(StrEnum):
     FAILURE = "failure"
     SUCCESS = "success"
 

@@ -45,7 +45,7 @@ class ModelWithAdditionalPropertiesInlined:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_additional_properties_inlined_additional_property import (
-            ModelWithAdditionalPropertiesInlinedAdditionalProperty,
+            ModelWithAdditionalPropertiesInlinedAdditionalProperty,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
