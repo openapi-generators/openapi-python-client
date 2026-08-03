@@ -69,8 +69,8 @@ class PostBodyMultipartResponse200:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.an_object import AnObject
-        from ..models.file import File
+        from ..models.an_object import AnObject  # noqa: PLC0415
+        from ..models.file import File  # noqa: PLC0415
 
         d = dict(src_dict)
         a_string = d.pop("a_string")

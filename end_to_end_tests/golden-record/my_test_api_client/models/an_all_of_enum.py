@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AnAllOfEnum(str, Enum):
+class AnAllOfEnum(StrEnum):
     A_DEFAULT = "a_default"
     BAR = "bar"
     FOO = "foo"

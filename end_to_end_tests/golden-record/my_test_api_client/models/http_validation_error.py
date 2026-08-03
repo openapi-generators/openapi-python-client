@@ -41,7 +41,7 @@ class HTTPValidationError:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.validation_error import ValidationError
+        from ..models.validation_error import ValidationError  # noqa: PLC0415
 
         d = dict(src_dict)
         _detail = d.pop("detail", UNSET)

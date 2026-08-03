@@ -25,7 +25,9 @@ class ModelWithUnionPropertyInlined:
     fruit: ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
+        from ..models.model_with_union_property_inlined_apples import (
+            ModelWithUnionPropertyInlinedApples,  # noqa: PLC0415
+        )
 
         fruit: dict[str, Any] | Unset
         if isinstance(self.fruit, Unset):
@@ -45,8 +47,12 @@ class ModelWithUnionPropertyInlined:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
-        from ..models.model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
+        from ..models.model_with_union_property_inlined_apples import (
+            ModelWithUnionPropertyInlinedApples,  # noqa: PLC0415
+        )
+        from ..models.model_with_union_property_inlined_bananas import (
+            ModelWithUnionPropertyInlinedBananas,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
 
