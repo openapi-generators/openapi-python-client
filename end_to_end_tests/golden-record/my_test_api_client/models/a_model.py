@@ -81,8 +81,8 @@ class AModel:
     not_required_nullable_model: ModelWithUnionProperty | None | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.free_form_model import FreeFormModel
-        from ..models.model_with_union_property import ModelWithUnionProperty
+        from ..models.free_form_model import FreeFormModel  # noqa: PLC0415
+        from ..models.model_with_union_property import ModelWithUnionProperty  # noqa: PLC0415
 
         an_enum_value = self.an_enum_value.value
 
@@ -256,8 +256,8 @@ class AModel:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.free_form_model import FreeFormModel
-        from ..models.model_with_union_property import ModelWithUnionProperty
+        from ..models.free_form_model import FreeFormModel  # noqa: PLC0415
+        from ..models.model_with_union_property import ModelWithUnionProperty  # noqa: PLC0415
 
         d = dict(src_dict)
         an_enum_value = AnEnum(d.pop("an_enum_value"))

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DifferentEnum(str, Enum):
+class DifferentEnum(StrEnum):
     DIFFERENT = "DIFFERENT"
     OTHER = "OTHER"
 

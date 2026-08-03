@@ -27,7 +27,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
-            PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+            PostResponsesUnionsSimpleBeforeComplexResponse200AType1,  # noqa: PLC0415
         )
 
         a: dict[str, Any] | str
@@ -49,7 +49,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
-            PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
+            PostResponsesUnionsSimpleBeforeComplexResponse200AType1,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

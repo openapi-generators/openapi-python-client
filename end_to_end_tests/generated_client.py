@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 import sys
 import tempfile
-from typing import Any
+from typing import Any, Self
 
 from attrs import define
 import pytest
@@ -29,7 +29,7 @@ class GeneratedClientContext:
     monkeypatch: pytest.MonkeyPatch
     old_modules: set[str] | None = None
 
-    def __enter__(self) -> "GeneratedClientContext":
+    def __enter__(self) -> Self:
         self.monkeypatch.syspath_prepend(self.output_path)
         self.old_modules = set(sys.modules.keys())
         return self

@@ -70,7 +70,7 @@ class BodyUploadFileTestsUploadPost:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
-            BodyUploadFileTestsUploadPostSomeNullableObject,
+            BodyUploadFileTestsUploadPostSomeNullableObject,  # noqa: PLC0415
         )
 
         some_file = self.some_file.to_tuple()
@@ -172,7 +172,7 @@ class BodyUploadFileTestsUploadPost:
 
     def to_multipart(self) -> types.RequestFiles:
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
-            BodyUploadFileTestsUploadPostSomeNullableObject,
+            BodyUploadFileTestsUploadPostSomeNullableObject,  # noqa: PLC0415
         )
 
         files: types.RequestFiles = []
@@ -251,16 +251,18 @@ class BodyUploadFileTestsUploadPost:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.a_form_data import AFormData
+        from ..models.a_form_data import AFormData  # noqa: PLC0415
         from ..models.body_upload_file_tests_upload_post_additional_property import (
-            BodyUploadFileTestsUploadPostAdditionalProperty,
+            BodyUploadFileTestsUploadPostAdditionalProperty,  # noqa: PLC0415
         )
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
-            BodyUploadFileTestsUploadPostSomeNullableObject,
+            BodyUploadFileTestsUploadPostSomeNullableObject,  # noqa: PLC0415
         )
-        from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
+        from ..models.body_upload_file_tests_upload_post_some_object import (
+            BodyUploadFileTestsUploadPostSomeObject,  # noqa: PLC0415
+        )
         from ..models.body_upload_file_tests_upload_post_some_optional_object import (
-            BodyUploadFileTestsUploadPostSomeOptionalObject,
+            BodyUploadFileTestsUploadPostSomeOptionalObject,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

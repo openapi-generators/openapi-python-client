@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AnotherAllOfSubModelType(str, Enum):
+class AnotherAllOfSubModelType(StrEnum):
     SUBMODEL = "submodel"
 
     def __str__(self) -> str:

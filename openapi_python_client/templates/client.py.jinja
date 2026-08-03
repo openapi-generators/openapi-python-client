@@ -1,5 +1,5 @@
 import ssl
-from typing import Any
+from typing import Any, Self
 
 from attrs import define, field, evolve
 import httpx
@@ -98,7 +98,7 @@ class Client:
         return evolve(self, timeout=timeout)
 {% endmacro %}{{ builders("Client") }}
 {% macro httpx_stuff(name, custom_constructor=None) %}
-    def set_httpx_client(self, client: httpx.Client) -> "{{ name }}":
+    def set_httpx_client(self, client: httpx.Client) -> Self:
         """Manually set the underlying httpx.Client
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
@@ -123,7 +123,7 @@ class Client:
             )
         return self._client
 
-    def __enter__(self) -> "{{ name }}":
+    def __enter__(self) -> Self:
         """Enter a context manager for self.client—you cannot enter twice (see httpx docs)"""
         self.get_httpx_client().__enter__()
         return self
@@ -132,7 +132,7 @@ class Client:
         """Exit a context manager for internal httpx.Client (see httpx docs)"""
         self.get_httpx_client().__exit__(*args, **kwargs)
 
-    def set_async_httpx_client(self, async_client: httpx.AsyncClient) -> "{{ name }}":
+    def set_async_httpx_client(self, async_client: httpx.AsyncClient) -> Self:
         """Manually set the underlying httpx.AsyncClient
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
@@ -157,7 +157,7 @@ class Client:
             )
         return self._async_client
 
-    async def __aenter__(self) -> "{{ name }}":
+    async def __aenter__(self) -> Self:
         """Enter a context manager for underlying httpx.AsyncClient—you cannot enter twice (see httpx docs)"""
         await self.get_async_httpx_client().__aenter__()
         return self

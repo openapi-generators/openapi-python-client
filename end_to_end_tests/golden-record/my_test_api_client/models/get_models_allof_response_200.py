@@ -57,8 +57,8 @@ class GetModelsAllofResponse200:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.a_model import AModel
-        from ..models.extended import Extended
+        from ..models.a_model import AModel  # noqa: PLC0415
+        from ..models.extended import Extended  # noqa: PLC0415
 
         d = dict(src_dict)
         _aliased = d.pop("aliased", UNSET)

@@ -32,7 +32,7 @@ class ModelWithCircularRefInAdditionalPropertiesA:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.model_with_circular_ref_in_additional_properties_b import (
-            ModelWithCircularRefInAdditionalPropertiesB,
+            ModelWithCircularRefInAdditionalPropertiesB,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
