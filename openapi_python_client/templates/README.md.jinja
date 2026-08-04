@@ -99,7 +99,11 @@ client = Client(
 You can even set the httpx client directly, but beware that this will override any existing settings (e.g., base_url):
 
 ```python
+{% if config.httpx_version >1 %}
+import httpx2 as httpx
+{% else %}
 import httpx
+{% endif %}
 from {{ package_name }} import Client
 
 client = Client(

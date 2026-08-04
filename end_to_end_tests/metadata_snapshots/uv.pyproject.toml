@@ -6,7 +6,7 @@ authors = []
 requires-python = ">=3.11"
 readme = "README.md"
 dependencies = [
-    "httpx>=0.23.1,<0.29.0",
+    "httpx2>=2.5.0",
     "attrs>=22.2.0",
 ]
 
