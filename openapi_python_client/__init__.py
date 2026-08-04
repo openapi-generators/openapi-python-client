@@ -10,8 +10,8 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any
 
-import httpcore
-import httpx
+import httpcore2
+import httpx2
 from jinja2 import BaseLoader, ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
@@ -19,6 +19,7 @@ from ruamel.yaml.error import YAMLError
 from openapi_python_client import utils
 
 from .config import Config, MetaType
+from .config import HTTPXVersion as HTTPXVersion
 from .parser import GeneratorData, import_string_from_class
 from .parser.errors import ErrorLevel, GeneratorError
 from .parser.properties import LiteralEnumProperty
@@ -346,14 +347,14 @@ def _get_document(*, source: str | Path, timeout: int) -> dict[str, Any] | Gener
     content_type: str | None
     if isinstance(source, str):
         try:
-            response = httpx.get(source, timeout=timeout)
+            response = httpx2.get(source, timeout=timeout)
             yaml_bytes = response.content
             if "content-type" in response.headers:
                 content_type = response.headers["content-type"].split(";")[0]
             else:  # pragma: no cover
                 content_type = mimetypes.guess_type(source, strict=True)[0]
 
-        except (httpx.HTTPError, httpcore.NetworkError):
+        except (httpx2.HTTPError, httpcore2.NetworkError):
             return GeneratorError(header="Could not get OpenAPI document from provided URL")
     else:
         yaml_bytes = source.read_bytes()
