@@ -30,4 +30,4 @@ class AnArrayWithACircularRefInItemsObjectAItem(BaseModel):
 
 from ..models.an_array_with_a_circular_ref_in_items_object_b_item import AnArrayWithACircularRefInItemsObjectBItem
 
-AnArrayWithACircularRefInItemsObjectAItem.model_rebuild()
+AnArrayWithACircularRefInItemsObjectAItem.model_rebuild(raise_errors=False)

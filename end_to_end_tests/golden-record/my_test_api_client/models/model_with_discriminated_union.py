@@ -32,4 +32,4 @@ class ModelWithDiscriminatedUnion(BaseModel):
 from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1
 from ..models.a_discriminated_union_type_2 import ADiscriminatedUnionType2
 
-ModelWithDiscriminatedUnion.model_rebuild()
+ModelWithDiscriminatedUnion.model_rebuild(raise_errors=False)

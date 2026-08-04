@@ -23,4 +23,4 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem(BaseModel):
         return cls.model_validate(src_dict)
 
 
-AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem.model_rebuild()
+AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem.model_rebuild(raise_errors=False)

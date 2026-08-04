@@ -36,4 +36,4 @@ class GetModelsAllofResponse200(BaseModel):
 from ..models.a_model import AModel
 from ..models.extended import Extended
 
-GetModelsAllofResponse200.model_rebuild()
+GetModelsAllofResponse200.model_rebuild(raise_errors=False)

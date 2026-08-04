@@ -30,4 +30,4 @@ class ModelWithCircularRefB(BaseModel):
 
 from ..models.model_with_circular_ref_a import ModelWithCircularRefA
 
-ModelWithCircularRefB.model_rebuild()
+ModelWithCircularRefB.model_rebuild(raise_errors=False)

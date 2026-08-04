@@ -23,4 +23,4 @@ class ModelWithCircularRefInAdditionalPropertiesA(BaseModel):
         return cls.model_validate(src_dict)
 
 
-ModelWithCircularRefInAdditionalPropertiesA.model_rebuild()
+ModelWithCircularRefInAdditionalPropertiesA.model_rebuild(raise_errors=False)

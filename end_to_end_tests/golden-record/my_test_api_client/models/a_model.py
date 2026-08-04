@@ -89,4 +89,4 @@ class AModel(BaseModel):
 from ..models.free_form_model import FreeFormModel
 from ..models.model_with_union_property import ModelWithUnionProperty
 
-AModel.model_rebuild()
+AModel.model_rebuild(raise_errors=False)

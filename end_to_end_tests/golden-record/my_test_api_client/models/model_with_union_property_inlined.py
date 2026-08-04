@@ -32,4 +32,4 @@ class ModelWithUnionPropertyInlined(BaseModel):
 from ..models.model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
 from ..models.model_with_union_property_inlined_bananas import ModelWithUnionPropertyInlinedBananas
 
-ModelWithUnionPropertyInlined.model_rebuild()
+ModelWithUnionPropertyInlined.model_rebuild(raise_errors=False)

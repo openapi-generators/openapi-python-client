@@ -3224,6 +3224,30 @@
           }
         }
       },
+      "ModelWithThreeWayCircularRefA": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithThreeWayCircularRefB"
+          }
+        }
+      },
+      "ModelWithThreeWayCircularRefB": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithThreeWayCircularRefC"
+          }
+        }
+      },
+      "ModelWithThreeWayCircularRefC": {
+        "type": "object",
+        "properties": {
+          "circular": {
+            "$ref": "#/components/schemas/ModelWithThreeWayCircularRefA"
+          }
+        }
+      },
       "ModelWithRecursiveRefInAdditionalProperties": {
         "type": "object",
         "additionalProperties": {

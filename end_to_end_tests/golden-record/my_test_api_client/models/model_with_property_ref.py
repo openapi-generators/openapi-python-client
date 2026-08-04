@@ -30,4 +30,4 @@ class ModelWithPropertyRef(BaseModel):
 
 from ..models.model_name import ModelName
 
-ModelWithPropertyRef.model_rebuild()
+ModelWithPropertyRef.model_rebuild(raise_errors=False)

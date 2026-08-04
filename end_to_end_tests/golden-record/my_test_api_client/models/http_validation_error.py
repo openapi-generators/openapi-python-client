@@ -30,4 +30,4 @@ class HTTPValidationError(BaseModel):
 
 from ..models.validation_error import ValidationError
 
-HTTPValidationError.model_rebuild()
+HTTPValidationError.model_rebuild(raise_errors=False)

@@ -150,4 +150,4 @@ from ..models.body_upload_file_tests_upload_post_some_optional_object import (
     BodyUploadFileTestsUploadPostSomeOptionalObject,
 )
 
-BodyUploadFileTestsUploadPost.model_rebuild()
+BodyUploadFileTestsUploadPost.model_rebuild(raise_errors=False)

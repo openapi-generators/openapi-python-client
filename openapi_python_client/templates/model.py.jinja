@@ -144,5 +144,5 @@ class {{ class_name }}({{ model.base_class_name }}):
 {{ lazy_import }}
 {% endfor %}
 
-{{ class_name }}.model_rebuild()
+{{ class_name }}.model_rebuild(raise_errors=False)
 {% endif %}

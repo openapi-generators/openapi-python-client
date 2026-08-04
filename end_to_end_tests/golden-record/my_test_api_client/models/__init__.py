@@ -70,6 +70,9 @@ from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditi
 from .model_with_property_ref import ModelWithPropertyRef
 from .model_with_recursive_ref import ModelWithRecursiveRef
 from .model_with_recursive_ref_in_additional_properties import ModelWithRecursiveRefInAdditionalProperties
+from .model_with_three_way_circular_ref_a import ModelWithThreeWayCircularRefA
+from .model_with_three_way_circular_ref_b import ModelWithThreeWayCircularRefB
+from .model_with_three_way_circular_ref_c import ModelWithThreeWayCircularRefC
 from .model_with_union_property import ModelWithUnionProperty
 from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
 from .model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
@@ -159,6 +162,9 @@ __all__ = (
     "ModelWithPropertyRef",
     "ModelWithRecursiveRef",
     "ModelWithRecursiveRefInAdditionalProperties",
+    "ModelWithThreeWayCircularRefA",
+    "ModelWithThreeWayCircularRefB",
+    "ModelWithThreeWayCircularRefC",
     "ModelWithUnionProperty",
     "ModelWithUnionPropertyInlined",
     "ModelWithUnionPropertyInlinedApples",
@@ -183,3 +189,19 @@ __all__ = (
     "TestInlineObjectsResponse200",
     "ValidationError",
 )
+
+
+def _rebuild_cyclic_models() -> None:
+    # models in import cycles defer their rebuild
+    # (model.py.jinja passes raise_errors=False); finish them here now that
+    # every model module is imported.
+    from pydantic import BaseModel
+
+    for _name in __all__:
+        _obj = globals()[_name]
+        if isinstance(_obj, type) and issubclass(_obj, BaseModel):
+            if not _obj.__pydantic_complete__:
+                _obj.model_rebuild()
+
+
+_rebuild_cyclic_models()

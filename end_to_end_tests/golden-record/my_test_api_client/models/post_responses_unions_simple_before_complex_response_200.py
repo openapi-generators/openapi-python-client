@@ -34,4 +34,4 @@ from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 i
     PostResponsesUnionsSimpleBeforeComplexResponse200AType1,
 )
 
-PostResponsesUnionsSimpleBeforeComplexResponse200.model_rebuild()
+PostResponsesUnionsSimpleBeforeComplexResponse200.model_rebuild(raise_errors=False)

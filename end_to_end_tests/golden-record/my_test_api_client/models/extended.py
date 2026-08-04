@@ -90,4 +90,4 @@ class Extended(BaseModel):
 from ..models.free_form_model import FreeFormModel
 from ..models.model_with_union_property import ModelWithUnionProperty
 
-Extended.model_rebuild()
+Extended.model_rebuild(raise_errors=False)

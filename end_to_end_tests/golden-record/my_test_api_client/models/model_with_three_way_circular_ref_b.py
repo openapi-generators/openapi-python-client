@@ -7,27 +7,27 @@ from pydantic import ConfigDict
 from tandem_platform.schema.protected import BaseModel
 
 if TYPE_CHECKING:
-    from ..models.model_with_circular_ref_b import ModelWithCircularRefB
+    from ..models.model_with_three_way_circular_ref_c import ModelWithThreeWayCircularRefC
 
 
-T = TypeVar("T", bound="ModelWithCircularRefA")
+T = TypeVar("T", bound="ModelWithThreeWayCircularRefB")
 
 
-class ModelWithCircularRefA(BaseModel):
+class ModelWithThreeWayCircularRefB(BaseModel):
     """
     Attributes:
-        circular (ModelWithCircularRefB | Unset):
+        circular (ModelWithThreeWayCircularRefC | Unset):
     """
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
-    circular: ModelWithCircularRefB | None = None
+    circular: ModelWithThreeWayCircularRefC | None = None
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         return cls.model_validate(src_dict)
 
 
-from ..models.model_with_circular_ref_b import ModelWithCircularRefB
+from ..models.model_with_three_way_circular_ref_c import ModelWithThreeWayCircularRefC
 
-ModelWithCircularRefA.model_rebuild(raise_errors=False)
+ModelWithThreeWayCircularRefB.model_rebuild(raise_errors=False)

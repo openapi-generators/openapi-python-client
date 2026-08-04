@@ -28,4 +28,4 @@ class ModelWithAdditionalPropertiesInlined(BaseModel):
         return cls.model_validate(src_dict)
 
 
-ModelWithAdditionalPropertiesInlined.model_rebuild()
+ModelWithAdditionalPropertiesInlined.model_rebuild(raise_errors=False)
