@@ -334,8 +334,12 @@ class TestUnexpectedStatus:
         payload = object()
         assert UnexpectedStatus(404, b"missing", parsed=payload).parsed is payload
 
-    def test_message_is_unchanged_by_parsed(self, UnexpectedStatus):
-        """`parsed` is extra context for callers that catch the error, not part of what it prints."""
-        assert str(UnexpectedStatus(404, b"missing", parsed="anything")) == str(UnexpectedStatus(404, b"missing"))
-        assert "404" in str(UnexpectedStatus(404, b"missing"))
-        assert "missing" in str(UnexpectedStatus(404, b"missing"))
+    def test_content_is_kept(self, UnexpectedStatus):
+        """The message drops the body, so `content` is the only way back to it."""
+        assert UnexpectedStatus(404, b"missing").content == b"missing"
+
+    def test_message_is_the_status_alone(self, UnexpectedStatus):
+        """The body can hold sensitive data and exception text reaches logs, so neither `content` nor `parsed`
+        may appear in what the error prints."""
+        assert str(UnexpectedStatus(404, b"missing", parsed="anything")) == "Unexpected status code: 404"
+        assert "missing" not in repr(UnexpectedStatus(404, b"missing"))
