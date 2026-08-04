@@ -13,6 +13,18 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.29.1 (2026-08-04)
+
+### Features
+
+- Update `uv_build` to 0.12 when using `--meta=uv` (#1473)
+
+### Fixes
+
+- Apply PEP 639 for improved license metadata (#1459)
+- update generated code to use `StrEnum` and `-> Self` (#1474)
+- Remove trailing spaces in README example code (#1475)
+
 ## 0.29.0 (2026-05-30)
 
 ### Breaking Changes
