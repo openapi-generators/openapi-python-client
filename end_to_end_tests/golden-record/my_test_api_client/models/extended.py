@@ -82,9 +82,6 @@ class Extended(BaseModel):
     not_required_nullable_model: ModelWithUnionProperty | None = None
     from_extended: str | None = Field(default=None, alias="fromExtended")
 
-    def to_dict(self) -> dict[str, Any]:
-        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         return cls.model_validate(src_dict)

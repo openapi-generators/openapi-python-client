@@ -5,7 +5,7 @@ from urllib.parse import quote
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
+from ...types import Response, UNSET, dump_dict__for_transport, dump_json__for_transport
 from ... import errors
 
 {% for relative in endpoint.relative_imports | sort %}

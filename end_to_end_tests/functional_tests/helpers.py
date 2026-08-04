@@ -1,5 +1,6 @@
 from typing import Any, Dict
 import asyncio
+import importlib
 import re
 
 import httpx
@@ -121,10 +122,22 @@ def with_generated_code_imports(*import_paths: str):
     return _decorator
 
 
+def dump_for_transport(instance: Any) -> Dict[str, Any]:
+    """Serialize a generated model the way its own client does.
+
+    Generated models have no public ``to_dict``: serialization lives in
+    ``<package>.types.dump_dict__for_transport`` so that there is a single audited
+    model-to-wire conversion. Reaching for it here keeps these assertions on the real
+    encode path rather than a copy of its arguments that could drift.
+    """
+    package = type(instance).__module__.rsplit(".models.", 1)[0]
+    return importlib.import_module(f"{package}.types").dump_dict__for_transport(instance)
+
+
 def assert_model_decode_encode(model_class: Any, json_data: dict, expected_instance: Any) -> None:
     instance = model_class.from_dict(json_data)
     assert instance == expected_instance
-    assert instance.to_dict() == json_data
+    assert dump_for_transport(instance) == json_data
 
 
 def assert_model_property_type_hint(model_class: Any, name: str, expected_type_hint: Any) -> None:

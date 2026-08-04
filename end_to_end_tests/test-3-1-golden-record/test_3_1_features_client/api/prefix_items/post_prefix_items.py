@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.post_prefix_items_body import PostPrefixItemsBody
-from ...types import Response
+from ...types import Response, dump_json__for_transport
 
 
 def _get_kwargs(
@@ -20,7 +20,7 @@ def _get_kwargs(
         "url": "/prefixItems",
     }
 
-    _kwargs["json"] = body.to_dict()
+    _kwargs["content"] = dump_json__for_transport(body)
 
     headers["Content-Type"] = "application/json"
 

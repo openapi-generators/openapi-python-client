@@ -8,7 +8,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.post_bodies_multiple_data_body import PostBodiesMultipleDataBody
 from ...models.post_bodies_multiple_files_body import PostBodiesMultipleFilesBody
 from ...models.post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
-from ...types import UNSET, File, Response, Unset
+from ...types import UNSET, File, Response, Unset, dump_dict__for_transport, dump_json__for_transport
 
 
 def _get_kwargs(
@@ -24,7 +24,7 @@ def _get_kwargs(
 
     if isinstance(body, PostBodiesMultipleJsonBody):
         if not isinstance(body, Unset):
-            _kwargs["json"] = body.to_dict()
+            _kwargs["content"] = dump_json__for_transport(body)
 
         headers["Content-Type"] = "application/json"
     if isinstance(body, File):
@@ -33,7 +33,7 @@ def _get_kwargs(
         headers["Content-Type"] = "application/octet-stream"
     if isinstance(body, PostBodiesMultipleDataBody):
         if not isinstance(body, Unset):
-            _kwargs["data"] = body.to_dict()
+            _kwargs["data"] = dump_dict__for_transport(body)
         headers["Content-Type"] = "application/x-www-form-urlencoded"
     if isinstance(body, PostBodiesMultipleFilesBody):
         if not isinstance(body, Unset):

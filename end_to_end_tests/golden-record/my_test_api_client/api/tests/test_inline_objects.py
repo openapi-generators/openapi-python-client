@@ -7,7 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.test_inline_objects_body import TestInlineObjectsBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
-from ...types import Response
+from ...types import Response, dump_json__for_transport
 
 
 def _get_kwargs(
@@ -21,7 +21,7 @@ def _get_kwargs(
         "url": "/tests/inline_objects",
     }
 
-    _kwargs["json"] = body.to_dict()
+    _kwargs["content"] = dump_json__for_transport(body)
 
     headers["Content-Type"] = "application/json"
 

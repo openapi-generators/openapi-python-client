@@ -9,7 +9,7 @@ from ...models.post_naming_property_conflict_with_import_body import PostNamingP
 from ...models.post_naming_property_conflict_with_import_response_200 import (
     PostNamingPropertyConflictWithImportResponse200,
 )
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response, Unset, dump_json__for_transport
 
 
 def _get_kwargs(
@@ -24,7 +24,7 @@ def _get_kwargs(
     }
 
     if not isinstance(body, Unset):
-        _kwargs["json"] = body.to_dict()
+        _kwargs["content"] = dump_json__for_transport(body)
 
     headers["Content-Type"] = "application/json"
 

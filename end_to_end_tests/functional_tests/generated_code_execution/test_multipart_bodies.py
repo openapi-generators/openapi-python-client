@@ -329,7 +329,7 @@ components:
             format: binary
 """
 )
-@with_generated_code_imports(".models.DownloadResponse", ".types.File")
+@with_generated_code_imports(".models.DownloadResponse", ".types.File", ".types.dump_dict__for_transport")
 class TestBinaryPropertiesOutsideMultipartBodies:
     """``File`` also shows up in plain models and in responses.
 
@@ -364,10 +364,10 @@ class TestBinaryPropertiesOutsideMultipartBodies:
         with pytest.raises(ValidationError):
             DownloadResponse.from_dict({"data": 123})
 
-    def test_dict_round_trip(self, DownloadResponse, File):
-        """``from_dict`` has to accept what ``to_dict`` produced."""
+    def test_dict_round_trip(self, DownloadResponse, File, dump_dict__for_transport):
+        """``from_dict`` has to accept what serialising produced."""
         original = DownloadResponse(data=File(payload=BytesIO(b"audio"), file_name="a.wav", mime_type="audio/wav"))
-        restored = DownloadResponse.from_dict(original.to_dict())
+        restored = DownloadResponse.from_dict(dump_dict__for_transport(original))
 
         assert restored.data.file_name == "a.wav"
         assert restored.data.mime_type == "audio/wav"
@@ -395,12 +395,14 @@ class TestBinaryPropertiesOutsideMultipartBodies:
         nothing to preserve."""
         assert DownloadResponse(data=BytesIO(b"x")).data.file_name is None
 
-    def test_to_dict_emits_metadata_and_leaves_the_stream_unread(self, DownloadResponse, File):
+    def test_serialising_emits_metadata_and_leaves_the_stream_unread(
+        self, DownloadResponse, File, dump_dict__for_transport
+    ):
         """Serialising must never drain the payload -- it is usually about to be uploaded."""
         payload = BytesIO(b"audio-bytes")
         response = DownloadResponse(data=File(payload=payload, file_name="a.wav", mime_type="audio/wav"))
 
-        assert response.to_dict() == {"data": {"file_name": "a.wav", "mime_type": "audio/wav"}}
+        assert dump_dict__for_transport(response) == {"data": {"file_name": "a.wav", "mime_type": "audio/wav"}}
         assert payload.read() == b"audio-bytes"
 
     def test_python_mode_dump_returns_the_file(self, DownloadResponse, File):
@@ -438,7 +440,7 @@ components:
       required: ["blob"]
 """
 )
-@with_generated_code_imports(".models.StoreBody")
+@with_generated_code_imports(".models.StoreBody", ".types.dump_dict__for_transport")
 class TestJsonBodyBinaryPropertiesStayStrings:
     """``contentMediaType`` must only mean "file" inside a multipart body.
 
@@ -450,8 +452,8 @@ class TestJsonBodyBinaryPropertiesStayStrings:
     def test_binary_property_in_json_body_is_a_string(self, StoreBody):
         assert StoreBody.model_fields["blob"].annotation is str
 
-    def test_json_body_serialises(self, StoreBody):
-        assert StoreBody(blob="aGVsbG8=").to_dict() == {"blob": "aGVsbG8="}
+    def test_json_body_serialises(self, StoreBody, dump_dict__for_transport):
+        assert dump_dict__for_transport(StoreBody(blob="aGVsbG8=")) == {"blob": "aGVsbG8="}
 
 
 @with_generated_client_fixture(

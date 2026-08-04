@@ -11,7 +11,7 @@
 {% macro check_type_for_construct(property, source) %}isinstance({{ source }}, dict){% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
-{% set transformed = source + ".to_dict()" %}
+{% set transformed = "dump_dict__for_transport(" + source + ")" %}
 {% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
 {{ destination }} = {{ transformed }}
@@ -20,6 +20,19 @@
 
 if not isinstance({{ source }}, Unset):
     {{ destination }} = {{ transformed }}
+{%- endif %}
+{% endmacro %}
+
+{# A model body is encoded here rather than handed to httpx as `json=`, so that the only code
+   that can turn a model into its wire form lives in `types.dump_json__for_transport`. The
+   endpoint always sets Content-Type explicitly, so nothing relied on httpx inferring it. #}
+{% macro transform_json_body(property) %}
+{% set transformed = "dump_json__for_transport(" + property.python_name + ")" %}
+{% if property.required %}
+_kwargs["content"] = {{ transformed }}
+{%- else %}
+if not isinstance({{ property.python_name }}, Unset):
+    _kwargs["content"] = {{ transformed }}
 {%- endif %}
 {% endmacro %}
 
@@ -34,5 +47,5 @@ if not isinstance({{ property.python_name }}, Unset):
 {% endmacro %}
 
 {% macro multipart(property, source, name) %}
-files.append(({{ name }}, (None, json.dumps( {{source}}.to_dict()).encode(), "application/json")))
+files.append(({{ name }}, (None, types.dump_json__for_transport({{ source }}), "application/json")))
 {% endmacro %}

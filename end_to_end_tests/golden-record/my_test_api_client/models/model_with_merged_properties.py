@@ -33,9 +33,6 @@ class ModelWithMergedProperties(BaseModel):
     number_to_int: int | None = Field(default=None, alias="numberToInt")
     any_to_string: str | None = Field(default="x", alias="anyToString")
 
-    def to_dict(self) -> dict[str, Any]:
-        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         return cls.model_validate(src_dict)

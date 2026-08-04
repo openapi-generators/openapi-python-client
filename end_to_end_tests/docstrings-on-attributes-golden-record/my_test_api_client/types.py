@@ -9,6 +9,7 @@ from typing import IO, Any, BinaryIO, Generic, Literal, TypeVar
 from attrs import define
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
+from tandem_platform.schema.protected import BaseModel, ProtectedModel
 
 
 class Unset:
@@ -46,7 +47,7 @@ class File:
         if isinstance(value, File):
             return value
         if isinstance(value, Mapping):
-            # The shape `_serialize` emits in JSON mode, for `to_dict` -> `from_dict` round-trips.
+            # The shape `_serialize` emits in JSON mode, so a serialize -> `from_dict` round-trip works.
             unexpected = set(value) - {"file_name", "mime_type"}
             if unexpected:
                 raise ValueError(f"unexpected keys for a File: {', '.join(sorted(unexpected))}")
@@ -92,6 +93,23 @@ class File:
         # Python mode hands the File back untouched, as `model_dump` does for any
         # non-Pydantic value.
         return value
+
+
+def dump_json__for_transport(model: BaseModel | ProtectedModel) -> bytes:
+    """Serialize a model to JSON bytes for the wire.
+
+    Models may hold protected data, so `model_dump`/`model_dump_json` must not be called anywhere outside the generated client.
+    """
+    return model.model_dump_json(by_alias=True, exclude_unset=True).encode()
+
+
+def dump_dict__for_transport(model: BaseModel | ProtectedModel) -> dict[str, Any]:
+    """Serialize a model to JSON-compatible Python objects.
+
+    For the destinations that need a mapping rather than encoded bytes: form-urlencoded bodies, and query parameters that flatten a model into `params`.
+    Models may hold protected data, so `model_dump`/`model_dump_json` must not be called anywhere outside the generated client.
+    """
+    return model.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
 
 T = TypeVar("T")

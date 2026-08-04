@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.post_form_data_inline_body import PostFormDataInlineBody
-from ...types import Response
+from ...types import Response, dump_dict__for_transport
 
 
 def _get_kwargs(
@@ -20,7 +20,7 @@ def _get_kwargs(
         "url": "/tests/post_form_data_inline",
     }
 
-    _kwargs["data"] = body.to_dict()
+    _kwargs["data"] = dump_dict__for_transport(body)
     headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     _kwargs["headers"] = headers

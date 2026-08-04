@@ -61,10 +61,10 @@ params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 {% macro body_to_kwarg(body) %}
 {% if body.body_type == "data" %}
   {% if body.prop.required %}
-_kwargs["data"] = body.to_dict()
+_kwargs["data"] = dump_dict__for_transport(body)
   {% else %}
 if not isinstance(body, Unset):
-    _kwargs["data"] = body.to_dict()
+    _kwargs["data"] = dump_dict__for_transport(body)
   {% endif %}
 {% elif body.body_type == "files"%}
 {{ multipart_body(body) }}
@@ -83,7 +83,9 @@ if not isinstance(body, Unset):
 {% macro json_body(body) %}
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
-{% if prop_template.transform %}
+{% if prop_template.transform_json_body %}
+{{ prop_template.transform_json_body(property) }}
+{% elif prop_template.transform %}
 {{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]", skip_unset=True, declare_type=False) }}
 {% elif property.required %}
 _kwargs["json"] = {{ property.python_name }}

@@ -39,8 +39,13 @@ components:
 class TestSimpleJsonObject:
     def test_encoding(self, MyModel):
         instance = MyModel(string_prop="abc")
-        assert instance.to_dict() == {"stringProp": "abc"}
+        assert dump_for_transport(instance) == {"stringProp": "abc"}
 ```
+
+Generated models have no public `to_dict`: serialization lives in the generated
+`types.dump_dict__for_transport` so that a model holding protected data has one audited
+conversion to the wire. Use the `dump_for_transport` helper (or
+`assert_model_decode_encode`, which calls it) instead of dumping a model by hand.
 
 # `generator_failure_cases`
 

@@ -7,7 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.post_const_path_body import PostConstPathBody
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response, Unset, dump_json__for_transport
 
 
 def _get_kwargs(
@@ -35,7 +35,7 @@ def _get_kwargs(
         "params": params,
     }
 
-    _kwargs["json"] = body.to_dict()
+    _kwargs["content"] = dump_json__for_transport(body)
 
     headers["Content-Type"] = "application/json"
 

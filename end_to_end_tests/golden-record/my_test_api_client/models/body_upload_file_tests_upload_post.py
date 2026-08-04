@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import json
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -62,9 +61,6 @@ class BodyUploadFileTestsUploadPost(BaseModel):
     some_optional_object: BodyUploadFileTestsUploadPostSomeOptionalObject | None = None
     some_enum: DifferentEnum | None = None
 
-    def to_dict(self) -> dict[str, Any]:
-        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         return cls.model_validate(src_dict)
@@ -76,13 +72,13 @@ class BodyUploadFileTestsUploadPost(BaseModel):
 
         files.append(("some_required_number", (None, str(self.some_required_number).encode(), "text/plain")))
 
-        files.append(("some_object", (None, json.dumps(self.some_object.to_dict()).encode(), "application/json")))
+        files.append(("some_object", (None, types.dump_json__for_transport(self.some_object), "application/json")))
 
         if isinstance(self.some_nullable_object, BodyUploadFileTestsUploadPostSomeNullableObject):
             files.append(
                 (
                     "some_nullable_object",
-                    (None, json.dumps(self.some_nullable_object.to_dict()).encode(), "application/json"),
+                    (None, types.dump_json__for_transport(self.some_nullable_object), "application/json"),
                 )
             )
         else:
@@ -122,7 +118,7 @@ class BodyUploadFileTestsUploadPost(BaseModel):
                     files.append(
                         (
                             "some_array",
-                            (None, json.dumps(some_array_type_0_item_element.to_dict()).encode(), "application/json"),
+                            (None, types.dump_json__for_transport(some_array_type_0_item_element), "application/json"),
                         )
                     )
             else:
@@ -132,7 +128,7 @@ class BodyUploadFileTestsUploadPost(BaseModel):
             files.append(
                 (
                     "some_optional_object",
-                    (None, json.dumps(self.some_optional_object.to_dict()).encode(), "application/json"),
+                    (None, types.dump_json__for_transport(self.some_optional_object), "application/json"),
                 )
             )
 
@@ -140,7 +136,7 @@ class BodyUploadFileTestsUploadPost(BaseModel):
             files.append(("some_enum", (None, str(self.some_enum.value).encode(), "text/plain")))
 
         for prop_name, prop in (self.__pydantic_extra__ or {}).items():
-            files.append((prop_name, (None, json.dumps(prop.to_dict()).encode(), "application/json")))
+            files.append((prop_name, (None, types.dump_json__for_transport(prop), "application/json")))
 
         return files
 

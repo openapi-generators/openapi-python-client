@@ -23,14 +23,14 @@ if _{{ property.python_name }} is not UNSET:
 {% endif %}
 {% endmacro %}
 
-{% macro _transform(property, source, destination, transform_method) %}
+{% macro _transform(property, source, destination) %}
 {% set inner_property = property.inner_property %}
 {% import "property_templates/" + inner_property.template as inner_template %}
 {% if inner_template.transform %}
 {% set inner_source = inner_property.python_name + "_data" %}
 {{ destination }} = []
 for {{ inner_source }} in {{ source }}:
-    {{ inner_template.transform(inner_property, inner_source, inner_property.python_name, transform_method) | indent(4) }}
+    {{ inner_template.transform(inner_property, inner_source, inner_property.python_name) | indent(4) }}
     {{ destination }}.append({{ inner_property.python_name }})
 {% else %}
 {{ destination }} = {{ source }}
@@ -43,11 +43,11 @@ for {{ inner_source }} in {{ source }}:
 {% set inner_property = property.inner_property %}
 {% set type_string = property.get_type_string(json=True) %}
 {% if property.required %}
-{{ _transform(property, source, destination, "to_dict") }}
+{{ _transform(property, source, destination) }}
 {% else %}
 {% if not skip_unset %}{{ destination }}{% if declare_type %}: {{ type_string }}{% endif %} = UNSET{% endif +%}
 if not isinstance({{ source }}, Unset):
-    {{ _transform(property, source, destination, "to_dict") | indent(4)}}
+    {{ _transform(property, source, destination) | indent(4)}}
 {% endif %}
 {% endmacro %}
 

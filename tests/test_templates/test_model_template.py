@@ -34,11 +34,11 @@ def test_model_template_renders_lazy_imports_in_stable_order(env) -> None:
     # The Pydantic-based template renders lazy imports in two places, both of which
     # must be sorted: the `if TYPE_CHECKING:` block at the top (used for annotations)
     # and the trailing block right before `model_rebuild()` (which resolves forward
-    # references at runtime). The serialization method bodies (`to_dict`/`from_dict`/
-    # `to_multipart`) no longer reference the imported models directly.
+    # references at runtime). The method bodies (`from_dict`/`to_multipart`) no longer
+    # reference the imported models directly.
     sections = [
         _section(content, "if TYPE_CHECKING:", "T = TypeVar"),
-        _section(content, "def to_dict(self)", "MyModel.model_rebuild()"),
+        _section(content, "def from_dict(cls", "MyModel.model_rebuild()"),
     ]
     for section in sections:
         assert section.index("from ..models.a import A") < section.index("from ..models.z import Z")

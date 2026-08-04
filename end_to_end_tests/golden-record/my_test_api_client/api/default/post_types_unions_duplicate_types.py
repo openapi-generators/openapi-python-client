@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.a_model import AModel
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response, Unset, dump_dict__for_transport
 
 
 def _get_kwargs(
@@ -21,7 +21,7 @@ def _get_kwargs(
     }
 
     if isinstance(body, AModel):
-        _kwargs["json"] = body.to_dict()
+        _kwargs["json"] = dump_dict__for_transport(body)
 
     headers["Content-Type"] = "application/json"
 

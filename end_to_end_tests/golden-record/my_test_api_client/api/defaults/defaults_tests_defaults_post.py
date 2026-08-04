@@ -9,7 +9,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
 from ...models.model_with_union_property import ModelWithUnionProperty
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response, Unset, dump_dict__for_transport
 
 
 def _get_kwargs(
@@ -69,10 +69,10 @@ def _get_kwargs(
     json_enum_prop = enum_prop.value
     params["enum_prop"] = json_enum_prop
 
-    json_model_prop = model_prop.to_dict()
+    json_model_prop = dump_dict__for_transport(model_prop)
     params.update(json_model_prop)
 
-    json_required_model_prop = required_model_prop.to_dict()
+    json_required_model_prop = dump_dict__for_transport(required_model_prop)
     params.update(json_required_model_prop)
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
