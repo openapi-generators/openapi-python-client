@@ -963,6 +963,222 @@
         }
       }
     },
+    "/responses/unions/scalars": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union of scalar types.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/number-or-string": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union with a `number` member: JSON draws no int/float distinction, so an integer body is valid.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/int-or-bool": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union whose Python type collapses to `int`, since `bool` is a subclass of it.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/model-or-string": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union mixing a model with a raw value.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/StreamEvent"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/model-or-null": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A nullable model: every non-null body must parse as the model or be rejected.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/StreamEvent"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/object-or-string": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union mixing a free-form object with a raw value.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/any-or-string": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union with an untyped member, which accepts any body at all.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {},
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/responses/unions/branded-or-model": {
+      "get": {
+        "tags": [
+          "responses"
+        ],
+        "description": "A union with a branded string member, which arrives as a plain JSON string.",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/StreamEvent"
+                    },
+                    {
+                      "type": "string",
+                      "format": "brand::protected::ProtectedString"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/responses/text": {
       "post": {
         "tags": [

@@ -5,39 +5,35 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.a_model import AModel
-from ...types import UNSET, Response, Unset, dump_dict__for_transport
+from ...models.stream_event import StreamEvent
+from ...types import Response
 
 
-def _get_kwargs(
-    *,
-    body: AModel | Unset = UNSET,
-) -> dict[str, Any]:
-    headers: dict[str, Any] = {}
+def _get_kwargs() -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
-        "method": "post",
-        "url": "/types/unions/duplicate-types",
+        "method": "get",
+        "url": "/responses/unions/model-or-null",
     }
 
-    if isinstance(body, AModel):
-        _kwargs["json"] = dump_dict__for_transport(body)
-
-    headers["Content-Type"] = "application/json"
-
-    _kwargs["headers"] = headers
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> AModel:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> None | StreamEvent:
     if response.status_code == 200:
 
-        def _parse_response_200(data: object) -> AModel:
-            if not isinstance(data, dict):
-                raise TypeError()
-            response_200_type_0 = AModel.from_dict(data)
+        def _parse_response_200(data: object) -> None | StreamEvent:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                response_200_type_0 = StreamEvent.from_dict(data)
 
-            return response_200_type_0
+                return response_200_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            raise TypeError(f"Response did not match any declared union type, got {type(data).__name__}")
 
         response_200 = _parse_response_200(response.json())
 
@@ -45,10 +41,10 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
-    return cast(AModel, None)
+    return cast(None | StreamEvent, None)
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[AModel]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[None | StreamEvent]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -60,11 +56,8 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: AModel | Unset = UNSET,
-) -> Response[AModel]:
-    """
-    Args:
-        body (AModel | Unset):
+) -> Response[None | StreamEvent]:
+    """A nullable model: every non-null body must parse as the model or be rejected.
 
     Raises:
         errors.UnexpectedStatus: If the server returns a status code that is not a documented
@@ -75,12 +68,10 @@ async def _request_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AModel]
+        Response[None | StreamEvent]
     """
 
-    kwargs = _get_kwargs(
-        body=body,
-    )
+    kwargs = _get_kwargs()
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -90,11 +81,8 @@ async def _request_detailed(
 async def request(
     *,
     client: AuthenticatedClient | Client,
-    body: AModel | Unset = UNSET,
-) -> AModel:
-    """
-    Args:
-        body (AModel | Unset):
+) -> None | StreamEvent:
+    """A nullable model: every non-null body must parse as the model or be rejected.
 
     Raises:
         errors.UnexpectedStatus: If the server returns a status code that is not a documented
@@ -105,12 +93,11 @@ async def request(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AModel
+        None | StreamEvent
     """
 
     return (
         await _request_detailed(
             client=client,
-            body=body,
         )
     ).parsed

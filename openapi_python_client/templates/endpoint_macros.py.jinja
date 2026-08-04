@@ -196,6 +196,9 @@ Raises:
         parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
         None instead of raising.
 {% endif %}
+{% if endpoint.has_union_response %}
+    TypeError: If a response body matches none of the types the OpenAPI document declares for it.
+{% endif %}
     httpx.TimeoutException: If the request takes longer than Client.timeout.
 
 Returns:

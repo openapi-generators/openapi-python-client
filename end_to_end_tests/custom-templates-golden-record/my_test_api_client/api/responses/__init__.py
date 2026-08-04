@@ -4,6 +4,14 @@ import types
 
 from . import (
     default_status_code,
+    get_responses_unions_any_or_string,
+    get_responses_unions_branded_or_model,
+    get_responses_unions_int_or_bool,
+    get_responses_unions_model_or_null,
+    get_responses_unions_model_or_string,
+    get_responses_unions_number_or_string,
+    get_responses_unions_object_or_string,
+    get_responses_unions_scalars,
     jsonl_stream,
     post_responses_unions_simple_before_complex,
     reference_response,
@@ -20,6 +28,62 @@ class ResponsesEndpoints:
         Regression test for #603
         """
         return post_responses_unions_simple_before_complex
+
+    @classmethod
+    def get_responses_unions_scalars(cls) -> types.ModuleType:
+        """
+        A union of scalar types.
+        """
+        return get_responses_unions_scalars
+
+    @classmethod
+    def get_responses_unions_number_or_string(cls) -> types.ModuleType:
+        """
+        A union with a `number` member: JSON draws no int/float distinction, so an integer body is valid.
+        """
+        return get_responses_unions_number_or_string
+
+    @classmethod
+    def get_responses_unions_int_or_bool(cls) -> types.ModuleType:
+        """
+        A union whose Python type collapses to `int`, since `bool` is a subclass of it.
+        """
+        return get_responses_unions_int_or_bool
+
+    @classmethod
+    def get_responses_unions_model_or_string(cls) -> types.ModuleType:
+        """
+        A union mixing a model with a raw value.
+        """
+        return get_responses_unions_model_or_string
+
+    @classmethod
+    def get_responses_unions_model_or_null(cls) -> types.ModuleType:
+        """
+        A nullable model: every non-null body must parse as the model or be rejected.
+        """
+        return get_responses_unions_model_or_null
+
+    @classmethod
+    def get_responses_unions_object_or_string(cls) -> types.ModuleType:
+        """
+        A union mixing a free-form object with a raw value.
+        """
+        return get_responses_unions_object_or_string
+
+    @classmethod
+    def get_responses_unions_any_or_string(cls) -> types.ModuleType:
+        """
+        A union with an untyped member, which accepts any body at all.
+        """
+        return get_responses_unions_any_or_string
+
+    @classmethod
+    def get_responses_unions_branded_or_model(cls) -> types.ModuleType:
+        """
+        A union with a branded string member, which arrives as a plain JSON string.
+        """
+        return get_responses_unions_branded_or_model
 
     @classmethod
     def text_response(cls) -> types.ModuleType:

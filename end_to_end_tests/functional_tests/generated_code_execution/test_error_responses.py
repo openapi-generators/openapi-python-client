@@ -113,6 +113,23 @@ paths:
           content:
             application/json:
               schema: {"$ref": "#/components/schemas/ApiError"}
+  "/union-error":
+    get:
+      operationId: getUnionError
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema: {"$ref": "#/components/schemas/Widget"}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - {"$ref": "#/components/schemas/ApiError"}
+                  - {type: string}
 """
 )
 @with_generated_code_imports(
@@ -129,6 +146,7 @@ paths:
 @with_generated_code_import(".api.default.get_defaulted.request", alias="get_defaulted")
 @with_generated_code_import(".api.default.post_created.request", alias="post_created")
 @with_generated_code_import(".api.default.delete_thing.request", alias="delete_thing")
+@with_generated_code_import(".api.default.get_union_error.request", alias="get_union_error")
 class TestDocumentedErrorResponses:
     def test_success_is_still_parsed(self, Client, get_validated, Widget):
         result = call(Client, get_validated, json={"name": "x"})
@@ -210,6 +228,23 @@ class TestDocumentedErrorResponses:
     def test_detailed_response_carries_the_error_status(self, Client, get_validated_detailed, UnexpectedStatus):
         with pytest.raises(UnexpectedStatus):
             call(Client, get_validated_detailed, status_code=422, json=ERROR_BODY)
+
+    def test_union_error_body_is_parsed_onto_the_raised_error(
+        self, Client, get_union_error, ApiError, UnexpectedStatus
+    ):
+        """A union error body is built before `UnexpectedStatus` is raised, so each member must reach `.parsed`."""
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            call(Client, get_union_error, status_code=400, json=ERROR_BODY)
+        assert isinstance(exc_info.value.parsed, ApiError)
+
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            call(Client, get_union_error, status_code=400, json="plain text")
+        assert exc_info.value.parsed == "plain text"
+
+    def test_unmatchable_union_error_body_raises_type_error(self, Client, get_union_error):
+        """Parsing the error body happens first, so its `TypeError` replaces the `UnexpectedStatus`."""
+        with pytest.raises(TypeError, match="did not match any declared union type"):
+            call(Client, get_union_error, status_code=400, json=[1, 2])
 
 
 @with_generated_client_fixture(

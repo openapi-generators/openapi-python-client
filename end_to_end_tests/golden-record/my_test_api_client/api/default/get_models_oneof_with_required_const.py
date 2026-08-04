@@ -76,6 +76,7 @@ async def _request_detailed(
             success and Client.raise_on_unexpected_status is True. A documented error response is
             parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
             None instead of raising.
+        TypeError: If a response body matches none of the types the OpenAPI document declares for it.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
@@ -99,6 +100,7 @@ async def request(
             success and Client.raise_on_unexpected_status is True. A documented error response is
             parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
             None instead of raising.
+        TypeError: If a response body matches none of the types the OpenAPI document declares for it.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:

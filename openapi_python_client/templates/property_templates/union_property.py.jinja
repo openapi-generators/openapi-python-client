@@ -33,7 +33,43 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     {% endif %}
     {% endfor %}
     {% if ns.contains_unmodified_properties %}
+    {#
+        Members with no `construct` are raw JSON values. Collect the runtime types they can
+        legitimately arrive as, then emit one exact-type guard plus a single cast, so a body that
+        matched no member raises instead of being handed back under a type it does not have.
+
+        `type(data) in ...` rather than `isinstance`, because the JSON type is what is on the wire:
+        the value always comes from `response.json()`, so it is an exact builtin and never a
+        subclass. That keeps `bool` from satisfying an `integer`-only member, lets a plain `str`
+        satisfy a branded string member, and leaves `data` un-narrowed so the cast is never
+        redundant.
+    #}
+    {% set raw = namespace(unchecked = false, types = []) %}
+    {% for inner_property in property.inner_properties %}
+        {% import "property_templates/" + inner_property.template as inner_template %}
+        {% if not inner_template.construct %}
+            {% set json_type = inner_property.get_type_string(no_optional=True, json=True) %}
+            {% if json_type == "None" %}{# already returned by the `data is None` check above #}
+            {% elif json_type == "str" %}{% set raw.types = raw.types + ["str"] %}
+            {% elif json_type == "bool" %}{% set raw.types = raw.types + ["bool"] %}
+            {% elif json_type == "int" %}{% set raw.types = raw.types + ["int"] %}
+            {% elif json_type == "float" %}{% set raw.types = raw.types + ["int", "float"] %}{# JSON has no int/float distinction #}
+            {% elif json_type.startswith("dict[") %}{% set raw.types = raw.types + ["dict"] %}
+            {% else %}{# `Any`, or a JSON type we cannot check: accept anything rather than reject something valid #}
+            {% set raw.unchecked = true %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% if raw.unchecked %}
     return cast({{ property.get_type_string() }}, data)
+    {% elif raw.types %}
+    {% set type_set = "{" + (raw.types | unique | join(", ")) + "}" %}
+    if type(data) not in {{ type_set }}:
+        raise TypeError(f"Response did not match any declared union type, got {type(data).__name__}")
+    return cast({{ property.get_type_string() }}, data)
+    {% else %}
+    raise TypeError(f"Response did not match any declared union type, got {type(data).__name__}")
+    {% endif %}
     {% endif %}
 
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})

@@ -44,12 +44,23 @@ def mock_client(
     return client
 
 
-def call(Client: Any, endpoint: Any, *, status_code: int = 200, json: Any = None, **kwargs: Any) -> Any:
-    """Call a generated async endpoint function against a canned response."""
+def call(
+    Client: Any,
+    endpoint: Any,
+    *,
+    status_code: int = 200,
+    json: Any = None,
+    content: bytes | None = None,
+    **kwargs: Any,
+) -> Any:
+    """Call a generated async endpoint function against a canned response.
+
+    `json=None` means "no body at all", so pass `content=b"null"` to send a literal JSON `null`.
+    """
     client_kwargs = {}
     if "raise_on_unexpected_status" in kwargs:
         client_kwargs["raise_on_unexpected_status"] = kwargs.pop("raise_on_unexpected_status")
-    client = mock_client(Client, status_code=status_code, json=json, **client_kwargs)
+    client = mock_client(Client, status_code=status_code, json=json, content=content, **client_kwargs)
     return asyncio.run(endpoint(client=client, **kwargs))
 
 

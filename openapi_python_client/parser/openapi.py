@@ -20,6 +20,7 @@ from .properties import (
     Parameters,
     Property,
     Schemas,
+    UnionProperty,
     build_parameters,
     build_schemas,
     property_from_data,
@@ -473,6 +474,15 @@ class Endpoint:
         from .properties.jsonl_property import JsonlProperty
 
         return any(isinstance(r.prop, JsonlProperty) for r in self.responses)
+
+    @property
+    def has_union_response(self) -> bool:
+        """Check if any response body is a union, and so can fail to match every declared member.
+
+        Parsing such a body raises `TypeError` when none of the union's members accept it, which is worth documenting
+        on the endpoint: it is the one exception a caller can see that isn't about the status code or the transport.
+        """
+        return any(isinstance(r.prop, UnionProperty) for r in self.responses)
 
     def jsonl_item_type(self) -> str:
         """Get the JSONL item type string for streaming return type annotations"""
