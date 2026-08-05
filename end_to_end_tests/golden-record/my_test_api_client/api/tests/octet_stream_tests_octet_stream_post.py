@@ -39,8 +39,11 @@ def _parse_response(
 
     if response.status_code == 422:
         if client.raise_on_unexpected_status:
-            response_422 = HTTPValidationError.from_dict(response.json())
-
+            response_422: HTTPValidationError | None = None
+            try:
+                response_422 = HTTPValidationError.from_dict(response.json())
+            except Exception:
+                pass
             raise errors.UnexpectedStatus(
                 response.status_code,
                 response.content,

@@ -7,10 +7,13 @@ from openapi_python_client.parser import responses
 from openapi_python_client.parser.errors import ParseError, PropertyError
 from openapi_python_client.parser.properties import Schemas
 from openapi_python_client.parser.responses import (
+    BYTES_SOURCE,
     JSON_SOURCE,
     NONE_SOURCE,
+    TEXT_SOURCE,
     HTTPStatusPattern,
     Response,
+    _ResponseSource,
     response_from_data,
 )
 
@@ -333,6 +336,24 @@ def test_response_has_content(any_property_factory) -> None:
 
     assert Response(status_code=status_code, prop=prop, source=JSON_SOURCE, data=data).has_content() is True
     assert Response(status_code=status_code, prop=prop, source=NONE_SOURCE, data=data).has_content() is False
+
+
+def test_response_source_can_fail(any_property_factory) -> None:
+    """The text and bytes sources are plain attribute reads; anything else is assumed able to raise."""
+    data = oai.Response.model_construct(description="")
+    prop = any_property_factory(name="response_200")
+
+    def source_can_fail(source) -> bool:
+        return Response(status_code=status_code, prop=prop, source=source, data=data).source_can_fail()
+
+    assert source_can_fail(TEXT_SOURCE) is False
+    assert source_can_fail(BYTES_SOURCE) is False
+    # Unreachable at the only call site, which `has_content()` already gates on this exact value, but the answer
+    # for a literal `None` read is still False.
+    assert source_can_fail(NONE_SOURCE) is False
+    assert source_can_fail(JSON_SOURCE) is True
+    # A source nobody has vetted defaults to guarded rather than to unguarded.
+    assert source_can_fail(_ResponseSource(attribute="response.something_new()", return_type="Any")) is True
 
 
 @pytest.mark.parametrize(

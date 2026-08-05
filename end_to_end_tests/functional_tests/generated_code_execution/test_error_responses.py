@@ -241,10 +241,54 @@ class TestDocumentedErrorResponses:
             call(Client, get_union_error, status_code=400, json="plain text")
         assert exc_info.value.parsed == "plain text"
 
-    def test_unmatchable_union_error_body_raises_type_error(self, Client, get_union_error):
-        """Parsing the error body happens first, so its `TypeError` replaces the `UnexpectedStatus`."""
-        with pytest.raises(TypeError, match="did not match any declared union type"):
+    def test_unmatchable_union_error_body_preserves_original_status(
+        self, Client, get_union_error, UnexpectedStatus
+    ):
+        """The status is the error being reported, so a body matching no union member must not replace it.
+
+        This is the one place the error path and the success path deliberately disagree: an unmatchable *success*
+        body raises `TypeError`, because there the body is the whole point. Here the caller already has an error
+        to handle, and losing its status code to a parse failure is strictly worse than losing `.parsed`.
+        """
+        with pytest.raises(UnexpectedStatus) as exc_info:
             call(Client, get_union_error, status_code=400, json=[1, 2])
+
+        assert exc_info.value.status_code == 400
+        assert exc_info.value.parsed is None
+
+    def test_malformed_error_body_preserves_original_status(self, Client, get_validated, UnexpectedStatus):
+        """A body that is not JSON at all reaches `response.json()`."""
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            call(Client, get_validated, status_code=422, content=b"Hello :)")
+
+        exc = exc_info.value
+        assert exc.status_code == 422
+        assert exc.content == b"Hello :)"
+        assert exc.parsed is None
+
+    def test_invalid_error_body_preserves_original_status(
+        self, Client, get_validated, UnexpectedStatus
+    ):
+        """Well-formed JSON that the documented schema rejects: the document is simply wrong about the envelope.
+
+        `ApiError.message` is required and a string, so a list fails validation.
+        """
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            call(Client, get_validated, status_code=422, json={"message": ["not", "a", "string"]})
+
+        assert exc_info.value.status_code == 422
+        assert exc_info.value.parsed is None
+
+    def test_parse_error_does_not_override_exception_context(
+        self, Client, get_validated, UnexpectedStatus
+    ):
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            call(Client, get_validated, status_code=422, content=b"{not json")
+
+        exc = exc_info.value
+        assert exc.__cause__ is None
+        assert exc.__context__ is None
+        assert b"not json" not in str(exc).encode()
 
 
 @with_generated_client_fixture(

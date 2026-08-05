@@ -51,8 +51,11 @@ async def stream(
 
         elif response.status_code == 422:
             await response.aread()
-            response_422 = HTTPValidationError.from_dict(response.json())
-
+            response_422: HTTPValidationError | None = None
+            try:
+                response_422 = HTTPValidationError.from_dict(response.json())
+            except Exception:
+                pass
             raise errors.UnexpectedStatus(
                 response.status_code,
                 response.content,

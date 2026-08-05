@@ -233,9 +233,19 @@ return None
 {% endif %}
 {% endmacro %}
 
-{# A documented status that isn't a success: raise, carrying the parsed body when there is one to parse #}
+{# A documented status that isn't a success: raise, carrying the parsed body when there is one to parse. #}
 {% macro raise_error_response(response) %}
-{% if response.has_content() %}{{ construct_response(response) }}
+{% if response.has_content() %}
+{% import "property_templates/" + response.prop.template as prop_template %}
+{% if prop_template.construct or response.source_can_fail() %}
+{{ response.prop.python_name }}: {{ response.prop.get_type_string() }} | None = None
+try:
+{{ construct_response(response) | trim | indent(4, first=True) }}
+except Exception:
+    pass
+{% else %}
+{{ construct_response(response) | trim }}
+{% endif %}
 raise errors.UnexpectedStatus(
     response.status_code,
     response.content,
