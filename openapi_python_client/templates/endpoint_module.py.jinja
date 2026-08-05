@@ -32,7 +32,7 @@ def _get_kwargs(
         {% if endpoint.path_parameters %}
         "url": "{{ endpoint.path }}".format(
         {%- for parameter in endpoint.path_parameters -%}
-        {{parameter.python_name}}=quote(str({{parameter.python_name}}), safe=""),
+        {{parameter.python_name}}=\quote(str({{parameter.python_name}}), safe=\"\"),
         {%- endfor -%}
         ),
         {% else %}
@@ -99,8 +99,12 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string }}]:
+    try:
+        status_code = HTTPStatus(response.status_code)
+    except ValueError:
+        status_code = response.status_code
     return Response(
-        status_code=HTTPStatus(response.status_code),
+        status_code=status_code,
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
