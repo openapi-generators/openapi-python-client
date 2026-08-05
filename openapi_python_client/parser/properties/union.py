@@ -4,14 +4,34 @@ from collections.abc import Iterator
 from itertools import chain
 from typing import Any, ClassVar, cast
 
-from attr import define, evolve
+from attr import define, evolve, field
 
 from ... import Config
 from ... import schema as oai
 from ...utils import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .protocol import PropertyProtocol, Value
-from .schemas import Schemas
+from .schemas import Schemas, parse_reference_path
+
+
+def _registered_member(
+    sub_prop_data: oai.Schema | oai.Reference,
+    sub_prop: PropertyProtocol,
+    schemas: Schemas,
+) -> PropertyProtocol:
+    """The property object registered in `schemas` for a union member, falling back to the member itself.
+
+    For a `$ref`, `property_from_data` hands back a per-use copy which is snapshotted before the referenced
+    schema's own properties have been processed, so the copy's `required_properties` stays `None` forever. The
+    registered object is the one that gets filled in later, in place.
+    """
+    if not isinstance(sub_prop_data, oai.Reference):
+        # An inline schema is only built once, so the property we just built *is* the registered one.
+        return sub_prop
+    ref_path = parse_reference_path(sub_prop_data.ref)
+    if isinstance(ref_path, ParseError):  # pragma: no cover -- property_from_data already resolved this ref
+        return sub_prop
+    return schemas.classes_by_reference.get(ref_path, sub_prop)
 
 
 @define
@@ -25,6 +45,11 @@ class UnionProperty(PropertyProtocol):
     description: str | None
     example: str | None
     inner_properties: list[PropertyProtocol]
+    discriminator_property_name: str | None = None
+    """`propertyName` of the OpenAPI `discriminator`, if this union or one flattened into it declared one."""
+    registered_members: dict[str, PropertyProtocol] = field(factory=dict)
+    """Members by type string, as the objects registered in `Schemas` rather than the copies in
+    `inner_properties`. See `_registered_member`; `get_discriminator_field_name` needs the processed versions."""
     template: ClassVar[str] = "union_property.py.jinja"
 
     @classmethod
@@ -56,6 +81,11 @@ class UnionProperty(PropertyProtocol):
         from . import property_from_data  # noqa: PLC0415
 
         sub_properties: list[PropertyProtocol] = []
+        registered_members: dict[str, PropertyProtocol] = {}
+        discriminator_names: set[str] = set()
+        own_discriminator = data.discriminator.propertyName if data.discriminator is not None else None
+        if own_discriminator:
+            discriminator_names.add(own_discriminator)
 
         type_list_data = []
         if isinstance(data.type, list):
@@ -88,10 +118,21 @@ class UnionProperty(PropertyProtocol):
                     schemas,
                 )
             sub_properties.append(sub_prop)
+            if own_discriminator and not isinstance(sub_prop, UnionProperty):
+                # Only unions that declare a discriminator have any use for these, and a nested union brings its
+                # own along when it is flattened below.
+                registered = _registered_member(sub_prop_data, sub_prop, schemas)
+                registered_members[registered.get_base_type_string()] = registered
 
         def flatten_union_properties(possibly_nested: list[PropertyProtocol]) -> Iterator[PropertyProtocol]:
             for to_flatten in possibly_nested:
                 if isinstance(to_flatten, UnionProperty):
+                    # A nested union collapses into this one, so its discriminator and members come along with it.
+                    # `Optional[Annotated[Union[...], Field(discriminator=...)]]` is written by pydantic itself as
+                    # `anyOf: [{oneOf: [...], discriminator: ...}, {type: "null"}]`, which lands here.
+                    if to_flatten.discriminator_property_name is not None:
+                        discriminator_names.add(to_flatten.discriminator_property_name)
+                    registered_members.update(to_flatten.registered_members)
                     yield from flatten_union_properties(to_flatten.inner_properties)
                 else:
                     yield to_flatten
@@ -112,6 +153,9 @@ class UnionProperty(PropertyProtocol):
             python_name=PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
+            # Members disagreeing about which property is the tag means there is no single tag to dispatch on.
+            discriminator_property_name=discriminator_names.pop() if len(discriminator_names) == 1 else None,
+            registered_members=registered_members,
         )
         default_or_error = prop.convert_value(data.default)
         if isinstance(default_or_error, PropertyError):
@@ -185,6 +229,60 @@ class UnionProperty(PropertyProtocol):
         """
         type_strings_in_union = self.get_type_strings_in_union(no_optional=no_optional, json=json)
         return self._get_type_string_from_inner_type_strings(type_strings_in_union)
+
+    def get_discriminator_field_name(self) -> str | None:
+        """The field to hand pydantic's `Field(discriminator=...)`, or `None` to leave this union untagged.
+
+        A tagged union accepts and serializes exactly what the untagged one does: pydantic tags each member by the
+        `Literal` values of the member's own field, which is what the untagged union matches on anyway. So this only
+        changes how pydantic dispatches -- more cheaply, and reporting the errors of the one member that was asked
+        for instead of every member's.
+
+        The catch is that pydantic rejects the whole *class* when its members cannot carry a tag, so everything
+        pydantic requires has to hold before we ask for one. Each member must be a model whose tag field is
+        required and annotated as a bare `Literal`, all of them must name that field identically (pydantic insists
+        the alias be the same across members), and no value may claim two members. Anything else falls back to the
+        plain union, which stays correct.
+
+        This runs while rendering rather than while parsing because members are still being processed when unions
+        are built -- see `registered_members`.
+        """
+        from .const import ConstProperty  # noqa: PLC0415
+        from .literal_enum_property import LiteralEnumProperty  # noqa: PLC0415
+        from .model_property import ModelProperty  # noqa: PLC0415
+        from .none import NoneProperty  # noqa: PLC0415
+
+        if self.discriminator_property_name is None:
+            return None
+
+        field_name: str | None = None
+        tagged_count = 0
+        seen_values: set[Any] = set()
+        for inner_property in self.inner_properties:
+            if isinstance(inner_property, NoneProperty):
+                continue  # pydantic tolerates a null member alongside the tagged ones
+            registered = self.registered_members.get(inner_property.get_base_type_string())
+            if not isinstance(registered, ModelProperty) or registered.required_properties is None:
+                return None
+            tag = next(
+                (prop for prop in registered.required_properties if prop.name == self.discriminator_property_name),
+                None,
+            )
+            # Only these two render as a bare `Literal[...]`; an `EnumProperty` renders as an `Enum` subclass, and
+            # an optional tag renders as `Literal[...] | None`, both of which pydantic refuses to tag on.
+            if isinstance(tag, ConstProperty):
+                values: set[Any] = {tag.value.raw_value}
+            elif isinstance(tag, LiteralEnumProperty):
+                values = set(tag.values)
+            else:
+                return None
+            if (field_name is not None and field_name != tag.python_name) or values & seen_values:
+                return None
+            field_name = tag.python_name
+            seen_values |= values
+            tagged_count += 1
+
+        return field_name if tagged_count > 1 else None
 
     def get_imports(self, *, prefix: str) -> set[str]:
         """

@@ -5,6 +5,8 @@ from .a_discriminated_union_type_2 import ADiscriminatedUnionType2
 from .a_form_data import AFormData
 from .a_model import AModel
 from .a_model_with_properties_reference_that_are_not_object import AModelWithPropertiesReferenceThatAreNotObject
+from .a_tagged_union_type_1 import ATaggedUnionType1
+from .a_tagged_union_type_2 import ATaggedUnionType2
 from .all_of_has_properties_but_no_type import AllOfHasPropertiesButNoType
 from .all_of_has_properties_but_no_type_type_enum import AllOfHasPropertiesButNoTypeTypeEnum
 from .all_of_required_base import AllOfRequiredBase
@@ -70,6 +72,7 @@ from .model_with_primitive_additional_properties import ModelWithPrimitiveAdditi
 from .model_with_property_ref import ModelWithPropertyRef
 from .model_with_recursive_ref import ModelWithRecursiveRef
 from .model_with_recursive_ref_in_additional_properties import ModelWithRecursiveRefInAdditionalProperties
+from .model_with_tagged_union import ModelWithTaggedUnion
 from .model_with_three_way_circular_ref_a import ModelWithThreeWayCircularRefA
 from .model_with_three_way_circular_ref_b import ModelWithThreeWayCircularRefB
 from .model_with_three_way_circular_ref_c import ModelWithThreeWayCircularRefC
@@ -124,6 +127,8 @@ __all__ = (
     "AnotherAllOfSubModel",
     "AnotherAllOfSubModelType",
     "AnotherAllOfSubModelTypeEnum",
+    "ATaggedUnionType1",
+    "ATaggedUnionType2",
     "BodyUploadFileTestsUploadPost",
     "BodyUploadFileTestsUploadPostAdditionalProperty",
     "BodyUploadFileTestsUploadPostSomeNullableObject",
@@ -162,6 +167,7 @@ __all__ = (
     "ModelWithPropertyRef",
     "ModelWithRecursiveRef",
     "ModelWithRecursiveRefInAdditionalProperties",
+    "ModelWithTaggedUnion",
     "ModelWithThreeWayCircularRefA",
     "ModelWithThreeWayCircularRefB",
     "ModelWithThreeWayCircularRefC",

@@ -3377,6 +3377,71 @@
           }
         }
       },
+      "ModelWithTaggedUnion": {
+        "type": "object",
+        "required": [
+          "taggedUnion"
+        ],
+        "properties": {
+          "taggedUnion": {
+            "$ref": "#/components/schemas/ATaggedUnion"
+          },
+          "nullableTaggedUnion": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ATaggedUnion"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "ATaggedUnion": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "modelType",
+          "mapping": {
+            "type1": "#/components/schemas/ATaggedUnionType1",
+            "type2": "#/components/schemas/ATaggedUnionType2"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ATaggedUnionType1"
+          },
+          {
+            "$ref": "#/components/schemas/ATaggedUnionType2"
+          }
+        ]
+      },
+      "ATaggedUnionType1": {
+        "type": "object",
+        "required": [
+          "modelType"
+        ],
+        "properties": {
+          "modelType": {
+            "const": "type1"
+          },
+          "colour": {
+            "type": "string"
+          }
+        }
+      },
+      "ATaggedUnionType2": {
+        "type": "object",
+        "required": [
+          "modelType"
+        ],
+        "properties": {
+          "modelType": {
+            "const": "type2"
+          },
+          "texture": {
+            "type": "string"
+          }
+        }
+      },
       "ProtectedBrandedModel": {
         "type": "object",
         "format": "brand::protected::ProtectedBrandedModel",

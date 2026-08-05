@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
@@ -8,6 +9,28 @@ from end_to_end_tests.functional_tests.helpers import (
     with_generated_code_import,
     with_generated_code_imports,
 )
+
+
+def annotation(model_class, name: str) -> str:
+    """The declared annotation for one field, normalized.
+
+    These are strings, because generated models are written under `from __future__ import annotations`. How
+    they are stringified is a Python-version detail -- 3.14 unparses the AST, which rewrites string literals
+    with single quotes and drops the formatter's line wrapping, while earlier versions keep the source text --
+    so flatten whitespace and settle on one quote style before comparing.
+    """
+    return " ".join(model_class.__annotations__[name].split()).replace("'", '"')
+
+
+def error_types(model_class, json_data: dict) -> list[str]:
+    """The pydantic error types raised by decoding `json_data`.
+
+    `union_tag_invalid` / `union_tag_not_found` are only ever produced by a *tagged* union, so these
+    double as the observable evidence that a discriminator was applied.
+    """
+    with pytest.raises(ValidationError) as exc_info:
+        model_class.from_dict(json_data)
+    return [error["type"] for error in exc_info.value.errors()]
 
 
 @with_generated_client_fixture(
@@ -148,6 +171,270 @@ class TestOneOf:
         assert_model_property_type_hint(
             ModelWithUnionOfOne, "required_thing", "ThingA"
         )
+
+
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    Cat:
+      type: object
+      required: [petType, meows]
+      properties:
+        petType: { const: cat }
+        meows: { type: integer }
+    Dog:
+      type: object
+      required: [petType, barks]
+      properties:
+        petType: { const: dog }
+        barks: { type: integer }
+    Lizard:
+      type: object
+      required: [petType]
+      properties:
+        petType: { type: string, enum: [lizard, gecko] }
+    Pet:
+      discriminator:
+        propertyName: petType
+        mapping:
+          cat: "#/components/schemas/Cat"
+          dog: "#/components/schemas/Dog"
+      oneOf:
+        - $ref: "#/components/schemas/Cat"
+        - $ref: "#/components/schemas/Dog"
+    ModelWithTaggedUnion:
+      type: object
+      required: [pet]
+      properties:
+        pet: { $ref: "#/components/schemas/Pet" }
+        maybePet:
+          anyOf:
+            - $ref: "#/components/schemas/Pet"
+            - type: "null"
+        inlinePet:
+          discriminator: { propertyName: petType }
+          oneOf:
+            - $ref: "#/components/schemas/Cat"
+            - $ref: "#/components/schemas/Lizard"
+""")
+@with_generated_code_imports(".models.Cat", ".models.Dog", ".models.Lizard", ".models.ModelWithTaggedUnion")
+class TestDiscriminatedUnion:
+    """A `discriminator` whose members carry `Literal` tags becomes a pydantic tagged union.
+
+    Which body decodes to which member is unchanged -- pydantic tags a member by the `Literal` values of its
+    own field, which is what an untagged union matches on anyway. What changes is that pydantic dispatches on
+    the tag instead of attempting every member, and so reports the errors of the member the tag asked for.
+    """
+
+    def test_tag_selects_the_member(self, Cat, Dog, ModelWithTaggedUnion):
+        assert_model_decode_encode(
+            ModelWithTaggedUnion,
+            {"pet": {"petType": "cat", "meows": 3}},
+            ModelWithTaggedUnion(pet=Cat(pet_type="cat", meows=3)),
+        )
+        assert_model_decode_encode(
+            ModelWithTaggedUnion,
+            {"pet": {"petType": "dog", "barks": 1}},
+            ModelWithTaggedUnion(pet=Dog(pet_type="dog", barks=1)),
+        )
+
+    def test_a_nullable_tagged_union_still_takes_null(self, Cat, Dog, ModelWithTaggedUnion):
+        """`Optional[Annotated[Union[...], Field(discriminator=...)]]` is written by pydantic itself as
+        `anyOf: [{oneOf: [...], discriminator: ...}, {type: "null"}]`, so the tag has to survive flattening."""
+        assert_model_decode_encode(
+            ModelWithTaggedUnion,
+            {"pet": {"petType": "cat", "meows": 3}, "maybePet": None},
+            ModelWithTaggedUnion(pet=Cat(pet_type="cat", meows=3), maybe_pet=None),
+        )
+        assert_model_decode_encode(
+            ModelWithTaggedUnion,
+            {"pet": {"petType": "cat", "meows": 3}, "maybePet": {"petType": "dog", "barks": 1}},
+            ModelWithTaggedUnion(pet=Cat(pet_type="cat", meows=3), maybe_pet=Dog(pet_type="dog", barks=1)),
+        )
+
+    def test_a_member_may_claim_several_tag_values(self, Cat, Lizard, ModelWithTaggedUnion):
+        """An `enum` tag under `literal_enums` is one member holding two tags -- see `TestLiteralEnumTag`."""
+        assert_model_decode_encode(
+            ModelWithTaggedUnion,
+            {"pet": {"petType": "cat", "meows": 3}, "inlinePet": {"petType": "cat", "meows": 3}},
+            ModelWithTaggedUnion(pet=Cat(pet_type="cat", meows=3), inline_pet=Cat(pet_type="cat", meows=3)),
+        )
+
+    def test_declares_a_pydantic_discriminator(self, ModelWithTaggedUnion):
+        assert annotation(ModelWithTaggedUnion, "pet") == 'Annotated[Cat | Dog, Field(discriminator="pet_type")]'
+        assert (
+            annotation(ModelWithTaggedUnion, "maybe_pet")
+            == 'Annotated[Cat | Dog | None, Field(discriminator="pet_type")]'
+        )
+
+    def test_reports_the_tag_rather_than_every_member(self, ModelWithTaggedUnion):
+        assert error_types(ModelWithTaggedUnion, {"pet": {"petType": "fish"}}) == ["union_tag_invalid"]
+        assert error_types(ModelWithTaggedUnion, {"pet": {"meows": 3}}) == ["union_tag_not_found"]
+
+    def test_a_matched_tag_still_validates_the_rest_of_the_body(self, ModelWithTaggedUnion):
+        assert error_types(ModelWithTaggedUnion, {"pet": {"petType": "dog", "barks": "lots"}}) == ["int_parsing"]
+
+
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    LooseA:
+      type: object
+      required: [tag]
+      properties: { tag: { type: string }, a: { type: string } }
+    LooseB:
+      type: object
+      required: [tag]
+      properties: { tag: { type: string }, b: { type: string } }
+    EnumA:
+      type: object
+      required: [tag]
+      properties: { tag: { type: string, enum: [ea] }, a: { type: string } }
+    EnumB:
+      type: object
+      required: [tag]
+      properties: { tag: { type: string, enum: [eb] }, b: { type: string } }
+    OptionalA:
+      type: object
+      properties: { tag: { const: oa }, a: { type: string } }
+    OptionalB:
+      type: object
+      properties: { tag: { const: ob }, b: { type: string } }
+    SameA:
+      type: object
+      required: [tag]
+      properties: { tag: { const: same }, a: { type: string } }
+    SameB:
+      type: object
+      required: [tag]
+      properties: { tag: { const: same }, b: { type: string } }
+    RenamedTagA:
+      type: object
+      required: [modelType]
+      properties: { modelType: { const: rta }, model_type: { type: string } }
+    RenamedTagB:
+      type: object
+      required: [modelType]
+      properties: { modelType: { const: rtb } }
+    OtherTagA:
+      type: object
+      required: [otherTag]
+      properties: { otherTag: { const: ota } }
+    ModelWithUntaggableUnions:
+      type: object
+      properties:
+        looseTag:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/LooseA" }, { $ref: "#/components/schemas/LooseB" }]
+        enumTag:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/EnumA" }, { $ref: "#/components/schemas/EnumB" }]
+        optionalTag:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/OptionalA" }, { $ref: "#/components/schemas/OptionalB" }]
+        duplicateTagValue:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/SameA" }, { $ref: "#/components/schemas/SameB" }]
+        renamedTagField:
+          discriminator: { propertyName: modelType }
+          oneOf: [{ $ref: "#/components/schemas/RenamedTagA" }, { $ref: "#/components/schemas/RenamedTagB" }]
+        untaggableMember:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/SameA" }, { type: string }]
+        onlyOneTaggedMember:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/SameA" }, { type: "null" }]
+        tagFieldsDisagree:
+          anyOf:
+            - discriminator: { propertyName: tag }
+              oneOf: [{ $ref: "#/components/schemas/SameA" }, { $ref: "#/components/schemas/LooseA" }]
+            - discriminator: { propertyName: otherTag }
+              oneOf: [{ $ref: "#/components/schemas/OtherTagA" }]
+""")
+@with_generated_code_imports(".models.LooseA", ".models.LooseB", ".models.ModelWithUntaggableUnions")
+class TestUnionsPydanticCannotTag:
+    """Pydantic rejects the whole model class when a union's members cannot carry a tag.
+
+    So every condition it enforces has to be ruled out before asking for one: each member must be a model whose
+    tag field is required and annotated as a bare `Literal`, all of them have to name that field identically,
+    and no tag value may claim two members. These specs each break one of those, and must come out as plain
+    unions -- if any of them asked for a discriminator anyway, importing the model below would raise.
+    """
+
+    @pytest.mark.parametrize(
+        ("field_name", "expected_annotation"),
+        [
+            # A `type: string` tag is not a `Literal`, so there is nothing to dispatch on.
+            ("loose_tag", "LooseA | LooseB | None"),
+            # An `enum` renders as an `Enum` subclass; only `literal_enums` makes it a `Literal`.
+            ("enum_tag", "EnumA | EnumB | None"),
+            # An optional tag renders as `Literal[...] | None`, which pydantic will not tag on.
+            ("optional_tag", "OptionalA | OptionalB | None"),
+            # Pydantic maps each value to exactly one member.
+            ("duplicate_tag_value", "SameA | SameB | None"),
+            # A name collision renamed the tag field in one member; pydantic needs one name across all of them.
+            ("renamed_tag_field", "RenamedTagA | RenamedTagB | None"),
+            # A scalar cannot be a member of a tagged union at all.
+            ("untaggable_member", "SameA | str | None"),
+            # One tagged member and a null is not a union to dispatch over.
+            ("only_one_tagged_member", "None | SameA"),
+            # Flattening brought in two candidate tag fields; neither one covers every member.
+            ("tag_fields_disagree", "LooseA | OtherTagA | SameA | None"),
+        ],
+    )
+    def test_falls_back_to_a_plain_union(self, ModelWithUntaggableUnions, field_name, expected_annotation):
+        assert annotation(ModelWithUntaggableUnions, field_name) == expected_annotation
+
+    def test_the_plain_union_still_decodes(self, LooseA, LooseB, ModelWithUntaggableUnions):
+        assert_model_decode_encode(
+            ModelWithUntaggableUnions,
+            {"looseTag": {"tag": "anything", "b": "x"}},
+            ModelWithUntaggableUnions(loose_tag=LooseB(tag="anything", b="x")),
+        )
+        # Every member was attempted and reported, which is what an untagged union does.
+        errors = error_types(ModelWithUntaggableUnions, {"looseTag": {"a": 1}})
+        assert "union_tag_not_found" not in errors
+        assert errors.count("missing") == 2
+
+
+@with_generated_client_fixture(
+"""
+components:
+  schemas:
+    EnumA:
+      type: object
+      required: [tag]
+      properties: { tag: { type: string, enum: [ea, also_ea] } }
+    EnumB:
+      type: object
+      required: [tag]
+      properties: { tag: { type: string, enum: [eb] } }
+    ModelWithLiteralEnumTag:
+      type: object
+      required: [thing]
+      properties:
+        thing:
+          discriminator: { propertyName: tag }
+          oneOf: [{ $ref: "#/components/schemas/EnumA" }, { $ref: "#/components/schemas/EnumB" }]
+""",
+    config="literal_enums: true",
+)
+@with_generated_code_imports(".models.EnumA", ".models.ModelWithLiteralEnumTag")
+class TestLiteralEnumTag:
+    """`literal_enums` renders an `enum` tag as a `Literal`, which pydantic can dispatch on."""
+
+    def test_enum_tag_is_tagged_under_literal_enums(self, EnumA, ModelWithLiteralEnumTag):
+        assert (
+            annotation(ModelWithLiteralEnumTag, "thing") == 'Annotated[EnumA | EnumB, Field(discriminator="tag")]'
+        )
+        assert_model_decode_encode(
+            ModelWithLiteralEnumTag,
+            {"thing": {"tag": "also_ea"}},
+            ModelWithLiteralEnumTag(thing=EnumA(tag="also_ea")),
+        )
+        assert error_types(ModelWithLiteralEnumTag, {"thing": {"tag": "nope"}}) == ["union_tag_invalid"]
 
 
 @with_generated_client_fixture(

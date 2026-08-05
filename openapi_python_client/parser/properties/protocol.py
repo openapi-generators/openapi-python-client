@@ -121,6 +121,10 @@ class PropertyProtocol(Protocol):
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
         return self.get_type_string(no_optional=True)
 
+    def get_discriminator_field_name(self) -> str | None:
+        """The field name for pydantic's `Field(discriminator=...)`, for properties that can be tagged unions"""
+        return None
+
     # noinspection PyUnusedLocal
     def get_imports(self, *, prefix: str) -> set[str]:
         """
