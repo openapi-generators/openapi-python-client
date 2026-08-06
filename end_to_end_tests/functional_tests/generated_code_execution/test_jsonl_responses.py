@@ -153,6 +153,17 @@ class TestJsonlResponse:
         assert exc_info.value.status_code == 503
         assert exc_info.value.parsed is None
 
+    def test_malformed_error_body_still_raises_the_status(self, Client, stream_events, UnexpectedStatus):
+        """The streaming error branch shares `raise_error_response` with the non-streaming one, so it degrades the
+        same way: a body that will not parse costs `.parsed`, never the status code."""
+        with pytest.raises(UnexpectedStatus) as exc_info:
+            drain(Client, stream_events, status_code=422, content=b"<html>502 Bad Gateway</html>")
+
+        exc = exc_info.value
+        assert exc.status_code == 422
+        assert exc.content == b"<html>502 Bad Gateway</html>"
+        assert exc.parsed is None
+
     def test_undocumented_status_raises_by_default(self, Client, stream_events, UnexpectedStatus):
         with pytest.raises(UnexpectedStatus) as exc_info:
             drain(Client, stream_events, status_code=500)

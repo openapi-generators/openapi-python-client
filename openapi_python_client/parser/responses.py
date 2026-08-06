@@ -144,6 +144,15 @@ class Response:
         """
         return self.source != NONE_SOURCE
 
+    def source_can_fail(self) -> bool:
+        """Whether reading the body off the httpx response can itself raise.
+
+        Named by exclusion: `response.text`, `response.content` and the literal `None` of a bodyless response are
+        plain reads, so a source added later is treated as able to fail until someone vets it. Guessing wrong that
+        way costs a redundant `try`; guessing wrong the other way costs an unguarded parse.
+        """
+        return self.source not in (TEXT_SOURCE, BYTES_SOURCE, NONE_SOURCE)
+
     def __lt__(self, other: "Response") -> bool:
         """Compare two responses based on the order in which they should be applied in"""
         return self.status_code < other.status_code

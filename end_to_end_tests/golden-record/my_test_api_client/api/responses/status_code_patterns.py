@@ -28,8 +28,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
     if 400 <= response.status_code <= 499:
         if client.raise_on_unexpected_status:
-            response_4xx = StatusCodePatternsResponse4XX.from_dict(response.json())
-
+            response_4xx: StatusCodePatternsResponse4XX | None = None
+            try:
+                response_4xx = StatusCodePatternsResponse4XX.from_dict(response.json())
+            except Exception:
+                pass
             raise errors.UnexpectedStatus(
                 response.status_code,
                 response.content,
