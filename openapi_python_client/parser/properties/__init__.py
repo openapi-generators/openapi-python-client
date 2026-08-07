@@ -366,12 +366,39 @@ def property_from_data(  # noqa: PLR0911, PLR0912
     )
 
 
+def _components_with_ambiguous_titles(
+    components: dict[str, oai.Reference | oai.Schema],
+    config: Config,
+) -> set[str]:
+    """Find the components whose `title` would give them a name that another component also claims.
+
+    FastAPI emits one component per direction when a model is used for both a request and a response
+    (`DemoEntity-Input` and `DemoEntity-Output`), and both carry the same `title`. Naming them from
+    their titles would collide, so those components fall back to their own names, which are unique by
+    construction.
+    """
+    component_names_by_class_name: dict[utils.ClassName, list[str]] = {}
+    for name, data in components.items():
+        if not isinstance(data, oai.Schema):
+            # A component that is itself a `$ref` is an alias; it takes its name from its referent.
+            continue
+        class_name = Class.from_string(string=data.title or name, config=config).name
+        component_names_by_class_name.setdefault(class_name, []).append(name)
+    return {
+        name
+        for component_names in component_names_by_class_name.values()
+        if len(component_names) > 1
+        for name in component_names
+    }
+
+
 def _create_schemas(
     *,
     components: dict[str, oai.Reference | oai.Schema],
     schemas: Schemas,
     config: Config,
 ) -> Schemas:
+    ambiguous_titles = _components_with_ambiguous_titles(components, config)
     to_process: Iterable[tuple[str, oai.Reference | oai.Schema]] = components.items()
     still_making_progress = True
     errors: list[PropertyError] = []
@@ -399,6 +426,8 @@ def _create_schemas(
                     # use derefenced schema definition for this schema
                     schema_data = components.get(data_ref_schema)
             if isinstance(schema_data, oai.Schema):
+                if name in ambiguous_titles:
+                    schema_data = schema_data.model_copy(update={"title": None})
                 schemas_or_err = update_schemas_with_data(
                     ref_path=ref_path, data=schema_data, schemas=schemas, config=config
                 )

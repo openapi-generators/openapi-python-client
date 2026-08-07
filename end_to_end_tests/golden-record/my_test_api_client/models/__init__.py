@@ -37,6 +37,8 @@ from .body_upload_file_tests_upload_post_additional_property import BodyUploadFi
 from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadFileTestsUploadPostSomeNullableObject
 from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
+from .demo_entity_input import DemoEntityInput
+from .demo_entity_output import DemoEntityOutput
 from .different_enum import DifferentEnum
 from .extended import Extended
 from .free_form_model import FreeFormModel
@@ -134,6 +136,8 @@ __all__ = (
     "BodyUploadFileTestsUploadPostSomeNullableObject",
     "BodyUploadFileTestsUploadPostSomeObject",
     "BodyUploadFileTestsUploadPostSomeOptionalObject",
+    "DemoEntityInput",
+    "DemoEntityOutput",
     "DifferentEnum",
     "Extended",
     "FreeFormModel",

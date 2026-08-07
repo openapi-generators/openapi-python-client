@@ -178,6 +178,8 @@ If you are carefully curating your `title` properties already to ensure no dupli
 
 If this option results in conflicts, you will need to manually override class names instead via the `class_overrides` option.
 
+Regardless of this setting, when two or more schemas under `components/schemas` would be named the same because they share a `title`, all of them are named from their own component names instead. This is what FastAPI produces when a model is used for both a request and a response body: `DemoEntity-Input` and `DemoEntity-Output` both have the title `DemoEntity`, and become `DemoEntityInput` and `DemoEntityOutput`.
+
 ### http_timeout
 
 By default, the timeout for retrieving the schema file via HTTP is 5 seconds. In case there is an error when retrieving the schema, you might try and increase this setting to a higher value.

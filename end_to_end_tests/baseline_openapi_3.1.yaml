@@ -1788,6 +1788,30 @@ info:
       }
     }
   },
+  "/naming/duplicate-title": {
+    "description": "Ensure that schemas sharing a title are named from their component names",
+    "post": {
+      "tags": [ "naming" ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/DemoEntity-Input" }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "The same title, a different model",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DemoEntity-Output" }
+            }
+          }
+        }
+      }
+    }
+  },
   "/naming/mixed-case": {
     "get": {
       "tags": [ "naming" ],
@@ -2106,6 +2130,24 @@ info:
       "allOf": [
         { "$ref": "#/components/schemas/AModel" }
       ]
+    },
+    "DemoEntity-Input": {
+      "title": "DemoEntity",
+      "type": "object",
+      "properties": {
+        "foo": { "title": "Foo", "type": "string", "minLength": 1, "maxLength": 100 },
+        "bar": { "title": "Bar", "type": "string", "default": "plopp" }
+      },
+      "required": [ "foo" ]
+    },
+    "DemoEntity-Output": {
+      "title": "DemoEntity",
+      "type": "object",
+      "properties": {
+        "foo": { "title": "Foo", "type": "string", "minLength": 1, "maxLength": 100 },
+        "bar": { "title": "Bar", "type": "string", "default": "plopp" }
+      },
+      "required": [ "foo", "bar" ]
     },
     "Extended": {
       "allOf": [

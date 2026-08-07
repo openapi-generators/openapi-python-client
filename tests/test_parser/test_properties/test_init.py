@@ -9,6 +9,7 @@ from openapi_python_client.parser.properties import (
     Parameters,
     ReferencePath,
     Schemas,
+    _components_with_ambiguous_titles,
     _create_schemas,
     _process_model_errors,
     _process_models,
@@ -222,6 +223,41 @@ class TestStringBasedProperty:
             name=name, required=required, data=data, schemas=Schemas(), config=config, parent_name=""
         )
         assert p == file_property_factory(name=name, required=required)
+
+
+class TestComponentsWithAmbiguousTitles:
+    def test_shared_title_falls_back_to_component_names(self, config):
+        components = {
+            "DemoEntity-Input": Schema.model_construct(title="DemoEntity"),
+            "DemoEntity-Output": Schema.model_construct(title="DemoEntity"),
+            "Unrelated": Schema.model_construct(title="SomethingElse"),
+        }
+
+        assert _components_with_ambiguous_titles(components, config) == {"DemoEntity-Input", "DemoEntity-Output"}
+
+    def test_title_colliding_with_another_components_name(self, config):
+        components = {
+            "Collision": Schema.model_construct(title=None),
+            "Aliased": Schema.model_construct(title="Collision"),
+        }
+
+        assert _components_with_ambiguous_titles(components, config) == {"Collision", "Aliased"}
+
+    def test_unique_titles_are_not_ambiguous(self, config):
+        components = {
+            "First": Schema.model_construct(title="Renamed"),
+            "Second": Schema.model_construct(title=None),
+        }
+
+        assert _components_with_ambiguous_titles(components, config) == set()
+
+    def test_reference_components_are_ignored(self, config):
+        components = {
+            "Alias": Reference(ref="#/components/schemas/Target"),
+            "Target": Schema.model_construct(title=None),
+        }
+
+        assert _components_with_ambiguous_titles(components, config) == set()
 
 
 class TestCreateSchemas:
