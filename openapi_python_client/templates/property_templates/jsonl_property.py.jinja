@@ -14,20 +14,6 @@ for _jsonl_line in {{ source }}.splitlines():
 {% endif %}
 {% endmacro %}
 
-{% macro construct_sync_stream(property) %}
-{% set inner_property = property.inner_property %}
-{% import "property_templates/" + inner_property.template as inner_template %}
-for _line in response.iter_lines():
-    if _line.strip():
-{% if inner_template.construct %}
-        _jsonl_data = orjson.loads(_line)
-        {{ inner_template.construct(inner_property, "_jsonl_data") | indent(8) }}
-        yield {{ inner_property.python_name }}
-{% else %}
-        yield orjson.loads(_line)
-{% endif %}
-{% endmacro %}
-
 {% macro construct_async_stream(property) %}
 {% set inner_property = property.inner_property %}
 {% import "property_templates/" + inner_property.template as inner_template %}
