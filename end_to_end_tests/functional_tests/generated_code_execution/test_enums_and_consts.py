@@ -1,5 +1,6 @@
 from typing import Literal
 import pytest
+from pydantic import ValidationError
 
 from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
@@ -58,7 +59,7 @@ class TestStringEnumClass:
         )
 
     def test_type_hints(self, MyModel, MyModelWithRequired):
-        optional_type = "MyEnum | Unset"
+        optional_type = "MyEnum | None"
         assert_model_property_type_hint(MyModel,"enum_prop", optional_type)
         assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
 
@@ -145,7 +146,7 @@ class TestIntEnumClass:
         )
 
     def test_type_hints(self, MyModel, MyModelWithRequired):
-        optional_type = "MyEnum | Unset"
+        optional_type = "MyEnum | None"
         assert_model_property_type_hint(MyModel,"enum_prop", optional_type)
         assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
 
@@ -226,7 +227,7 @@ class TestNullableEnums:
         assert_model_decode_encode(MyModel, {"nullOnlyEnumProp": None}, MyModel(null_only_enum_prop=None))
     
     def test_type_hints(self, MyModel):
-        expected_type = "MyEnum | None | Unset"
+        expected_type = "MyEnum | None"
         assert_model_property_type_hint(MyModel, "nullable_enum_prop", expected_type)
     
 
@@ -302,15 +303,20 @@ class TestStringLiteralEnum:
         assert_model_decode_encode(MyModel, {"inlineEnumProp": "a"}, MyModel(inline_enum_prop="a"))
     
     def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum):
-        optional_type = "MyEnum | Unset"
+        optional_type = "MyEnum | None"
         assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
         assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
         assert MyEnum == Literal["a", "A", "b"]
 
     def test_invalid_values(self, MyModel):
-        with pytest.raises(TypeError):
+        """Literal enums are validated at runtime.
+
+        Upstream generated a bare `Literal` and did no decode-time check, so a value outside the
+        enum went straight onto the model and only ever surfaced as a type-checker complaint.
+        """
+        with pytest.raises(ValidationError):
             MyModel.from_dict({"enumProp": "c"})
-        with pytest.raises(TypeError):
+        with pytest.raises(ValidationError):
             MyModel.from_dict({"enumProp": 2})
 
 
@@ -346,15 +352,15 @@ class TestIntLiteralEnum:
         assert_model_decode_encode(MyModel, {"inlineEnumProp": 2}, MyModel(inline_enum_prop=2))
     
     def test_type_hints(self, MyModel, MyModelWithRequired, MyEnum):
-        optional_type = "MyEnum | Unset"
+        optional_type = "MyEnum | None"
         assert_model_property_type_hint(MyModel, "enum_prop", optional_type)
         assert_model_property_type_hint(MyModelWithRequired, "enum_prop", "MyEnum")
         assert MyEnum == Literal[2, 3, -4]
 
     def test_invalid_values(self, MyModel):
-        with pytest.raises(TypeError):
+        with pytest.raises(ValidationError):
             MyModel.from_dict({"enumProp": 4})
-        with pytest.raises(TypeError):
+        with pytest.raises(ValidationError):
             MyModel.from_dict({"enumProp": "a"})
 
 
@@ -385,7 +391,9 @@ components:
 @with_generated_code_imports(".models.MyModel")
 class TestNullableLiteralEnum:
     def test_nullable_enum_prop(self, MyModel):
-        assert_model_decode_encode(MyModel, {"nullableEnumProp": "B"}, MyModel(nullable_enum_prop="B"))
+        # "A", not upstream's "B": MyEnum is ["a", "A"], so "B" was never a member. Upstream's
+        # unvalidated Literal accepted it anyway; the fork's Pydantic model rejects it, correctly.
+        assert_model_decode_encode(MyModel, {"nullableEnumProp": "A"}, MyModel(nullable_enum_prop="A"))
         assert_model_decode_encode(MyModel, {"nullableEnumProp": None}, MyModel(nullable_enum_prop=None))
         assert_model_decode_encode(MyModel, {"enumIncludingNullProp": "a"}, MyModel(enum_including_null_prop="a"))
         assert_model_decode_encode(MyModel, {"enumIncludingNullProp": None}, MyModel(enum_including_null_prop=None))

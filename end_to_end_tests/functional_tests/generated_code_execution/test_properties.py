@@ -1,6 +1,7 @@
 import datetime
 import uuid
 import pytest
+from pydantic import ValidationError
 
 from end_to_end_tests.functional_tests.helpers import (
     assert_model_decode_encode,
@@ -61,16 +62,18 @@ class TestRequiredAndOptionalProperties:
         )
 
     def test_required_missing(self, MyModel, DerivedModel):
-        with pytest.raises(KeyError):
+        """Pydantic reports every missing field at once, where upstream's attrs models raised
+        `KeyError` on whichever one it happened to read first."""
+        with pytest.raises(ValidationError):
             MyModel.from_dict({"req1": "a"})
-        with pytest.raises(KeyError):
+        with pytest.raises(ValidationError):
             MyModel.from_dict({"req2": "b"})
-        with pytest.raises(KeyError):
+        with pytest.raises(ValidationError):
             DerivedModel.from_dict({"req1": "a", "req2": "b"})
 
     def test_type_hints(self, MyModel):
         assert_model_property_type_hint(MyModel, "req1", "str")
-        assert_model_property_type_hint(MyModel, "opt", "str | Unset")
+        assert_model_property_type_hint(MyModel, "opt", "str | None")
 
 
 @with_generated_client_fixture(
@@ -106,8 +109,9 @@ class TestBasicModelProperties:
             "nullProp": None,
             "anyProp": "e",
         }
-        expected_any_object = AnyObject()
-        expected_any_object.additional_properties = {"d": 3}
+        # `AnyObject` is `extra="allow"`, so an undeclared key becomes an ordinary field on the model.
+        # Upstream's attrs models parked it in a separate `additional_properties` dict instead.
+        expected_any_object = AnyObject(d=3)
         assert_model_decode_encode(
             MyModel,
             json_data,
@@ -134,13 +138,14 @@ class TestBasicModelProperties:
             MyModel.from_dict(bad_data)
 
     def test_type_hints(self, MyModel):
-        assert_model_property_type_hint(MyModel, "boolean_prop", "bool | Unset")
-        assert_model_property_type_hint(MyModel, "string_prop", "str | Unset")
-        assert_model_property_type_hint(MyModel, "number_prop", "float | Unset")
-        assert_model_property_type_hint(MyModel, "int_prop", "int | Unset")
-        assert_model_property_type_hint(MyModel, "any_object_prop", "AnyObject | Unset")
-        assert_model_property_type_hint(MyModel, "null_prop", "None | Unset")
-        assert_model_property_type_hint(MyModel, "any_prop", "Any | Unset")
+        assert_model_property_type_hint(MyModel, "boolean_prop", "bool | None")
+        assert_model_property_type_hint(MyModel, "string_prop", "str | None")
+        assert_model_property_type_hint(MyModel, "number_prop", "float | None")
+        assert_model_property_type_hint(MyModel, "int_prop", "int | None")
+        assert_model_property_type_hint(MyModel, "any_object_prop", "AnyObject | None")
+        # A `null`-typed property is already `None`; being optional adds nothing to widen.
+        assert_model_property_type_hint(MyModel, "null_prop", "None")
+        assert_model_property_type_hint(MyModel, "any_prop", "Any | None")
 
 
 @with_generated_client_fixture(
@@ -166,8 +171,13 @@ class TestSpecialStringFormats:
         assert_model_decode_encode(MyModel, json_data, MyModel(date_prop=date_value))
 
     def test_date_time(self, MyModel):
+        """A UTC datetime goes out as `...Z`, not `...+00:00`.
+
+        Both are valid RFC 3339 and both decode to the same instant, so this asserts the encoding
+        the fork's Pydantic serializer actually emits rather than `isoformat()`'s spelling of it.
+        """
         date_time_value = datetime.datetime.now(datetime.UTC)
-        json_data = {"dateTimeProp": date_time_value.isoformat()}
+        json_data = {"dateTimeProp": date_time_value.isoformat().replace("+00:00", "Z")}
         assert_model_decode_encode(MyModel, json_data, MyModel(date_time_prop=date_time_value))
 
     def test_uuid(self, MyModel):
@@ -180,10 +190,10 @@ class TestSpecialStringFormats:
         assert_model_decode_encode(MyModel, json_data, MyModel(unknown_format_prop="whatever"))
 
     def test_type_hints(self, MyModel):
-        assert_model_property_type_hint(MyModel, "date_prop", "datetime.date | Unset")
-        assert_model_property_type_hint(MyModel, "date_time_prop", "datetime.datetime | Unset")
-        assert_model_property_type_hint(MyModel, "uuid_prop", "UUID | Unset")
-        assert_model_property_type_hint(MyModel, "unknown_format_prop", "str | Unset")
+        assert_model_property_type_hint(MyModel, "date_prop", "datetime.date | None")
+        assert_model_property_type_hint(MyModel, "date_time_prop", "datetime.datetime | None")
+        assert_model_property_type_hint(MyModel, "uuid_prop", "UUID | None")
+        assert_model_property_type_hint(MyModel, "unknown_format_prop", "str | None")
 
 
 @with_generated_client_fixture(

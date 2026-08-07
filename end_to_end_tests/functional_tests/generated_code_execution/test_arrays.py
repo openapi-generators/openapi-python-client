@@ -59,9 +59,9 @@ class TestArraySchemas:
         )
 
     def test_type_hints(self, ModelWithArrayOfAny, ModelWithArrayOfInts, ModelWithArrayOfObjects):
-        assert_model_property_type_hint(ModelWithArrayOfAny, "array_prop", "list[Any] | Unset")
-        assert_model_property_type_hint(ModelWithArrayOfInts, "array_prop", "list[int] | Unset")
-        assert_model_property_type_hint(ModelWithArrayOfObjects, "array_prop", "list[SimpleObject] | Unset")
+        assert_model_property_type_hint(ModelWithArrayOfAny, "array_prop", "list[Any] | None")
+        assert_model_property_type_hint(ModelWithArrayOfInts, "array_prop", "list[int] | None")
+        assert_model_property_type_hint(ModelWithArrayOfObjects, "array_prop", "list[SimpleObject] | None")
 
 
 @with_generated_client_fixture(
@@ -126,16 +126,16 @@ class TestArraysWithPrefixItems:
         )
 
     def test_type_hints(self, ModelWithSinglePrefixItem, ModelWithPrefixItems, ModelWithMixedItems):
-        assert_model_property_type_hint(ModelWithSinglePrefixItem, "array_prop", "list[str] | Unset")
+        assert_model_property_type_hint(ModelWithSinglePrefixItem, "array_prop", "list[str] | None")
         assert_model_property_type_hint(
             ModelWithPrefixItems,
             "array_prop",
-            "list[SimpleObject | str] | Unset",
+            "list[SimpleObject | str] | None",
         )
         assert_model_property_type_hint(
             ModelWithMixedItems,
             "array_prop",
-            "list[SimpleObject | str] | Unset",
+            "list[SimpleObject | str] | None",
         )
         # Note, this test is asserting the current behavior which, due to limitations of the implementation
         # (see: https://github.com/openapi-generators/openapi-python-client/pull/1130), is not really doing

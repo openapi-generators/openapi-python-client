@@ -55,7 +55,7 @@ class TestSimpleTypeList:
         assert_model_decode_encode(MyModel, {"stringOrIntProp": 1}, MyModel(string_or_int_prop=1))
 
     def test_type_hints(self, MyModel):
-        assert_model_property_type_hint(MyModel, "string_or_int_prop", "int | str | Unset")
+        assert_model_property_type_hint(MyModel, "string_or_int_prop", "int | str | None")
 
 
 @with_generated_client_fixture(
@@ -158,7 +158,7 @@ class TestOneOf:
         assert_model_property_type_hint(
             ModelWithUnion,
             "thing",
-            "ThingA | ThingB | Unset",
+            "ThingA | ThingB | None",
         )
         assert_model_property_type_hint(
             ModelWithRequiredUnion,
@@ -166,7 +166,7 @@ class TestOneOf:
             "ThingA | ThingB",
         )
         assert_model_property_type_hint(
-            ModelWithUnionOfOne, "thing", "ThingA | Unset"
+            ModelWithUnionOfOne, "thing", "ThingA | None"
         )
         assert_model_property_type_hint(
             ModelWithUnionOfOne, "required_thing", "ThingA"
