@@ -5,6 +5,7 @@ __all__ = [
     "Class",
     "DictProperty",
     "EnumProperty",
+    "JsonlProperty",
     "LiteralEnumProperty",
     "ModelProperty",
     "Parameters",
@@ -33,6 +34,7 @@ from .enum_property import EnumProperty
 from .file import FileProperty
 from .float import FloatProperty
 from .int import IntProperty
+from .jsonl_property import JsonlProperty
 from .list_property import ListProperty
 from .literal_enum_property import LiteralEnumProperty
 from .model_property import ModelProperty, process_model
@@ -56,7 +58,13 @@ from .uuid import UuidProperty
 def _string_based_property(
     name: str, required: bool, data: oai.Schema, config: Config
 ) -> (
-    StringProperty | DateProperty | DateTimeProperty | FileProperty | UuidProperty | BrandedStringProperty | PropertyError
+    StringProperty
+    | DateProperty
+    | DateTimeProperty
+    | FileProperty
+    | UuidProperty
+    | BrandedStringProperty
+    | PropertyError
 ):
     """Construct a Property from the type "string" """
     string_format = data.schema_format

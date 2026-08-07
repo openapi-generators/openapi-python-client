@@ -15,6 +15,7 @@ from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
     Class,
     EnumProperty,
+    JsonlProperty,
     LiteralEnumProperty,
     ModelProperty,
     Parameters,
@@ -471,8 +472,6 @@ class Endpoint:
     @property
     def is_jsonl_streaming(self) -> bool:
         """Check if this endpoint has a JSONL streaming response"""
-        from .properties.jsonl_property import JsonlProperty
-
         return any(isinstance(r.prop, JsonlProperty) for r in self.responses)
 
     @property
@@ -486,8 +485,6 @@ class Endpoint:
 
     def jsonl_item_type(self) -> str:
         """Get the JSONL item type string for streaming return type annotations"""
-        from .properties.jsonl_property import JsonlProperty
-
         for r in self.responses:
             if isinstance(r.prop, JsonlProperty):
                 return r.prop.inner_property.get_type_string()

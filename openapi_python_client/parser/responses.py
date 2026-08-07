@@ -1,7 +1,7 @@
 __all__ = ["HTTPStatusPattern", "Response", "Responses", "response_from_data"]
 
 from collections.abc import Iterator
-from typing import TypedDict
+from typing import NamedTuple, TypedDict
 
 from attrs import define
 
@@ -201,6 +201,35 @@ def empty_response(
     )
 
 
+class _MediaTypeSelection(NamedTuple):
+    """The content type this generator will read a response body from, and the schema describing it."""
+
+    source: _ResponseSource
+    schema_data: oai.Reference | oai.Schema | None
+    is_jsonl: bool
+
+
+def _select_media_type(content: dict[str, oai.MediaType], config: Config) -> _MediaTypeSelection | None:
+    """Pick the first content type we know how to read. Returns None if none of them are supported.
+
+    `application/jsonl` is the odd one out: the body is a stream of items, so the schema that describes a
+    single item lives in the `itemSchema` extension rather than in the media type's own schema.
+    """
+    for content_type, media_type in content.items():
+        source = _source_by_content_type(content_type, config)
+        if source is None:
+            continue
+        if utils.get_content_type(content_type, config) != "application/jsonl":
+            return _MediaTypeSelection(source, media_type.media_type_schema, is_jsonl=False)
+        item_schema_raw = (media_type.model_extra or {}).get("itemSchema")
+        if item_schema_raw is None:
+            return _MediaTypeSelection(source, media_type.media_type_schema, is_jsonl=True)
+        if isinstance(item_schema_raw, dict) and "$ref" in item_schema_raw:
+            return _MediaTypeSelection(source, oai.Reference.model_validate(item_schema_raw), is_jsonl=True)
+        return _MediaTypeSelection(source, oai.Schema.model_validate(item_schema_raw), is_jsonl=True)
+    return None
+
+
 def response_from_data(  # noqa: PLR0911
     *,
     status_code: HTTPStatusPattern,
@@ -238,29 +267,13 @@ def response_from_data(  # noqa: PLR0911
             schemas,
         )
 
-    is_jsonl = False
-    for content_type, media_type in content.items():
-        source = _source_by_content_type(content_type, config)
-        if source is not None:
-            parsed_content_type = utils.get_content_type(content_type, config)
-            if parsed_content_type == "application/jsonl":
-                is_jsonl = True
-                item_schema_raw = (media_type.model_extra or {}).get("itemSchema")
-                if item_schema_raw is not None:
-                    if isinstance(item_schema_raw, dict) and "$ref" in item_schema_raw:
-                        schema_data: oai.Reference | oai.Schema | None = oai.Reference.model_validate(item_schema_raw)
-                    else:
-                        schema_data = oai.Schema.model_validate(item_schema_raw)
-                else:
-                    schema_data = media_type.media_type_schema
-            else:
-                schema_data = media_type.media_type_schema
-            break
-    else:
+    selected = _select_media_type(content, config)
+    if selected is None:
         return (
             ParseError(data=data, detail=f"Unsupported content_type {content}"),
             schemas,
         )
+    source, schema_data, is_jsonl = selected
 
     if schema_data is None:
         return (
