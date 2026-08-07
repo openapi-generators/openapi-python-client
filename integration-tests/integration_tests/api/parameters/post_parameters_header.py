@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -37,19 +37,35 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> PostParametersHeaderResponse200 | PublicError:
-    response.raise_for_status()
+) -> PostParametersHeaderResponse200:
     if response.status_code == 200:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
 
         return response_200
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if response.status_code == 400:
+        if client.raise_on_unexpected_status:
+            response_400: PublicError | None = None
+            try:
+                response_400 = PublicError.from_dict(response.json())
+            except Exception:
+                pass
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_400,
+            )
+
+        return cast(PostParametersHeaderResponse200, None)
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return cast(PostParametersHeaderResponse200, None)
 
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> Response[PostParametersHeaderResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,7 +81,7 @@ async def _request_detailed(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> Response[PostParametersHeaderResponse200]:
     """
     Args:
         boolean_header (bool):
@@ -74,11 +90,14 @@ async def _request_detailed(
         integer_header (int):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success and Client.raise_on_unexpected_status is True. A documented error response is
+            parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
+            None instead of raising.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[PostParametersHeaderResponse200 | PublicError]
+        Response[PostParametersHeaderResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -100,7 +119,7 @@ async def request(
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> PostParametersHeaderResponse200 | PublicError:
+) -> PostParametersHeaderResponse200:
     """
     Args:
         boolean_header (bool):
@@ -109,11 +128,14 @@ async def request(
         integer_header (int):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success and Client.raise_on_unexpected_status is True. A documented error response is
+            parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
+            None instead of raising.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        PostParametersHeaderResponse200 | PublicError
+        PostParametersHeaderResponse200
     """
 
     return (

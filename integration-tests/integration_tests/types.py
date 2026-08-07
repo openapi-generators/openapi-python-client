@@ -2,9 +2,14 @@
 
 from collections.abc import Mapping, MutableMapping
 from http import HTTPStatus
-from typing import IO, BinaryIO, Generic, Literal, TypeVar
+from io import BytesIO
+from pathlib import Path
+from typing import IO, Any, BinaryIO, Generic, Literal, TypeVar
 
 from attrs import define
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import core_schema
+from tandem_platform.schema.protected import BaseModel, ProtectedModel
 
 
 class Unset:
@@ -36,6 +41,75 @@ class File:
     def to_tuple(self) -> FileTypes:
         """Return a tuple representation that httpx will accept for multipart/form-data"""
         return self.file_name, self.payload, self.mime_type
+
+    @classmethod
+    def _validate(cls, value: Any) -> "File":
+        if isinstance(value, File):
+            return value
+        if isinstance(value, Mapping):
+            # The shape `_serialize` emits in JSON mode, so a serialize -> `from_dict` round-trip works.
+            unexpected = set(value) - {"file_name", "mime_type"}
+            if unexpected:
+                raise ValueError(f"unexpected keys for a File: {', '.join(sorted(unexpected))}")
+            return cls(payload=BytesIO(), file_name=value.get("file_name"), mime_type=value.get("mime_type"))
+        if isinstance(value, (bytes, bytearray)):
+            raise ValueError(
+                "cannot build a File from bare bytes: an upload needs a file name and a content type, "
+                "which raw bytes do not carry. Pass an explicit "
+                'File(payload=BytesIO(...), file_name="...", mime_type="...") instead.'
+            )
+        if hasattr(value, "read"):
+            # An open file (`open("recording.wav", "rb")`) exposes the path it was opened from.
+            name = getattr(value, "name", None)
+            return cls(payload=value, file_name=(Path(name).name or None) if isinstance(name, str) else None)
+        raise ValueError(f"expected a File, got {type(value).__name__}")
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
+        """Teach Pydantic how to handle a File field.
+
+        `payload` is an arbitrary binary stream that Pydantic cannot introspect. Without
+        this hook, every model holding a binary property -- a multipart request body, an
+        octet-stream response, a list of uploads -- fails to build its schema and the
+        module raises `PydanticSchemaGenerationError` on import.
+
+        An existing File passes through untouched: re-wrapping it would detach the
+        caller's stream, and copying it would re-read one that may already be consumed.
+        """
+        return core_schema.no_info_plain_validator_function(
+            cls._validate,
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                cls._serialize, info_arg=True, return_schema=core_schema.any_schema()
+            ),
+        )
+
+    @staticmethod
+    def _serialize(value: "File", info: core_schema.SerializationInfo) -> Any:
+        # JSON mode emits metadata only. The payload has no faithful JSON form, and
+        # letting Pydantic fall back to inference would drain the stream -- usually the
+        # very stream that is about to be uploaded.
+        if info.mode == "json":
+            return {"file_name": value.file_name, "mime_type": value.mime_type}
+        # Python mode hands the File back untouched, as `model_dump` does for any
+        # non-Pydantic value.
+        return value
+
+
+def dump_json__for_transport(model: BaseModel | ProtectedModel) -> bytes:
+    """Serialize a model to JSON bytes for the wire.
+
+    Models may hold protected data, so `model_dump`/`model_dump_json` must not be called anywhere outside the generated client.
+    """
+    return model.model_dump_json(by_alias=True, exclude_unset=True).encode()
+
+
+def dump_dict__for_transport(model: BaseModel | ProtectedModel) -> dict[str, Any]:
+    """Serialize a model to JSON-compatible Python objects.
+
+    For the destinations that need a mapping rather than encoded bytes: form-urlencoded bodies, and query parameters that flatten a model into `params`.
+    Models may hold protected data, so `model_dump`/`model_dump_json` must not be called anywhere outside the generated client.
+    """
+    return model.model_dump(by_alias=True, exclude_unset=True, mode="json")
 
 
 T = TypeVar("T")

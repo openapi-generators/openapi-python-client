@@ -312,11 +312,6 @@ def test_generate_dir_already_exists():
         shutil.rmtree(Path.cwd() / "my-test-api-client", ignore_errors=True)
 
 
-@pytest.mark.skip(
-    reason="Fork generates async-only endpoints (`request`/`_request_detailed`); the hand-written "
-    "integration-tests/tests/ call sync_detailed/asyncio_detailed, so `mypy --strict` fails. "
-    "Re-enable once those tests are rewritten for the async-only API."
-)
 def test_update_integration_tests():
     url = "https://raw.githubusercontent.com/openapi-generators/openapi-test-server/refs/tags/v0.2.1/openapi.yaml"
     source_path = Path(__file__).parent.parent / "integration-tests"
@@ -332,9 +327,19 @@ def test_update_integration_tests():
             url=url,
             config_path=config_path
         )
-        _compare_directories(source_path, temp_dir, ignore=["pyproject.toml"])
+        # pyproject.toml and README.md are the `--meta` output, and integration-tests/ maintains both
+        # by hand: the pyproject carries the tandem-platform shim dependency the generator can't know
+        # about, and `pdm regen_integration` runs with `--meta none` so it never rewrites either one.
+        # What this test is for is the generated client code, which regen does produce. README
+        # generation stays covered by the golden records.
+        _compare_directories(source_path, temp_dir, ignore=["pyproject.toml", "README.md"])
+        # Run from inside the copy, exactly as the CI integration job does. mypy resolves both its
+        # config file and its package roots relative to the cwd, so checking `temp_dir` from here
+        # would pick up this repo's `[tool.mypy]` and fail to resolve `integration_tests` as a
+        # top-level package.
         result = subprocess.run(
-            [sys.executable, "-m", "mypy", str(temp_dir), "--strict"],
+            [sys.executable, "-m", "mypy", ".", "--strict"],
+            cwd=temp_dir,
             capture_output=True,
             text=True,
         )

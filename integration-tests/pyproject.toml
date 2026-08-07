@@ -8,6 +8,11 @@ requires-python = ">=3.11,<4.0"
 dependencies = [
     "httpx>=0.23.1,<0.29.0",
     "attrs>=22.2.0",
+    # Runtime deps of the generated client: models are Pydantic and subclass
+    # tandem_platform.schema.protected.BaseModel. The latter is the test-only shim
+    # shared with the generator's own suite -- see test_support/tandem-platform.
+    "pydantic>=2.10,<3.0.0",
+    "tandem-platform @ file:///${PROJECT_ROOT}/../test_support/tandem-platform",
 ]
 
 [tool.pdm]
@@ -19,6 +24,10 @@ dev = [
     "mypy>=1.13",
     "pytest-asyncio>=0.23.5",
 ]
+
+[tool.pytest.ini_options]
+# Every generated endpoint is async, so every test that calls one is too.
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["pdm-backend"]

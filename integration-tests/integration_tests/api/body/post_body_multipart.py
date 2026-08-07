@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -31,21 +31,35 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> PostBodyMultipartResponse200 | PublicError:
-    response.raise_for_status()
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> PostBodyMultipartResponse200:
     if response.status_code == 200:
         response_200 = PostBodyMultipartResponse200.from_dict(response.json())
 
         return response_200
 
-    raise errors.UnexpectedStatus(response.status_code, response.content)
+    if response.status_code == 400:
+        if client.raise_on_unexpected_status:
+            response_400: PublicError | None = None
+            try:
+                response_400 = PublicError.from_dict(response.json())
+            except Exception:
+                pass
+            raise errors.UnexpectedStatus(
+                response.status_code,
+                response.content,
+                parsed=response_400,
+            )
+
+        return cast(PostBodyMultipartResponse200, None)
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    return cast(PostBodyMultipartResponse200, None)
 
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostBodyMultipartResponse200 | PublicError]:
+) -> Response[PostBodyMultipartResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -58,17 +72,20 @@ async def _request_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PostBodyMultipartBody | Unset = UNSET,
-) -> Response[PostBodyMultipartResponse200 | PublicError]:
+) -> Response[PostBodyMultipartResponse200]:
     """
     Args:
         body (PostBodyMultipartBody | Unset):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success and Client.raise_on_unexpected_status is True. A documented error response is
+            parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
+            None instead of raising.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[PostBodyMultipartResponse200 | PublicError]
+        Response[PostBodyMultipartResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -84,17 +101,20 @@ async def request(
     *,
     client: AuthenticatedClient | Client,
     body: PostBodyMultipartBody | Unset = UNSET,
-) -> PostBodyMultipartResponse200 | PublicError:
+) -> PostBodyMultipartResponse200:
     """
     Args:
         body (PostBodyMultipartBody | Unset):
 
     Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        errors.UnexpectedStatus: If the server returns a status code that is not a documented
+            success and Client.raise_on_unexpected_status is True. A documented error response is
+            parsed onto UnexpectedStatus.parsed. With the flag set to False, those statuses return
+            None instead of raising.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        PostBodyMultipartResponse200 | PublicError
+        PostBodyMultipartResponse200
     """
 
     return (

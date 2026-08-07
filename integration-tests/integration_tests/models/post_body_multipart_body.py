@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import json
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -36,9 +35,6 @@ class PostBodyMultipartBody(BaseModel):
     objects: list[AnObject]
     times: list[datetime.datetime]
 
-    def to_dict(self) -> dict[str, Any]:
-        return self.model_dump(by_alias=True, exclude_unset=True, mode="json")
-
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         return cls.model_validate(src_dict)
@@ -54,7 +50,7 @@ class PostBodyMultipartBody(BaseModel):
         files.append(("description", (None, str(self.description).encode(), "text/plain")))
 
         for objects_item_element in self.objects:
-            files.append(("objects", (None, json.dumps(objects_item_element.to_dict()).encode(), "application/json")))
+            files.append(("objects", (None, types.dump_json__for_transport(objects_item_element), "application/json")))
 
         for times_item_element in self.times:
             files.append(("times", (None, times_item_element.isoformat().encode(), "text/plain")))
@@ -67,4 +63,4 @@ class PostBodyMultipartBody(BaseModel):
 
 from ..models.an_object import AnObject
 
-PostBodyMultipartBody.model_rebuild()
+PostBodyMultipartBody.model_rebuild(raise_errors=False)

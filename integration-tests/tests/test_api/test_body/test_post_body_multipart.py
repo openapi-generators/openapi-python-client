@@ -6,45 +6,43 @@ import pytest
 
 from integration_tests.api.body import post_body_multipart
 from integration_tests.client import Client
-from integration_tests.models import AnObject, PublicError
+from integration_tests.models import AnObject, PostBodyMultipartResponse200
 from integration_tests.models.post_body_multipart_body import PostBodyMultipartBody
-from integration_tests.models.post_body_multipart_response_200 import PostBodyMultipartResponse200
-from integration_tests.types import File, Response
-
-body = PostBodyMultipartBody(
-    a_string="a test string",
-    description="super descriptive thing",
-    files=[
-        File(
-            payload=BytesIO(b"some file content"),
-            file_name="cool_stuff.txt",
-            mime_type="application/openapi-python-client",
-        ),
-        File(
-            payload=BytesIO(b"more file content"),
-            file_name=None,
-            mime_type=None,
-        ),
-    ],
-    times=[datetime.now(UTC) - timedelta(days=1), datetime.now(UTC)],
-    objects=[
-        AnObject(
-            an_int=1,
-            a_float=2.3,
-        ),
-        AnObject(
-            an_int=4,
-            a_float=5.6,
-        ),
-    ],
-)
+from integration_tests.types import File
 
 
-def check_response(response: Response[PostBodyMultipartResponse200 | PublicError]) -> None:
-    content = response.parsed
-    if not isinstance(content, PostBodyMultipartResponse200):
-        raise AssertionError(f"Received status {response.status_code} from test server with payload: {content!r}")
+def make_body() -> PostBodyMultipartBody:
+    """A fresh body per test: the files are `BytesIO` payloads that get consumed on send."""
+    return PostBodyMultipartBody(
+        a_string="a test string",
+        description="super descriptive thing",
+        files=[
+            File(
+                payload=BytesIO(b"some file content"),
+                file_name="cool_stuff.txt",
+                mime_type="application/openapi-python-client",
+            ),
+            File(
+                payload=BytesIO(b"more file content"),
+                file_name=None,
+                mime_type=None,
+            ),
+        ],
+        times=[datetime.now(UTC) - timedelta(days=1), datetime.now(UTC)],
+        objects=[
+            AnObject(
+                an_int=1,
+                a_float=2.3,
+            ),
+            AnObject(
+                an_int=4,
+                a_float=5.6,
+            ),
+        ],
+    )
 
+
+def check_response(content: PostBodyMultipartResponse200, body: PostBodyMultipartBody) -> None:
     assert content.a_string == body.a_string
     assert content.description == body.description
     assert content.times == body.times
@@ -57,24 +55,46 @@ def check_response(response: Response[PostBodyMultipartResponse200 | PublicError
         assert file.content_type == body.files[i].mime_type
 
 
-def test(client: Client) -> None:
-    response = post_body_multipart.sync_detailed(
+async def test(client: Client) -> None:
+    body = make_body()
+
+    content = await post_body_multipart.request(
         client=client,
         body=body,
     )
 
-    check_response(response)
+    check_response(content, body)
 
 
-def test_custom_hooks() -> None:
+async def test_detailed_response_carries_status_and_parsed(client: Client) -> None:
+    """`_request_detailed` is the escape hatch for callers that need more than the parsed body."""
+    body = make_body()
+
+    response = await post_body_multipart._request_detailed(
+        client=client,
+        body=body,
+    )
+
+    assert response.status_code == 200
+    assert response.parsed is not None
+    check_response(response.parsed, body)
+
+
+async def test_custom_hooks() -> None:
+    """`httpx_args` reaches the underlying client.
+
+    The hooks must be coroutines: endpoints go through `httpx.AsyncClient`, which awaits every
+    event hook. A plain function is accepted at construction and only blows up on the first
+    request, with `TypeError: 'NoneType' object can't be awaited`.
+    """
     request_hook_called = False
     response_hook_called = False
 
-    def log_request(*_: Any, **__: Any) -> None:
+    async def log_request(*_: Any, **__: Any) -> None:
         nonlocal request_hook_called
         request_hook_called = True
 
-    def log_response(*_: Any, **__: Any) -> None:
+    async def log_response(*_: Any, **__: Any) -> None:
         nonlocal response_hook_called
         response_hook_called = True
 
@@ -82,61 +102,32 @@ def test_custom_hooks() -> None:
         "http://localhost:3000", httpx_args={"event_hooks": {"request": [log_request], "response": [log_response]}}
     )
 
-    post_body_multipart.sync_detailed(
+    await post_body_multipart.request(
         client=client,
-        body=body,
+        body=make_body(),
     )
 
     assert request_hook_called
     assert response_hook_called
 
 
-def test_context_manager(client: Client) -> None:
-    with client as client:
-        post_body_multipart.sync_detailed(
-            client=client,
-            body=body,
-        )
-        response = post_body_multipart.sync_detailed(
-            client=client,
-            body=body,
-        )
-
-    with pytest.raises(RuntimeError):
-        post_body_multipart.sync_detailed(
-            client=client,
-            body=body,
-        )
-
-    check_response(response)
-
-
-@pytest.mark.asyncio
-async def test_async(client: Client) -> None:
-    response = await post_body_multipart.asyncio_detailed(
-        client=client,
-        body=body,
-    )
-
-    check_response(response)
-
-
-@pytest.mark.asyncio
 async def test_async_context_manager(client: Client) -> None:
+    body = make_body()
+
     async with client as client:
-        await post_body_multipart.asyncio_detailed(
+        await post_body_multipart.request(
             client=client,
-            body=body,
+            body=make_body(),
         )
-        response = await post_body_multipart.asyncio_detailed(
+        content = await post_body_multipart.request(
             client=client,
             body=body,
         )
 
     with pytest.raises(RuntimeError):
-        await post_body_multipart.asyncio_detailed(
+        await post_body_multipart.request(
             client=client,
-            body=body,
+            body=make_body(),
         )
 
-    check_response(response)
+    check_response(content, body)
