@@ -64,6 +64,37 @@ def call(
     return asyncio.run(endpoint(client=client, **kwargs))
 
 
+def call_recording_requests(
+    Client: Any,
+    endpoint: Any,
+    *,
+    status_code: int = 200,
+    json: Any = None,
+    **kwargs: Any,
+) -> list[httpx.Request]:
+    """Call a generated async endpoint and return the requests it issued.
+
+    For assertions about how the request was *built* -- URL encoding, headers, body -- rather than about
+    how the response was parsed. Recording the `httpx.Request` rather than the kwargs handed to
+    `httpx.request()` means the assertion covers httpx's own URL handling too, so it holds for what
+    actually goes on the wire.
+    """
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if json is None:
+            return httpx.Response(status_code)
+        return httpx.Response(status_code, json=json)
+
+    client = Client(base_url="https://example.com")
+    client.set_async_httpx_client(
+        httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.com")
+    )
+    asyncio.run(endpoint(client=client, **kwargs))
+    return requests
+
+
 def drain(Client: Any, stream_endpoint: Any, **mock_client_kwargs: Any) -> list[Any]:
     """Consume a generated `stream` endpoint to exhaustion and return everything it yielded."""
     client = mock_client(Client, **mock_client_kwargs)

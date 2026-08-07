@@ -131,32 +131,36 @@ components:
       type: object
       description: The thing.
 """)
-@with_generated_code_import(".api.service1.get_simple_thing.sync", alias="get_simple_thing_sync")
-@with_generated_code_import(".api.service1.post_simple_thing.sync", alias="post_simple_thing_sync")
-@with_generated_code_import(".api.service1.get_attribute_by_index.sync", alias="get_attribute_by_index_sync")
+@with_generated_code_import(".api.service1.get_simple_thing.request", alias="get_simple_thing_request")
+@with_generated_code_import(".api.service1.post_simple_thing.request", alias="post_simple_thing_request")
+@with_generated_code_import(".api.service1.get_attribute_by_index.request", alias="get_attribute_by_index_request")
 class TestEndpointDocstrings:
-    def test_description(self, get_simple_thing_sync):
-        assert DocstringParser(get_simple_thing_sync).lines[0] == "Get a simple thing."
+    def test_description(self, get_simple_thing_request):
+        assert DocstringParser(get_simple_thing_request).lines[0] == "Get a simple thing."
 
-    def test_response_single_type(self, get_simple_thing_sync):
-        assert DocstringParser(get_simple_thing_sync).get_section("Returns:") == [
+    def test_response_single_type(self, get_simple_thing_request):
+        assert DocstringParser(get_simple_thing_request).get_section("Returns:") == [
             "GoodResponse",
         ]
 
-    def test_response_union_type(self, post_simple_thing_sync):
-        returns_line = DocstringParser(post_simple_thing_sync).get_section("Returns:")[0]
-        assert returns_line in (
-            "GoodResponse | ErrorResponse",
-            "ErrorResponse | GoodResponse",
-        )
+    def test_documented_error_response_is_not_in_the_return_type(self, post_simple_thing_request):
+        """A documented 4xx is raised, not returned, so it must not widen `Returns:`.
 
-    def test_request_body(self, post_simple_thing_sync):
-        assert DocstringParser(post_simple_thing_sync).get_section("Args:") == [
+        Upstream unioned the error schema into the return type and left the caller to narrow it.
+        This fork raises `UnexpectedStatus` with the parsed body on `.parsed` instead, so a return
+        annotation of `GoodResponse | ErrorResponse` would describe a value that never arrives.
+        """
+        parsed = DocstringParser(post_simple_thing_request)
+        assert parsed.get_section("Returns:") == ["GoodResponse"]
+        assert any("errors.UnexpectedStatus" in line for line in parsed.get_section("Raises:"))
+
+    def test_request_body(self, post_simple_thing_request):
+        assert DocstringParser(post_simple_thing_request).get_section("Args:") == [
             "body (Thing | Unset): The thing."
         ]
 
-    def test_params(self, get_attribute_by_index_sync):
-        assert DocstringParser(get_attribute_by_index_sync).get_section("Args:") == [
+    def test_params(self, get_attribute_by_index_request):
+        assert DocstringParser(get_attribute_by_index_request).get_section("Args:") == [
             "id (str): Which one.",
             "index (int):",
             "fries (bool | Unset): Do you want fries with that?",
