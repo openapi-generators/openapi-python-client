@@ -99,7 +99,7 @@ client = Client(
 You can even set the httpx client directly, but beware that this will override any existing settings (e.g., base_url):
 
 ```python
-import httpx
+import httpx2 as httpx
 from integration_tests import Client
 
 client = Client(

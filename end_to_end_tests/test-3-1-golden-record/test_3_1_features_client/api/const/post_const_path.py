@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Any, Literal, cast
 from urllib.parse import quote
 
-import httpx
+import httpx2 as httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client

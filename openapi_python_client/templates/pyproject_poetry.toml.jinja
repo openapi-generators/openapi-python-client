@@ -11,7 +11,11 @@ include = ["{{ package_name }}/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+{% if config.httpx_version > 1 %}
+httpx2 = ">=2.5.0"
+{% else %}
 httpx = ">=0.23.1,<0.29.0"
+{% endif %}
 attrs = ">=22.2.0"
 
 [build-system]

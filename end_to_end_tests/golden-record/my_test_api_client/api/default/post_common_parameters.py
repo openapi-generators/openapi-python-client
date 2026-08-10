@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Any
 
-import httpx
+import httpx2 as httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
