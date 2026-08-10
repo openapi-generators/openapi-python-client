@@ -20,6 +20,7 @@ class FloatProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
@@ -40,6 +41,7 @@ class FloatProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
+        data: oai.Schema,
     ) -> FloatProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -52,6 +54,7 @@ class FloatProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
+            data=data,
         )
 
     @classmethod

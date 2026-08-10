@@ -20,6 +20,7 @@ class NoneProperty(PropertyProtocol):
     python_name: PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
 
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
         oai.ParameterLocation.QUERY,
@@ -38,6 +39,7 @@ class NoneProperty(PropertyProtocol):
         python_name: PythonIdentifier,
         description: str | None,
         example: str | None,
+        data: oai.Schema
     ) -> NoneProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -49,6 +51,7 @@ class NoneProperty(PropertyProtocol):
             python_name=python_name,
             description=description,
             example=example,
+            data=data,
         )
 
     @classmethod

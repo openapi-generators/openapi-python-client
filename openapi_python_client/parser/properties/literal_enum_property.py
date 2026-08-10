@@ -29,6 +29,7 @@ class LiteralEnumProperty(PropertyProtocol):
     python_name: utils.PythonIdentifier
     description: str | None
     example: str | None
+    data: oai.Schema
     values: set[ValueType]
     class_info: Class
     value_type: type[ValueType]
@@ -140,6 +141,7 @@ class LiteralEnumProperty(PropertyProtocol):
             python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
             description=data.description,
             example=data.example,
+            data=data,
         )
         checked_default = prop.convert_value(data.default)
         if isinstance(checked_default, PropertyError):
