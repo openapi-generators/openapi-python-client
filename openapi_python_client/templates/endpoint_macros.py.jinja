@@ -122,11 +122,20 @@ client: AuthenticatedClient | Client,
 {% if endpoint.bodies | length == 1 %}
 body: {{ endpoint.bodies[0].prop.get_type_string() }}{% if not endpoint.bodies[0].prop.required %} = UNSET{% endif %},
 {% elif endpoint.bodies | length > 1 %}
+{% if endpoint.bodies_with_content_type_dispatch %}
+body:
+    {%- for body in endpoint.unique_body_types -%}{% set body_required = body_required and body.prop.required %}
+    {{ body.prop.get_type_string(no_optional=True) }} {% if not loop.last %} | {% endif %}
+    {%- endfor -%}{% if not body_required %} | Unset = UNSET{% endif %}
+,
+body_content_type: str = "{{ endpoint.bodies[0].content_type }}",
+{% else %}
 body:
     {%- for body in endpoint.bodies -%}{% set body_required = body_required and body.prop.required %}
     {{ body.prop.get_type_string(no_optional=True) }} {% if not loop.last %} | {% endif %}
     {%- endfor -%}{% if not body_required %} | Unset = UNSET{% endif %}
 ,
+{% endif %}
 {% endif %}
 {# query parameters #}
 {% for parameter in endpoint.query_parameters %}
@@ -151,6 +160,9 @@ client=client,
 {% endif %}
 {% if endpoint.bodies | length > 0 %}
 body=body,
+{% if endpoint.bodies_with_content_type_dispatch %}
+body_content_type=body_content_type,
+{% endif %}
 {% endif %}
 {% for parameter in endpoint.query_parameters %}
 {{ parameter.python_name }}={{ parameter.python_name }},
