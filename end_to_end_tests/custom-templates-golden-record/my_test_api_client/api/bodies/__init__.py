@@ -2,7 +2,7 @@
 
 import types
 
-from . import json_like, optional_body, post_bodies_multiple, refs
+from . import json_like, optional_body, post_bodies_multiple, post_bodies_multiple_required, refs
 
 
 class BodiesEndpoints:
@@ -12,6 +12,13 @@ class BodiesEndpoints:
         Test multiple bodies
         """
         return post_bodies_multiple
+
+    @classmethod
+    def post_bodies_multiple_required(cls) -> types.ModuleType:
+        """
+        Test multiple bodies, all required
+        """
+        return post_bodies_multiple_required
 
     @classmethod
     def json_like(cls) -> types.ModuleType:
