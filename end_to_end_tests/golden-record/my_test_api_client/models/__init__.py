@@ -82,6 +82,9 @@ from .optional_body_body import OptionalBodyBody
 from .post_bodies_multiple_data_body import PostBodiesMultipleDataBody
 from .post_bodies_multiple_files_body import PostBodiesMultipleFilesBody
 from .post_bodies_multiple_json_body import PostBodiesMultipleJsonBody
+from .post_bodies_multiple_required_data_body import PostBodiesMultipleRequiredDataBody
+from .post_bodies_multiple_required_files_body import PostBodiesMultipleRequiredFilesBody
+from .post_bodies_multiple_required_json_body import PostBodiesMultipleRequiredJsonBody
 from .post_form_data_inline_body import PostFormDataInlineBody
 from .post_naming_property_conflict_with_import_body import PostNamingPropertyConflictWithImportBody
 from .post_naming_property_conflict_with_import_response_200 import PostNamingPropertyConflictWithImportResponse200
@@ -171,6 +174,9 @@ __all__ = (
     "PostBodiesMultipleDataBody",
     "PostBodiesMultipleFilesBody",
     "PostBodiesMultipleJsonBody",
+    "PostBodiesMultipleRequiredDataBody",
+    "PostBodiesMultipleRequiredFilesBody",
+    "PostBodiesMultipleRequiredJsonBody",
     "PostFormDataInlineBody",
     "PostNamingPropertyConflictWithImportBody",
     "PostNamingPropertyConflictWithImportResponse200",

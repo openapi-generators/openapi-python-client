@@ -123,9 +123,9 @@ client: AuthenticatedClient | Client,
 body: {{ endpoint.bodies[0].prop.get_type_string() }}{% if not endpoint.bodies[0].prop.required %} = UNSET{% endif %},
 {% elif endpoint.bodies | length > 1 %}
 body:
-    {%- for body in endpoint.bodies -%}{% set body_required = body_required and body.prop.required %}
+    {%- for body in endpoint.bodies -%}
     {{ body.prop.get_type_string(no_optional=True) }} {% if not loop.last %} | {% endif %}
-    {%- endfor -%}{% if not body_required %} | Unset = UNSET{% endif %}
+    {%- endfor -%}{% if endpoint.bodies | rejectattr("prop.required") | list %} | Unset = UNSET{% endif %}
 ,
 {% endif %}
 {# query parameters #}
