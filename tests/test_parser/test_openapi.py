@@ -555,6 +555,49 @@ class TestEndpoint:
             config=config,
         )
 
+    @pytest.mark.parametrize(
+        ("security", "expected_requires_security"),
+        [
+            ([{}], False),
+            ([{"apiKey": []}, {}], False),
+            ([{"apiKey": []}], True),
+        ],
+    )
+    def test_from_data_security_allows_anonymous_alternative(
+        self,
+        security,
+        expected_requires_security,
+        mocker,
+        config,
+    ):
+        data = oai.Operation.model_construct(
+            description=mocker.MagicMock(),
+            operationId=mocker.MagicMock(),
+            security=security,
+            responses=mocker.MagicMock(),
+        )
+        add_parameters = mocker.patch.object(
+            Endpoint, "add_parameters", return_value=(mocker.MagicMock(), mocker.MagicMock(), mocker.MagicMock())
+        )
+        mocker.patch.object(Endpoint, "_add_responses", return_value=(mocker.MagicMock(), mocker.MagicMock()))
+        path = mocker.MagicMock()
+        method = mocker.MagicMock()
+        mocker.patch("openapi_python_client.utils.remove_string_escapes", return_value=data.description)
+
+        Endpoint.from_data(
+            data=data,
+            path=path,
+            method=method,
+            tags=["default"],
+            schemas=mocker.MagicMock(),
+            responses={},
+            parameters=mocker.MagicMock(),
+            config=config,
+            request_bodies={},
+        )
+
+        assert add_parameters.call_args.kwargs["endpoint"].requires_security is expected_requires_security
+
     def test_from_data_some_bad_bodies(self, config):
         endpoint, _, _ = Endpoint.from_data(
             data=oai.Operation(
