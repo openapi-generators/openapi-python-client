@@ -196,11 +196,17 @@ class UnionProperty(PropertyProtocol):
         """
         imports = super().get_imports(prefix=prefix)
         for inner_prop in self.inner_properties:
-            imports.update(inner_prop.get_imports(prefix=prefix))
+            if self.default is not None:
+                imports.update(inner_prop.get_imports(prefix=prefix))
+                imports.update(inner_prop.get_lazy_imports(prefix=prefix))
+            else:
+                imports.update(inner_prop.get_imports(prefix=prefix))
         imports.add("from typing import cast")
         return imports
 
     def get_lazy_imports(self, *, prefix: str) -> set[str]:
+        if self.default is not None:
+            return set()
         lazy_imports = super().get_lazy_imports(prefix=prefix)
         for inner_prop in self.inner_properties:
             lazy_imports.update(inner_prop.get_lazy_imports(prefix=prefix))
