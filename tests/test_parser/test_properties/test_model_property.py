@@ -164,6 +164,23 @@ class TestBuild:
         assert new_schemas == schemas
         assert err == PropertyError(detail='Attempted to generate duplicate models with name "OtherModel"', data=data)
 
+    def test_model_name_conflict_fallback(self, config):
+        data = oai.Schema.model_construct(title="OtherModel")
+        schemas = Schemas(classes_by_name={"OtherModel": None})
+
+        model, _new_schemas = ModelProperty.build(
+            data=data,
+            name="UniqueModelName",
+            schemas=schemas,
+            required=True,
+            parent_name=None,
+            config=config,
+            roots={"root"},
+            process_properties=True,
+        )
+
+        assert model.class_info.name == "UniqueModelName"
+
     @pytest.mark.parametrize(
         "name, title, parent_name, use_title_prefixing, expected",
         ids=(
