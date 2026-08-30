@@ -13,6 +13,68 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.29.1 (2026-08-30)
+
+### 🚨Security
+
+#### Arbitrary code generation vulnerability
+
+Prior to this release, malicious OpenAPI documents could cause openapi-python-client to generate arbitrary code, which 
+would then be executed by consumers of the generated client.
+
+If you generate code from OpenAPI documents you don't control, you should upgrade to this release as **soon as possible**
+and validate any previously-generated code.
+
+See [the GitHub advisory](https://github.com/openapi-generators/openapi-python-client/security/advisories/GHSA-5293-mq8x-g3xj) for more details.
+
+### 🚀 Features
+
+- Update `uv_build` to 0.12 when using `--meta=uv` (#1473)
+
+### 🐛 Fixes
+
+- Apply PEP 639 for improved license metadata (#1459)
+- update generated code to use `StrEnum` and `-> Self` (#1474)
+- Remove trailing spaces in README example code (#1475)
+- Stopped generating empty docstrings for models with no description
+
+#### Fixed invalid Python identifiers when resolving naming conflicts
+
+When two property or parameter names conflicted after conversion to `snake_case` (e.g. `foo-bar` and `fooBar`), the conflict-resolution path preserved delimiters like `-`, `.`, and spaces in the generated Python identifiers, producing invalid code which failed generation. Conflicting names now keep their original casing but have any characters which are invalid in Python identifiers stripped (e.g. `foobar` and `fooBar`).
+
+#### Improve readability of error messages
+
+Errors and warnings which include a snippet of your OpenAPI document now render that snippet as JSON, making them much easier to read.
+
+### 📝Notes
+
+#### Breaking changes for all custom templates
+
+**ALL** custom templates are expected to break with this version as a result of the security fix.
+
+1. The `utils` global has been renamed to `strings`
+2. Most string values can no longer be rendered directly into templates, 
+   you must describe how the value is being used so it can be properly escaped using either a Python function or Jinja filter:
+   1. `strings.snake_case()` / `| snakecase` (existing)
+   2. `strings.kebab_case()` /  `| kebabcase` (existing)
+   3. `strings.pascal_case()` / `| pascalcase` (existing)
+   4. `python_identifier()` (existing)
+   5. `class_name()` (existing)
+   6. `strings.safe_for_docstring()` / `| safe_for_docstring` for values which get injected into a `"""` docstring
+   7. `strings.in_f_string_literal()` / `| in_f_string_literal` for values that go into `f""` f-strings
+   8. `strings.in_double_quote_literal()` / `| in_double_quote_literal` for values that go into **non-f-string** `""` literals
+   9. `.as_unembedded_code()` / `| as_unembedded_code` ONLY for `PythonCode` values—those that are intended to be Python code which is not embedded into any string/docstring. Examples include usages of `.python_code`, `.get_type_string()`, `.get_instance_type_string()`, `.get_type_strings_in_union()`. You *should not* assume these values are safe to put in docstrings, string literals, or f-string literals. Use the dedicated helpers for those.
+As always, you can check the diff of the built in templates for examples. You will also want to check generated output 
+for "UntrustedString", which is how any string now requiring one of those functions will appear.
+
+#### Many control characters now stripped from string literals
+
+Out of an abundance of caution, most Unicode control characters are now stripped from string literals.
+If your API uses control characters as part of const values, enums, or JSON body property names you may have issues 
+with this new version.
+
+Most APIs are not expected to be affected by this change.
+
 ## 0.29.0 (2026-05-30)
 
 ### Breaking Changes
