@@ -31,6 +31,13 @@ from .responses import HTTPStatusPattern, Responses, response_from_data
 _PATH_PARAM_REGEX = re.compile("{([a-zA-Z_-][a-zA-Z0-9_-]*)}")
 
 
+def requires_authenticated_client(security: list[dict[str, list[str]]] | None) -> bool:
+    """Return false when an operation permits anonymous access."""
+    if not security:
+        return False
+    return not any(not requirement for requirement in security)
+
+
 def import_string_from_class(class_: Class, prefix: str = "") -> str:
     """Create a string which is used to import a reference"""
     return f"from {prefix}.{class_.module_name} import {class_.name}"
@@ -430,7 +437,7 @@ class Endpoint:
             summary=data.summary if data.summary else UntrustedString(""),
             description=data.description if data.description else UntrustedString(""),
             name=name,
-            requires_security=bool(data.security),
+            requires_security=requires_authenticated_client(data.security),
             tags=tags,
         )
 
