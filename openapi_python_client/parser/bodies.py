@@ -12,7 +12,8 @@ from openapi_python_client.parser.properties.schemas import get_reference_simple
 
 from .. import schema as oai
 from ..config import Config
-from ..utils import get_content_type
+from ..schema.untrusted_string import UntrustedString
+from ..strings import get_content_type
 from .errors import ErrorLevel, ParseError
 
 
@@ -25,7 +26,7 @@ class BodyType(StrEnum):
 
 @attr.define
 class Body:
-    content_type: str
+    content_type: UntrustedString
     prop: Property
     body_type: BodyType
 
@@ -34,7 +35,7 @@ def body_from_data(
     *,
     data: oai.Operation,
     schemas: Schemas,
-    request_bodies: dict[str, oai.RequestBody | oai.Reference],
+    request_bodies: dict[UntrustedString, oai.RequestBody | oai.Reference],
     config: Config,
     endpoint_name: str,
 ) -> tuple[list[Body | ParseError], Schemas]:
@@ -50,7 +51,7 @@ def body_from_data(
     prefix_type_names = len(body_content) > 1
 
     for content_type, media_type in body_content.items():
-        simplified_content_type = get_content_type(content_type, config)
+        simplified_content_type = get_content_type(content_type.get_untrusted_value(), config)
         if simplified_content_type is None:
             bodies.append(
                 ParseError(
@@ -88,7 +89,7 @@ def body_from_data(
             )
             continue
         prop, schemas = property_from_data(
-            name="body",
+            name=UntrustedString("body"),
             required=body.required,
             data=media_type_schema,
             schemas=schemas,
@@ -121,7 +122,7 @@ def body_from_data(
 
 
 def _resolve_reference(
-    body: oai.RequestBody | oai.Reference | None, request_bodies: dict[str, oai.RequestBody | oai.Reference]
+    body: oai.RequestBody | oai.Reference | None, request_bodies: dict[UntrustedString, oai.RequestBody | oai.Reference]
 ) -> oai.RequestBody | ParseError | None:
     if body is None:
         return None
@@ -132,5 +133,5 @@ def _resolve_reference(
     if isinstance(body, oai.Reference):
         return ParseError(detail="Circular $ref in request body", data=body)
     if body is None and references_seen:
-        return ParseError(detail=f"Could not resolve $ref {references_seen[-1]} in request body")
+        return ParseError(detail=f"Could not resolve $ref {references_seen[-1].get_untrusted_value()} in request body")
     return body

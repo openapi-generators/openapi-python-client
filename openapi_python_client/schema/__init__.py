@@ -4,7 +4,6 @@ __all__ = [
     "OpenAPI",
     "Operation",
     "Parameter",
-    "Parameter",
     "ParameterLocation",
     "PathItem",
     "Reference",
@@ -12,6 +11,7 @@ __all__ = [
     "Response",
     "Responses",
     "Schema",
+    "UntrustedString",
 ]
 
 
@@ -29,3 +29,4 @@ from .openapi_schema_pydantic import (
     Schema,
 )
 from .parameter_location import ParameterLocation
+from .untrusted_string import UntrustedString

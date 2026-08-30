@@ -1,7 +1,8 @@
+from ..untrusted_string import UntrustedString
 from .reference import ReferenceOr
 from .response import Response
 
-Responses = dict[str, ReferenceOr[Response]]
+Responses = dict[UntrustedString, ReferenceOr[Response]]
 """
 A container for the expected responses of an operation.
 The container maps a HTTP response code to the expected response.

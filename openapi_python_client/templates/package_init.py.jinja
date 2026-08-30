@@ -1,6 +1,6 @@
-{% from "helpers.jinja" import safe_docstring %}
+{% from "helpers.jinja" import docstring %}
 
-{{ safe_docstring(package_description) }}
+{{ docstring(package_description | safe_for_docstring) }}
 from .client import AuthenticatedClient, Client
 
 __all__ = (

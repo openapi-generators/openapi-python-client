@@ -17,7 +17,7 @@ UUID({{ source }})
 {%- else %}
 {% if not skip_unset %}
     {% if declare_type %}
-    {% set type_annotation = property.get_type_string(json=True) %}
+    {% set type_annotation = property.get_type_string(json=True) | as_unembedded_code %}
 {{ destination }}: {{ type_annotation }} = UNSET
     {% else %}
 {{ destination }} = UNSET

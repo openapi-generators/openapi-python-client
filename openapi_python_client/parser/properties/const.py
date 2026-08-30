@@ -4,7 +4,8 @@ from typing import Any, ClassVar, overload
 
 from attr import define
 
-from ...utils import PythonIdentifier
+from ... import schema as oai
+from ...strings import PythonCode, PythonIdentifier
 from ..errors import PropertyError
 from .protocol import PropertyProtocol, Value
 from .string import StringProperty
@@ -14,12 +15,12 @@ from .string import StringProperty
 class ConstProperty(PropertyProtocol):
     """A property representing a const value"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     value: Value
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
+    description: oai.UntrustedString | None
     example: None
     template: ClassVar[str] = "const_property.py.jinja"
 
@@ -29,10 +30,10 @@ class ConstProperty(PropertyProtocol):
         *,
         const: str | int | float | bool,
         default: Any,
-        name: str,
+        name: oai.UntrustedString,
         python_name: PythonIdentifier,
         required: bool,
-        description: str | None,
+        description: oai.UntrustedString | None,
     ) -> ConstProperty | PropertyError:
         """
         Create a `ConstProperty` the right way.
@@ -62,7 +63,7 @@ class ConstProperty(PropertyProtocol):
         prop.default = converted_default
         return prop
 
-    def convert_value(self, value: Any) -> Value | None | PropertyError:
+    def convert_value(self, value: Any) -> Value | PropertyError | None:
         value = self._convert_value(value)
         if value is None:
             return value
@@ -87,16 +88,16 @@ class ConstProperty(PropertyProtocol):
             return value
         if isinstance(value, str):
             return StringProperty.convert_value(value)
-        return Value(python_code=str(value), raw_value=value)
+        return Value(python_code=PythonCode(str(value)), raw_value=value)
 
     def get_type_string(
         self,
         no_optional: bool = False,
         json: bool = False,
-    ) -> str:
-        lit = f"Literal[{self.value.python_code}]"
+    ) -> PythonCode:
+        lit = PythonCode(f"Literal[{self.value.python_code.as_unembedded_code()}]")
         if not no_optional and not self.required:
-            return f"{lit} | Unset"
+            return PythonCode(f"{lit.as_unembedded_code()} | Unset")
         return lit
 
     def get_imports(self, *, prefix: str) -> set[str]:

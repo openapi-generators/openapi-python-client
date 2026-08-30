@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .media_type import MediaType
 
 
@@ -11,8 +12,8 @@ class RequestBody(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject
     """
 
-    description: str | None = None
-    content: dict[str, MediaType]
+    description: UntrustedString | None = None
+    content: dict[UntrustedString, MediaType]
     required: bool = False
     model_config = ConfigDict(
         # `MediaType` is not build yet, will rebuild in `__init__.py`:

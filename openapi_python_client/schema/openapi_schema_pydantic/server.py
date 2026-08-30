@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .server_variable import ServerVariable
 
 
@@ -11,9 +12,9 @@ class Server(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject
     """
 
-    url: str
-    description: str | None = None
-    variables: dict[str, ServerVariable] | None = None
+    url: UntrustedString
+    description: UntrustedString | None = None
+    variables: dict[UntrustedString, ServerVariable] | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

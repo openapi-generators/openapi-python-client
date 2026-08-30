@@ -7,6 +7,8 @@ from attr import define
 from pydantic import BaseModel
 from ruamel.yaml import YAML
 
+from openapi_python_client.schema.untrusted_string import UntrustedString
+
 
 class ClassOverride(BaseModel):
     """An override of a single generated class.
@@ -14,7 +16,7 @@ class ClassOverride(BaseModel):
     See https://github.com/openapi-generators/openapi-python-client#class_overrides
     """
 
-    class_name: str | None = None
+    class_name: UntrustedString | None = None
     module_name: str | None = None
 
 

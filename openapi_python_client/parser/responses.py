@@ -5,12 +5,13 @@ from typing import TypedDict
 
 from attrs import define
 
-from openapi_python_client import utils
+from openapi_python_client import strings
 from openapi_python_client.parser.properties.schemas import get_reference_simple_name, parse_reference_path
 
 from .. import Config
 from .. import schema as oai
-from ..utils import PythonIdentifier
+from ..schema.untrusted_string import UntrustedString
+from ..strings import PythonIdentifier
 from .errors import ParseError, PropertyError
 from .properties import AnyProperty, Property, Schemas, property_from_data
 
@@ -60,22 +61,23 @@ class HTTPStatusPattern:
         self.range = code_range
 
     @staticmethod
-    def parse(pattern: str) -> "HTTPStatusPattern | ParseError":
+    def parse(pattern: UntrustedString) -> "HTTPStatusPattern | ParseError":
         """Parse a status code pattern such as 2XX or 404"""
-        if pattern == "default":
-            return HTTPStatusPattern(pattern=pattern, code_range=None)
+        untrusted = pattern.get_untrusted_value()
+        if untrusted == "default":
+            return HTTPStatusPattern(pattern=untrusted, code_range=None)
 
-        if pattern.endswith("XX") and pattern[0].isdigit():
-            first_digit = int(pattern[0])
-            return HTTPStatusPattern(pattern=pattern, code_range=(first_digit * 100, first_digit * 100 + 99))
+        if len(untrusted) == 3 and untrusted.endswith("XX") and untrusted[0].isdigit():
+            first_digit = int(untrusted[0])
+            return HTTPStatusPattern(pattern=untrusted, code_range=(first_digit * 100, first_digit * 100 + 99))
 
         try:
-            code = int(pattern)
-            return HTTPStatusPattern(pattern=pattern, code_range=(code, code))
+            code = int(untrusted)
+            return HTTPStatusPattern(pattern=untrusted, code_range=(code, code))
         except ValueError:
             return ParseError(
                 detail=(
-                    f"Invalid response status code pattern: {pattern}, response will be omitted from generated client"
+                    f"Invalid response status code pattern: {untrusted}, response will be omitted from generated client"
                 )
             )
 
@@ -129,7 +131,7 @@ class Response:
 
 
 def _source_by_content_type(content_type: str, config: Config) -> _ResponseSource | None:
-    parsed_content_type = utils.get_content_type(content_type, config)
+    parsed_content_type = strings.get_content_type(content_type, config)
     if parsed_content_type is None:
         return None
 
@@ -150,7 +152,7 @@ def _source_by_content_type(content_type: str, config: Config) -> _ResponseSourc
 def empty_response(
     *,
     status_code: HTTPStatusPattern,
-    response_name: str,
+    response_name: UntrustedString,
     config: Config,
     data: oai.Response | oai.Reference,
 ) -> Response:
@@ -175,23 +177,25 @@ def response_from_data(  # noqa: PLR0911
     status_code: HTTPStatusPattern,
     data: oai.Response | oai.Reference,
     schemas: Schemas,
-    responses: dict[str, oai.Response | oai.Reference],
+    responses: dict[UntrustedString, oai.Response | oai.Reference],
     parent_name: str,
     config: Config,
 ) -> tuple[Response | ParseError, Schemas]:
     """Generate a Response from the OpenAPI dictionary representation of it"""
 
-    response_name = f"response_{status_code.pattern}"
+    response_name = UntrustedString(f"response_{status_code.pattern}")
     if isinstance(data, oai.Reference):
         ref_path = parse_reference_path(data.ref)
-        if isinstance(ref_path, ParseError):
+        if isinstance(ref_path, ParseError):  # pragma: no cover
             return ref_path, schemas
-        if not ref_path.startswith("/components/responses/"):
-            return ParseError(data=data, detail=f"$ref to {data.ref} not allowed in responses"), schemas
+        if not ref_path.startswith("/components/responses/"):  # pragma: no cover
+            return ParseError(
+                data=data, detail=f"$ref to {data.ref.get_untrusted_value()} not allowed in responses"
+            ), schemas
         resp_data = responses.get(get_reference_simple_name(ref_path), None)
-        if not resp_data:
-            return ParseError(data=data, detail=f"Could not find reference: {data.ref}"), schemas
-        if not isinstance(resp_data, oai.Response):
+        if not resp_data:  # pragma: no cover
+            return ParseError(data=data, detail=f"Could not find reference: {data.ref.get_untrusted_value()}"), schemas
+        if not isinstance(resp_data, oai.Response):  # pragma: no cover
             return ParseError(data=data, detail="Top-level $ref inside components/responses is not supported"), schemas
         data = resp_data
 
@@ -208,13 +212,16 @@ def response_from_data(  # noqa: PLR0911
         )
 
     for content_type, media_type in content.items():
-        source = _source_by_content_type(content_type, config)
+        source = _source_by_content_type(content_type.get_untrusted_value(), config)
         if source is not None:
             schema_data = media_type.media_type_schema
             break
     else:
         return (
-            ParseError(data=data, detail=f"Unsupported content_type {content}"),
+            ParseError(
+                data=data,
+                detail=f"Unsupported content_type {', '.join(key.get_untrusted_value() for key in content)}",
+            ),
             schemas,
         )
 

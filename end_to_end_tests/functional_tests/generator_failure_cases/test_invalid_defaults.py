@@ -4,7 +4,7 @@ from end_to_end_tests.functional_tests.helpers import assert_bad_schema, with_ge
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     WithBadBoolean:
@@ -82,7 +82,7 @@ class TestInvalidDefaultValues:
             ("WithBadEnum", "Value x is not valid for enum"),
             ("OverriddenEnumWithBadDefault", "Value x is not valid for enum"),
             ("UnionWithNoValidDefault", "Invalid int value"),
-        ]
+        ],
     )
     def test_bad_default_warning(self, model_name, message, generated_client):
         assert_bad_schema(generated_client, model_name, message)

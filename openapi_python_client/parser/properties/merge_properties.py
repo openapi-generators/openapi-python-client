@@ -67,11 +67,12 @@ def merge_properties(prop1: Property, prop2: Property) -> Property | PropertyErr
         return merged
 
     return PropertyError(
-        detail=f"{prop1.get_type_string(no_optional=True)} can't be merged with {prop2.get_type_string(no_optional=True)}"
+        detail=f"{prop1.get_type_string(no_optional=True).as_unembedded_code()} can't be merged with "
+        f"{prop2.get_type_string(no_optional=True).as_unembedded_code()}"
     )
 
 
-def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | PropertyError:
+def _merge_same_type(prop1: Property, prop2: Property) -> Property | PropertyError | None:
     if type(prop1) is not type(prop2):
         return None
 
@@ -90,7 +91,7 @@ def _merge_same_type(prop1: Property, prop2: Property) -> Property | None | Prop
     return _merge_common_attributes(prop1, prop2)
 
 
-def _merge_string_with_format(prop1: Property, prop2: Property) -> Property | None | PropertyError:
+def _merge_string_with_format(prop1: Property, prop2: Property) -> Property | PropertyError | None:
     """Merge a string that has no format with a string that has a format"""
     # Here we need to use the DateProperty/DateTimeProperty/FileProperty as the base so that we preserve
     # its class, but keep the correct override order for merging the attributes.
@@ -103,7 +104,7 @@ def _merge_string_with_format(prop1: Property, prop2: Property) -> Property | No
         return None
 
 
-def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | None | PropertyError:
+def _merge_numeric(prop1: Property, prop2: Property) -> IntProperty | PropertyError | None:
     """Merge IntProperty with FloatProperty"""
     if isinstance(prop1, IntProperty) and isinstance(prop2, IntProperty | FloatProperty):
         return _merge_common_attributes(prop1, prop2)
@@ -136,7 +137,8 @@ def _merge_with_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -> EnumPr
     ):
         return _merge_common_attributes(enum_prop, prop1, prop2)
     return PropertyError(
-        detail=f"can't combine enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
+        detail=f"can't combine enum of type {enum_prop.value_type} with "
+        f"{non_enum_prop.get_type_string(no_optional=True).as_unembedded_code()}"
     )
 
 
@@ -162,7 +164,8 @@ def _merge_with_literal_enum(prop1: PropertyProtocol, prop2: PropertyProtocol) -
     ):
         return _merge_common_attributes(enum_prop, prop1, prop2)
     return PropertyError(
-        detail=f"can't combine literal enum of type {enum_prop.value_type} with {non_enum_prop.get_type_string(no_optional=True)}"
+        detail=f"can't combine literal enum of type {enum_prop.value_type} with "
+        f"{non_enum_prop.get_type_string(no_optional=True).as_unembedded_code()}"
     )
 
 

@@ -1,0 +1,179 @@
+openapi: "3.1.\"print('uh oh')"
+info:
+  title: "escapes\""
+  version: "1.2.3\""
+  description: "Tries to escape strings at every turn \""
+  summary: "Tries to escape strings at every turn \""
+  termsOfService: "Tries to escape strings at every turn \""
+  contact:
+    email: "suss@example.com\""
+    name: "Escaper \""
+    url: "https://example.com\""
+  license:
+    url: "https://example.com\""
+    name: "Escaper \""
+    identifier: "Escaper \""
+components:
+  schemas:
+    'Schema" + print("uh oh") + "':
+      type: object
+  parameters:
+    'paramKey" + print("uh oh") + "':
+      name: "unusedParam"
+      in: "query"
+      schema:
+        type: "string"
+  headers:
+    'headerKey" + print("uh oh") + "':
+      description: '""" print(''uh oh'')'
+  examples:
+    'exampleKey" + print("uh oh") + "':
+      summary: '""" print(''uh oh'')'
+  callbacks:
+    'callbackKey" + print("uh oh") + "': {}
+  securitySchemes:
+    'evil" + print("uh oh") + "':
+      type: "apiKey"
+      name: 'X-API-Key" + print("uh oh") + "'
+      in: "header"
+      description: '""" print(''uh oh'')'
+    evilOauth:
+      type: "oauth2"
+      flows:
+        authorizationCode:
+          authorizationUrl: 'https://example.com/" + print("uh oh") + "'
+          tokenUrl: 'https://example.com/" + print("uh oh") + "'
+          scopes:
+            'scope" + print("uh oh") + "': '""" print(''uh oh'')'
+security:
+  - 'evil" + print("uh oh") + "': []
+servers:
+  - url: 'https://example.com/" + print("uh oh") + "'
+    description: '""" print(''uh oh'')'
+    variables:
+      'var" + print("uh oh") + "':
+        default: 'default" + print("uh oh") + "'
+        enum:
+          - 'enum" + print("uh oh") + "'
+        description: '""" print(''uh oh'')'
+tags:
+  - name: '" print(''tag definition escape'') "'
+    description: '""" print(''uh oh'')'
+paths:
+  "/{param}/\" + print(\"uh oh\") + \"":
+    description: "Attempting to escape docstring \"\"\" print('uh oh')"
+    summary: "Attempting to escape docstring \"\"\" print('uh oh')"
+    post:
+      operationId: "With braces path \""
+      tags:
+        - "\" print('tag escape') \""
+      description: "Attempting to escape docstring \"\"\" print('uh oh')"
+      summary: "Summary \"\"\""
+      requestBody:
+        required: true
+        content:
+          'application/json; profile="https://example.com/escape" + print("uh oh") + "':
+            schema:
+              type: object
+      parameters:
+        - name: "param"
+          description: "\" print('escape param description')"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+        - name: "\\\"print('escape param name')"
+          in: "query"
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: "Success \""
+  /property-escapes:
+    post:
+      operationId: "Property escapes"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: 'Model title """ print(''uh oh'')'
+              properties:
+                escaped_description:
+                  type: string
+                  description: 'Attempting to escape the Attributes docstring """ print(''uh oh'')'
+                  example: 'Example """ print(''uh oh'')'
+                  default: 'default value with "quotes"'
+                escaped_enum:
+                  type: string
+                  enum:
+                    - 'normal value'
+                    - 'value" + print(''uh oh'') + "'
+                escaped_const:
+                  const: '" + print(''uh oh'') + "'
+      responses:
+        '200':
+          description: Success
+  /misc-metadata-escapes:
+    post:
+      operationId: "Misc metadata escapes"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              externalDocs:
+                url: 'https://example.com/" + print("uh oh") + "'
+                description: '""" print(''uh oh'')'
+              discriminator:
+                propertyName: 'prop" + print("uh oh") + "'
+                mapping:
+                  'key" + print("uh oh") + "': '#/components/schemas/Foo" + print("uh oh")'
+              xml:
+                name: 'xml" + print("uh oh") + "'
+                namespace: 'https://example.com/" + print("uh oh")'
+                prefix: 'prefix" + print("uh oh")'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                'example" + print("uh oh") + "':
+                  summary: '""" print(''uh oh'')'
+                  description: '""" print(''uh oh'')'
+                  externalValue: 'https://example.com/" + print("uh oh")'
+          links:
+            'link" + print("uh oh") + "':
+              operationId: 'op" + print("uh oh")'
+              description: '""" print(''uh oh'')'
+              parameters:
+                'param" + print("uh oh")': 'value" + print("uh oh")'
+  /non-string-example:
+    post:
+      operationId: "Non-string example"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dict_example:
+                  type: object
+                  example:
+                    nested: 'dict example """ print(''uh oh'')'
+      responses:
+        '200':
+          description: Success
+  /weird-responses:
+    get:
+      responses:
+        "\"print('uh oh')":
+          description: Success
+        "3FakePatternXX":
+          description: A Fake Pattern

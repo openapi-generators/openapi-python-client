@@ -1,6 +1,4 @@
-import pytest
-
-from end_to_end_tests.functional_tests.helpers import assert_bad_schema, with_generated_client_fixture
+from end_to_end_tests.functional_tests.helpers import with_generated_client_fixture
 
 
 @with_generated_client_fixture(

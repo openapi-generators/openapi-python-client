@@ -10,6 +10,9 @@ from openapi_python_client.parser.properties.model_property import (
     _PropertyData,
     process_model,
 )
+from openapi_python_client.schema import DataType
+from openapi_python_client.schema.ref import Ref
+from openapi_python_client.strings import PythonCode
 
 MODULE_NAME = "openapi_python_client.parser.properties.model_property"
 
@@ -30,7 +33,7 @@ class TestModelProperty:
             required=required,
         )
 
-        assert prop.get_type_string(no_optional=no_optional, json=json) == expected
+        assert prop.get_type_string(no_optional=no_optional, json=json) == PythonCode(expected)
 
     def test_get_imports(self, model_property_factory):
         prop = model_property_factory(required=False)
@@ -49,7 +52,7 @@ class TestModelProperty:
 
     def test_get_base_type_string(self, model_property_factory):
         m = model_property_factory()
-        assert m.get_base_type_string() == "MyClass"
+        assert m.get_base_type_string() == PythonCode("MyClass")
 
 
 class TestBuild:
@@ -61,7 +64,7 @@ class TestBuild:
             (None, ANY_ADDITIONAL_PROPERTY),
             (False, None),
             (
-                oai.Schema.model_construct(type="string"),
+                oai.Schema(type=DataType.STRING),
                 StringProperty(
                     name="AdditionalProperty",
                     required=True,
@@ -212,7 +215,7 @@ class TestBuild:
     def test_model_bad_properties(self, config):
         data = oai.Schema(
             properties={
-                "bad": oai.Reference.model_construct(ref="#/components/schema/NotExist"),
+                "bad": oai.Reference.model_construct(ref=Ref("#/components/schema/NotExist")),
             },
         )
         result = ModelProperty.build(
@@ -298,7 +301,10 @@ class TestProcessProperties:
         self, model_property_factory, string_property_factory, int_property_factory, config
     ):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         schemas = Schemas(
             classes_by_reference={
@@ -316,7 +322,7 @@ class TestProcessProperties:
     def test_process_properties_reference_not_exist(self, config):
         data = oai.Schema(
             properties={
-                "bad": oai.Reference.model_construct(ref="#/components/schema/NotExist"),
+                "bad": oai.Reference.model_construct(ref=Ref("#/components/schema/NotExist")),
             },
         )
 
@@ -325,7 +331,9 @@ class TestProcessProperties:
         assert isinstance(result, PropertyError)
 
     def test_process_properties_all_of_reference_not_exist(self, config):
-        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/components/schema/NotExist")])
+        data = oai.Schema.model_construct(
+            allOf=[oai.Reference.model_construct(ref=Ref("#/components/schema/NotExist"))]
+        )
 
         result = _process_properties(data=data, class_name="", schemas=Schemas(), config=config, roots={"root"})
 
@@ -340,7 +348,7 @@ class TestProcessProperties:
         assert all(root in result.optional_props[0].roots for root in roots)
 
     def test_invalid_reference(self, config):
-        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="ThisIsNotGood")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref=Ref("ThisIsNotGood"))])
         schemas = Schemas()
 
         result = _process_properties(data=data, schemas=schemas, class_name="", config=config, roots={"root"})
@@ -348,7 +356,7 @@ class TestProcessProperties:
         assert isinstance(result, PropertyError)
 
     def test_non_model_reference(self, enum_property_factory, config):
-        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/First")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref=Ref("#/First"))])
         schemas = Schemas(
             classes_by_reference={
                 "/First": enum_property_factory(),
@@ -360,7 +368,7 @@ class TestProcessProperties:
         assert isinstance(result, PropertyError)
 
     def test_reference_not_processed(self, model_property_factory, config):
-        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref="#/Unprocessed")])
+        data = oai.Schema.model_construct(allOf=[oai.Reference.model_construct(ref=Ref("#/Unprocessed"))])
         schemas = Schemas(
             classes_by_reference={
                 "/Unprocessed": model_property_factory(),
@@ -375,7 +383,10 @@ class TestProcessProperties:
         self, model_property_factory, enum_property_factory, string_property_factory, config
     ):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property = enum_property_factory(
             values={"foo": "foo"},
@@ -397,7 +408,10 @@ class TestProcessProperties:
         self, model_property_factory, enum_property_factory, string_property_factory, config
     ):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property = enum_property_factory(
             required=False,
@@ -418,7 +432,10 @@ class TestProcessProperties:
 
     def test_allof_int_and_int_enum(self, model_property_factory, enum_property_factory, int_property_factory, config):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property = enum_property_factory(
             values={"foo": 1},
@@ -438,7 +455,10 @@ class TestProcessProperties:
         self, model_property_factory, enum_property_factory, int_property_factory, config
     ):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property = enum_property_factory(
             values={"foo": 1},
@@ -456,7 +476,10 @@ class TestProcessProperties:
 
     def test_allof_string_enums(self, model_property_factory, enum_property_factory, config):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property1 = enum_property_factory(
             name="an_enum",
@@ -480,7 +503,10 @@ class TestProcessProperties:
 
     def test_allof_int_enums(self, model_property_factory, enum_property_factory, config):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property1 = enum_property_factory(
             name="an_enum",
@@ -504,7 +530,10 @@ class TestProcessProperties:
 
     def test_allof_enums_are_not_subsets(self, model_property_factory, enum_property_factory, config):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         enum_property1 = enum_property_factory(
             name="an_enum",
@@ -528,7 +557,10 @@ class TestProcessProperties:
 
     def test_duplicate_properties(self, model_property_factory, string_property_factory, config):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         prop = string_property_factory(required=False)
         schemas = Schemas(
@@ -560,7 +592,7 @@ class TestProcessProperties:
 
         data = oai.Schema.model_construct(
             allOf=[
-                oai.Reference.model_construct(ref="#/FooBase"),
+                oai.Reference.model_construct(ref=Ref("#/FooBase")),
                 oai.Schema.model_construct(type="object", required=["bar"]),
             ]
         )
@@ -589,7 +621,10 @@ class TestProcessProperties:
         config,
     ):
         data = oai.Schema.model_construct(
-            allOf=[oai.Reference.model_construct(ref="#/First"), oai.Reference.model_construct(ref="#/Second")]
+            allOf=[
+                oai.Reference.model_construct(ref=Ref("#/First")),
+                oai.Reference.model_construct(ref=Ref("#/Second")),
+            ]
         )
         schemas = Schemas(
             classes_by_reference={

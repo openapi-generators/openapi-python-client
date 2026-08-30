@@ -2,6 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..untrusted_string import UntrustedString
 from .encoding import Encoding
 from .example import Example
 from .reference import ReferenceOr
@@ -18,8 +19,8 @@ class MediaType(BaseModel):
 
     media_type_schema: ReferenceOr[Schema] | None = Field(default=None, alias="schema")
     example: Any | None = None
-    examples: dict[str, ReferenceOr[Example]] | None = None
-    encoding: dict[str, Encoding] | None = None
+    examples: dict[UntrustedString, ReferenceOr[Example]] | None = None
+    encoding: dict[UntrustedString, Encoding] | None = None
     model_config = ConfigDict(
         # `Encoding` is not build yet, will rebuild in `__init__.py`:
         defer_build=True,

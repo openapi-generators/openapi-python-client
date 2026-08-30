@@ -1,10 +1,10 @@
 {% macro construct(property, source) %}
-def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_string() }}:
-    {% if "None" in property.get_type_strings_in_union(json=True) %}
+def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_string() | as_unembedded_code }}:
+    {% if PythonCode("None") in property.get_type_strings_in_union(json=True) %}
     if data is None:
         return data
     {% endif %}
-    {% if "Unset" in property.get_type_strings_in_union(json=True) %}
+    {% if PythonCode("Unset") in property.get_type_strings_in_union(json=True) %}
     if isinstance(data, Unset):
         return data
     {% endif %}
@@ -33,7 +33,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
     {% endif %}
     {% endfor %}
     {% if ns.contains_unmodified_properties %}
-    return cast({{ property.get_type_string() }}, data)
+    return cast({{ property.get_type_string() | as_unembedded_code }}, data)
     {% endif %}
 
 {{ property.python_name }} = _parse_{{ property.python_name }}({{ source }})
@@ -41,7 +41,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 
 {% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
 {% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
-{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) }}{% endif %}
+{% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) | as_unembedded_code }}{% endif %}
 
 {% if not property.required and not skip_unset %}
 if isinstance({{ source }}, Unset):
@@ -57,10 +57,10 @@ if isinstance({{ source }}, Unset):
         {% set ns.contains_modified_properties = true %}
     {% endif %}
     {% if not ns.has_if %}
-if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+if isinstance({{ source }}, {{ inner_property.get_instance_type_string() | as_unembedded_code }}):
         {% set ns.has_if = true %}
     {% elif not loop.last or ns.contains_properties_without_transform %}
-elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() | as_unembedded_code }}):
     {% else %}
 else:
     {% endif %}
@@ -76,10 +76,10 @@ else:
 
 
 {% macro instance_check(inner_property, source) %}
-{% if inner_property.get_instance_type_string() == "None" %}
+{% if inner_property.get_instance_type_string() == PythonCode("None") %}
 if {{ source }} is None:
 {% else %}
-if isinstance({{ source }}, {{ inner_property.get_instance_type_string() }}):
+if isinstance({{ source }}, {{ inner_property.get_instance_type_string() | as_unembedded_code }}):
 {% endif %}
 {% endmacro %}
 

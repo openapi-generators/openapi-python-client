@@ -3,24 +3,24 @@ from __future__ import annotations
 from typing import Any, ClassVar
 from uuid import UUID
 
-from attr import define
+from attr import define, field
 
 from ... import schema as oai
-from ...utils import PythonIdentifier
+from ...strings import PythonCode, PythonIdentifier
 from ..errors import PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 
 
 @define
 class UuidProperty(PropertyProtocol):
     """A property of type uuid.UUID"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
 
     _type_string: ClassVar[str] = "UUID"
     _json_type_string: ClassVar[str] = "str"
@@ -35,12 +35,12 @@ class UuidProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         default: Any,
         python_name: PythonIdentifier,
-        description: str | None,
-        example: str | None,
+        description: oai.UntrustedString | None,
+        example: Any,
     ) -> UuidProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -56,7 +56,7 @@ class UuidProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | PropertyError | None:
         if value is None or isinstance(value, Value):
             return value
         if isinstance(value, str):
@@ -64,7 +64,7 @@ class UuidProperty(PropertyProtocol):
                 UUID(value)
             except ValueError:
                 return PropertyError(f"Invalid UUID value: {value}")
-            return Value(python_code=f"UUID('{value}')", raw_value=value)
+            return Value(python_code=PythonCode(f"UUID('{value}')"), raw_value=value)
         return PropertyError(f"Invalid UUID value: {value}")
 
     def get_imports(self, *, prefix: str) -> set[str]:

@@ -7,9 +7,10 @@ from typing import Any, Protocol
 from pydantic import ValidationError
 
 from .. import schema as oai
-from .. import utils
+from .. import strings
 from ..config import Config
-from ..utils import PythonIdentifier
+from ..schema.untrusted_string import UntrustedString
+from ..strings import PythonIdentifier
 from .bodies import Body, body_from_data
 from .errors import GeneratorError, ParseError, PropertyError
 from .properties import (
@@ -46,15 +47,15 @@ class EndpointCollection:
     @staticmethod
     def from_data(
         *,
-        data: dict[str, oai.PathItem],
+        data: dict[UntrustedString, oai.PathItem],
         schemas: Schemas,
         parameters: Parameters,
-        request_bodies: dict[str, oai.RequestBody | oai.Reference],
-        responses: dict[str, oai.Response | oai.Reference],
+        request_bodies: dict[UntrustedString, oai.RequestBody | oai.Reference],
+        responses: dict[UntrustedString, oai.Response | oai.Reference],
         config: Config,
-    ) -> tuple[dict[utils.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
+    ) -> tuple[dict[strings.PythonIdentifier, "EndpointCollection"], Schemas, Parameters]:
         """Parse the openapi paths data to get EndpointCollections by tag"""
-        endpoints_by_tag: dict[utils.PythonIdentifier, EndpointCollection] = {}
+        endpoints_by_tag: dict[strings.PythonIdentifier, EndpointCollection] = {}
 
         methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 
@@ -64,7 +65,10 @@ class EndpointCollection:
                 if operation is None:
                     continue
 
-                tags = [utils.PythonIdentifier(value=tag, prefix="tag") for tag in operation.tags or ["default"]]
+                tags = [
+                    strings.PythonIdentifier(value=tag, prefix="tag")
+                    for tag in operation.tags or [UntrustedString("default")]
+                ]
                 if not config.generate_all_tags:
                     tags = tags[:1]
 
@@ -93,12 +97,14 @@ class EndpointCollection:
                 if not isinstance(endpoint, ParseError):
                     endpoint = Endpoint.sort_parameters(endpoint=endpoint)
                 if isinstance(endpoint, ParseError):
-                    endpoint.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}. Endpoint will not be generated."
+                    endpoint.header = f"WARNING parsing {method.upper()} {path.get_untrusted_value()} within {'/'.join(tags)}. Endpoint will not be generated."
                     for collection in collections:
                         collection.parse_errors.append(endpoint)
                     continue
                 for error in endpoint.errors:
-                    error.header = f"WARNING parsing {method.upper()} {path} within {'/'.join(tags)}."
+                    error.header = (
+                        f"WARNING parsing {method.upper()} {path.get_untrusted_value()} within {'/'.join(tags)}."
+                    )
                     for collection in collections:
                         collection.parse_errors.append(error)
                 for collection in collections:
@@ -107,14 +113,14 @@ class EndpointCollection:
         return endpoints_by_tag, schemas, parameters
 
 
-def generate_operation_id(*, path: str, method: str) -> str:
+def generate_operation_id(*, path: UntrustedString, method: str, prefix: str) -> PythonIdentifier:
     """Generate an operationId from a path"""
-    clean_path = path.replace("{", "").replace("}", "").replace("/", "_")
-    if clean_path.startswith("_"):
-        clean_path = clean_path[1:]
-    if clean_path.endswith("_"):
-        clean_path = clean_path[:-1]
-    return f"{method}_{clean_path}"
+    unsafe_id = path.get_untrusted_value().replace("{", "").replace("}", "").replace("/", "_")
+    if unsafe_id.startswith("_"):
+        unsafe_id = unsafe_id[1:]
+    if unsafe_id.endswith("_"):  # pragma: no cover
+        unsafe_id = unsafe_id[:-1]
+    return PythonIdentifier(f"{method}_{unsafe_id}", prefix=prefix)
 
 
 models_relative_prefix: str = "..."
@@ -134,13 +140,13 @@ class Endpoint:
     Describes a single endpoint on the server
     """
 
-    path: str
+    path: UntrustedString
     method: str
-    description: str | None
-    name: str
+    description: UntrustedString
+    name: PythonIdentifier
     requires_security: bool
     tags: list[PythonIdentifier]
-    summary: str | None = ""
+    summary: UntrustedString
     relative_imports: set[str] = field(default_factory=set)
     query_parameters: list[Property] = field(default_factory=list)
     path_parameters: list[Property] = field(default_factory=list)
@@ -156,7 +162,7 @@ class Endpoint:
         endpoint: "Endpoint",
         data: oai.Responses,
         schemas: Schemas,
-        responses: dict[str, oai.Response | oai.Reference],
+        responses: dict[UntrustedString, oai.Response | oai.Reference],
         config: Config,
     ) -> tuple["Endpoint", Schemas]:
         endpoint = deepcopy(endpoint)
@@ -234,7 +240,7 @@ class Endpoint:
 
         endpoint = deepcopy(endpoint)
 
-        unique_parameters: set[tuple[str, oai.ParameterLocation]] = set()
+        unique_parameters: set[tuple[UntrustedString, oai.ParameterLocation]] = set()
         parameters_by_location: dict[str, list[Property]] = {
             oai.ParameterLocation.QUERY: endpoint.query_parameters,
             oai.ParameterLocation.PATH: endpoint.path_parameters,
@@ -260,7 +266,7 @@ class Endpoint:
                         detail=(
                             "Parameters MUST NOT contain duplicates. "
                             "A unique parameter is defined by a combination of a name and location. "
-                            f"Duplicated parameters named `{param.name}` detected in `{param.param_in}`."
+                            f"Duplicated parameters named `{param.name.get_untrusted_value()}` detected in `{param.param_in}`."
                         ),
                     ),
                     schemas,
@@ -312,7 +318,7 @@ class Endpoint:
         self,
         *,
         config: Config,
-        previously_modified_params: set[tuple[oai.ParameterLocation, str]] | None = None,
+        previously_modified_params: set[tuple[oai.ParameterLocation, UntrustedString]] | None = None,
     ) -> "Endpoint | ParseError":
         """Check for conflicting parameters
 
@@ -330,7 +336,7 @@ class Endpoint:
             location, prop = parameter
 
             if prop.python_name in reserved_names:
-                prop.set_python_name(new_name=f"{prop.python_name}_{location}", config=config)
+                prop.set_python_name(new_name=UntrustedString(f"{prop.python_name}_{location}"), config=config)
                 modified_params.add((location, prop.name))
                 continue
 
@@ -349,9 +355,9 @@ class Endpoint:
 
             if location != conflicting_location:
                 conflicting_prop.set_python_name(
-                    new_name=f"{conflicting_prop.python_name}_{conflicting_location}", config=config
+                    new_name=UntrustedString(f"{conflicting_prop.python_name}_{conflicting_location}"), config=config
                 )
-                prop.set_python_name(new_name=f"{prop.python_name}_{location}", config=config)
+                prop.set_python_name(new_name=UntrustedString(f"{prop.python_name}_{location}"), config=config)
             elif conflicting_prop.name != prop.name:  # Use the name to differentiate
                 conflicting_prop.set_python_name(new_name=conflicting_prop.name, config=config, skip_snake_case=True)
                 prop.set_python_name(new_name=prop.name, config=config, skip_snake_case=True)
@@ -378,7 +384,7 @@ class Endpoint:
                 the path parameters and they could not be sorted.
         """
         endpoint = deepcopy(endpoint)
-        parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path)
+        parameters_from_path = re.findall(_PATH_PARAM_REGEX, endpoint.path.get_untrusted_value())
         try:
             endpoint.path_parameters.sort(
                 key=lambda param: parameters_from_path.index(param.name),
@@ -388,37 +394,41 @@ class Endpoint:
 
         if parameters_from_path != [param.name for param in endpoint.path_parameters]:
             return ParseError(
-                detail=f"Incorrect path templating for {endpoint.path} (Path parameters do not match with path)",
+                detail=f"Incorrect path templating for {endpoint.path.get_untrusted_value()} (Path parameters do not match with path)",
             )
         for parameter in endpoint.path_parameters:
-            endpoint.path = endpoint.path.replace(f"{{{parameter.name}}}", f"{{{parameter.python_name}}}")
+            endpoint.path = UntrustedString(
+                endpoint.path.get_untrusted_value().replace(
+                    f"{{{parameter.name.get_untrusted_value()}}}", f"{{{parameter.python_name}}}"
+                )
+            )
         return endpoint
 
     @staticmethod
     def from_data(
         *,
         data: oai.Operation,
-        path: str,
+        path: UntrustedString,
         method: str,
         tags: list[PythonIdentifier],
         schemas: Schemas,
         parameters: Parameters,
-        request_bodies: dict[str, oai.RequestBody | oai.Reference],
-        responses: dict[str, oai.Response | oai.Reference],
+        request_bodies: dict[UntrustedString, oai.RequestBody | oai.Reference],
+        responses: dict[UntrustedString, oai.Response | oai.Reference],
         config: Config,
     ) -> tuple["Endpoint | ParseError", Schemas, Parameters]:
         """Construct an endpoint from the OpenAPI data"""
 
         if data.operationId is None:
-            name = generate_operation_id(path=path, method=method)
+            name = generate_operation_id(path=path, method=method, prefix=config.field_prefix)
         else:
-            name = data.operationId
+            name = PythonIdentifier(data.operationId, prefix=config.field_prefix)
 
         endpoint = Endpoint(
             path=path,
             method=method,
-            summary=utils.remove_string_escapes(data.summary) if data.summary else "",
-            description=utils.remove_string_escapes(data.description) if data.description else "",
+            summary=data.summary if data.summary else UntrustedString(""),
+            description=data.description if data.description else UntrustedString(""),
             name=name,
             requires_security=bool(data.security),
             tags=tags,
@@ -440,7 +450,7 @@ class Endpoint:
             responses=responses,
             config=config,
         )
-        if isinstance(result, ParseError):
+        if isinstance(result, ParseError):  # pragma: no cover
             return result, schemas, parameters
         bodies, schemas = body_from_data(
             data=data, schemas=schemas, config=config, endpoint_name=result.name, request_bodies=request_bodies
@@ -467,14 +477,14 @@ class Endpoint:
 
         return result, schemas, parameters
 
-    def response_type(self) -> str:
+    def response_type(self) -> strings.PythonCode:
         """Get the Python type of any response from this endpoint"""
-        types = sorted({response.prop.get_type_string() for response in self.responses})
+        types = sorted({response.prop.get_type_string().as_unembedded_code() for response in self.responses})
         if len(types) == 0:
-            return "Any"
+            return strings.PythonCode("Any")
         if len(types) == 1:
-            return types[0]
-        return " | ".join(types)
+            return strings.PythonCode(types[0])
+        return strings.PythonCode(" | ".join(types))
 
     def iter_all_parameters(self) -> Iterator[tuple[oai.ParameterLocation, Property]]:
         """Iterate through all the parameters of this endpoint"""
@@ -498,12 +508,12 @@ class Endpoint:
 class GeneratorData:
     """All the data needed to generate a client"""
 
-    title: str
-    description: str | None
-    version: str
+    title: UntrustedString
+    description: UntrustedString | None
+    version: UntrustedString
     models: list[ModelProperty]
     errors: list[ParseError]
-    endpoint_collections_by_tag: dict[utils.PythonIdentifier, EndpointCollection]
+    endpoint_collections_by_tag: dict[strings.PythonIdentifier, EndpointCollection]
     enums: list[EnumProperty | LiteralEnumProperty]
 
     @staticmethod

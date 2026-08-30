@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
+
 
 class License(BaseModel):
     """
@@ -9,8 +11,8 @@ class License(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#licenseObject
     """
 
-    name: str
-    url: str | None = None
+    name: UntrustedString
+    url: UntrustedString | None = None
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

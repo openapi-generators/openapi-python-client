@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..untrusted_string import UntrustedString
 from .oauth_flows import OAuthFlows
 
 
@@ -17,14 +18,14 @@ class SecurityScheme(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject
     """
 
-    type: str
-    description: str | None = None
-    name: str | None = None
-    security_scheme_in: str | None = Field(default=None, alias="in")
-    scheme: str | None = None
-    bearerFormat: str | None = None
+    type: UntrustedString
+    description: UntrustedString | None = None
+    name: UntrustedString | None = None
+    security_scheme_in: UntrustedString | None = Field(default=None, alias="in")
+    scheme: UntrustedString | None = None
+    bearerFormat: UntrustedString | None = None
     flows: OAuthFlows | None = None
-    openIdConnectUrl: str | None = None
+    openIdConnectUrl: UntrustedString | None = None
     model_config = ConfigDict(
         extra="allow",
         populate_by_name=True,

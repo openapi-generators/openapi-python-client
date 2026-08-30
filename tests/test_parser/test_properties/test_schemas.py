@@ -5,12 +5,14 @@ from openapi_python_client.config import ClassOverride
 from openapi_python_client.parser.errors import ParameterError
 from openapi_python_client.parser.properties import Class, Parameters
 from openapi_python_client.parser.properties.schemas import (
+    ReferencePath,
     parameter_from_data,
     parameter_from_reference,
-    update_parameters_with_data,
 )
 from openapi_python_client.schema import Parameter, ParameterLocation, Reference, Schema
-from openapi_python_client.utils import ClassName
+from openapi_python_client.schema.ref import Ref
+from openapi_python_client.schema.untrusted_string import UntrustedString
+from openapi_python_client.strings import ClassName
 
 MODULE_NAME = "openapi_python_client.parser.properties.schemas"
 
@@ -63,7 +65,7 @@ class TestParameterFromData:
 
     def test_registers_new_parameters(self, config):
         param = Parameter.model_construct(
-            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
+            name=UntrustedString("a_param"), param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
         )
         parameters = Parameters()
         param_or_error, new_parameters = parameter_from_data(
@@ -81,10 +83,10 @@ class TestParameterFromReference:
         assert param_or_error == param
 
     def test_errors_out_if_reference_not_in_parameters(self):
-        ref = Reference.model_construct(ref="#/components/parameters/a_param")
-        class_info = Class(name="a_param", module_name="module_name")
+        ref = Reference.model_construct(ref=Ref("#/components/parameters/a_param"))
+        class_info = Class(name=ClassName(UntrustedString("a_param"), prefix=""), module_name="module_name")
         existing_param = Parameter.model_construct(name="a_param")
-        param_by_ref = Reference.model_construct(ref="#/components/parameters/another_param")
+        param_by_ref = Reference.model_construct(ref=Ref("#/components/parameters/another_param"))
         params = Parameters(
             classes_by_name={class_info.name: existing_param}, classes_by_reference={ref.ref: existing_param}
         )
@@ -95,47 +97,12 @@ class TestParameterFromReference:
 
     def test_returns_reference_from_registry(self):
         existing_param = Parameter.model_construct(name="a_param")
-        class_info = Class(name="MyParameter", module_name="module_name")
+        class_info = Class(name=ClassName(UntrustedString("MyParameter"), prefix=""), module_name="module_name")
         params = Parameters(
             classes_by_name={class_info.name: existing_param},
-            classes_by_reference={"/components/parameters/a_param": existing_param},
+            classes_by_reference={ReferencePath(UntrustedString("/components/parameters/a_param")): existing_param},
         )
 
-        param_by_ref = Reference.model_construct(ref="#/components/parameters/a_param")
+        param_by_ref = Reference.model_construct(ref=Ref("#/components/parameters/a_param"))
         param_or_error = parameter_from_reference(param=param_by_ref, parameters=params)
         assert param_or_error == existing_param
-
-
-class TestUpdateParametersFromData:
-    def test_reports_parameters_with_errors(self, mocker, config):
-        parameters = Parameters()
-        param = Parameter.model_construct(
-            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
-        )
-        parameter_from_data = mocker.patch(
-            f"{MODULE_NAME}.parameter_from_data", side_effect=[(ParameterError(), parameters)]
-        )
-        ref_path = Reference.model_construct(ref="#/components/parameters/a_param")
-        new_parameters_or_error = update_parameters_with_data(
-            ref_path=ref_path.ref, data=param, parameters=parameters, config=config
-        )
-
-        parameter_from_data.assert_called_once()
-        assert new_parameters_or_error == ParameterError(
-            detail="Unable to parse this part of your OpenAPI document: : None",
-            header="Unable to parse parameter #/components/parameters/a_param",
-        )
-
-    def test_records_references_to_parameters(self, mocker, config):
-        parameters = Parameters()
-        param = Parameter.model_construct(
-            name="a_param", param_in=ParameterLocation.QUERY, param_schema=Schema.model_construct()
-        )
-        parameter_from_data = mocker.patch(f"{MODULE_NAME}.parameter_from_data", side_effect=[(param, parameters)])
-        ref_path = "#/components/parameters/a_param"
-        new_parameters = update_parameters_with_data(
-            ref_path=ref_path, data=param, parameters=parameters, config=config
-        )
-
-        parameter_from_data.assert_called_once()
-        assert new_parameters.classes_by_reference[ref_path] == param

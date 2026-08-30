@@ -2,23 +2,24 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from attr import define
+from attr import define, field
 
-from ...utils import PythonIdentifier
+from ... import schema as oai
+from ...strings import PythonIdentifier
 from ..errors import PropertyError
-from .protocol import PropertyProtocol
+from .protocol import PropertyProtocol, convert_example
 
 
 @define
 class FileProperty(PropertyProtocol):
     """A property used for uploading files"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
 
     _type_string: ClassVar[str] = "File"
     # Return type of File.to_tuple()
@@ -28,12 +29,12 @@ class FileProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         default: Any,
         python_name: PythonIdentifier,
-        description: str | None,
-        example: str | None,
+        description: oai.UntrustedString | None,
+        example: Any,
     ) -> FileProperty | PropertyError:
         default_or_err = cls.convert_value(default)
         if isinstance(default_or_err, PropertyError):
@@ -49,7 +50,7 @@ class FileProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: Any) -> None | PropertyError:
+    def convert_value(cls, value: Any) -> PropertyError | None:
         if value is not None:
             return PropertyError(detail="File properties cannot have a default value")
         return value

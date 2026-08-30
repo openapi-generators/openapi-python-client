@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .contact import Contact
 from .license import License
 
@@ -15,12 +16,12 @@ class Info(BaseModel):
         -https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#infoObject
     """
 
-    title: str
-    description: str | None = None
-    termsOfService: str | None = None
+    title: UntrustedString
+    description: UntrustedString | None = None
+    termsOfService: UntrustedString | None = None
     contact: Contact | None = None
     license: License | None = None
-    version: str
+    version: UntrustedString
     model_config = ConfigDict(
         extra="allow",
         json_schema_extra={

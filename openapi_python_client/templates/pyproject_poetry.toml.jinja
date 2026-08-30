@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "{{ project_name }}"
-version = "{{ package_version }}"
-description = "{{ package_description }}"
+version = "{{ package_version | in_double_quote_literal }}"
+description = "{{ package_description | in_double_quote_literal }}"
 authors = []
 readme = "README.md"
 packages = [

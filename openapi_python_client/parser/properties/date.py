@@ -3,23 +3,24 @@ from __future__ import annotations
 import datetime
 from typing import Any, ClassVar
 
-from attr import define
+from attr import define, field
 
-from ...utils import PythonIdentifier
+from ... import schema as oai
+from ...strings import PythonCode, PythonIdentifier
 from ..errors import PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 
 
 @define
 class DateProperty(PropertyProtocol):
     """A property of type datetime.date"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
 
     _type_string: ClassVar[str] = "datetime.date"
     _json_type_string: ClassVar[str] = "str"
@@ -28,12 +29,12 @@ class DateProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         default: Any,
         python_name: PythonIdentifier,
-        description: str | None,
-        example: str | None,
+        description: oai.UntrustedString | None,
+        example: Any,
     ) -> DateProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -49,7 +50,7 @@ class DateProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | PropertyError | None:
         if isinstance(value, Value) or value is None:
             return value
         if isinstance(value, str):
@@ -57,7 +58,7 @@ class DateProperty(PropertyProtocol):
                 datetime.date.fromisoformat(value)  # make sure it's a valid value
             except ValueError as e:
                 return PropertyError(f"Invalid date: {e}")
-            return Value(python_code=f"datetime.date.fromisoformat({value!r})", raw_value=value)
+            return Value(python_code=PythonCode(f"datetime.date.fromisoformat({value!r})"), raw_value=value)
         return PropertyError(f"Cannot convert {value} to a date")
 
     def get_imports(self, *, prefix: str) -> set[str]:

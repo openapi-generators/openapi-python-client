@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from attr import define
+from attr import define, field
 
-from ...utils import PythonIdentifier
-from .protocol import PropertyProtocol, Value
+from ...schema.untrusted_string import UntrustedString
+from ...strings import PythonCode, PythonIdentifier
+from .protocol import PropertyProtocol, Value, convert_example
 
 
 @define
@@ -15,12 +16,12 @@ class AnyProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
-        name: str,
+        name: UntrustedString,
         required: bool,
         default: Any,
         python_name: PythonIdentifier,
-        description: str | None,
-        example: str | None,
+        description: UntrustedString | None,
+        example: Any,
     ) -> AnyProperty:
         return cls(
             name=name,
@@ -39,13 +40,13 @@ class AnyProperty(PropertyProtocol):
             return value
         if isinstance(value, str):
             return StringProperty.convert_value(value)
-        return Value(python_code=str(value), raw_value=value)
+        return Value(python_code=PythonCode(str(value)), raw_value=value)
 
-    name: str
+    name: UntrustedString
     required: bool
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: UntrustedString | None
+    example: UntrustedString | None = field(converter=convert_example)
     _type_string: ClassVar[str] = "Any"
     _json_type_string: ClassVar[str] = "Any"

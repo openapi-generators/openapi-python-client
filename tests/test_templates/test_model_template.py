@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+from openapi_python_client import UntrustedString
+
 
 def _section(content: str, start: str, end: str | None = None) -> str:
     section = content.split(start, 1)[1]
@@ -19,9 +21,9 @@ def test_model_template_renders_lazy_imports_in_stable_order(env) -> None:
         lazy_imports={"from ..models.z import Z", "from ..models.a import A"},
         additional_properties=False,
         class_info=SimpleNamespace(name="MyModel", module_name="my_model"),
-        title="",
-        description="",
-        example="",
+        title=UntrustedString(""),
+        description=UntrustedString(""),
+        example=UntrustedString(""),
         required_properties=[],
         optional_properties=[],
     )

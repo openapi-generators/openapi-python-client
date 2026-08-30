@@ -1,4 +1,5 @@
 import pytest
+
 from end_to_end_tests.functional_tests.helpers import (
     inline_spec_should_fail,
 )
@@ -17,10 +18,10 @@ class TestInvalidSpecFormats:
     def test_unparseable_file(self, filename_suffix, content, expected_error):
         result = inline_spec_should_fail(content, filename_suffix=filename_suffix, add_missing_sections=False)
         assert expected_error in result.output
-        
+
     def test_missing_openapi_version(self):
         result = inline_spec_should_fail(
-"""
+            """
 info:
   title: My API
   version: "1.0"
@@ -33,7 +34,7 @@ paths: {}
 
     def test_missing_title(self):
         result = inline_spec_should_fail(
-"""
+            """
 info:
   version: "1.0"
 openapi: "3.1.0"
@@ -46,7 +47,7 @@ paths: {}
 
     def test_missing_version(self):
         result = inline_spec_should_fail(
-"""
+            """
 info:
   title: My API
 openapi: "3.1.0"
@@ -59,7 +60,7 @@ paths: {}
 
     def test_missing_paths(self):
         result = inline_spec_should_fail(
-"""
+            """
 info:
   title: My API
   version: "1.0"
@@ -72,7 +73,7 @@ openapi: "3.1.0"
 
     def test_swagger_unsupported(self):
         result = inline_spec_should_fail(
-"""
+            """
 swagger: "2.0"
 info:
   title: My API

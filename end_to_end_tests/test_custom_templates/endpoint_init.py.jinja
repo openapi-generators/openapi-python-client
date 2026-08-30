@@ -13,11 +13,11 @@ class {{ class_name(endpoint_collection.tag) }}Endpoints:
     def {{ python_identifier(endpoint.name) }}(cls) -> types.ModuleType:
         {% if endpoint.description %}
         """
-            {{ endpoint.description }}
+            {{ endpoint.description | safe_for_docstring }}
         """
         {% elif endpoint.summary %}
         """
-            {{ endpoint.summary  }}
+            {{ endpoint.summary | safe_for_docstring }}
         """
         {% endif %}
         return {{ python_identifier(endpoint.name) }}

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
+from ..untrusted_string import UntrustedString
 from .reference import ReferenceOr
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -16,9 +17,9 @@ class Encoding(BaseModel):
         - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject
     """
 
-    contentType: str | None = None
-    headers: dict[str, ReferenceOr["Header"]] | None = None
-    style: str | None = None
+    contentType: UntrustedString | None = None
+    headers: dict[UntrustedString, ReferenceOr["Header"]] | None = None
+    style: UntrustedString | None = None
     explode: bool = False
     allowReserved: bool = False
     model_config = ConfigDict(

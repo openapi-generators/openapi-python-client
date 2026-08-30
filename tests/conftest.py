@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from mypy.semanal_shared import Protocol
 
-from openapi_python_client import Config, MetaType, utils
+from openapi_python_client import Config, MetaType, strings
 from openapi_python_client import schema as oai
 from openapi_python_client.config import ConfigFile
 from openapi_python_client.parser.properties import (
@@ -30,7 +30,8 @@ from openapi_python_client.parser.properties.float import FloatProperty
 from openapi_python_client.parser.properties.protocol import PropertyType, Value
 from openapi_python_client.schema.openapi_schema_pydantic import Parameter
 from openapi_python_client.schema.parameter_location import ParameterLocation
-from openapi_python_client.utils import ClassName, PythonIdentifier
+from openapi_python_client.schema.untrusted_string import UntrustedString
+from openapi_python_client.strings import ClassName, PythonIdentifier
 
 
 @pytest.fixture(scope="session")
@@ -62,7 +63,9 @@ def model_property_factory() -> ModelFactory:
         kwargs = _common_kwargs(kwargs)
         kwargs = {
             "description": "",
-            "class_info": Class(name=ClassName("MyClass", ""), module_name=PythonIdentifier("my_module", "")),
+            "class_info": Class(
+                name=ClassName(UntrustedString("MyClass"), ""), module_name=PythonIdentifier("my_module", "")
+            ),
             "data": oai.Schema.model_construct(),
             "roots": set(),
             "required_properties": None,
@@ -134,7 +137,7 @@ def enum_property_factory() -> EnumFactory[EnumProperty]:
     return _simple_factory(
         EnumProperty,
         lambda kwargs: {
-            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
+            "class_info": Class(name=ClassName(kwargs["name"], prefix=""), module_name=kwargs["name"]),
             "values": {},
             "value_type": str,
         },
@@ -152,7 +155,7 @@ def literal_enum_property_factory() -> EnumFactory[LiteralEnumProperty]:
     return _simple_factory(
         LiteralEnumProperty,
         lambda kwargs: {
-            "class_info": Class(name=kwargs["name"], module_name=kwargs["name"]),
+            "class_info": Class(name=UntrustedString(kwargs["name"]), module_name=kwargs["name"]),
             "values": set(),
             "value_type": str,
         },
@@ -321,6 +324,7 @@ def _common_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
         "example": None,
         **kwargs,
     }
+    kwargs["name"] = UntrustedString(kwargs["name"])
     if not kwargs.get("python_name"):
-        kwargs["python_name"] = utils.PythonIdentifier(value=kwargs["name"], prefix="")
+        kwargs["python_name"] = strings.PythonIdentifier(value=kwargs["name"], prefix="")
     return kwargs

@@ -2,24 +2,24 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from attr import define
+from attr import define, field
 
 from ... import schema as oai
-from ...utils import PythonIdentifier
+from ...strings import PythonCode, PythonIdentifier
 from ..errors import PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 
 
 @define
 class FloatProperty(PropertyProtocol):
     """A property of type float"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
 
     _type_string: ClassVar[str] = "float"
     _json_type_string: ClassVar[str] = "float"
@@ -34,12 +34,12 @@ class FloatProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         default: Any,
         python_name: PythonIdentifier,
-        description: str | None,
-        example: str | None,
+        description: oai.UntrustedString | None,
+        example: Any,
     ) -> FloatProperty | PropertyError:
         checked_default = cls.convert_value(default)
         if isinstance(checked_default, PropertyError):
@@ -55,17 +55,17 @@ class FloatProperty(PropertyProtocol):
         )
 
     @classmethod
-    def convert_value(cls, value: Any) -> Value | None | PropertyError:
+    def convert_value(cls, value: Any) -> Value | PropertyError | None:
         if isinstance(value, Value) or value is None:
             return value
         if isinstance(value, str):
             try:
                 parsed = float(value)
-                return Value(python_code=str(parsed), raw_value=value)
+                return Value(python_code=PythonCode(str(parsed)), raw_value=value)
             except ValueError:
                 return PropertyError(f"Invalid float value: {value}")
         if isinstance(value, float):
-            return Value(python_code=str(value), raw_value=value)
+            return Value(python_code=PythonCode(str(value)), raw_value=value)
         if isinstance(value, int) and not isinstance(value, bool):
-            return Value(python_code=str(float(value)), raw_value=value)
+            return Value(python_code=PythonCode(str(float(value))), raw_value=value)
         return PropertyError(f"Cannot convert {value} to a float")

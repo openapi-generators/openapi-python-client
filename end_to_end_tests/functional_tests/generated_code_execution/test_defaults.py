@@ -8,7 +8,7 @@ from end_to_end_tests.functional_tests.helpers import (
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyModel:
@@ -38,7 +38,8 @@ components:
         unionWithValidDefaultForType2:
           anyOf: [{"type": "boolean"}, {"type": "integer"}]
           default: 3
-""")
+"""
+)
 @with_generated_code_imports(".models.MyModel")
 class TestSimpleDefaults:
     # Note, the null/None type is not covered here due to a known bug:
@@ -69,9 +70,8 @@ class TestSimpleDefaults:
         )
 
 
-
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:
@@ -85,7 +85,8 @@ components:
             - $ref: "#/components/schemas/MyEnum"
           default: "a"
 
-""")
+"""
+)
 @with_generated_code_imports(".models.MyEnum", ".models.MyModel")
 class TestEnumDefaults:
     def test_enum_default(self, MyEnum, MyModel):
@@ -93,7 +94,7 @@ class TestEnumDefaults:
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     MyEnum:

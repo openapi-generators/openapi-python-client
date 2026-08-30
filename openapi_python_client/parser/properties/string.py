@@ -2,25 +2,24 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, overload
 
-from attr import define
+from attr import define, field
 
 from ... import schema as oai
-from ... import utils
-from ...utils import PythonIdentifier
+from ...strings import PythonCode, PythonIdentifier, remove_string_escapes
 from ..errors import PropertyError
-from .protocol import PropertyProtocol, Value
+from .protocol import PropertyProtocol, Value, convert_example
 
 
 @define
 class StringProperty(PropertyProtocol):
     """A property of type str"""
 
-    name: str
+    name: oai.UntrustedString
     required: bool
     default: Value | None
     python_name: PythonIdentifier
-    description: str | None
-    example: str | None
+    description: oai.UntrustedString | None
+    example: oai.UntrustedString | None = field(converter=convert_example)
     _type_string: ClassVar[str] = "str"
     _json_type_string: ClassVar[str] = "str"
     _allowed_locations: ClassVar[set[oai.ParameterLocation]] = {
@@ -33,12 +32,12 @@ class StringProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
-        name: str,
+        name: oai.UntrustedString,
         required: bool,
         default: Any,
         python_name: PythonIdentifier,
-        description: str | None,
-        example: str | None,
+        description: oai.UntrustedString | None,
+        example: Any,
     ) -> StringProperty | PropertyError:
         checked_default = cls.convert_value(default)
         return cls(
@@ -65,4 +64,4 @@ class StringProperty(PropertyProtocol):
             return value
         if not isinstance(value, str):
             value = str(value)
-        return Value(python_code=repr(utils.remove_string_escapes(value)), raw_value=value)
+        return Value(python_code=PythonCode(repr(remove_string_escapes(value))), raw_value=value)

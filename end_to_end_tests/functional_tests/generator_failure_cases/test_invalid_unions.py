@@ -2,7 +2,7 @@ from end_to_end_tests.functional_tests.helpers import assert_bad_schema, with_ge
 
 
 @with_generated_client_fixture(
-"""
+    """
 components:
   schemas:
     UnionWithInvalidReference:
@@ -15,7 +15,7 @@ components:
       anyOf:
         - type: string
         - type: array  # invalid because no items
-"""    
+"""
 )
 class TestUnionInvalidSchemas:
     def test_invalid_reference(self, generated_client):
