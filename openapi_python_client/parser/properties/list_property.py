@@ -58,20 +58,17 @@ class ListProperty(PropertyProtocol):
         """
         from . import property_from_data  # noqa: PLC0415
 
-        if data.items is None and not data.prefixItems:
-            return (
-                PropertyError(
-                    data=data,
-                    detail="type array must have items or prefixItems defined",
-                ),
-                schemas,
-            )
-
         items = data.prefixItems or []
         if data.items:
             items.append(data.items)
 
-        if len(items) == 1:
+        if not items:
+            # An array with neither `items` nor `prefixItems` is valid in JSON
+            # Schema 2020-12 (OpenAPI 3.1) and means "array of any type". Treat
+            # it as equivalent to `items: {}` and generate a list of Any rather
+            # than failing. See issue #1435.
+            inner_schema: oai.Schema | oai.Reference = oai.Schema()
+        elif len(items) == 1:
             inner_schema = items[0]
         else:
             inner_schema = oai.Schema(anyOf=items)
