@@ -21,7 +21,7 @@ class AFormData:
 
     an_required_field: str
     an_optional_field: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         an_required_field = self.an_required_field
@@ -47,13 +47,11 @@ class AFormData:
 
         an_optional_field = d.pop("an_optional_field", UNSET)
 
-        a_form_data = cls(
+        return cls(
             an_required_field=an_required_field,
             an_optional_field=an_optional_field,
+            additional_properties=d,
         )
-
-        a_form_data.additional_properties = d
-        return a_form_data
 
     @property
     def additional_keys(self) -> list[str]:

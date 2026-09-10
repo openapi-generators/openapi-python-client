@@ -19,7 +19,7 @@ class BodyUploadFileTestsUploadPostSomeNullableObject:
     """
 
     bar: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         bar = self.bar
@@ -37,12 +37,10 @@ class BodyUploadFileTestsUploadPostSomeNullableObject:
         d = dict(src_dict)
         bar = d.pop("bar", UNSET)
 
-        body_upload_file_tests_upload_post_some_nullable_object = cls(
+        return cls(
             bar=bar,
+            additional_properties=d,
         )
-
-        body_upload_file_tests_upload_post_some_nullable_object.additional_properties = d
-        return body_upload_file_tests_upload_post_some_nullable_object
 
     @property
     def additional_keys(self) -> list[str]:

@@ -12,7 +12,7 @@ T = TypeVar("T", bound="AnArrayWithARecursiveRefInItemsObjectAdditionalPropertie
 @_attrs_define
 class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     additional_properties: dict[str, list[AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem]] = (
-        _attrs_field(init=False, factory=dict)
+        _attrs_field(factory=dict)
     )
 
     def to_dict(self) -> dict[str, Any]:
@@ -31,7 +31,6 @@ class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        an_array_with_a_recursive_ref_in_items_object_additional_properties_item = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -52,10 +51,9 @@ class AnArrayWithARecursiveRefInItemsObjectAdditionalPropertiesItem:
 
             additional_properties[prop_name] = additional_property
 
-        an_array_with_a_recursive_ref_in_items_object_additional_properties_item.additional_properties = (
-            additional_properties
+        return cls(
+            additional_properties=additional_properties,
         )
-        return an_array_with_a_recursive_ref_in_items_object_additional_properties_item
 
     @property
     def additional_keys(self) -> list[str]:

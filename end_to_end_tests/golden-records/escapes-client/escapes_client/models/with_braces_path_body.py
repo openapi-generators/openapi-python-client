@@ -11,7 +11,7 @@ T = TypeVar("T", bound="WithBracesPathBody")
 
 @_attrs_define
 class WithBracesPathBody:
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -23,10 +23,10 @@ class WithBracesPathBody:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        with_braces_path_body = cls()
 
-        with_braces_path_body.additional_properties = d
-        return with_braces_path_body
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

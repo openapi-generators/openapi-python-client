@@ -24,7 +24,7 @@ class ModelWithDescription:
     it was the epoch of belief, it was the epoch of incredulity, it was the season of light, it was the season of
     darkness, it was the spring of hope, it was the winter of despair.
      """
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         prop_with_no_desc = self.prop_with_no_desc
@@ -54,14 +54,12 @@ class ModelWithDescription:
 
         prop_with_long_desc = d.pop("propWithLongDesc", UNSET)
 
-        model_with_description = cls(
+        return cls(
             prop_with_no_desc=prop_with_no_desc,
             prop_with_desc=prop_with_desc,
             prop_with_long_desc=prop_with_long_desc,
+            additional_properties=d,
         )
-
-        model_with_description.additional_properties = d
-        return model_with_description
 
     @property
     def additional_keys(self) -> list[str]:

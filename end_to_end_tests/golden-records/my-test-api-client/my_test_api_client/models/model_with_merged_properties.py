@@ -30,7 +30,7 @@ class ModelWithMergedProperties:
     string_to_date: datetime.date | Unset = UNSET
     number_to_int: int | Unset = UNSET
     any_to_string: str | Unset = "x"
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         simple_string = self.simple_string
@@ -86,16 +86,14 @@ class ModelWithMergedProperties:
 
         any_to_string = d.pop("anyToString", UNSET)
 
-        model_with_merged_properties = cls(
+        return cls(
             simple_string=simple_string,
             string_to_enum=string_to_enum,
             string_to_date=string_to_date,
             number_to_int=number_to_int,
             any_to_string=any_to_string,
+            additional_properties=d,
         )
-
-        model_with_merged_properties.additional_properties = d
-        return model_with_merged_properties
 
     @property
     def additional_keys(self) -> list[str]:

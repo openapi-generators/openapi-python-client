@@ -23,7 +23,7 @@ class File:
     data: str | Unset = UNSET
     name: str | Unset = UNSET
     content_type: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         data = self.data
@@ -53,14 +53,12 @@ class File:
 
         content_type = d.pop("content_type", UNSET)
 
-        file = cls(
+        return cls(
             data=data,
             name=name,
             content_type=content_type,
+            additional_properties=d,
         )
-
-        file.additional_properties = d
-        return file
 
     @property
     def additional_keys(self) -> list[str]:

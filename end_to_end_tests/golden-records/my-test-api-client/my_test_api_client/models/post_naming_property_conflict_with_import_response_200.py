@@ -21,7 +21,7 @@ class PostNamingPropertyConflictWithImportResponse200:
 
     field: str | Unset = UNSET
     define: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         field = self.field
@@ -45,13 +45,11 @@ class PostNamingPropertyConflictWithImportResponse200:
 
         define = d.pop("Define", UNSET)
 
-        post_naming_property_conflict_with_import_response_200 = cls(
+        return cls(
             field=field,
             define=define,
+            additional_properties=d,
         )
-
-        post_naming_property_conflict_with_import_response_200.additional_properties = d
-        return post_naming_property_conflict_with_import_response_200
 
     @property
     def additional_keys(self) -> list[str]:

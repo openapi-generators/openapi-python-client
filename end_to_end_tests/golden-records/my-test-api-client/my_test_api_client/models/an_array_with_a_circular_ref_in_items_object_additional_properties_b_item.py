@@ -18,7 +18,7 @@ T = TypeVar("T", bound="AnArrayWithACircularRefInItemsObjectAdditionalProperties
 @_attrs_define
 class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
     additional_properties: dict[str, list[AnArrayWithACircularRefInItemsObjectAdditionalPropertiesAItem]] = (
-        _attrs_field(init=False, factory=dict)
+        _attrs_field(factory=dict)
     )
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,7 +43,6 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
         )
 
         d = dict(src_dict)
-        an_array_with_a_circular_ref_in_items_object_additional_properties_b_item = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -64,10 +63,9 @@ class AnArrayWithACircularRefInItemsObjectAdditionalPropertiesBItem:
 
             additional_properties[prop_name] = additional_property
 
-        an_array_with_a_circular_ref_in_items_object_additional_properties_b_item.additional_properties = (
-            additional_properties
+        return cls(
+            additional_properties=additional_properties,
         )
-        return an_array_with_a_circular_ref_in_items_object_additional_properties_b_item
 
     @property
     def additional_keys(self) -> list[str]:

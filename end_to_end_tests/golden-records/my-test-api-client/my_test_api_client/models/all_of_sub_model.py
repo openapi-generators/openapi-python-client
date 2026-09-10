@@ -24,7 +24,7 @@ class AllOfSubModel:
     a_sub_property: str | Unset = UNSET
     type_: str | Unset = UNSET
     type_enum: AllOfSubModelTypeEnum | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_sub_property = self.a_sub_property
@@ -61,14 +61,12 @@ class AllOfSubModel:
         else:
             type_enum = AllOfSubModelTypeEnum(_type_enum)
 
-        all_of_sub_model = cls(
+        return cls(
             a_sub_property=a_sub_property,
             type_=type_,
             type_enum=type_enum,
+            additional_properties=d,
         )
-
-        all_of_sub_model.additional_properties = d
-        return all_of_sub_model
 
     @property
     def additional_keys(self) -> list[str]:
