@@ -20,7 +20,7 @@ def _get_kwargs(
         "url": "/types/unions/duplicate-types",
     }
 
-    if isinstance(body, AModel):
+    if not isinstance(body, Unset):
         _kwargs["json"] = body.to_dict()
 
     headers["Content-Type"] = "application/json"

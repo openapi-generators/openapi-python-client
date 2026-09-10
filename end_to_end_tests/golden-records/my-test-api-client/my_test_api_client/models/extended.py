@@ -182,8 +182,6 @@ class Extended:
         not_required_one_of_models: dict[str, Any] | Unset
         if isinstance(self.not_required_one_of_models, Unset):
             not_required_one_of_models = UNSET
-        elif isinstance(self.not_required_one_of_models, FreeFormModel):
-            not_required_one_of_models = self.not_required_one_of_models.to_dict()
         else:
             not_required_one_of_models = self.not_required_one_of_models.to_dict()
 
