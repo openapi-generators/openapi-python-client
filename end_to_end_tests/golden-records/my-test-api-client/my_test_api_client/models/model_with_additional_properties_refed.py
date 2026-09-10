@@ -13,7 +13,7 @@ T = TypeVar("T", bound="ModelWithAdditionalPropertiesRefed")
 
 @_attrs_define
 class ModelWithAdditionalPropertiesRefed:
-    additional_properties: dict[str, AnEnum] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, AnEnum] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -26,7 +26,6 @@ class ModelWithAdditionalPropertiesRefed:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        model_with_additional_properties_refed = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -34,8 +33,9 @@ class ModelWithAdditionalPropertiesRefed:
 
             additional_properties[prop_name] = additional_property
 
-        model_with_additional_properties_refed.additional_properties = additional_properties
-        return model_with_additional_properties_refed
+        return cls(
+            additional_properties=additional_properties,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

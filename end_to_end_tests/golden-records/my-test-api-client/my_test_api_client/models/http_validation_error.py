@@ -53,8 +53,6 @@ class HTTPValidationError:
 
                 detail.append(detail_item)
 
-        http_validation_error = cls(
+        return cls(
             detail=detail,
         )
-
-        return http_validation_error

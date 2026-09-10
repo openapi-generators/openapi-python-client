@@ -11,7 +11,7 @@ T = TypeVar("T", bound="SchemaPrintuhOh")
 
 @_attrs_define
 class SchemaPrintuhOh:
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -23,10 +23,10 @@ class SchemaPrintuhOh:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        schema_printuh_oh = cls()
 
-        schema_printuh_oh.additional_properties = d
-        return schema_printuh_oh
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

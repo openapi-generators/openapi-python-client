@@ -19,7 +19,7 @@ class ADiscriminatedUnionType1:
     """
 
     model_type: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         model_type = self.model_type
@@ -37,12 +37,10 @@ class ADiscriminatedUnionType1:
         d = dict(src_dict)
         model_type = d.pop("modelType", UNSET)
 
-        a_discriminated_union_type_1 = cls(
+        return cls(
             model_type=model_type,
+            additional_properties=d,
         )
-
-        a_discriminated_union_type_1.additional_properties = d
-        return a_discriminated_union_type_1
 
     @property
     def additional_keys(self) -> list[str]:

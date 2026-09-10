@@ -19,7 +19,7 @@ class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
     """
 
     extra_props_prop: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         extra_props_prop = self.extra_props_prop
@@ -37,12 +37,10 @@ class ModelWithAdditionalPropertiesInlinedAdditionalProperty:
         d = dict(src_dict)
         extra_props_prop = d.pop("extra_props_prop", UNSET)
 
-        model_with_additional_properties_inlined_additional_property = cls(
+        return cls(
             extra_props_prop=extra_props_prop,
+            additional_properties=d,
         )
-
-        model_with_additional_properties_inlined_additional_property.additional_properties = d
-        return model_with_additional_properties_inlined_additional_property
 
     @property
     def additional_keys(self) -> list[str]:

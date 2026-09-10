@@ -21,7 +21,7 @@ class MixedCaseResponse200:
 
     mixed_case: str | Unset = UNSET
     mixedCase: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         mixed_case = self.mixed_case
@@ -45,13 +45,11 @@ class MixedCaseResponse200:
 
         mixedCase = d.pop("mixedCase", UNSET)
 
-        mixed_case_response_200 = cls(
+        return cls(
             mixed_case=mixed_case,
             mixedCase=mixedCase,
+            additional_properties=d,
         )
-
-        mixed_case_response_200.additional_properties = d
-        return mixed_case_response_200
 
     @property
     def additional_keys(self) -> list[str]:

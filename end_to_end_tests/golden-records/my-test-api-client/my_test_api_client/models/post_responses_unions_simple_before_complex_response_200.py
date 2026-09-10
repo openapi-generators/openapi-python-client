@@ -23,7 +23,7 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
     """
 
     a: PostResponsesUnionsSimpleBeforeComplexResponse200AType1 | str
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.post_responses_unions_simple_before_complex_response_200a_type_1 import (
@@ -67,12 +67,10 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200:
 
         a = _parse_a(d.pop("a"))
 
-        post_responses_unions_simple_before_complex_response_200 = cls(
+        return cls(
             a=a,
+            additional_properties=d,
         )
-
-        post_responses_unions_simple_before_complex_response_200.additional_properties = d
-        return post_responses_unions_simple_before_complex_response_200
 
     @property
     def additional_keys(self) -> list[str]:

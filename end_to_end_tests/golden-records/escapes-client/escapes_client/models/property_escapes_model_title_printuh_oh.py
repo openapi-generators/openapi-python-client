@@ -25,7 +25,7 @@ class PropertyEscapesModelTitlePrintuhOh:
     escaped_description: str | Unset = 'default value with \\"quotes\\"'
     escaped_enum: PropertyEscapesModelTitlePrintuhOhEscapedEnum | Unset = UNSET
     escaped_const: Literal["\\\" + print('uh oh') + \\\""] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         escaped_description = self.escaped_description
@@ -66,14 +66,12 @@ class PropertyEscapesModelTitlePrintuhOh:
                 f"escaped_const must match const '\\\\\" + print(\\'uh oh\\') + \\\\\"', got '{escaped_const}'"
             )
 
-        property_escapes_model_title_printuh_oh = cls(
+        return cls(
             escaped_description=escaped_description,
             escaped_enum=escaped_enum,
             escaped_const=escaped_const,
+            additional_properties=d,
         )
-
-        property_escapes_model_title_printuh_oh.additional_properties = d
-        return property_escapes_model_title_printuh_oh
 
     @property
     def additional_keys(self) -> list[str]:

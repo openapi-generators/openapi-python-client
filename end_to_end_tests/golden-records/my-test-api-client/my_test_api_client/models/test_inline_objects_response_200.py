@@ -35,8 +35,6 @@ class TestInlineObjectsResponse200:
         d = dict(src_dict)
         a_property = d.pop("a_property", UNSET)
 
-        test_inline_objects_response_200 = cls(
+        return cls(
             a_property=a_property,
         )
-
-        return test_inline_objects_response_200

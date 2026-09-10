@@ -20,7 +20,7 @@ class StatusCodePatternsResponse2XX:
     """
 
     status: StatusCodePatternsResponse2XXStatus | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         status: str | Unset = UNSET
@@ -45,12 +45,10 @@ class StatusCodePatternsResponse2XX:
         else:
             status = StatusCodePatternsResponse2XXStatus(_status)
 
-        status_code_patterns_response_2xx = cls(
+        return cls(
             status=status,
+            additional_properties=d,
         )
-
-        status_code_patterns_response_2xx.additional_properties = d
-        return status_code_patterns_response_2xx
 
     @property
     def additional_keys(self) -> list[str]:

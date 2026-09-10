@@ -12,7 +12,7 @@ T = TypeVar("T", bound="ModelWithPrimitiveAdditionalPropertiesADateHolder")
 
 @_attrs_define
 class ModelWithPrimitiveAdditionalPropertiesADateHolder:
-    additional_properties: dict[str, datetime.datetime] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, datetime.datetime] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -25,7 +25,6 @@ class ModelWithPrimitiveAdditionalPropertiesADateHolder:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        model_with_primitive_additional_properties_a_date_holder = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -33,8 +32,9 @@ class ModelWithPrimitiveAdditionalPropertiesADateHolder:
 
             additional_properties[prop_name] = additional_property
 
-        model_with_primitive_additional_properties_a_date_holder.additional_properties = additional_properties
-        return model_with_primitive_additional_properties_a_date_holder
+        return cls(
+            additional_properties=additional_properties,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

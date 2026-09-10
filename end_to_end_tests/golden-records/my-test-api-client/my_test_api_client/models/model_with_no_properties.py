@@ -18,6 +18,4 @@ class ModelWithNoProperties:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        model_with_no_properties = cls()
-
-        return model_with_no_properties
+        return cls()

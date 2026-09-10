@@ -100,12 +100,10 @@ class AModel:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
-        a_model = cls(
+        return cls(
             an_enum_value=an_enum_value,
             an_allof_enum_with_overridden_default=an_allof_enum_with_overridden_default,
             any_value=any_value,
             an_optional_allof_enum=an_optional_allof_enum,
             nested_list_of_enums=nested_list_of_enums,
         )
-
-        return a_model

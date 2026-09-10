@@ -21,7 +21,7 @@ class PostFormDataInlineBody:
 
     a_required_field: str
     an_optional_field: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_required_field = self.a_required_field
@@ -47,13 +47,11 @@ class PostFormDataInlineBody:
 
         an_optional_field = d.pop("an_optional_field", UNSET)
 
-        post_form_data_inline_body = cls(
+        return cls(
             a_required_field=a_required_field,
             an_optional_field=an_optional_field,
+            additional_properties=d,
         )
-
-        post_form_data_inline_body.additional_properties = d
-        return post_form_data_inline_body
 
     @property
     def additional_keys(self) -> list[str]:

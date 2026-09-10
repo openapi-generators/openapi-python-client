@@ -23,7 +23,7 @@ class ModelWithCircularRefA:
     """
 
     circular: ModelWithCircularRefB | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         circular: dict[str, Any] | Unset = UNSET
@@ -50,12 +50,10 @@ class ModelWithCircularRefA:
         else:
             circular = ModelWithCircularRefB.from_dict(_circular)
 
-        model_with_circular_ref_a = cls(
+        return cls(
             circular=circular,
+            additional_properties=d,
         )
-
-        model_with_circular_ref_a.additional_properties = d
-        return model_with_circular_ref_a
 
     @property
     def additional_keys(self) -> list[str]:

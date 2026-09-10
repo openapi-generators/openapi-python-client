@@ -11,7 +11,7 @@ T = TypeVar("T", bound="PostResponsesUnionsSimpleBeforeComplexResponse200AType1"
 
 @_attrs_define
 class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -23,10 +23,10 @@ class PostResponsesUnionsSimpleBeforeComplexResponse200AType1:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        post_responses_unions_simple_before_complex_response_200a_type_1 = cls()
 
-        post_responses_unions_simple_before_complex_response_200a_type_1.additional_properties = d
-        return post_responses_unions_simple_before_complex_response_200a_type_1
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

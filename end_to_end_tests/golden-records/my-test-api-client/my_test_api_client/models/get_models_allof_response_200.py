@@ -28,7 +28,7 @@ class GetModelsAllofResponse200:
     aliased: AModel | Unset = UNSET
     extended: Extended | Unset = UNSET
     model: AModel | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         aliased: dict[str, Any] | Unset = UNSET
@@ -82,14 +82,12 @@ class GetModelsAllofResponse200:
         else:
             model = AModel.from_dict(_model)
 
-        get_models_allof_response_200 = cls(
+        return cls(
             aliased=aliased,
             extended=extended,
             model=model,
+            additional_properties=d,
         )
-
-        get_models_allof_response_200.additional_properties = d
-        return get_models_allof_response_200
 
     @property
     def additional_keys(self) -> list[str]:

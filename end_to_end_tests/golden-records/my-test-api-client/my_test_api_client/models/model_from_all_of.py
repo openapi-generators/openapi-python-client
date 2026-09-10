@@ -27,7 +27,7 @@ class ModelFromAllOf:
     type_: AnotherAllOfSubModelType | Unset = UNSET
     type_enum: AnotherAllOfSubModelTypeEnum | Unset = UNSET
     another_sub_property: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_sub_property = self.a_sub_property
@@ -77,15 +77,13 @@ class ModelFromAllOf:
 
         another_sub_property = d.pop("another_sub_property", UNSET)
 
-        model_from_all_of = cls(
+        return cls(
             a_sub_property=a_sub_property,
             type_=type_,
             type_enum=type_enum,
             another_sub_property=another_sub_property,
+            additional_properties=d,
         )
-
-        model_from_all_of.additional_properties = d
-        return model_from_all_of
 
     @property
     def additional_keys(self) -> list[str]:
