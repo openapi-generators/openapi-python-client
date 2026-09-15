@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import inspect
+import json
 import subprocess
 import sys
 from typing import Any, get_args
@@ -370,25 +371,23 @@ class TestOpenAPI31NullableRequestBodies:
         model_endpoint = self._endpoint(generated_client, "nullable_model")
         assert _sync_request(model_endpoint, Client).content == b""
         assert _sync_request(model_endpoint, Client, body=None).content == b"null"
-        assert _sync_request(model_endpoint, Client, body=Payload(name="Ada")).content == b'{"name":"Ada"}'
+        assert json.loads(_sync_request(model_endpoint, Client, body=Payload(name="Ada")).content) == {"name": "Ada"}
 
         array_endpoint = self._endpoint(generated_client, "nullable_array")
         assert _sync_request(array_endpoint, Client).content == b""
         assert _sync_request(array_endpoint, Client, body=None).content == b"null"
-        assert _sync_request(array_endpoint, Client, body=[]).content == b"[]"
-        assert _sync_request(array_endpoint, Client, body=[0, 2]).content == b"[0,2]"
+        assert json.loads(_sync_request(array_endpoint, Client, body=[]).content) == []
+        assert json.loads(_sync_request(array_endpoint, Client, body=[0, 2]).content) == [0, 2]
 
         nested_endpoint = self._endpoint(generated_client, "nested_nullable_fields")
-        assert _sync_request(nested_endpoint, Client, body=NestedPayload()).content == b"{}"
-        assert (
+        assert json.loads(_sync_request(nested_endpoint, Client, body=NestedPayload()).content) == {}
+        assert json.loads(
             _sync_request(nested_endpoint, Client, body=NestedPayload(optional_nullable=None)).content
-            == b'{"optionalNullable":null}'
-        )
+        ) == {"optionalNullable": None}
         date_time = datetime.datetime(2026, 9, 15, 12, 30, tzinfo=datetime.UTC)
-        assert (
+        assert json.loads(
             _sync_request(nested_endpoint, Client, body=NestedPayload(optional_date_time=date_time)).content
-            == b'{"optionalDateTime":"2026-09-15T12:30:00+00:00"}'
-        )
+        ) == {"optionalDateTime": "2026-09-15T12:30:00+00:00"}
 
     def test_async_transport_preserves_presence(self, generated_client: Any) -> None:
         Client = generated_client.import_symbol(".client", "Client")
