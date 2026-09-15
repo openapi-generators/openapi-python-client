@@ -84,13 +84,18 @@ if not isinstance(body, Unset):
 {% set property = body.prop %}
 {% import "property_templates/" + property.template as prop_template %}
 {% if prop_template.transform %}
-{{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]", skip_unset=True, declare_type=False) }}
-{% elif property.required %}
-_kwargs["json"] = {{ property.python_name }}
+{{ prop_template.transform(property, property.python_name, "_kwargs[\"json\"]", declare_type=False) }}
 {% else %}
-if not isinstance({{property.python_name}}, Unset):
-    _kwargs["json"] = {{ property.python_name }}
+_kwargs["json"] = {{ property.python_name }}
 {% endif %}
+{% if not property.required %}
+if isinstance(_kwargs["json"], Unset):
+    del _kwargs["json"]
+{% endif %}
+{% if property.required %}if{% else %}elif{% endif %} _kwargs["json"] is None:
+    # HTTPX treats json=None as no body; send JSON null explicitly.
+    _kwargs["content"] = b"null"
+    del _kwargs["json"]
 {% endmacro %}
 
 {% macro multipart_body(body) %}

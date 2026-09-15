@@ -21,6 +21,10 @@ def _get_kwargs(
     }
 
     _kwargs["json"] = body.to_dict()
+    if _kwargs["json"] is None:
+        # HTTPX treats json=None as no body; send JSON null explicitly.
+        _kwargs["content"] = b"null"
+        del _kwargs["json"]
 
     headers["Content-Type"] = "application/json"
 
