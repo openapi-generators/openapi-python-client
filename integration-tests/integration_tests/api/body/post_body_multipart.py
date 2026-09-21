@@ -1,14 +1,16 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.post_body_multipart_body import PostBodyMultipartBody
 from ...models.post_body_multipart_response_200 import PostBodyMultipartResponse200
 from ...models.public_error import PublicError
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -32,7 +34,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> PostBodyMultipartResponse200 | PublicError | None:
     if response.status_code == 200:
         response_200 = PostBodyMultipartResponse200.from_dict(response.json())
@@ -51,10 +53,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostBodyMultipartResponse200 | PublicError]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[PostBodyMultipartResponse200 | PublicError]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -63,9 +65,9 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostBodyMultipartBody | Unset = UNSET,
-) -> Response[PostBodyMultipartResponse200 | PublicError]:
+) -> _Response[PostBodyMultipartResponse200 | PublicError]:
     """
     Args:
         body (PostBodyMultipartBody | Unset):
@@ -91,7 +93,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostBodyMultipartBody | Unset = UNSET,
 ) -> PostBodyMultipartResponse200 | PublicError | None:
     """
@@ -114,9 +116,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostBodyMultipartBody | Unset = UNSET,
-) -> Response[PostBodyMultipartResponse200 | PublicError]:
+) -> _Response[PostBodyMultipartResponse200 | PublicError]:
     """
     Args:
         body (PostBodyMultipartBody | Unset):
@@ -140,7 +142,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostBodyMultipartBody | Unset = UNSET,
 ) -> PostBodyMultipartResponse200 | PublicError | None:
     """

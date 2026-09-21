@@ -1,16 +1,18 @@
 import datetime
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response
+from ...types import UNSET
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -65,7 +67,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> HTTPValidationError | list[AModel] | None:
     if response.status_code == 200:
         response_200 = []
@@ -94,10 +96,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | list[AModel]]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[HTTPValidationError | list[AModel]]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -106,12 +108,12 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
-) -> Response[HTTPValidationError | list[AModel]]:
+) -> _Response[HTTPValidationError | list[AModel]]:
     """Get List
 
      Get a list of things
@@ -146,7 +148,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
@@ -181,12 +183,12 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     some_date: datetime.date | datetime.datetime,
-) -> Response[HTTPValidationError | list[AModel]]:
+) -> _Response[HTTPValidationError | list[AModel]]:
     """Get List
 
      Get a list of things
@@ -219,7 +221,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],

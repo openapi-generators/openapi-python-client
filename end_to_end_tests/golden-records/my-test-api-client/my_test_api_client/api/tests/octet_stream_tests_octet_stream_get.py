@@ -1,12 +1,14 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from io import BytesIO
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
-from ...types import File, Response
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
+from ...types import File
+from ...types import Response as _Response
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -19,7 +21,7 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> File | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> File | None:
     if response.status_code == 200:
         response_200 = File(payload=BytesIO(response.content))
 
@@ -31,9 +33,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[File]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[File]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -42,8 +44,8 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[File]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[File]:
     """Octet Stream
 
     Raises:
@@ -65,7 +67,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> File | None:
     """Octet Stream
 
@@ -84,8 +86,8 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[File]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[File]:
     """Octet Stream
 
     Raises:
@@ -105,7 +107,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> File | None:
     """Octet Stream
 

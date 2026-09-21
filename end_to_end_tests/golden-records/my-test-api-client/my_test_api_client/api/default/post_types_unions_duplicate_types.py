@@ -1,12 +1,14 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.a_model import AModel
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -29,7 +31,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> AModel | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> AModel | None:
     if response.status_code == 200:
 
         def _parse_response_200(data: object) -> AModel:
@@ -49,9 +51,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[AModel]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[AModel]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -60,9 +62,9 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: AModel | Unset = UNSET,
-) -> Response[AModel]:
+) -> _Response[AModel]:
     """
     Args:
         body (AModel | Unset):
@@ -88,7 +90,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: AModel | Unset = UNSET,
 ) -> AModel | None:
     """
@@ -111,9 +113,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: AModel | Unset = UNSET,
-) -> Response[AModel]:
+) -> _Response[AModel]:
     """
     Args:
         body (AModel | Unset):
@@ -137,7 +139,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: AModel | Unset = UNSET,
 ) -> AModel | None:
     """
