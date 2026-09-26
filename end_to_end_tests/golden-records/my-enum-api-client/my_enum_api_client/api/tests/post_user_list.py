@@ -1,13 +1,15 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.a_model import AModel
 from ...models.post_user_list_body import PostUserListBody
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -30,7 +32,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[AModel] | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> list[AModel] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -47,9 +49,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[list[AModel]]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -58,9 +60,9 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostUserListBody | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> _Response[list[AModel]]:
     """Post List
 
      Post a list of things
@@ -89,7 +91,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostUserListBody | Unset = UNSET,
 ) -> list[AModel] | None:
     """Post List
@@ -115,9 +117,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostUserListBody | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> _Response[list[AModel]]:
     """Post List
 
      Post a list of things
@@ -144,7 +146,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostUserListBody | Unset = UNSET,
 ) -> list[AModel] | None:
     """Post List

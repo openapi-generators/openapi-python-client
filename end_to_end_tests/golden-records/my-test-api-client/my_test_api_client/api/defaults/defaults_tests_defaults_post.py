@@ -1,15 +1,17 @@
 import datetime
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.an_enum import AnEnum
 from ...models.http_validation_error import HTTPValidationError
 from ...models.model_with_union_property import ModelWithUnionProperty
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -87,7 +89,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> Any | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = response.json()
@@ -105,10 +107,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[Any | HTTPValidationError]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -117,7 +119,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
@@ -131,7 +133,7 @@ def sync_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError]:
+) -> _Response[Any | HTTPValidationError]:
     """Defaults
 
     Args:
@@ -182,7 +184,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
@@ -242,7 +244,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),
@@ -256,7 +258,7 @@ async def asyncio_detailed(
     enum_prop: AnEnum,
     model_prop: ModelWithUnionProperty,
     required_model_prop: ModelWithUnionProperty,
-) -> Response[Any | HTTPValidationError]:
+) -> _Response[Any | HTTPValidationError]:
     """Defaults
 
     Args:
@@ -305,7 +307,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     string_prop: str = "the default string",
     string_with_num: str = "1",
     date_prop: datetime.date = datetime.date.fromisoformat("1010-10-10"),

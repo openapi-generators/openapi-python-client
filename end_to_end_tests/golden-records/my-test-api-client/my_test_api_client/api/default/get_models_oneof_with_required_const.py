@@ -1,17 +1,18 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.get_models_oneof_with_required_const_response_200_type_0 import (
     GetModelsOneofWithRequiredConstResponse200Type0,
 )
 from ...models.get_models_oneof_with_required_const_response_200_type_1 import (
     GetModelsOneofWithRequiredConstResponse200Type1,
 )
-from ...types import Response
+from ...types import Response as _Response
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -25,7 +26,7 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1 | None:
     if response.status_code == 200:
 
@@ -57,10 +58,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -69,8 +70,8 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -91,7 +92,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1 | None:
     """
     Raises:
@@ -109,8 +110,8 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -129,7 +130,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> GetModelsOneofWithRequiredConstResponse200Type0 | GetModelsOneofWithRequiredConstResponse200Type1 | None:
     """
     Raises:

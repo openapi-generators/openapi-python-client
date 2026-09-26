@@ -1,13 +1,14 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.post_parameters_header_response_200 import PostParametersHeaderResponse200
 from ...models.public_error import PublicError
-from ...types import Response
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -36,7 +37,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> PostParametersHeaderResponse200 | PublicError | None:
     if response.status_code == 200:
         response_200 = PostParametersHeaderResponse200.from_dict(response.json())
@@ -55,10 +56,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[PostParametersHeaderResponse200 | PublicError]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -67,12 +68,12 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> _Response[PostParametersHeaderResponse200 | PublicError]:
     """
     Args:
         boolean_header (bool):
@@ -104,7 +105,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
@@ -136,12 +137,12 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,
     integer_header: int,
-) -> Response[PostParametersHeaderResponse200 | PublicError]:
+) -> _Response[PostParametersHeaderResponse200 | PublicError]:
     """
     Args:
         boolean_header (bool):
@@ -171,7 +172,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     boolean_header: bool,
     string_header: str,
     number_header: float,

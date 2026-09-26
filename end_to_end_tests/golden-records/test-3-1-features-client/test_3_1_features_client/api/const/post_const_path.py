@@ -1,13 +1,15 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any, Literal, cast
 from urllib.parse import quote
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.post_const_path_body import PostConstPathBody
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -44,7 +46,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> Literal["Why have a fixed response? I dunno"] | None:
     if response.status_code == 200:
         response_200 = cast(Literal["Why have a fixed response? I dunno"], response.json())
@@ -61,10 +63,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Literal["Why have a fixed response? I dunno"]]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[Literal["Why have a fixed response? I dunno"]]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -74,11 +76,11 @@ def _build_response(
 def sync_detailed(
     path: Literal["this goes in the path"],
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
-) -> Response[Literal["Why have a fixed response? I dunno"]]:
+) -> _Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
         path (Literal['this goes in the path']):
@@ -111,7 +113,7 @@ def sync_detailed(
 def sync(
     path: Literal["this goes in the path"],
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
@@ -143,11 +145,11 @@ def sync(
 async def asyncio_detailed(
     path: Literal["this goes in the path"],
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,
-) -> Response[Literal["Why have a fixed response? I dunno"]]:
+) -> _Response[Literal["Why have a fixed response? I dunno"]]:
     """
     Args:
         path (Literal['this goes in the path']):
@@ -178,7 +180,7 @@ async def asyncio_detailed(
 async def asyncio(
     path: Literal["this goes in the path"],
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: PostConstPathBody,
     required_query: Literal["this always goes in the query"],
     optional_query: Literal["this sometimes goes in the query"] | Unset = UNSET,

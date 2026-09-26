@@ -1,12 +1,13 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.get_models_allof_response_200 import GetModelsAllofResponse200
-from ...types import Response
+from ...types import Response as _Response
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -20,7 +21,7 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> GetModelsAllofResponse200 | None:
     if response.status_code == 200:
         response_200 = GetModelsAllofResponse200.from_dict(response.json())
@@ -34,10 +35,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetModelsAllofResponse200]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[GetModelsAllofResponse200]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -46,8 +47,8 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[GetModelsAllofResponse200]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[GetModelsAllofResponse200]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -68,7 +69,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> GetModelsAllofResponse200 | None:
     """
     Raises:
@@ -86,8 +87,8 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[GetModelsAllofResponse200]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[GetModelsAllofResponse200]:
     """
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -106,7 +107,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> GetModelsAllofResponse200 | None:
     """
     Raises:
