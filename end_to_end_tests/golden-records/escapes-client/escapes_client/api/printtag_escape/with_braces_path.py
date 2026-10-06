@@ -71,7 +71,7 @@ def sync_detailed(
      Attempting to escape docstring \"\"\" print('uh oh')
 
     Args:
-        param (str):
+        param (str): " print('escape param description')
         printescape_param_name (str | Unset):
         body (WithBracesPathBody):
 
@@ -108,7 +108,7 @@ async def asyncio_detailed(
      Attempting to escape docstring \"\"\" print('uh oh')
 
     Args:
-        param (str):
+        param (str): " print('escape param description')
         printescape_param_name (str | Unset):
         body (WithBracesPathBody):
 
