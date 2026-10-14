@@ -76,7 +76,7 @@ Things to know:
 
 ## Advanced customizations
 
-There are more settings on the generated `Client` class which let you control more runtime behavior, check out the docstring on that class for more info. You can also customize the underlying `httpx.Client` or `httpx.AsyncClient` (depending on your use-case):
+There are more settings on the generated `Client` class which let you control more runtime behavior, check out the docstring on that class for more info. You can also customize the underlying `httpx2.Client` or `httpx2.AsyncClient` (depending on your use-case):
 
 ```python
 from test_3_1_features_client import Client
@@ -90,23 +90,23 @@ def log_response(response):
 
 client = Client(
     base_url="https://api.example.com",
-    httpx_args={"event_hooks": {"request": [log_request], "response": [log_response]}},
+    httpx2_args={"event_hooks": {"request": [log_request], "response": [log_response]}},
 )
 
-# Or get the underlying httpx client to modify directly with client.get_httpx_client() or client.get_async_httpx_client()
+# Or get the underlying httpx2 client to modify directly with client.get_httpx_client() or client.get_async_httpx_client()
 ```
 
-You can even set the httpx client directly, but beware that this will override any existing settings (e.g., base_url):
+You can even set the httpx2 client directly, but beware that this will override any existing settings (e.g., base_url):
 
 ```python
-import httpx
+import httpx2
 from test_3_1_features_client import Client
 
 client = Client(
     base_url="https://api.example.com",
 )
 # Note that base_url needs to be re-set, as would any shared cookies, headers, etc.
-client.set_httpx_client(httpx.Client(base_url="https://api.example.com", proxies="http://localhost:8030"))
+client.set_httpx_client(httpx2.Client(base_url="https://api.example.com", proxy="http://localhost:8030"))
 ```
 
 ## Building / publishing this package

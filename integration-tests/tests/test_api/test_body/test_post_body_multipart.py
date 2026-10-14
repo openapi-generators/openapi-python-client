@@ -79,7 +79,7 @@ def test_custom_hooks() -> None:
         response_hook_called = True
 
     client = Client(
-        "http://localhost:3000", httpx_args={"event_hooks": {"request": [log_request], "response": [log_response]}}
+        "http://localhost:3000", httpx2_args={"event_hooks": {"request": [log_request], "response": [log_response]}}
     )
 
     post_body_multipart.sync_detailed(
