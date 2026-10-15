@@ -61,7 +61,8 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
 
 ## What You Get
 
-1. A `pyproject.toml` file, optionally with [Poetry] metadata (default), [PDM] (with `--meta=pdm`), or only [Ruff] config.
+1. A `pyproject.toml` file, optionally with [Poetry] metadata (default), [uv] (with `--meta=uv`), [PDM]
+   (with `--meta=pdm`), or only [Ruff] config.
 2. A `README.md` you'll most definitely need to update with your project's details
 3. A Python module named just like the auto-generated project name (e.g. "my_api_client") which contains:
    1. A `client` module which will have both a `Client` class and an `AuthenticatedClient` class. You'll need these
@@ -200,7 +201,7 @@ This extension has been adopted by similar projects such as [OpenAPI Tools](http
 It is intended to provide user-friendly names for integer Enum members that get generated.
 It is critical that the length of the array matches that of the enum values.
 
-```
+```json
 "Colors": {
    "type": "integer",
    "format": "int32",
@@ -218,7 +219,7 @@ It is critical that the length of the array matches that of the enum values.
 ```
 
 Results in:
-```
+```json
 class Color(IntEnum):
     RED = 0
     GREEN = 1
@@ -227,5 +228,6 @@ class Color(IntEnum):
 
 [changelog.md]: CHANGELOG.md
 [poetry]: https://python-poetry.org/
+[uv]: https://docs.astral.sh/uv/
 [PDM]: https://pdm-project.org/latest/
 [Ruff]: https://docs.astral.sh/ruff/
