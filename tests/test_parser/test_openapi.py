@@ -7,6 +7,7 @@ import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import ParseError
 from openapi_python_client.parser.openapi import Endpoint, EndpointCollection, import_string_from_class
 from openapi_python_client.parser.properties import Class, IntProperty, Parameters, Schemas
+from openapi_python_client.parser.properties.protocol import Value
 from openapi_python_client.schema import DataType
 from openapi_python_client.schema.ref import Ref
 from openapi_python_client.schema.untrusted_string import UntrustedString
@@ -267,6 +268,22 @@ class TestEndpoint:
         expected_names = [f"param{i}" for i in (4, 2, 1, 3)]
 
         assert result_names == expected_names
+
+    def test_sort_parameters_moves_parameters_with_defaults_last(self, string_property_factory):
+        endpoint = self.make_endpoint()
+        endpoint.path = UntrustedString("/multiple-path-parameters/{param1}/{param2}/{param3}/{param4}")
+
+        endpoint.path_parameters.append(string_property_factory(name="param1", default=Value(PythonCode("'a'"), "a")))
+        endpoint.path_parameters.append(string_property_factory(name="param2"))
+        endpoint.path_parameters.append(string_property_factory(name="param3", default=Value(PythonCode("'c'"), "c")))
+        endpoint.path_parameters.append(string_property_factory(name="param4"))
+
+        result = Endpoint.sort_parameters(endpoint=endpoint)
+
+        assert isinstance(result, Endpoint)
+        result_names = [param.name for param in result.path_parameters]
+        # Parameters without a default come first; path order is preserved within each group
+        assert result_names == ["param2", "param4", "param1", "param3"]
 
     def test_sort_parameters_missing_param(self, string_property_factory):
         endpoint = self.make_endpoint()
