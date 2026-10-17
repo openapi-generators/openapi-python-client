@@ -376,6 +376,11 @@ class Endpoint:
         """
         Sorts the path parameters of an `endpoint` so that they match the order declared in `endpoint.path`.
 
+        Parameters which declare a default are then moved after parameters which do not, preserving the
+        path order within each group. Generated endpoint functions declare path parameters as
+        positional-or-keyword arguments, so a parameter with a default followed by one without would be
+        a `SyntaxError` in the generated code.
+
         Args:
             endpoint: The endpoint to sort the parameters of.
 
@@ -402,6 +407,8 @@ class Endpoint:
                     f"{{{parameter.name.get_untrusted_value()}}}", f"{{{parameter.python_name}}}"
                 )
             )
+        # Stable sort: parameters without a default must be declared before those with one
+        endpoint.path_parameters.sort(key=lambda param: param.default is not None)
         return endpoint
 
     @staticmethod
