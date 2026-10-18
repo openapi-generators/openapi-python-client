@@ -3,7 +3,9 @@ import pytest
 import openapi_python_client.schema as oai
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import (
+    AnyProperty,
     Class,
+    ListProperty,
     ReferencePath,
     Schemas,
     _propogate_removal,
@@ -323,3 +325,23 @@ class TestPropogateRemoval:
         assert schemas.classes_by_name == {class_name: None}
         assert schemas.classes_by_reference == {ref_path: None}
         assert not error.detail
+
+
+class TestArrayWithoutItems:
+    def test_array_without_items_becomes_list_of_any(self, config):
+        """Issue #1435: `{"type": "array"}` with no `items`/`prefixItems` is
+        valid in OpenAPI 3.1 (JSON Schema 2020-12) and means "array of any". It
+        must generate a list of Any instead of failing with a PropertyError."""
+        data = oai.Schema(type="array", description="anything")
+        prop, _ = property_from_data(
+            name=UntrustedString("metrics"),
+            required=True,
+            data=data,
+            schemas=Schemas(),
+            parent_name="parent",
+            config=config,
+        )
+
+        assert isinstance(prop, ListProperty)
+        assert isinstance(prop.inner_property, AnyProperty)
+        assert prop.get_base_type_string().as_unembedded_code() == "list[Any]"
