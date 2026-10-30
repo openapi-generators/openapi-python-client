@@ -40,6 +40,8 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
+{% set inner_templates = property.inner_properties | map(attribute="template") | unique | list %}
+{% set homogeneous_model_union = property.inner_properties and inner_templates == ["model_property.py.jinja"] %}
 {% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
 {% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) | as_unembedded_code }}{% endif %}
 
@@ -48,6 +50,17 @@ if isinstance({{ source }}, Unset):
     {{ destination }} = UNSET
     {% set ns.has_if = true %}
 {% endif %}
+{% if homogeneous_model_union %}
+{% if property.required %}
+{{ destination }} = {{ source }}.to_dict()
+{% elif ns.has_if %}
+else:
+    {{ destination }} = {{ source }}.to_dict()
+{% else %}
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ source }}.to_dict()
+{% endif %}
+{% else %}
 {% for inner_property in property.inner_properties %}
     {% import "property_templates/" + inner_property.template as inner_template %}
     {% if not inner_template.transform %}
@@ -72,6 +85,7 @@ else:
 {%- elif ns.contains_properties_without_transform %}
 {{ destination }} = {{ source }}
 {%- endif %}
+{% endif %}
 {% endmacro %}
 
 

@@ -25,15 +25,9 @@ class ModelWithUnionPropertyInlined:
     fruit: ModelWithUnionPropertyInlinedApples | ModelWithUnionPropertyInlinedBananas | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.model_with_union_property_inlined_apples import (
-            ModelWithUnionPropertyInlinedApples,  # noqa: PLC0415
-        )
-
         fruit: dict[str, Any] | Unset
         if isinstance(self.fruit, Unset):
             fruit = UNSET
-        elif isinstance(self.fruit, ModelWithUnionPropertyInlinedApples):
-            fruit = self.fruit.to_dict()
         else:
             fruit = self.fruit.to_dict()
 
