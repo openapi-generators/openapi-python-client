@@ -288,6 +288,16 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             process_properties=process_properties,
             roots=roots,
         )
+    if data.allOf and _all_of_is_values(data.allOf, schemas):
+        return _property_from_values_all_of(
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
+            roots=roots,
+        )
     if data.type == oai.DataType.OBJECT or data.allOf or (data.type is None and data.properties):
         return ModelProperty.build(
             data=data,
@@ -472,3 +482,70 @@ def build_parameters(
 
     parameters.errors.extend(errors)
     return parameters
+
+
+def _all_of_is_values(parts: list[oai.Reference | oai.Schema], schemas: Schemas) -> bool:
+    """Whether every part of an allOf describes a value (an enum, string, number...) rather than an object.
+
+    Such an allOf narrows a value, for example a reference to an enum plus `enum: [ONE_VALUE]`. It is merged
+    property by property instead of being built as a model.
+    """
+    for part in parts:
+        if isinstance(part, oai.Reference):
+            ref_path = parse_reference_path(part.ref)
+            if isinstance(ref_path, ParseError):
+                return False
+            existing = schemas.classes_by_reference.get(ref_path)
+            if existing is None or isinstance(existing, ModelProperty):
+                return False
+            continue
+        if part.type == oai.DataType.OBJECT or part.properties or part.allOf or part.anyOf or part.oneOf:
+            return False
+    return True
+
+
+def _property_from_values_all_of(
+    *,
+    name: UntrustedString,
+    required: bool,
+    data: oai.Schema,
+    schemas: Schemas,
+    parent_name: str,
+    config: Config,
+    roots: set[ReferencePath | strings.ClassName],
+) -> tuple[Property | PropertyError, Schemas]:
+    """Merge the parts of a value allOf into one property, using the same rules as merging model properties."""
+    from .merge_properties import merge_properties  # noqa: PLC0415
+
+    merged: Property | None = None
+    for part in data.allOf:
+        prop, schemas = property_from_data(
+            name=name,
+            required=required,
+            data=part,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,
+            roots=roots,
+        )
+        if isinstance(prop, PropertyError):
+            return prop, schemas
+        if merged is None:
+            merged = prop
+            continue
+        result = merge_properties(merged, prop)
+        if isinstance(result, PropertyError):
+            result.data = data
+            return result, schemas
+        merged = result
+    assert merged is not None
+    return (
+        evolve(
+            merged,
+            required=required,
+            name=name,
+            python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
+            description=data.description or merged.description,
+        ),
+        schemas,
+    )
