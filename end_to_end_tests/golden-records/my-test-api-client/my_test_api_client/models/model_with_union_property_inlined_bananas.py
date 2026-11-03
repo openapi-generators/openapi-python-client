@@ -19,7 +19,7 @@ class ModelWithUnionPropertyInlinedBananas:
     """
 
     bananas: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         bananas = self.bananas
@@ -37,12 +37,10 @@ class ModelWithUnionPropertyInlinedBananas:
         d = dict(src_dict)
         bananas = d.pop("bananas", UNSET)
 
-        model_with_union_property_inlined_bananas = cls(
+        return cls(
             bananas=bananas,
+            additional_properties=d,
         )
-
-        model_with_union_property_inlined_bananas.additional_properties = d
-        return model_with_union_property_inlined_bananas
 
     @property
     def additional_keys(self) -> list[str]:

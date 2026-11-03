@@ -16,7 +16,7 @@ class ModelWithNoDescription:
     prop_with_no_desc: str | Unset = UNSET
     prop_with_desc: str | Unset = UNSET
     """ This is a nice property. """
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         prop_with_no_desc = self.prop_with_no_desc
@@ -40,13 +40,11 @@ class ModelWithNoDescription:
 
         prop_with_desc = d.pop("propWithDesc", UNSET)
 
-        model_with_no_description = cls(
+        return cls(
             prop_with_no_desc=prop_with_no_desc,
             prop_with_desc=prop_with_desc,
+            additional_properties=d,
         )
-
-        model_with_no_description.additional_properties = d
-        return model_with_no_description
 
     @property
     def additional_keys(self) -> list[str]:

@@ -11,7 +11,7 @@ T = TypeVar("T", bound="None_")
 
 @_attrs_define
 class None_:
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -23,10 +23,10 @@ class None_:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        none = cls()
 
-        none.additional_properties = d
-        return none
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

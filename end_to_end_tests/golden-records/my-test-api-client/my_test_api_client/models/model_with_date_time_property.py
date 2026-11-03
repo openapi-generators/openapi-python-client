@@ -20,7 +20,7 @@ class ModelWithDateTimeProperty:
     """
 
     datetime_: datetime.datetime | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         datetime_: str | Unset = UNSET
@@ -45,12 +45,10 @@ class ModelWithDateTimeProperty:
         else:
             datetime_ = datetime.datetime.fromisoformat(_datetime_)
 
-        model_with_date_time_property = cls(
+        return cls(
             datetime_=datetime_,
+            additional_properties=d,
         )
-
-        model_with_date_time_property.additional_properties = d
-        return model_with_date_time_property
 
     @property
     def additional_keys(self) -> list[str]:

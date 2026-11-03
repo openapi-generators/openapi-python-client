@@ -29,7 +29,7 @@ class PublicError:
     extra_parameters: list[str] | Unset = UNSET
     invalid_parameters: list[Problem] | Unset = UNSET
     missing_parameters: list[str] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         errors: list[str] | Unset = UNSET
@@ -85,15 +85,13 @@ class PublicError:
 
         missing_parameters = cast(list[str], d.pop("missing_parameters", UNSET))
 
-        public_error = cls(
+        return cls(
             errors=errors,
             extra_parameters=extra_parameters,
             invalid_parameters=invalid_parameters,
             missing_parameters=missing_parameters,
+            additional_properties=d,
         )
-
-        public_error.additional_properties = d
-        return public_error
 
     @property
     def additional_keys(self) -> list[str]:

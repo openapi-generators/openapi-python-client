@@ -23,7 +23,7 @@ class AnArrayWithACircularRefInItemsObjectBItem:
     """
 
     circular: list[AnArrayWithACircularRefInItemsObjectAItem] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         circular: list[dict[str, Any]] | Unset = UNSET
@@ -63,12 +63,10 @@ class AnArrayWithACircularRefInItemsObjectBItem:
 
                 circular.append(componentsschemas_an_array_with_a_circular_ref_in_items_object_a_item)
 
-        an_array_with_a_circular_ref_in_items_object_b_item = cls(
+        return cls(
             circular=circular,
+            additional_properties=d,
         )
-
-        an_array_with_a_circular_ref_in_items_object_b_item.additional_properties = d
-        return an_array_with_a_circular_ref_in_items_object_b_item
 
     @property
     def additional_keys(self) -> list[str]:

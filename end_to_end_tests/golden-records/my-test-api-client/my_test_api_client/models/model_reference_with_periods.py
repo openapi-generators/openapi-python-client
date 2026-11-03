@@ -13,7 +13,7 @@ T = TypeVar("T", bound="ModelReferenceWithPeriods")
 class ModelReferenceWithPeriods:
     """A Model with periods in its reference"""
 
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -25,10 +25,10 @@ class ModelReferenceWithPeriods:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        model_reference_with_periods = cls()
 
-        model_reference_with_periods.additional_properties = d
-        return model_reference_with_periods
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

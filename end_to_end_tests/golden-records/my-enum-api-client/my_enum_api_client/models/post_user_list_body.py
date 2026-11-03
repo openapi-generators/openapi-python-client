@@ -34,7 +34,7 @@ class PostUserListBody:
     an_allof_enum_with_overridden_default: AnAllOfEnum | Unset = "overridden_default"
     an_optional_allof_enum: AnAllOfEnum | Unset = UNSET
     nested_list_of_enums: list[list[DifferentEnum]] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         an_enum_value: list[str] | Unset = UNSET
@@ -220,17 +220,15 @@ class PostUserListBody:
 
                 nested_list_of_enums.append(nested_list_of_enums_item)
 
-        post_user_list_body = cls(
+        return cls(
             an_enum_value=an_enum_value,
             an_enum_value_with_null=an_enum_value_with_null,
             an_enum_value_with_only_null=an_enum_value_with_only_null,
             an_allof_enum_with_overridden_default=an_allof_enum_with_overridden_default,
             an_optional_allof_enum=an_optional_allof_enum,
             nested_list_of_enums=nested_list_of_enums,
+            additional_properties=d,
         )
-
-        post_user_list_body.additional_properties = d
-        return post_user_list_body
 
     @property
     def additional_keys(self) -> list[str]:

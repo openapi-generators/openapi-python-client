@@ -64,9 +64,7 @@ class BodyUploadFileTestsUploadPost:
     some_array: list[AFormData] | None | Unset = UNSET
     some_optional_object: BodyUploadFileTestsUploadPostSomeOptionalObject | Unset = UNSET
     some_enum: DifferentEnum | Unset = UNSET
-    additional_properties: dict[str, BodyUploadFileTestsUploadPostAdditionalProperty] = _attrs_field(
-        init=False, factory=dict
-    )
+    additional_properties: dict[str, BodyUploadFileTestsUploadPostAdditionalProperty] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
@@ -372,7 +370,13 @@ class BodyUploadFileTestsUploadPost:
         else:
             some_enum = DifferentEnum(_some_enum)
 
-        body_upload_file_tests_upload_post = cls(
+        additional_properties = {}
+        for prop_name, prop_dict in d.items():
+            additional_property = BodyUploadFileTestsUploadPostAdditionalProperty.from_dict(prop_dict)
+
+            additional_properties[prop_name] = additional_property
+
+        return cls(
             some_file=some_file,
             some_required_number=some_required_number,
             some_object=some_object,
@@ -387,16 +391,8 @@ class BodyUploadFileTestsUploadPost:
             some_array=some_array,
             some_optional_object=some_optional_object,
             some_enum=some_enum,
+            additional_properties=additional_properties,
         )
-
-        additional_properties = {}
-        for prop_name, prop_dict in d.items():
-            additional_property = BodyUploadFileTestsUploadPostAdditionalProperty.from_dict(prop_dict)
-
-            additional_properties[prop_name] = additional_property
-
-        body_upload_file_tests_upload_post.additional_properties = additional_properties
-        return body_upload_file_tests_upload_post
 
     @property
     def additional_keys(self) -> list[str]:

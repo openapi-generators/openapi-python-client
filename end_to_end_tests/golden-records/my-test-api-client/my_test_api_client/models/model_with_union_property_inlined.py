@@ -77,8 +77,6 @@ class ModelWithUnionPropertyInlined:
 
         fruit = _parse_fruit(d.pop("fruit", UNSET))
 
-        model_with_union_property_inlined = cls(
+        return cls(
             fruit=fruit,
         )
-
-        return model_with_union_property_inlined

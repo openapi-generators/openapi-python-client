@@ -49,10 +49,8 @@ class ValidationError:
 
         type_ = d.pop("type")
 
-        validation_error = cls(
+        return cls(
             loc=loc,
             msg=msg,
             type_=type_,
         )
-
-        return validation_error

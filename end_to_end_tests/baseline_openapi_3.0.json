@@ -2495,6 +2495,17 @@
           "type": "string"
         }
       },
+      "ModelWithSelfNamedProperty": {
+        "title": "ModelWithSelfNamedProperty",
+        "type": "object",
+        "properties": {
+          "model_with_self_named_property": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": ["model_with_self_named_property"]
+      },
       "ModelWithAdditionalPropertiesRefed": {
         "title": "ModelWithAdditionalPropertiesRefed",
         "type": "object",

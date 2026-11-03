@@ -24,7 +24,7 @@ class ModelWithDiscriminatedUnion:
     """
 
     discriminated_union: ADiscriminatedUnionType1 | ADiscriminatedUnionType2 | None | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.a_discriminated_union_type_1 import ADiscriminatedUnionType1  # noqa: PLC0415
@@ -82,12 +82,10 @@ class ModelWithDiscriminatedUnion:
 
         discriminated_union = _parse_discriminated_union(d.pop("discriminated_union", UNSET))
 
-        model_with_discriminated_union = cls(
+        return cls(
             discriminated_union=discriminated_union,
+            additional_properties=d,
         )
-
-        model_with_discriminated_union.additional_properties = d
-        return model_with_discriminated_union
 
     @property
     def additional_keys(self) -> list[str]:

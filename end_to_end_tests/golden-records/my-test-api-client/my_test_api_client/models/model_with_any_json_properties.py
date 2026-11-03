@@ -19,7 +19,7 @@ T = TypeVar("T", bound="ModelWithAnyJsonProperties")
 class ModelWithAnyJsonProperties:
     additional_properties: dict[
         str, bool | float | int | list[str] | ModelWithAnyJsonPropertiesAdditionalPropertyType0 | str
-    ] = _attrs_field(init=False, factory=dict)
+    ] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.model_with_any_json_properties_additional_property_type_0 import (
@@ -45,7 +45,6 @@ class ModelWithAnyJsonProperties:
         )
 
         d = dict(src_dict)
-        model_with_any_json_properties = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -77,8 +76,9 @@ class ModelWithAnyJsonProperties:
 
             additional_properties[prop_name] = additional_property
 
-        model_with_any_json_properties.additional_properties = additional_properties
-        return model_with_any_json_properties
+        return cls(
+            additional_properties=additional_properties,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

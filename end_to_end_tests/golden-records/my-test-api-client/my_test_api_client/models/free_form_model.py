@@ -11,7 +11,7 @@ T = TypeVar("T", bound="FreeFormModel")
 
 @_attrs_define
 class FreeFormModel:
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -23,10 +23,10 @@ class FreeFormModel:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        free_form_model = cls()
 
-        free_form_model.additional_properties = d
-        return free_form_model
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

@@ -21,7 +21,7 @@ class GetModelsOneofWithRequiredConstResponse200Type0:
 
     type_: Literal["alpha"]
     color: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         type_ = self.type_
@@ -49,13 +49,11 @@ class GetModelsOneofWithRequiredConstResponse200Type0:
 
         color = d.pop("color", UNSET)
 
-        get_models_oneof_with_required_const_response_200_type_0 = cls(
+        return cls(
             type_=type_,
             color=color,
+            additional_properties=d,
         )
-
-        get_models_oneof_with_required_const_response_200_type_0.additional_properties = d
-        return get_models_oneof_with_required_const_response_200_type_0
 
     @property
     def additional_keys(self) -> list[str]:

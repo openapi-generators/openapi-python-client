@@ -21,7 +21,7 @@ class PostPrefixItemsBody:
 
     prefix_items_and_items: list[float | Literal["prefix"] | str] | Unset = UNSET
     prefix_items_only: list[float | str] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         prefix_items_and_items: list[float | Literal["prefix"] | str] | Unset = UNSET
@@ -85,13 +85,11 @@ class PostPrefixItemsBody:
 
                 prefix_items_only.append(prefix_items_only_item)
 
-        post_prefix_items_body = cls(
+        return cls(
             prefix_items_and_items=prefix_items_and_items,
             prefix_items_only=prefix_items_only,
+            additional_properties=d,
         )
-
-        post_prefix_items_body.additional_properties = d
-        return post_prefix_items_body
 
     @property
     def additional_keys(self) -> list[str]:

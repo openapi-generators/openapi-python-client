@@ -21,7 +21,7 @@ class GetModelsOneofWithRequiredConstResponse200Type1:
 
     type_: Literal["beta"]
     texture: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         type_ = self.type_
@@ -49,13 +49,11 @@ class GetModelsOneofWithRequiredConstResponse200Type1:
 
         texture = d.pop("texture", UNSET)
 
-        get_models_oneof_with_required_const_response_200_type_1 = cls(
+        return cls(
             type_=type_,
             texture=texture,
+            additional_properties=d,
         )
-
-        get_models_oneof_with_required_const_response_200_type_1.additional_properties = d
-        return get_models_oneof_with_required_const_response_200_type_1
 
     @property
     def additional_keys(self) -> list[str]:

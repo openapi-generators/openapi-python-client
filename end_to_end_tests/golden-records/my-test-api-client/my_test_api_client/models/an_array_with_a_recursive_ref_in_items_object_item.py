@@ -19,7 +19,7 @@ class AnArrayWithARecursiveRefInItemsObjectItem:
     """
 
     recursive: list[AnArrayWithARecursiveRefInItemsObjectItem] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         recursive: list[dict[str, Any]] | Unset = UNSET
@@ -55,12 +55,10 @@ class AnArrayWithARecursiveRefInItemsObjectItem:
 
                 recursive.append(componentsschemas_an_array_with_a_recursive_ref_in_items_object_item)
 
-        an_array_with_a_recursive_ref_in_items_object_item = cls(
+        return cls(
             recursive=recursive,
+            additional_properties=d,
         )
-
-        an_array_with_a_recursive_ref_in_items_object_item.additional_properties = d
-        return an_array_with_a_recursive_ref_in_items_object_item
 
     @property
     def additional_keys(self) -> list[str]:

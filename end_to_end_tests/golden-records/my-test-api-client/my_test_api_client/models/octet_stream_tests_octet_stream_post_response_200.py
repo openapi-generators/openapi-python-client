@@ -20,7 +20,7 @@ class OctetStreamTestsOctetStreamPostResponse200:
     """
 
     data: File | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         data: FileTypes | Unset = UNSET
@@ -45,12 +45,10 @@ class OctetStreamTestsOctetStreamPostResponse200:
         else:
             data = File(payload=BytesIO(_data))
 
-        octet_stream_tests_octet_stream_post_response_200 = cls(
+        return cls(
             data=data,
+            additional_properties=d,
         )
-
-        octet_stream_tests_octet_stream_post_response_200.additional_properties = d
-        return octet_stream_tests_octet_stream_post_response_200
 
     @property
     def additional_keys(self) -> list[str]:

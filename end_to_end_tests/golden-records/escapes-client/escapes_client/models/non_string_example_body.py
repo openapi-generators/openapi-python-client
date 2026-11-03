@@ -24,7 +24,7 @@ class NonStringExampleBody:
     """
 
     dict_example: NonStringExampleBodyDictExample | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         dict_example: dict[str, Any] | Unset = UNSET
@@ -51,12 +51,10 @@ class NonStringExampleBody:
         else:
             dict_example = NonStringExampleBodyDictExample.from_dict(_dict_example)
 
-        non_string_example_body = cls(
+        return cls(
             dict_example=dict_example,
+            additional_properties=d,
         )
-
-        non_string_example_body.additional_properties = d
-        return non_string_example_body
 
     @property
     def additional_keys(self) -> list[str]:

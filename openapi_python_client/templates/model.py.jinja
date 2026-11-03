@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 {% endif %}
 
 {% set class_name = model.class_info.name %}
-{% set module_name = model.class_info.module_name %}
 
 {% from "helpers.jinja" import docstring %}
 
@@ -82,7 +81,7 @@ class {{ class_name }}:
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}
-    additional_properties: dict[str, {{ additional_property_type }}] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, {{ additional_property_type }}] = _attrs_field(factory=dict)
     {% endif %}
 
 {% macro _transform_property(property, content) %}
@@ -193,12 +192,6 @@ return field_dict
 
 {% endfor %}
 {% endif %}
-        {{ module_name }} = cls(
-{% for property in model.required_properties + model.optional_properties %}
-            {{ property.python_name }}={{ property.python_name }},
-{% endfor %}
-        )
-
 {% if model.additional_properties %}
     {% if model.additional_properties.template %}{# Can be a bool instead of an object #}
         {% import "property_templates/" + model.additional_properties.template as prop_template %}
@@ -217,12 +210,19 @@ return field_dict
             {{ prop_template.construct(model.additional_properties, "prop_dict") | indent(12) }}
             additional_properties[prop_name] = {{ model.additional_properties.python_name }}
 
-        {{ module_name }}.additional_properties = additional_properties
+        {% set additional_properties_expr = "additional_properties" %}
     {% else %}
-        {{ module_name }}.additional_properties = d
+        {% set additional_properties_expr = "d" %}
     {% endif %}
 {% endif %}
-        return {{ module_name }}
+        return cls(
+{% for property in model.required_properties + model.optional_properties %}
+            {{ property.python_name }}={{ property.python_name }},
+{% endfor %}
+{% if model.additional_properties %}
+            additional_properties={{ additional_properties_expr }},
+{% endif %}
+        )
 
     {% if model.additional_properties %}
     @property

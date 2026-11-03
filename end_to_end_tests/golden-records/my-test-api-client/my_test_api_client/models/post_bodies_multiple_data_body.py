@@ -19,7 +19,7 @@ class PostBodiesMultipleDataBody:
     """
 
     a: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a = self.a
@@ -37,12 +37,10 @@ class PostBodiesMultipleDataBody:
         d = dict(src_dict)
         a = d.pop("a", UNSET)
 
-        post_bodies_multiple_data_body = cls(
+        return cls(
             a=a,
+            additional_properties=d,
         )
-
-        post_bodies_multiple_data_body.additional_properties = d
-        return post_bodies_multiple_data_body
 
     @property
     def additional_keys(self) -> list[str]:

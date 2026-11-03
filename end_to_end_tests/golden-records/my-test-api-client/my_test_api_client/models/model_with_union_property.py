@@ -61,8 +61,6 @@ class ModelWithUnionProperty:
 
         a_property = _parse_a_property(d.pop("a_property", UNSET))
 
-        model_with_union_property = cls(
+        return cls(
             a_property=a_property,
         )
-
-        return model_with_union_property

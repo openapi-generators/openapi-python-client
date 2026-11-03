@@ -80,7 +80,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
     double_property_ref: float
     file_property_ref: File
     bytestream_property_ref: str
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         enum_properties_ref = []
@@ -329,7 +329,7 @@ class AModelWithPropertiesReferenceThatAreNotObject:
 
         bytestream_property_ref = d.pop("bytestream_property_ref")
 
-        a_model_with_properties_reference_that_are_not_object = cls(
+        return cls(
             enum_properties_ref=enum_properties_ref,
             str_properties_ref=str_properties_ref,
             date_properties_ref=date_properties_ref,
@@ -360,10 +360,8 @@ class AModelWithPropertiesReferenceThatAreNotObject:
             double_property_ref=double_property_ref,
             file_property_ref=file_property_ref,
             bytestream_property_ref=bytestream_property_ref,
+            additional_properties=d,
         )
-
-        a_model_with_properties_reference_that_are_not_object.additional_properties = d
-        return a_model_with_properties_reference_that_are_not_object
 
     @property
     def additional_keys(self) -> list[str]:

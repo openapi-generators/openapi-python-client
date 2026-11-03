@@ -509,7 +509,7 @@ class AModel:
 
         not_required_nullable_model = _parse_not_required_nullable_model(d.pop("not_required_nullable_model", UNSET))
 
-        a_model = cls(
+        return cls(
             an_enum_value=an_enum_value,
             an_allof_enum_with_overridden_default=an_allof_enum_with_overridden_default,
             a_camel_date_time=a_camel_date_time,
@@ -537,5 +537,3 @@ class AModel:
             not_required_model=not_required_model,
             not_required_nullable_model=not_required_nullable_model,
         )
-
-        return a_model

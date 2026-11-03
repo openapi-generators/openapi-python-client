@@ -17,7 +17,7 @@ class NonStringExampleBodyDictExample:
 
     """
 
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -29,10 +29,10 @@ class NonStringExampleBodyDictExample:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        non_string_example_body_dict_example = cls()
 
-        non_string_example_body_dict_example.additional_properties = d
-        return non_string_example_body_dict_example
+        return cls(
+            additional_properties=d,
+        )
 
     @property
     def additional_keys(self) -> list[str]:
