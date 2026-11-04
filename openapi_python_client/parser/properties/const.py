@@ -100,6 +100,10 @@ class ConstProperty(PropertyProtocol):
             return PythonCode(f"{lit.as_unembedded_code()} | Unset")
         return lit
 
+    def get_instance_type_string(self) -> PythonCode:
+        """The runtime type of the const value, used for `isinstance` checks (e.g., when choosing a union variant)"""
+        return PythonCode(type(self.value.raw_value).__name__)
+
     def get_imports(self, *, prefix: str) -> set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere

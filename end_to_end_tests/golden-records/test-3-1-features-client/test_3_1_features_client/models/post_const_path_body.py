@@ -56,12 +56,17 @@ class PostConstPathBody:
         def _parse_nullable(data: object) -> Literal["this or null goes in the body"] | None:
             if data is None:
                 return data
-            nullable_type_1 = cast(Literal["this or null goes in the body"], data)
-            if nullable_type_1 != "this or null goes in the body":
-                raise ValueError(
-                    f"nullable_type_1 must match const 'this or null goes in the body', got '{nullable_type_1}'"
-                )
-            return nullable_type_1
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                nullable_type_1 = cast(Literal["this or null goes in the body"], data)
+                if nullable_type_1 != "this or null goes in the body":
+                    raise ValueError(
+                        f"nullable_type_1 must match const 'this or null goes in the body', got '{nullable_type_1}'"
+                    )
+                return nullable_type_1
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
             return cast(Literal["this or null goes in the body"] | None, data)
 
         nullable = _parse_nullable(d.pop("nullable"))

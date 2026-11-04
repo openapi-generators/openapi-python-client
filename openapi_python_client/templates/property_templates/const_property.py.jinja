@@ -4,6 +4,8 @@ if {{ property.python_name }} != {{ property.value.python_code | as_unembedded_c
     raise ValueError(f"{{ property.name | in_f_string_literal }} must match const {{ property.value.python_code | in_f_string_literal }}, got '{{'{' + property.python_name + '}' }}'")
 {%- endmacro %}
 
+{% macro check_type_for_construct(property, source) %}isinstance({{ source }}, {{ property.get_instance_type_string() | as_unembedded_code }}){% endmacro %}
+
 {% macro multipart(property, source, name) %}
 files.append(({{ name }}, (None, {{ source }}, "text/plain")))
 {% endmacro %}
