@@ -50,18 +50,15 @@ def _get_kwargs(
 {% for body in endpoint.bodies %}
     if isinstance(body, {{body.prop.get_type_string(no_optional=True) | as_unembedded_code }}):
         {{ body_to_kwarg(body) | indent(8) }}
-        {%- if body.content_type == "multipart/form-data" %}
-        headers["Content-Type"] = "multipart/form-data; boundary=+++"
-        {% else %}
+        {#- httpx2 sets multipart/form-data with a random boundary itself, a fixed one could appear in the content #}
+        {%- if body.content_type != "multipart/form-data" %}
         headers["Content-Type"] = "{{ body.content_type | in_double_quote_literal }}"
         {% endif %}
 {% endfor %}
 {% elif endpoint.bodies | length == 1 %}
 {% set body = endpoint.bodies[0] %}
     {{ body_to_kwarg(body) | indent(4) }}
-    {%- if body.content_type == "multipart/form-data" %}
-    headers["Content-Type"] = "multipart/form-data; boundary=+++"
-    {% else %}
+    {%- if body.content_type != "multipart/form-data" %}
     headers["Content-Type"] = "{{ body.content_type | in_double_quote_literal }}"
     {% endif %}
 {% endif %}
