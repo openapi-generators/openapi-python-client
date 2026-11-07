@@ -258,9 +258,7 @@ class BodyUploadFileTestsUploadPost:
         from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
             BodyUploadFileTestsUploadPostSomeNullableObject,  # noqa: PLC0415
         )
-        from ..models.body_upload_file_tests_upload_post_some_object import (
-            BodyUploadFileTestsUploadPostSomeObject,  # noqa: PLC0415
-        )
+        from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject  # noqa: PLC0415
         from ..models.body_upload_file_tests_upload_post_some_optional_object import (
             BodyUploadFileTestsUploadPostSomeOptionalObject,  # noqa: PLC0415
         )
