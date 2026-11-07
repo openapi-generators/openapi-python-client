@@ -72,8 +72,8 @@ class TestProject:
 
     def test_build_creates_parent_directories(self, tmp_path):
         fresh_config = Config.from_sources(
-            ConfigFile(),
-            MetaType.POETRY,
+            config_file=ConfigFile(),
+            meta_type=MetaType.POETRY,
             document_source=Path("openapi.yaml"),
             file_encoding="utf-8",
             overwrite=False,

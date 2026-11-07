@@ -38,8 +38,8 @@ from openapi_python_client.strings import ClassName, PythonIdentifier
 def config() -> Config:
     """Create a default config for when it doesn't matter"""
     return Config.from_sources(
-        ConfigFile(),
-        MetaType.POETRY,
+        config_file=ConfigFile(),
+        meta_type=MetaType.POETRY,
         document_source=Path("openapi.yaml"),
         file_encoding="utf-8",
         overwrite=False,

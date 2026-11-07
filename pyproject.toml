@@ -49,7 +49,7 @@ dev = [
     "pytest-cov",
     "pytest-mock>3",
     "python-multipart",
-    "ruff>=0.15,<0.16",
+    "ruff>=0.2,<0.17",
     "syrupy>=4",
     "hypothesis>=6.100",
     "types-PyYAML<7.0.0,>=6.0.3",
@@ -74,7 +74,7 @@ ignore = ["E501", "PLR0913", "PLR2004"]
 
 [tool.ruff.lint.per-file-ignores]
 "openapi_python_client/cli.py" = ["B008"]
-"tests/*" = ["PLR2004"]
+"tests/*" = ["PLR2004", "PLR0917"]
 
 [tool.coverage.run]
 omit = ["openapi_python_client/__main__.py", "openapi_python_client/templates/*", "end_to_end_tests/*", "integration_tests/*", "tests/*"]

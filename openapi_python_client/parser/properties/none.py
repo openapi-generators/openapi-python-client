@@ -32,6 +32,7 @@ class NoneProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
+        *,
         name: oai.UntrustedString,
         required: bool,
         default: Any,

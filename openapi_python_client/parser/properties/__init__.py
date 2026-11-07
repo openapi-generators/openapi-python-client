@@ -105,6 +105,7 @@ def _string_based_property(
 
 
 def _property_from_ref(
+    *,
     name: UntrustedString,
     required: bool,
     parent: oai.Schema | None,
@@ -141,6 +142,7 @@ def _property_from_ref(
 
 
 def property_from_data(  # noqa: PLR0911, PLR0912
+    *,
     name: UntrustedString,
     required: bool,
     data: oai.Reference | oai.Schema,

@@ -86,6 +86,7 @@ class Config:
 
     @staticmethod
     def from_sources(
+        *,
         config_file: ConfigFile,
         meta_type: MetaType,
         document_source: Path | str,

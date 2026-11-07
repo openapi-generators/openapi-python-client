@@ -15,6 +15,7 @@ from openapi_python_client.cli import app
 
 
 def _compare_directories(
+    *,
     record: Path,
     test_subject: Path,
     expected_differences: dict[Path, str] | None = None,
@@ -59,8 +60,8 @@ def _compare_directories(
 
     for sub_path in dc.common_dirs:
         _compare_directories(
-            record / sub_path,
-            test_subject / sub_path,
+            record=record / sub_path,
+            test_subject=test_subject / sub_path,
             expected_differences=expected_differences,
             ignore=ignore,
             depth=depth + 1,
@@ -80,7 +81,7 @@ def run_e2e_test(
     *,
     golden_record_path: str | None = None,
 ) -> Result:
-    with generate_client(openapi_document, extra_args, output_path) as g:
+    with generate_client(openapi_document=openapi_document, extra_args=extra_args, output_path=output_path) as g:
         if golden_record_path:
             gr_path = Path(__file__).parent / "golden-records" / golden_record_path
         else:
@@ -90,7 +91,10 @@ def run_e2e_test(
         # Use absolute paths for expected differences for easier comparisons
         expected_differences = {g.output_path.joinpath(key): value for key, value in expected_differences.items()}
         _compare_directories(
-            gr_path, g.output_path, expected_differences=expected_differences, expected_missing=expected_missing
+            record=gr_path,
+            test_subject=g.output_path,
+            expected_differences=expected_differences,
+            expected_missing=expected_missing,
         )
 
         result = subprocess.run(
@@ -146,7 +150,7 @@ def test_escapes_end_to_end():
 )
 def test_meta(meta: str, generated_file: str | None, expected_file: str | None):
     with generate_client(
-        "3.1_specific.openapi.yaml",
+        openapi_document="3.1_specific.openapi.yaml",
         extra_args=[f"--meta={meta}"],
         output_path="test-3-1-features-client",
     ) as g:
@@ -220,7 +224,7 @@ ERROR_DOCUMENTS = [path for path in Path(__file__).parent.joinpath("documents_wi
 @pytest.mark.parametrize("document", ERROR_DOCUMENTS, ids=[path.stem for path in ERROR_DOCUMENTS])
 def test_documents_with_errors(snapshot, document):
     with generate_client(
-        document,
+        openapi_document=document,
         extra_args=["--fail-on-warning"],
         output_path="test-documents-with-errors",
         raise_on_error=False,
@@ -234,8 +238,8 @@ def test_documents_with_errors(snapshot, document):
 def test_custom_post_hooks():
     config_path = Path(__file__).parent / "custom_post_hooks.config.yml"
     with generate_client(
-        "baseline_openapi_3.0.json",
-        [f"--config={config_path}"],
+        openapi_document="baseline_openapi_3.0.json",
+        extra_args=[f"--config={config_path}"],
         raise_on_error=False,
     ) as g:
         assert g.generator_result.exit_code == 1
@@ -271,7 +275,7 @@ def test_update_integration_tests():
             url=url,
             config_path=config_path,
         )
-        _compare_directories(source_path, temp_dir, ignore=["pyproject.toml"])
+        _compare_directories(record=source_path, test_subject=temp_dir, ignore=["pyproject.toml"])
         result = subprocess.run(
             [sys.executable, "-m", "mypy", str(temp_dir), "--strict"],
             capture_output=True,

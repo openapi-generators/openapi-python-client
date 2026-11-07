@@ -53,7 +53,14 @@ def _process_config(
         except Exception as err:
             raise typer.BadParameter("Unable to parse config") from err
 
-    return Config.from_sources(config_file, meta_type, source, file_encoding, overwrite, output_path=output_path)
+    return Config.from_sources(
+        config_file=config_file,
+        meta_type=meta_type,
+        document_source=source,
+        file_encoding=file_encoding,
+        overwrite=overwrite,
+        output_path=output_path,
+    )
 
 
 # noinspection PyUnusedLocal
@@ -123,6 +130,7 @@ def handle_errors(errors: Sequence[GeneratorError], fail_on_warning: bool = Fals
 
 @app.command()
 def generate(
+    *,
     url: str | None = typer.Option(None, help="A URL to read the OpenAPI document from"),
     path: Path | None = typer.Option(None, help="A path to the OpenAPI document"),
     custom_template_path: Path | None = typer.Option(
