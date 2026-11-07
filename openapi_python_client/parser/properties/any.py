@@ -16,6 +16,7 @@ class AnyProperty(PropertyProtocol):
     @classmethod
     def build(
         cls,
+        *,
         name: UntrustedString,
         required: bool,
         default: Any,

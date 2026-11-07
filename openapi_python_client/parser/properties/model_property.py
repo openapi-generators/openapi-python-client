@@ -347,7 +347,7 @@ ANY_ADDITIONAL_PROPERTY = AnyProperty.build(
 
 def _get_additional_properties(
     *,
-    schema_additional: None | (bool | (oai.Reference | oai.Schema)),
+    schema_additional: bool | oai.Reference | oai.Schema | None,
     schemas: Schemas,
     class_name: strings.ClassName,
     config: Config,

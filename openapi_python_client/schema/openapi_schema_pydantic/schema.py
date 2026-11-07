@@ -36,8 +36,8 @@ class Schema(BaseModel):
     maxProperties: int | None = Field(default=None, ge=0)
     minProperties: int | None = Field(default=None, ge=0)
     required: list[UntrustedString] | None = Field(default=None)
-    enum: None | list[Any] = Field(default=None, min_length=1)
-    const: None | StrictStr | StrictInt | StrictFloat | StrictBool = None
+    enum: list[Any] | None = Field(default=None, min_length=1)
+    const: StrictStr | StrictInt | StrictFloat | StrictBool | None = None
     type: DataType | list[DataType] | None = Field(default=None)
     allOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)
     oneOf: list[ReferenceOr["Schema"]] = Field(default_factory=list)

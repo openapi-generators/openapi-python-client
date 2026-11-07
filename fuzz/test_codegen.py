@@ -288,12 +288,12 @@ def test_valid_openapi_never_generates_invalid_python(document: dict[str, Any], 
         document_path.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
 
         config = Config.from_sources(
-            ConfigFile(
+            config_file=ConfigFile(
                 project_name_override="fuzz-client",
                 package_name_override="fuzz_client",
                 post_hooks=[],
             ),
-            meta_type,
+            meta_type=meta_type,
             document_source=document_path,
             file_encoding="utf-8",
             overwrite=False,

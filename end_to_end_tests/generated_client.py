@@ -59,6 +59,7 @@ class GeneratedClientContext:
 
 def _run_command(
     command: str,
+    *,
     extra_args: list[str] | None = None,
     openapi_document: str | Path | None = None,
     url: str | None = None,
@@ -84,6 +85,7 @@ def _run_command(
 
 
 def generate_client(
+    *,
     openapi_document: str | Path,
     extra_args: list[str] | None = None,
     output_path: str = "my-test-api-client",
@@ -102,7 +104,9 @@ def generate_client(
     args.extend(["--output-path", str(full_output_path)])
     if overwrite:
         args.append("--overwrite")
-    generator_result = _run_command("generate", args, openapi_document, raise_on_error=raise_on_error)
+    generator_result = _run_command(
+        "generate", extra_args=args, openapi_document=openapi_document, raise_on_error=raise_on_error
+    )
     return GeneratedClientContext(
         full_output_path,
         generator_result,
@@ -113,6 +117,7 @@ def generate_client(
 
 def generate_client_from_inline_spec(
     openapi_spec: str,
+    *,
     extra_args: list[str] | None = None,
     config: str = "",
     filename_suffix: str | None = None,
@@ -146,10 +151,10 @@ def generate_client_from_inline_spec(
         extra_args = [*extra_args, "--config", config_file.name]
 
     generated_client = generate_client(
-        file.name,
-        extra_args,
-        output_path,
-        base_module,
+        openapi_document=file.name,
+        extra_args=extra_args,
+        output_path=output_path,
+        base_module=base_module,
         raise_on_error=raise_on_error,
     )
     os.unlink(file.name)

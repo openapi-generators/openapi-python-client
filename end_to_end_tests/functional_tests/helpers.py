@@ -98,8 +98,8 @@ def inline_spec_should_fail(
         extra_args = []
     with generate_client_from_inline_spec(
         openapi_spec,
-        extra_args,
-        config,
+        extra_args=extra_args,
+        config=config,
         filename_suffix=filename_suffix,
         add_missing_sections=add_missing_sections,
         raise_on_error=False,
