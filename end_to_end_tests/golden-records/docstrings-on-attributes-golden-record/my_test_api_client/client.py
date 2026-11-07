@@ -25,7 +25,7 @@ class Client:
 
         ``follow_redirects``: Whether or not to follow redirects. Default value is False.
 
-        ``httpx2_args``: A dictionary of additional arguments to be passed to the ``httpx2.Client`` and ``httpx2.AsyncClient`` constructor.
+        ``httpx_args``: A dictionary of additional arguments to be passed to the ``httpx2.Client`` and ``httpx2.AsyncClient`` constructor.
 
     """
 
@@ -37,7 +37,7 @@ class Client:
     _timeout: httpx2.Timeout | None = field(default=None, kw_only=True, alias="timeout")
     _verify_ssl: str | bool | ssl.SSLContext = field(default=True, kw_only=True, alias="verify_ssl")
     _follow_redirects: bool = field(default=False, kw_only=True, alias="follow_redirects")
-    _httpx2_args: dict[str, Any] = field(factory=dict, kw_only=True, alias="httpx2_args")
+    _httpx_args: dict[str, Any] = field(factory=dict, kw_only=True, alias="httpx_args")
     _client: httpx2.Client | None = field(default=None, init=False)
     _async_client: httpx2.AsyncClient | None = field(default=None, init=False)
 
@@ -83,7 +83,7 @@ class Client:
                 timeout=self._timeout,
                 verify=self._verify_ssl,
                 follow_redirects=self._follow_redirects,
-                **self._httpx2_args,
+                **self._httpx_args,
             )
         return self._client
 
@@ -114,7 +114,7 @@ class Client:
                 timeout=self._timeout,
                 verify=self._verify_ssl,
                 follow_redirects=self._follow_redirects,
-                **self._httpx2_args,
+                **self._httpx_args,
             )
         return self._async_client
 
@@ -148,7 +148,7 @@ class AuthenticatedClient:
 
         ``follow_redirects``: Whether or not to follow redirects. Default value is False.
 
-        ``httpx2_args``: A dictionary of additional arguments to be passed to the ``httpx2.Client`` and ``httpx2.AsyncClient`` constructor.
+        ``httpx_args``: A dictionary of additional arguments to be passed to the ``httpx2.Client`` and ``httpx2.AsyncClient`` constructor.
 
     """
 
@@ -160,7 +160,7 @@ class AuthenticatedClient:
     _timeout: httpx2.Timeout | None = field(default=None, kw_only=True, alias="timeout")
     _verify_ssl: str | bool | ssl.SSLContext = field(default=True, kw_only=True, alias="verify_ssl")
     _follow_redirects: bool = field(default=False, kw_only=True, alias="follow_redirects")
-    _httpx2_args: dict[str, Any] = field(factory=dict, kw_only=True, alias="httpx2_args")
+    _httpx_args: dict[str, Any] = field(factory=dict, kw_only=True, alias="httpx_args")
     _client: httpx2.Client | None = field(default=None, init=False)
     _async_client: httpx2.AsyncClient | None = field(default=None, init=False)
 
@@ -214,7 +214,7 @@ class AuthenticatedClient:
                 timeout=self._timeout,
                 verify=self._verify_ssl,
                 follow_redirects=self._follow_redirects,
-                **self._httpx2_args,
+                **self._httpx_args,
             )
         return self._client
 
@@ -246,7 +246,7 @@ class AuthenticatedClient:
                 timeout=self._timeout,
                 verify=self._verify_ssl,
                 follow_redirects=self._follow_redirects,
-                **self._httpx2_args,
+                **self._httpx_args,
             )
         return self._async_client
 

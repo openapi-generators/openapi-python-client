@@ -90,7 +90,7 @@ def log_response(response):
 
 client = Client(
     base_url="https://api.example.com",
-    httpx2_args={"event_hooks": {"request": [log_request], "response": [log_response]}},
+    httpx_args={"event_hooks": {"request": [log_request], "response": [log_response]}},
 )
 
 # Or get the underlying httpx2 client to modify directly with client.get_httpx_client() or client.get_async_httpx_client()
