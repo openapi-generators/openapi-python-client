@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-import httpx
+import httpx2
 
 from end_to_end_tests.functional_tests.helpers import (
     with_generated_client_fixture,
@@ -44,8 +44,8 @@ class TestPathParameterEncoding:
 
     def test_path_params_with_normal_chars_work(self, sync_detailed, Client):
         """Test that normal alphanumeric path parameters still work correctly"""
-        mock_httpx_client = MagicMock(spec=httpx.Client)
-        mock_response = MagicMock(spec=httpx.Response)
+        mock_httpx_client = MagicMock(spec=httpx2.Client)
+        mock_response = MagicMock(spec=httpx2.Response)
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "test"}
         mock_response.content = b'{"id": "test"}'
@@ -70,16 +70,16 @@ class TestPathParameterEncoding:
 
     def test_path_params_with_reserved_chars_are_encoded(self, sync_detailed, Client):
         """Test that path parameters with reserved characters are properly URL-encoded"""
-        # Create a mock httpx client
-        mock_httpx_client = MagicMock(spec=httpx.Client)
-        mock_response = MagicMock(spec=httpx.Response)
+        # Create a mock httpx2 client
+        mock_httpx_client = MagicMock(spec=httpx2.Client)
+        mock_response = MagicMock(spec=httpx2.Response)
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "test"}
         mock_response.content = b'{"id": "test"}'
         mock_response.headers = {}
         mock_httpx_client.request.return_value = mock_response
 
-        # Create a client with the mock httpx client
+        # Create a client with the mock httpx2 client
         client = Client(base_url="https://api.example.com")
         client.set_httpx_client(mock_httpx_client)
 
@@ -100,8 +100,8 @@ class TestPathParameterEncoding:
 
     def test_path_params_with_spaces_are_encoded(self, sync_detailed, Client):
         """Test that path parameters with spaces are properly URL-encoded"""
-        mock_httpx_client = MagicMock(spec=httpx.Client)
-        mock_response = MagicMock(spec=httpx.Response)
+        mock_httpx_client = MagicMock(spec=httpx2.Client)
+        mock_response = MagicMock(spec=httpx2.Response)
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "test"}
         mock_response.content = b'{"id": "test"}'
@@ -126,8 +126,8 @@ class TestPathParameterEncoding:
 
     def test_path_params_with_hash_are_encoded(self, sync_detailed, Client):
         """Test that path parameters with hash/fragment characters are properly URL-encoded"""
-        mock_httpx_client = MagicMock(spec=httpx.Client)
-        mock_response = MagicMock(spec=httpx.Response)
+        mock_httpx_client = MagicMock(spec=httpx2.Client)
+        mock_response = MagicMock(spec=httpx2.Response)
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "test"}
         mock_response.content = b'{"id": "test"}'
