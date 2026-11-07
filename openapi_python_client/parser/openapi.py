@@ -4,6 +4,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+from attrs import evolve
 from pydantic import ValidationError
 
 from .. import schema as oai
@@ -301,6 +302,9 @@ class Endpoint:
                 )
 
             schemas = new_schemas
+
+            if param.description:
+                prop = evolve(prop, description=param.description)
 
             location_error = prop.validate_location(param.param_in)
             if location_error is not None:

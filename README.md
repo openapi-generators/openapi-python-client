@@ -74,6 +74,9 @@ _Be forewarned, this is a beta-level feature in the sense that the API exposed i
 For a full example you can look at the `end_to_end_tests` directory which has `baseline_openapi_3.0.json` and `baseline_openapi_3.1.yaml` files.
 The "golden-record" in that same directory is the generated client from either of those OpenAPI documents.
 
+Endpoint argument docstrings use the parameter's description when it is non-empty, falling back to the schema's description.
+Reusable model docstrings retain the schema's description.
+
 ## Configuration
 
 You can pass a YAML (or JSON) file to openapi-python-client with the `--config` option in order to change some behavior.

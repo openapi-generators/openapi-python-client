@@ -1,5 +1,7 @@
 from typing import Any
 
+import pytest
+
 from end_to_end_tests.functional_tests.helpers import (
     with_generated_client_fixture,
     with_generated_code_import,
@@ -161,3 +163,114 @@ class TestEndpointDocstrings:
             "index (int):",
             "fries (bool | Unset): Do you want fries with that?",
         ]
+
+
+@with_generated_client_fixture(
+    """
+paths:
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Task to export.
+        schema:
+          type: string
+          description: A task identifier.
+    get:
+      operationId: exportTasks
+      parameters:
+        - name: since
+          in: query
+          description: Only include tasks changed after this timestamp.
+          schema:
+            type: integer
+            description: Unix timestamp in milliseconds.
+        - name: empty
+          in: query
+          description: ""
+          schema:
+            type: string
+            description: Schema fallback.
+        - name: undescribed
+          in: query
+          schema:
+            type: string
+        - name: trace
+          in: header
+          description: Trace this export.
+          schema:
+            type: string
+        - name: session
+          in: cookie
+          description: Session for this export.
+          schema:
+            type: string
+        - $ref: "#/components/parameters/State"
+        - name: filters
+          in: query
+          description: Filter the exported tasks.
+          schema:
+            $ref: "#/components/schemas/Filters"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Filters"
+  /other:
+    get:
+      operationId: getOther
+      parameters:
+        - name: filters
+          in: query
+          schema:
+            $ref: "#/components/schemas/Filters"
+      responses:
+        "200":
+          description: OK
+components:
+  parameters:
+    State:
+      name: state
+      in: query
+      description: Select tasks in this state.
+      schema:
+        $ref: "#/components/schemas/State"
+  schemas:
+    State:
+      type: string
+      enum: [open, closed]
+      description: A task state.
+    Filters:
+      type: object
+      description: Reusable task filters.
+      properties:
+        label:
+          type: string
+          description: A task label.
+"""
+)
+class TestParameterDocstrings:
+    @pytest.mark.parametrize("function_name", ["sync", "sync_detailed", "asyncio", "asyncio_detailed"])
+    def test_parameter_descriptions(self, generated_client, function_name):
+        function = generated_client.import_symbol(".api.default.export_tasks", function_name)
+        assert set(DocstringParser(function).get_section("Args:")) == {
+            "id (str): Task to export.",
+            "since (int | Unset): Only include tasks changed after this timestamp.",
+            "empty (str | Unset): Schema fallback.",
+            "undescribed (str | Unset):",
+            "trace (str | Unset): Trace this export.",
+            "session (str | Unset): Session for this export.",
+            "state (State | Unset): Select tasks in this state.",
+            "filters (Filters | Unset): Filter the exported tasks.",
+        }
+
+    def test_shared_schema_descriptions(self, generated_client):
+        filters = generated_client.import_symbol(".models.filters", "Filters")
+        assert DocstringParser(filters).lines[0] == "Reusable task filters."
+        assert DocstringParser(filters).get_section("Attributes:") == ["label (str | Unset): A task label."]
+
+        function = generated_client.import_symbol(".api.default.get_other", "sync_detailed")
+        assert DocstringParser(function).get_section("Args:") == ["filters (Filters | Unset): Reusable task filters."]
