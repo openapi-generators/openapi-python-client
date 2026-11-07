@@ -1,13 +1,15 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 from urllib.parse import quote
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.with_braces_path_body import WithBracesPathBody
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -40,7 +42,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> Any | None:
     if response.status_code == 200:
         return None
 
@@ -50,9 +52,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[Any]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -62,10 +64,10 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     param: str,
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: WithBracesPathBody,
     printescape_param_name: str | Unset = UNSET,
-) -> Response[Any]:
+) -> _Response[Any]:
     """Summary \"\"\"
 
      Attempting to escape docstring \"\"\" print('uh oh')
@@ -99,10 +101,10 @@ def sync_detailed(
 async def asyncio_detailed(
     param: str,
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: WithBracesPathBody,
     printescape_param_name: str | Unset = UNSET,
-) -> Response[Any]:
+) -> _Response[Any]:
     """Summary \"\"\"
 
      Attempting to escape docstring \"\"\" print('uh oh')

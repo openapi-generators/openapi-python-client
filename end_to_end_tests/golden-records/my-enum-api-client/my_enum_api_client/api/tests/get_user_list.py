@@ -1,10 +1,11 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.a_model import AModel
 from ...models.an_enum import AnEnum
 from ...models.an_enum_with_null import AnEnumWithNull
@@ -12,7 +13,8 @@ from ...models.get_user_list_int_enum_header import GetUserListIntEnumHeader
 from ...models.get_user_list_string_enum_header import (
     GetUserListStringEnumHeader,
 )
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -66,7 +68,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> list[AModel] | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> list[AModel] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -83,9 +85,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[list[AModel]]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[list[AModel]]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -94,13 +96,13 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> _Response[list[AModel]]:
     """Get List
 
      Get a list of things
@@ -137,7 +139,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
@@ -175,13 +177,13 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],
     int_enum_header: GetUserListIntEnumHeader | Unset = UNSET,
     string_enum_header: GetUserListStringEnumHeader | Unset = UNSET,
-) -> Response[list[AModel]]:
+) -> _Response[list[AModel]]:
     """Get List
 
      Get a list of things
@@ -216,7 +218,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     an_enum_value: list[AnEnum],
     an_enum_value_with_null: list[AnEnumWithNull | None],
     an_enum_value_with_only_null: list[None],

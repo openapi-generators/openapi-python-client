@@ -1,13 +1,14 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.test_inline_objects_body import TestInlineObjectsBody
 from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
-from ...types import Response
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -30,7 +31,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
 ) -> TestInlineObjectsResponse200 | None:
     if response.status_code == 200:
         response_200 = TestInlineObjectsResponse200.from_dict(response.json())
@@ -44,10 +45,10 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[TestInlineObjectsResponse200]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+    *, client: _AuthenticatedClient | _Client, response: httpx.Response
+) -> _Response[TestInlineObjectsResponse200]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -56,9 +57,9 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: TestInlineObjectsBody,
-) -> Response[TestInlineObjectsResponse200]:
+) -> _Response[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
@@ -85,7 +86,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: TestInlineObjectsBody,
 ) -> TestInlineObjectsResponse200 | None:
     """Test Inline Objects
@@ -109,9 +110,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: TestInlineObjectsBody,
-) -> Response[TestInlineObjectsResponse200]:
+) -> _Response[TestInlineObjectsResponse200]:
     """Test Inline Objects
 
     Args:
@@ -136,7 +137,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: TestInlineObjectsBody,
 ) -> TestInlineObjectsResponse200 | None:
     """Test Inline Objects

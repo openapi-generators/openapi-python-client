@@ -1,11 +1,13 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any, cast
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
-from ...types import UNSET, Response, Unset
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
+from ...types import UNSET, Unset
+from ...types import Response as _Response
 
 
 def _get_kwargs(
@@ -28,7 +30,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> str | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> str | None:
     if response.status_code == 200:
         response_200 = cast(str, response.json())
         return response_200
@@ -39,9 +41,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[str]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[str]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -50,9 +52,9 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: str | Unset = UNSET,
-) -> Response[str]:
+) -> _Response[str]:
     """Content Type Override
 
     Args:
@@ -79,7 +81,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: str | Unset = UNSET,
 ) -> str | None:
     """Content Type Override
@@ -103,9 +105,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: str | Unset = UNSET,
-) -> Response[str]:
+) -> _Response[str]:
     """Content Type Override
 
     Args:
@@ -130,7 +132,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
     body: str | Unset = UNSET,
 ) -> str | None:
     """Content Type Override

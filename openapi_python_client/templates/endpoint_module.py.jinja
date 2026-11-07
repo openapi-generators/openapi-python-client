@@ -1,11 +1,11 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any, cast
 from urllib.parse import quote
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
+from ...client import AuthenticatedClient as _AuthenticatedClient, Client as _Client
+from ...types import Response as _Response, UNSET
 from ... import errors
 
 {% for relative in endpoint.relative_imports | sort %}
@@ -78,7 +78,7 @@ def _get_kwargs(
 {% endif %}
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> {{return_type}}:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> {{return_type}}:
     {% for response in endpoint.responses.patterns %}
     {% set code_range = response.status_code.range %}
     {% if code_range[0] == code_range[1] %}
@@ -98,9 +98,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     {% endif %}
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[{{ return_string | as_unembedded_code }}]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[{{ return_string | as_unembedded_code }}]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -109,7 +109,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string | as_unembedded_code }}]:
+) -> _Response[{{ return_string | as_unembedded_code }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(
@@ -135,7 +135,7 @@ def sync(
 
 async def asyncio_detailed(
     {{ arguments(endpoint) | indent(4) }}
-) -> Response[{{ return_string | as_unembedded_code }}]:
+) -> _Response[{{ return_string | as_unembedded_code }}]:
     {{ docstring(endpoint, return_string, is_detailed=true) | indent(4) }}
 
     kwargs = _get_kwargs(

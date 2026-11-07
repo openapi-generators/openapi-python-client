@@ -113,9 +113,9 @@ if not isinstance({{property.python_name}}, Unset):
 {# Proper client based on whether or not the endpoint requires authentication #}
 {% if include_client %}
 {% if endpoint.requires_security %}
-client: AuthenticatedClient,
+client: _AuthenticatedClient,
 {% else %}
-client: AuthenticatedClient | Client,
+client: _AuthenticatedClient | _Client,
 {% endif %}
 {% endif %}
 {# Any allowed bodies #}

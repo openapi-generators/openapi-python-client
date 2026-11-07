@@ -1,12 +1,13 @@
-from http import HTTPStatus
+from http import HTTPStatus as _HTTPStatus
 from typing import Any
 
 import httpx
 
 from ... import errors
-from ...client import AuthenticatedClient, Client
+from ...client import AuthenticatedClient as _AuthenticatedClient
+from ...client import Client as _Client
 from ...models.a_model import AModel
-from ...types import Response
+from ...types import Response as _Response
 
 
 def _get_kwargs() -> dict[str, Any]:
@@ -19,7 +20,7 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> AModel | None:
+def _parse_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> AModel | None:
     if response.status_code == 200:
         response_200 = AModel.from_dict(response.json())
 
@@ -31,9 +32,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[AModel]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
+def _build_response(*, client: _AuthenticatedClient | _Client, response: httpx.Response) -> _Response[AModel]:
+    return _Response(
+        status_code=_HTTPStatus(response.status_code),
         content=response.content,
         headers=response.headers,
         parsed=_parse_response(client=client, response=response),
@@ -42,8 +43,8 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[AModel]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[AModel]:
     """Endpoint using predefined response
 
     Raises:
@@ -65,7 +66,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> AModel | None:
     """Endpoint using predefined response
 
@@ -84,8 +85,8 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[AModel]:
+    client: _AuthenticatedClient | _Client,
+) -> _Response[AModel]:
     """Endpoint using predefined response
 
     Raises:
@@ -105,7 +106,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient | Client,
+    client: _AuthenticatedClient | _Client,
 ) -> AModel | None:
     """Endpoint using predefined response
 
