@@ -13,6 +13,28 @@ Programmatic usage of this project (e.g., importing it as a Python module) and t
 
 The 0.x prefix used in versions for this project is to indicate that breaking changes are expected frequently (several times a year). Breaking changes will increment the minor number, all other changes will increment the patch number. You can track the progress toward 1.0 [here](https://github.com/openapi-generators/openapi-python-client/projects/2).
 
+## 0.30.0 (2026-11-07)
+
+### ❗️Breaking ❗
+
+#### Switch from `httpx` to `httpx2` in generated clients
+
+[`httpx2`](https://pydantic.dev/docs/httpx2/get-started/) is largely compatible with `httpx` and should only be a breaking change for users who customize the internal `Client`.
+
+Thanks to @s-sajid-ali and @johnthagen for making this one happen in PR #1461 and discussion #1455!
+
+### 🚀 Features
+
+- Update `uv_build` to 0.13 when using `--meta=uv` (#1507)
+
+### 🐛 Fixes
+
+- Let httpx2 choose the multipart/form-data boundary (#1511)
+
+#### Let httpx2 choose the boundary for `multipart/form-data` requests
+
+Since 0.29.0, generated endpoints sent every `multipart/form-data` body with the fixed boundary `+++`, so an uploaded file containing `\r\n--+++` was cut short at that point (#1509). These bodies no longer set `Content-Type`, so httpx2 sets it with a random boundary for each request, as single-body endpoints did before 0.29.0. Endpoints with several body types still get a boundary (#947).
+
 ## 0.29.1 (2026-08-30)
 
 ### 🚨Security
