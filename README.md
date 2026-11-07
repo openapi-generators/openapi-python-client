@@ -219,7 +219,7 @@ It is critical that the length of the array matches that of the enum values.
 ```
 
 Results in:
-```json
+```python
 class Color(IntEnum):
     RED = 0
     GREEN = 1
