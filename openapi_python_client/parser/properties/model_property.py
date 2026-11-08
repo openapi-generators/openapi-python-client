@@ -113,6 +113,10 @@ class ModelProperty(PropertyProtocol):
             python_name=strings.PythonIdentifier(value=name, prefix=config.field_prefix),
             example=data.example,
         )
+        existing = schemas.classes_by_name.get(class_info.name)
+        if isinstance(existing, ModelProperty) and existing.data == data:
+            # The same schema reached again, e.g. through a one-option oneOf: reuse its class.
+            return evolve(existing, required=required, name=name, python_name=prop.python_name), schemas
         if class_info.name in schemas.classes_by_name:
             error = PropertyError(
                 data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"'
