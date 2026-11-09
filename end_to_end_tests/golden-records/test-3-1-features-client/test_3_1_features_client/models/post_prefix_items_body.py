@@ -60,12 +60,17 @@ class PostPrefixItemsBody:
             for prefix_items_and_items_item_data in _prefix_items_and_items:
 
                 def _parse_prefix_items_and_items_item(data: object) -> float | Literal["prefix"] | str:
-                    prefix_items_and_items_item_type_0 = cast(Literal["prefix"], data)
-                    if prefix_items_and_items_item_type_0 != "prefix":
-                        raise ValueError(
-                            f"prefixItemsAndItems_item_type_0 must match const 'prefix', got '{prefix_items_and_items_item_type_0}'"
-                        )
-                    return prefix_items_and_items_item_type_0
+                    try:
+                        if not isinstance(data, str):
+                            raise TypeError()
+                        prefix_items_and_items_item_type_0 = cast(Literal["prefix"], data)
+                        if prefix_items_and_items_item_type_0 != "prefix":
+                            raise ValueError(
+                                f"prefixItemsAndItems_item_type_0 must match const 'prefix', got '{prefix_items_and_items_item_type_0}'"
+                            )
+                        return prefix_items_and_items_item_type_0
+                    except (TypeError, ValueError, AttributeError, KeyError):
+                        pass
                     return cast(float | Literal["prefix"] | str, data)
 
                 prefix_items_and_items_item = _parse_prefix_items_and_items_item(prefix_items_and_items_item_data)
