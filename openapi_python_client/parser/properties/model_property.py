@@ -128,8 +128,11 @@ class ModelProperty(PropertyProtocol):
 
     @classmethod
     def convert_value(cls, value: Any) -> Value | PropertyError | None:
+        if isinstance(value, dict) and not value:
+            # An empty object adds nothing to the default, and rejecting it drops the whole schema.
+            return None
         if value is not None:
-            return PropertyError(detail="ModelProperty cannot have a default value")  # pragma: no cover
+            return PropertyError(detail="ModelProperty cannot have a default value")
         return None
 
     def __attrs_post_init__(self) -> None:

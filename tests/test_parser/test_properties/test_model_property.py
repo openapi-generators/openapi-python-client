@@ -54,6 +54,15 @@ class TestModelProperty:
         m = model_property_factory()
         assert m.get_base_type_string() == PythonCode("MyClass")
 
+    def test_convert_value_passes_none_through(self, model_property_factory):
+        assert model_property_factory().convert_value(None) is None
+
+    def test_convert_value_ignores_an_empty_object_default(self, model_property_factory):
+        assert model_property_factory().convert_value({}) is None
+
+    def test_convert_value_rejects_a_non_empty_default(self, model_property_factory):
+        assert isinstance(model_property_factory().convert_value({"a": 1}), PropertyError)
+
 
 class TestBuild:
     @pytest.mark.parametrize(
