@@ -141,3 +141,32 @@ class TestOneOf:
         )
         assert_model_property_type_hint(ModelWithUnionOfOne, "thing", "ThingA | Unset")
         assert_model_property_type_hint(ModelWithUnionOfOne, "required_thing", "ThingA")
+
+
+@with_generated_client_fixture(
+    """
+components:
+  schemas:
+    Outer:
+      type: object
+      properties:
+        inner:
+          $ref: "#/components/schemas/Inner"
+    Inner:
+      type: ["object", "null"]
+      properties:
+        labels:
+          type: ["object", "null"]
+          additionalProperties: { type: "string" }
+"""
+)
+@with_generated_code_imports(
+    ".models.Outer",
+    ".models.InnerType0",
+)
+class TestNullableTopLevelObjectWithNullableProperty:
+    def test_decode_encode(self, Outer, InnerType0):
+        data = {"inner": {"labels": {"a": "b"}}}
+        outer = Outer.from_dict(data)
+        assert isinstance(outer.inner, InnerType0)
+        assert outer.to_dict() == data

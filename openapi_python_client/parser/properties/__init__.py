@@ -225,6 +225,8 @@ def property_from_data(  # noqa: PLR0911, PLR0912
             schemas=schemas,
             parent_name=parent_name,
             config=config,
+            process_properties=process_properties,
+            roots=roots,
         )
     if data.const is not None:
         return (
