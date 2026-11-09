@@ -34,3 +34,48 @@ def test_endpoint_docstring_unwraps_python_code_return_string(env) -> None:
 
     assert "MyModel | None" in result
     assert "object at 0x" not in result
+
+
+def test_endpoint_arguments_multi_body_required(env) -> None:
+    template = env.get_template("endpoint_macros.py.jinja")
+    body1 = SimpleNamespace(
+        prop=SimpleNamespace(required=True, get_type_string=lambda no_optional=False: PythonCode("ItemA"))
+    )
+    body2 = SimpleNamespace(
+        prop=SimpleNamespace(required=True, get_type_string=lambda no_optional=False: PythonCode("ItemB"))
+    )
+    endpoint = SimpleNamespace(
+        path_parameters=[],
+        query_parameters=[],
+        header_parameters=[],
+        cookie_parameters=[],
+        requires_security=False,
+        bodies=[body1, body2],
+        list_all_parameters=lambda: [body1.prop, body2.prop],
+    )
+
+    result = template.module.arguments(endpoint, include_client=False)
+    assert "Unset" not in result
+    assert "UNSET" not in result
+
+
+def test_endpoint_arguments_multi_body_optional(env) -> None:
+    template = env.get_template("endpoint_macros.py.jinja")
+    body1 = SimpleNamespace(
+        prop=SimpleNamespace(required=True, get_type_string=lambda no_optional=False: PythonCode("ItemA"))
+    )
+    body2 = SimpleNamespace(
+        prop=SimpleNamespace(required=False, get_type_string=lambda no_optional=False: PythonCode("ItemB"))
+    )
+    endpoint = SimpleNamespace(
+        path_parameters=[],
+        query_parameters=[],
+        header_parameters=[],
+        cookie_parameters=[],
+        requires_security=False,
+        bodies=[body1, body2],
+        list_all_parameters=lambda: [body1.prop, body2.prop],
+    )
+
+    result = template.module.arguments(endpoint, include_client=False)
+    assert "| Unset = UNSET" in result

@@ -114,3 +114,41 @@ class TestMultipartBodyAmongSeveralBodies:
 
         assert request.headers["content-type"] == "application/json"
         assert request.content == b'{"name":"a"}'
+
+
+@with_generated_client_fixture(
+    """
+paths:
+  /upload:
+    post:
+      operationId: upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: {type: string, format: binary}
+      responses:
+        "200": {description: OK}
+"""
+)
+@with_generated_code_imports(
+    ".api.default.upload.sync_detailed",
+    ".client.Client",
+    ".models.UploadJsonBody",
+    ".models.UploadFilesBody",
+    ".types.File",
+)
+class TestRequiredMultipartBodyAmongSeveralBodies:
+    def test_json_body_still_sets_its_content_type(self, sync_detailed, Client, UploadJsonBody, UploadFilesBody, File):
+        request = _send_and_capture(Client, sync_detailed, UploadJsonBody(name="a"))
+
+        assert request.headers["content-type"] == "application/json"
+        assert request.content == b'{"name":"a"}'
