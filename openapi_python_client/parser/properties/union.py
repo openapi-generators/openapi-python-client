@@ -11,7 +11,7 @@ from ... import schema as oai
 from ...strings import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .protocol import PropertyProtocol, Value, convert_example
-from .schemas import Schemas
+from .schemas import ReferencePath, Schemas
 
 
 @define
@@ -37,6 +37,8 @@ class UnionProperty(PropertyProtocol):
         schemas: Schemas,
         parent_name: str,
         config: Config,
+        process_properties: bool = True,
+        roots: set[ReferencePath | strings.ClassName] | None = None,
     ) -> tuple[UnionProperty | PropertyError, Schemas]:
         """
         Create a `UnionProperty` the right way.
@@ -48,6 +50,8 @@ class UnionProperty(PropertyProtocol):
             schemas: The `Schemas` so far describing existing classes / references.
             parent_name: The name of the thing which holds this property (used for renaming inner classes).
             config: User-defined config values for modifying inner properties.
+            process_properties: Passed to inner properties; False defers building inner model properties.
+            roots: Passed to inner properties; schema objects the new properties depend on.
 
         Returns:
             `(result, schemas)` where `schemas` is the updated version of the input `schemas` and `result` is the
@@ -81,6 +85,8 @@ class UnionProperty(PropertyProtocol):
                 schemas=schemas,
                 parent_name=parent_name,
                 config=config,
+                process_properties=process_properties,
+                roots=roots,
             )
             if isinstance(sub_prop, PropertyError):
                 return (
