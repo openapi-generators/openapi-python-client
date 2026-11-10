@@ -19,8 +19,13 @@ def _get_kwargs(
         "url": "/config/content-type-override",
     }
 
-    if not isinstance(body, Unset):
-        _kwargs["json"] = body
+    _kwargs["json"] = body
+    if isinstance(_kwargs["json"], Unset):
+        del _kwargs["json"]
+    elif _kwargs["json"] is None:
+        # HTTPX treats json=None as no body; send JSON null explicitly.
+        _kwargs["content"] = b"null"
+        del _kwargs["json"]
 
     headers["Content-Type"] = "openapi/python/client"
 

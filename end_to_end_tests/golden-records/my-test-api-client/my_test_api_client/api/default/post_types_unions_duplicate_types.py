@@ -20,8 +20,17 @@ def _get_kwargs(
         "url": "/types/unions/duplicate-types",
     }
 
-    if isinstance(body, AModel):
+    if isinstance(body, Unset):
+        _kwargs["json"] = UNSET
+    else:
         _kwargs["json"] = body.to_dict()
+
+    if isinstance(_kwargs["json"], Unset):
+        del _kwargs["json"]
+    elif _kwargs["json"] is None:
+        # HTTPX treats json=None as no body; send JSON null explicitly.
+        _kwargs["content"] = b"null"
+        del _kwargs["json"]
 
     headers["Content-Type"] = "application/json"
 
