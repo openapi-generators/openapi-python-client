@@ -40,7 +40,7 @@ def _parse_{{ property.python_name }}(data: object) -> {{ property.get_type_stri
 {% endmacro %}
 
 {% macro transform(property, source, destination, declare_type=True, skip_unset=False) %}
-{% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required, has_if = false) %}
+{% set ns = namespace(contains_properties_without_transform = false, contains_modified_properties = not property.required and not skip_unset, has_if = false) %}
 {% if declare_type %}{{ destination }}: {{ property.get_type_string(json=True) | as_unembedded_code }}{% endif %}
 
 {% if not property.required and not skip_unset %}
@@ -59,7 +59,7 @@ if isinstance({{ source }}, Unset):
     {% if not ns.has_if %}
 if isinstance({{ source }}, {{ inner_property.get_instance_type_string() | as_unembedded_code }}):
         {% set ns.has_if = true %}
-    {% elif not loop.last or ns.contains_properties_without_transform %}
+    {% elif not loop.last or ns.contains_properties_without_transform or (not property.required and skip_unset) %}
 elif isinstance({{ source }}, {{ inner_property.get_instance_type_string() | as_unembedded_code }}):
     {% else %}
 else:
@@ -67,10 +67,19 @@ else:
     {{ inner_template.transform(inner_property, source, destination, declare_type=False) | indent(4) }}
 {% endfor %}
 {% if ns.contains_properties_without_transform and ns.contains_modified_properties %}
+    {%- if not property.required and skip_unset %}
+elif not isinstance({{ source }}, Unset):
+    {%- else %}
 else:
+    {%- endif %}
     {{ destination }} = {{ source }}
 {%- elif ns.contains_properties_without_transform %}
+    {%- if not property.required and skip_unset %}
+if not isinstance({{ source }}, Unset):
+    {{ destination }} = {{ source }}
+    {%- else %}
 {{ destination }} = {{ source }}
+    {%- endif %}
 {%- endif %}
 {% endmacro %}
 
