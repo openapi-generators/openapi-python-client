@@ -177,6 +177,7 @@ def parameter_from_data(
 
     new_param = Parameter(
         name=name.get_untrusted_value(),
+        description=data.description.get_untrusted_value() if data.description is not None else None,
         required=data.required,
         explode=data.explode,
         style=data.style.get_untrusted_value() if data.style is not None else None,
