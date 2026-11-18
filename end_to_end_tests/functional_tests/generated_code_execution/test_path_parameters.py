@@ -149,3 +149,79 @@ class TestPathParameterEncoding:
         # Hash should be encoded as %23
         expected_url = "/items/item%231/details/detail%23id"
         assert call_kwargs["url"] == expected_url
+
+
+@with_generated_client_fixture(
+    """
+paths:
+  "/test/{has_default}/{no_default}":
+    get:
+      operationId: getTest
+      parameters:
+        - name: has_default
+          in: path
+          required: true
+          schema:
+            type: string
+            default: default_value
+        - name: no_default
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+"""
+)
+@with_generated_code_import(".api.default.get_test.sync_detailed")
+@with_generated_code_import(".client.Client")
+class TestPathParameterWithDefaultBeforeRequired:
+    """A path parameter with a default may precede one without a default in the path.
+
+    The generated function must still be valid Python, and the default must be used
+    when the parameter is not supplied.
+    """
+
+    def test_default_is_used_when_parameter_is_omitted(self, sync_detailed, Client):
+        mock_httpx_client = MagicMock(spec=httpx.Client)
+        mock_response = MagicMock(spec=httpx.Response)
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": "ok"}
+        mock_response.content = b'{"result": "ok"}'
+        mock_response.headers = {}
+        mock_httpx_client.request.return_value = mock_response
+
+        client = Client(base_url="https://api.example.com")
+        client.set_httpx_client(mock_httpx_client)
+
+        sync_detailed(no_default=42, client=client)
+
+        mock_httpx_client.request.assert_called_once()
+        call_kwargs = mock_httpx_client.request.call_args[1]
+        assert call_kwargs["url"] == "/test/default_value/42"
+
+    def test_explicit_value_overrides_default(self, sync_detailed, Client):
+        mock_httpx_client = MagicMock(spec=httpx.Client)
+        mock_response = MagicMock(spec=httpx.Response)
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": "ok"}
+        mock_response.content = b'{"result": "ok"}'
+        mock_response.headers = {}
+        mock_httpx_client.request.return_value = mock_response
+
+        client = Client(base_url="https://api.example.com")
+        client.set_httpx_client(mock_httpx_client)
+
+        sync_detailed(no_default=42, has_default="custom", client=client)
+
+        mock_httpx_client.request.assert_called_once()
+        call_kwargs = mock_httpx_client.request.call_args[1]
+        assert call_kwargs["url"] == "/test/custom/42"
