@@ -72,6 +72,7 @@ from .model_with_primitive_additional_properties_a_date_holder import ModelWithP
 from .model_with_property_ref import ModelWithPropertyRef
 from .model_with_recursive_ref import ModelWithRecursiveRef
 from .model_with_recursive_ref_in_additional_properties import ModelWithRecursiveRefInAdditionalProperties
+from .model_with_self_named_property import ModelWithSelfNamedProperty
 from .model_with_union_property import ModelWithUnionProperty
 from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
 from .model_with_union_property_inlined_apples import ModelWithUnionPropertyInlinedApples
@@ -161,6 +162,7 @@ __all__ = (
     "ModelWithPropertyRef",
     "ModelWithRecursiveRef",
     "ModelWithRecursiveRefInAdditionalProperties",
+    "ModelWithSelfNamedProperty",
     "ModelWithUnionProperty",
     "ModelWithUnionPropertyInlined",
     "ModelWithUnionPropertyInlinedApples",

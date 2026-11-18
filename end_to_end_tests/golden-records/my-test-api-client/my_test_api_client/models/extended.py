@@ -81,7 +81,7 @@ class Extended:
     not_required_model: ModelWithUnionProperty | Unset = UNSET
     not_required_nullable_model: ModelWithUnionProperty | None | Unset = UNSET
     from_extended: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.free_form_model import FreeFormModel  # noqa: PLC0415
@@ -518,7 +518,7 @@ class Extended:
 
         from_extended = d.pop("fromExtended", UNSET)
 
-        extended = cls(
+        return cls(
             an_enum_value=an_enum_value,
             an_allof_enum_with_overridden_default=an_allof_enum_with_overridden_default,
             a_camel_date_time=a_camel_date_time,
@@ -546,10 +546,8 @@ class Extended:
             not_required_model=not_required_model,
             not_required_nullable_model=not_required_nullable_model,
             from_extended=from_extended,
+            additional_properties=d,
         )
-
-        extended.additional_properties = d
-        return extended
 
     @property
     def additional_keys(self) -> list[str]:

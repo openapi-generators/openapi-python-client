@@ -35,7 +35,7 @@ class PostBodyMultipartBody:
     description: str
     objects: list[AnObject]
     times: list[datetime.datetime]
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_string = self.a_string
@@ -123,16 +123,14 @@ class PostBodyMultipartBody:
 
             times.append(times_item)
 
-        post_body_multipart_body = cls(
+        return cls(
             a_string=a_string,
             files=files,
             description=description,
             objects=objects,
             times=times,
+            additional_properties=d,
         )
-
-        post_body_multipart_body.additional_properties = d
-        return post_body_multipart_body
 
     @property
     def additional_keys(self) -> list[str]:

@@ -19,7 +19,7 @@ class AnObject:
 
     an_int: int
     a_float: float
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         an_int = self.an_int
@@ -44,13 +44,11 @@ class AnObject:
 
         a_float = d.pop("a_float")
 
-        an_object = cls(
+        return cls(
             an_int=an_int,
             a_float=a_float,
+            additional_properties=d,
         )
-
-        an_object.additional_properties = d
-        return an_object
 
     @property
     def additional_keys(self) -> list[str]:

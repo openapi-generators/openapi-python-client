@@ -19,7 +19,7 @@ class StatusCodePatternsResponse4XX:
     """
 
     error: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         error = self.error
@@ -37,12 +37,10 @@ class StatusCodePatternsResponse4XX:
         d = dict(src_dict)
         error = d.pop("error", UNSET)
 
-        status_code_patterns_response_4xx = cls(
+        return cls(
             error=error,
+            additional_properties=d,
         )
-
-        status_code_patterns_response_4xx.additional_properties = d
-        return status_code_patterns_response_4xx
 
     @property
     def additional_keys(self) -> list[str]:

@@ -23,7 +23,7 @@ class ModelWithPropertyRef:
     """
 
     inner: ModelName | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         inner: dict[str, Any] | Unset = UNSET
@@ -50,12 +50,10 @@ class ModelWithPropertyRef:
         else:
             inner = ModelName.from_dict(_inner)
 
-        model_with_property_ref = cls(
+        return cls(
             inner=inner,
+            additional_properties=d,
         )
-
-        model_with_property_ref.additional_properties = d
-        return model_with_property_ref
 
     @property
     def additional_keys(self) -> list[str]:

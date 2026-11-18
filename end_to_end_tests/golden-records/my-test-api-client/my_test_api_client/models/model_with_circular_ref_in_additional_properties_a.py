@@ -15,9 +15,7 @@ T = TypeVar("T", bound="ModelWithCircularRefInAdditionalPropertiesA")
 
 @_attrs_define
 class ModelWithCircularRefInAdditionalPropertiesA:
-    additional_properties: dict[str, ModelWithCircularRefInAdditionalPropertiesB] = _attrs_field(
-        init=False, factory=dict
-    )
+    additional_properties: dict[str, ModelWithCircularRefInAdditionalPropertiesB] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -34,7 +32,6 @@ class ModelWithCircularRefInAdditionalPropertiesA:
         )
 
         d = dict(src_dict)
-        model_with_circular_ref_in_additional_properties_a = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -42,8 +39,9 @@ class ModelWithCircularRefInAdditionalPropertiesA:
 
             additional_properties[prop_name] = additional_property
 
-        model_with_circular_ref_in_additional_properties_a.additional_properties = additional_properties
-        return model_with_circular_ref_in_additional_properties_a
+        return cls(
+            additional_properties=additional_properties,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

@@ -23,7 +23,7 @@ class PostConstPathBody:
     required: Literal["this always goes in the body"]
     nullable: Literal["this or null goes in the body"] | None
     optional: Literal["this sometimes goes in the body"] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         required = self.required
@@ -70,14 +70,12 @@ class PostConstPathBody:
         if optional != "this sometimes goes in the body" and not isinstance(optional, Unset):
             raise ValueError(f"optional must match const 'this sometimes goes in the body', got '{optional}'")
 
-        post_const_path_body = cls(
+        return cls(
             required=required,
             nullable=nullable,
             optional=optional,
+            additional_properties=d,
         )
-
-        post_const_path_body.additional_properties = d
-        return post_const_path_body
 
     @property
     def additional_keys(self) -> list[str]:

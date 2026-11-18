@@ -23,7 +23,7 @@ class PostParametersHeaderResponse200:
     string: str
     number: float
     integer: int
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         boolean = self.boolean
@@ -58,15 +58,13 @@ class PostParametersHeaderResponse200:
 
         integer = d.pop("integer")
 
-        post_parameters_header_response_200 = cls(
+        return cls(
             boolean=boolean,
             string=string,
             number=number,
             integer=integer,
+            additional_properties=d,
         )
-
-        post_parameters_header_response_200.additional_properties = d
-        return post_parameters_header_response_200
 
     @property
     def additional_keys(self) -> list[str]:

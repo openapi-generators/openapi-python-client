@@ -19,7 +19,7 @@ class JsonLikeBody:
     """
 
     a: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a = self.a
@@ -37,12 +37,10 @@ class JsonLikeBody:
         d = dict(src_dict)
         a = d.pop("a", UNSET)
 
-        json_like_body = cls(
+        return cls(
             a=a,
+            additional_properties=d,
         )
-
-        json_like_body.additional_properties = d
-        return json_like_body
 
     @property
     def additional_keys(self) -> list[str]:

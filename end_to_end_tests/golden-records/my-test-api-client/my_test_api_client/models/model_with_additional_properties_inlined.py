@@ -26,7 +26,7 @@ class ModelWithAdditionalPropertiesInlined:
 
     a_number: float | Unset = UNSET
     additional_properties: dict[str, ModelWithAdditionalPropertiesInlinedAdditionalProperty] = _attrs_field(
-        init=False, factory=dict
+        factory=dict
     )
 
     def to_dict(self) -> dict[str, Any]:
@@ -51,18 +51,16 @@ class ModelWithAdditionalPropertiesInlined:
         d = dict(src_dict)
         a_number = d.pop("a_number", UNSET)
 
-        model_with_additional_properties_inlined = cls(
-            a_number=a_number,
-        )
-
         additional_properties = {}
         for prop_name, prop_dict in d.items():
             additional_property = ModelWithAdditionalPropertiesInlinedAdditionalProperty.from_dict(prop_dict)
 
             additional_properties[prop_name] = additional_property
 
-        model_with_additional_properties_inlined.additional_properties = additional_properties
-        return model_with_additional_properties_inlined
+        return cls(
+            a_number=a_number,
+            additional_properties=additional_properties,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

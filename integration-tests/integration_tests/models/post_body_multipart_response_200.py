@@ -31,7 +31,7 @@ class PostBodyMultipartResponse200:
     files: list[File]
     times: list[datetime.datetime]
     objects: list[AnObject]
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_string = self.a_string
@@ -98,16 +98,14 @@ class PostBodyMultipartResponse200:
 
             objects.append(objects_item)
 
-        post_body_multipart_response_200 = cls(
+        return cls(
             a_string=a_string,
             description=description,
             files=files,
             times=times,
             objects=objects,
+            additional_properties=d,
         )
-
-        post_body_multipart_response_200.additional_properties = d
-        return post_body_multipart_response_200
 
     @property
     def additional_keys(self) -> list[str]:

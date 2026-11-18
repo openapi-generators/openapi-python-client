@@ -25,7 +25,7 @@ class ModelWithPrimitiveAdditionalProperties:
     """
 
     a_date_holder: ModelWithPrimitiveAdditionalPropertiesADateHolder | Unset = UNSET
-    additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, str] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         a_date_holder: dict[str, Any] | Unset = UNSET
@@ -54,12 +54,10 @@ class ModelWithPrimitiveAdditionalProperties:
         else:
             a_date_holder = ModelWithPrimitiveAdditionalPropertiesADateHolder.from_dict(_a_date_holder)
 
-        model_with_primitive_additional_properties = cls(
+        return cls(
             a_date_holder=a_date_holder,
+            additional_properties=d,
         )
-
-        model_with_primitive_additional_properties.additional_properties = d
-        return model_with_primitive_additional_properties
 
     @property
     def additional_keys(self) -> list[str]:

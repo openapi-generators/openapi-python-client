@@ -11,9 +11,7 @@ T = TypeVar("T", bound="ModelWithRecursiveRefInAdditionalProperties")
 
 @_attrs_define
 class ModelWithRecursiveRefInAdditionalProperties:
-    additional_properties: dict[str, ModelWithRecursiveRefInAdditionalProperties] = _attrs_field(
-        init=False, factory=dict
-    )
+    additional_properties: dict[str, ModelWithRecursiveRefInAdditionalProperties] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
 
@@ -26,7 +24,6 @@ class ModelWithRecursiveRefInAdditionalProperties:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        model_with_recursive_ref_in_additional_properties = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
@@ -34,8 +31,9 @@ class ModelWithRecursiveRefInAdditionalProperties:
 
             additional_properties[prop_name] = additional_property
 
-        model_with_recursive_ref_in_additional_properties.additional_properties = additional_properties
-        return model_with_recursive_ref_in_additional_properties
+        return cls(
+            additional_properties=additional_properties,
+        )
 
     @property
     def additional_keys(self) -> list[str]:

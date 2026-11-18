@@ -19,7 +19,7 @@ class BodyUploadFileTestsUploadPostSomeObject:
 
     num: float
     text: str
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         num = self.num
@@ -44,13 +44,11 @@ class BodyUploadFileTestsUploadPostSomeObject:
 
         text = d.pop("text")
 
-        body_upload_file_tests_upload_post_some_object = cls(
+        return cls(
             num=num,
             text=text,
+            additional_properties=d,
         )
-
-        body_upload_file_tests_upload_post_some_object.additional_properties = d
-        return body_upload_file_tests_upload_post_some_object
 
     @property
     def additional_keys(self) -> list[str]:

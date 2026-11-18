@@ -21,7 +21,7 @@ class Problem:
 
     parameter_name: str | Unset = UNSET
     description: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         parameter_name = self.parameter_name
@@ -45,13 +45,11 @@ class Problem:
 
         description = d.pop("description", UNSET)
 
-        problem = cls(
+        return cls(
             parameter_name=parameter_name,
             description=description,
+            additional_properties=d,
         )
-
-        problem.additional_properties = d
-        return problem
 
     @property
     def additional_keys(self) -> list[str]:

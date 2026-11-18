@@ -19,7 +19,7 @@ class BodyUploadFileTestsUploadPostAdditionalProperty:
     """
 
     foo: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         foo = self.foo
@@ -37,12 +37,10 @@ class BodyUploadFileTestsUploadPostAdditionalProperty:
         d = dict(src_dict)
         foo = d.pop("foo", UNSET)
 
-        body_upload_file_tests_upload_post_additional_property = cls(
+        return cls(
             foo=foo,
+            additional_properties=d,
         )
-
-        body_upload_file_tests_upload_post_additional_property.additional_properties = d
-        return body_upload_file_tests_upload_post_additional_property
 
     @property
     def additional_keys(self) -> list[str]:

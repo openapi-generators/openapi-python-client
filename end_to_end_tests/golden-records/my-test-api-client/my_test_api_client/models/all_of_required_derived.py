@@ -21,7 +21,7 @@ class AllOfRequiredDerived:
 
     bar: str
     baz: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         bar = self.bar
@@ -47,13 +47,11 @@ class AllOfRequiredDerived:
 
         baz = d.pop("baz", UNSET)
 
-        all_of_required_derived = cls(
+        return cls(
             bar=bar,
             baz=baz,
+            additional_properties=d,
         )
-
-        all_of_required_derived.additional_properties = d
-        return all_of_required_derived
 
     @property
     def additional_keys(self) -> list[str]:
