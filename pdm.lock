@@ -5,20 +5,20 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.1"
-content_hash = "sha256:c5878d921aec4583fa4ebeecc159abecf4dc07f3de1196996f3622e7ce8aeddf"
+content_hash = "sha256:20cf6031a898ebfc944dd20059d16318881f45c0b58e3410a15586c78d13cb4e"
 
 [[metadata.targets]]
 requires_python = "~=3.11"
 
 [[package]]
 name = "annotated-doc"
-version = "0.0.5"
-requires_python = ">=3.9"
+version = "0.0.6"
+requires_python = ">=3.10"
 summary = "Document parameters, class attributes, return types, and variables inline, with Annotated."
 groups = ["default"]
 files = [
-    {file = "annotated_doc-0.0.5-py3-none-any.whl", hash = "sha256:117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"},
-    {file = "annotated_doc-0.0.5.tar.gz", hash = "sha256:c7e58ce09192557605d8bbd92836d7e1d520ac9580096042c0bfd197efacf1bb"},
+    {file = "annotated_doc-0.0.6-py3-none-any.whl", hash = "sha256:361ca0950cc7082f53fa69e9328409f40a62c61e57e0a47e1825a08078a58a53"},
+    {file = "annotated_doc-0.0.6.tar.gz", hash = "sha256:7969bb69912085b2285849c0dcac0b4b374fd180c13cf10a87f284ffcf347bbf"},
 ]
 
 [[package]]
@@ -709,7 +709,7 @@ files = [
 
 [[package]]
 name = "markdown-it-py"
-version = "4.2.0"
+version = "4.3.0"
 requires_python = ">=3.10"
 summary = "Python port of markdown-it. Markdown parsing, done right!"
 groups = ["default"]
@@ -717,8 +717,8 @@ dependencies = [
     "mdurl~=0.1",
 ]
 files = [
-    {file = "markdown_it_py-4.2.0-py3-none-any.whl", hash = "sha256:9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a"},
-    {file = "markdown_it_py-4.2.0.tar.gz", hash = "sha256:04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49"},
+    {file = "markdown_it_py-4.3.0-py3-none-any.whl", hash = "sha256:7aa1511a46c39138de78d9eba92ce47e63124d8003fc98b3a351909e04239efa"},
+    {file = "markdown_it_py-4.3.0.tar.gz", hash = "sha256:91a58fa5b72c71a40cf7177250fd767480d7a2bb3ac426ccfb76fb90305fdaaa"},
 ]
 
 [[package]]
@@ -1292,19 +1292,20 @@ files = [
 
 [[package]]
 name = "typer"
-version = "0.27.3"
+version = "0.29.1"
 requires_python = ">=3.10"
 summary = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 groups = ["default"]
 dependencies = [
     "annotated-doc>=0.0.2",
     "colorama; platform_system == \"Windows\"",
+    "pydantic>=2.5.3",
     "rich>=13.8.0",
     "shellingham>=1.3.0",
 ]
 files = [
-    {file = "typer-0.27.3-py3-none-any.whl", hash = "sha256:e50022f28b82a86313e54501317a1db64bf8f8d036ff8cfe5ca7e47675454aff"},
-    {file = "typer-0.27.3.tar.gz", hash = "sha256:d0396f770a560ab1b0a8504e13b5f254b728cedb05c61cf0359e944e50ce8901"},
+    {file = "typer-0.29.1-py3-none-any.whl", hash = "sha256:00dbc549c13428bec1be55fe1f4d0fb8c6637a310e4f178ef14abe9534ee7b58"},
+    {file = "typer-0.29.1.tar.gz", hash = "sha256:ab6eb3880bf67ce96147734717f9ec333c06f66e361f3ea947d0be43da39f242"},
 ]
 
 [[package]]
@@ -1341,7 +1342,7 @@ files = [
 
 [[package]]
 name = "typing-inspection"
-version = "0.4.4"
+version = "0.4.5"
 requires_python = ">=3.10"
 summary = "Runtime typing introspection tools"
 groups = ["default"]
@@ -1349,6 +1350,6 @@ dependencies = [
     "typing-extensions>=4.15.0",
 ]
 files = [
-    {file = "typing_inspection-0.4.4-py3-none-any.whl", hash = "sha256:65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"},
-    {file = "typing_inspection-0.4.4.tar.gz", hash = "sha256:547274fa6b0a561ccf549cc9524b999a578e737d015d8709d021f9d0d13bea47"},
+    {file = "typing_inspection-0.4.5-py3-none-any.whl", hash = "sha256:bc210535442b39e1bf2805e0c7a17dfd6a4ace760c84c7f7d16245d23a6b1c39"},
+    {file = "typing_inspection-0.4.5.tar.gz", hash = "sha256:7f16c411e7930dc79596d42ab44672a3fe5f60eb34b781a1647e7872363120c7"},
 ]
