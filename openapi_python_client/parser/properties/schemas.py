@@ -90,6 +90,7 @@ class Schemas:
     classes_by_name: dict[ClassName, Property] = field(factory=dict)
     models_to_process: list[ModelProperty] = field(factory=list)
     errors: list[ParseError] = field(factory=list)
+    # Module names of the models and enums generated so far, see `ensure_unique_module_name`.
     used_module_names: set[str] = field(factory=set)
 
     def add_dependencies(self, ref_path: ReferencePath, roots: set[ReferencePath | ClassName]) -> None:
