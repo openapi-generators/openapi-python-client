@@ -102,6 +102,54 @@ class Schemas:
         self.dependencies[ref_path].update(roots)
 
 
+def ensure_unique_module_name(*, class_info: Class, schemas: Schemas, config: Config) -> Class:
+    """Give a class a module name that no other schema in this document is using.
+
+    Different class names can be turned into the same module name, since module names are snake_case versions of
+    class names (`VLAN` and `Vlan` both become `vlan`). Without this, both classes would be generated into the same
+    module, where the second one silently overwrites the first one and the `models` package fails to import.
+
+    Args:
+        class_info: The class for which a module name is needed.
+        schemas: Existing Schemas which have already been processed (to check module name conflicts).
+        config: Config data for this run of the generator, used for renaming.
+
+    Returns:
+        Either `class_info` unchanged, or a copy of it with a unique module name.
+    """
+    if class_info.name in schemas.classes_by_name:
+        # Classes with the same name conflict in a more fundamental way, which the callers already report;
+        # renaming their module would not help and would make the error messages harder to understand.
+        return class_info
+
+    used_module_names: set[str] = set()
+    for existing in schemas.classes_by_name.values():
+        # Only models and enums have a module of their own; `getattr` is used instead of an `isinstance` check
+        # because importing those property classes here would be circular.
+        existing_class_info = getattr(existing, "class_info", None)
+        if isinstance(existing_class_info, Class):
+            used_module_names.add(existing_class_info.module_name)
+
+    module_name = class_info.module_name
+    if module_name not in used_module_names:
+        return class_info
+
+    suffix = 1
+    while f"{module_name}_{suffix}" in used_module_names:
+        suffix += 1
+    new_module_name = PythonIdentifier(f"{module_name}_{suffix}", config.field_prefix)
+    schemas.errors.append(
+        ParseError(
+            header="Renamed a conflicting module",
+            detail=(
+                f"The module name `{module_name}` is already used by another schema, so `{class_info.name}` "
+                f"will be generated in `{new_module_name}.py` instead of overwriting it."
+            ),
+        )
+    )
+    return evolve(class_info, module_name=new_module_name)
+
+
 def update_schemas_with_data(
     *, ref_path: ReferencePath, data: oai.Schema, schemas: Schemas, config: Config
 ) -> Schemas | PropertyError:

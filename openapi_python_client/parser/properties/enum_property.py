@@ -13,7 +13,7 @@ from ...schema import DataType
 from ..errors import PropertyError
 from .none import NoneProperty
 from .protocol import PropertyProtocol, Value, convert_example
-from .schemas import Class, Schemas
+from .schemas import Class, Schemas, ensure_unique_module_name
 from .union import UnionProperty
 
 ValueType = str | int
@@ -119,6 +119,7 @@ class EnumProperty(PropertyProtocol):
         if parent_name:
             class_name = f"{strings.pascal_case(parent_name)}{strings.pascal_case(class_name)}"
         class_info = Class.from_string(string=class_name, config=config)
+        class_info = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
         var_names = data.model_extra.get("x-enum-varnames", []) if data.model_extra else []
         values = EnumProperty.values_from_list(value_list, class_info, var_names)
 

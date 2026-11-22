@@ -98,6 +98,11 @@ class_overrides:
 
 The easiest way to find what needs to be overridden is probably to generate your client and go look at everything in the `models` folder.
 
+Model and enum modules are named after their class names, so two schemas whose class names only differ by
+capitalization or punctuation would end up in the same module (for example, `VLAN` and `Vlan` would both be generated
+into `vlan.py`). The conflicting class is generated into a module with a numeric suffix instead (such as `vlan_1.py`)
+and a warning is emitted. You can use `class_overrides` to choose a more meaningful module name in that case.
+
 ### docstrings_on_attributes
 
 By default, when `openapi-python-client` generates a model class, it includes a list of attributes and their

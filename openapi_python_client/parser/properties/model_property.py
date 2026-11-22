@@ -11,7 +11,7 @@ from ...strings import PythonIdentifier
 from ..errors import ParseError, PropertyError
 from .any import AnyProperty
 from .protocol import PropertyProtocol, Value, convert_example
-from .schemas import Class, ReferencePath, Schemas, parse_reference_path
+from .schemas import Class, ReferencePath, Schemas, ensure_unique_module_name, parse_reference_path
 
 
 @define
@@ -75,6 +75,7 @@ class ModelProperty(PropertyProtocol):
             else:
                 class_string = title
         class_info = Class.from_string(string=class_string, config=config)
+        class_info = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
         model_roots = {*roots, class_info.name}
         required_properties: list[Property] | None = None
         optional_properties: list[Property] | None = None
