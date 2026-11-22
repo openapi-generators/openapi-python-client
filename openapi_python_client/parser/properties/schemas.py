@@ -90,6 +90,7 @@ class Schemas:
     classes_by_name: dict[ClassName, Property] = field(factory=dict)
     models_to_process: list[ModelProperty] = field(factory=list)
     errors: list[ParseError] = field(factory=list)
+    used_module_names: set[str] = field(factory=set)
 
     def add_dependencies(self, ref_path: ReferencePath, roots: set[ReferencePath | ClassName]) -> None:
         """Record new dependencies on the given ReferencePath
@@ -122,22 +123,17 @@ def ensure_unique_module_name(*, class_info: Class, schemas: Schemas, config: Co
         # renaming their module would not help and would make the error messages harder to understand.
         return class_info
 
-    used_module_names: set[str] = set()
-    for existing in schemas.classes_by_name.values():
-        # Only models and enums have a module of their own; `getattr` is used instead of an `isinstance` check
-        # because importing those property classes here would be circular.
-        existing_class_info = getattr(existing, "class_info", None)
-        if isinstance(existing_class_info, Class):
-            used_module_names.add(existing_class_info.module_name)
-
+    used_module_names = schemas.used_module_names
     module_name = class_info.module_name
     if module_name not in used_module_names:
+        used_module_names.add(module_name)
         return class_info
 
     suffix = 1
     while f"{module_name}_{suffix}" in used_module_names:
         suffix += 1
     new_module_name = PythonIdentifier(f"{module_name}_{suffix}", config.field_prefix)
+    used_module_names.add(new_module_name)
     schemas.errors.append(
         ParseError(
             header="Renamed a conflicting module",

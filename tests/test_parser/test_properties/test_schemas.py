@@ -113,18 +113,21 @@ class TestParameterFromReference:
 class TestEnsureUniqueModuleName:
     def test_keeps_module_name_when_there_is_no_conflict(self, config):
         class_info = Class.from_string(string="/components/schemas/PingResponse", config=config)
-        schemas = Schemas()
+        schemas = Schemas(used_module_names={"other_model"})
 
         result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
 
         assert result is class_info
+        assert schemas.used_module_names == {"other_model", "ping_response"}
         assert schemas.errors == []
 
     def test_keeps_module_name_when_the_class_name_already_exists(self, config, model_property_factory):
         existing = model_property_factory(
             class_info=Class(name=ClassName(UntrustedString("Vlan"), ""), module_name=PythonIdentifier("vlan", ""))
         )
-        schemas = Schemas(classes_by_name={existing.class_info.name: existing})
+        schemas = Schemas(
+            classes_by_name={existing.class_info.name: existing}, used_module_names={existing.class_info.module_name}
+        )
         class_info = Class.from_string(string="/components/schemas/Vlan", config=config)
 
         result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
@@ -136,7 +139,9 @@ class TestEnsureUniqueModuleName:
         existing = model_property_factory(
             class_info=Class(name=ClassName(UntrustedString("VLAN"), ""), module_name=PythonIdentifier("vlan", ""))
         )
-        schemas = Schemas(classes_by_name={existing.class_info.name: existing})
+        schemas = Schemas(
+            classes_by_name={existing.class_info.name: existing}, used_module_names={existing.class_info.module_name}
+        )
         class_info = Class.from_string(string="/components/schemas/Vlan", config=config)
 
         result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
@@ -154,7 +159,8 @@ class TestEnsureUniqueModuleName:
         schemas = Schemas(
             classes_by_name={
                 class_info.name: model_property_factory(class_info=class_info) for class_info in class_infos
-            }
+            },
+            used_module_names={class_info.module_name for class_info in class_infos},
         )
         class_info = Class.from_string(string="/components/schemas/Vlan", config=config)
 
