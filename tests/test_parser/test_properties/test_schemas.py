@@ -6,13 +6,15 @@ from openapi_python_client.parser.errors import ParameterError
 from openapi_python_client.parser.properties import Class, Parameters
 from openapi_python_client.parser.properties.schemas import (
     ReferencePath,
+    Schemas,
+    ensure_unique_module_name,
     parameter_from_data,
     parameter_from_reference,
 )
 from openapi_python_client.schema import Parameter, ParameterLocation, Reference, Schema
 from openapi_python_client.schema.ref import Ref
 from openapi_python_client.schema.untrusted_string import UntrustedString
-from openapi_python_client.strings import ClassName
+from openapi_python_client.strings import ClassName, PythonIdentifier
 
 MODULE_NAME = "openapi_python_client.parser.properties.schemas"
 
@@ -106,3 +108,62 @@ class TestParameterFromReference:
         param_by_ref = Reference.model_construct(ref=Ref("#/components/parameters/a_param"))
         param_or_error = parameter_from_reference(param=param_by_ref, parameters=params)
         assert param_or_error == existing_param
+
+
+class TestEnsureUniqueModuleName:
+    def test_keeps_module_name_when_there_is_no_conflict(self, config):
+        class_info = Class.from_string(string="/components/schemas/PingResponse", config=config)
+        schemas = Schemas(used_module_names={"other_model"})
+
+        result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
+
+        assert result is class_info
+        assert schemas.used_module_names == {"other_model", "ping_response"}
+        assert schemas.errors == []
+
+    def test_keeps_module_name_when_the_class_name_already_exists(self, config, model_property_factory):
+        existing = model_property_factory(
+            class_info=Class(name=ClassName(UntrustedString("Vlan"), ""), module_name=PythonIdentifier("vlan", ""))
+        )
+        schemas = Schemas(
+            classes_by_name={existing.class_info.name: existing}, used_module_names={existing.class_info.module_name}
+        )
+        class_info = Class.from_string(string="/components/schemas/Vlan", config=config)
+
+        result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
+
+        assert result is class_info
+        assert schemas.errors == []
+
+    def test_renames_a_conflicting_module_name(self, config, model_property_factory):
+        existing = model_property_factory(
+            class_info=Class(name=ClassName(UntrustedString("VLAN"), ""), module_name=PythonIdentifier("vlan", ""))
+        )
+        schemas = Schemas(
+            classes_by_name={existing.class_info.name: existing}, used_module_names={existing.class_info.module_name}
+        )
+        class_info = Class.from_string(string="/components/schemas/Vlan", config=config)
+
+        result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
+
+        assert result.name == "Vlan"
+        assert result.module_name == "vlan_1"
+        assert len(schemas.errors) == 1
+        assert "will be generated in `vlan_1.py`" in schemas.errors[0].detail
+
+    def test_keeps_looking_until_it_finds_an_unused_suffix(self, config, model_property_factory):
+        class_infos = (
+            Class(name=ClassName(UntrustedString("VLAN"), ""), module_name=PythonIdentifier("vlan", "")),
+            Class(name=ClassName(UntrustedString("Vlan1"), ""), module_name=PythonIdentifier("vlan_1", "")),
+        )
+        schemas = Schemas(
+            classes_by_name={
+                class_info.name: model_property_factory(class_info=class_info) for class_info in class_infos
+            },
+            used_module_names={class_info.module_name for class_info in class_infos},
+        )
+        class_info = Class.from_string(string="/components/schemas/Vlan", config=config)
+
+        result = ensure_unique_module_name(class_info=class_info, schemas=schemas, config=config)
+
+        assert result.module_name == "vlan_2"
